@@ -17,6 +17,7 @@ import {
   getVisualProgressTrackProfile,
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
+  addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -29,9 +30,14 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
-import { viewProfile } from '../../actions/receive-profile';
+import {
+  viewProfile,
+  changeTimelineTrackOrganization,
+} from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -1656,7 +1662,9 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
     const { getState, dispatch } = setupStore();
 
-    dispatch(ProfileView.changeShowTabOnly(browsingContextID));
+    dispatch(
+      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
+    );
     expect(
       selectedThreadSelectors.getTabFilteredThread(getState())
     ).toMatchSnapshot();
@@ -2761,121 +2769,158 @@ describe('visual metrics selectors', function() {
   });
 });
 
+describe('right clicked call node info', () => {
+  function setup() {
+    const profile = getProfileFromTextSamples(`
+      A
+      B
+      C
+    `);
+
+    return storeWithProfile(profile.profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked call node info when right clicked call node action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+  });
+
+  it('resets right clicked call node when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+});
+
+describe('right clicked marker info', () => {
+  function setup() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null],
+      ['b', 1, null],
+      ['c', 2, null],
+    ]);
+
+    return storeWithProfile(profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked marker info when right clicked marker action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 0));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 0,
+    });
+  });
+
+  it('resets right clicked marker when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 1));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 1,
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+});
+
 describe('pages and active tab selectors', function() {
   // Setting some IDs here so we can use those inside the setup and test functions.
   const firstTabBrowsingContextID = 1;
   const secondTabBrowsingContextID = 4;
-  const parentPageWithChildren = 11111111111;
-  const iframePageWithChild = 11111111112;
-  const fistTabInnerWindowIDs = [
-    parentPageWithChildren,
-    iframePageWithChild,
-    11111111113,
-    11111111115,
-  ];
-  const secondTabInnerWindowIDs = [11111111114, 11111111116];
 
   // Setup an empty profile with pages array and activeBrowsingContextID
   function setup(activeBrowsingContextID: BrowsingContextID) {
-    const profile = getEmptyProfile();
-    // Add a pages array with the following relationship:
-    // Tab #1                           Tab #2
-    // --------------                --------------
-    // Page #1                        Page #4
-    // |- Page #2                     |
-    // |  |- Page #3                  Page #6
-    // |
-    // Page #5
-    profile.pages = [
-      // A top most page in the first tab
-      {
-        browsingContextID: firstTabBrowsingContextID,
-        innerWindowID: parentPageWithChildren,
-        url: 'Page #1',
-        embedderInnerWindowID: 0,
-      },
-      // An iframe page inside the previous page
-      {
-        browsingContextID: 2,
-        innerWindowID: iframePageWithChild,
-        url: 'Page #2',
-        embedderInnerWindowID: parentPageWithChildren,
-      },
-      // Another iframe page inside the previous iframe
-      {
-        browsingContextID: 3,
-        innerWindowID: fistTabInnerWindowIDs[2],
-        url: 'Page #3',
-        embedderInnerWindowID: iframePageWithChild,
-      },
-      // A top most frame from the second tab
-      {
-        browsingContextID: secondTabBrowsingContextID,
-        innerWindowID: secondTabInnerWindowIDs[0],
-        url: 'Page #4',
-        embedderInnerWindowID: 0,
-      },
-      // Another top most frame from the first tab
-      // Their browsingContextIDs are the same because of that.
-      {
-        browsingContextID: firstTabBrowsingContextID,
-        innerWindowID: fistTabInnerWindowIDs[3],
-        url: 'Page #5',
-        embedderInnerWindowID: 0,
-      },
-      // Another top most frame from the second tab
-      {
-        browsingContextID: secondTabBrowsingContextID,
-        innerWindowID: secondTabInnerWindowIDs[1],
-        url: 'Page #4',
-        embedderInnerWindowID: 0,
-      },
-    ];
-
-    // Set the active BrowsingContext ID.
-    profile.meta.configuration = {
-      activeBrowsingContextID,
-      capacity: 1,
-      features: [],
-      threads: [],
-    };
-
+    const { profile, ...pageInfo } = addActiveTabInformationToProfile(
+      getEmptyProfile(),
+      activeBrowsingContextID
+    );
     // Adding an empty thread to the profile so the loadProfile function won't complain
     profile.threads.push(getEmptyThread());
 
     const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(ProfileView.changeShowTabOnly(activeBrowsingContextID));
-    return { profile, dispatch, getState };
+    dispatch(
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID: activeBrowsingContextID,
+      })
+    );
+    return { profile, dispatch, getState, ...pageInfo };
   }
 
-  it('getPagesMap will construct the whole map correctly', function() {
-    const { getState } = setup(firstTabBrowsingContextID); // the given argument is not important for this test
+  it('getInnerWindowIDSetByBrowsingContextID will construct the whole map correctly', function() {
+    const { getState, fistTabInnerWindowIDs, secondTabInnerWindowIDs } = setup(
+      firstTabBrowsingContextID
+    ); // the given argument is not important for this test
     const objectResult = [
       [firstTabBrowsingContextID, new Set(fistTabInnerWindowIDs)],
       [secondTabBrowsingContextID, new Set(secondTabInnerWindowIDs)],
     ];
     const result = new Map(objectResult);
-    expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
+    expect(
+      ProfileViewSelectors.getInnerWindowIDSetByBrowsingContextID(getState())
+    ).toEqual(result);
   });
 
-  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
-    const { getState } = setup(firstTabBrowsingContextID);
+  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
+    const { getState, fistTabInnerWindowIDs } = setup(
+      firstTabBrowsingContextID
+    );
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
-    const { getState } = setup(secondTabBrowsingContextID);
+  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
+    const { getState, secondTabInnerWindowIDs } = setup(
+      secondTabBrowsingContextID
+    );
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForCurrentTab will return an empty set for an ID that is not in the array', function() {
+  it('getRelevantInnerWindowIDsForCurrentTab will return an empty set for an ID that is not in the array', function() {
     const { getState } = setup(99999); // a non-existent BrowsingContextID
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set());
   });
 });

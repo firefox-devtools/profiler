@@ -25,7 +25,6 @@ import { getIsSidebarOpen } from '../../selectors/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerContextMenu from '../shared/MarkerContextMenu';
-import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -107,7 +106,6 @@ class ProfileViewer extends PureComponent<Props> {
         </ErrorBoundary>
         <CallNodeContextMenu />
         <MarkerContextMenu />
-        <TimelineTrackContextMenu />
       </div>
     );
   }

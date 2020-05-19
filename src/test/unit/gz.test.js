@@ -23,7 +23,8 @@ describe('utils/gz', function() {
   it('compresses and decompresses properly', async () => {
     const clearText = '42';
     const gzipedData = await compress(clearText);
-    expect(gzipedData).toBeInstanceOf(Uint8Array);
+    // We can't use toBeInstanceOf because the Uint8Array type is different in the worker.
+    expect(Object.prototype.toString.call(gzipedData)).toContain('Uint8Array');
 
     const gunzippedDataBuffer = await decompress(gzipedData);
     const decoder = new TextDecoder('utf-8');

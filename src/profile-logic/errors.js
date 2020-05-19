@@ -10,14 +10,16 @@ import type { RequestedLib } from '../types/actions';
 // symbols for a specific library
 export class SymbolsNotFoundError extends Error {
   library: RequestedLib;
-  error: ?Error;
+  errors: Error[];
 
-  constructor(message: string, library: RequestedLib, error?: Error) {
-    super(message);
+  constructor(message: string, library: RequestedLib, ...errors: Error[]) {
+    super(
+      [message, ...errors.map(e => ` - ${e.name}: ${e.message}`)].join('\n')
+    );
     // Workaround for a babel issue when extending Errors
     (this: any).__proto__ = SymbolsNotFoundError.prototype;
     this.name = 'SymbolsNotFoundError';
     this.library = library;
-    this.error = error;
+    this.errors = errors;
   }
 }

@@ -13,7 +13,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
-import { getShowTabOnly } from '../../selectors/url-state';
+import { getTimelineTrackOrganization } from '../../selectors/url-state';
 import { getRightClickedTrack } from '../../selectors/profile';
 
 import type { Profile } from '../../types/profile';
@@ -113,7 +113,10 @@ describe('Timeline', function() {
     delete window.devicePixelRatio;
   });
 
-  describe('TimelineSettingsActiveTabView', function() {
+  // These tests are disabled for now because active tab view checkbox is disabled for now.
+  // TODO: Enable it again once we have that checbox back.
+  // eslint-disable-next-line jest/no-disabled-tests
+  describe.skip('TimelineSettingsActiveTabView', function() {
     it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
       const ctx = mockCanvasContext();
       jest
@@ -150,13 +153,20 @@ describe('Timeline', function() {
         </Provider>
       );
 
-      expect(getShowTabOnly(store.getState())).toEqual(null);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'full',
+      });
 
       fireEvent.click(getByText('Show active tab only'));
-      expect(getShowTabOnly(store.getState())).toEqual(123);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'active-tab',
+        browsingContextID: 123,
+      });
 
       fireEvent.click(getByText('Show active tab only'));
-      expect(getShowTabOnly(store.getState())).toEqual(null);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'full',
+      });
     });
   });
 

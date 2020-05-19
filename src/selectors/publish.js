@@ -4,6 +4,8 @@
 
 // @flow
 import { createSelector } from 'reselect';
+import clamp from 'clamp';
+
 import {
   getProfile,
   getProfileRootRange,
@@ -11,8 +13,6 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -24,6 +24,7 @@ import {
 import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
+import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
 import type {
   PublishState,
@@ -67,8 +68,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   getCheckedSharingOptions,
   getProfile,
   getCommittedRange,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
@@ -205,23 +206,22 @@ export const getUploadPhase: Selector<UploadPhase> = state =>
 export const getUploadGeneration: Selector<number> = state =>
   getUploadState(state).generation;
 
-export const getUploadProgress: Selector<number> = state =>
-  getUploadState(state).uploadProgress;
+export const getUploadProgress: Selector<number> = createSelector(
+  getUploadState,
+  ({ uploadProgress }) =>
+    // Create a minimum value of 0.1 so that there is at least some user feedback
+    // that the upload started, and a maximum value of 0.95 so that the user
+    // doesn't wait with a full bar (there's still some work to do after the
+    // uplod succeeds).
+    clamp(uploadProgress, 0.1, 0.95)
+);
 
 export const getUploadError: Selector<Error | mixed> = state =>
   getUploadState(state).error;
 
 export const getUploadProgressString: Selector<string> = createSelector(
   getUploadProgress,
-  progress =>
-    formatNumber(
-      // Create a minimum value of 0.1 so that there is at least some user feedback
-      // that the upload started.
-      Math.max(progress, 0.1),
-      0,
-      0,
-      'percent'
-    )
+  progress => formatNumber(progress, 0, 0, 'percent')
 );
 
 export const getAbortFunction: Selector<() => void> = state =>

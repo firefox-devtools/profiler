@@ -8,7 +8,7 @@ The `production` branch is configured to be automatically deployed to
 <https://profiler.firefox.com>.
 
 In addition to this pushes to the `master` branch deploys to the domain
-https://master--perf-html.netlify.com. Every pull request will be deployed as well to a
+https://master--perf-html.netlify.app. Every pull request will be deployed as well to a
 separate domain, whose link will be added automatically to the PR:
 ![The link to the preview deployment is in the sections where checks are](images/netlify-link.png)
 

@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 
 import ProfileFilterNavigator from '../../components/app/ProfileFilterNavigator';
 import * as ProfileView from '../../actions/profile-view';
+import * as ReceiveProfile from '../../actions/receive-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
@@ -83,13 +84,23 @@ describe('app/ProfileFilterNavigator', () => {
 
   it('renders the site hostname as its first element in the single tab view', () => {
     const { dispatch, container } = setup();
-    dispatch(ProfileView.changeShowTabOnly(browsingContextID));
+    dispatch(
+      ReceiveProfile.changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID,
+      })
+    );
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('displays the site hostname as its first element in the single tab view', () => {
     const { dispatch, queryByText } = setup();
-    dispatch(ProfileView.changeShowTabOnly(browsingContextID));
+    dispatch(
+      ReceiveProfile.changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID,
+      })
+    );
     expect(queryByText('Full Range')).toBeFalsy();
     // Using regexp because searching for a partial text.
     expect(queryByText(/developer\.mozilla\.org/)).toBeTruthy();

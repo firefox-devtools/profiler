@@ -19,7 +19,8 @@ export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 // Export the value for tests, and for computing the max height of the timeline
 // for the splitter.
-export const TRACK_SCREENSHOT_HEIGHT = 50;
+export const FULL_TRACK_SCREENSHOT_HEIGHT = 50;
+export const ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT = 30;
 
 // The following values are for network track.
 export const TRACK_NETWORK_ROW_HEIGHT = 5;
@@ -50,3 +51,6 @@ export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;
 // The following values are for the visual progress tracks.
 export const TRACK_VISUAL_PROGRESS_HEIGHT = 40;
 export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;
+
+// Height of the active tab resources panel header.
+export const ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT = 20;

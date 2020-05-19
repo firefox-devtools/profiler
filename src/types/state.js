@@ -25,6 +25,8 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -37,13 +39,49 @@ export type Reducer<T> = (T | void, Action) => T;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
-  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
-  +rightClickedMarker: MarkerIndex | null,
 |};
 
-export type ProfileViewState = {|
+export type RightClickedCallNode = {|
+  +threadIndex: ThreadIndex,
+  +callNodePath: CallNodePath,
+|};
+
+export type RightClickedMarker = {|
+  +threadIndex: ThreadIndex,
+  +markerIndex: MarkerIndex,
+|};
+
+/**
+ * Full profile view state
+ * They should not be used from the active tab view.
+ * NOTE: This state is empty for now, but will be used later, do not remove.
+ * globalTracks and localTracksByPid states will be here in the future.
+ */
+export type FullProfileViewState = {|
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+|};
+
+export type OriginsViewState = {|
+  originsTimeline: OriginsTimeline,
+|};
+
+/**
+ * Active tab profile view state
+ * They should not be used from the full view.
+ */
+export type ActiveTabProfileViewState = {|
+  globalTracks: ActiveTabGlobalTrack[],
+  // TODO: Add a better refined type for resource tracks.
+  resourceTracks: LocalTrack[],
+|};
+
+/**
+ * Profile view state
+ */
+export type ProfileViewState = {
   +viewOptions: {|
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
@@ -53,19 +91,21 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
+    rightClickedCallNode: RightClickedCallNode | null,
+    rightClickedMarker: RightClickedMarker | null,
   |},
-  +globalTracks: GlobalTrack[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
-  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
-  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
   +profile: Profile | null,
-|};
+  +full: FullProfileViewState,
+  +activeTab: ActiveTabProfileViewState,
+  +origins: OriginsViewState,
+};
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
   | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
   | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
+  | {| +phase: 'DATA_RELOAD' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
       +phase: 'INITIALIZING',
@@ -142,15 +182,6 @@ export type UploadState = {|
   generation: number,
 |};
 
-/**
- * This holds the state of the profile before it was uploaded.
- */
-export type PrePublishedState = {|
-  +profile: Profile,
-  +urlState: UrlState,
-  +zipFileState: ZipFileState,
-|};
-
 export type PublishState = {|
   +checkedSharingOptions: CheckedSharingOptions,
   +upload: UploadState,
@@ -168,6 +199,52 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
+/**
+ * Full profile specific url state
+ * They should not be used from the active tab view.
+ */
+export type FullProfileSpecificUrlState = {|
+  globalTrackOrder: TrackIndex[],
+  hiddenGlobalTracks: Set<TrackIndex>,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  showJsTracerSummary: boolean,
+  timelineType: TimelineType,
+  legacyThreadOrder: ThreadIndex[] | null,
+  legacyHiddenThreads: ThreadIndex[] | null,
+|};
+
+/**
+ * Active tab profile specific url state
+ * They should not be used from the full view.
+ */
+export type ActiveTabSpecificProfileUrlState = {|
+  isResourcesPanelOpen: boolean,
+|};
+
+export type ProfileSpecificUrlState = {|
+  selectedThread: ThreadIndex | null,
+  implementation: ImplementationFilter,
+  lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
+  invertCallstack: boolean,
+  showUserTimings: boolean,
+  committedRanges: StartEndRange[],
+  callTreeSearchString: string,
+  markersSearchString: string,
+  networkSearchString: string,
+  transforms: TransformStacksPerThread,
+  full: FullProfileSpecificUrlState,
+  activeTab: ActiveTabSpecificProfileUrlState,
+|};
+
+/**
+ * Determines how the timeline's tracks are organized.
+ */
+export type TimelineTrackOrganization =
+  | {| +type: 'full' |}
+  | {| +type: 'active-tab', +browsingContextID: BrowsingContextID |}
+  | {| +type: 'origins' |};
+
 export type UrlState = {|
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
@@ -179,27 +256,8 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string,
-  +showTabOnly: BrowsingContextID | null,
-  +profileSpecific: {|
-    selectedThread: ThreadIndex | null,
-    globalTrackOrder: TrackIndex[],
-    hiddenGlobalTracks: Set<TrackIndex>,
-    hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-    localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-    implementation: ImplementationFilter,
-    lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
-    invertCallstack: boolean,
-    showUserTimings: boolean,
-    showJsTracerSummary: boolean,
-    committedRanges: StartEndRange[],
-    callTreeSearchString: string,
-    markersSearchString: string,
-    networkSearchString: string,
-    transforms: TransformStacksPerThread,
-    timelineType: TimelineType,
-    legacyThreadOrder: ThreadIndex[] | null,
-    legacyHiddenThreads: ThreadIndex[] | null,
-  |},
+  +timelineTrackOrganization: TimelineTrackOrganization,
+  +profileSpecific: ProfileSpecificUrlState,
 |};
 
 export type IconState = Set<string>;

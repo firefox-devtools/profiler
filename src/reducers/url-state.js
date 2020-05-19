@@ -7,7 +7,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 
-import type { ThreadIndex, Pid, BrowsingContextID } from '../types/profile';
+import type { ThreadIndex, Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type { TransformStacksPerThread } from '../types/transforms';
@@ -17,7 +17,11 @@ import type {
   CallTreeSummaryStrategy,
   TimelineType,
 } from '../types/actions';
-import type { UrlState, Reducer } from '../types/state';
+import type {
+  UrlState,
+  Reducer,
+  TimelineTrackOrganization,
+} from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 /*
@@ -83,7 +87,6 @@ const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
-    case 'CHANGE_SHOW_TAB_ONLY':
       return action.selectedTab;
     default:
       return state;
@@ -110,7 +113,9 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ORIGINS_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
@@ -134,12 +139,6 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
       }
       return newThreadIndex;
     }
-    case 'CHANGE_SHOW_TAB_ONLY':
-      if (action.selectedThreadIndex === null) {
-        // Do not change the selected thread if we don't have to.
-        return state;
-      }
-      return action.selectedThreadIndex;
     default:
       return state;
   }
@@ -199,7 +198,7 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
       // This may no longer be valid because of PII sanitization.
       const newTransforms = {};
       for (const [threadIndex, transformStack] of objectEntries(state)) {
-        const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+        const newThreadIndex = oldThreadIndexToNew.get(Number(threadIndex));
         if (newThreadIndex !== undefined) {
           newTransforms[newThreadIndex] = transformStack;
         }
@@ -291,7 +290,7 @@ const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
 
 const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
     case 'SANITIZED_PROFILE_PUBLISHED':
@@ -308,7 +307,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
@@ -338,7 +337,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.hiddenLocalTracksByPid;
     case 'HIDE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
@@ -373,7 +372,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.localTrackOrderByPid;
     case 'CHANGE_LOCAL_TRACK_ORDER': {
       const localTrackOrderByPid = new Map(state);
@@ -411,37 +410,50 @@ const profileName: Reducer<string> = (state = '', action) => {
   }
 };
 
-const showTabOnly: Reducer<BrowsingContextID | null> = (
-  state = null,
+const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
+  state = { type: 'full' },
   action
 ) => {
   switch (action.type) {
-    case 'CHANGE_SHOW_TAB_ONLY':
-      return action.showTabOnly;
+    case 'VIEW_FULL_PROFILE':
+      return { type: 'full' };
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      return {
+        type: 'active-tab',
+        browsingContextID: action.browsingContextID,
+      };
+    case 'VIEW_ORIGINS_PROFILE':
+      return { type: 'origins' };
     default:
       return state;
   }
 };
 
 /**
- * These values are specific to an individual profile.
+ * Active tab specific profile url states
  */
-const profileSpecific = combineReducers({
-  selectedThread,
+
+/**
+ * Active tab resources panel open/close state.
+ */
+const isResourcesPanelOpen: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'TOGGLE_RESOURCES_PANEL':
+      return !state;
+    default:
+      return state;
+  }
+};
+
+/**
+ * These values are specific to an individual full profile.
+ */
+const fullProfileSpecific = combineReducers({
   globalTrackOrder,
   hiddenGlobalTracks,
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
-  implementation,
-  lastSelectedCallTreeSummaryStrategy,
-  invertCallstack,
-  showUserTimings,
   showJsTracerSummary,
-  committedRanges,
-  callTreeSearchString,
-  markersSearchString,
-  networkSearchString,
-  transforms,
   timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
@@ -449,6 +461,31 @@ const profileSpecific = combineReducers({
   // process. These value are only set by the locationToState function.
   legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
   legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
+});
+
+/**
+ * These values are specific to an individual active tab profile.
+ */
+const activeTabProfileSpecific = combineReducers({
+  isResourcesPanelOpen,
+});
+
+/**
+ * These values are specific to an individual profile.
+ */
+const profileSpecific = combineReducers({
+  selectedThread,
+  implementation,
+  lastSelectedCallTreeSummaryStrategy,
+  invertCallstack,
+  showUserTimings,
+  committedRanges,
+  callTreeSearchString,
+  markersSearchString,
+  networkSearchString,
+  transforms,
+  full: fullProfileSpecific,
+  activeTab: activeTabProfileSpecific,
 });
 
 /**
@@ -492,7 +529,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
-    showTabOnly,
+    timelineTrackOrganization,
   })
 );
 

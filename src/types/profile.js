@@ -7,6 +7,7 @@
 import type {
   Milliseconds,
   MemoryOffset,
+  Address,
   Microseconds,
   Bytes,
   Nanoseconds,
@@ -196,11 +197,14 @@ export type RawMarkerTable = {|
 
 /**
  * Frames contain the context information about the function execution at the moment in
- * time. The relationship between frames is defined by the StackTable.
+ * time. The caller/callee relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {|
-  // The address is a copy from the FuncTable entry.
-  address: Array<MemoryOffset | -1>,
+  // If this is a frame for native code, the address is the address of the frame's
+  // assembly instruction,  relative to the native library that contains it.
+  // The library is given by the frame's func: frame -> func -> resource -> lib.
+  address: Array<Address | -1>,
+
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
@@ -220,25 +224,59 @@ export type FrameTable = {|
 |};
 
 /**
- * Multiple frames represent individual invocations of a function, while the FuncTable
- * holds the static information about that function. C++ samples are single memory
- * locations. However, functions span ranges of memory. During symbolication each of
- * these samples are collapsed to point to a single function rather than multiple memory
- * locations.
+ * The funcTable stores the functions that were called in the profile.
+ * These can be native functions (e.g. C / C++ / rust), JavaScript functions, or
+ * "label" functions. Multiple frames can have the same function: The frame
+ * represents which part of a function was being executed at a given moment, and
+ * the function groups all frames that occurred inside that function.
+ * Concretely, for native code, each encountered instruction address is a separate
+ * frame, and the function groups the instruction addresses inside that native
+ * function. (The address range of a native function is the range between the
+ * address of its function symbol and the next symbol in the library.)
+ * For JS code, each encountered line/column in a JS file is a separate frame, and
+ * the function represents an entire JS function which can span multiple lines.
+ *
+ * Funcs that are orphaned, i.e. funcs that no frame refers to, do not have
+ * meaningful values in their fields. Symbolication will cause many funcs that
+ * were created upfront to become orphaned, as the frames that originally referred
+ * to them get reassigned to the canonical func for their actual function.
  */
 export type FuncTable = {|
-  // This is relevant for native entries only.
-  address: Array<MemoryOffset | -1>,
-  isJS: boolean[],
-  length: number,
-  name: IndexIntoStringTable[],
-  // The resource is -1 if we couldn't extract a function name as a native or JS
-  // function. This is most often the case for frame labels.
-  resource: Array<IndexIntoResourceTable | -1>,
+  // The function name.
+  name: Array<IndexIntoStringTable>,
+
+  // isJS and relevantForJS describe the function type. Non-JavaScript functions
+  // can be marked as "relevant for JS" so that for example DOM API label functions
+  // will show up in any JavaScript stack views.
+  // It may be worth combining these two fields into one:
+  // https://github.com/firefox-devtools/profiler/issues/2543
+  isJS: Array<boolean>,
   relevantForJS: Array<boolean>,
+
+  // The resource describes "Which bag of code did this function come from?".
+  // For JS functions, the resource is of type addon, webhost, otherhost, or url.
+  // For native functions, the resource is of type library.
+  // For labels and for other unidentified functions, we set the resource to -1.
+  resource: Array<IndexIntoResourceTable | -1>,
+
+  // These are non-null for JS functions only. The line and column describe the
+  // location of the *start* of the JS function. As for the information about which
+  // which lines / columns inside the function were actually hit during execution,
+  // that information is stored in the frameTable, not in the funcTable.
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
+
+  // This is relevant for functions of the 'native' stackType only (functions
+  // whose resource is a library).
+  // Stores the library-relative offset of the start of the function, i.e. the
+  // address of the symbol that gave this function its name.
+  // Prior to initial symbolication, it stores the same address as the single
+  // frame that refers to this func, because at that point the actual boundaries
+  // of the true functions are not known.
+  address: Array<Address | -1>,
+
+  length: number,
 |};
 
 /**
@@ -260,15 +298,28 @@ export type ResourceTable = {|
  * Information about libraries, for instance the Firefox executables, and its memory
  * offsets. This information is used for symbolicating C++ memory addresses into
  * actual function names. For instance turning 0x23459234 into "void myFuncName()".
+ *
+ * Libraries are mapped into the (virtual memory) address space of the profiled
+ * process. Libraries exist as files on disk, and not the entire file needs to be
+ * mapped. When the beginning of the file is not mapped, the library's "offset"
+ * field will be non-zero.
  */
 export type Lib = {|
+  // The range in the address space of the profiled process that the mappings for
+  // this shared library occupied.
   start: MemoryOffset,
   end: MemoryOffset,
-  offset: MemoryOffset,
+
+  // The offset relative to the library's base address where the first mapping starts.
+  // libBaseAddress + lib.offset = lib.start
+  // When instruction addresses are given as library-relative offsets, they are
+  // relative to the library's baseAddress.
+  offset: Bytes,
+
   arch: string, // e.g. "x86_64"
   name: string, // e.g. "firefox"
   path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  debugName: string, // e.g. "firefox"
+  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 |};

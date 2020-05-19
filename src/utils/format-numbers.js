@@ -161,6 +161,39 @@ export function formatSeconds(
   );
 }
 
+export function formatTimestamp(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 3
+) {
+  // Format in the closest base (seconds, milliseconds, microseconds, or nanoseconds),
+  // to avoid cases where times are displayed with too many leading zeroes to be useful.
+  if (time >= 1000) {
+    return formatSeconds(
+      time,
+      significantDigits,
+      Number.isInteger(time / 1000) ? 0 : maxFractionalDigits
+    );
+  } else if (time >= 1) {
+    return formatMilliseconds(
+      time,
+      significantDigits,
+      Number.isInteger(time) ? 0 : maxFractionalDigits
+    );
+  } else if (time * 1000 >= 1) {
+    return formatMicroseconds(
+      time * 1000,
+      significantDigits,
+      Number.isInteger(time * 1000) ? 0 : maxFractionalDigits
+    );
+  }
+  return formatNanoseconds(
+    time * 1000 * 1000,
+    significantDigits,
+    Number.isInteger(time * 1000 * 1000) ? 0 : maxFractionalDigits
+  );
+}
+
 /*
  * Format a value and a total to the form "v/t (p%)".  For example this can
  * be used to print "7MB/10MB (70%)"  fornatNum is a function to format the

@@ -6,7 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
   accumulateCounterSamples,
@@ -33,6 +33,7 @@ import type {
   ProfilerConfiguration,
   InnerWindowID,
   BrowsingContextID,
+  Page,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -40,6 +41,8 @@ import type {
   GlobalTrack,
   AccumulatedCounterSamples,
   ProfileFilterPageData,
+  ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -54,11 +57,20 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
+  FullProfileViewState,
+  ActiveTabProfileViewState,
+  OriginsViewState,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;
+export const getFullProfileView: Selector<FullProfileViewState> = state =>
+  getProfileView(state).full;
+export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = state =>
+  getProfileView(state).activeTab;
+export const getOriginsProfileView: Selector<OriginsViewState> = state =>
+  getProfileView(state).origins;
 
 /**
  * Profile View Options
@@ -234,10 +246,7 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> = createS
  * They're uniquely referenced by a TrackReference.
  */
 export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
-  getProfileView(state).globalTracks;
-export const getActiveTabHiddenGlobalTracksGetter: Selector<
-  () => Set<TrackIndex>
-> = state => getProfileView(state).activeTabHiddenGlobalTracksGetter;
+  getFullProfileView(state).globalTracks;
 
 /**
  * This returns all TrackReferences for global tracks.
@@ -304,10 +313,7 @@ export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
  * This returns a map of local tracks from a pid.
  */
 export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = state =>
-  getProfileView(state).localTracksByPid;
-export const getActiveTabHiddenLocalTracksByPidGetter: Selector<
-  () => Map<Pid, Set<TrackIndex>>
-> = state => getProfileView(state).activeTabHiddenLocalTracksByPidGetter;
+  getFullProfileView(state).localTracksByPid;
 
 /**
  * This selectors performs a simple look up in a Map, throws an error if it doesn't exist,
@@ -319,7 +325,7 @@ export const getLocalTracks: DangerousSelectorWithArguments<
   Pid
 > = (state, pid) =>
   ensureExists(
-    getProfileView(state).localTracksByPid.get(pid),
+    getFullProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
 
@@ -416,6 +422,52 @@ export const getLocalTrackName = (
   )[trackIndex];
 
 /**
+ * Active tab profile selectors
+ */
+
+/**
+ * Returns global tracks for the active tab view.
+ */
+export const getActiveTabGlobalTracks: Selector<
+  ActiveTabGlobalTrack[]
+> = state => getActiveTabProfileView(state).globalTracks;
+
+/**
+ * Returns resource tracks for the active tab view.
+ */
+export const getActiveTabResourceTracks: Selector<LocalTrack[]> = state =>
+  getActiveTabProfileView(state).resourceTracks;
+
+/**
+ * This returns all TrackReferences for global tracks.
+ */
+export const getActiveTabGlobalTrackReferences: Selector<
+  GlobalTrackReference[]
+> = createSelector(getActiveTabGlobalTracks, globalTracks =>
+  globalTracks.map((globalTrack, trackIndex) => ({
+    type: 'global',
+    trackIndex,
+  }))
+);
+
+/**
+ * This finds an ActiveTabGlobalTrack from its TrackReference. No memoization is needed
+ * as this is a simple value look-up.
+ */
+export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArguments<
+  ActiveTabGlobalTrack,
+  GlobalTrackReference
+> = (state, trackReference) =>
+  getActiveTabGlobalTracks(state)[trackReference.trackIndex];
+
+/**
+ * Origins profile view selectors.
+ */
+
+export const getOriginsTimeline: Selector<OriginsTimeline> = state =>
+  getOriginsProfileView(state).originsTimeline;
+
+/**
  * It's a bit hard to deduce the total amount of hidden tracks, as there are both
  * global and local tracks, and they are stored by PID. If a global track is hidden,
  * then all its children are as well. Also we need to take into account the tracks
@@ -427,18 +479,12 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   getGlobalTracks,
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,
-  getActiveTabHiddenLocalTracksByPidGetter,
   UrlState.getHiddenGlobalTracks,
-  getActiveTabHiddenGlobalTracksGetter,
-  UrlState.getShowTabOnly,
   (
     globalTracks,
     localTracksByPid,
     hiddenLocalTracksByPid,
-    activeTabHiddenLocalTracksByPidGetter,
-    hiddenGlobalTracks,
-    activeTabHiddenGlobalTracksGetter,
-    showTabOnly
+    hiddenGlobalTracks
   ) => {
     let hidden = 0;
     let total = 0;
@@ -447,11 +493,6 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     for (const [pid, localTracks] of localTracksByPid) {
       // Look up some of the information.
       const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid) || new Set();
-      const activeTabHiddenLocalTracks =
-        // Do not call the getter if we are not in the single tab view.
-        showTabOnly !== null
-          ? activeTabHiddenLocalTracksByPidGetter().get(pid) || new Set()
-          : new Set();
       const globalTrackIndex = globalTracks.findIndex(
         track => track.type === 'process' && track.pid === pid
       );
@@ -466,65 +507,35 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
-        if (showTabOnly !== null) {
-          if (!activeTabHiddenGlobalTracksGetter().has(globalTrackIndex)) {
-            // If we are in active tab view and the current hidden track is not
-            // hidden by that, count its local tracks but also make sure that we
-            // don't count its hidden local tracks that if they are hidden by active tab view.
-            hidden += localTracks.length - activeTabHiddenLocalTracks.size;
-          }
-        } else {
-          hidden += localTracks.length;
-        }
+        hidden += localTracks.length;
       } else {
         // Only count the hidden local tracks.
         hidden += hiddenLocalTracks.size;
-        if (showTabOnly !== null) {
-          // If we are in active tab view, we should remove the count of active
-          // tab hidden tracks since they won't be visible at all.
-          hidden -= [...activeTabHiddenLocalTracks].filter(t =>
-            hiddenLocalTracks.has(t)
-          ).length;
-        }
       }
       total += localTracks.length;
-      if (showTabOnly !== null) {
-        // Again, if we are in active tab view, do not count the tracks that are hidden by active tab view.
-        total -= activeTabHiddenLocalTracks.size;
-      }
     }
 
-    // Count up the global tracks
-    if (showTabOnly) {
-      const activeTabHiddenGlobalTracks = activeTabHiddenGlobalTracksGetter();
-      total += globalTracks.length - activeTabHiddenGlobalTracks.size;
-      hidden += [...hiddenGlobalTracks].filter(
-        t => !activeTabHiddenGlobalTracks.has(t)
-      ).length;
-    } else {
-      total += globalTracks.length;
-      hidden += hiddenGlobalTracks.size;
-    }
+    total += globalTracks.length;
+    hidden += hiddenGlobalTracks.size;
 
     return { hidden, total };
   }
 );
 
 /**
- * Get the pages array and construct a Map that we can use to easily get the
- * InnerWindowIDs that are under one tab. The constructed map is
- * `Map<BrowsingContextID,Set<InnerWindowID>>`. The BrowsingContextID we use in
- * that map is the BrowsingContextID of the top most frame. That corresponds to
- * a tab(Side note: don't tell any platform developer that this is a tab ID,
- * they will freak out. Because in the platform world this isn't a tab ID, since
- * the iframe has a different BrowsingContext than the parent. But outer most
- * BrowsingContextID _acts_ like a tab ID).
- * So we had to figure out the outer most BrowsingContextID of each element. And
- * we constructed an intermediate map to quickly find that value.
+ * Get the pages array and construct a Map of pages that we can use to get the
+ * relationships of tabs. The constructed map is `Map<BrowsingContextID,Page[]>`.
+ * The BrowsingContextID we use in that map is the BrowsingContextID of the
+ * topmost frame. That corresponds to a tab(Side note: don't tell any platform
+ * developer that this is a tab ID, they will freak out. Because in the platform
+ * world this isn't a tab ID, since the iframe has a different BrowsingContext
+ * than the parent. But outer most BrowsingContextID _acts_ like a tab ID for our case).
+ * So we had to figure out the outer most BrowsingContextID of each element and
+ * constructed an intermediate map to quickly find that value.
  */
 export const getPagesMap: Selector<Map<
   BrowsingContextID,
-  Set<InnerWindowID>
+  Page[]
 > | null> = createSelector(getPageList, pageList => {
   if (pageList === null || pageList.length === 0) {
     // There is no data, return null
@@ -533,31 +544,21 @@ export const getPagesMap: Selector<Map<
 
   // Constructing this map first so we won't have to walk through the page list
   // all the time.
-  const innerWindowIDToPageMap: Map<
-    InnerWindowID,
-    {
-      browsingContextID: BrowsingContextID,
-      embedderInnerWindowID: InnerWindowID,
-    }
-  > = new Map();
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
 
   for (const page of pageList) {
-    innerWindowIDToPageMap.set(page.innerWindowID, {
-      browsingContextID: page.browsingContextID,
-      embedderInnerWindowID: page.embedderInnerWindowID,
-    });
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
   }
 
   // Now we have a way to fastly traverse back with the previous Map.
-  // We can do construction of BrowsingContextID to set of InnerWindowID map.
-  const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
-  const appendPageMap = (browsingContextID, innerWindowID) => {
+  // We can do construction of BrowsingContextID to Page array map.
+  const pageMap: Map<BrowsingContextID, Page[]> = new Map();
+  const appendPageMap = (browsingContextID, page) => {
     const tabEntry = pageMap.get(browsingContextID);
     if (tabEntry === undefined) {
-      const newTabEntry = new Set([innerWindowID]);
-      pageMap.set(browsingContextID, newTabEntry);
+      pageMap.set(browsingContextID, [page]);
     } else {
-      tabEntry.add(innerWindowID);
+      tabEntry.push(page);
     }
   };
 
@@ -580,7 +581,7 @@ export const getPagesMap: Selector<Map<
 
       const parent = getTopMostParent(page);
       // Now we have the top most parent. We can append the pageMap.
-      appendPageMap(parent.browsingContextID, page.innerWindowID);
+      appendPageMap(parent.browsingContextID, page);
     }
   }
 
@@ -588,20 +589,74 @@ export const getPagesMap: Selector<Map<
 });
 
 /**
+ * Return the relevant page array for active tab.
+ * This is useful for operations that require the whole Page object instead of
+ * only the InnerWindowIDs. If you only need the InnerWindowID array of the active
+ * tab, please use getRelevantInnerWindowIDsForActiveTab selector. Returns
+ * _emptyRelevantPagesForActiveTab array as empty array to return the same array
+ * every time the selector inputs are invalidated. That eliminates the re-render
+ * of the components.
+ */
+const _emptyRelevantPagesForActiveTab = [];
+export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
+  getPagesMap,
+  getActiveBrowsingContextID,
+  (pagesMap, activeBrowsingContextID) => {
+    if (
+      pagesMap === null ||
+      pagesMap.size === 0 ||
+      activeBrowsingContextID === null
+    ) {
+      // Return an empty array if we want to see everything or that data is not there.
+      return _emptyRelevantPagesForActiveTab;
+    }
+
+    const pages = pagesMap.get(activeBrowsingContextID);
+    return pages !== undefined ? pages : _emptyRelevantPagesForActiveTab;
+  }
+);
+
+/**
+ * Get the page map and return the set of InnerWindowIDs by its parent BrowsingContextID.
+ * This is a helper selector for other selectors so we can easily get the relevant
+ * InnerWindowID set of a parent BrowsingContextID. Set is useful for faster
+ * filtering operations.
+ */
+export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
+  BrowsingContextID,
+  Set<InnerWindowID>
+> | null> = createSelector(getPagesMap, pagesMap => {
+  if (pagesMap === null || pagesMap.size === 0) {
+    // There is no data, return null
+    return null;
+  }
+
+  const innerWindowIDSetByBrowsingContextID = new Map();
+  for (const [browsingContextID, pages] of pagesMap) {
+    innerWindowIDSetByBrowsingContextID.set(
+      browsingContextID,
+      new Set(pages.map(page => page.innerWindowID))
+    );
+  }
+  return innerWindowIDSetByBrowsingContextID;
+});
+
+/**
  * Get the page map and the active tab ID, then return the InnerWindowIDs that
  * are related to this active tab. This is a fairly simple map element access.
  * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
- * the getPageMap selector.
+ * the getInnerWindowIDSetByBrowsingContextID selector.
  * This function returns the Set all the time even though we are not in the active
- * tab view at the moment. Idaelly you should use the wrapper getRelevantPagesForCurrentTab
- * function if you want to do something inside the active tab view. This is needed
- * for only viewProfile function to calculate the hidden tracks during page load,
- * even though we are not in the active tab view.
+ * tab view at the moment. Ideally you should use the wrapper
+ * getRelevantInnerWindowIDsForCurrentTab function if you want to do something
+ * inside the active tab view. This is needed for only viewProfile function to
+ * calculate the hidden tracks during page load, even though we are not in the
+ * active tab view.
  */
-export const getRelevantPagesForActiveTab: Selector<
+export const getRelevantInnerWindowIDsForActiveTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  getPagesMap,
+  getInnerWindowIDSetByBrowsingContextID,
   getActiveBrowsingContextID,
   (pagesMap, activeBrowsingContextID) => {
     if (
@@ -619,108 +674,32 @@ export const getRelevantPagesForActiveTab: Selector<
 );
 
 /**
- * A simple wrapper for getRelevantPagesForActiveTab.
+ * A simple wrapper for getRelevantInnerWindowIDsForActiveTab.
  * It returns an empty Set if showTabOnly is null, and returns the real Set if
  * showTabOnly is assigned already. We should usually use this instead of the
  * wrapped function. But the wrapped function is helpful to calculate the hidden
  * tracks by active tab view during the first page load(inside viewProfile function).
  */
-export const getRelevantPagesForCurrentTab: Selector<
+export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  UrlState.getShowTabOnly,
-  getRelevantPagesForActiveTab,
-  (showTabOnly, relevantPages) => {
-    if (showTabOnly === null) {
-      // Return an empty set if we want to see everything or that data is not there.
-      return new Set();
-    }
-
-    return relevantPages;
-  }
-);
-
-/**
- * Gets the hidden global tracks from the url and from the active tab view,
- * then merges those Sets depending on the active tab view status.
- */
-export const getComputedHiddenGlobalTracks: Selector<
-  Set<TrackIndex>
-> = createSelector(
-  UrlState.getHiddenGlobalTracks,
-  UrlState.getShowTabOnly,
-  getActiveTabHiddenGlobalTracksGetter,
-  (hiddenGlobalTracks, showTabOnly, activeTabHiddenGlobalTracksGetter) => {
-    if (showTabOnly === null) {
-      return hiddenGlobalTracks;
-    }
-
-    // We are in the showTabOnly mode and we need to hide the tracks that don't
-    // belong to the active tab as well.
-    return new Set([
-      ...hiddenGlobalTracks,
-      ...activeTabHiddenGlobalTracksGetter(),
-    ]);
-  }
-);
-
-/**
- * Gets the hidden local tracks from the url and from the active tab view,
- * then merges those Sets depending on the active tab view status.
- */
-export const getComputedHiddenLocalTracksByPid: Selector<
-  Map<Pid, Set<TrackIndex>>
-> = createSelector(
-  UrlState.getHiddenLocalTracksByPid,
-  UrlState.getShowTabOnly,
-  getActiveTabHiddenLocalTracksByPidGetter,
-  (
-    hiddenLocalTracksByPid,
-    showTabOnly,
-    activeTabHiddenLocalTracksByPidGetter
-  ) => {
-    if (showTabOnly === null) {
-      return hiddenLocalTracksByPid;
-    }
-
-    // We are in the showTabOnly mode and we need to hide the tracks that don't
-    // belong to the active tab as well.
-
-    // We need to deep copy those Maps and Sets here, just in case.
-    const mergedHiddenLocalTracksByPid = new Map();
-    for (const [pid, localTracks] of hiddenLocalTracksByPid) {
-      mergedHiddenLocalTracksByPid.set(pid, new Set([...localTracks]));
-    }
-
-    for (const [pid, localTracks] of activeTabHiddenLocalTracksByPidGetter()) {
-      const entry = mergedHiddenLocalTracksByPid.get(pid);
-      if (entry) {
-        mergedHiddenLocalTracksByPid.set(
-          pid,
-          new Set([...entry, ...localTracks])
+  UrlState.getTimelineTrackOrganization,
+  getRelevantInnerWindowIDsForActiveTab,
+  (timelineTrackOrganization, relevantInnerWindowIDs) => {
+    switch (timelineTrackOrganization.type) {
+      case 'active-tab':
+        return relevantInnerWindowIDs;
+      case 'full':
+      case 'origins':
+        return new Set();
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          'Unhandled timelineTrackOrganization case'
         );
-      } else {
-        mergedHiddenLocalTracksByPid.set(pid, new Set([...localTracks]));
-      }
     }
-
-    return mergedHiddenLocalTracksByPid;
   }
 );
-
-/**
- * This selector does a simple lookup in the set of computed hidden tracks for a
- * PID, and ensures that a TrackIndex is selected correctly. This makes it easier
- * to avoid doing null checks everywhere.
- */
-export const getComputedHiddenLocalTracks: DangerousSelectorWithArguments<
-  Set<TrackIndex>,
-  Pid
-> = (state, pid) =>
-  ensureExists(
-    getComputedHiddenLocalTracksByPid(state).get(pid),
-    'Unable to get the tracks for the given pid.'
-  );
 
 /**
  * Extracts the data of the first page on the tab filtered profile.
@@ -731,6 +710,6 @@ export const getComputedHiddenLocalTracks: DangerousSelectorWithArguments<
  */
 export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> = createSelector(
   getPageList,
-  getRelevantPagesForCurrentTab,
+  getRelevantInnerWindowIDsForCurrentTab,
   extractProfileFilterPageData
 );

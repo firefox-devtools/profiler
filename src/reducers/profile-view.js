@@ -3,10 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import {
-  applyFunctionMerging,
-  setFuncNames,
-} from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -16,7 +12,8 @@ import type { Profile, Pid } from '../types/profile';
 import type {
   LocalTrack,
   GlobalTrack,
-  TrackIndex,
+  ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -29,13 +26,15 @@ import type {
   ProfileViewState,
   SymbolicationStatus,
   ThreadViewOptions,
+  RightClickedCallNode,
+  RightClickedMarker,
 } from '../types/state';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
     case 'PROFILE_LOADED':
       return action.profile;
-    case 'COALESCED_FUNCTIONS_UPDATE': {
+    case 'BULK_SYMBOLICATION': {
       if (state === null) {
         throw new Error(
           'Assumed that a profile would be loaded in time for a coalesced functions update.'
@@ -44,23 +43,8 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
       if (!state.threads.length) {
         return state;
       }
-      const { functionsUpdatePerThread } = action;
-      const threads = state.threads.map((thread, threadIndex) => {
-        if (!functionsUpdatePerThread[threadIndex]) {
-          return thread;
-        }
-        const {
-          oldFuncToNewFuncMap,
-          funcIndices,
-          funcNames,
-        } = functionsUpdatePerThread[threadIndex];
-        return setFuncNames(
-          applyFunctionMerging(thread, oldFuncToNewFuncMap),
-          funcIndices,
-          funcNames
-        );
-      });
-      return { ...state, threads };
+      const { symbolicatedThreads } = action;
+      return { ...state, threads: symbolicatedThreads };
     }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {
@@ -89,7 +73,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
  */
 const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.globalTracks;
     default:
       return state;
@@ -105,7 +89,7 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.localTracksByPid;
     default:
       return state;
@@ -117,13 +101,13 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
  * function update would force it to be recomputed on every symbolication update
  * pass. It is valid for the lifetime of the profile.
  */
-const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
-  state = () => new Set(),
+const activeTabGlobalTracks: Reducer<ActiveTabGlobalTrack[]> = (
+  state = [],
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
-      return action.activeTabHiddenGlobalTracksGetter;
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      return action.globalTracks;
     default:
       return state;
   }
@@ -133,12 +117,10 @@ const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
  * This can be derived like the globalTracks information, but is stored in the state
  * for the same reason.
  */
-const activeTabHiddenLocalTracksByPidGetter: Reducer<
-  () => Map<Pid, Set<TrackIndex>>
-> = (state = () => new Map(), action) => {
+const activeTabResourceTracks: Reducer<LocalTrack[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
-      return action.activeTabHiddenLocalTracksByPidGetter;
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      return action.resourceTracks;
     default:
       return state;
   }
@@ -166,20 +148,18 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
     case 'PROFILE_LOADED':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
-        rightClickedCallNodePath: null,
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
-        rightClickedMarker: null,
       }));
-    case 'COALESCED_FUNCTIONS_UPDATE': {
-      const { functionsUpdatePerThread } = action;
+    case 'BULK_SYMBOLICATION': {
+      const { oldFuncToNewFuncMaps } = action;
       // For each thread, apply oldFuncToNewFuncMap to that thread's
       // selectedCallNodePath and expandedCallNodePaths.
       return state.map((threadViewOptions, threadIndex) => {
-        if (!functionsUpdatePerThread[threadIndex]) {
+        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(threadIndex);
+        if (oldFuncToNewFuncMap === undefined) {
           return threadViewOptions;
         }
-        const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
         const mapOldFuncToNewFunc = oldFunc => {
           const newFunc = oldFuncToNewFuncMap.get(oldFunc);
           return newFunc === undefined ? oldFunc : newFunc;
@@ -189,9 +169,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
-          rightClickedCallNodePath:
-            threadViewOptions.rightClickedCallNodePath &&
-            threadViewOptions.rightClickedCallNodePath.map(mapOldFuncToNewFunc),
           expandedCallNodePaths: new PathSet(
             Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
               oldPath.map(mapOldFuncToNewFunc)
@@ -253,17 +230,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(threadIndex + 1),
       ];
     }
-    case 'CHANGE_RIGHT_CLICKED_CALL_NODE': {
-      const { callNodePath, threadIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedCallNodePath: callNodePath,
-        },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
     case 'CHANGE_INVERT_CALLSTACK': {
       const { callTree, callNodeTable, selectedThreadIndex } = action;
       return state.map((viewOptions, threadIndex) => {
@@ -285,9 +251,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           return {
             ...viewOptions,
             selectedCallNodePath,
-            // `rightClickedCallNodePath` is most likely null already, but we
-            // force it because we don't want to risk that it's incorrect.
-            rightClickedCallNodePath: null,
             expandedCallNodePaths,
           };
         }
@@ -310,34 +273,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
       return [
         ...state.slice(0, threadIndex),
         { ...state[threadIndex], selectedMarker },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
-    case 'CHANGE_RIGHT_CLICKED_MARKER': {
-      const { threadIndex, markerIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedMarker: markerIndex,
-        },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
-    case 'SET_CONTEXT_MENU_VISIBILITY': {
-      // We want to change the state only when the menu is hidden.
-      if (action.isVisible) {
-        return state;
-      }
-
-      const { threadIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedCallNodePath: null,
-          rightClickedMarker: null,
-        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -366,9 +301,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
-          // `rightClickedCallNodePath` is most likely null already, but we
-          // force it because we don't want to risk that it's incorrect.
-          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),
@@ -383,7 +315,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath: [],
-          rightClickedCallNodePath: null,
           expandedCallNodePaths: new PathSet(),
         },
         ...state.slice(threadIndex + 1),
@@ -439,9 +370,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
-          // `rightClickedCallNodePath` is most likely null already, but we
-          // force it because we don't want to risk that it's incorrect.
-          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),
@@ -502,7 +430,6 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'CHANGE_SELECTED_MARKER':
-    case 'CHANGE_SHOW_TAB_ONLY':
       return state + 1;
     default:
       return state;
@@ -548,6 +475,100 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   }
 };
 
+const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'BULK_SYMBOLICATION': {
+      if (state === null) {
+        return null;
+      }
+
+      const { oldFuncToNewFuncMaps } = action;
+      const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(state.threadIndex);
+      if (oldFuncToNewFuncMap === undefined) {
+        return state;
+      }
+
+      const mapOldFuncToNewFunc = oldFunc => {
+        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+        return newFunc === undefined ? oldFunc : newFunc;
+      };
+
+      return {
+        ...state,
+        callNodePath: state.callNodePath.map(mapOldFuncToNewFunc),
+      };
+    }
+    case 'CHANGE_RIGHT_CLICKED_CALL_NODE':
+      if (action.callNodePath !== null) {
+        return {
+          threadIndex: action.threadIndex,
+          callNodePath: action.callNodePath,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+    case 'CHANGE_INVERT_CALLSTACK':
+    case 'ADD_TRANSFORM_TO_STACK':
+    case 'POP_TRANSFORMS_FROM_STACK':
+    case 'CHANGE_IMPLEMENTATION_FILTER':
+      return null;
+    default:
+      return state;
+  }
+};
+
+const rightClickedMarker: Reducer<RightClickedMarker | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_RIGHT_CLICKED_MARKER':
+      if (action.markerIndex !== null) {
+        return {
+          threadIndex: action.threadIndex,
+          markerIndex: action.markerIndex,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+      return null;
+    default:
+      return state;
+  }
+};
+
+/**
+ * The origins timeline is experimental. See the OriginsTimeline component
+ * for more information.
+ */
+const originsTimeline: Reducer<OriginsTimeline> = (state = [], action) => {
+  switch (action.type) {
+    case 'VIEW_ORIGINS_PROFILE':
+      return action.originsTimeline;
+    default:
+      return state;
+  }
+};
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -582,12 +603,21 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
+      rightClickedCallNode,
+      rightClickedMarker,
     }),
-    globalTracks,
-    localTracksByPid,
-    activeTabHiddenGlobalTracksGetter,
-    activeTabHiddenLocalTracksByPidGetter,
     profile,
+    full: combineReducers({
+      globalTracks,
+      localTracksByPid,
+    }),
+    activeTab: combineReducers({
+      globalTracks: activeTabGlobalTracks,
+      resourceTracks: activeTabResourceTracks,
+    }),
+    origins: combineReducers({
+      originsTimeline,
+    }),
   })
 );
 

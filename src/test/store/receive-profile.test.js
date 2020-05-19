@@ -30,12 +30,9 @@ import {
   retrieveProfilesToCompare,
   _fetchProfile,
   getProfilesFromRawUrl,
+  changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import {
-  changeShowTabOnly,
-  changeSelectedThread,
-} from '../../actions/profile-view';
 import fakeIndexedDB from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -47,8 +44,6 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
-  getNetworkMarkers,
-  getScreenshotTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -385,172 +380,133 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    describe('with showTabOnly', function() {
-      const browsingContextID = 123;
-      const innerWindowID = 111111;
-      function setup(profile: ?Profile, dispatchToShowTabOnly: boolean = true) {
-        const store = blankStore();
+    it('will not hide audio tracks if they have at least one sample', function() {
+      const store = blankStore();
 
-        if (!profile) {
-          profile = getEmptyProfile();
-          profile.threads.push(
-            // This thread should be completely hidden because it doesn't contain anything from the tab.
-            getEmptyThread({
-              name: 'GeckoMain',
-              processType: 'default',
-              pid: 1,
-            }),
-            // This thread shouldn't be hidden because it will have markers with innerWindowID.
-            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
-            // This thread should be completely hidden because it doesn't contain anything from the tab.
-            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
-          );
-        } else {
-          // Appending a thread to test the second all the time
-          profile.threads = [
-            getEmptyThread({
-              name: 'GeckoMain',
-              processType: 'default',
-              pid: 1,
-            }),
-            ...profile.threads,
-          ];
-        }
+      const idleThread: Array<string> = (Array.from({
+        length: 100,
+      }): any).fill('idle[cat:Idle]');
+      const idleThreadString = idleThread.join('  ');
 
-        profile.meta.configuration = {
-          threads: [],
-          features: [],
-          capacity: 1000000,
-          activeBrowsingContextID: browsingContextID,
-        };
-        profile.pages = [
-          {
-            browsingContextID: browsingContextID,
-            innerWindowID: innerWindowID,
-            url: 'URL',
-            embedderInnerWindowID: 0,
-          },
-        ];
+      // We want 1 work sample in 100 samples for each thread.
+      const oneWorkSampleThread = idleThread.slice();
+      oneWorkSampleThread[1] = 'work';
+      const oneWorkSampleThreadString = oneWorkSampleThread.join('  ');
 
-        addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-          [
-            'RefreshDriverTick',
-            0,
-            {
-              type: 'tracing',
-              category: 'Navigation',
-              interval: 'start',
-              innerWindowID: innerWindowID,
-            },
-          ],
-          ...getNetworkMarkers({
-            startTime: 1,
-          }),
-        ]);
+      const { profile } = getProfileFromTextSamples(
+        oneWorkSampleThreadString, // AudioIPC
+        oneWorkSampleThreadString, // MediaPDecoder
+        oneWorkSampleThreadString, // MediaTimer
+        oneWorkSampleThreadString, // MediaPlayback
+        oneWorkSampleThreadString, // MediaDecoderStateMachine
+        idleThreadString, // AudioIPC
+        idleThreadString, // MediaPDecoder
+        idleThreadString, // MediaTimer
+        idleThreadString, // MediaPlayback
+        idleThreadString // MediaDecoderStateMachine
+      );
 
-        store.dispatch(viewProfile(profile));
-        if (dispatchToShowTabOnly) {
-          store.dispatch(changeShowTabOnly(browsingContextID));
-        }
+      profile.threads[0].name = 'AudioIPC work';
+      profile.threads[1].name = 'MediaPDecoder work';
+      profile.threads[2].name = 'MediaTimer work';
+      profile.threads[3].name = 'MediaPlayback work';
+      profile.threads[4].name = 'MediaDecoderStateMachine work';
+      profile.threads[5].name = 'AudioIPC idle';
+      profile.threads[6].name = 'MediaPDecoder idle';
+      profile.threads[7].name = 'MediaTimer idle';
+      profile.threads[8].name = 'MediaPlayback idle';
+      profile.threads[9].name = 'MediaDecoderStateMachine idle';
 
-        return { ...store, profile };
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread AudioIPC work] SELECTED',
+        '  - show [thread MediaPDecoder work]',
+        '  - show [thread MediaTimer work]',
+        '  - show [thread MediaPlayback work]',
+        '  - show [thread MediaDecoderStateMachine work]',
+        '  - hide [thread AudioIPC idle]',
+        '  - hide [thread MediaPDecoder idle]',
+        '  - hide [thread MediaTimer idle]',
+        '  - hide [thread MediaPlayback idle]',
+        '  - hide [thread MediaDecoderStateMachine idle]',
+      ]);
+    });
+  });
+
+  describe('changeTimelineTrackOrganization', function() {
+    const browsingContextID = 123;
+    const innerWindowID = 111111;
+    function setup(initializeShowTabOnly: boolean = false) {
+      const store = blankStore();
+      const profile = getEmptyProfile();
+
+      profile.threads.push(
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+      );
+
+      profile.meta.configuration = {
+        threads: [],
+        features: [],
+        capacity: 1000000,
+        activeBrowsingContextID: browsingContextID,
+      };
+      profile.pages = [
+        {
+          browsingContextID: browsingContextID,
+          innerWindowID: innerWindowID,
+          url: 'URL',
+          embedderInnerWindowID: 0,
+        },
+      ];
+
+      store.dispatch(viewProfile(profile));
+      if (initializeShowTabOnly) {
+        store.dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            browsingContextID,
+          })
+        );
       }
 
-      it('should calculate the hidden tracks correctly', function() {
-        const { getState } = setup();
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [thread GeckoMain tab] SELECTED',
-        ]);
+      return { ...store, profile };
+    }
+
+    it('should be able to switch to active tab view from the full view', function() {
+      const { dispatch, getState } = setup();
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
       });
-
-      it('should not hide screenshot tracks', function() {
-        const profile = getScreenshotTrackProfile();
-        profile.threads[0].name = 'GeckoMain';
-        profile.threads[0].processType = 'tab';
-
-        const { getState } = setup(profile);
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [screenshots]',
-          'show [screenshots]',
-          'show [thread GeckoMain tab] SELECTED',
-        ]);
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID,
+        })
+      );
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        browsingContextID,
       });
+    });
 
-      it('should calculate the hidden local threads correctly', function() {
-        const { profile } = getProfileFromTextSamples(
-          `work  work  work`,
-          `work  work  work`,
-          `work  work  work`
-        );
-        // There is one main thread and two other threads that belong to the same process.
-        const [threadA, threadB, threadC] = profile.threads;
-        threadA.name = 'GeckoMain';
-        threadA.processType = 'tab';
-        threadA.pid = 111;
-        threadB.name = 'Other1';
-        threadB.processType = 'default';
-        threadB.pid = 111;
-        threadC.name = 'Other2';
-        threadC.processType = 'default';
-        threadC.pid = 111;
-
-        // Other2 should be visible and Other1 should not.
-        threadC.frameTable.innerWindowID[0] = innerWindowID;
-
-        const { getState } = setup(profile);
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [thread GeckoMain tab] SELECTED',
-          '  - show [thread Other2]',
-        ]);
+    it('should be able to switch to full view from the active tab', function() {
+      const { dispatch, getState } = setup(true);
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        browsingContextID,
       });
-
-      it('should select the first visible thread during changeShowTabOnly action', function() {
-        const { profile } = getProfileFromTextSamples(
-          `work  work  work`,
-          `work  work  work`
-        );
-        // There is one main thread and two other threads that belong to the same process.
-        const [threadA, threadB] = profile.threads;
-        threadA.name = 'GeckoMain';
-        threadA.processType = 'tab';
-        threadA.pid = 111;
-        threadB.name = 'Other';
-        threadB.processType = 'default';
-        threadB.pid = 111;
-
-        // Other should be visible
-        threadB.frameTable.innerWindowID[0] = innerWindowID;
-
-        const { getState, dispatch } = setup(profile, false);
-
-        // Select the first thread
-        dispatch(changeSelectedThread(0));
-        // First thread should be selected. This will be hidden after the next dispatch.
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [thread GeckoMain default] SELECTED',
-          'show [thread GeckoMain tab]',
-          '  - show [network GeckoMain]',
-          '  - show [thread Other]',
-        ]);
-
-        // Switch to active tab view.
-        dispatch(changeShowTabOnly(browsingContextID));
-
-        // Now first visible thread should be selected. This was a breaking action.
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [thread GeckoMain tab] SELECTED',
-          '  - show [thread Other]',
-        ]);
-
-        // Switching back again.
-        dispatch(changeShowTabOnly(null));
-        // Now the selected thread should not change, since this is not a breaking action.
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [thread GeckoMain default]',
-          'show [thread GeckoMain tab] SELECTED',
-          '  - show [network GeckoMain] SELECTED',
-          '  - show [thread Other]',
-        ]);
+      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
       });
     });
   });
@@ -600,8 +556,23 @@ describe('actions/receive-profile', function() {
 
       window.TextDecoder = TextDecoder;
 
-      // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      // Silence the warnings coming from the failed symbolication attempts, and
+      // make sure that the logged error contains our error messages.
+      jest.spyOn(console, 'warn').mockImplementation(error => {
+        expect(error).toBeInstanceOf(SymbolsNotFoundError);
+        expect(error.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              errors: expect.arrayContaining([
+                expect.objectContaining({
+                  message: 'No symbolication API in place',
+                }),
+              ]),
+            }),
+            expect.objectContaining({ message: 'No symbol tables available' }),
+          ])
+        );
+      });
 
       const store = blankStore();
 
@@ -623,6 +594,7 @@ describe('actions/receive-profile', function() {
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
         await dispatch(retrieveProfileFromAddon());
+        expect(console.warn).toHaveBeenCalledTimes(2);
 
         const state = getState();
         expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
@@ -761,7 +733,7 @@ describe('actions/receive-profile', function() {
       simulateSymbolStoreHasNoCache();
 
       // Silence console logs coming from the previous rejection
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
@@ -770,6 +742,16 @@ describe('actions/receive-profile', function() {
         'https://symbols.mozilla.org/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
+        })
+      );
+
+      expect(console.warn).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          message:
+            'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
+            ' - SymbolsNotFoundError: There was a problem with the JSON returned by the symbolication API.\n' +
+            ' - Error: Expected an object with property `results`\n' +
+            " - Error: There's no connection to the gecko profiler add-on.",
         })
       );
     });
@@ -1241,7 +1223,7 @@ describe('actions/receive-profile', function() {
         .mockRejectedValue(new Error('No symbolication API in place'));
 
       // Silence console logs coming from the previous rejections
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const profile = createGeckoProfile();
 
@@ -1693,7 +1675,7 @@ describe('actions/receive-profile', function() {
       simulateSymbolStoreHasNoCache();
 
       // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(getProfilesFromRawUrl(location));

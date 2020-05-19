@@ -24,11 +24,11 @@ This project is made up of a cross section of different parts of Mozilla, includ
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
 
-We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
+We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
 ## Getting started with development
 
-[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/firefox-devtools/Gecko-Profiler-Addon), online storage, and from local files.
+[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including directly imported from Firefox, online storage, and from local files.
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
 version 1.0.1 is known to work correctly.
@@ -65,11 +65,10 @@ The web app doesn't include any performance profiles by default, so you'll need 
  * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
-   - Install the Gecko Profiler addon from the [profiler.firefox.com](https://profiler.firefox.com) loading screen.
-   - Go to `about:addons` in your URL bar.
-   - Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png) next to the Gecko Profiler addon.
-   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://profiler.firefox.com` to `http://localhost:4242`.
-   - Record a profile following the directions on the loading screen, and the profile should open in the local development version.
+  1. Open `about:config` in Firefox.
+  2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
+  3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
+  4. Record a profile using the menu button, and it should open up in your local environment.
 
 ## Running the tests
 
@@ -118,10 +117,12 @@ week-ends be aware that our team is working mostly on week days,
 therefore please be patient :-)
 
 
-Feel free to [chat with us on
-slack](https://devtools-html-slack.herokuapp.com/) if you need help finding
-something you might be interested to work on or have any question. You can also
-leave message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
+Feel free to [chat with us on Matrix](https://chat.mozilla.org/#/room/#profiler:mozilla.org)
+if you need help finding something you might be interested to work on or have any question.
+You'll need to login first, and possibly click on the link again to access our
+room directly.
+
+You can also leave a message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
 ## Submitting changes with a pull request (PR)
 

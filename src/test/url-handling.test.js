@@ -11,7 +11,6 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
-  changeShowTabOnly,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -22,7 +21,10 @@ import {
   upgradeLocationToCurrentVersion,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import { viewProfile } from '../actions/receive-profile';
+import {
+  viewProfile,
+  changeTimelineTrackOrganization,
+} from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -30,9 +32,16 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addActiveTabInformationToProfile,
+} from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
+import {
+  getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
+} from '../selectors/profile';
 
 function _getStoreWithURL(
   settings: {
@@ -322,6 +331,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.search) {
+        throw new Error('Could not find the search query string');
+      }
       expect(query.search).toBe(callTreeSearchString);
     });
   });
@@ -337,6 +349,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.markerSearch) {
+        throw new Error('Could not find the markerSearch query string');
+      }
       expect(query.markerSearch).toBe(markerSearchString);
     });
   });
@@ -350,6 +365,9 @@ describe('search strings', function() {
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
+    if (!query.networkSearch) {
+      throw new Error('Could not find the networkSearch query string');
+    }
     expect(query.networkSearch).toBe(networkSearchString);
   });
 });
@@ -383,24 +401,79 @@ describe('profileName', function() {
 describe('showTabOnly', function() {
   it('serializes the showTabOnly in the URL ', function() {
     const { getState, dispatch } = _getStoreWithURL();
-    const showTabOnly = 123;
+    const browsingContextID = 123;
 
-    dispatch(changeShowTabOnly(showTabOnly));
+    dispatch(
+      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
+    );
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
-    expect(query.showTabOnly).toBe(showTabOnly);
+    expect(query.ctxId).toBe(browsingContextID);
   });
 
   it('reflects in the state from URL', function() {
     const { getState } = _getStoreWithURL({
-      search: '?showTabOnly=123',
+      search: '?ctxId=123&view=active-tab',
     });
-    expect(urlStateReducers.getShowTabOnly(getState())).toBe(123);
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      browsingContextID: 123,
+    });
   });
 
-  it('returns null when showTabOnly is not specified', function() {
+  it('returns the full view when showTabOnly is not specified', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
+    });
+  });
+
+  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
+    const {
+      profile,
+      parentInnerWindowIDsWithChildren,
+      iframeInnerWindowIDsWithChild,
+    } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
+    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
+    const { getState } = _getStoreWithURL(
+      {
+        search: '?view=active-tab&ctxId=123',
+      },
+      profile
+    );
+    const globalTracks = getActiveTabGlobalTracks(getState());
+    expect(globalTracks.length).toBe(1);
+    expect(globalTracks).toEqual([
+      {
+        type: 'tab',
+        threadIndex: 0,
+      },
+    ]);
+    // TODO: Resource track type will be changed soon.
+    const resourceTracks = getActiveTabResourceTracks(getState());
+    expect(resourceTracks).toEqual([
+      {
+        type: 'thread',
+        threadIndex: 1,
+      },
+    ]);
+  });
+
+  it('should remove other full view url states if present', function() {
+    const { getState } = _getStoreWithURL({
+      search:
+        '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+    });
+
+    const newUrl = new URL(
+      urlFromState(urlStateReducers.getUrlState(getState())),
+      'https://profiler.firefox.com'
+    );
+    // The url states that are relevant to full view should be stripped out.
+    expect(newUrl.search).toEqual(
+      `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
+    );
   });
 });
 

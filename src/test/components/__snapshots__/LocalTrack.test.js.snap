@@ -23,15 +23,19 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
     >
       <div
         class="timelineTrackMemory"
-        style="height: 40px;"
+        style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
       >
         <div
           class="timelineMarkers timelineMarkersMemory"
           data-testid="TimelineMarkersMemory"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineTrackMemoryGraph"
@@ -83,27 +87,27 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
           <div
             class="timelineVerticalIndicatorsLine"
             data-testid="vertical-indicator-line"
-            style="left: 0px;"
+            style="--vertical-indicator-color: var(--red-60); left: 0px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
             data-testid="vertical-indicator-line"
-            style="left: 0px;"
+            style="--vertical-indicator-color: #000; left: 0px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
             data-testid="vertical-indicator-line"
-            style="left: 0px;"
+            style="--vertical-indicator-color: var(--blue-50); left: 0px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
             data-testid="vertical-indicator-line"
-            style="left: 0px;"
+            style="--vertical-indicator-color: var(--grey-40); left: 0px;"
           />
           <div
             class="timelineVerticalIndicatorsLine"
             data-testid="vertical-indicator-line"
-            style="left: 0px;"
+            style="--vertical-indicator-color: var(--green-60); left: 0px;"
           />
         </div>
       </div>
@@ -141,9 +145,13 @@ process: \\"tab\\" (222)"
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="threadActivityGraph"
@@ -184,15 +192,19 @@ exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC t
       class="timelineTrackTrack"
     >
       <div
-        style="height: 25px;"
+        style="height: 25px; --markers-height: 25px;"
       >
         <div
           class="timelineMarkers timelineMarkersIPC"
           data-testid="TimelineMarkersIPC"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,10 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
-import { symbolicateProfile } from '../profile-logic/symbolication';
+import {
+  symbolicateProfile,
+  applySymbolicationStep,
+} from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { mergeProfiles } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
@@ -25,7 +28,12 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from '../selectors/url-state';
+  getTimelineTrackOrganization,
+  getProfileOrNull,
+  getProfile,
+  getView,
+  getRelevantPagesForActiveTab,
+} from 'firefox-profiler/selectors';
 import {
   stateFromLocation,
   getDataSourceFromPathParts,
@@ -40,28 +48,24 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import {
-  computeActiveTabHiddenGlobalTracks,
-  computeActiveTabHiddenLocalTracksByPid,
-} from '../profile-logic/active-tab';
-import { getProfileOrNull, getProfile } from '../selectors/profile';
-import { getView } from '../selectors/app';
+import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 
-import type {
-  FunctionsUpdatePerThread,
-  FuncToFuncMap,
-  RequestedLib,
-  ImplementationFilter,
-} from '../types/actions';
+import type { RequestedLib, ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
+import type { TimelineTrackOrganization } from '../types/state';
 import type {
   Profile,
   ThreadIndex,
-  IndexIntoFuncTable,
+  BrowsingContextID,
+  Page,
+  InnerWindowID,
+  Pid,
 } from '../types/profile';
-import { assertExhaustiveCheck } from '../utils/flow';
+import type { OriginsTimelineRoot } from '../types/profile-derived';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -88,6 +92,7 @@ export function waitingForProfileFromAddon(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -127,7 +132,12 @@ export function loadProfile(
     // before finalizing profile view. That's why we are dispatching this action
     // after completing those steps inside `setupInitialUrlState`.
     if (initialLoad === false) {
-      await dispatch(finalizeProfileView(config.geckoProfiler));
+      await dispatch(
+        finalizeProfileView(
+          config.geckoProfiler,
+          config.timelineTrackOrganization
+        )
+      );
     }
   };
 }
@@ -140,7 +150,8 @@ export function loadProfile(
  * functions in the src/profile-logic/tracks.js file.
  */
 export function finalizeProfileView(
-  geckoProfiler?: $GeckoProfiler
+  geckoProfiler?: $GeckoProfiler,
+  timelineTrackOrganization?: TimelineTrackOrganization
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const profile = getProfileOrNull(getState());
@@ -152,7 +163,79 @@ export function finalizeProfileView(
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
-    let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const pages = profile.pages;
+    if (!timelineTrackOrganization) {
+      // Most likely we'll need to load the timeline track organization, as requested
+      // by the URL, but tests can pass in a value.
+      timelineTrackOrganization = getTimelineTrackOrganization(getState());
+    }
+
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        if (selectedThreadIndex === null) {
+          // Switch back over to the full view.
+          timelineTrackOrganization = { type: 'full' };
+        } else {
+          // The url state says this is an active tab view. We should compute and
+          // initialize the state relevant to that state.
+          dispatch(
+            finalizeActiveTabProfileView(
+              profile,
+              selectedThreadIndex,
+              timelineTrackOrganization.browsingContextID
+            )
+          );
+        }
+        break;
+      case 'origins': {
+        if (pages) {
+          dispatch(
+            finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+          );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the origins based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        }
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
+    }
+
+    // Note we kick off symbolication only for the profiles we know for sure
+    // that they weren't symbolicated.
+    if (profile.meta.symbolicated === false) {
+      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
+      if (symbolStore) {
+        // Only symbolicate if a symbol store is available. In tests we may not
+        // have access to IndexedDB.
+        await doSymbolicateProfile(dispatch, profile, symbolStore);
+      }
+    }
+  };
+}
+
+/**
+ * Finalize the profile state for full view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeFullProfileView(
+  profile: Profile,
+  selectedThreadIndex: ThreadIndex | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
 
     const globalTracks = computeGlobalTracks(profile);
@@ -168,12 +251,6 @@ export function finalizeProfileView(
       hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
       getLegacyHiddenThreads(getState())
     );
-    // Pre-compute which tracks are not available for the active tab.
-    const activeTabHiddenGlobalTracksGetter = () =>
-      computeActiveTabHiddenGlobalTracks(
-        globalTracks,
-        getState() // we need to access per thread selectors inside
-      );
     const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
@@ -186,12 +263,6 @@ export function finalizeProfileView(
       profile,
       getLegacyHiddenThreads(getState())
     );
-    // Pre-compute which local tracks are not available for the active tab.
-    const activeTabHiddenLocalTracksByPidGetter = () =>
-      computeActiveTabHiddenLocalTracksByPid(
-        localTracksByPid,
-        getState() // we need to access per thread selectors inside
-      );
     let visibleThreadIndexes = getVisibleThreads(
       globalTracks,
       hiddenGlobalTracks,
@@ -243,7 +314,7 @@ export function finalizeProfileView(
     }
 
     dispatch({
-      type: 'VIEW_PROFILE',
+      type: 'VIEW_FULL_PROFILE',
       selectedThreadIndex,
       globalTracks,
       globalTrackOrder,
@@ -251,19 +322,270 @@ export function finalizeProfileView(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      activeTabHiddenGlobalTracksGetter,
-      activeTabHiddenLocalTracksByPidGetter,
+    });
+  };
+}
+
+/**
+ * This is a small utility to extract the origin from a URL, to build the origins-based
+ * profile view.
+ */
+function getOrigin(urlString: string): string {
+  if (urlString.startsWith('chrome://')) {
+    return urlString;
+  }
+  try {
+    const url = new URL(urlString);
+    if (url.origin === 'null') {
+      // This can happen for "about:newtab"
+      return urlString;
+    }
+    return url.origin;
+  } catch {
+    // This failed, maybe it's an internal URL.
+    return urlString;
+  }
+}
+
+/**
+ * Finalize the profile state for the origin-based view. This is an experimental
+ * view for fission. It's not turned on by default. Note, that this function
+ * probably needs a lot of work to become more correct to handle everything,
+ * so it shouldn't be trusted too much at this time.
+ */
+export function finalizeOriginProfileView(
+  profile: Profile,
+  pages: Page[],
+  selectedThreadIndex: ThreadIndex | null
+): ThunkAction<void> {
+  return dispatch => {
+    const idToPage: Map<InnerWindowID, Page> = new Map();
+    for (const page of pages) {
+      idToPage.set(page.innerWindowID, page);
+    }
+
+    // TODO - A thread can have multiple pages. Ignore this for now.
+    const pageOfThread: Array<Page | null> = [];
+    // These maps essentially serve as a tuple of the InnerWindowID and ThreadIndex
+    // that can be iterated through on a "for of" loop.
+    const rootOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    const subOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    // The set of all thread indexes that do not have an origin associated with them.
+    const noOrigins: Set<ThreadIndex> = new Set();
+
+    // Populate the collections above by iterating through all of the threads.
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const { frameTable } = profile.threads[threadIndex];
+
+      let originFound = false;
+      for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        if (innerWindowID === null || innerWindowID === 0) {
+          continue;
+        }
+
+        const page = idToPage.get(innerWindowID);
+        if (!page) {
+          // This should only happen if there is an error in the Gecko implementation.
+          console.error('Could not find the page for an innerWindowID', {
+            innerWindowID,
+            pages,
+          });
+          break;
+        }
+
+        if (page.embedderInnerWindowID === 0) {
+          rootOrigins.set(innerWindowID, threadIndex);
+        } else {
+          subOrigins.set(innerWindowID, threadIndex);
+        }
+
+        originFound = true;
+        pageOfThread[threadIndex] = page;
+        break;
+      }
+
+      if (!originFound) {
+        pageOfThread[threadIndex] = null;
+        noOrigins.add(threadIndex);
+      }
+    }
+
+    // Build up the `originsTimelineRoots` variable and any relationships needed
+    // for determining the structure of the threads in terms of their origins.
+    const originsTimelineRoots: OriginsTimelineRoot[] = [];
+    // This map can be used to take a thread with no origin information, and assign
+    // it to some origin based on a shared PID.
+    const pidToRootInnerWindowID: Map<Pid, InnerWindowID> = new Map();
+    // The root is a root domain only.
+    const innerWindowIDToRoot: Map<InnerWindowID, InnerWindowID> = new Map();
+    for (const [innerWindowID, threadIndex] of rootOrigins) {
+      const thread = profile.threads[threadIndex];
+      const page = ensureExists(pageOfThread[threadIndex]);
+      pidToRootInnerWindowID.set(thread.pid, innerWindowID);
+      // These are all roots.
+      innerWindowIDToRoot.set(innerWindowID, innerWindowID);
+      originsTimelineRoots.push({
+        type: 'origin',
+        innerWindowID,
+        threadIndex,
+        page,
+        origin: getOrigin(page.url),
+        children: [],
+      });
+    }
+
+    // Iterate and drain the sub origins from this set, and attempt to assign them
+    // to a root origin. This needs to loop to handle arbitrary sub-iframe depths.
+    const remainingSubOrigins = new Set([...subOrigins]);
+    let lastRemaining = Infinity;
+    while (lastRemaining !== remainingSubOrigins.size) {
+      lastRemaining = remainingSubOrigins.size;
+      for (const suborigin of remainingSubOrigins) {
+        const [innerWindowID, threadIndex] = suborigin;
+        const page = ensureExists(pageOfThread[threadIndex]);
+        const rootInnerWindowID = innerWindowIDToRoot.get(
+          page.embedderInnerWindowID
+        );
+        if (rootInnerWindowID === undefined) {
+          // This root has not been found yet.
+          continue;
+        }
+        const thread = profile.threads[threadIndex];
+        pidToRootInnerWindowID.set(thread.pid, rootInnerWindowID);
+
+        remainingSubOrigins.delete(suborigin);
+        innerWindowIDToRoot.set(innerWindowID, rootInnerWindowID);
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push({
+          type: 'sub-origin',
+          innerWindowID,
+          threadIndex,
+          origin: getOrigin(page.url),
+          page,
+        });
+      }
+    }
+
+    // Try to blame a thread on another thread with an origin. If this doesn't work,
+    // then add it to this originsTimelineNoOrigin array.
+    const originsTimelineNoOrigin = [];
+    for (const threadIndex of noOrigins) {
+      const thread = profile.threads[threadIndex];
+      const rootInnerWindowID = pidToRootInnerWindowID.get(thread.pid);
+      const noOriginEntry = {
+        type: 'no-origin',
+        threadIndex,
+      };
+      if (rootInnerWindowID) {
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push(noOriginEntry);
+      } else {
+        originsTimelineNoOrigin.push(noOriginEntry);
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_ORIGINS_PROFILE',
+      // TODO - We should pick the best selected thread.
+      selectedThreadIndex:
+        selectedThreadIndex === null ? 0 : selectedThreadIndex,
+      originsTimeline: [...originsTimelineNoOrigin, ...originsTimelineRoots],
+    });
+  };
+}
+
+/**
+ * Finalize the profile state for active tab view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeActiveTabProfileView(
+  profile: Profile,
+  selectedThreadIndex: ThreadIndex,
+  browsingContextID: BrowsingContextID
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const relevantPages = getRelevantPagesForActiveTab(getState());
+    const { globalTracks, resourceTracks } = computeActiveTabTracks(
+      profile,
+      relevantPages,
+      getState()
+    );
+
+    // TODO: check the selectedThreadIndex and select the proper one if it's out of bound.
+
+    dispatch({
+      type: 'VIEW_ACTIVE_TAB_PROFILE',
+      globalTracks,
+      resourceTracks,
+      selectedThreadIndex,
+      browsingContextID,
+    });
+  };
+}
+
+/**
+ * Re-compute the profile view data. That's used to be able to switch between
+ * full and active tab view.
+ */
+export function changeTimelineTrackOrganization(
+  timelineTrackOrganization: TimelineTrackOrganization
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    // We are resetting the selected thread index, because we are not sure if
+    // the selected thread will be availabe in the next view.
+    const selectedThreadIndex = 0;
+    dispatch({
+      type: 'DATA_RELOAD',
     });
 
-    // Note we kick off symbolication only for the profiles we know for sure
-    // that they weren't symbolicated.
-    if (profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
-      if (symbolStore) {
-        // Only symbolicate if a symbol store is available. In tests we may not
-        // have access to IndexedDB.
-        await doSymbolicateProfile(dispatch, profile, symbolStore);
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        // The url state says this is an active tab view. We should compute and
+        // initialize the state relevant to that state.
+        dispatch(
+          finalizeActiveTabProfileView(
+            profile,
+            selectedThreadIndex,
+            timelineTrackOrganization.browsingContextID
+          )
+        );
+        break;
+      case 'origins': {
+        const pages = ensureExists(
+          profile.pages,
+          'There was no page information in the profile.'
+        );
+        dispatch(
+          finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+        );
+        break;
       }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
   };
 }
@@ -295,6 +617,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -330,12 +653,43 @@ export function doneSymbolicating(): Action {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function coalescedFunctionsUpdate(
-  functionsUpdatePerThread: FunctionsUpdatePerThread
-): Action {
-  return {
-    type: 'COALESCED_FUNCTIONS_UPDATE',
-    functionsUpdatePerThread,
+// Apply all the individual "symbolication steps" from symbolicationStepsPerThread
+// to the current profile, as one redux action.
+// We combine steps into one redux action in order to avoid unnecessary renders.
+// When symbolication results arrive, we often get a very high number of individual
+// symbolication updates. If we dispatched all of them as individual redux actions,
+// we would cause React to re-render synchronously for each action, and the profile
+// selectors called from rendering would do expensive work, most of which would never
+// reach the screen because it would be invalidated by the next symbolication update.
+// So we queue up symbolication steps and run the update from requestIdleCallback.
+export function bulkProcessSymbolicationSteps(
+  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { threads } = getProfile(getState());
+    const oldFuncToNewFuncMaps = new Map();
+    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
+      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
+      if (symbolicationSteps === undefined) {
+        return oldThread;
+      }
+      const oldFuncToNewFuncMap = new Map();
+      let thread = oldThread;
+      for (const symbolicationStep of symbolicationSteps) {
+        thread = applySymbolicationStep(
+          thread,
+          symbolicationStep,
+          oldFuncToNewFuncMap
+        );
+      }
+      oldFuncToNewFuncMaps.set(threadIndex, oldFuncToNewFuncMap);
+      return thread;
+    });
+    dispatch({
+      type: 'BULK_SYMBOLICATION',
+      oldFuncToNewFuncMaps,
+      symbolicatedThreads,
+    });
   };
 }
 
@@ -353,29 +707,24 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
-class ColascedFunctionsUpdateDispatcher {
-  _updates: FunctionsUpdatePerThread;
+// Queues up symbolication steps and bulk-processes them from requestIdleCallback,
+// in order to improve UI responsiveness during symbolication.
+class SymbolicationStepQueue {
+  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
-  _requestIdleTimeout: { timeout: number };
-  scheduledUpdatesDone: Promise<void>;
 
   constructor() {
-    this._updates = {};
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    this._requestIdleTimeout = { timeout: 2000 };
-    this.scheduledUpdatesDone = Promise.resolve();
   }
 
   _scheduleUpdate(dispatch) {
-    // Only request an update if one hasn't already been schedule.
+    // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
-      // Let any consumers of this class be able to know when all scheduled updates
-      // are done.
-      this.scheduledUpdatesDone = new Promise(resolve => {
-        requestIdleCallbackPolyfill(() => {
-          this._dispatchUpdate(dispatch);
-          resolve();
-        }, this._requestIdleTimeout);
+      requestIdleCallbackPolyfill(() => this._dispatchUpdate(dispatch), {
+        timeout: 2000,
       });
       this._requestedUpdate = true;
     }
@@ -383,91 +732,46 @@ class ColascedFunctionsUpdateDispatcher {
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
-    this._updates = {};
+    const observers = this._updateObservers;
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    dispatch(coalescedFunctionsUpdate(updates));
+
+    dispatch(bulkProcessSymbolicationSteps(updates));
+
+    for (const observer of observers) {
+      observer();
+    }
   }
 
-  mergeFunctions(
+  enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: FuncToFuncMap
+    symbolicationStepInfo: SymbolicationStepInfo,
+    completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        oldFuncToNewFuncMap,
-        funcIndices: [],
-        funcNames: [],
-      };
-    } else {
-      for (const oldFunc of oldFuncToNewFuncMap.keys()) {
-        const funcIndex = oldFuncToNewFuncMap.get(oldFunc);
-        if (funcIndex === undefined) {
-          throw new Error(
-            'Unable to merge functions together, an undefined funcIndex was returned.'
-          );
-        }
-        this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
-      }
+    let threadSteps = this._updates.get(threadIndex);
+    if (threadSteps === undefined) {
+      threadSteps = [];
+      this._updates.set(threadIndex, threadSteps);
     }
-  }
-
-  assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames) {
-    this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        funcIndices,
-        funcNames,
-        oldFuncToNewFuncMap: new Map(),
-      };
-    } else {
-      this._updates[threadIndex].funcIndices = this._updates[
-        threadIndex
-      ].funcIndices.concat(funcIndices);
-      this._updates[threadIndex].funcNames = this._updates[
-        threadIndex
-      ].funcNames.concat(funcNames);
-    }
+    threadSteps.push(symbolicationStepInfo);
+    this._updateObservers.push(completionHandler);
   }
 }
 
-const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
-
-export function mergeFunctions(
-  threadIndex: ThreadIndex,
-  oldFuncToNewFuncMap: FuncToFuncMap
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(
-      dispatch,
-      threadIndex,
-      oldFuncToNewFuncMap
-    );
-  };
-}
-
-export function assignFunctionNames(
-  threadIndex: ThreadIndex,
-  funcIndices: IndexIntoFuncTable[],
-  funcNames: string[]
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(
-      dispatch,
-      threadIndex,
-      funcIndices,
-      funcNames
-    );
-  };
-}
+const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
 
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromAddon(profile) {
-  if (profile instanceof ArrayBuffer) {
+  // Note: the following check will work for array buffers coming from another
+  // global. This happens especially with tests but could happen in the future
+  // in Firefox too.
+  if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress
@@ -558,23 +862,30 @@ export async function doSymbolicateProfile(
   symbolStore: SymbolStore
 ) {
   dispatch(startSymbolicating());
-  await symbolicateProfile(profile, symbolStore, {
-    onMergeFunctions: (
-      threadIndex: ThreadIndex,
-      oldFuncToNewFuncMap: FuncToFuncMap
-    ) => {
-      dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
-    },
-    onGotFuncNames: (
-      threadIndex: ThreadIndex,
-      funcIndices: IndexIntoFuncTable[],
-      funcNames: string[]
-    ) => {
-      dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-    },
-  });
 
-  await gCoalescedFunctionsUpdateDispatcher.scheduledUpdatesDone;
+  const completionPromises = [];
+
+  await symbolicateProfile(
+    profile,
+    symbolStore,
+    (
+      threadIndex: ThreadIndex,
+      symbolicationStepInfo: SymbolicationStepInfo
+    ) => {
+      completionPromises.push(
+        new Promise(resolve => {
+          _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
+            dispatch,
+            threadIndex,
+            symbolicationStepInfo,
+            resolve
+          );
+        })
+      );
+    }
+  );
+
+  await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
 }
@@ -805,11 +1116,13 @@ async function _extractJsonFromResponse(
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
-    if (fileType === 'application/json') {
+    if (error && typeof error === 'object' && error.name === 'AbortError') {
+      message = 'The network request to load the profile was aborted.';
+    } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
     } else {
       message = oneLine`
-        The profile could not be decoded. This does not look like a supported file
+        The profile could not be downloaded and decoded. This does not look like a supported file
         type.
       `;
     }

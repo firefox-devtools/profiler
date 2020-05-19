@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global tab track 1`] = `
+<li
+  class="timelineTrack"
+>
+  <div
+    class="timelineTrackRow timelineTrackGlobalRow activeTab"
+  >
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        class="timelineTrackThread"
+      >
+        <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+        <div
+          class="timelineMarkers timelineMarkersGeckoMain"
+          data-testid="TimelineMarkersOverview"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+        <div
+          class="threadActivityGraph"
+        >
+          <canvas
+            class="threadActivityGraphCanvas threadActivityGraphCanvas"
+            height="300"
+            width="200"
+          />
+        </div>
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a resources panel 1`] = `
+<div
+  class="timelineResources"
+  style="--resources-header-height: 20px;"
+>
+  <div
+    class="timelineResourcesHeader"
+  >
+    Resources (
+    1
+    )
+  </div>
+</div>
+`;
+
+exports[`ActiveTabTimeline should be rendered properly from the Timeline component 1`] = `
+<div
+  class="timelineSelection activeTab"
+>
+  <div
+    class="timelineRuler"
+    style="--timeline-ruler-height: 20px;"
+  >
+    <ol
+      class="timelineRulerContainer"
+    />
+  </div>
+  <div
+    class="overflowEdgeIndicator timelineOverflowEdgeIndicator"
+  >
+    <div
+      class="overflowEdgeIndicatorEdge topEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge rightEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge bottomEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge leftEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
+    >
+      <div
+        class="overflowEdgeIndicatorContentsWrapper"
+      >
+        <ol
+          class="timelineThreadList"
+        >
+          <li
+            class="timelineTrack"
+          >
+            <div
+              class="timelineTrackRow timelineTrackGlobalRow activeTab selected"
+            >
+              <div
+                class="timelineTrackTrack"
+              >
+                <div
+                  class="timelineTrackThread"
+                >
+                  <div
+                    class="timelineMarkers selected"
+                    data-testid="TimelineMarkersJank"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <canvas
+                        class="timelineMarkersCanvas"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="timelineMarkers timelineMarkersGeckoMain selected"
+                    data-testid="TimelineMarkersOverview"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <canvas
+                        class="timelineMarkersCanvas"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="threadActivityGraph"
+                  >
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="300"
+                      width="200"
+                    />
+                  </div>
+                  <div
+                    class="timelineEmptyThreadIndicator"
+                  />
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div
+    class="timelineSelectionHoverLine"
+    style="visibility: hidden; left: 0px;"
+  />
+</div>
+`;

@@ -16,6 +16,7 @@ import {
   getSelectedThreadIndex,
   getLocalTrackOrder,
   getSelectedTab,
+  getHiddenGlobalTracks,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
@@ -26,7 +27,6 @@ import {
   getVisualProgress,
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
-  getComputedHiddenGlobalTracks,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import './Track.css';
@@ -349,7 +349,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       localTrackOrder,
       localTracks,
       pid,
-      isHidden: getComputedHiddenGlobalTracks(state).has(trackIndex),
+      isHidden: getHiddenGlobalTracks(state).has(trackIndex),
       selectedTab,
       processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
       progressGraphData,

@@ -9,7 +9,6 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoFuncTable,
   Pid,
   BrowsingContextID,
 } from './profile';
@@ -20,7 +19,10 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from './profile-derived';
+import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -45,14 +47,6 @@ export type PreviewSelection =
       +selectionStart: number,
       +selectionEnd: number,
     |};
-export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
-export type FunctionsUpdatePerThread = {
-  [id: ThreadIndex]: {|
-    oldFuncToNewFuncMap: FuncToFuncMap,
-    funcIndices: IndexIntoFuncTable[],
-    funcNames: string[],
-  |},
-};
 
 /**
  * The counts for how many tracks are hidden in the timeline.
@@ -76,6 +70,7 @@ export type LocalTrackReference = {|
   +trackIndex: TrackIndex,
   +pid: Pid,
 |};
+
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
 
 export type RequestedLib = {|
@@ -221,7 +216,6 @@ type ProfileAction =
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -231,8 +225,9 @@ type ProfileAction =
 
 type ReceiveProfileAction =
   | {|
-      +type: 'COALESCED_FUNCTIONS_UPDATE',
-      +functionsUpdatePerThread: FunctionsUpdatePerThread,
+      +type: 'BULK_SYMBOLICATION',
+      +symbolicatedThreads: Thread[],
+      +oldFuncToNewFuncMaps: Map<ThreadIndex, FuncToFuncMap>,
     |}
   | {|
       +type: 'DONE_SYMBOLICATING',
@@ -253,7 +248,7 @@ type ReceiveProfileAction =
       +transformStacks: ?TransformStacksPerThread,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
+      +type: 'VIEW_FULL_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
@@ -261,8 +256,22 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
-      +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
+      +showTabOnly?: BrowsingContextID | null,
+    |}
+  | {|
+      +type: 'VIEW_ORIGINS_PROFILE',
+      +selectedThreadIndex: ThreadIndex,
+      +originsTimeline: OriginsTimeline,
+    |}
+  | {|
+      +type: 'VIEW_ACTIVE_TAB_PROFILE',
+      +selectedThreadIndex: ThreadIndex,
+      +globalTracks: ActiveTabGlobalTrack[],
+      +resourceTracks: LocalTrack[],
+      +browsingContextID: BrowsingContextID,
+    |}
+  | {|
+      +type: 'DATA_RELOAD',
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -361,12 +370,7 @@ type UrlStateAction =
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
     |}
-  | {|
-      +type: 'CHANGE_SHOW_TAB_ONLY',
-      +showTabOnly: BrowsingContextID | null,
-      +selectedTab: TabSlug,
-      +selectedThreadIndex: ThreadIndex | null,
-    |};
+  | {| +type: 'TOGGLE_RESOURCES_PANEL' |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}

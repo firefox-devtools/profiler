@@ -337,6 +337,7 @@ export type NetworkPayload = {|
   count?: number, // Total size of transfer, if any
   status: string,
   cache?: string,
+  cause?: CauseBacktrace,
   contentType?: string,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
@@ -406,6 +407,33 @@ export type TextMarkerPayload = {|
   name: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
+|};
+
+// ph: 'X' in the Trace Event Format
+export type ChromeCompleteTraceEventPayload = {|
+  type: 'CompleteTraceEvent',
+  category: string,
+  data: Object | null,
+  startTime: number,
+  endTime: number,
+|};
+
+// ph: 'I' in the Trace Event Format
+export type ChromeInstantTraceEventPayload = {|
+  type: 'InstantTraceEvent',
+  category: string,
+  data: Object | null,
+  startTime: number,
+  endTime: number,
+|};
+
+// ph: 'B' | 'E' in the Trace Event Format
+export type ChromeDurationTraceEventPayload = {|
+  type: 'tracing',
+  category: 'FromChrome',
+  interval: 'start' | 'end',
+  data: Object | null,
+  cause?: CauseBacktrace,
 |};
 
 /**
@@ -574,6 +602,9 @@ export type MarkerPayload =
   | NavigationMarkerPayload
   | PrefMarkerPayload
   | IPCMarkerPayload
+  | ChromeCompleteTraceEventPayload
+  | ChromeDurationTraceEventPayload
+  | ChromeInstantTraceEventPayload
   | null;
 
 export type MarkerPayload_Gecko =

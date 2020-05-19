@@ -740,12 +740,19 @@ const _upgraders = {
         GCCC,
       ],
       ['g_main_context_dispatch', OTHER],
+      ['Events::ProcessGeckoEvents', OTHER],
+      ['widget::ChildView::drawUsingOpenGL', OTHER],
       ['nsContentSink::StartLayout(bool)', LAYOUT],
+      ['Paint::PresShell::Paint', GRAPHICS],
+      ['JS::EvaluateString', JS],
+      ['js::RunScript', JS],
     ]);
 
     const upToFirstSpaceMatches = new Map([
       ['PresShell::DoFlushPendingNotifications', LAYOUT],
       ['PresShell::DoReflow', LAYOUT],
+      ['layout::DoReflow', LAYOUT],
+      ['JS::Compile', JS],
     ]);
 
     function truncateAtFirstSpace(s: string): string {

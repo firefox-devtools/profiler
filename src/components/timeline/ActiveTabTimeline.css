@@ -1,0 +1,55 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineSelection.activeTab {
+  --thread-label-column-width: 0;
+}
+
+.timelineTrack:not(:first-child)
+  .timelineTrackGlobalRow.activeTab
+  .timelineTrackThread {
+  padding-top: 10px;
+  border-top: 1px solid var(--grey-30);
+}
+
+/* Active tab timeline resources panel */
+.timelineResources {
+  background-color: #fff;
+}
+
+.timelineResourcesHeader {
+  position: relative;
+  height: var(--resources-header-height);
+  padding-left: 20px;
+  cursor: default;
+  font-size: 12px;
+  line-height: var(--resources-header-height);
+}
+
+.timelineResourcesHeader::before {
+  position: absolute;
+  top: calc(50% - 5px);
+  left: 8px;
+  width: 0;
+  height: 0;
+
+  /* Drawing the arrow */
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid #979797;
+  content: '';
+  transition: transform 0.2s;
+}
+
+.timelineResourcesHeader.opened::before {
+  /* Rotating the arrow if the panel is opened */
+  transform: rotate(90deg);
+}
+
+.timelineResourceTracks {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}

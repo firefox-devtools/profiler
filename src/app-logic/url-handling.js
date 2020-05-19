@@ -19,7 +19,7 @@ import {
 } from '../utils/flow';
 import { toValidCallTreeSummaryStrategy } from '../profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import type { UrlState } from '../types/state';
+import type { UrlState, TimelineTrackOrganization } from '../types/state';
 import type { DataSource } from '../types/actions';
 import type {
   Pid,
@@ -80,27 +80,43 @@ function getDataSourceDirs(
   }
 }
 
-// "null | void" in the query objects are flags which map to true for null, and false
-// for void. False flags do not show up the URL.
-type BaseQuery = {|
-  v: number,
-  range: string, //
-  thread: string, // "3"
+// Base query that only applies to full profile view.
+type FullProfileSpecificBaseQuery = {|
   globalTrackOrder: string, // "3-2-0-1"
   hiddenGlobalTracks: string, // "0-1"
   hiddenLocalTracksByPid: string,
   localTrackOrderByPid: string,
-  file: string, // Path into a zip file.
-  transforms: string,
   timelineType: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
+|};
+
+// Base query that only applies to active tab profile view.
+type ActiveTabProfileSpecificBaseQuery = {|
+  resources: null | void,
+|};
+
+// Base query that only applies to origins profile view.
+type OriginsProfileSpecificBaseQuery = {||};
+
+// "null | void" in the query objects are flags which map to true for null, and false
+// for void. False flags do not show up the URL.
+type BaseQuery = {|
+  v: number,
+  range: string, //
+  thread: string, // "3"
+  file: string, // Path into a zip file.
+  transforms: string,
   profiles: string[],
   profileName: string,
-  showTabOnly: BrowsingContextID,
+  ctxId: BrowsingContextID,
+  view: string,
+  ...FullProfileSpecificBaseQuery,
+  ...ActiveTabProfileSpecificBaseQuery,
+  ...OriginsProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
@@ -135,19 +151,41 @@ type JsTracerQuery = {|
   summary: null | void,
 |};
 
-// Use object type spread in the definition of Query rather than unions, so that they
-// are really easy to manipulate. This permissive definition makes it easy to not have
-// to refine the type down to the individual query types when working with them.
-type Query = {|
-  ...CallTreeQuery,
-  ...MarkersQuery,
-  ...NetworkQuery,
-  ...StackChartQuery,
-  ...JsTracerQuery,
-|};
+type Query =
+  | CallTreeQuery
+  | MarkersQuery
+  | NetworkQuery
+  | StackChartQuery
+  | JsTracerQuery;
 
 type $MakeOptional = <T>(T) => T | void;
-type QueryShape = $Shape<$ObjMap<Query, $MakeOptional>>;
+// Base query shape is needed for the typechecking during the URL query initialization.
+type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
+// Full profile view and active tab profile view query shapes are for also
+// typechecking during the query object initialization.
+type FullProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>
+>;
+type ActiveTabProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>
+>;
+type OriginsProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>
+>;
+
+// Query shapes for individual query paths. These are needed for QueryShape union type.
+type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
+type MarkersQueryShape = $Shape<$ObjMap<MarkersQuery, $MakeOptional>>;
+type NetworkQueryShape = $Shape<$ObjMap<NetworkQuery, $MakeOptional>>;
+type StackChartQueryShape = $Shape<$ObjMap<StackChartQuery, $MakeOptional>>;
+type JsTracerQueryShape = $Shape<$ObjMap<JsTracerQuery, $MakeOptional>>;
+
+type QueryShape =
+  | CallTreeQueryShape
+  | MarkersQueryShape
+  | NetworkQueryShape
+  | StackChartQueryShape
+  | JsTracerQueryShape;
 
 type UrlObject = {|
   pathParts: string[],
@@ -180,66 +218,126 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
-  // Start with the query parameters that are shown regardless of the active tab.
-  const query: QueryShape = {
+  // Start with the query parameters that are shown regardless of the active panel.
+  let baseQuery;
+  const { timelineTrackOrganization } = urlState;
+  switch (timelineTrackOrganization.type) {
+    case 'full': {
+      // Add the full profile specific state query here.
+      baseQuery = ({}: FullProfileSpecificBaseQueryShape);
+      baseQuery.globalTrackOrder =
+        urlState.profileSpecific.full.globalTrackOrder.join('-') || undefined;
+
+      // Add the parameter hiddenGlobalTracks only when needed.
+      if (urlState.profileSpecific.full.hiddenGlobalTracks.size > 0) {
+        baseQuery.hiddenGlobalTracks = [
+          ...urlState.profileSpecific.full.hiddenGlobalTracks,
+        ].join('-');
+      }
+
+      let hiddenLocalTracksByPid = '';
+      for (const [pid, tracks] of urlState.profileSpecific.full
+        .hiddenLocalTracksByPid) {
+        if (tracks.size > 0) {
+          hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
+        }
+      }
+      if (hiddenLocalTracksByPid.length > 0) {
+        // Only add to the query string if something was actually hidden.
+        // Also, slice off the last '~'.
+        baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+      }
+
+      if (urlState.profileSpecific.full.timelineType === 'stack') {
+        // The default is the category view, so only add it to the URL if it's the
+        // stack view.
+        baseQuery.timelineType = 'stack';
+      }
+
+      let localTrackOrderByPid = '';
+      for (const [pid, trackOrder] of urlState.profileSpecific.full
+        .localTrackOrderByPid) {
+        if (trackOrder.length > 0) {
+          localTrackOrderByPid +=
+            `${String(pid)}-` + trackOrder.join('-') + '~';
+        }
+      }
+      baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
+      break;
+    }
+    case 'active-tab': {
+      baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
+
+      baseQuery.resources = urlState.profileSpecific.activeTab
+        .isResourcesPanelOpen
+        ? null
+        : undefined;
+      break;
+    }
+    case 'origins':
+      baseQuery = ({}: OriginsProfileSpecificBaseQueryShape);
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        `Unhandled GlobalTrack type.`
+      );
+  }
+
+  let ctxId;
+  let view;
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      // Dont URL-encode anything.
+      break;
+    case 'active-tab':
+      view = timelineTrackOrganization.type;
+      ctxId = timelineTrackOrganization.browsingContextID;
+      break;
+    case 'origins':
+      view = timelineTrackOrganization.type;
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        'Unhandled TimelineTrackOrganization case'
+      );
+  }
+
+  baseQuery = ({
+    ...baseQuery,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
     thread: selectedThread === null ? undefined : selectedThread.toString(),
-    globalTrackOrder:
-      urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
+    ctxId,
+    view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
-    showTabOnly: urlState.showTabOnly || undefined,
-  };
+  }: BaseQueryShape);
 
-  // Add the parameter hiddenGlobalTracks only when needed.
-  if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
-    query.hiddenGlobalTracks = [
-      ...urlState.profileSpecific.hiddenGlobalTracks,
-    ].join('-');
-  }
-
-  let hiddenLocalTracksByPid = '';
-  for (const [pid, tracks] of urlState.profileSpecific.hiddenLocalTracksByPid) {
-    if (tracks.size > 0) {
-      hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
-    }
-  }
-  if (hiddenLocalTracksByPid.length > 0) {
-    // Only add to the query string if something was actually hidden.
-    // Also, slice off the last '~'.
-    query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
-  }
-
-  if (urlState.profileSpecific.timelineType === 'stack') {
-    // The default is the category view, so only add it to the URL if it's the
-    // stack view.
-    query.timelineType = 'stack';
-  }
-
-  let localTrackOrderByPid = '';
-  for (const [pid, trackOrder] of urlState.profileSpecific
-    .localTrackOrderByPid) {
-    if (trackOrder.length > 0) {
-      localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
-    }
-  }
-  query.localTrackOrderByPid = localTrackOrderByPid || undefined;
-
-  // Depending on which tab is active, also show tab-specific query parameters.
+  // Depending on which panel is active, also show tab-specific query parameters.
+  let query: QueryShape;
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
     case 'flame-graph':
     case 'calltree': {
+      if (selectedTab === 'stack-chart') {
+        // Stack chart uses all of the CallTree's query strings but also has an
+        // additional query string.
+        query = (baseQuery: StackChartQueryShape);
+        query.showUserTimings = urlState.profileSpecific.showUserTimings
+          ? null
+          : undefined;
+      } else {
+        query = (baseQuery: CallTreeQueryShape);
+      }
+
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
-        ? null
-        : undefined;
-      query.showUserTimings = urlState.profileSpecific.showUserTimings
         ? null
         : undefined;
       query.implementation =
@@ -261,22 +359,41 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
     case 'marker-table':
     case 'marker-chart':
+      query = (baseQuery: MarkersQueryShape);
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
+      query = (baseQuery: NetworkQueryShape);
       query.networkSearch =
         urlState.profileSpecific.networkSearchString || undefined;
       break;
-    case 'js-tracer':
-      // `null` adds the parameter to the query, while `undefined` doesn't.
-      query.summary = urlState.profileSpecific.showJsTracerSummary
-        ? null
-        : undefined;
+    case 'js-tracer': {
+      query = (baseQuery: JsTracerQueryShape);
+      const { timelineTrackOrganization } = urlState;
+      switch (timelineTrackOrganization.type) {
+        case 'full':
+        case 'origins':
+          // `null` adds the parameter to the query, while `undefined` doesn't.
+          query.summary = urlState.profileSpecific.full.showJsTracerSummary
+            ? null
+            : undefined;
+          break;
+        case 'active-tab':
+          // JS Tracer isn't helpful for web developers.
+          break;
+        default:
+          throw assertExhaustiveCheck(
+            timelineTrackOrganization,
+            'Unhandled timelineTrackOrganization case'
+          );
+      }
       break;
+    }
     default:
-      assertExhaustiveCheck(selectedTab);
+      throw assertExhaustiveCheck(selectedTab);
   }
+
   return { query, pathParts };
 }
 
@@ -364,9 +481,9 @@ export function stateFromLocation(
       : [];
   }
 
-  let showTabOnly = null;
-  if (query.showTabOnly && Number.isInteger(Number(query.showTabOnly))) {
-    showTabOnly = Number(query.showTabOnly);
+  let browsingContextId = null;
+  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
+    browsingContextId = Number(query.ctxId);
   }
 
   return {
@@ -377,42 +494,50 @@ export function stateFromLocation(
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileName: query.profileName,
-    showTabOnly: showTabOnly,
+    timelineTrackOrganization: validateTimelineTrackOrganization(
+      query.view,
+      browsingContextId
+    ),
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
-        query.ctSummary
+        query.ctSummary || undefined
       ),
-      invertCallstack: query.invertCallstack !== undefined,
-      showUserTimings: query.showUserTimings !== undefined,
-      showJsTracerSummary: query.summary !== undefined,
+      invertCallstack: query.invertCallstack === undefined ? false : true,
+      showUserTimings: query.showUserTimings === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',
-      globalTrackOrder: query.globalTrackOrder
-        ? query.globalTrackOrder.split('-').map(index => Number(index))
-        : [],
-      hiddenGlobalTracks: query.hiddenGlobalTracks
-        ? new Set(
-            query.hiddenGlobalTracks.split('-').map(index => Number(index))
-          )
-        : new Set(),
-      hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
-        ? parseHiddenTracks(query.hiddenLocalTracksByPid)
-        : new Map(),
-      localTrackOrderByPid: query.localTrackOrderByPid
-        ? parseLocalTrackOrder(query.localTrackOrderByPid)
-        : new Map(),
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
-      timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
-      legacyThreadOrder: query.threadOrder
-        ? query.threadOrder.split('-').map(index => Number(index))
-        : null,
-      legacyHiddenThreads: query.hiddenThreads
-        ? query.hiddenThreads.split('-').map(index => Number(index))
-        : null,
+      full: {
+        showJsTracerSummary: query.summary === undefined ? false : true,
+        globalTrackOrder: query.globalTrackOrder
+          ? query.globalTrackOrder.split('-').map(index => Number(index))
+          : [],
+        hiddenGlobalTracks: query.hiddenGlobalTracks
+          ? new Set(
+              query.hiddenGlobalTracks.split('-').map(index => Number(index))
+            )
+          : new Set(),
+        hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
+          ? parseHiddenTracks(query.hiddenLocalTracksByPid)
+          : new Map(),
+        localTrackOrderByPid: query.localTrackOrderByPid
+          ? parseLocalTrackOrder(query.localTrackOrderByPid)
+          : new Map(),
+        timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
+        legacyThreadOrder: query.threadOrder
+          ? query.threadOrder.split('-').map(index => Number(index))
+          : null,
+        legacyHiddenThreads: query.hiddenThreads
+          ? query.hiddenThreads.split('-').map(index => Number(index))
+          : null,
+      },
+      activeTab: {
+        isResourcesPanelOpen: query.resources !== undefined,
+      },
     },
   };
 }
@@ -712,4 +837,30 @@ function getVersion4JSCallNodePathFromStackIndex(
     nextStackIndex = stackTable.prefix[nextStackIndex];
   }
   return callNodePath;
+}
+
+function validateTimelineTrackOrganization(
+  type: ?string,
+  browsingContextID: number | null
+): TimelineTrackOrganization {
+  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
+  // go through each option.
+  const timelineTrackOrganization: TimelineTrackOrganization = ({ type }: any);
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      return { type: 'full' };
+    case 'active-tab':
+      if (browsingContextID) {
+        return { type: 'active-tab', browsingContextID };
+      }
+      return { type: 'full' };
+
+    case 'origins':
+      return { type: 'origins' };
+    default:
+      // Type assert we've checked everythign:
+      (timelineTrackOrganization: empty);
+
+      return { type: 'full' };
+  }
 }

@@ -52,7 +52,7 @@ type OwnProps = {|
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
-  +rightClickedMarker: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
 |};
 
@@ -224,7 +224,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rowHeight,
       marginLeft,
       marginRight,
-      rightClickedMarker,
+      rightClickedMarkerIndex,
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
@@ -299,7 +299,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           const markerIndex = markerTiming.index[i];
 
           const isHighlighted =
-            rightClickedMarker === markerIndex || hoveredItem === markerIndex;
+            rightClickedMarkerIndex === markerIndex ||
+            hoveredItem === markerIndex;
 
           if (isHighlighted) {
             highlightedMarkers.push({ x, y, w, h, uncutWidth, text });

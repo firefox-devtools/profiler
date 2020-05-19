@@ -17,13 +17,14 @@ import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
+  'from-addon': "Couldn't retrieve the profile from the Firefox.",
   'from-file': "Couldn't read the file or parse the profile in it.",
   local: 'Not implemented yet.',
   public: 'Could not download the profile.',
@@ -44,16 +45,32 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
   renderCurrentRoute() {
     const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
-    if (dataSource === 'none') {
-      return <Home />;
+
+    // We're using a switch to assert that all values for the dataSource has
+    // been checked. This is useful when we add a new dataSource, as Flow will
+    // error here if we forget to update this code.
+    switch (dataSource) {
+      case 'none':
+        return <Home />;
+      case 'compare':
+        if (profilesToCompare === null) {
+          return <CompareHome />;
+        }
+        break;
+      case 'from-addon':
+      case 'from-file':
+      case 'local':
+      case 'public':
+      case 'from-url':
+        break;
+      default:
+        throw assertExhaustiveCheck(dataSource);
     }
 
-    if (dataSource === 'compare' && profilesToCompare === null) {
-      return <CompareHome />;
-    }
     switch (phase) {
       case 'INITIALIZING':
       case 'PROFILE_LOADED':
+      case 'DATA_RELOAD':
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =

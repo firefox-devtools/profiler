@@ -27,7 +27,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { Thread, CategoryList, PageList } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type { Milliseconds, StartEndRange } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type {
   PreviewSelection,
@@ -58,7 +58,7 @@ type StateProps = {|
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
   +callTree: CallTree,
@@ -325,38 +325,36 @@ function viewportNeedsUpdate() {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    return {
-      thread: selectedThreadSelectors.getFilteredThread(state),
-      unfilteredThread: selectedThreadSelectors.getThread(state),
-      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
-        state
-      ),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
-      flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-      callTree: selectedThreadSelectors.getCallTree(state),
-      timeRange: getCommittedRange(state),
-      previewSelection: getPreviewSelection(state),
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-      categories: getCategories(state),
-      threadIndex: getSelectedThreadIndex(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-        state
-      ),
-      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-      interval: getProfileInterval(state),
-      isInverted: getInvertCallstack(state),
-      callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-        state
-      ),
-      pages: getPageList(state),
-    };
-  },
+  mapStateToProps: state => ({
+    thread: selectedThreadSelectors.getFilteredThread(state),
+    unfilteredThread: selectedThreadSelectors.getThread(state),
+    sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+      state
+    ),
+    maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+      state
+    ),
+    flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
+    callTree: selectedThreadSelectors.getCallTree(state),
+    timeRange: getCommittedRange(state),
+    previewSelection: getPreviewSelection(state),
+    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    categories: getCategories(state),
+    threadIndex: getSelectedThreadIndex(state),
+    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+      state
+    ),
+    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      state
+    ),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+    interval: getProfileInterval(state),
+    isInverted: getInvertCallstack(state),
+    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+      state
+    ),
+    pages: getPageList(state),
+  }),
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,

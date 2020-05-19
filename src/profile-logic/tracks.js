@@ -223,7 +223,7 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (!_isMainThread(thread)) {
+    if (!isMainThread(thread)) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
@@ -290,7 +290,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   ) {
     const thread = profile.threads[threadIndex];
     const { pid, markers, stringTable } = thread;
-    if (_isMainThread(thread)) {
+    if (isMainThread(thread)) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
       let globalTrack = globalTracksByPid.get(pid);
@@ -548,11 +548,25 @@ export function getGlobalTrackName(
         // happen for instance when recording "DOM Worker" but not "GeckoMain". The
         // "DOM Worker" thread will be captured, but not the main thread, thus leaving
         // a process track with no main thread.
-        return typeof globalTrack.pid === 'string'
-          ? // The pid is a unique string label, use that.
-            globalTrack.pid
-          : // The pid is a number, make a label for it.
-            `Process ${globalTrack.pid}`;
+        // It can also happen when importing other profile formats.
+
+        // First, see if any thread in this process has a non-empty processName.
+        const pid = globalTrack.pid;
+        const processName = threads
+          .filter(thread => thread.pid === pid)
+          .map(thread => thread.processName)
+          .find(processName => !!processName);
+        if (processName) {
+          return processName;
+        }
+
+        // Fallback: Use the PID.
+        if (typeof pid === 'string') {
+          // The pid is a unique string label, use that.
+          return pid;
+        }
+        // The pid is a number, make a label for it.
+        return `Process ${pid}`;
       }
       return getFriendlyThreadName(
         threads,
@@ -625,6 +639,15 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
       thread,
       PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT
     );
+  }
+
+  if (/^(?:Audio|Media)/.test(thread.name)) {
+    // This is a media thread: they are usually very idle, but are interesting
+    // as soon as there's at least one sample. They're present with the media
+    // preset, but not usually captured otherwise.
+    // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
+    // MediaDecoderStateMachine. They're enabled by the media preset.
+    return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
   }
 
   return _isThreadMostlyFullOfIdleSamples(profile, thread);
@@ -710,6 +733,24 @@ function _isThreadMostlyFullOfIdleSamples(
   return activeStackCount <= maxActiveStackCount;
 }
 
+function _hasThreadAtLeastOneNonIdleSample(
+  profile: Profile,
+  thread: Thread
+): boolean {
+  for (const stackIndex of thread.samples.stack) {
+    if (stackIndex === null) {
+      continue;
+    }
+
+    const categoryIndex = thread.stackTable.category[stackIndex];
+    const category = profile.meta.categories[categoryIndex];
+    if (category.name !== 'Idle') {
+      return true;
+    }
+  }
+  return false;
+}
+
 function _findDefaultThread(threads: Thread[]): Thread | null {
   if (threads.length === 0) {
     // Tests may have no threads.
@@ -724,7 +765,7 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
   return threads[defaultThreadIndex];
 }
 
-function _isMainThread(thread: Thread): boolean {
+export function isMainThread(thread: Thread): boolean {
   return (
     thread.name === 'GeckoMain' ||
     // If the pid is a string, then it's not one that came from the system.
