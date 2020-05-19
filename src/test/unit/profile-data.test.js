@@ -5,8 +5,7 @@
 import {
   getContainingLibrary,
   symbolicateProfile,
-  applyFunctionMerging,
-  setFuncNames,
+  applySymbolicationStep,
 } from '../../profile-logic/symbolication';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
@@ -607,26 +606,15 @@ describe('symbolication', function() {
       const symbolicationPromise = symbolicateProfile(
         unsymbolicatedProfile,
         symbolStore,
-        {
-          onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
-            if (!symbolicatedProfile) {
-              throw new Error('symbolicatedProfile cannot be null');
-            }
-            symbolicatedProfile.threads[threadIndex] = applyFunctionMerging(
-              symbolicatedProfile.threads[threadIndex],
-              oldFuncToNewFuncMap
-            );
-          },
-          onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
-            if (!symbolicatedProfile) {
-              throw new Error('symbolicatedProfile cannot be null');
-            }
-            symbolicatedProfile.threads[threadIndex] = setFuncNames(
-              symbolicatedProfile.threads[threadIndex],
-              funcIndices,
-              funcNames
-            );
-          },
+        (threadIndex, symbolicationStepInfo) => {
+          if (!symbolicatedProfile) {
+            throw new Error('symbolicatedProfile cannot be null');
+          }
+          symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
+            symbolicatedProfile.threads[threadIndex],
+            symbolicationStepInfo,
+            new Map()
+          );
         }
       );
       return symbolicationPromise;

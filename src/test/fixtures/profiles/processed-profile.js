@@ -124,10 +124,80 @@ export function getProfileWithMarkers(
   ...markersPerThread: TestDefinedMarkers[]
 ): Profile {
   const profile = getEmptyProfile();
+  if (markersPerThread.length === 0) {
+    throw new Error(
+      'getProfileWithMarkers expected to get at least one list of markers.'
+    );
+  }
   profile.threads = markersPerThread.map(testDefinedMarkers =>
     getThreadWithMarkers(testDefinedMarkers)
   );
   return profile;
+}
+
+/**
+ * This profile is useful for marker table tests. The markers were taken from
+ * real-world values.
+ */
+export function getMarkerTableProfile() {
+  return getProfileWithMarkers(
+    [
+      [
+        'UserTiming',
+        12.5,
+        {
+          type: 'UserTiming',
+          startTime: 12.5,
+          endTime: 12.5,
+          name: 'foobar',
+          entryType: 'mark',
+        },
+      ],
+      [
+        'NotifyDidPaint',
+        14.5,
+        {
+          type: 'tracing',
+          category: 'Paint',
+          interval: 'start',
+        },
+      ],
+      [
+        'setTimeout',
+        165.87091900000001,
+        {
+          type: 'Text',
+          startTime: 165.87091900000001,
+          endTime: 165.871503,
+          name: '5.5',
+        },
+      ],
+      [
+        'IPC',
+        120,
+        {
+          type: 'IPC',
+          startTime: 120,
+          endTime: 120,
+          otherPid: 2222,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          messageSeqno: 1,
+          side: 'parent',
+          direction: 'sending',
+          sync: false,
+        },
+      ],
+      [
+        'LogMessages',
+        170,
+        {
+          type: 'Log',
+          name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+          module: 'nsJarProtocol',
+        },
+      ],
+    ].sort((a, b) => a[1] - b[1])
+  );
 }
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {

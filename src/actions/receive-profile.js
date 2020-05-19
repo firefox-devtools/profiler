@@ -10,7 +10,10 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
-import { symbolicateProfile } from '../profile-logic/symbolication';
+import {
+  symbolicateProfile,
+  applySymbolicationStep,
+} from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { mergeProfiles } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
@@ -48,25 +51,20 @@ import {
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 
-import type {
-  FunctionsUpdatePerThread,
-  FuncToFuncMap,
-  RequestedLib,
-  ImplementationFilter,
-} from '../types/actions';
+import type { RequestedLib, ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type { TimelineTrackOrganization } from '../types/state';
 import type {
   Profile,
   ThreadIndex,
-  IndexIntoFuncTable,
   BrowsingContextID,
   Page,
   InnerWindowID,
   Pid,
 } from '../types/profile';
 import type { OriginsTimelineRoot } from '../types/profile-derived';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
@@ -655,12 +653,43 @@ export function doneSymbolicating(): Action {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function coalescedFunctionsUpdate(
-  functionsUpdatePerThread: FunctionsUpdatePerThread
-): Action {
-  return {
-    type: 'COALESCED_FUNCTIONS_UPDATE',
-    functionsUpdatePerThread,
+// Apply all the individual "symbolication steps" from symbolicationStepsPerThread
+// to the current profile, as one redux action.
+// We combine steps into one redux action in order to avoid unnecessary renders.
+// When symbolication results arrive, we often get a very high number of individual
+// symbolication updates. If we dispatched all of them as individual redux actions,
+// we would cause React to re-render synchronously for each action, and the profile
+// selectors called from rendering would do expensive work, most of which would never
+// reach the screen because it would be invalidated by the next symbolication update.
+// So we queue up symbolication steps and run the update from requestIdleCallback.
+export function bulkProcessSymbolicationSteps(
+  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { threads } = getProfile(getState());
+    const oldFuncToNewFuncMaps = new Map();
+    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
+      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
+      if (symbolicationSteps === undefined) {
+        return oldThread;
+      }
+      const oldFuncToNewFuncMap = new Map();
+      let thread = oldThread;
+      for (const symbolicationStep of symbolicationSteps) {
+        thread = applySymbolicationStep(
+          thread,
+          symbolicationStep,
+          oldFuncToNewFuncMap
+        );
+      }
+      oldFuncToNewFuncMaps.set(threadIndex, oldFuncToNewFuncMap);
+      return thread;
+    });
+    dispatch({
+      type: 'BULK_SYMBOLICATION',
+      oldFuncToNewFuncMaps,
+      symbolicatedThreads,
+    });
   };
 }
 
@@ -678,29 +707,24 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
-class ColascedFunctionsUpdateDispatcher {
-  _updates: FunctionsUpdatePerThread;
+// Queues up symbolication steps and bulk-processes them from requestIdleCallback,
+// in order to improve UI responsiveness during symbolication.
+class SymbolicationStepQueue {
+  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
-  _requestIdleTimeout: { timeout: number };
-  scheduledUpdatesDone: Promise<void>;
 
   constructor() {
-    this._updates = {};
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    this._requestIdleTimeout = { timeout: 2000 };
-    this.scheduledUpdatesDone = Promise.resolve();
   }
 
   _scheduleUpdate(dispatch) {
-    // Only request an update if one hasn't already been schedule.
+    // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
-      // Let any consumers of this class be able to know when all scheduled updates
-      // are done.
-      this.scheduledUpdatesDone = new Promise(resolve => {
-        requestIdleCallbackPolyfill(() => {
-          this._dispatchUpdate(dispatch);
-          resolve();
-        }, this._requestIdleTimeout);
+      requestIdleCallbackPolyfill(() => this._dispatchUpdate(dispatch), {
+        timeout: 2000,
       });
       this._requestedUpdate = true;
     }
@@ -708,84 +732,36 @@ class ColascedFunctionsUpdateDispatcher {
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
-    this._updates = {};
+    const observers = this._updateObservers;
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    dispatch(coalescedFunctionsUpdate(updates));
+
+    dispatch(bulkProcessSymbolicationSteps(updates));
+
+    for (const observer of observers) {
+      observer();
+    }
   }
 
-  mergeFunctions(
+  enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: FuncToFuncMap
+    symbolicationStepInfo: SymbolicationStepInfo,
+    completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        oldFuncToNewFuncMap,
-        funcIndices: [],
-        funcNames: [],
-      };
-    } else {
-      for (const oldFunc of oldFuncToNewFuncMap.keys()) {
-        const funcIndex = oldFuncToNewFuncMap.get(oldFunc);
-        if (funcIndex === undefined) {
-          throw new Error(
-            'Unable to merge functions together, an undefined funcIndex was returned.'
-          );
-        }
-        this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
-      }
+    let threadSteps = this._updates.get(threadIndex);
+    if (threadSteps === undefined) {
+      threadSteps = [];
+      this._updates.set(threadIndex, threadSteps);
     }
-  }
-
-  assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames) {
-    this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        funcIndices,
-        funcNames,
-        oldFuncToNewFuncMap: new Map(),
-      };
-    } else {
-      this._updates[threadIndex].funcIndices = this._updates[
-        threadIndex
-      ].funcIndices.concat(funcIndices);
-      this._updates[threadIndex].funcNames = this._updates[
-        threadIndex
-      ].funcNames.concat(funcNames);
-    }
+    threadSteps.push(symbolicationStepInfo);
+    this._updateObservers.push(completionHandler);
   }
 }
 
-const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
-
-export function mergeFunctions(
-  threadIndex: ThreadIndex,
-  oldFuncToNewFuncMap: FuncToFuncMap
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(
-      dispatch,
-      threadIndex,
-      oldFuncToNewFuncMap
-    );
-  };
-}
-
-export function assignFunctionNames(
-  threadIndex: ThreadIndex,
-  funcIndices: IndexIntoFuncTable[],
-  funcNames: string[]
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(
-      dispatch,
-      threadIndex,
-      funcIndices,
-      funcNames
-    );
-  };
-}
+const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
 
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
@@ -886,23 +862,30 @@ export async function doSymbolicateProfile(
   symbolStore: SymbolStore
 ) {
   dispatch(startSymbolicating());
-  await symbolicateProfile(profile, symbolStore, {
-    onMergeFunctions: (
-      threadIndex: ThreadIndex,
-      oldFuncToNewFuncMap: FuncToFuncMap
-    ) => {
-      dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
-    },
-    onGotFuncNames: (
-      threadIndex: ThreadIndex,
-      funcIndices: IndexIntoFuncTable[],
-      funcNames: string[]
-    ) => {
-      dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-    },
-  });
 
-  await gCoalescedFunctionsUpdateDispatcher.scheduledUpdatesDone;
+  const completionPromises = [];
+
+  await symbolicateProfile(
+    profile,
+    symbolStore,
+    (
+      threadIndex: ThreadIndex,
+      symbolicationStepInfo: SymbolicationStepInfo
+    ) => {
+      completionPromises.push(
+        new Promise(resolve => {
+          _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
+            dispatch,
+            threadIndex,
+            symbolicationStepInfo,
+            resolve
+          );
+        })
+      );
+    }
+  );
+
+  await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
 }
@@ -1133,11 +1116,13 @@ async function _extractJsonFromResponse(
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
-    if (fileType === 'application/json') {
+    if (error && typeof error === 'object' && error.name === 'AbortError') {
+      message = 'The network request to load the profile was aborted.';
+    } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
     } else {
       message = oneLine`
-        The profile could not be decoded. This does not look like a supported file
+        The profile could not be downloaded and decoded. This does not look like a supported file
         type.
       `;
     }

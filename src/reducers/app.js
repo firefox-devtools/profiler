@@ -82,6 +82,7 @@ function _getSidebarInitialState() {
   const state = {};
   tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
   state.calltree = true;
+  state['marker-table'] = true;
   return state;
 }
 

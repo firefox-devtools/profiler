@@ -40,6 +40,68 @@ export interface AbstractSymbolStore {
   ): Promise<void>;
 }
 
+// Look up the symbols for the given addresses in the symbol table.
+// The symbol table is given in the [addrs, index, buffer] format.
+// This format is documented at the SymbolTableAsTuple flow type definition.
+export function readSymbolsFromSymbolTable(
+  addresses: Set<number>,
+  symbolTable: SymbolTableAsTuple,
+  demangleCallback: string => string
+): Map<number, AddressResult> {
+  const [symbolTableAddrs, symbolTableIndex, symbolTableBuffer] = symbolTable;
+  const addressArray = Uint32Array.from(addresses);
+  addressArray.sort();
+
+  // Iterate over all addresses in addressArray and look them up in the
+  // symbolTableAddrs array. The index at which a match is found can be used
+  // to obtain the start and end position of its string in the buffer, using
+  // the symbolTableIndex array.
+  // Both addressArray and symbolTableAddrs are sorted in ascending order.
+  const decoder = new TextDecoder();
+  const results = new Map();
+  let currentSymbolIndex = undefined;
+  let currentSymbol = '';
+  for (let i = 0; i < addressArray.length; i++) {
+    const address = addressArray[i];
+
+    // Look up address in symbolTableAddrs. symbolTableAddrs is sorted, so we
+    // can do the lookup using bisection. And address is >= the previously
+    // looked up address, so we can use the last found index as a lower bound
+    // during the bisection.
+    // We're not looking for an exact match here. We're looking for the
+    // largest symbolIndex for which symbolTableAddrs[symbolIndex] <= address.
+    // bisection() returns the insertion index, which is one position after
+    // the index that we consider the match, so we need to subtract 1 from the
+    // result.
+    const symbolIndex =
+      bisection(symbolTableAddrs, address, currentSymbolIndex) - 1;
+
+    if (symbolIndex >= 0) {
+      if (symbolIndex !== currentSymbolIndex) {
+        // Get the corresponding string from symbolTableBuffer. The start and
+        // end positions are recorded in symbolTableIndex.
+        const startOffset = symbolTableIndex[symbolIndex];
+        const endOffset = symbolTableIndex[symbolIndex + 1];
+        const subarray = symbolTableBuffer.subarray(startOffset, endOffset);
+        // C++ or rust symbols in the symbol table may have mangled names.
+        // Demangle them here.
+        currentSymbol = demangleCallback(decoder.decode(subarray));
+        currentSymbolIndex = symbolIndex;
+      }
+      results.set(address, {
+        functionOffset: address - symbolTableAddrs[symbolIndex],
+        name: currentSymbol,
+      });
+    } else {
+      results.set(address, {
+        functionOffset: address,
+        name: '<before first symbol>',
+      });
+    }
+  }
+  return results;
+}
+
 // Partition the array into "chunks".
 // Every element in the array is assigned a numeric value using the computeValue
 // callback function. The chunks are chosen in such a way that the accumulated
@@ -135,68 +197,6 @@ export class SymbolStore {
       });
   }
 
-  // Look up the symbols for the given addresses in the symbol table.
-  // The symbol table is given in the [addrs, index, buffer] format.
-  // This format is documented at the SymbolTableAsTuple flow type definition.
-  _readSymbolsFromSymbolTable(
-    addresses: Set<number>,
-    symbolTable: SymbolTableAsTuple,
-    demangleCallback: string => string
-  ): Map<number, AddressResult> {
-    const [symbolTableAddrs, symbolTableIndex, symbolTableBuffer] = symbolTable;
-    const addressArray = Uint32Array.from(addresses);
-    addressArray.sort();
-
-    // Iterate over all addresses in addressArray and look them up in the
-    // symbolTableAddrs array. The index at which a match is found can be used
-    // to obtain the start and end position of its string in the buffer, using
-    // the symbolTableIndex array.
-    // Both addressArray and symbolTableAddrs are sorted in ascending order.
-    const decoder = new TextDecoder();
-    const results = new Map();
-    let currentSymbolIndex = undefined;
-    let currentSymbol = '';
-    for (let i = 0; i < addressArray.length; i++) {
-      const address = addressArray[i];
-
-      // Look up address in symbolTableAddrs. symbolTableAddrs is sorted, so we
-      // can do the lookup using bisection. And address is >= the previously
-      // looked up address, so we can use the last found index as a lower bound
-      // during the bisection.
-      // We're not looking for an exact match here. We're looking for the
-      // largest symbolIndex for which symbolTableAddrs[symbolIndex] <= address.
-      // bisection() returns the insertion index, which is one position after
-      // the index that we consider the match, so we need to subtract 1 from the
-      // result.
-      const symbolIndex =
-        bisection(symbolTableAddrs, address, currentSymbolIndex) - 1;
-
-      if (symbolIndex >= 0) {
-        if (symbolIndex !== currentSymbolIndex) {
-          // Get the corresponding string from symbolTableBuffer. The start and
-          // end positions are recorded in symbolTableIndex.
-          const startOffset = symbolTableIndex[symbolIndex];
-          const endOffset = symbolTableIndex[symbolIndex + 1];
-          const subarray = symbolTableBuffer.subarray(startOffset, endOffset);
-          // C++ or rust symbols in the symbol table may have mangled names.
-          // Demangle them here.
-          currentSymbol = demangleCallback(decoder.decode(subarray));
-          currentSymbolIndex = symbolIndex;
-        }
-        results.set(address, {
-          functionOffset: address - symbolTableAddrs[symbolIndex],
-          name: currentSymbol,
-        });
-      } else {
-        results.set(address, {
-          functionOffset: address,
-          name: '<before first symbol>',
-        });
-      }
-    }
-    return results;
-  }
-
   /**
    * Look up symbols for the given addresses in the given libraries.
    * For each LibSymbolicationRequest in requests, either errorCb or successCb
@@ -222,7 +222,7 @@ export class SymbolStore {
         errorCb(
           request,
           new SymbolsNotFoundError(
-            `Failed to symbolicate library ${debugName}`,
+            `Failed to symbolicate library ${debugName}/${breakpadId}`,
             request.lib,
             new Error('Invalid debugName or breakpadId')
           )
@@ -305,7 +305,7 @@ export class SymbolStore {
     for (const { request, symbolTable } of requestsForCachedLibs) {
       successCb(
         request,
-        this._readSymbolsFromSymbolTable(
+        readSymbolsFromSymbolTable(
           request.addresses,
           symbolTable,
           demangleCallback
@@ -326,17 +326,11 @@ export class SymbolStore {
 
           // Did not throw, option 2 was successful!
           successCb(request, results);
-        } catch (error) {
+        } catch (error1) {
           // The symbolication API did not have any symbols for this library,
           // or an error occurred when parsing the results. We want to continue
-          // to search for symbol information from other sources in both cases,
-          // so we swallow the error and keep going. But in order to catch
-          // problems with the API we should still log these errors.
-          console.log(
-            `The symbolication API request was not successful for ${request.lib.debugName}/${request.lib.breakpadId}:`,
-            error
-          );
-
+          // to search for symbol information from other sources in both cases.
+          // We keep the error around so that we can report it if all avenues fail.
           const { lib, addresses } = request;
           try {
             // Option 3: Request a symbol table from the add-on.
@@ -348,7 +342,7 @@ export class SymbolStore {
             // Did not throw, option 3 was successful!
             successCb(
               request,
-              this._readSymbolsFromSymbolTable(
+              readSymbolsFromSymbolTable(
                 addresses,
                 symbolTable,
                 demangleCallback
@@ -357,15 +351,16 @@ export class SymbolStore {
 
             // Store the symbol table in the database.
             await this._storeSymbolTableInDB(lib, symbolTable);
-          } catch (error) {
+          } catch (error2) {
             // None of the symbolication methods were successful.
             // Call the error callback.
             errorCb(
               request,
               new SymbolsNotFoundError(
-                `Failed to symbolicate library ${lib.debugName}`,
+                `Could not obtain symbols for ${lib.debugName}/${lib.breakpadId}.`,
                 lib,
-                error
+                error1,
+                error2
               )
             );
           }

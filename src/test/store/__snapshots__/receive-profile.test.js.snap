@@ -78,12 +78,12 @@ Array [
 ]
 `;
 
-exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
+exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be downloaded and decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
 
 exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 2`] = `
 Array [
   Array [
-    "The profile could not be decoded. This does not look like a supported file type.",
+    "The profile could not be downloaded and decoded. This does not look like a supported file type.",
   ],
   Array [
     "JSON parsing error:",

@@ -76,8 +76,6 @@ export type ActiveTabProfileViewState = {|
   globalTracks: ActiveTabGlobalTrack[],
   // TODO: Add a better refined type for resource tracks.
   resourceTracks: LocalTrack[],
-  hiddenGlobalTracksGetter: () => Set<TrackIndex>,
-  hiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
 |};
 
 /**
@@ -219,9 +217,10 @@ export type FullProfileSpecificUrlState = {|
 /**
  * Active tab profile specific url state
  * They should not be used from the full view.
- * NOTE: This state is empty for now, but will be used later, do not remove.
  */
-export type ActiveTabSpecificProfileUrlState = {||};
+export type ActiveTabSpecificProfileUrlState = {|
+  isResourcesPanelOpen: boolean,
+|};
 
 export type ProfileSpecificUrlState = {|
   selectedThread: ThreadIndex | null,
@@ -235,9 +234,7 @@ export type ProfileSpecificUrlState = {|
   networkSearchString: string,
   transforms: TransformStacksPerThread,
   full: FullProfileSpecificUrlState,
-  // NOTE: Currently commented out to fix the flow warnings, but will be used soon.
-  // Do not remove.
-  // activeTab: ActiveTabSpecificProfileUrlState,
+  activeTab: ActiveTabSpecificProfileUrlState,
 |};
 
 /**

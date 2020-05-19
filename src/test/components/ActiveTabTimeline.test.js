@@ -8,6 +8,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import Timeline from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
+import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -16,7 +17,10 @@ import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getActiveTabGlobalTracks } from '../../selectors/profile';
+import {
+  getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
+} from '../../selectors/profile';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedThread } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
@@ -147,6 +151,83 @@ describe('ActiveTabTimeline', function() {
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireEvent.click(getGlobalTrackRow());
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+    });
+
+    it('does not display the resources panel if there are no resource tracks', () => {
+      const { getState, queryByText } = setup();
+      expect(getActiveTabResourceTracks(getState()).length).toBe(0);
+      expect(queryByText(/Resources/)).toBe(null);
+    });
+  });
+
+  describe('ActiveTabResourcesPanel', function() {
+    function setup() {
+      const { profile, ...pageInfo } = addActiveTabInformationToProfile(
+        getProfileWithNiceTracks()
+      );
+      // Setting the first thread as parent track and the second as the iframe track.
+      profile.threads[0].frameTable.innerWindowID[0] =
+        pageInfo.parentInnerWindowIDsWithChildren;
+      profile.threads[1].frameTable.innerWindowID[0] =
+        pageInfo.iframeInnerWindowIDsWithChild;
+      const store = storeWithProfile(profile);
+      store.dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: pageInfo.firstTabBrowsingContextID,
+        })
+      );
+      const { getState, dispatch } = store;
+      const resourceTracks = getActiveTabResourceTracks(getState());
+
+      const renderResult = render(
+        <Provider store={store}>
+          <ActiveTabResourcesPanel
+            resourceTracks={resourceTracks}
+            setIsInitialSelectedPane={() => {}}
+          />
+        </Provider>
+      );
+
+      const { getByText } = renderResult;
+      const getResourcesPanelHeader = () => getByText(/Resources/);
+
+      return {
+        ...renderResult,
+        ...pageInfo,
+        dispatch,
+        getState,
+        profile,
+        store,
+        getResourcesPanelHeader,
+      };
+    }
+
+    it('matches the snapshot of a resources panel', () => {
+      const { container } = setup();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('is closed by default', () => {
+      const { getResourcesPanelHeader } = setup();
+      // TODO: Currently it's not possible to test this without accessing the class
+      // directly but this is not ideal for testing. We should assert user-like actions
+      // instead when we have content in this panel.
+      expect(getResourcesPanelHeader().classList.contains('opened')).toBe(
+        false
+      );
+    });
+
+    it('clicking on the header opens the resources panel', () => {
+      const { getResourcesPanelHeader } = setup();
+      const resourcesPanelHeader = getResourcesPanelHeader();
+      // TODO: Currently it's not possible to test this without accessing the class
+      // directly but this is not ideal for testing. We should assert user-like actions
+      // instead when we have content in this panel.
+      expect(resourcesPanelHeader.classList.contains('opened')).toBe(false);
+
+      fireEvent.click(resourcesPanelHeader);
+      expect(resourcesPanelHeader.classList.contains('opened')).toBe(true);
     });
   });
 });

@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getUrlSetupPhase } from '../../selectors/app';
+import { getView, getUrlSetupPhase } from '../../selectors/app';
 import {
   updateUrlState,
   startFetchingProfiles,
@@ -30,10 +30,10 @@ import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from '../../utils/connect';
-import type { UrlState, UrlSetupPhase } from '../../types/state';
-import type { Profile } from '../../types/profile';
+import type { UrlState, Phase, UrlSetupPhase } from '../../types/state';
 
 type StateProps = {|
+  +phase: Phase,
   +urlState: UrlState,
   +urlSetupPhase: UrlSetupPhase,
 |};
@@ -96,17 +96,20 @@ class UrlManager extends React.PureComponent<Props> {
 
     try {
       // Process the raw url and fetch the profile.
-      const results: {
-        profile: Profile | null,
-        shouldSetupInitialUrlState: boolean,
+      // We try to fetch the profile before setting the url state, because
+      // while processing and especially upgrading the url information we may
+      // need the profile data.
+      //
+      // Also note the profile may be null for the `from-addon` dataSource since
+      // we do not `await` for retrieveProfileFromAddon function, but also in
+      // case of fatal errors in the process of retrieving and processing a
+      // profile. To handle the latter case properly, we won't `pushState` if
+      // we're in a FATAL_ERROR state.
+      const {
+        profile,
+        shouldSetupInitialUrlState,
       } = await getProfilesFromRawUrl(window.location);
 
-      // Manually coerce these into the proper type due to the FlowFixMe above.
-      // Profile may be null only for the `from-addon` dataSource since we do
-      // not `await` for retrieveProfileFromAddon function.
-      const profile: Profile | null = results.profile;
-      const shouldSetupInitialUrlState: boolean =
-        results.shouldSetupInitialUrlState;
       if (profile !== null && shouldSetupInitialUrlState) {
         setupInitialUrlState(window.location, profile);
       } else {
@@ -166,6 +169,16 @@ class UrlManager extends React.PureComponent<Props> {
     if (nextProps.urlSetupPhase !== 'done') {
       return;
     }
+
+    if (nextProps.phase === 'FATAL_ERROR') {
+      // Even if the url setup phase is done, we must not change the URL if
+      // we're in a FATAL_ERROR state. Likely the profile update failed, and so
+      // the url state wasn't initialized properly. Therefore trying to
+      // pushState will result in a broken URL and break reload mechanisms,
+      // especially the reload we do in ServiceWorkerManager.
+      return;
+    }
+
     const newUrl = urlFromState(nextProps.urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
       if (!getIsHistoryReplaceState()) {
@@ -200,6 +213,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
+    phase: getView(state).phase,
   }),
   mapDispatchToProps: {
     updateUrlState,

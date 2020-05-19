@@ -622,6 +622,7 @@ export function deriveMarkersFromRawMarkerTable(
                 ...endData,
                 startTime: startData.startTime,
                 fetchStart: endData.startTime,
+                cause: startData.cause || endData.cause,
               },
             });
           } else {
@@ -638,6 +639,7 @@ export function deriveMarkersFromRawMarkerTable(
                 ...endData,
                 startTime: start,
                 fetchStart: endData.startTime,
+                cause: endData.cause,
               },
               incomplete: true,
             });
