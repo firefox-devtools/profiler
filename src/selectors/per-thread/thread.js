@@ -24,6 +24,7 @@ import type {
   JsTracerTiming,
   $ReturnType,
   StartEndRange,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
@@ -48,6 +49,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
+  const getSamplesWeightType: Selector<WeightType> = state =>
+    getSamplesTable(state).weightType || 'samples';
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = state =>
     getThread(state).nativeAllocations;
   const getThreadRange: Selector<StartEndRange> = state =>
@@ -306,6 +309,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getSamplesWeightType,
     getNativeAllocations,
     getThreadRange,
     getFilteredThread,
