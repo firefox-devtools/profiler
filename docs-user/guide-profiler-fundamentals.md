@@ -8,9 +8,9 @@ For samples, the profiler stops the execution of the profiled code at a fixed ra
 
 ### Statistical significance and the overhead of samples
 
-There are two ways to get more samples to provide more statistical significance. The first way is to increase the sampling rate. The sampling rate can be changed by tweaking the interval in the Gecko Profiler Addon.
+There are two ways to get more samples to provide more statistical significance. The first way is to increase the sampling rate. The sampling rate can be changed by tweaking the sampling interval in about:profiling.
 
-![A picture of the dropdown in the Gecko Profiler Addon with the interval adjustment highlighted.](images/interval.jpg)
+![A picture of the UI in about:profiling to adjust the sampling interval.](images/interval-2020-05.png)
 
 For example, the sampling rate could be increased by changing the interval from 1ms to 0.1ms to collect 10 times more samples. This makes it easy to run the profiled program fewer times, but comes with a trade-off. When the profiler is collecting more samples, the profiler needs to do more work to collect these samples and thus, there is more overhead from the profiler. This can skew the results by measuring more of the overhead of profiling, compared to the actual program that is being run.
 
