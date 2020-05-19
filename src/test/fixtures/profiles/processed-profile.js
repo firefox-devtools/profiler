@@ -1012,7 +1012,7 @@ export function getProfileWithJsAllocations(): * {
     jsAllocations.className.push('Function');
     jsAllocations.typeName.push('JSObject');
     jsAllocations.coarseType.push('Object');
-    jsAllocations.duration.push(byteSize);
+    jsAllocations.weight.push(byteSize);
     jsAllocations.inNursery.push(true);
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
@@ -1090,7 +1090,7 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
   for (const { byteSize, stack } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.length++;
   }
@@ -1167,7 +1167,7 @@ export function getProfileWithBalancedNativeAllocations(): * {
   for (const { byteSize, stack, memoryAddress } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.memoryAddress.push(memoryAddress);
     nativeAllocations.threadId.push(threadId);
