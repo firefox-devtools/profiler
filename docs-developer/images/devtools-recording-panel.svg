@@ -29,7 +29,7 @@
                 <use fill="#F2F2F2" fill-rule="evenodd" xlink:href="#path-3"></use>
                 <rect stroke="#DCDBDB" stroke-width="1" x="385.5" y="315.5" width="338" height="309" rx="8"></rect>
             </g>
-            <text id="Instrumented-by-Geck" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+            <text id="Instrumented-by-Geck" font-family="sans-serif" font-size="12" font-weight="normal" fill="#000000">
                 <tspan x="33" y="388">Instrumented by Gecko Profiler, no DevTools</tspan>
                 <tspan x="33" y="402">remote debugging instrumentation is needed here.</tspan>
                 <tspan x="33" y="416"></tspan>
@@ -43,7 +43,7 @@
                 <tspan x="33" y="528">thread, but also includes information from every single </tspan>
                 <tspan x="33" y="542">content process and tabs inside of them.</tspan>
             </text>
-            <text id="Repeat-for-all-addit" font-family="Helvetica" font-size="12" font-weight="normal" line-spacing="17" fill="#000000">
+            <text id="Repeat-for-all-addit" font-family="sans-serif" font-size="12" font-weight="normal" line-spacing="17" fill="#000000">
                 <tspan x="441.930664" y="396">Repeat for all additional content processes.</tspan>
             </text>
             <g id="Group-Copy" transform="translate(487.000000, 100.000000)">
@@ -51,7 +51,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-4"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="213" height="58" rx="8"></rect>
                 </g>
-                <text id="DevTools-Client" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="DevTools-Client" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="44.3952637" y="34">DevTools Client</tspan>
                 </text>
             </g>
@@ -60,10 +60,10 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-5"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
                 </g>
-                <text font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="12.8945312" y="24">Gecko Profiler</tspan>
                 </text>
-                <text id="C++-Native-Code" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+                <text id="C++-Native-Code" font-family="sans-serif" font-size="12" font-weight="normal" fill="#000000">
                     <tspan x="23.4746094" y="42">C++ Native Code</tspan>
                 </text>
             </g>
@@ -72,7 +72,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-6"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
@@ -81,7 +81,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-7"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
@@ -90,7 +90,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-8"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
@@ -99,7 +99,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-9"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
@@ -108,7 +108,7 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-10"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
@@ -117,17 +117,17 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-11"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
                 </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="Tab" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="26.0151367" y="26">Tab</tspan>
                 </text>
             </g>
-            <text id="Parent-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+            <text id="Parent-Process" font-family="sans-serif" font-size="25" font-weight="bold" fill="#6F6F6F">
                 <tspan x="68.4782715" y="64">Parent Process</tspan>
             </text>
-            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+            <text id="Content-Process" font-family="sans-serif" font-size="25" font-weight="bold" fill="#6F6F6F">
                 <tspan x="84.1713867" y="359">Content Process</tspan>
             </text>
-            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+            <text id="Content-Process" font-family="sans-serif" font-size="25" font-weight="bold" fill="#6F6F6F">
                 <tspan x="458.171387" y="359">Content Process</tspan>
             </text>
             <g id="Group-Copy-2" transform="translate(36.000000, 86.000000)">
@@ -135,19 +135,19 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-12"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="253" height="85" rx="8"></rect>
                 </g>
-                <text id="DevTools-Debugger-Se" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <text id="DevTools-Debugger-Se" font-family="sans-serif" font-size="17" font-weight="bold" fill="#0A84FF">
                     <tspan x="20.0087891" y="35">DevTools Debugger Server</tspan>
                 </text>
-                <text id="using-devtools/serve" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+                <text id="using-devtools/serve" font-family="sans-serif" font-size="12" font-weight="normal" fill="#000000">
                     <tspan x="34.7929688" y="62">using devtools/server/actors/perf.js</tspan>
                 </text>
             </g>
             <path d="M157.5,172.5 L157.5,209.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
             <path id="Line-Copy-7-decoration-1" d="M157.5,209.5 L160.5,198.7 L154.5,198.7 L157.5,209.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <text id="nsIProfiler" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+            <text id="nsIProfiler" font-family="sans-serif" font-size="12" font-weight="normal" fill="#000000">
                 <tspan x="172.991211" y="197">nsIProfiler</tspan>
             </text>
-            <text id="Remote-Debugging-Pro" font-family="Helvetica" font-size="12" font-weight="normal" line-spacing="16" fill="#000000">
+            <text id="Remote-Debugging-Pro" font-family="sans-serif" font-size="12" font-weight="normal" line-spacing="16" fill="#000000">
                 <tspan x="318.12207" y="147">Remote Debugging Protocol </tspan>
                 <tspan x="311.336914" y="163">using LocalDebuggerTransport</tspan>
             </text>

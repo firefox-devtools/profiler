@@ -27,7 +27,7 @@ declare class WebChannelEvent {
 declare class Window {
   // Google Analytics
   ga?: GoogleAnalytics;
-  // profiler.firefox.com and Gecko Profiler Addon
+  // profiler.firefox.com and globals injected via frame scripts.
   geckoProfilerPromise: Promise<$GeckoProfiler>;
   connectToGeckoProfiler: $GeckoProfiler => void;
   geckoProfilerAddonInstalled?: () => void;

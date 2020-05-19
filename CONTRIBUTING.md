@@ -28,7 +28,7 @@ We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.o
 
 ## Getting started with development
 
-[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/firefox-devtools/Gecko-Profiler-Addon), online storage, and from local files.
+[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including directly imported from Firefox, online storage, and from local files.
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
 version 1.0.1 is known to work correctly.
@@ -50,16 +50,6 @@ To get started clone the repo and get the web application started.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
-## Capturing profiles in development
-
-Normally, Firefox loads newly captured profiles into [profiler.firefox.com](https://profiler.firefox.com). In order to change this to your local environment, try the following:
-
-1. Open `about:config` in Firefox.
-2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
-3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
-4. Record a profile using the menu button, and it should open up in your local environment.
-
-
 ## Using Gitpod
 
 Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
@@ -75,11 +65,10 @@ The web app doesn't include any performance profiles by default, so you'll need 
  * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
-   - Install the Gecko Profiler addon from the [profiler.firefox.com](https://profiler.firefox.com) loading screen.
-   - Go to `about:addons` in your URL bar.
-   - Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png) next to the Gecko Profiler addon.
-   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://profiler.firefox.com` to `http://localhost:4242`.
-   - Record a profile following the directions on the loading screen, and the profile should open in the local development version.
+  1. Open `about:config` in Firefox.
+  2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
+  3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
+  4. Record a profile using the menu button, and it should open up in your local environment.
 
 ## Running the tests
 

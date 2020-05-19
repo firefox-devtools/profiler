@@ -24,7 +24,7 @@ import type { DataSource } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
+  'from-addon': "Couldn't retrieve the profile from the Firefox.",
   'from-file': "Couldn't read the file or parse the profile in it.",
   local: 'Not implemented yet.',
   public: 'Could not download the profile.',

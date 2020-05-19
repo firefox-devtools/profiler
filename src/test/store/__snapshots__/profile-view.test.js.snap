@@ -1148,6 +1148,7 @@ Array [
     "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
+      "cause": undefined,
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,
@@ -1218,6 +1219,7 @@ Array [
     "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
+      "cause": undefined,
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,
@@ -1235,6 +1237,7 @@ Array [
     "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
+      "cause": undefined,
       "endTime": 8,
       "fetchStart": 7.5,
       "id": 7,
@@ -1424,6 +1427,7 @@ Array [
     "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
+      "cause": undefined,
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,

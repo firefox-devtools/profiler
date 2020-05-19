@@ -88,6 +88,31 @@ describe('app actions', function() {
   });
 
   describe('isSidebarOpen', function() {
+    it('has certain sidebars open by default', function() {
+      const { dispatch, getState } = storeWithSimpleProfile();
+
+      dispatch(AppActions.changeSelectedTab('calltree'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+
+      dispatch(AppActions.changeSelectedTab('flame-graph'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+
+      dispatch(AppActions.changeSelectedTab('stack-chart'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+
+      dispatch(AppActions.changeSelectedTab('marker-chart'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+
+      dispatch(AppActions.changeSelectedTab('marker-table'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+
+      dispatch(AppActions.changeSelectedTab('network-chart'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+
+      dispatch(AppActions.changeSelectedTab('js-tracer'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+    });
+
     it('can change the state of the sidebar', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
       expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
