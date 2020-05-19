@@ -119,7 +119,10 @@ describe('CallTreeSidebar', function() {
     // This is lazy but this works good enough for what we're doing here.
     profile.meta.interval = interval;
 
+    const [thread] = profile.threads;
+    thread.samples.weight = thread.samples.time.map(() => interval);
     const store = storeWithProfile(profile);
+    // Modify the weight of all the samples.
 
     const { getByText } = render(
       <Provider store={store}>

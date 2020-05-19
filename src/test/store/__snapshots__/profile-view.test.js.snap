@@ -2170,7 +2170,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -2190,6 +2189,7 @@ Object {
       5,
       6,
     ],
+    "weight": undefined,
   },
   "stackTable": Object {
     "category": Array [
@@ -2559,7 +2559,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       100,
       0,
@@ -2573,6 +2572,7 @@ Object {
       4,
       5,
     ],
+    "weight": undefined,
   },
   "stackTable": Object {
     "category": Array [
@@ -2864,7 +2864,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -2884,6 +2883,7 @@ Object {
       5,
       6,
     ],
+    "weight": undefined,
   },
   "stackTable": Object {
     "category": Array [
@@ -3175,7 +3175,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -3195,6 +3194,7 @@ Object {
       5,
       6,
     ],
+    "weight": undefined,
   },
   "stackTable": Object {
     "category": Array [
