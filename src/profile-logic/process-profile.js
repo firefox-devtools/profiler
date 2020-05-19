@@ -622,7 +622,7 @@ function _processMarkers(
           jsAllocations.className.push(geckoPayload.className);
           jsAllocations.typeName.push(geckoPayload.typeName);
           jsAllocations.coarseType.push(geckoPayload.coarseType);
-          jsAllocations.duration.push(geckoPayload.size);
+          jsAllocations.weight.push(geckoPayload.size);
           jsAllocations.inNursery.push(geckoPayload.inNursery);
           jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
           jsAllocations.length++;
@@ -638,7 +638,7 @@ function _processMarkers(
           // Build up a separate table for the native allocation data, and do not
           // include it in the marker information.
           inProgressNativeAllocations.time.push(geckoPayload.startTime);
-          inProgressNativeAllocations.duration.push(geckoPayload.size);
+          inProgressNativeAllocations.weight.push(geckoPayload.size);
           inProgressNativeAllocations.stack.push(
             _convertPayloadStackToIndex(geckoPayload)
           );
@@ -686,7 +686,8 @@ function _processMarkers(
     // This is the newer native allocations with memory addresses.
     nativeAllocations = {
       time: inProgressNativeAllocations.time,
-      duration: inProgressNativeAllocations.duration,
+      weight: inProgressNativeAllocations.weight,
+      weightType: inProgressNativeAllocations.weightType,
       stack: inProgressNativeAllocations.stack,
       memoryAddress,
       threadId,
@@ -696,7 +697,8 @@ function _processMarkers(
     // There is the older native allocations, without memory addresses.
     nativeAllocations = {
       time: inProgressNativeAllocations.time,
-      duration: inProgressNativeAllocations.duration,
+      weight: inProgressNativeAllocations.weight,
+      weightType: inProgressNativeAllocations.weightType,
       stack: inProgressNativeAllocations.stack,
       length: inProgressNativeAllocations.length,
     };

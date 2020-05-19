@@ -677,7 +677,7 @@ function combineSamplesDiffing(
 
   const newSamples = {
     ...getEmptySamplesTableWithEventDelay(),
-    duration: [],
+    weight: [],
   };
 
   let i = 0;
@@ -711,9 +711,9 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples1.time[i]);
-      // We add the first thread with a negative duration, because this is the
+      // We add the first thread with a negative weight, because this is the
       // base profile.
-      newSamples.duration.push(-interval1);
+      newSamples.weight.push(-interval1);
 
       translationMaps[0].set(i, newSamples.length);
       newSamples.length++;
@@ -736,7 +736,7 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples2.time[j]);
-      newSamples.duration.push(interval2);
+      newSamples.weight.push(interval2);
 
       translationMaps[1].set(j, newSamples.length);
       newSamples.length++;
