@@ -92,16 +92,14 @@ server.listen(PORT, err => {
 });
 ```
 
-### Add-on
+### Directly from Firefox
 
 > `https://profiler.firefox.com/from-addon/`
 
-The [Gecko Profiler Addon][Gecko Profiler Addon] injects the profile into the page through a frame script
+Firefox loads the profiles directly into the front-end through a WebChannel mechanism. This is done with the profile menu button, which can be enabled on the homepage of [profiler.firefox.com](https://profiler.firefox.com/)
 
 ### File
 
 > `https://profiler.firefox.com/from-file/`
 
 When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
-
-[Gecko Profiler Addon]: https://github.com/firefox-devtools/Gecko-Profiler-Addon

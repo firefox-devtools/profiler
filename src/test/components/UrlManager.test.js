@@ -7,24 +7,21 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
-import { getUrlSetupPhase } from '../../selectors/app';
+import { getView, getUrlSetupPhase } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
 import { getDataSource } from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import * as receiveProfile from '../../actions/receive-profile';
 
 jest.mock('../../profile-logic/symbol-store');
 
 describe('UrlManager', function() {
   function setup(urlPath: ?string) {
-    (receiveProfile: any).doSymbolicateProfile = jest.fn(() => async () => {});
-
     if (typeof urlPath === 'string') {
       // jsdom doesn't allow us to rewrite window.location. Instead, use the
       // History API to properly set the current location.
-      window.history.pushState(undefined, 'profiler.firefox.com', urlPath);
+      window.history.pushState(undefined, 'Firefox Profiler', urlPath);
     }
     const store = blankStore();
     const { dispatch, getState } = store;
@@ -54,7 +51,7 @@ describe('UrlManager', function() {
     };
     window.fetch = jest
       .fn()
-      .mockRejectedValue(new Error('No symbolication API in place'));
+      .mockRejectedValue(new Error('Simulated network error'));
     window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
   });
 
@@ -104,14 +101,17 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('none');
   });
 
-  it('sets the data source to public', async function() {
+  it(`sets the data source to public and doesn't change the URL when there's an error`, async function() {
+    const urlPath = '/public/FAKE_HASH/marker-chart';
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      '/public/'
+      urlPath
     );
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('public');
+    expect(getView(getState()).phase).toBe('FATAL_ERROR');
+    expect(window.location.pathname).toBe(urlPath);
   });
 });
