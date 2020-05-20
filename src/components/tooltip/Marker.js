@@ -235,6 +235,9 @@ function getMarkerDetails(
           <TooltipDetails>
             <TooltipDetail label="Operation">{data.operation}</TooltipDetail>
             <TooltipDetail label="Source">{data.source}</TooltipDetail>
+            {data.threadId ? (
+              <TooltipDetail label="Thread ID">{data.threadId}</TooltipDetail>
+            ) : null}
             <TooltipDetail label="Filename">{data.filename}</TooltipDetail>
           </TooltipDetails>
         );

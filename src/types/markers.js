@@ -394,6 +394,10 @@ export type FileIoPayload = {|
   source: string,
   operation: string,
   filename: string,
+  // FileIO markers that are happening on the current thread don't have a threadId,
+  // but they have threadId field if the markers belong to a different (potentially
+  // non-profiled) thread.
+  threadId?: number,
 |};
 
 /**

@@ -122,11 +122,12 @@ export function getSearchFilteredMarkerIndexes(
       }
 
       if (data.type === 'FileIO') {
-        const { filename, operation, source } = data;
+        const { filename, operation, source, threadId } = data;
         if (
           searchRegExp.test(filename) ||
           searchRegExp.test(operation) ||
-          searchRegExp.test(source)
+          searchRegExp.test(source) ||
+          (threadId && searchRegExp.test(threadId.toString()))
         ) {
           newMarkers.push(markerIndex);
           continue;
@@ -1315,7 +1316,8 @@ export function getMarkerFullDescription(marker: Marker) {
         break;
       case 'FileIO':
         if (data.source) {
-          description = `(${data.source}) `;
+          const threadId = data.threadId ? `/TID: ${data.threadId}` : '';
+          description = `(${data.source}${threadId}) `;
         }
         description += data.operation;
         if (data.filename) {
