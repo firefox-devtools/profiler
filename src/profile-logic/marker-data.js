@@ -1160,6 +1160,18 @@ export function isFileIoMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'FileIO');
 }
 
+/**
+ * Returns true if the marker is an on-thread FileIO marker.
+ */
+export function isOnThreadFileIoMarker(marker: Marker): boolean {
+  return !!(
+    marker.data &&
+    marker.data.type === 'FileIO' &&
+    // If thread ID isn't there, that means it's a FileIO marker belongs to that thread.
+    typeof marker.data.threadId === 'undefined'
+  );
+}
+
 export function isMemoryMarker(marker: Marker): boolean {
   const { data } = marker;
   if (!data) {

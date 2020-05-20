@@ -266,7 +266,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       rangeEnd: committedRange.end,
       categories: getCategories(state),
       timelineType: getTimelineType(state),
-      hasFileIoMarkers: selectors.getFileIoMarkerIndexes(state).length !== 0,
+      hasFileIoMarkers:
+        selectors.getFileIoMarkerIndexesForHeader(state).length !== 0,
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
         state
       ),
