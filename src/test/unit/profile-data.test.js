@@ -6,6 +6,7 @@ import {
   getContainingLibrary,
   symbolicateProfile,
   applySymbolicationStep,
+  StackMapper,
 } from '../../profile-logic/symbolication';
 import {
   processGeckoProfile,
@@ -626,7 +627,8 @@ describe('symbolication', function() {
           symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
             symbolicatedProfile.threads[threadIndex],
             symbolicationStepInfo,
-            new Map()
+            new Map(),
+            new StackMapper()
           );
         }
       );

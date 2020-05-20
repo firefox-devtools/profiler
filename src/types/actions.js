@@ -18,7 +18,7 @@ import type {
   ActiveTabTimeline,
   ThreadsKey,
 } from './profile-derived';
-import type { FuncToFuncMap } from '../profile-logic/symbolication';
+import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -277,7 +277,7 @@ type ReceiveProfileAction =
   | {|
       +type: 'BULK_SYMBOLICATION',
       +symbolicatedThreads: Thread[],
-      +oldFuncToNewFuncMaps: Map<ThreadIndex, FuncToFuncMap>,
+      +oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>,
     |}
   | {|
       +type: 'DONE_SYMBOLICATING',

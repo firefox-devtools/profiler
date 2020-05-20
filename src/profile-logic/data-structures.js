@@ -161,6 +161,21 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
   };
 }
 
+export function shallowCloneNativeSymbolTable(
+  nativeSymbols: NativeSymbolTable
+): NativeSymbolTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    libIndex: nativeSymbols.libIndex.slice(),
+    address: nativeSymbols.address.slice(),
+    name: nativeSymbols.name.slice(),
+    length: nativeSymbols.length,
+  };
+}
+
 export function getEmptyResourceTable(): ResourceTable {
   return {
     // Important!

@@ -360,6 +360,7 @@ export class SymbolStore {
               request,
             ])[0];
             const results = await resultsPromise;
+            // console.log(results);
 
             // Did not throw, option 3 was successful!
             successCb(request, results);

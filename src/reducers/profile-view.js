@@ -171,13 +171,13 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       // The view options are lazily initialized. Reset to the default values.
       return {};
     case 'BULK_SYMBOLICATION': {
-      const { oldFuncToNewFuncMaps } = action;
-      // For each thread, apply oldFuncToNewFuncMap to that thread's
+      const { oldFuncToNewFuncsMaps } = action;
+      // For each thread, apply oldFuncToNewFuncsMap to that thread's
       // selectedCallNodePath and expandedCallNodePaths.
       const newState = objectMap(state, (threadViewOptions, threadsKey) => {
         // Multiple selected threads are not supported, note that transforming
         // the threadKey with multiple threads into a number will result in a NaN.
-        // This should be fine here, as the oldFuncToNewFuncMaps only supports
+        // This should be fine here, as the oldFuncToNewFuncsMaps only supports
         // single thread indexes.
         const threadIndex = +threadsKey;
         if (Number.isNaN(threadIndex)) {
@@ -186,28 +186,59 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
               'multiple threads was used.'
           );
         }
-        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(threadIndex);
-        if (oldFuncToNewFuncMap === undefined) {
+        const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(threadIndex);
+        if (oldFuncToNewFuncsMap === undefined) {
           return threadViewOptions;
         }
-
-        function mapOldFuncToNewFunc(
-          oldFunc: IndexIntoFuncTable
-        ): IndexIntoFuncTable {
-          const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-          return newFunc === undefined ? oldFunc : newFunc;
+        const oldExpandedCallPaths = Array.from(
+          threadViewOptions.expandedCallNodePaths
+        );
+        const newExpandedCallPaths = [];
+        for (const callPath of oldExpandedCallPaths) {
+          const newCallPath = [];
+          let leafExpandedToFuncs = null;
+          for (let depth = 0; depth < callPath.length; depth++) {
+            const oldFunc = callPath[depth];
+            const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
+            if (newFuncs === undefined) {
+              newCallPath.push(oldFunc);
+            } else {
+              newCallPath.push(...newFuncs);
+              if (depth === callPath.length - 1) {
+                leafExpandedToFuncs = newFuncs;
+              }
+            }
+          }
+          newExpandedCallPaths.push(newCallPath);
+          if (leafExpandedToFuncs && leafExpandedToFuncs.length > 1) {
+            // Make sure the call node is expanded by expanding its new ancestors.
+            for (let i = 1; i < leafExpandedToFuncs.length; i++) {
+              newExpandedCallPaths.push(
+                newCallPath.slice(0, newCallPath.length - i)
+              );
+            }
+          }
         }
-
+        const expandOldFuncToNewFuncs = (accum, oldFunc) => {
+          const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
+          return newFuncs === undefined
+            ? [...accum, oldFunc]
+            : [...accum, ...newFuncs];
+        };
+        // console.log('expanded call paths before:', threadViewOptions.expandedCallNodePaths);
+        // const newExpandedCallPaths = new PathSet(
+        //   Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
+        //     oldPath.reduce(expandOldFuncToNewFuncs, [])
+        //   )
+        // );
+        // console.log('after:', newExpandedCallPaths);
         return {
           ...threadViewOptions,
-          selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
-            mapOldFuncToNewFunc
+          selectedCallNodePath: threadViewOptions.selectedCallNodePath.reduce(
+            expandOldFuncToNewFuncs,
+            []
           ),
-          expandedCallNodePaths: new PathSet(
-            Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
-              oldPath.map(mapOldFuncToNewFunc)
-            )
-          ),
+          expandedCallNodePaths: new PathSet(newExpandedCallPaths),
         };
       });
 
@@ -508,21 +539,23 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
         return null;
       }
 
-      const { oldFuncToNewFuncMaps } = action;
+      const { oldFuncToNewFuncsMaps } = action;
       // This doesn't support a ThreadsKey with multiple threads.
-      const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(+state.threadsKey);
-      if (oldFuncToNewFuncMap === undefined) {
+      const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(+state.threadsKey);
+      if (oldFuncToNewFuncsMap === undefined) {
         return state;
       }
 
-      const mapOldFuncToNewFunc = oldFunc => {
-        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-        return newFunc === undefined ? oldFunc : newFunc;
+      const expandOldFuncToNewFuncs = (accum, oldFunc) => {
+        const newFuncs = oldFuncToNewFuncsMap.get(oldFunc);
+        return newFuncs === undefined
+          ? [...accum, oldFunc]
+          : [...accum, ...newFuncs];
       };
 
       return {
         ...state,
-        callNodePath: state.callNodePath.map(mapOldFuncToNewFunc),
+        callNodePath: state.callNodePath.reduce(expandOldFuncToNewFuncs, []),
       };
     }
     case 'CHANGE_RIGHT_CLICKED_CALL_NODE':
