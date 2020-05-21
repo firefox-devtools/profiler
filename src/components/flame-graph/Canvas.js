@@ -25,6 +25,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type {
@@ -38,6 +39,7 @@ import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
@@ -266,6 +268,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       isInverted,
       callTreeSummaryStrategy,
       pages,
+      weightType,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -291,6 +294,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       // doesn't over-render.
       <TooltipCallNode
         thread={thread}
+        weightType={weightType}
         pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}
