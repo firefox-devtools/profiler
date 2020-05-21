@@ -397,6 +397,10 @@ export type FileIoPayload = {|
   // FileIO markers that are happening on the current thread don't have a threadId,
   // but they have threadId field if the markers belong to a different (potentially
   // non-profiled) thread.
+  // This field is added on Firefox 78, but this is backwards compatible because
+  // previous FileIO markers were also belonging to the threads they are in only.
+  // We still don't serialize this field if the marker belongs to the thread they
+  // are being captured.
   threadId?: number,
 |};
 
