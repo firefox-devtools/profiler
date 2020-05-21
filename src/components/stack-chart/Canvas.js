@@ -29,6 +29,7 @@ import type {
   PageList,
   ThreadIndex,
   UserTimingMarkerPayload,
+  WeightType,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
@@ -50,6 +51,7 @@ type OwnProps = {|
   +pages: PageList | null,
   +threadIndex: ThreadIndex,
   +interval: Milliseconds,
+  +weightType: WeightType,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +combinedTimingRows: CombinedTimingRows,
@@ -406,6 +408,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }: HoveredStackTiming): React.Node | null => {
     const {
       thread,
+      weightType,
       threadIndex,
       combinedTimingRows,
       categories,
@@ -440,6 +443,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <TooltipCallNode
         thread={thread}
+        weightType={weightType}
         pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}

@@ -36,6 +36,7 @@ import type {
   CallTreeSummaryStrategy,
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
@@ -57,6 +58,7 @@ const SELECTABLE_THRESHOLD = 0.001;
 
 type StateProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
@@ -264,6 +266,7 @@ class FlameGraph extends React.PureComponent<Props> {
       interval,
       isInverted,
       pages,
+      weightType,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -295,6 +298,7 @@ class FlameGraph extends React.PureComponent<Props> {
             chartProps={{
               thread,
               pages,
+              weightType,
               unfilteredThread,
               sampleIndexOffset,
               maxStackDepth,
@@ -331,6 +335,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
       state
     ),

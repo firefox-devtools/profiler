@@ -22,6 +22,7 @@ import type {
   NativeAllocationsTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
+  WeightType,
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
@@ -278,6 +279,17 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  /**
+   * When computing the call tree, a "samples" table is used, which
+   * can represent a variety of formats with different weight types.
+   * This selector uses that table's weight type if it exists, or
+   * defaults to samples, which the Gecko Profiler outputs by default.
+   */
+  const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
+    getSamplesForCallTree,
+    samples => samples.weightType || 'samples'
+  );
+
   const getCallTreeCountsAndTimings: Selector<CallTree.CallTreeCountsAndTimings> = createSelector(
     getSamplesForCallTree,
     getCallNodeInfo,
@@ -293,7 +305,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
-    getCallTreeSummaryStrategy,
+    getWeightTypeForCallTree,
     CallTree.getCallTree
   );
 
@@ -338,6 +350,7 @@ export function getStackAndSampleSelectorsPerThread(
 
   return {
     unfilteredSamplesRange,
+    getWeightTypeForCallTree,
     getCallNodeInfo,
     getCallNodeMaxDepth,
     getSelectedCallNodePath,

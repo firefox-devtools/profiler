@@ -21,6 +21,7 @@ import type {
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   CallNodeInfo,
+  WeightType,
   Milliseconds,
   CallTreeSummaryStrategy,
 } from 'firefox-profiler/types';
@@ -34,6 +35,7 @@ const GRAPH_HEIGHT = 10;
 
 type Props = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
@@ -68,7 +70,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const sortedTotalBreakdownByImplementation = objectEntries(
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
-    const { interval, thread } = this.props;
+    const { thread, weightType } = this.props;
 
     // JS Tracer threads have data relevant to the microsecond level.
     const isHighPrecision = Boolean(thread.isJsTracer);
@@ -133,13 +135,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatCallNodeNumber(interval, isHighPrecision, time)}ms
+                  {formatCallNodeNumber(weightType, isHighPrecision, time)}
+                  ms
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
                     : `${formatCallNodeNumber(
-                        interval,
+                        weightType,
                         isHighPrecision,
                         selfTimeValue
                       )}ms`}

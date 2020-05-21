@@ -31,6 +31,7 @@ describe('TooltipCallNode', function() {
         <Provider store={store}>
           <TooltipCallNode
             thread={selectedThreadSelectors.getThread(getState())}
+            weightType="samples"
             pages={ProfileSelectors.getPageList(getState())}
             callNodeIndex={ensureExists(
               selectedThreadSelectors.getSelectedCallNodeIndex(getState()),

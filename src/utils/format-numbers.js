@@ -11,7 +11,9 @@ import type {
   Microseconds,
   Milliseconds,
   Nanoseconds,
+  WeightType,
 } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from './flow';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
 // problem. It's much better to reuse an instance of `Intl.NumberFormat`.
@@ -83,12 +85,23 @@ export function formatNumber(
  * Format call node numbers consistently.
  */
 export function formatCallNodeNumber(
-  interval: number,
+  weightType: WeightType,
   isHighPrecision: boolean,
   number: number
 ): string {
   // If the interval is an integer, display the number as an integer.
-  let precision = Number.isInteger(interval) ? 0 : 1;
+  let precision;
+  switch (weightType) {
+    case 'tracing-ms':
+      precision = 1;
+      break;
+    case 'samples':
+    case 'bytes':
+      precision = 0;
+      break;
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
 
   if (isHighPrecision) {
     // Sometimes the number should be high precision, such as on a JS tracer thread

@@ -50,7 +50,7 @@ function callTreeFromProfile(
     categories,
     'combined',
     callTreeCountsAndTimings,
-    'timing'
+    'samples'
   );
 }
 
@@ -320,7 +320,8 @@ describe('unfiltered call tree', function() {
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
-          ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
+          ariaLabel:
+            'A, running count is 3 samples (100%), self count is 0 samples',
           isFrameLabel: true,
           icon: null,
           lib: '',
@@ -328,21 +329,22 @@ describe('unfiltered call tree', function() {
           selfTime: '—',
           selfTimeWithUnit: '—',
           totalTime: '3',
-          totalTimeWithUnit: '3ms',
+          totalTimeWithUnit: '3 samples',
           totalTimePercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
         expect(callTree.getDisplayData(I)).toEqual({
-          ariaLabel: 'I, running time is 1ms (33%), self time is 1ms',
+          ariaLabel:
+            'I, running count is 1 sample (33%), self count is 1 sample',
           isFrameLabel: false,
           icon: null,
           lib: 'libI.so',
           name: 'I',
           selfTime: '1',
-          selfTimeWithUnit: '1ms',
+          selfTimeWithUnit: '1 sample',
           totalTime: '1',
-          totalTimeWithUnit: '1ms',
+          totalTimeWithUnit: '1 sample',
           totalTimePercent: '33%',
           categoryColor: 'grey',
           categoryName: 'Other',
@@ -456,7 +458,7 @@ describe('inverted call tree', function() {
       categories,
       'combined',
       callTreeCountsAndTimings,
-      'timing'
+      'samples'
     );
 
     it('computes an non-inverted call tree', function() {
@@ -496,7 +498,7 @@ describe('inverted call tree', function() {
       categories,
       'combined',
       invertedCallTreeCountsAndTimings,
-      'timing'
+      'samples'
     );
 
     /**

@@ -3862,7 +3862,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             >
               <div
                 aria-expanded="true"
-                aria-label="Z, running time is 2ms (67%), self time is 2ms"
+                aria-label="Z, running count is 2 samples (67%), self count is 2 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -3892,7 +3892,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="Y, running time is 2ms (67%), self time is 0ms"
+                aria-label="Y, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -3922,7 +3922,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="X, running time is 2ms (67%), self time is 0ms"
+                aria-label="X, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -3954,7 +3954,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 1ms (33%), self time is 0ms"
+                aria-label="B, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -3983,7 +3983,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 />
               </div>
               <div
-                aria-label="A, running time is 1ms (33%), self time is 0ms"
+                aria-label="A, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -4013,7 +4013,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               </div>
               <div
                 aria-expanded="false"
-                aria-label="C, running time is 1ms (33%), self time is 0ms"
+                aria-label="C, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -4043,7 +4043,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               </div>
               <div
                 aria-expanded="false"
-                aria-label="E, running time is 1ms (33%), self time is 1ms"
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -4478,7 +4478,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 3ms (100%), self time is 0ms"
+                aria-label="A, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -4508,7 +4508,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 3ms (100%), self time is 0ms"
+                aria-label="B, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -4538,7 +4538,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 2ms (67%), self time is 0ms"
+                aria-label="C, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -4568,7 +4568,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               </div>
               <div
                 aria-expanded="true"
-                aria-label="D, running time is 1ms (33%), self time is 0ms"
+                aria-label="D, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -4597,7 +4597,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 />
               </div>
               <div
-                aria-label="E, running time is 1ms (33%), self time is 1ms"
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -4627,7 +4627,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (33%), self time is 0ms"
+                aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -4657,7 +4657,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               </div>
               <div
                 aria-expanded="false"
-                aria-label="H, running time is 1ms (33%), self time is 0ms"
+                aria-label="H, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -5094,7 +5094,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 3ms (100%), self time is 0ms"
+                aria-label="A, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -5124,7 +5124,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 3ms (100%), self time is 0ms"
+                aria-label="B, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -5154,7 +5154,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 2ms (67%), self time is 0ms"
+                aria-label="C, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -5184,7 +5184,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="D, running time is 1ms (33%), self time is 0ms"
+                aria-label="D, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -5213,7 +5213,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 />
               </div>
               <div
-                aria-label="E, running time is 1ms (33%), self time is 1ms"
+                aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -5243,7 +5243,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (33%), self time is 0ms"
+                aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -5273,7 +5273,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="H, running time is 1ms (33%), self time is 0ms"
+                aria-label="H, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -5679,7 +5679,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 2ms (100%), self time is 0ms"
+                aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -5711,7 +5711,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 2ms (100%), self time is 0ms"
+                aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -5743,7 +5743,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 2ms (100%), self time is 0ms"
+                aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -5781,7 +5781,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="D, running time is 1ms (50%), self time is 0ms"
+                aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -5812,7 +5812,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                aria-label="E, running time is 1ms (50%), self time is 1ms"
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -5844,7 +5844,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (50%), self time is 0ms"
+                aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -6250,7 +6250,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 2ms (100%), self time is 0ms"
+                aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -6282,7 +6282,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 2ms (100%), self time is 0ms"
+                aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -6314,7 +6314,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 2ms (100%), self time is 0ms"
+                aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -6352,7 +6352,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="D, running time is 1ms (50%), self time is 0ms"
+                aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -6383,7 +6383,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                aria-label="E, running time is 1ms (50%), self time is 1ms"
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -6415,7 +6415,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (50%), self time is 0ms"
+                aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -6759,7 +6759,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 1ms (100%), self time is 0ms"
+                aria-label="A, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -6791,7 +6791,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 1ms (100%), self time is 0ms"
+                aria-label="B, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -6823,7 +6823,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 1ms (100%), self time is 0ms"
+                aria-label="C, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -6861,7 +6861,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (100%), self time is 0ms"
+                aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -7211,7 +7211,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 1ms (100%), self time is 0ms"
+                aria-label="A, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -7243,7 +7243,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 1ms (100%), self time is 0ms"
+                aria-label="B, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -7275,7 +7275,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 1ms (100%), self time is 0ms"
+                aria-label="C, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -7313,7 +7313,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (100%), self time is 0ms"
+                aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -7725,7 +7725,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             >
               <div
                 aria-expanded="true"
-                aria-label="A, running time is 2ms (100%), self time is 0ms"
+                aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -7757,7 +7757,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="B, running time is 2ms (100%), self time is 0ms"
+                aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -7789,7 +7789,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="C, running time is 2ms (100%), self time is 0ms"
+                aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even dim"
@@ -7827,7 +7827,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="true"
-                aria-label="D, running time is 1ms (50%), self time is 0ms"
+                aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"
@@ -7858,7 +7858,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                aria-label="E, running time is 1ms (50%), self time is 1ms"
+                aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
@@ -7896,7 +7896,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               </div>
               <div
                 aria-expanded="false"
-                aria-label="F, running time is 1ms (50%), self time is 0ms"
+                aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd dim"

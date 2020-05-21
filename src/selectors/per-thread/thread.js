@@ -49,8 +49,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
-  const getSamplesWeightType: Selector<WeightType> = state =>
-    getSamplesTable(state).weightType || 'samples';
   const getNativeAllocations: Selector<NativeAllocationsTable | void> = state =>
     getThread(state).nativeAllocations;
   const getThreadRange: Selector<StartEndRange> = state =>
@@ -60,6 +58,14 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
       getThread(state),
       ProfileSelectors.getProfileInterval(state)
     );
+
+  /**
+   * This selector gets the weight type from the thread.samples table, but
+   * does not get it for others like the Native Allocations table. The call
+   * tree uses the getWeightTypeForCallTree selector.
+   */
+  const getSamplesWeightType: Selector<WeightType> = state =>
+    getSamplesTable(state).weightType || 'samples';
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { oneLine } from 'common-tags';
 import { timeCode } from '../utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
@@ -20,12 +21,12 @@ import type {
   SamplesTable,
   JsAllocationsTable,
   NativeAllocationsTable,
+  WeightType,
   CallNodeTable,
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodeData,
   CallNodeDisplayData,
-  CallTreeSummaryStrategy,
   Milliseconds,
 } from 'firefox-profiler/types';
 
@@ -79,7 +80,7 @@ export class CallTree {
   _jsOnly: boolean;
   _interval: number;
   _isHighPrecision: boolean;
-  _callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  _weightType: WeightType;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -92,7 +93,7 @@ export class CallTree {
     jsOnly: boolean,
     interval: number,
     isHighPrecision: boolean,
-    strategy: CallTreeSummaryStrategy
+    weightType: WeightType
   ) {
     this._categories = categories;
     this._callNodeTable = callNodeTable;
@@ -108,7 +109,7 @@ export class CallTree {
     this._jsOnly = jsOnly;
     this._interval = interval;
     this._isHighPrecision = isHighPrecision;
-    this._callTreeSummaryStrategy = strategy;
+    this._weightType = weightType;
   }
 
   getRoots() {
@@ -223,6 +224,7 @@ export class CallTree {
       const resourceType = this._resourceTable.type[resourceIndex];
       const isFrameLabel = resourceIndex === -1;
       const libName = this._getOriginAnnotation(funcIndex);
+      const weightType = this._weightType;
 
       let icon = null;
       if (resourceType === resourceTypes.webhost) {
@@ -232,12 +234,12 @@ export class CallTree {
       }
 
       const formattedTotalTime = formatCallNodeNumber(
-        this._interval,
+        weightType,
         this._isHighPrecision,
         totalTime
       );
       const formattedSelfTime = formatCallNodeNumber(
-        this._interval,
+        weightType,
         this._isHighPrecision,
         selfTime
       );
@@ -246,29 +248,46 @@ export class CallTree {
       let ariaLabel;
       let totalTimeWithUnit;
       let selfTimeWithUnit;
-      const strategy = this._callTreeSummaryStrategy;
-      switch (strategy) {
-        case 'timing': {
+      switch (weightType) {
+        case 'tracing-ms': {
           totalTimeWithUnit = `${formattedTotalTime}ms`;
           selfTimeWithUnit = `${formattedSelfTime}ms`;
-          ariaLabel = `${funcName}, running time is ${totalTimeWithUnit} (${totalTimePercent}), self time is ${selfTimeWithUnit}`;
+          ariaLabel = oneLine`
+              ${funcName},
+              running time is ${totalTimeWithUnit} (${totalTimePercent}),
+              self time is ${selfTimeWithUnit}
+            `;
           break;
         }
-        case 'js-allocations':
-        case 'native-allocations':
-        case 'native-retained-allocations':
-        case 'native-deallocations-sites':
-        case 'native-deallocations-memory': {
+        case 'samples': {
+          // TODO - L10N pluralization
+          totalTimeWithUnit =
+            totalTime === 1
+              ? `${formattedTotalTime} sample`
+              : `${formattedTotalTime} samples`;
+          selfTimeWithUnit =
+            selfTime === 1
+              ? `${formattedSelfTime} sample`
+              : `${formattedSelfTime} samples`;
+          ariaLabel = oneLine`
+            ${funcName},
+            running count is ${totalTimeWithUnit} (${totalTimePercent}),
+            self count is ${selfTimeWithUnit}
+          `;
+          break;
+        }
+        case 'bytes': {
           totalTimeWithUnit = `${formattedTotalTime} bytes`;
           selfTimeWithUnit = `${formattedSelfTime} bytes`;
-          ariaLabel = `${funcName}, total size is ${totalTimeWithUnit} (${totalTimePercent}), self size is ${selfTimeWithUnit}`;
+          ariaLabel = oneLine`
+            ${funcName},
+            total size is ${totalTimeWithUnit} (${totalTimePercent}),
+            self size is ${selfTimeWithUnit}
+          `;
           break;
         }
         default:
-          throw assertExhaustiveCheck(
-            strategy,
-            'Unhandled callTreeSummaryStrategy.'
-          );
+          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
       }
 
       displayData = {
@@ -468,7 +487,7 @@ export function getCallTree(
   categories: CategoryList,
   implementationFilter: string,
   callTreeCountsAndTimings: CallTreeCountsAndTimings,
-  callTreeSummaryStrategy: CallTreeSummaryStrategy
+  weightType: WeightType
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -479,7 +498,6 @@ export function getCallTree(
     } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
-
     // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(
       thread,
@@ -492,7 +510,7 @@ export function getCallTree(
       jsOnly,
       interval,
       Boolean(thread.isJsTracer),
-      callTreeSummaryStrategy
+      weightType
     );
   });
 }
