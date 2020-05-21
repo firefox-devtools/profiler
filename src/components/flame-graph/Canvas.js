@@ -26,6 +26,7 @@ import type {
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
   WeightType,
+  SamplesLikeTable,
 } from 'firefox-profiler/types';
 
 import type {
@@ -57,6 +58,8 @@ export type OwnProps = {|
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +samples: SamplesLikeTable,
+  +unfilteredSamples: SamplesLikeTable,
 |};
 
 type Props = {|
@@ -269,6 +272,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       callTreeSummaryStrategy,
       pages,
       weightType,
+      samples,
+      unfilteredSamples,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -313,7 +318,9 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,
-                categories
+                categories,
+                samples,
+                unfilteredSamples
               )
             : undefined
         }

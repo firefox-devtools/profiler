@@ -32,11 +32,12 @@ import type {
   PageList,
   Milliseconds,
   StartEndRange,
+  WeightType,
+  SamplesLikeTable,
   PreviewSelection,
   CallTreeSummaryStrategy,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  WeightType,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
@@ -76,6 +77,8 @@ type StateProps = {|
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +samples: SamplesLikeTable,
+  +unfilteredSamples: SamplesLikeTable,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -267,6 +270,8 @@ class FlameGraph extends React.PureComponent<Props> {
       isInverted,
       pages,
       weightType,
+      samples,
+      unfilteredSamples,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -315,6 +320,8 @@ class FlameGraph extends React.PureComponent<Props> {
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
+              samples,
+              unfilteredSamples,
             }}
           />
         </ContextMenuTrigger>
@@ -362,6 +369,10 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     pages: getPageList(state),
+    samples: selectedThreadSelectors.getSamplesForCallTree(state),
+    unfilteredSamples: selectedThreadSelectors.getUnfilteredSamplesForCallTree(
+      state
+    ),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
