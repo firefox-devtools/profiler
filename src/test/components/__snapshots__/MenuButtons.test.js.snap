@@ -61,7 +61,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            28
+            29
           </div>
           <div
             class="metaInfoRow"
@@ -477,7 +477,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             >
               Profile Version:
             </span>
-            28
+            29
           </div>
           <div
             class="metaInfoRow"
