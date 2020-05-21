@@ -38,18 +38,18 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
@@ -77,7 +77,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        2ms
+        2 samples
          (
         100%
         )
@@ -97,7 +97,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -116,7 +116,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -143,7 +143,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -182,18 +182,18 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
@@ -221,7 +221,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         100%
         )
@@ -241,7 +241,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -260,7 +260,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
@@ -287,7 +287,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -326,24 +326,24 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -365,7 +365,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         50%
         )
@@ -382,7 +382,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         50%
         )
@@ -402,7 +402,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -421,7 +421,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -440,7 +440,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -451,7 +451,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -467,7 +467,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -486,7 +486,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -525,24 +525,24 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -564,7 +564,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         100%
         )
@@ -584,7 +584,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -603,7 +603,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -622,7 +622,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -633,7 +633,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <h4
       class="sidebar-title3"
@@ -649,7 +649,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -668,7 +668,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -715,24 +715,24 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <h4
       class="sidebar-title3"
@@ -754,7 +754,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        2ms
+        2 samples
          (
         100%
         )
@@ -774,7 +774,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -793,7 +793,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -804,7 +804,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <h4
       class="sidebar-title3"
@@ -820,7 +820,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -839,7 +839,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -878,24 +878,24 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -917,7 +917,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         100%
         )
@@ -937,7 +937,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -956,7 +956,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -967,7 +967,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -983,7 +983,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -1002,7 +1002,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -1041,18 +1041,18 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
@@ -1080,7 +1080,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         100%
         )
@@ -1100,7 +1100,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -1119,7 +1119,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2 samples (50%)
     </div>
     <div
       class="sidebar-label"
@@ -1130,7 +1130,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <h4
       class="sidebar-title3"
@@ -1146,7 +1146,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       100
       %)
@@ -1165,7 +1165,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -1204,18 +1204,18 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      Running Time
+      Running Total
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1 sample (25%)
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
+      Self Total
       :
     </div>
     <div
@@ -1243,7 +1243,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         class="sidebar-categorytiming"
       >
-        1ms
+        1 sample
          (
         100%
         )
@@ -1263,7 +1263,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
+      1 sample
        (
       100
       %)
@@ -1282,7 +1282,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      4ms (100%)
+      4 samples (100%)
     </div>
     <div
       class="sidebar-label"
@@ -1309,7 +1309,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       50
       %)
@@ -1323,7 +1323,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
+      2 samples
        (
       50
       %)

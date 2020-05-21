@@ -104,7 +104,7 @@ describe('CallTreeSidebar', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('rounds properly the displayed values', () => {
+  it('shows samples as integral values', () => {
     const itemsCount = 25;
     const interval = 0.7;
 
@@ -134,7 +134,7 @@ describe('CallTreeSidebar', function() {
 
     const categoryLabel = getByText(/Other/);
     const categoryValue = ensureExists(categoryLabel.nextElementSibling);
-    expect(categoryValue.textContent).toEqual('17.5ms (100%)');
+    expect(categoryValue.textContent).toEqual('17 samples (100%)');
   });
 
   it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {

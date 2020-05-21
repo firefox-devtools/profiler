@@ -5,14 +5,15 @@
 // @flow
 
 import * as React from 'react';
-
+import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
+import { assertExhaustiveCheck } from '../../utils/flow';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
 } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getCategories, getProfileInterval } from '../../selectors/profile';
+import { getCategories } from '../../selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
 import {
   getFriendlyStackTypeName,
@@ -27,6 +28,7 @@ import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   Milliseconds,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type {
@@ -35,7 +37,12 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
-import { formatMilliseconds, formatPercent } from '../../utils/format-numbers';
+import {
+  formatMilliseconds,
+  formatPercent,
+  formatBytes,
+  formatNumber,
+} from '../../utils/format-numbers';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -54,7 +61,7 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
 
 type ImplementationBreakdownProps = {|
   +breakdown: BreakdownByImplementation,
-  +isIntervalInteger: boolean,
+  +number: number => string,
 |};
 
 // This component is responsible for displaying the breakdown data specific to
@@ -70,7 +77,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
   ];
 
   render() {
-    const { breakdown, isIntervalInteger } = this.props;
+    const { breakdown, number } = this.props;
 
     const data = [];
 
@@ -86,19 +93,20 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
       });
     }
 
-    return <Breakdown data={data} isIntervalInteger={isIntervalInteger} />;
+    return <Breakdown data={data} number={number} />;
   }
 }
 
 type CategoryBreakdownProps = {|
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
-  +isIntervalInteger: boolean,
+  +number: number => string,
 |};
 
 class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
   render() {
-    const { breakdown, categoryList, isIntervalInteger } = this.props;
+    const { breakdown, categoryList, number } = this.props;
+
     const data = breakdown
       .map((oneCategoryBreakdown, categoryIndex) => {
         const category = categoryList[categoryIndex];
@@ -127,7 +135,6 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
       (accum, { value }) => accum + Math.abs(value),
       0
     );
-    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
     return (
       <div className="sidebar-categorylist">
@@ -142,16 +149,14 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
                 {category.name}
               </div>
               <div className="sidebar-categorytiming">
-                {formatMilliseconds(value, 3, maxFractionalDigits)} (
-                {formatPercent(value / totalTime)})
+                {number(value)} ({formatPercent(value / totalTime)})
               </div>
               {shouldDisplaySubcategoryInfoForCategory(category)
                 ? subcategories.map(({ name, value }) => (
                     <React.Fragment key={name}>
                       <div className="sidebar-subcategoryname">{name}</div>
                       <div className="sidebar-categorytiming">
-                        {formatMilliseconds(value, 3, maxFractionalDigits)} (
-                        {formatPercent(value / totalTime)})
+                        {number(value)} ({formatPercent(value / totalTime)})
                       </div>
                     </React.Fragment>
                   ))
@@ -169,14 +174,13 @@ type BreakdownProps = {|
     group: string,
     value: Milliseconds,
   |}>,
-  +isIntervalInteger: boolean,
+  number: number => string,
 |};
 
 // This stateless component is responsible for displaying the implementation
 // breakdown. It also computes the percentage from the total time.
-function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
+function Breakdown({ data, number }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
-  const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
   return data
     .filter(({ value }) => value)
@@ -185,7 +189,7 @@ function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
 
       return (
         <SidebarDetail label={group} key={group}>
-          {formatMilliseconds(value, 3, maxFractionalDigits)} ({percentage}%)
+          {number(value)} ({percentage}%)
         </SidebarDetail>
       );
     });
@@ -199,12 +203,44 @@ type StateProps = {|
   +lib: string,
   +timings: TimingsForPath,
   +categoryList: CategoryList,
-  +isIntervalInteger: boolean,
+  +weightType: WeightType,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
+type WeightDetails = {
+  running: string,
+  self: string,
+  number: (n: number) => string,
+};
+
 class CallTreeSidebar extends React.PureComponent<Props> {
+  _getWeightDetails = memoize((weightType: WeightType): WeightDetails => {
+    switch (weightType) {
+      case 'tracing-ms':
+        return {
+          running: 'Running Time',
+          self: 'Self Time',
+          number: n => `${formatMilliseconds(n, 3, 1)}ms`,
+        };
+      case 'samples':
+        return {
+          running: 'Running Total',
+          self: 'Self Total',
+          // TODO - L10n the plurals
+          number: n => (n === 1 ? '1 sample' : `${formatNumber(n, 0)} samples`),
+        };
+      case 'bytes':
+        return {
+          running: 'Running Size',
+          self: 'Self Size',
+          number: n => formatBytes(n),
+        };
+      default:
+        throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+    }
+  });
+
   render() {
     const {
       selectedNodeIndex,
@@ -212,7 +248,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       lib,
       timings,
       categoryList,
-      isIntervalInteger,
+      weightType,
     } = this.props;
     const {
       forPath: { selfTime, totalTime },
@@ -228,6 +264,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       );
     }
 
+    const { number, running, self } = this._getWeightDetails(weightType);
+
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeForFuncPercent = Math.round(
@@ -236,8 +274,6 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     const selfTimeForFuncPercent = Math.round(
       (selfTimeForFunc.value / rootTime) * 100
     );
-
-    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
     return (
       <aside className="sidebar sidebar-calltree">
@@ -257,22 +293,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             ) : null}
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
-          <SidebarDetail label="Running Time">
+          <SidebarDetail label={running}>
             {totalTime.value
-              ? `${formatMilliseconds(
-                  totalTime.value,
-                  3,
-                  maxFractionalDigits
-                )} (${totalTimePercent}%)`
+              ? `${number(totalTime.value)} (${totalTimePercent}%)`
               : '—'}
           </SidebarDetail>
-          <SidebarDetail label="Self Time">
+          <SidebarDetail label={self}>
             {selfTime.value
-              ? `${formatMilliseconds(
-                  selfTime.value,
-                  3,
-                  maxFractionalDigits
-                )} (${selfTimePercent}%)`
+              ? `${number(selfTime.value)} (${selfTimePercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTime.breakdownByCategory ? (
@@ -281,7 +309,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <CategoryBreakdown
                 breakdown={totalTime.breakdownByCategory}
                 categoryList={categoryList}
-                isIntervalInteger={isIntervalInteger}
+                number={number}
               />
             </>
           ) : null}
@@ -290,7 +318,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
                 breakdown={totalTime.breakdownByImplementation}
-                isIntervalInteger={isIntervalInteger}
+                number={number}
               />
             </React.Fragment>
           ) : null}
@@ -299,7 +327,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
                 breakdown={selfTime.breakdownByImplementation}
-                isIntervalInteger={isIntervalInteger}
+                number={number}
               />
             </React.Fragment>
           ) : null}
@@ -308,20 +336,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </h3>
           <SidebarDetail label="Running Time">
             {totalTimeForFunc.value
-              ? `${formatMilliseconds(
-                  totalTimeForFunc.value,
-                  3,
-                  maxFractionalDigits
+              ? `${number(
+                  totalTimeForFunc.value
                 )} (${totalTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTimeForFunc.value
-              ? `${formatMilliseconds(
-                  selfTimeForFunc.value,
-                  3,
-                  maxFractionalDigits
-                )} (${selfTimeForFuncPercent}%)`
+              ? `${number(selfTimeForFunc.value)} (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation &&
@@ -330,7 +352,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
                 breakdown={totalTimeForFunc.breakdownByImplementation}
-                isIntervalInteger={isIntervalInteger}
+                number={number}
               />
             </React.Fragment>
           ) : null}
@@ -340,7 +362,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
                 breakdown={selfTimeForFunc.breakdownByImplementation}
-                isIntervalInteger={isIntervalInteger}
+                number={number}
               />
             </React.Fragment>
           ) : null}
@@ -359,7 +381,7 @@ export default explicitConnect<{||}, StateProps, {||}>({
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
     categoryList: getCategories(state),
-    isIntervalInteger: Number.isInteger(getProfileInterval(state)),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
   }),
   component: CallTreeSidebar,
 });
