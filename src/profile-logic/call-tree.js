@@ -18,9 +18,7 @@ import type {
   FuncTable,
   ResourceTable,
   IndexIntoFuncTable,
-  SamplesTable,
-  JsAllocationsTable,
-  NativeAllocationsTable,
+  SamplesLikeTable,
   WeightType,
   CallNodeTable,
   IndexIntoCallNodeTable,
@@ -32,7 +30,9 @@ import type {
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
-import { assertExhaustiveCheck } from '../utils/flow';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import * as ProfileData from './profile-data';
+import type { CallTreeSummaryStrategy } from '../types/actions';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -326,7 +326,7 @@ export class CallTree {
 
 function _getInvertedStackSelfTimes(
   // The samples could either be a SamplesTable, or a JsAllocationsTable.
-  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
+  samples: SamplesLikeTable,
   callNodeTable: CallNodeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>
 ): {
@@ -385,7 +385,7 @@ function _getInvertedStackSelfTimes(
  * This is a helper function to get the stack timings for un-inverted call trees.
  */
 function _getStackSelfTimes(
-  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
+  samples: SamplesLikeTable,
   callNodeTable: CallNodeTable,
   sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>
 ): {
@@ -414,7 +414,7 @@ function _getStackSelfTimes(
  * It takes into account both the normal tree, and the inverted tree.
  */
 export function computeCallTreeCountsAndTimings(
-  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
+  samples: SamplesLikeTable,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
@@ -513,4 +513,74 @@ export function getCallTree(
       weightType
     );
   });
+}
+
+/**
+ * This function takes the call tree summary strategy, and finds the appropriate data
+ * structure. This can then be used by the call tree and other UI to report on the data.
+ */
+export function extractSamplesLikeTable(
+  thread: Thread,
+  strategy: CallTreeSummaryStrategy
+): SamplesLikeTable {
+  switch (strategy) {
+    case 'timing':
+      return thread.samples;
+    case 'js-allocations':
+      return ensureExists(
+        thread.jsAllocations,
+        'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+      );
+    case 'native-retained-allocations': {
+      const nativeAllocations = ensureExists(
+        thread.nativeAllocations,
+        'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
+      );
+
+      /* istanbul ignore if */
+      if (!nativeAllocations.memoryAddress) {
+        throw new Error(
+          'Attempting to filter by retained allocations data that is missing the memory addresses.'
+        );
+      }
+      return ProfileData.filterToRetainedAllocations(nativeAllocations);
+    }
+    case 'native-allocations':
+      return ProfileData.filterToAllocations(
+        ensureExists(
+          thread.nativeAllocations,
+          'Expected the NativeAllocationTable to exist when using a "native-allocations" strategy'
+        )
+      );
+    case 'native-deallocations-sites':
+      return ProfileData.filterToDeallocationsSites(
+        ensureExists(
+          thread.nativeAllocations,
+          'Expected the NativeAllocationTable to exist when using a "native-deallocations-sites" strategy'
+        )
+      );
+    case 'native-deallocations-memory': {
+      const nativeAllocations = ensureExists(
+        thread.nativeAllocations,
+        'Expected the NativeAllocationTable to exist when using a "native-deallocations-memory" strategy'
+      );
+
+      /* istanbul ignore if */
+      if (!nativeAllocations.memoryAddress) {
+        throw new Error(
+          'Attempting to filter by retained allocations data that is missing the memory addresses.'
+        );
+      }
+
+      return ProfileData.filterToDeallocationsMemory(
+        ensureExists(
+          nativeAllocations,
+          'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+        )
+      );
+    }
+    /* istanbul ignore next */
+    default:
+      throw assertExhaustiveCheck(strategy);
+  }
 }

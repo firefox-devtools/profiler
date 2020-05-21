@@ -124,6 +124,22 @@ export type StackTable = {|
  */
 export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
 
+type SamplesLikeTableShape = {
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight?: number[],
+  weightType?: WeightType,
+  length: number,
+};
+
+export type SamplesLikeTable =
+  | SamplesLikeTableShape
+  | SamplesTable
+  | NativeAllocationsTable
+  | JsAllocationsTable;
+
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
  * the callstack that is associated with it. This is done at a fixed but configurable
