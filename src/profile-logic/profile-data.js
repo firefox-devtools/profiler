@@ -41,6 +41,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
+  SamplesLikeTable,
   SelectedState,
   ProfileFilterPageData,
   Milliseconds,
@@ -366,7 +367,9 @@ export function getTimingsForPath(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ) {
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
@@ -376,7 +379,9 @@ export function getTimingsForPath(
     thread,
     unfilteredThread,
     sampleIndexOffset,
-    categories
+    categories,
+    samples,
+    unfilteredSamples
   );
 }
 
@@ -396,18 +401,19 @@ export function getTimingsForCallNodeIndex(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
   // This is the data from the filtered thread that we'll loop over.
-  const { samples, stackTable, stringTable } = thread;
+  const { stackTable, stringTable } = thread;
 
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
   // `sampleIndexOffset` because of range filtering.
   const {
-    samples: unfilteredSamples,
     stackTable: unfilteredStackTable,
     funcTable: unfilteredFuncTable,
     frameTable: unfilteredFrameTable,
