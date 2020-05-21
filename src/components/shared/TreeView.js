@@ -28,11 +28,12 @@ const PAGE_KEYS_DELTA = 15;
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
 
-export type Column = {
+export type Column = {|
   propName: string,
   title: string,
+  tooltip?: string,
   component?: React.ComponentType<*>,
-};
+|};
 
 type TreeViewHeaderProps = {|
   +fixedColumns: Column[],
@@ -50,6 +51,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
         <span
           className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
           key={col.propName}
+          title={col.tooltip}
         >
           {col.title}
         </span>
