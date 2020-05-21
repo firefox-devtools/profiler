@@ -12,14 +12,12 @@ import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
-import { assertExhaustiveCheck, ensureExists } from '../../utils/flow';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   Thread,
   ThreadIndex,
-  SamplesTable,
-  JsAllocationsTable,
-  NativeAllocationsTable,
+  SamplesLikeTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
   WeightType,
@@ -213,70 +211,16 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getSamplesForCallTree: Selector<
-    SamplesTable | JsAllocationsTable | NativeAllocationsTable
-  > = createSelector(
+  const getSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallTreeSummaryStrategy,
-    (thread, strategy) => {
-      switch (strategy) {
-        case 'timing':
-          return thread.samples;
-        case 'js-allocations':
-          return ensureExists(
-            thread.jsAllocations,
-            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-          );
-        case 'native-retained-allocations': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
-          );
+    CallTree.extractSamplesLikeTable
+  );
 
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-          return ProfileData.filterToRetainedAllocations(nativeAllocations);
-        }
-        case 'native-allocations':
-          return ProfileData.filterToAllocations(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-allocations" strategy'
-            )
-          );
-        case 'native-deallocations-sites':
-          return ProfileData.filterToDeallocationsSites(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-deallocations-sites" strategy'
-            )
-          );
-        case 'native-deallocations-memory': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-deallocations-memory" strategy'
-          );
-
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-
-          return ProfileData.filterToDeallocationsMemory(
-            ensureExists(
-              nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-            )
-          );
-        }
-        default:
-          throw assertExhaustiveCheck(strategy);
-      }
-    }
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
   );
 
   /**
@@ -353,6 +297,8 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     getCallNodeInfo,
     getCallNodeMaxDepth,
+    getSamplesForCallTree,
+    getUnfilteredSamplesForCallTree,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
