@@ -71,12 +71,10 @@ function mockFetchForBitly({
       });
     }
 
-    const authorization = headers.Authorization;
-    if (!authorization || !authorization.startsWith('Bearer')) {
-      return new Response(null, { status: 401, statusText: 'Unauthorized' });
-    }
-
-    if (headers['Content-Type'] !== 'application/json') {
+    if (
+      headers['Content-Type'] !== 'application/json' ||
+      headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+    ) {
       return new Response(null, {
         status: 406,
         statusText: 'Not acceptable',
@@ -91,20 +89,14 @@ function mockFetchForBitly({
 describe('shortenUrl', () => {
   function mockFetchWith(returnedHash) {
     mockFetchForBitly({
-      endpointUrl: 'https://api-ssl.bitly.com/v4/shorten',
-      responseFromRequestPayload: payload => {
-        const domain = payload.domain;
-        const longUrl = payload.long_url;
-
+      endpointUrl: 'https://api.profiler.firefox.com/shorten',
+      responseFromRequestPayload: () => {
         return new Response(
           JSON.stringify({
-            long_url: longUrl,
-            link: `https://${domain}/${returnedHash}`,
-            id: `${domain}/${returnedHash}`,
-            // There are other things, but we're not really interested
+            shortUrl: `https://share.firefox.dev/${returnedHash}`,
           }),
           {
-            status: 201,
+            status: 200,
             headers: {
               'Content-Type': 'application/json',
             },
@@ -116,7 +108,7 @@ describe('shortenUrl', () => {
 
   it('calls the bitly API properly and returns the value', async () => {
     const bitlyHash = 'BITLYHASH';
-    const expectedShortUrl = `https://perfht.ml/${bitlyHash}`;
+    const expectedShortUrl = `https://share.firefox.dev/${bitlyHash}`;
     mockFetchWith(bitlyHash);
 
     const longUrl =
@@ -127,14 +119,14 @@ describe('shortenUrl', () => {
     expect(window.fetch).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        body: expect.stringContaining(`"long_url":"${longUrl}"`),
+        body: expect.stringContaining(`"longUrl":"${longUrl}"`),
       })
     );
   });
 
   it('changes the requested url if is not the main URL', async () => {
     const bitlyHash = 'BITLYHASH';
-    const expectedShortUrl = `https://perfht.ml/${bitlyHash}`;
+    const expectedShortUrl = `https://share.firefox.dev/${bitlyHash}`;
     const longUrl =
       'https://perf-html.io/public/FAKE_HASH/calltree/?thread=1&v=3';
     const expectedLongUrl = longUrl.replace(
@@ -149,7 +141,7 @@ describe('shortenUrl', () => {
     expect(window.fetch).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        body: expect.stringContaining(`"long_url":"${expectedLongUrl}"`),
+        body: expect.stringContaining(`"longUrl":"${expectedLongUrl}"`),
       })
     );
   });
@@ -158,17 +150,11 @@ describe('shortenUrl', () => {
 describe('expandUrl', () => {
   function mockFetchWith(returnedLongUrl) {
     mockFetchForBitly({
-      endpointUrl: 'https://api-ssl.bitly.com/v4/expand',
-      responseFromRequestPayload: payload => {
-        const bitlinkId = payload.bitlink_id;
-        const [domain, hash] = bitlinkId.split('/');
-
+      endpointUrl: 'https://api.profiler.firefox.com/expand',
+      responseFromRequestPayload: () => {
         return new Response(
           JSON.stringify({
-            long_url: returnedLongUrl,
-            link: `https://${domain}/${hash}`,
-            id: bitlinkId,
-            // There are other things, but we're not really interested
+            longUrl: returnedLongUrl,
           }),
           {
             status: 200,
@@ -182,8 +168,7 @@ describe('expandUrl', () => {
   }
 
   it('returns the long url returned by the API', async () => {
-    const bitlinkId = 'perfht.ml/BITLYHASH';
-    const shortUrl = 'https://' + bitlinkId;
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     const returnedLongUrl =
       'https://profiler.firefox.com/public/FAKE_HASH/calltree/?thread=1&v=3';
     mockFetchWith(returnedLongUrl);
@@ -193,7 +178,7 @@ describe('expandUrl', () => {
     expect(window.fetch).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        body: expect.stringContaining(`"bitlink_id":"${bitlinkId}"`),
+        body: expect.stringContaining(`"shortUrl":"${shortUrl}"`),
       })
     );
   });
@@ -206,7 +191,7 @@ describe('expandUrl', () => {
         })
     );
 
-    const shortUrl = 'https://perfht.ml/BITLYHASH';
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 
@@ -218,7 +203,7 @@ describe('expandUrl', () => {
         })
     );
 
-    const shortUrl = 'https://perfht.ml/BITLYHASH';
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 });
