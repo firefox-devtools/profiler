@@ -2202,6 +2202,60 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] = `
+<div
+  class="tooltipMarker propClass"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        —
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        PlayAudio
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Main Thread
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Sample start time
+      :
+    </div>
+    3,632,654,500μs
+    <div
+      class="tooltipLabel"
+    >
+      Sample end time
+      :
+    </div>
+    3,632,674,500μs
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.9 1`] = `
 <div
   class="tooltipMarker propClass"

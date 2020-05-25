@@ -4,6 +4,13 @@
 // @flow
 import { oneLine } from 'common-tags';
 
+// This is the server we use to publish new profiles.
+const PUBLISHING_ENDPOINT = 'https://api.profiler.firefox.com/compressed-store';
+// Uncomment the following endpoint instead to use your local server.
+//const PUBLISHING_ENDPOINT = 'http://localhost:5252/compressed-store';
+
+const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
+
 export function uploadBinaryProfileData(): * {
   const xhr = new XMLHttpRequest();
   let isAborted = false;
@@ -24,35 +31,43 @@ export function uploadBinaryProfileData(): * {
         }
 
         xhr.onload = () => {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(
-              new Error(
-                `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
-              )
-            );
+          switch (xhr.status) {
+            case 413:
+              reject(
+                new Error(
+                  oneLine`
+                    The profile size is too large.
+                    You can try enabling some of the privacy features to trim its size down.
+                  `
+                )
+              );
+              break;
+            default:
+              if (xhr.status >= 200 && xhr.status <= 299) {
+                // Success!
+                resolve(xhr.responseText);
+              } else {
+                reject(
+                  new Error(
+                    `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
+                  )
+                );
+              }
           }
         };
 
         xhr.onerror = () => {
           console.error(
-            'There was an XHR error in uploadBinaryProfileData()',
+            'There was an XHR network error in uploadBinaryProfileData()',
             xhr
           );
-          reject(
-            new Error(
-              // The profile store does not give useful responses.
-              // See: https://github.com/firefox-devtools/profiler/issues/998
-              xhr.statusText
-                ? oneLine`
-                    There was an issue uploading the profile to the server. This is often
-                    caused by the profile file size being too large. The error
-                    response was: ${xhr.statusText}
-                  `
-                : 'Unable to make a connection to publish the profile.'
-            )
-          );
+
+          let errorMessage =
+            'Unable to make a connection to publish the profile.';
+          if (xhr.statusText) {
+            errorMessage += ` The error response was: ${xhr.statusText}`;
+          }
+          reject(new Error(errorMessage));
         };
 
         xhr.upload.onprogress = e => {
@@ -61,7 +76,8 @@ export function uploadBinaryProfileData(): * {
           }
         };
 
-        xhr.open('POST', 'https://profile-store.appspot.com/compressed-store');
+        xhr.open('POST', PUBLISHING_ENDPOINT);
+        xhr.setRequestHeader('Accept', ACCEPT_HEADER_VALUE);
         xhr.send(data);
       }),
   };

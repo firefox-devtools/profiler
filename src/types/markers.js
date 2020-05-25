@@ -578,6 +578,12 @@ export type IPCMarkerPayload = {|
   sync: boolean,
 |};
 
+export type MediaSampleMarkerPayload = {|
+  type: 'MediaSample',
+  sampleStartTimeUs: Microseconds,
+  sampleEndTimeUs: Microseconds,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -611,6 +617,7 @@ export type MarkerPayload =
   | ChromeCompleteTraceEventPayload
   | ChromeDurationTraceEventPayload
   | ChromeInstantTraceEventPayload
+  | MediaSampleMarkerPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -634,6 +641,7 @@ export type MarkerPayload_Gecko =
   | NativeAllocationPayload_Gecko
   | PrefMarkerPayload
   | IPCMarkerPayload
+  | MediaSampleMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
