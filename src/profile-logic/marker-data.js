@@ -122,11 +122,12 @@ export function getSearchFilteredMarkerIndexes(
       }
 
       if (data.type === 'FileIO') {
-        const { filename, operation, source } = data;
+        const { filename, operation, source, threadId } = data;
         if (
           searchRegExp.test(filename) ||
           searchRegExp.test(operation) ||
-          searchRegExp.test(source)
+          searchRegExp.test(source) ||
+          (threadId !== undefined && searchRegExp.test(threadId.toString()))
         ) {
           newMarkers.push(markerIndex);
           continue;
@@ -1157,6 +1158,23 @@ export function isNavigationMarker({ name, data }: Marker) {
 
 export function isFileIoMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'FileIO');
+}
+
+/**
+ * Returns true if the marker is an on-thread FileIO marker.
+ * The FileIO markers can be either on-thread or off-thread. If the FileIO marker
+ * has a threadId, that means the marker does not belong to that thread but rather
+ * belongs to the thread with the given threadId, which is off-thread.
+ * We don't want to display the off-thread markers in some parts of the UI because
+ * they bring a lot of noise.
+ */
+export function isOnThreadFileIoMarker(marker: Marker): boolean {
+  return !!(
+    marker.data &&
+    marker.data.type === 'FileIO' &&
+    // If thread ID isn't there, that means this FileIO marker belongs to that thread.
+    typeof marker.data.threadId === 'undefined'
+  );
 }
 
 export function isMemoryMarker(marker: Marker): boolean {

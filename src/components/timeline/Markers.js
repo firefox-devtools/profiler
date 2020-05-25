@@ -539,7 +539,7 @@ export const TimelineMarkersFileIo = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
-      markerIndexes: selectors.getFileIoMarkerIndexes(state),
+      markerIndexes: selectors.getFileIoMarkerIndexesForHeader(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',

@@ -252,7 +252,7 @@ describe('timeline/TrackThread', function() {
     expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
   });
 
-  it('adds disk io markers if they are present', function() {
+  it('adds file io markers if they are present', function() {
     const fileIoMarker = [
       [
         'FileIO',
@@ -269,5 +269,25 @@ describe('timeline/TrackThread', function() {
     ];
     const { getByTestId } = setup(getMarkersProfile(fileIoMarker));
     expect(getByTestId('TimelineMarkersFileIo')).toBeTruthy();
+  });
+
+  it('does not add off-thread file io markers even if they are present', function() {
+    const fileIoMarker = [
+      [
+        'FileIO',
+        2,
+        ({
+          type: 'FileIO',
+          startTime: 2,
+          endTime: 3,
+          source: 'PoisionOIInterposer',
+          filename: '/foo/bar/',
+          operation: 'read/write',
+          threadId: 123,
+        }: FileIoPayload),
+      ],
+    ];
+    const { queryByTestId } = setup(getMarkersProfile(fileIoMarker));
+    expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
   });
 });

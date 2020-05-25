@@ -359,6 +359,23 @@ describe('TooltipMarker', function() {
         },
       ],
       [
+        'FileIO (non-main thread)',
+        114.5,
+        {
+          type: 'FileIO',
+          startTime: 114,
+          endTime: 115,
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+          threadId: 123,
+        },
+      ],
+      [
         'IPC',
         120,
         {

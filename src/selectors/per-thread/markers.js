@@ -383,12 +383,15 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
-   * This returns only FileIO markers.
+   * This returns only FileIO markers for the header.
+   * Also excludes FileIO markers that belong to other threads.
    */
-  const getFileIoMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getFileIoMarkerIndexesForHeader: Selector<
+    MarkerIndex[]
+  > = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isFileIoMarker)
+    filterMarkerIndexesCreator(MarkerData.isOnThreadFileIoMarker)
   );
 
   /**
@@ -498,7 +501,7 @@ export function getMarkerSelectorsPerThread(
     getCommittedRangeAndTabFilteredMarkerIndexesForHeader,
     getActiveTabFilteredMarkerIndexesWithoutGlobals,
     getTimelineVerticalMarkerIndexes,
-    getFileIoMarkerIndexes,
+    getFileIoMarkerIndexesForHeader,
     getMemoryMarkerIndexes,
     getIPCMarkerIndexes,
     getNetworkTrackTiming,
