@@ -1145,7 +1145,11 @@ function getProfileUrlForHash(hash: string): string {
   // is not documented nowadays.
   // By convention, "profile-store" is the name of our bucket, and the file path
   // is the hash we receive in the URL.
+
   return `https://storage.googleapis.com/profile-store/${hash}`;
+
+  // Use the following return value to use the development bucket instead.
+  //return `https://storage.googleapis.com/profile-store-julien-dev/${hash}`;
 }
 
 export function retrieveProfileFromStore(
