@@ -85,7 +85,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             class="treeViewBodyInner treeViewBodyInner0InnerChunk"
           >
             <div
-              class="networkChartRowItem network-color-other"
+              class="networkChartRowItem network-color-html"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -120,7 +120,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other odd"
+              class="networkChartRowItem network-color-html odd"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -155,7 +155,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other"
+              class="networkChartRowItem network-color-html"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -190,7 +190,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other odd"
+              class="networkChartRowItem network-color-html odd"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -225,7 +225,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other"
+              class="networkChartRowItem network-color-html"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -260,7 +260,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other odd"
+              class="networkChartRowItem network-color-html odd"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -295,7 +295,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other"
+              class="networkChartRowItem network-color-html"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -330,7 +330,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other odd"
+              class="networkChartRowItem network-color-html odd"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -365,7 +365,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other"
+              class="networkChartRowItem network-color-html"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -400,7 +400,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
-              class="networkChartRowItem network-color-other odd"
+              class="networkChartRowItem network-color-html odd"
             >
               <div
                 class="networkChartRowItemLabel"

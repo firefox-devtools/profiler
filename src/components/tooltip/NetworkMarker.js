@@ -351,7 +351,13 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
 
   render() {
     const { payload } = this.props;
-    const mimeType = guessMimeTypeFromNetworkMarker(payload);
+    let mimeType = payload.contentType;
+    let mimeTypeLabel = 'MIME type';
+    if (mimeType === undefined || mimeType === null) {
+      mimeType = guessMimeTypeFromNetworkMarker(payload);
+      mimeTypeLabel = 'Guessed MIME type';
+    }
+
     const markerColorClass = getColorClassNameForMimeType(mimeType);
     return (
       <>
@@ -372,7 +378,7 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
             {_getHumanReadablePriority(payload.pri)}
           </TooltipDetail>
           {mimeType ? (
-            <TooltipDetail label="Guessed MIME type">
+            <TooltipDetail label={mimeTypeLabel}>
               <div className="tooltipNetworkMimeType">
                 <span
                   className={`tooltipNetworkMimeTypeSwatch colored-square ${markerColorClass}`}

@@ -429,7 +429,11 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
   _getClassNameTypeForMarker() {
     const { networkPayload } = this.props;
-    const mimeType = guessMimeTypeFromNetworkMarker(networkPayload);
+    const mimeType =
+      networkPayload.contentType === undefined ||
+      networkPayload.contentType === null
+        ? guessMimeTypeFromNetworkMarker(networkPayload)
+        : networkPayload.contentType;
     return getColorClassNameForMimeType(mimeType);
   }
 
