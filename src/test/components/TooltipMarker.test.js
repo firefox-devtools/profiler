@@ -387,6 +387,15 @@ describe('TooltipMarker', function() {
           prefValue: '-1',
         },
       ],
+      [
+        'PlayAudio',
+        115,
+        {
+          type: 'MediaSample',
+          sampleStartTimeUs: 3632654500,
+          sampleEndTimeUs: 3632674500,
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();

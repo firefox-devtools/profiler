@@ -559,9 +559,12 @@ export function deriveMarkersFromRawMarkerTable(
             });
           }
         } else {
-          console.error(
-            `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
-          );
+          if (data.interval !== undefined) {
+            // Undefined values are valid, but others are unexpected.
+            console.error(
+              `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
+            );
+          }
           matchedMarkers.push({
             start: time,
             dur: 0,
@@ -910,9 +913,12 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
             }
           }
         } else {
-          console.error(
-            `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
-          );
+          if (data.interval !== undefined) {
+            // Undefined  values are valid, but others are unexpected.
+            console.error(
+              `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
+            );
+          }
           if (isTimeInRange(time)) {
             yield i;
           }

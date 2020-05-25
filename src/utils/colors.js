@@ -8,7 +8,7 @@
  * please change the CSS variables as well.
  *
  * Firefox Colors v1.0.3
- * https://github.com/FirefoxUX/design-tokens/tree/master/colors
+ * https://github.com/FirefoxUX/photon-colors/blob/master/photon-colors.js
  */
 
 export const MAGENTA_50 = '#ff1ad9';
@@ -87,7 +87,7 @@ type ColorStyles = {|
  * that already have their category colors saved into the profile.
  *
  * Category color names come from:
- * https://searchfox.org/mozilla-central/rev/0b8ed772d24605d7cb44c1af6d59e4ca023bd5f5/tools/profiler/core/platform.cpp#1593-1627
+ * https://searchfox.org/mozilla-central/rev/9193635dca8cfdcb68f114306194ffc860456044/js/public/ProfilingCategory.h#33
  */
 export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
   switch (colorName) {
@@ -140,7 +140,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: GREY_30,
         unselectedFillStyle: GREY_30 + '60',
         selectedTextColor: '#000',
-        gravity: 8,
+        gravity: 9,
       };
     case 'blue':
       return {
@@ -156,6 +156,13 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#fff',
         gravity: 7,
       };
+    case 'lightgreen':
+      return {
+        selectedFillStyle: GREEN_50,
+        unselectedFillStyle: GREEN_50 + '60',
+        selectedTextColor: '#fff',
+        gravity: 8,
+      };
     default:
       console.error(
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
@@ -164,7 +171,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: GREY_30,
         unselectedFillStyle: GREY_30 + '60',
         selectedTextColor: '#000',
-        gravity: 8,
+        gravity: 9,
       };
   }
 }

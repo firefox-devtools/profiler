@@ -167,7 +167,8 @@ class TimelineTrackThread extends PureComponent<Props> {
     const displayMarkers =
       (filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
-        filteredThread.name === 'Renderer') &&
+        filteredThread.name === 'Renderer' ||
+        filteredThread.name.startsWith('MediaDecoderStateMachine')) &&
       processType !== 'plugin';
 
     return (
