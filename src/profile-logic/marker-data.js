@@ -1333,9 +1333,7 @@ export function getMarkerFullDescription(marker: Marker) {
         break;
       case 'FileIO':
         if (data.source) {
-          const threadId =
-            data.threadId !== undefined ? `/TID: ${data.threadId}` : '';
-          description = `(${data.source}${threadId}) `;
+          description = `(${data.source}) `;
         }
         description += data.operation;
         if (data.filename) {
