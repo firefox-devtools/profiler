@@ -49,25 +49,30 @@
   flex-direction: column;
 }
 
-.timelineTrackResourceRow .timelineTrackThreadMarkers {
-  width: 100%;
-}
-
 .timelineTrackResourceRow .threadActivityGraph,
 .timelineTrackResourceRow .timelineMarkers {
   transition: height 0.2s;
 }
 
+/* Set the marker height of the closed resources to 3px */
 .timelineTrackResourceRow:not(.opened) .timelineMarkers {
   height: 3px;
 }
 
+/**
+ * Double the marker height of markers when they are open, except the main marker
+ * row, because it should be heigher (it's set by the full timeline css).
+ */
 .timelineTrackResourceRow.opened
   .timelineMarkers:not(.timelineMarkersGeckoMain)
   canvas {
   height: 6px;
 }
 
+/**
+ * This is the main markers section. Since it has additional marker rows,
+ * we need to set it a heigher value.
+ */
 .timelineTrackResourceRow .timelineMarkersGeckoMain {
   height: 9px;
 }
@@ -77,8 +82,6 @@
 }
 
 .timelineTrackResourceLabel {
-  z-index: 3;
-  top: 0;
   overflow: hidden;
   max-width: calc(100% - 55px);
   padding: 0 5px 0 30px;

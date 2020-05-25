@@ -237,7 +237,10 @@ describe('ActiveTabTimeline', function() {
       const { profile, ...pageInfo } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
       );
-      // Setting the first thread as parent track, the second and third as the iframe tracks.
+      // Setting the threads with the following relationship:
+      // Page #1 (thread #0)
+      // |- Page #2 (thread #1)
+      //    |- Page #3 (thread #2)
       const threadIndex = 2;
       profile.threads[0].frameTable.innerWindowID[0] =
         pageInfo.parentInnerWindowIDsWithChildren;
