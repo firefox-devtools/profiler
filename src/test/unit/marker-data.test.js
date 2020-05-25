@@ -163,7 +163,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
     });
   });
-  it('should handle arbitrary event markers correctly', function() {
+  it('should handle arbitrary tracing markers correctly', function() {
     const { markers } = setup();
     expect(markers[9]).toMatchObject({
       start: 21,
@@ -172,9 +172,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
     });
-    // Such a marker is unexpected, so we output an error to the console in this
-    // case.
-    expect(console.error).toHaveBeenCalled();
   });
 
   // Note that the network markers are also extensively tested below in the part
@@ -418,8 +415,8 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters tracing markers', () => {
-    // Note: these tracing markers define the same set of markers as in the
-    // previous test.
+    // Note: these tracing markers define mostly the same set of markers as in the
+    // previous test. Only the marker without an interval value has been added.
     const markers = [
       ['0', 0, { type: 'tracing', interval: 'start' }],
       ['1', 1, { type: 'tracing', interval: 'start' }],
@@ -431,6 +428,7 @@ describe('filterRawMarkerTableToRange', () => {
       ['0', 4, { type: 'tracing', interval: 'end' }],
       ['5', 5, { type: 'tracing', interval: 'start' }],
       ['5', 5, { type: 'tracing', interval: 'end' }],
+      ['5.5', 5.5, { type: 'tracing' }], // No interval value
       ['6', 6, { type: 'tracing', interval: 'start' }],
       ['4', 6, { type: 'tracing', interval: 'end' }],
       ['7', 7, { type: 'tracing', interval: 'start' }],
@@ -463,6 +461,7 @@ describe('filterRawMarkerTableToRange', () => {
       '3',
       '4',
       '5',
+      '5.5',
     ]);
   });
 

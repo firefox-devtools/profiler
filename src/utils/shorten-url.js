@@ -4,7 +4,9 @@
 
 // @flow
 
-const accessToken = 'b177b00a130faf3ecda6960e8b59fde73e902422';
+const SERVER_HOST = 'https://api.profiler.firefox.com';
+const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
+
 export async function shortenUrl(urlToShorten: string): Promise<string> {
   let longUrl = urlToShorten;
   if (!longUrl.startsWith('https://profiler.firefox.com/')) {
@@ -15,16 +17,15 @@ export async function shortenUrl(urlToShorten: string): Promise<string> {
     longUrl = parsedUrl.toString();
   }
 
-  const bitlyQueryUrl = 'https://api-ssl.bitly.com/v4/shorten';
+  const ENDPOINT = `${SERVER_HOST}/shorten`;
   const payload = {
-    long_url: longUrl,
-    domain: 'perfht.ml',
+    longUrl,
   };
 
-  const response = await fetch(bitlyQueryUrl, {
+  const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Accept: ACCEPT_HEADER_VALUE,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -37,18 +38,18 @@ export async function shortenUrl(urlToShorten: string): Promise<string> {
   }
 
   const json = await response.json();
-  return json.link;
+  return json.shortUrl;
 }
 
-export async function expandUrl(urlToExpand: string): Promise<string> {
-  const bitlyQueryUrl = 'https://api-ssl.bitly.com/v4/expand';
+export async function expandUrl(shortUrl: string): Promise<string> {
+  const ENDPOINT = `${SERVER_HOST}/expand`;
   const payload = {
-    bitlink_id: urlToExpand.replace(/^https:\/\//, ''),
+    shortUrl,
   };
-  const response = await fetch(bitlyQueryUrl, {
+  const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Accept: ACCEPT_HEADER_VALUE,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -56,10 +57,10 @@ export async function expandUrl(urlToExpand: string): Promise<string> {
 
   if (!response.ok) {
     throw new Error(
-      `An error happened while expanding the shortened url ${urlToExpand}: ${response.statusText} (${response.status})`
+      `An error happened while expanding the shortened url ${shortUrl}: ${response.statusText} (${response.status})`
     );
   }
 
   const json = await response.json();
-  return json.long_url;
+  return json.longUrl;
 }

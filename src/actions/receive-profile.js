@@ -1312,6 +1312,7 @@ export function retrieveProfilesToCompare(
         profileViewUrls.map(async url => {
           if (
             url.startsWith('https://perfht.ml/') ||
+            url.startsWith('https://share.firefox.dev/') ||
             url.startsWith('https://bit.ly/')
           ) {
             url = await expandUrl(url);
