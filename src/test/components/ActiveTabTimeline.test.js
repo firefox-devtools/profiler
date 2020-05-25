@@ -9,6 +9,7 @@ import ReactDOM from 'react-dom';
 import Timeline from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
+import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -189,8 +190,9 @@ describe('ActiveTabTimeline', function() {
         </Provider>
       );
 
-      const { getByText } = renderResult;
+      const { getByText, queryByText } = renderResult;
       const getResourcesPanelHeader = () => getByText(/Resources/);
+      const getResourceFrameTrack = () => queryByText(/Frame:/);
 
       return {
         ...renderResult,
@@ -200,34 +202,125 @@ describe('ActiveTabTimeline', function() {
         profile,
         store,
         getResourcesPanelHeader,
+        getResourceFrameTrack,
       };
     }
 
-    it('matches the snapshot of a resources panel', () => {
+    it('matches the snapshot of a resources panel when closed', () => {
       const { container } = setup();
       expect(container.firstChild).toMatchSnapshot();
     });
 
+    it('matches the snapshot of a resources panel when opened', () => {
+      const { container, getResourcesPanelHeader } = setup();
+      fireEvent.click(getResourcesPanelHeader());
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
     it('is closed by default', () => {
-      const { getResourcesPanelHeader } = setup();
-      // TODO: Currently it's not possible to test this without accessing the class
-      // directly but this is not ideal for testing. We should assert user-like actions
-      // instead when we have content in this panel.
-      expect(getResourcesPanelHeader().classList.contains('opened')).toBe(
-        false
-      );
+      const { getResourceFrameTrack } = setup();
+      expect(getResourceFrameTrack()).toBeFalsy();
     });
 
     it('clicking on the header opens the resources panel', () => {
-      const { getResourcesPanelHeader } = setup();
+      const { getResourcesPanelHeader, getResourceFrameTrack } = setup();
       const resourcesPanelHeader = getResourcesPanelHeader();
-      // TODO: Currently it's not possible to test this without accessing the class
-      // directly but this is not ideal for testing. We should assert user-like actions
-      // instead when we have content in this panel.
-      expect(resourcesPanelHeader.classList.contains('opened')).toBe(false);
+      expect(getResourceFrameTrack()).toBeFalsy();
 
       fireEvent.click(resourcesPanelHeader);
-      expect(resourcesPanelHeader.classList.contains('opened')).toBe(true);
+      expect(getResourceFrameTrack()).toBeTruthy();
+    });
+  });
+
+  describe('ActiveTabResourceTrack', function() {
+    function setup() {
+      const { profile, ...pageInfo } = addActiveTabInformationToProfile(
+        getProfileWithNiceTracks()
+      );
+      // Setting the threads with the following relationship:
+      // Page #1 (thread #0)
+      // |- Page #2 (thread #1)
+      //    |- Page #3 (thread #2)
+      const threadIndex = 2;
+      profile.threads[0].frameTable.innerWindowID[0] =
+        pageInfo.parentInnerWindowIDsWithChildren;
+      profile.threads[1].frameTable.innerWindowID[0] =
+        pageInfo.iframeInnerWindowIDsWithChild;
+      profile.threads[threadIndex].frameTable.innerWindowID[0] =
+        pageInfo.fistTabInnerWindowIDs[2];
+      profile.threads[threadIndex].name = 'GeckoMain';
+      const store = storeWithProfile(profile);
+      store.dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: pageInfo.firstTabBrowsingContextID,
+        })
+      );
+      const { getState, dispatch } = store;
+      const resourceTracks = getActiveTabResourceTracks(getState());
+      const trackIndex = 1;
+      const renderResult = render(
+        <Provider store={store}>
+          <ActiveTabResourceTrack
+            resourceTrack={resourceTracks[1]}
+            trackIndex={trackIndex}
+            setIsInitialSelectedPane={() => {}}
+          />
+        </Provider>
+      );
+
+      const { getByText, container } = renderResult;
+      const resourcePage = ensureExists(profile.pages)[2];
+      const getResourceFrameTrackLabel = () => getByText(resourcePage.url);
+      const getResourceTrackRow = () =>
+        ensureExists(
+          container.querySelector('.timelineTrackResourceRow'),
+          `Couldn't find the track resource row with selector .timelineTrackResourceRow`
+        );
+
+      return {
+        ...renderResult,
+        ...pageInfo,
+        dispatch,
+        getState,
+        profile,
+        store,
+        threadIndex,
+        getResourceFrameTrackLabel,
+        getResourceTrackRow,
+        resourcePage,
+      };
+    }
+
+    describe('with a thread/sub-frame track', function() {
+      it('matches the snapshot of a resource track', () => {
+        const { container } = setup();
+        expect(container.firstChild).toMatchSnapshot();
+      });
+
+      it('has the correct track name', function() {
+        const { queryByText, resourcePage } = setup();
+        expect(queryByText(resourcePage.url)).toBeTruthy();
+      });
+
+      it('starts out not being selected', function() {
+        const { getState, threadIndex } = setup();
+        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      });
+
+      it('can select a thread by clicking the label', () => {
+        const { getState, getResourceFrameTrackLabel, threadIndex } = setup();
+        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        fireEvent.mouseUp(getResourceFrameTrackLabel());
+        expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      });
+
+      it('can select a thread by clicking the row', () => {
+        const { getState, getResourceTrackRow, threadIndex } = setup();
+        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        fireEvent.mouseUp(getResourceTrackRow());
+        expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      });
     });
   });
 });

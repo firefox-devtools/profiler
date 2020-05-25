@@ -14,6 +14,7 @@ import {
   getGlobalTrackFromReference,
   getPreviewSelection,
   getActiveTabGlobalTrackFromReference,
+  getActiveTabResourceTrackFromReference,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -45,6 +46,7 @@ import type {
   TrackReference,
   TimelineType,
   DataSource,
+  ActiveTabTrackReference,
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
@@ -382,7 +384,7 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
  * track.
  */
 export function selectActiveTabTrack(
-  trackReference: TrackReference
+  trackReference: ActiveTabTrackReference
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const currentlySelectedTab = getSelectedTab(getState());
@@ -420,10 +422,31 @@ export function selectActiveTabTrack(
         }
         break;
       }
-      case 'local': {
-        // TODO: Implement resource clicking once we have resources.
-        // Also add ActiveTabTrackReference to ignore this 'local' track type.
-        return;
+      case 'resource': {
+        // Handle the case of resource tracks.
+        const resourceTrack = getActiveTabResourceTrackFromReference(
+          getState(),
+          trackReference
+        );
+
+        // Go through each type, and determine the selected slug and thread index.
+        switch (resourceTrack.type) {
+          case 'sub-frame':
+          case 'thread': {
+            selectedThreadIndex = resourceTrack.threadIndex;
+            // Ensure a relevant thread-based tab is used.
+            if (selectedTab === 'network-chart') {
+              selectedTab = getLastVisibleThreadTabSlug(getState());
+            }
+            break;
+          }
+          default:
+            throw assertExhaustiveCheck(
+              resourceTrack,
+              `Unhandled ActiveTabResourceTrack type.`
+            );
+        }
+        break;
       }
       default:
         throw assertExhaustiveCheck(

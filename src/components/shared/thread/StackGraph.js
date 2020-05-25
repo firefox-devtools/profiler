@@ -231,6 +231,7 @@ class StackGraph extends PureComponent<Props> {
         return;
       }
 
+      e.stopPropagation();
       this.props.onSampleClick(sampleIndex);
     }
   };

@@ -11,13 +11,14 @@ import { withSize } from '../shared/WithSize';
 import { getIsActiveTabResourcesPanelOpen } from '../../selectors/url-state';
 import { toggleResourcesPanel } from '../../actions/app';
 import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from '../../app-logic/constants';
+import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
 
 import type { SizeProps } from '../shared/WithSize';
-import type { LocalTrack } from '../../types/profile-derived';
+import type { ActiveTabResourceTrack } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
-  +resourceTracks: LocalTrack[],
+  +resourceTracks: ActiveTabResourceTrack[],
   +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 
@@ -40,6 +41,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
       resourceTracks,
       toggleResourcesPanel,
       isActiveTabResourcesPanelOpen,
+      setIsInitialSelectedPane,
     } = this.props;
     return (
       <div
@@ -58,7 +60,14 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
         </div>
         {isActiveTabResourcesPanelOpen ? (
           <ol className="timelineResourceTracks">
-            {/* TODO: Add the Resource tracks here */}
+            {resourceTracks.map((resourceTrack, trackIndex) => (
+              <ActiveTabTimelineResourceTrack
+                key={trackIndex}
+                resourceTrack={resourceTrack}
+                trackIndex={trackIndex}
+                setIsInitialSelectedPane={setIsInitialSelectedPane}
+              />
+            ))}
           </ol>
         ) : null}
       </div>

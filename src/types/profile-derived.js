@@ -258,8 +258,19 @@ export type ActiveTabGlobalTrack =
   | {| +type: 'tab', +threadIndex: ThreadIndex |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
 
-// TODO: add resource track type
-export type ActiveTabTrack = ActiveTabGlobalTrack;
+export type ActiveTabResourceTrack =
+  | {|
+      +type: 'sub-frame',
+      +threadIndex: ThreadIndex,
+      +name: string,
+    |}
+  | {|
+      +type: 'thread',
+      +threadIndex: ThreadIndex,
+      +name: string,
+    |};
+
+export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 
 /**
  * Type that holds the values of personally identifiable information that user

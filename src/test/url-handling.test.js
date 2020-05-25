@@ -454,7 +454,8 @@ describe('showTabOnly', function() {
     const resourceTracks = getActiveTabResourceTracks(getState());
     expect(resourceTracks).toEqual([
       {
-        type: 'thread',
+        name: 'Page #2',
+        type: 'sub-frame',
         threadIndex: 1,
       },
     ]);

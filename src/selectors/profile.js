@@ -43,6 +43,7 @@ import type {
   ProfileFilterPageData,
   ActiveTabGlobalTrack,
   OriginsTimeline,
+  ActiveTabResourceTrack,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -51,6 +52,8 @@ import type {
   TrackReference,
   PreviewSelection,
   HiddenTrackCount,
+  ActiveTabGlobalTrackReference,
+  ActiveTabResourceTrackReference,
 } from '../types/actions';
 import type { Selector, DangerousSelectorWithArguments } from '../types/store';
 import type {
@@ -435,8 +438,9 @@ export const getActiveTabGlobalTracks: Selector<
 /**
  * Returns resource tracks for the active tab view.
  */
-export const getActiveTabResourceTracks: Selector<LocalTrack[]> = state =>
-  getActiveTabProfileView(state).resourceTracks;
+export const getActiveTabResourceTracks: Selector<
+  ActiveTabResourceTrack[]
+> = state => getActiveTabProfileView(state).resourceTracks;
 
 /**
  * This returns all TrackReferences for global tracks.
@@ -456,9 +460,19 @@ export const getActiveTabGlobalTrackReferences: Selector<
  */
 export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArguments<
   ActiveTabGlobalTrack,
-  GlobalTrackReference
+  ActiveTabGlobalTrackReference
 > = (state, trackReference) =>
   getActiveTabGlobalTracks(state)[trackReference.trackIndex];
+
+/**
+ * This finds an ActiveTabResourceTrack from its TrackReference. No memoization is needed
+ * as this is a simple value look-up.
+ */
+export const getActiveTabResourceTrackFromReference: DangerousSelectorWithArguments<
+  ActiveTabResourceTrack,
+  ActiveTabResourceTrackReference
+> = (state, trackReference) =>
+  getActiveTabResourceTracks(state)[trackReference.trackIndex];
 
 /**
  * Origins profile view selectors.
