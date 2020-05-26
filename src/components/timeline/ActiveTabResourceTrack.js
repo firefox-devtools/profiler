@@ -25,7 +25,6 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +resourceTrack: ActiveTabResourceTrack,
   +trackIndex: TrackIndex,
-  +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 
 type StateProps = {|
@@ -90,13 +89,6 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
       default:
         console.error('Unhandled resourceTrack type', (resourceTrack: empty));
         return null;
-    }
-  }
-
-  componentDidMount() {
-    const { isSelected } = this.props;
-    if (isSelected) {
-      this.props.setIsInitialSelectedPane(true);
     }
   }
 
