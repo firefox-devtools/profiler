@@ -14,11 +14,15 @@ import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from '../../app-logic/con
 import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
 
 import type { SizeProps } from '../shared/WithSize';
-import type { ActiveTabResourceTrack } from '../../types/profile-derived';
+import type {
+  ActiveTabResourceTrack,
+  InitialSelectedTrackReference,
+} from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +resourceTracks: ActiveTabResourceTrack[],
+  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
 type StateProps = {|
@@ -40,6 +44,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
       resourceTracks,
       toggleResourcesPanel,
       isActiveTabResourcesPanelOpen,
+      setInitialSelected,
     } = this.props;
     return (
       <div
@@ -63,6 +68,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
                 key={trackIndex}
                 resourceTrack={resourceTrack}
                 trackIndex={trackIndex}
+                setInitialSelected={setInitialSelected}
               />
             ))}
           </ol>

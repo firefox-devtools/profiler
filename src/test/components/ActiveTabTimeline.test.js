@@ -185,7 +185,10 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourcesPanel resourceTracks={resourceTracks} />
+          <ActiveTabResourcesPanel
+            resourceTracks={resourceTracks}
+            setInitialSelected={() => {}}
+          />
         </Provider>
       );
 
@@ -289,6 +292,7 @@ describe('ActiveTabTimeline', function() {
           <ActiveTabResourceTrack
             resourceTrack={resourceTracks[1]}
             trackIndex={trackIndex}
+            setInitialSelected={() => {}}
           />
         </Provider>
       );
