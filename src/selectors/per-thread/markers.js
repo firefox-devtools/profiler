@@ -413,10 +413,18 @@ export function getMarkerSelectorsPerThread(
   /**
    * This returns only memory markers.
    */
-  const getMemoryMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getMemoryMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isMemoryMarker)
+    ProfileSelectors.getTimelineMemoryMarkerTypes,
+    (getMarker, markerIndexes, timelineMemoryMarkerTypes) =>
+      MarkerData.filterMarkerByTypes(
+        getMarker,
+        markerIndexes,
+        timelineMemoryMarkerTypes
+      )
   );
 
   /**
