@@ -93,12 +93,17 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
   }
 
   renderResourcesPanel() {
-    const { resourceTracks } = this.props;
+    const { resourceTracks, setInitialSelected } = this.props;
     if (resourceTracks.length === 0) {
       return null;
     }
 
-    return <ActiveTabResourcesPanel resourceTracks={resourceTracks} />;
+    return (
+      <ActiveTabResourcesPanel
+        resourceTracks={resourceTracks}
+        setInitialSelected={setInitialSelected}
+      />
+    );
   }
 
   _takeContainerRef = (el: HTMLElement | null) => {
