@@ -98,12 +98,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
       return null;
     }
 
-    return (
-      <ActiveTabResourcesPanel
-        resourceTracks={resourceTracks}
-        setIsInitialSelectedPane={this.setIsInitialSelectedPane}
-      />
-    );
+    return <ActiveTabResourcesPanel resourceTracks={resourceTracks} />;
   }
 
   _takeContainerRef = (el: HTMLElement | null) => {
@@ -111,12 +106,8 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     this._container = el;
 
     if (isSelected) {
-      this.setIsInitialSelectedPane(true);
+      this._isInitialSelectedPane = true;
     }
-  };
-
-  setIsInitialSelectedPane = (value: boolean) => {
-    this._isInitialSelectedPane = value;
   };
 
   componentDidMount() {

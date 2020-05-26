@@ -19,7 +19,6 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +resourceTracks: ActiveTabResourceTrack[],
-  +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 
 type StateProps = {|
@@ -41,7 +40,6 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
       resourceTracks,
       toggleResourcesPanel,
       isActiveTabResourcesPanelOpen,
-      setIsInitialSelectedPane,
     } = this.props;
     return (
       <div
@@ -65,7 +63,6 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
                 key={trackIndex}
                 resourceTrack={resourceTrack}
                 trackIndex={trackIndex}
-                setIsInitialSelectedPane={setIsInitialSelectedPane}
               />
             ))}
           </ol>
