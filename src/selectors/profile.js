@@ -727,3 +727,18 @@ export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> = 
   getRelevantInnerWindowIDsForCurrentTab,
   extractProfileFilterPageData
 );
+
+/**
+ * Get the map of Thread ID -> Thread Name for easy access.
+ */
+export const getThreadIdToNameMap: Selector<
+  Map<number, string>
+> = createSelector(getThreads, threads => {
+  const threadIdToNameMap = new Map();
+  for (const thread of threads) {
+    if (thread.tid !== undefined) {
+      threadIdToNameMap.set(thread.tid, thread.name);
+    }
+  }
+  return threadIdToNameMap;
+});

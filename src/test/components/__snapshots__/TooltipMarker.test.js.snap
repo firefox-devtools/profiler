@@ -1411,10 +1411,17 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-main th
       <div
         class="tooltipLabel"
       >
-        Thread
+        Recording Thread
         :
       </div>
       Main Thread
+      <div
+        class="tooltipLabel"
+      >
+        Occurring Thread ID
+        :
+      </div>
+      123
     </div>
   </div>
   <div
@@ -1434,13 +1441,6 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-main th
       :
     </div>
     PoisonIOInterposer
-    <div
-      class="tooltipLabel"
-    >
-      Thread ID
-      :
-    </div>
-    123
     <div
       class="tooltipLabel"
     >
