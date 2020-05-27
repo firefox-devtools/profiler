@@ -182,8 +182,17 @@ describe('sanitizePII', function() {
   it('should sanitize the pages information', function() {
     const profile = processProfile(createGeckoProfile());
 
+    // Checking to make sure that we have a http{,s} URI in the pages array.
+    let pageUrl = null;
     for (const page of ensureExists(profile.pages)) {
-      expect(page.url.includes('http')).toBe(true);
+      if (page.url.includes('http')) {
+        pageUrl = page.url;
+      }
+    }
+    expect(pageUrl).not.toBe(null);
+    if (pageUrl === null) {
+      // This makes flow happy when we need to use pageUrl next.
+      return;
     }
 
     const PIIToRemove = getRemoveProfileInformation({
@@ -192,8 +201,39 @@ describe('sanitizePII', function() {
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
     for (const page of ensureExists(sanitizedProfile.pages)) {
-      expect(page.url.includes('http')).toBe(false);
+      expect(page.url.includes(pageUrl)).toBe(false);
     }
+  });
+
+  it('should keep the chrome URIs inside the pages array', function() {
+    const profile = processProfile(createGeckoProfile());
+
+    // Checking to make sure that we have a chrome URI in the pages array.
+    let chromePageUrl = null;
+    for (const page of ensureExists(profile.pages)) {
+      if (page.url.includes('chrome://')) {
+        chromePageUrl = page.url;
+      }
+    }
+    expect(chromePageUrl).not.toBe(null);
+    if (chromePageUrl === null) {
+      // This makes flow happy when we need to use chromePageUrl next.
+      return;
+    }
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveUrls: true,
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+
+    let includesChromeUrl = false;
+    for (const page of ensureExists(sanitizedProfile.pages)) {
+      if (page.url.includes(chromePageUrl)) {
+        includesChromeUrl = true;
+        break;
+      }
+    }
+    expect(includesChromeUrl).toBe(true);
   });
 
   it('should sanitize all the URLs inside network markers', function() {

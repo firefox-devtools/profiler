@@ -91,6 +91,12 @@ export function createGeckoSubprocessProfile(
         url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
         embedderInnerWindowID: 0,
       },
+      {
+        browsingContextID: 111111,
+        innerWindowID: 2,
+        url: 'chrome://browser/content/browser.xhtml',
+        embedderInnerWindowID: 0,
+      },
     ],
     threads: [
       {
