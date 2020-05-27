@@ -48,15 +48,14 @@ export function sanitizePII(
   // Flow mistakenly thinks that PIIToBeRemoved could be null in the reduce functions
   // below, so instead re-bind it here.
   const PIIToBeRemoved = maybePIIToBeRemoved;
-  let urlCounter = 0;
   const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> = new Map();
 
   let pages;
   if (profile.pages) {
     if (PIIToBeRemoved.shouldRemoveUrls) {
-      pages = profile.pages.map(page =>
+      pages = profile.pages.map((page, pageIndex) =>
         Object.assign({}, page, {
-          url: 'Page #' + urlCounter++,
+          url: removeURLs(page.url, true, `<Page #${pageIndex}>`),
         })
       );
     } else {
