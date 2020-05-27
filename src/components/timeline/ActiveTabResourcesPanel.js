@@ -22,7 +22,10 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +resourceTracks: ActiveTabResourceTrack[],
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  +setInitialSelected: (
+    el: InitialSelectedTrackReference,
+    forceScroll?: boolean
+  ) => void,
 |};
 
 type StateProps = {|

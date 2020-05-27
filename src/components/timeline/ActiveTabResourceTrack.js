@@ -26,7 +26,10 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +resourceTrack: ActiveTabResourceTrack,
   +trackIndex: TrackIndex,
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  +setInitialSelected: (
+    el: InitialSelectedTrackReference,
+    forceScroll?: boolean
+  ) => void,
 |};
 
 type StateProps = {|
@@ -104,6 +107,19 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     if (this._isInitialSelectedPane && this._container !== null) {
       // Handle the scrolling of the initial selected track into view.
       this.props.setInitialSelected(this._container);
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { setInitialSelected } = this.props;
+
+    if (!prevState.isOpen && this.state.isOpen && this._container !== null) {
+      // Scroll to the expanded resource track after it's fully opened.
+      setTimeout(() => {
+        if (this._container !== null) {
+          setInitialSelected(this._container, true);
+        }
+      }, 200); // We need to wait for the transition.
     }
   }
 

@@ -35,7 +35,10 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  +setInitialSelected: (
+    el: InitialSelectedTrackReference,
+    forceScroll?: boolean
+  ) => void,
 |};
 
 type StateProps = {|
