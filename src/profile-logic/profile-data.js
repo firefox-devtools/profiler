@@ -48,6 +48,7 @@ import type {
   StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck } from '../utils/flow';
@@ -2501,4 +2502,55 @@ export function getOrCreateURIResource(
     resourceTable.type[resourceIndex] = resourceTypes.url;
   }
   return resourceIndex;
+}
+
+/**
+ * This function computes the traced timing for sample-based information. Samples
+ * don't have duration information associated with them, it's mostly how long they
+ * were observed to be running. This function computes the timing the exact same
+ * way that the stack chart will display the information, so that timing information
+ * will agree. In the past timing was computed by samplingInterval * sampleCount.
+ * This caused confusion when switching to the trace-based views when the numbers
+ * did not agree. In order to remove confusion, we can show the sample counts,
+ * plus the traced timing, which is a compromise between correctness, and consistency.
+ */
+export function computeTracedTiming(
+  samples: SamplesLikeTable,
+  samplingInterval: Milliseconds,
+  callNodeInfo: CallNodeInfo
+): TracedTiming | null {
+  if (samples.weightType && samples.weightType !== 'samples') {
+    // Only compute for the samples table.
+    return null;
+  }
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+
+  const timing = {
+    self: Array(callNodeTable.length).fill(0),
+    running: Array(callNodeTable.length).fill(0),
+  };
+
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
+      continue;
+    }
+
+    // Compute the timing delta, which is the time between this sample and the next.
+    // If it's the last sample, take the sampling interval.
+    const delta =
+      sampleIndex === samples.length - 1
+        ? samplingInterval
+        : samples.time[sampleIndex + 1] - samples.time[sampleIndex];
+
+    // Set the self time, then walk up the rest of the call node to compute the
+    // running time.
+    let callNodeIndex = stackIndexToCallNodeIndex[stack];
+    timing.self[callNodeIndex] += delta;
+    while (callNodeIndex !== -1) {
+      timing.running[callNodeIndex] += delta;
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+    }
+  }
+  return timing;
 }

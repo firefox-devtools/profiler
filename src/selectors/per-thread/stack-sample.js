@@ -29,6 +29,7 @@ import type {
   Selector,
   $ReturnType,
   CallTreeSummaryStrategy,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -253,6 +254,13 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
+  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
+    getSamplesForCallTree,
+    ProfileSelectors.getProfileInterval,
+    getCallNodeInfo,
+    ProfileData.computeTracedTiming
+  );
+
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
@@ -307,6 +315,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTreeSummaryStrategy,
     getCallTree,
+    getTracedTiming,
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,
