@@ -27,6 +27,7 @@ import type {
   CategoryList,
   CallNodeTable,
   IndexIntoCallNodeTable,
+  TracedTiming,
   Milliseconds,
   WeightType,
 } from 'firefox-profiler/types';
@@ -204,6 +205,7 @@ type StateProps = {|
   +timings: TimingsForPath,
   +categoryList: CategoryList,
   +weightType: WeightType,
+  +tracedTiming: TracedTiming | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -219,20 +221,20 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     switch (weightType) {
       case 'tracing-ms':
         return {
-          running: 'Running Time',
+          running: 'Running time',
           self: 'Self Time',
-          number: n => `${formatMilliseconds(n, 3, 1)}ms`,
+          number: n => formatMilliseconds(n, 3, 1),
         };
       case 'samples':
         return {
-          running: 'Running Total',
+          running: 'Running total',
           self: 'Self Total',
           // TODO - L10n the plurals
           number: n => (n === 1 ? '1 sample' : `${formatNumber(n, 0)} samples`),
         };
       case 'bytes':
         return {
-          running: 'Running Size',
+          running: 'Running size',
           self: 'Self Size',
           number: n => formatBytes(n),
         };
@@ -249,6 +251,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       timings,
       categoryList,
       weightType,
+      tracedTiming,
     } = this.props;
     const {
       forPath: { selfTime, totalTime },
@@ -292,7 +295,26 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             ) : null}
           </header>
-          <h3 className="sidebar-title2">This selected call node</h3>
+          {tracedTiming ? (
+            <SidebarDetail label="Traced running time">
+              {formatMilliseconds(
+                tracedTiming.running[selectedNodeIndex],
+                3,
+                1
+              )}
+            </SidebarDetail>
+          ) : null}
+          {tracedTiming ? (
+            <SidebarDetail label="Traced self time">
+              {tracedTiming.self[selectedNodeIndex] === 0
+                ? '—'
+                : formatMilliseconds(
+                    tracedTiming.self[selectedNodeIndex],
+                    3,
+                    1
+                  )}
+            </SidebarDetail>
+          ) : null}
           <SidebarDetail label={running}>
             {totalTime.value
               ? `${number(totalTime.value)} (${totalTimePercent}%)`
@@ -382,6 +404,7 @@ export default explicitConnect<{||}, StateProps, {||}>({
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
     categoryList: getCategories(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
   }),
   component: CallTreeSidebar,
 });

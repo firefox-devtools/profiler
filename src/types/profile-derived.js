@@ -324,3 +324,12 @@ export type ProfileFilterPageData = {|
   hostname: string,
   favicon: string,
 |};
+
+/**
+ * This is the timing of the samples when interpreted as traced data, not sample
+ * counts.
+ */
+export type TracedTiming = {|
+  self: Milliseconds[],
+  running: Milliseconds[],
+|};

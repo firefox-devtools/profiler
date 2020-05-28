@@ -3262,3 +3262,52 @@ describe('pages and active tab selectors', function() {
     ).toEqual(new Set());
   });
 });
+
+describe('traced timing', function() {
+  it('computes traced timing', function() {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  C
+         B
+    `);
+    const [{ samples }] = profile.threads;
+    profile.meta.interval = 0.5;
+    samples.time[0] = 0; // A
+    samples.time[1] = 1; // A B
+    samples.time[2] = 5; // A
+    samples.time[3] = 6; // C
+    const stack_A = 0;
+    const stack_AB = 1;
+    const stack_C = 2;
+
+    const { getState } = storeWithProfile(profile);
+    const { running, self } = ensureExists(
+      selectedThreadSelectors.getTracedTiming(getState()),
+      'Expected to get a traced timing.'
+    );
+
+    expect(running[stack_A]).toBe(6);
+    expect(self[stack_A]).toBe(2);
+
+    expect(running[stack_AB]).toBe(4);
+    expect(self[stack_AB]).toBe(4);
+
+    // This is the last sample, which is deduced to be the interval length.
+    expect(running[stack_C]).toBe(profile.meta.interval);
+    expect(self[stack_C]).toBe(profile.meta.interval);
+  });
+
+  it('does not compute traced timing for other types', function() {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  C
+         B
+    `);
+
+    // Create a weighted samples table.
+    const [{ samples }] = profile.threads;
+    samples.weightType = 'tracing-ms';
+    samples.weight = samples.time.map(() => 1);
+
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+});
