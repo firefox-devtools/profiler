@@ -9,17 +9,52 @@ import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
 // Provide different formatting options for strings.
 export type MarkerFormatType =
-  | 'string' // "Label: Some String"
-  | 'bytes' // "Label: 5mb"
+  // ----------------------------------------------------
+  // String types.
+
+  // Show the URL, and handle PII sanitization.
+  | 'url'
+  // Show the file path, and handle PII sanitization.
+  | 'file-path'
+  // Important, do not put URL or file path information here, as it will not be
+  // sanitized. Please be careful with including other types of PII here as well.
+  // e.g. "Label: Some String"
+  | 'string'
+
+  // ----------------------------------------------------
+  // Numeric types
+
+  // For time data that represents a duration of time.
+  // e.g. "Label: 5s, 5ms, 5μs"
+  | 'duration'
+  // Data that happened at a specific time, relative to the start of
+  // the profile. e.g. "Label: 15.5s, 20.5ms, 30.5μs"
+  | 'time'
+  // The following are alternatives to display a time only in a specific
+  // unit of time.
   | 'seconds' // "Label: 5s"
   | 'milliseconds' // "Label: 5ms"
   | 'microseconds' // "Label: 5μs"
   | 'nanoseconds' // "Label: 5ns"
-  | 'integer' // "Label: 5323"
-  | 'number' // "Label: 52.23"
-  | 'percentage' // "Label: 50%"
-  | 'stack' // Prints a full stack trace using the value.
-  | 'url'; // Show the URL, and handle sanitization
+  // e.g. "Label: 5.55mb, 5 bytes, 312.5kb"
+  | 'bytes'
+  // This should be a value between 0 and 1.
+  // "Label: 50%"
+  | 'percentage'
+  // The integer should be used for generic representations of numbers. Do not
+  // use it for time information.
+  // "Label: 52, 5,323, 1,234,567"
+  | 'integer'
+  // The decimal should be used for generic representations of numbers. Do not
+  // use it for time information.
+  // "Label: 52.23, 0.0054, 123,456.78"
+  | 'decimal'
+
+  // ----------------------------------------------------
+  // Complex types
+
+  // Prints a full stack trace using the value.
+  | 'stack';
 
 // A list of all the valid locations to surface this marker.
 // We can be free to add more UI areas.
@@ -28,28 +63,33 @@ export type MarkerDisplayLocation =
   | 'marker-table'
   | 'timeline'
   // In the timeline, this is a section that breaks out markers that are related
-  // to memory.
+  // to memory. When memory counters are enabled, this is its own track, otherwise
+  // it is displayed with the main thread.
   | 'timeline-memory'
+  // TODO - This is not supported yet.
   | 'stack-chart';
 
 export type MarkerSchema = {
   // The unique identifier for this marker.
-  name: string, // e.g. "GCMajor-complete"
+  name: string, // e.g. "CC"
 
   // The label of how this marker should be displayed in the UI.
-  // TODO - It would be nice to support printf-like features here
-  label: string, // e.g. "GCMajor"
+  // If none is provided, then the name is used.
+  label?: string, // e.g. "Cycle Collect"
 
   // The locations to display
   display: MarkerDisplayLocation[],
 
   data: Array<{
     key: string,
-    label: string,
+    // If no label is provided, the key is displayed.
+    label?: string,
     format: MarkerFormatType,
     searchable?: boolean,
   }>,
 };
+
+export type MarkerSchemaByName = { [name: string]: MarkerSchema };
 
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
