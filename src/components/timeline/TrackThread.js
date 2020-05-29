@@ -173,6 +173,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       (filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer' ||
+        filteredThread.name === 'Java Main Thread' ||
         filteredThread.name.startsWith('MediaDecoderStateMachine')) &&
       processType !== 'plugin';
 
