@@ -77,7 +77,7 @@ If you've compiled an Android Gecko build locally, and want to profile it, you h
 
 ## Startup profiling
 
-For startup profiling, similar to [startup profiling on Desktop](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler#Profiling_Firefox_Startup), you will need to manually set some `MOZ_PROFILER_STARTUP*` environment variables. The way to do this varies based on the app you want to profile (more details below). Once the app has been started with these environment variables, the profiler will be running. Then you can connect to the app using `about:debugging` as usual, and capture the profile with the regular UI. (This only works if you're running Desktop Firefox Nightly newer than February 18, 2020, because it requires the patch from [bug 1615436](https://bugzilla.mozilla.org/show_bug.cgi?id=1615436).)
+For startup profiling, similar to [startup profiling on Desktop](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler#Profiling_Firefox_Startup), you will need to manually set some `MOZ_PROFILER_STARTUP*` environment variables. The way to do this varies based on the app you want to profile (more details below). Once the app has been started with these environment variables, the profiler will be running. Then you can connect to the app using `about:debugging` as usual, and capture the profile with the regular UI.
 
 ### Startup profiling GeckoView-example (and Fennec)
 
@@ -102,28 +102,27 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 ### Startup profiling Fenix
 
-The above doesn't work with Fenix (I'm guessing it doesn't pass environment variables along to Gecko the way GeckoView-example does), but the following works instead:
+Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables:
 
- 1. Make sure you have a "debuggable" Fenix. The easiest way to do this is to make your own Fenix build with a *debug* profile. This Fenix has the app ID `org.mozilla.fenix.debug`.
- 2. Push a file to your device that contains the environment variables as described in the [Reading configuration from a file](https://mozilla.github.io/geckoview/consumer/docs/automation#reading-configuration-from-a-file) section of the GeckoView docs.
+ 1. Create a file with the name `org.mozilla.fenix.nightly-geckoview-config.yaml` on your desktop machine and content of the following form:
 
-For example, you can create a file with the name `org.mozilla.fenix.debug-geckoview-config.yaml` on your Desktop machine and content of the following form:
+    ```
+    env:
+      MOZ_PROFILER_STARTUP: 1
+      MOZ_PROFILER_STARTUP_INTERVAL: 5
+      MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
+      MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
+    ```
+ 2. Push this file to the device with `adb push org.mozilla.fenix.nightly-geckoview-config.yaml /data/local/tmp/`.
+ 3. Run `adb shell am set-debug-app --persistent org.mozilla.fenix.nightly` to make sure the file is respected.
 
-```
-env:
-  MOZ_PROFILER_STARTUP: 1
-  MOZ_PROFILER_STARTUP_INTERVAL: 5
-  MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
-  MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
-```
-
-Now push this file to the device with `adb push org.mozilla.fenix.debug-geckoview-config.yaml /data/local/tmp/`.
-
-From now on, whenever you open your debuggable Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
+From now on, whenever you open the Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
 
 You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.debug-geckoview-config.yaml`.
 
 [Here's an example profile captured using this method](https://perfht.ml/3bKTFCG).
+
+Refer to the [Reading configuration from a file](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) section of the GeckoView docs for more details.
 
 ### Profiling App Link startup
 
