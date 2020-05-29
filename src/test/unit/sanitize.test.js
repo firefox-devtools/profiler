@@ -183,16 +183,13 @@ describe('sanitizePII', function() {
     const profile = processProfile(createGeckoProfile());
 
     // Checking to make sure that we have a http{,s} URI in the pages array.
-    let pageUrl = null;
-    for (const page of ensureExists(profile.pages)) {
-      if (page.url.includes('http')) {
-        pageUrl = page.url;
-      }
-    }
-    expect(pageUrl).not.toBe(null);
-    if (pageUrl === null) {
-      // This makes flow happy when we need to use pageUrl next.
-      return;
+    const pageUrl = ensureExists(profile.pages).find(page =>
+      page.url.includes('http')
+    );
+    if (pageUrl === undefined) {
+      throw new Error(
+        "There should be an http URL in the 'pages' array in this profile."
+      );
     }
 
     const PIIToRemove = getRemoveProfileInformation({
@@ -201,7 +198,7 @@ describe('sanitizePII', function() {
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
     for (const page of ensureExists(sanitizedProfile.pages)) {
-      expect(page.url.includes(pageUrl)).toBe(false);
+      expect(page.url.includes(pageUrl.url)).toBe(false);
     }
   });
 
@@ -209,16 +206,13 @@ describe('sanitizePII', function() {
     const profile = processProfile(createGeckoProfile());
 
     // Checking to make sure that we have a chrome URI in the pages array.
-    let chromePageUrl = null;
-    for (const page of ensureExists(profile.pages)) {
-      if (page.url.includes('chrome://')) {
-        chromePageUrl = page.url;
-      }
-    }
-    expect(chromePageUrl).not.toBe(null);
-    if (chromePageUrl === null) {
-      // This makes flow happy when we need to use chromePageUrl next.
-      return;
+    const chromePageUrl = ensureExists(profile.pages).find(page =>
+      page.url.includes('chrome://')
+    );
+    if (chromePageUrl === undefined) {
+      throw new Error(
+        "There should be a chrome URL in the 'pages' array in this profile."
+      );
     }
 
     const PIIToRemove = getRemoveProfileInformation({
@@ -228,7 +222,7 @@ describe('sanitizePII', function() {
 
     let includesChromeUrl = false;
     for (const page of ensureExists(sanitizedProfile.pages)) {
-      if (page.url.includes(chromePageUrl)) {
+      if (page.url.includes(chromePageUrl.url)) {
         includesChromeUrl = true;
         break;
       }
