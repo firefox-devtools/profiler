@@ -641,12 +641,13 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     );
   }
 
-  if (/^(?:Audio|Media)/.test(thread.name)) {
+  if (/^(?:Audio|Media|GraphRunner)/.test(thread.name)) {
     // This is a media thread: they are usually very idle, but are interesting
     // as soon as there's at least one sample. They're present with the media
     // preset, but not usually captured otherwise.
     // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
-    // MediaDecoderStateMachine. They're enabled by the media preset.
+    // MediaDecoderStateMachine, GraphRunner. They're enabled by the media
+    // preset.
     return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
   }
 
