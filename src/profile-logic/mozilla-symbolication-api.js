@@ -118,7 +118,7 @@ export function requestSymbols(
     ),
   };
 
-  const jsonPromise = fetch('https://symbols.mozilla.org/symbolicate/v5', {
+  const jsonPromise = fetch('http://127.0.0.1:3000/symbolicate/v5', {
     body: JSON.stringify(body),
     method: 'POST',
     mode: 'cors',
