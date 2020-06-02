@@ -11,7 +11,8 @@
  */
 export function removeURLs(
   string: string,
-  removeExtensions: boolean = true
+  removeExtensions: boolean = true,
+  redactedText: string = '<URL>'
 ): string {
   const rmExtensions = removeExtensions ? '|moz-extension' : '';
   const regExp = new RegExp(
@@ -26,5 +27,5 @@ export function removeURLs(
     //    Matches 'http', 'https', 'ftp', 'file' and optionally 'moz-extension' protocols.
     'gi'
   );
-  return string.replace(regExp, '$1<URL>');
+  return string.replace(regExp, '$1' + redactedText);
 }

@@ -11,6 +11,7 @@ import {
   getTimelineTrackOrganization,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
+  getIsActiveTabResourcesPanelOpen,
 } from './url-state';
 import {
   getGlobalTracks,
@@ -106,6 +107,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getTrackThreadHeights,
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
+  getIsActiveTabResourcesPanelOpen,
   getScreenshotTrackHeight,
   (
     timelineTrackOrganization,
@@ -116,6 +118,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     trackThreadHeights,
     activeTabGlobalTracks,
     activeTabResourceTracks,
+    isActiveTabResourcesPanelOpen,
     screenshotTrackHeight
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
@@ -131,20 +134,42 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
           height += ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT;
         }
 
-        for (const [
-          trackIndex,
-          globalTrack,
-        ] of activeTabGlobalTracks.entries()) {
-          if (!hiddenGlobalTracks.has(trackIndex)) {
-            switch (globalTrack.type) {
-              case 'screenshots':
-                height += screenshotTrackHeight + border;
-                break;
-              case 'tab':
+        for (const globalTrack of activeTabGlobalTracks) {
+          switch (globalTrack.type) {
+            case 'screenshots':
+              height += screenshotTrackHeight + border;
+              break;
+            case 'tab':
+              {
+                // The thread tracks have enough complexity that it warrants measuring
+                // them rather than statically using a value like the other tracks.
+                const { threadIndex } = globalTrack;
+                if (threadIndex === null) {
+                  height += TRACK_PROCESS_BLANK_HEIGHT + border;
+                } else {
+                  const trackThreadHeight = trackThreadHeights[threadIndex];
+                  if (trackThreadHeight === undefined) {
+                    // The height isn't computed yet, return.
+                    return null;
+                  }
+                  height += trackThreadHeight + border;
+                }
+              }
+              break;
+            default:
+              throw assertExhaustiveCheck(globalTrack);
+          }
+        }
+
+        if (isActiveTabResourcesPanelOpen) {
+          for (const resourceTrack of activeTabResourceTracks) {
+            switch (resourceTrack.type) {
+              case 'sub-frame':
+              case 'thread':
                 {
                   // The thread tracks have enough complexity that it warrants measuring
                   // them rather than statically using a value like the other tracks.
-                  const { threadIndex } = globalTrack;
+                  const { threadIndex } = resourceTrack;
                   if (threadIndex === null) {
                     height += TRACK_PROCESS_BLANK_HEIGHT + border;
                   } else {
@@ -153,15 +178,19 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                       // The height isn't computed yet, return.
                       return null;
                     }
-                    height += trackThreadHeight + border;
+                    height +=
+                      trackThreadHeight +
+                      ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT +
+                      border;
                   }
                 }
                 break;
               default:
-                throw assertExhaustiveCheck(globalTrack);
+                throw assertExhaustiveCheck(resourceTrack);
             }
           }
         }
+
         return height;
       }
       case 'full': {

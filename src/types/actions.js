@@ -21,6 +21,7 @@ import type {
   MarkerIndex,
   ActiveTabGlobalTrack,
   OriginsTimeline,
+  ActiveTabResourceTrack,
 } from './profile-derived';
 import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -72,6 +73,23 @@ export type LocalTrackReference = {|
 |};
 
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
+
+/**
+ * Active tab track references
+ * A TrackReference uniquely identifies a track.
+ */
+export type ActiveTabGlobalTrackReference = {|
+  +type: 'global',
+  +trackIndex: TrackIndex,
+|};
+export type ActiveTabResourceTrackReference = {|
+  +type: 'resource',
+  +trackIndex: TrackIndex,
+|};
+
+export type ActiveTabTrackReference =
+  | ActiveTabGlobalTrackReference
+  | ActiveTabResourceTrackReference;
 
 export type RequestedLib = {|
   +debugName: string,
@@ -267,7 +285,7 @@ type ReceiveProfileAction =
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: ActiveTabGlobalTrack[],
-      +resourceTracks: LocalTrack[],
+      +resourceTracks: ActiveTabResourceTrack[],
       +browsingContextID: BrowsingContextID,
     |}
   | {|

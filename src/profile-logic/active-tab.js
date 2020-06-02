@@ -5,6 +5,7 @@
 
 import { getThreadSelectors } from '../selectors/per-thread';
 import { isMainThread } from './tracks';
+import { ensureExists } from '../utils/flow';
 
 import type { State } from '../types/state';
 import type {
@@ -16,7 +17,7 @@ import type {
 } from '../types/profile';
 import type {
   ActiveTabGlobalTrack,
-  LocalTrack,
+  ActiveTabResourceTrack,
 } from '../types/profile-derived';
 import type { ScreenshotPayload } from '../types/markers';
 
@@ -64,11 +65,15 @@ export function computeActiveTabTracks(
   profile: Profile,
   relevantPages: Page[],
   state: State
-): {| globalTracks: ActiveTabGlobalTrack[], resourceTracks: LocalTrack[] |} {
+): {|
+  globalTracks: ActiveTabGlobalTrack[],
+  resourceTracks: ActiveTabResourceTrack[],
+|} {
   // Global tracks that are certainly global tracks.
   const globalTracks: ActiveTabGlobalTrack[] = [];
   const resourceTracks = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
+  const innerWindowIDToPageMap = _getInnerWindowIDToPageMap(relevantPages);
 
   for (
     let threadIndex = 0;
@@ -90,7 +95,11 @@ export function computeActiveTabTracks(
         });
       } else {
         if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-          resourceTracks.push({ type: 'thread', threadIndex });
+          resourceTracks.push({
+            type: 'sub-frame',
+            threadIndex,
+            name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
+          });
         }
       }
     } else {
@@ -98,7 +107,11 @@ export function computeActiveTabTracks(
       // track. Find out if that thread contains the active tab data, and add it
       // as a resource track if it does.
       if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-        resourceTracks.push({ type: 'thread', threadIndex });
+        resourceTracks.push({
+          type: 'thread',
+          threadIndex,
+          name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
+        });
       }
     }
 
@@ -181,4 +194,62 @@ function isTopmostThread(
   }
 
   return false;
+}
+
+/**
+ * Returns the name of active tab resource track.
+ * It can be either a sub-frame or a regular thread.
+ */
+function _getActiveTabResourceName(
+  thread: Thread,
+  innerWindowIDToPageMap: Map<InnerWindowID, Page>
+): string {
+  if (isMainThread(thread)) {
+    // This is a sub-frame.
+    // Get the first innerWindowID inside the thread.
+    let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(
+      innerWindowID => innerWindowID && innerWindowID !== 0
+    );
+    if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
+      const markerData = thread.markers.data.find(data => {
+        if (
+          data &&
+          data.innerWindowID &&
+          data.innerWindowID !== 0 &&
+          // Network markers are not reliable because they can point to their parent frame.
+          data.type !== 'Network'
+        ) {
+          // about:blank and about:newtab pages are special and we are skipping if we
+          // find them, so we can get the real resource name.
+          const page = innerWindowIDToPageMap.get(data.innerWindowID);
+          return (
+            page && page.url !== 'about:blank' && page.url !== 'about:newtab'
+          );
+        }
+        return false;
+      });
+      if (markerData && markerData.innerWindowID) {
+        firstInnerWindowID = markerData.innerWindowID;
+      }
+    }
+    if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
+      throw new Error('There must be an innerWindowID in the thread');
+    }
+    const page = ensureExists(innerWindowIDToPageMap.get(firstInnerWindowID));
+    return page.url;
+  }
+
+  // This is a thread, return its name.
+  return thread.name;
+}
+
+/**
+ * Returns an InnerWindowID to Page map to easily access using InnerWindowIDs.
+ */
+function _getInnerWindowIDToPageMap(pages: Page[]): Map<InnerWindowID, Page> {
+  const innerWindowIDToPageMap = new Map();
+  for (const page of pages) {
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
+  }
+  return innerWindowIDToPageMap;
 }

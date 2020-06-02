@@ -28,7 +28,7 @@ import type {
   TrackIndex,
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
-  LocalTrack,
+  ActiveTabResourceTrack,
 } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -42,7 +42,7 @@ type StateProps = {|
   +globalTrack: ActiveTabGlobalTrack,
   +isSelected: boolean,
   +selectedTab: TabSlug,
-  +resourceTracks: LocalTrack[],
+  +resourceTracks: ActiveTabResourceTrack[],
 |};
 
 type DispatchProps = {|
@@ -73,6 +73,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
           <TimelineTrackThread
             threadIndex={threadIndex}
             showMemoryMarkers={false}
+            trackType="expanded"
           />
         );
       }

@@ -182,8 +182,14 @@ describe('sanitizePII', function() {
   it('should sanitize the pages information', function() {
     const profile = processProfile(createGeckoProfile());
 
-    for (const page of ensureExists(profile.pages)) {
-      expect(page.url.includes('http')).toBe(true);
+    // Checking to make sure that we have a http{,s} URI in the pages array.
+    const pageUrl = ensureExists(profile.pages).find(page =>
+      page.url.includes('http')
+    );
+    if (pageUrl === undefined) {
+      throw new Error(
+        "There should be an http URL in the 'pages' array in this profile."
+      );
     }
 
     const PIIToRemove = getRemoveProfileInformation({
@@ -192,8 +198,36 @@ describe('sanitizePII', function() {
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
     for (const page of ensureExists(sanitizedProfile.pages)) {
-      expect(page.url.includes('http')).toBe(false);
+      expect(page.url.includes(pageUrl.url)).toBe(false);
     }
+  });
+
+  it('should keep the chrome URIs inside the pages array', function() {
+    const profile = processProfile(createGeckoProfile());
+
+    // Checking to make sure that we have a chrome URI in the pages array.
+    const chromePageUrl = ensureExists(profile.pages).find(page =>
+      page.url.includes('chrome://')
+    );
+    if (chromePageUrl === undefined) {
+      throw new Error(
+        "There should be a chrome URL in the 'pages' array in this profile."
+      );
+    }
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveUrls: true,
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+
+    let includesChromeUrl = false;
+    for (const page of ensureExists(sanitizedProfile.pages)) {
+      if (page.url.includes(chromePageUrl.url)) {
+        includesChromeUrl = true;
+        break;
+      }
+    }
+    expect(includesChromeUrl).toBe(true);
   });
 
   it('should sanitize all the URLs inside network markers', function() {

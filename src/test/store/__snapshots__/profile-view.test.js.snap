@@ -482,6 +482,7 @@ Object {
           },
           Object {
             "URI": "https://mozilla.org",
+            "contentType": "text/html",
             "endTime": 7,
             "id": 6,
             "pri": 0,
@@ -500,6 +501,7 @@ Object {
           },
           Object {
             "URI": "https://mozilla.org",
+            "contentType": "text/html",
             "endTime": 8,
             "id": 7,
             "pri": 0,
@@ -978,6 +980,7 @@ Array [
         },
         Object {
           "URI": "https://mozilla.org",
+          "contentType": "text/html",
           "endTime": 7,
           "id": 6,
           "pri": 0,
@@ -996,6 +999,7 @@ Array [
         },
         Object {
           "URI": "https://mozilla.org",
+          "contentType": "text/html",
           "endTime": 8,
           "id": 7,
           "pri": 0,
@@ -1149,6 +1153,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "cause": undefined,
+      "contentType": "text/html",
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,
@@ -1220,6 +1225,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "cause": undefined,
+      "contentType": "text/html",
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,
@@ -1238,6 +1244,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "cause": undefined,
+      "contentType": "text/html",
       "endTime": 8,
       "fetchStart": 7.5,
       "id": 7,
@@ -1343,6 +1350,7 @@ Object {
     },
     Object {
       "URI": "https://mozilla.org",
+      "contentType": "text/html",
       "endTime": 7,
       "id": 6,
       "pri": 0,
@@ -1361,6 +1369,7 @@ Object {
     },
     Object {
       "URI": "https://mozilla.org",
+      "contentType": "text/html",
       "endTime": 8,
       "id": 7,
       "pri": 0,
@@ -1428,6 +1437,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "cause": undefined,
+      "contentType": "text/html",
       "endTime": 7,
       "fetchStart": 6.5,
       "id": 6,

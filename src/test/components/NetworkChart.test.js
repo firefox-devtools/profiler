@@ -596,46 +596,41 @@ describe('NetworkChartRowBar URL split', function() {
 });
 
 describe('NetworkChartRowBar MIME-type filter', function() {
+  /**
+   * Setup network markers payload for URL, with content type removed.
+   */
+  function setupForUrl(uri: string) {
+    return setupWithPayload(
+      getNetworkMarkers({ uri, payload: { contentType: undefined } })
+    );
+  }
+
   it('searches for img MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({
-        uri: 'https://test.mozilla.org/img/optimized/test.png',
-      })
+    const { rowItem } = setupForUrl(
+      'https://test.mozilla.org/img/optimized/test.png'
     );
     expect(rowItem().classList.contains('network-color-img')).toBe(true);
   });
 
   it('searches for html MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({
-        uri: 'https://test.mozilla.org/img/optimized/test.html',
-      })
+    const { rowItem } = setupForUrl(
+      'https://test.mozilla.org/img/optimized/test.html'
     );
-
     expect(rowItem().classList.contains('network-color-html')).toBe(true);
   });
 
   it('searches for js MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/scripts/test.js' })
-    );
-
+    const { rowItem } = setupForUrl('https://test.mozilla.org/scripts/test.js');
     expect(rowItem().classList.contains('network-color-js')).toBe(true);
   });
 
   it('searches for css MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/styles/test.css' })
-    );
-
+    const { rowItem } = setupForUrl('https://test.mozilla.org/styles/test.css');
     expect(rowItem().classList.contains('network-color-css')).toBe(true);
   });
 
   it('uses default when no filter applies', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/file.xuul' })
-    );
-
+    const { rowItem } = setupForUrl('https://test.mozilla.org/file.xuul');
     expect(rowItem().classList.contains('network-color-other')).toBe(true);
   });
 });

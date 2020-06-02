@@ -14,30 +14,6 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
         class="timelineTrackThread"
       >
         <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <canvas
-              class="timelineMarkersCanvas"
-            />
-          </div>
-        </div>
-        <div
-          class="timelineMarkers timelineMarkersGeckoMain"
-          data-testid="TimelineMarkersOverview"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <canvas
-              class="timelineMarkersCanvas"
-            />
-          </div>
-        </div>
-        <div
           class="threadActivityGraph"
         >
           <canvas
@@ -45,6 +21,34 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             height="300"
             width="200"
           />
+        </div>
+        <div
+          class="timelineTrackThreadMarkers"
+        >
+          <div
+            class="timelineMarkers"
+            data-testid="TimelineMarkersJank"
+          >
+            <div
+              class="react-contextmenu-wrapper"
+            >
+              <canvas
+                class="timelineMarkersCanvas"
+              />
+            </div>
+          </div>
+          <div
+            class="timelineMarkers timelineMarkersGeckoMain"
+            data-testid="TimelineMarkersOverview"
+          >
+            <div
+              class="react-contextmenu-wrapper"
+            >
+              <canvas
+                class="timelineMarkersCanvas"
+              />
+            </div>
+          </div>
         </div>
         <div
           class="timelineEmptyThreadIndicator"
@@ -55,7 +59,63 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
 </li>
 `;
 
-exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a resources panel 1`] = `
+exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track matches the snapshot of a resource track 1`] = `
+<li
+  class="timelineTrack timelineTrackResource"
+>
+  <div
+    class="timelineTrackRow timelineTrackResourceRow"
+  >
+    <div
+      class="timelineTrackResourceLabel"
+    >
+      <span>
+        Frame:
+      </span>
+       
+      Page #3
+    </div>
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        class="timelineTrackThread"
+      >
+        <div
+          class="threadActivityGraph"
+        >
+          <canvas
+            class="threadActivityGraphCanvas threadActivityGraphCanvas"
+            height="300"
+            width="200"
+          />
+        </div>
+        <div
+          class="timelineTrackThreadMarkers"
+        >
+          <div
+            class="timelineMarkers"
+            data-testid="TimelineMarkersJank"
+          >
+            <div
+              class="react-contextmenu-wrapper"
+            >
+              <canvas
+                class="timelineMarkersCanvas"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a resources panel when closed 1`] = `
 <div
   class="timelineResources"
   style="--resources-header-height: 20px;"
@@ -67,6 +127,78 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
     1
     )
   </div>
+</div>
+`;
+
+exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a resources panel when opened 1`] = `
+<div
+  class="timelineResources"
+  style="--resources-header-height: 20px;"
+>
+  <div
+    class="timelineResourcesHeader opened"
+  >
+    Resources (
+    1
+    )
+  </div>
+  <ol
+    class="timelineResourceTracks"
+  >
+    <li
+      class="timelineTrack timelineTrackResource"
+    >
+      <div
+        class="timelineTrackRow timelineTrackResourceRow"
+      >
+        <div
+          class="timelineTrackResourceLabel"
+        >
+          <span>
+            Frame:
+          </span>
+           
+          Page #2
+        </div>
+        <div
+          class="timelineTrackTrack"
+        >
+          <div
+            class="timelineTrackThread"
+          >
+            <div
+              class="threadActivityGraph"
+            >
+              <canvas
+                class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                height="300"
+                width="200"
+              />
+            </div>
+            <div
+              class="timelineTrackThreadMarkers"
+            >
+              <div
+                class="timelineMarkers"
+                data-testid="TimelineMarkersJank"
+              >
+                <div
+                  class="react-contextmenu-wrapper"
+                >
+                  <canvas
+                    class="timelineMarkersCanvas"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              class="timelineEmptyThreadIndicator"
+            />
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
 </div>
 `;
 
@@ -119,30 +251,6 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                   class="timelineTrackThread"
                 >
                   <div
-                    class="timelineMarkers selected"
-                    data-testid="TimelineMarkersJank"
-                  >
-                    <div
-                      class="react-contextmenu-wrapper"
-                    >
-                      <canvas
-                        class="timelineMarkersCanvas"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="timelineMarkers timelineMarkersGeckoMain selected"
-                    data-testid="TimelineMarkersOverview"
-                  >
-                    <div
-                      class="react-contextmenu-wrapper"
-                    >
-                      <canvas
-                        class="timelineMarkersCanvas"
-                      />
-                    </div>
-                  </div>
-                  <div
                     class="threadActivityGraph"
                   >
                     <canvas
@@ -150,6 +258,34 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       height="300"
                       width="200"
                     />
+                  </div>
+                  <div
+                    class="timelineTrackThreadMarkers"
+                  >
+                    <div
+                      class="timelineMarkers selected"
+                      data-testid="TimelineMarkersJank"
+                    >
+                      <div
+                        class="react-contextmenu-wrapper"
+                      >
+                        <canvas
+                          class="timelineMarkersCanvas"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="timelineMarkers timelineMarkersGeckoMain selected"
+                      data-testid="TimelineMarkersOverview"
+                    >
+                      <div
+                        class="react-contextmenu-wrapper"
+                      >
+                        <canvas
+                          class="timelineMarkersCanvas"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div
                     class="timelineEmptyThreadIndicator"

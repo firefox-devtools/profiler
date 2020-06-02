@@ -339,6 +339,13 @@ export type NetworkPayload = {|
   cache?: string,
   cause?: CauseBacktrace,
 
+  // contentType is the value of the Content-Type header from the HTTP
+  // response. An empty string means the response had no content type,
+  // while a value of null means no HTTP response was received. If
+  // this property is absent then it means this profiler came from an
+  // older version of the Gecko profiler without content type support.
+  contentType?: string | null,
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.
@@ -387,6 +394,14 @@ export type FileIoPayload = {|
   source: string,
   operation: string,
   filename: string,
+  // FileIO markers that are happening on the current thread don't have a threadId,
+  // but they have threadId field if the markers belong to a different (potentially
+  // non-profiled) thread.
+  // This field is added on Firefox 78, but this is backwards compatible because
+  // previous FileIO markers were also belonging to the threads they are in only.
+  // We still don't serialize this field if the marker belongs to the thread they
+  // are being captured.
+  threadId?: number,
 |};
 
 /**

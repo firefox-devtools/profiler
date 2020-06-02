@@ -14,6 +14,7 @@ import type {
   GlobalTrack,
   ActiveTabGlobalTrack,
   OriginsTimeline,
+  ActiveTabResourceTrack,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -117,7 +118,10 @@ const activeTabGlobalTracks: Reducer<ActiveTabGlobalTrack[]> = (
  * This can be derived like the globalTracks information, but is stored in the state
  * for the same reason.
  */
-const activeTabResourceTracks: Reducer<LocalTrack[]> = (state = [], action) => {
+const activeTabResourceTracks: Reducer<ActiveTabResourceTrack[]> = (
+  state = [],
+  action
+) => {
   switch (action.type) {
     case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.resourceTracks;
