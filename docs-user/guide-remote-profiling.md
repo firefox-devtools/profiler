@@ -102,7 +102,7 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 ### Startup profiling Fenix
 
-Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables:
+Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file. The filename depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix.nightly`.
 
  1. Create a file with the name `org.mozilla.fenix.nightly-geckoview-config.yaml` on your desktop machine and content of the following form:
 
@@ -118,7 +118,7 @@ Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/andro
 
 From now on, whenever you open the Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
 
-You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.debug-geckoview-config.yaml`.
+You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.nightly-geckoview-config.yaml`.
 
 [Here's an example profile captured using this method](https://perfht.ml/3bKTFCG).
 
