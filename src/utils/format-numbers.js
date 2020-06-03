@@ -111,6 +111,30 @@ export function formatCallNodeNumber(
   return formatNumber(number, 3, precision);
 }
 
+/**
+ * Format call node numbers consistently.
+ */
+export function formatCallNodeNumberWithUnit(
+  weightType: WeightType,
+  isHighPrecision: boolean,
+  number: number
+): string {
+  switch (weightType) {
+    case 'tracing-ms': {
+      // Sometimes the number should be high precision, such as on a JS tracer thread
+      // which has timing to the microsecond.
+      const precision = isHighPrecision ? 3 : 1;
+      return formatNumber(number, 3, precision) + 'ms';
+    }
+    case 'samples':
+      return formatNumber(number, 3, 0) + ' samples';
+    case 'bytes':
+      return formatNumber(number, 3, 0) + ' bytes';
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
 export function formatPercent(value: number): string {
   return formatNumber(
     value,
