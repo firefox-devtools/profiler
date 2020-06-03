@@ -12,6 +12,7 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
@@ -27,6 +28,7 @@ import type {
   CallTreeSummaryStrategy,
   WeightType,
   SamplesLikeTable,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import type {
@@ -60,6 +62,7 @@ export type OwnProps = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
+  +tracedTiming: TracedTiming | null,
 |};
 
 type Props = {|
@@ -274,6 +277,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       weightType,
       samples,
       unfilteredSamples,
+      tracedTiming,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -282,9 +286,18 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
 
     const stackTiming = flameGraphTiming[depth];
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    const duration =
+    const ratio =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
+    let percentage = (100 * ratio).toFixed(2) + '%';
+    if (tracedTiming) {
+      const time = formatCallNodeNumberWithUnit(
+        'tracing-ms',
+        false,
+        tracedTiming.running[callNodeIndex]
+      );
+      percentage = `${time} (${percentage})`;
+    }
 
     const shouldComputeTimings =
       // This is currently too slow for JS Tracer threads.
@@ -305,7 +318,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
-        durationText={`${(100 * duration).toFixed(2)}%`}
+        durationText={percentage}
         callTree={callTree}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={

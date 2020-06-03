@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
-import { formatCallNodeNumber } from '../../utils/format-numbers';
+import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
 import Icon from '../shared/Icon';
 import {
   getFriendlyStackTypeName,
@@ -48,6 +48,13 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
+
+// For debugging purposes, allow tooltips to persist. This aids in inspecting
+// the DOM structure.
+window.persistTooltips = false;
+if (process.env.NODE_ENV === 'development') {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
+}
 
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.
@@ -104,8 +111,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             }}
           />
         </div>
-        <div>{displayData.totalTimeWithUnit}</div>
-        <div>{displayData.selfTimeWithUnit}</div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.totalTimeWithUnit}
+        </div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.selfTimeWithUnit}
+        </div>
         {/* grid row -------------------------------------------------- */}
         {sortedTotalBreakdownByImplementation.map(
           ([implementation, time], index) => {
@@ -135,17 +146,20 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatCallNodeNumber(weightType, isHighPrecision, time)}
-                  ms
+                  {formatCallNodeNumberWithUnit(
+                    weightType,
+                    isHighPrecision,
+                    time
+                  )}
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
-                    : `${formatCallNodeNumber(
+                    : formatCallNodeNumberWithUnit(
                         weightType,
                         isHighPrecision,
                         selfTimeValue
-                      )}ms`}
+                      )}
                 </div>
               </React.Fragment>
             );

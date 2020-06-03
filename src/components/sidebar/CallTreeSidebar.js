@@ -44,18 +44,34 @@ import {
   formatBytes,
   formatNumber,
 } from '../../utils/format-numbers';
+import classNames from 'classnames';
 
 type SidebarDetailProps = {|
-  +label: string,
+  +label: React.Node,
   +color?: string,
-  +children: React.Node,
+  +indent?: boolean,
+  +value: React.Node,
+  +percentage?: string | number,
 |};
 
-function SidebarDetail({ label, children }: SidebarDetailProps) {
+function SidebarDetail({
+  label,
+  value,
+  percentage,
+  indent,
+}: SidebarDetailProps) {
   return (
     <React.Fragment>
-      <div className="sidebar-label">{label}:</div>
-      <div className="sidebar-value">{children}</div>
+      <div
+        className={classNames({
+          'sidebar-label': true,
+          'sidebar-label-indent': indent,
+        })}
+      >
+        {label}
+      </div>
+      <div className="sidebar-percentage">{percentage}</div>
+      <div className="sidebar-value">{value}</div>
     </React.Fragment>
   );
 }
@@ -104,7 +120,34 @@ type CategoryBreakdownProps = {|
   +number: number => string,
 |};
 
-class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
+type CategoryBreakdownState = {|
+  +openCategories: Set<string>,
+|};
+
+class CategoryBreakdown extends React.PureComponent<
+  CategoryBreakdownProps,
+  CategoryBreakdownState
+> {
+  state = {
+    openCategories: new Set(),
+  };
+
+  _toggleCategory = (event: SyntheticInputEvent<>) => {
+    const { category } = event.target.dataset;
+    if (typeof category !== 'string') {
+      throw new Error('Expected to find a category on the clicked element.');
+    }
+    this.setState(({ openCategories }) => {
+      const newCategories = new Set(openCategories);
+      if (openCategories.has(category)) {
+        newCategories.delete(category);
+      } else {
+        newCategories.add(category);
+      }
+      return { openCategories: newCategories };
+    });
+  };
+
   render() {
     const { breakdown, categoryList, number } = this.props;
 
@@ -137,35 +180,64 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
       0
     );
 
+    const { openCategories } = this.state;
+
     return (
-      <div className="sidebar-categorylist">
+      <>
         {data.map(({ category, value, subcategories }) => {
+          const hasSubcategory = shouldDisplaySubcategoryInfoForCategory(
+            category
+          );
+          const expanded = openCategories.has(category.name);
           return (
             <React.Fragment key={category.name}>
-              <div className="sidebar-categoryname">
-                <span
-                  className={`sidebar-color colored-square category-color-${category.color}`}
-                  title={category.name}
-                />
-                {category.name}
+              <SidebarDetail
+                label={
+                  <div>
+                    {hasSubcategory ? (
+                      <button
+                        type="button"
+                        data-category={category.name}
+                        onClick={this._toggleCategory}
+                        className={classNames({
+                          'sidebar-toggle': true,
+                          expanded,
+                        })}
+                      >
+                        {category.name}
+                      </button>
+                    ) : (
+                      category.name
+                    )}
+                  </div>
+                }
+                value={number(value)}
+                percentage={formatPercent(value / totalTime)}
+              />
+
+              {/* Draw a histogram bar, colored by the category. */}
+              <div className="sidebar-histogram-bar">
+                <div
+                  className={`sidebar-histogram-bar-color category-color-${category.color}`}
+                  style={{ width: formatPercent(value / totalTime) }}
+                ></div>
               </div>
-              <div className="sidebar-categorytiming">
-                {number(value)} ({formatPercent(value / totalTime)})
-              </div>
-              {shouldDisplaySubcategoryInfoForCategory(category)
+
+              {hasSubcategory && expanded
                 ? subcategories.map(({ name, value }) => (
-                    <React.Fragment key={name}>
-                      <div className="sidebar-subcategoryname">{name}</div>
-                      <div className="sidebar-categorytiming">
-                        {number(value)} ({formatPercent(value / totalTime)})
-                      </div>
-                    </React.Fragment>
+                    <SidebarDetail
+                      key={name}
+                      label={name}
+                      value={number(value)}
+                      percentage={formatPercent(value / totalTime)}
+                      indent={true}
+                    />
                   ))
                 : null}
             </React.Fragment>
           );
         })}
-      </div>
+      </>
     );
   }
 }
@@ -186,12 +258,24 @@ function Breakdown({ data, number }: BreakdownProps) {
   return data
     .filter(({ value }) => value)
     .map(({ group, value }) => {
-      const percentage = Math.round((value / totalTime) * 100);
-
       return (
-        <SidebarDetail label={group} key={group}>
-          {number(value)} ({percentage}%)
-        </SidebarDetail>
+        <React.Fragment key={group}>
+          <SidebarDetail
+            label={group}
+            value={number(value)}
+            percentage={formatPercent(value / totalTime)}
+          />
+          {/* Draw a histogram bar, colored by the category. */}
+          <div className="sidebar-histogram-bar">
+            <div
+              className="sidebar-histogram-bar-color"
+              style={{
+                width: formatPercent(value / totalTime),
+                backgroundColor: 'var(--grey-50)',
+              }}
+            ></div>
+          </div>
+        </React.Fragment>
       );
     });
 }
@@ -216,26 +300,38 @@ type WeightDetails = {
   number: (n: number) => string,
 };
 
+function getWeightTypeLabel(weightType: WeightType): string {
+  switch (weightType) {
+    case 'tracing-ms':
+      return `milliseconds`;
+    case 'samples':
+      return 'sample count';
+    case 'bytes':
+      return 'bytes';
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
 class CallTreeSidebar extends React.PureComponent<Props> {
   _getWeightDetails = memoize((weightType: WeightType): WeightDetails => {
     switch (weightType) {
       case 'tracing-ms':
         return {
           running: 'Running time',
-          self: 'Self Time',
+          self: 'Self time',
           number: n => formatMilliseconds(n, 3, 1),
         };
       case 'samples':
         return {
-          running: 'Running total',
-          self: 'Self Total',
-          // TODO - L10n the plurals
-          number: n => (n === 1 ? '1 sample' : `${formatNumber(n, 0)} samples`),
+          running: 'Running samples',
+          self: 'Self samples',
+          number: n => formatNumber(n, 0),
         };
       case 'bytes':
         return {
           running: 'Running size',
-          self: 'Self Size',
+          self: 'Self size',
           number: n => formatBytes(n),
         };
       default:
@@ -255,7 +351,6 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     } = this.props;
     const {
       forPath: { selfTime, totalTime },
-      forFunc: { selfTime: selfTimeForFunc, totalTime: totalTimeForFunc },
       rootTime,
     } = timings;
 
@@ -271,12 +366,11 @@ class CallTreeSidebar extends React.PureComponent<Props> {
 
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
-    const totalTimeForFuncPercent = Math.round(
-      (totalTimeForFunc.value / rootTime) * 100
-    );
-    const selfTimeForFuncPercent = Math.round(
-      (selfTimeForFunc.value / rootTime) * 100
-    );
+    const totalTimeBreakdownByCategory = totalTime.breakdownByCategory;
+    const totalTimeBreakdownByImplementation =
+      totalTime.breakdownByImplementation;
+    const selfTimeBreakdownByImplementation =
+      selfTime.breakdownByImplementation;
 
     return (
       <aside className="sidebar sidebar-calltree">
@@ -295,79 +389,97 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             ) : null}
           </header>
+          <h4 className="sidebar-title3">
+            <div>Call node details</div>
+          </h4>
           {tracedTiming ? (
-            <SidebarDetail label="Traced running time">
-              {formatMilliseconds(
+            <SidebarDetail
+              label="Traced running time"
+              value={formatMilliseconds(
                 tracedTiming.running[selectedNodeIndex],
                 3,
                 1
               )}
-            </SidebarDetail>
+            ></SidebarDetail>
           ) : null}
           {tracedTiming ? (
-            <SidebarDetail label="Traced self time">
-              {tracedTiming.self[selectedNodeIndex] === 0
-                ? '—'
-                : formatMilliseconds(
-                    tracedTiming.self[selectedNodeIndex],
-                    3,
-                    1
-                  )}
-            </SidebarDetail>
+            <SidebarDetail
+              label="Traced self time"
+              value={
+                tracedTiming.self[selectedNodeIndex] === 0
+                  ? '—'
+                  : formatMilliseconds(
+                      tracedTiming.self[selectedNodeIndex],
+                      3,
+                      1
+                    )
+              }
+            />
           ) : null}
-          <SidebarDetail label={running}>
-            {totalTime.value
-              ? `${number(totalTime.value)} (${totalTimePercent}%)`
-              : '—'}
-          </SidebarDetail>
-          <SidebarDetail label={self}>
-            {selfTime.value
-              ? `${number(selfTime.value)} (${selfTimePercent}%)`
-              : '—'}
-          </SidebarDetail>
-          {totalTime.breakdownByCategory ? (
+          <SidebarDetail
+            label={running}
+            value={totalTime.value ? `${number(totalTime.value)}` : '—'}
+            percentage={totalTimePercent ? totalTimePercent + '%' : '—'}
+          />
+          <SidebarDetail
+            label={self}
+            value={selfTime.value ? `${number(selfTime.value)}` : '—'}
+            percentage={selfTimePercent ? selfTimePercent + '%' : '—'}
+          />
+          {totalTimeBreakdownByCategory ? (
             <>
-              <h4 className="sidebar-title3">Categories</h4>
+              <h4 className="sidebar-title3 sidebar-title-label">
+                <div className="sidebar-title-label-left">Categories</div>
+                <div className="sidebar-title-label-right">
+                  Running {getWeightTypeLabel(weightType)}
+                </div>
+              </h4>
               <CategoryBreakdown
-                breakdown={totalTime.breakdownByCategory}
+                breakdown={totalTimeBreakdownByCategory}
                 categoryList={categoryList}
                 number={number}
               />
             </>
           ) : null}
-          {totalTime.breakdownByImplementation && totalTime.value ? (
+          {totalTimeBreakdownByImplementation && totalTime.value ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – running time</h4>
+              <h4 className="sidebar-title3 sidebar-title-label">
+                <div>Implementation</div>
+                <div>Running {getWeightTypeLabel(weightType)}</div>
+              </h4>
               <ImplementationBreakdown
-                breakdown={totalTime.breakdownByImplementation}
+                breakdown={totalTimeBreakdownByImplementation}
                 number={number}
               />
             </React.Fragment>
           ) : null}
-          {selfTime.breakdownByImplementation && selfTime.value ? (
+          {selfTimeBreakdownByImplementation && selfTime.value ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – self time</h4>
+              <h4 className="sidebar-title3 sidebar-title-label">
+                <div>Implementation</div>
+                <div>Self {getWeightTypeLabel(weightType)}</div>
+              </h4>
               <ImplementationBreakdown
-                breakdown={selfTime.breakdownByImplementation}
+                breakdown={selfTimeBreakdownByImplementation}
                 number={number}
               />
             </React.Fragment>
           ) : null}
-          <h3 className="sidebar-title2">
+          {/* <h3 className="sidebar-title2">
             This function across the entire tree
           </h3>
-          <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value
-              ? `${number(
-                  totalTimeForFunc.value
-                )} (${totalTimeForFuncPercent}%)`
-              : '—'}
-          </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTimeForFunc.value
-              ? `${number(selfTimeForFunc.value)} (${selfTimeForFuncPercent}%)`
-              : '—'}
-          </SidebarDetail>
+          <SidebarDetail
+            label="Running Time"
+            value={
+              totalTimeForFunc.value ? number(totalTimeForFunc.value) : '—'
+            }
+            percentage={totalTimeForFuncPercent}
+          />
+          <SidebarDetail
+            label="Self Time"
+            value={selfTimeForFunc.value ? number(selfTimeForFunc.value) : '—'}
+            percentage={selfTimeForFuncPercent}
+          />
           {totalTimeForFunc.breakdownByImplementation &&
           totalTimeForFunc.value ? (
             <React.Fragment>
@@ -387,7 +499,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
                 number={number}
               />
             </React.Fragment>
-          ) : null}
+          ) : null} */}
         </div>
       </aside>
     );

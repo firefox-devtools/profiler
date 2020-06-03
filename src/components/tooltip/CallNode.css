@@ -47,6 +47,7 @@
 }
 
 .tooltipCallNodeImplementationTiming {
+  padding-inline-end: 5px;
   white-space: nowrap;
 }
 
