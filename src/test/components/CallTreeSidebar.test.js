@@ -14,7 +14,6 @@ import {
   changeInvertCallstack,
   changeSelectedThread,
 } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -102,39 +101,6 @@ describe('CallTreeSidebar', function() {
 
     selectNode([H, B, A]);
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('shows samples as integral values', () => {
-    const itemsCount = 25;
-    const interval = 0.7;
-
-    const profileString = Array(itemsCount)
-      .fill('A')
-      .join('  ');
-
-    const {
-      profile,
-      funcNamesDictPerThread: [{ A }],
-    } = getProfileFromTextSamples(profileString);
-    // This is lazy but this works good enough for what we're doing here.
-    profile.meta.interval = interval;
-
-    const [thread] = profile.threads;
-    thread.samples.weight = thread.samples.time.map(() => interval);
-    const store = storeWithProfile(profile);
-    // Modify the weight of all the samples.
-
-    const { getByText } = render(
-      <Provider store={store}>
-        <CallTreeSidebar />
-      </Provider>
-    );
-
-    store.dispatch(changeSelectedCallNode(0, [A]));
-
-    const categoryLabel = getByText(/Other/);
-    const categoryValue = ensureExists(categoryLabel.nextElementSibling);
-    expect(categoryValue.textContent).toEqual('17 samples (100%)');
   });
 
   it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {
