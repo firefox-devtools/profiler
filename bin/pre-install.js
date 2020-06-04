@@ -104,9 +104,7 @@ function parseExpectedNodeVersion() {
   const circleConfig = fs.readFileSync('.circleci/config.yml', {
     encoding: 'utf8',
   });
-  const expectedNodeVersion = /image: cimg\/node:([\d.]+)/.exec(
-    circleConfig
-  );
+  const expectedNodeVersion = /image: cimg\/node:([\d.]+)/.exec(circleConfig);
   if (!expectedNodeVersion) {
     throw new Error(
       `Couldn't extract the node version from .circleci/config.yml.`
