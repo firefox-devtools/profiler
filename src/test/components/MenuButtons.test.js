@@ -9,7 +9,6 @@ import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
 import { render, fireEvent, wait } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
 import {
@@ -144,7 +143,7 @@ describe('app/MenuButtons', function() {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
       }
-      (window: any).TextEncoder = TextEncoder;
+      (window: any).TextEncoder = new TextEncoder();
     });
 
     afterAll(async function() {
