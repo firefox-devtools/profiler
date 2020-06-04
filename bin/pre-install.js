@@ -104,7 +104,7 @@ function parseExpectedNodeVersion() {
   const circleConfig = fs.readFileSync('.circleci/config.yml', {
     encoding: 'utf8',
   });
-  const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(
+  const expectedNodeVersion = /image: cimg\/node:([\d.]+)/.exec(
     circleConfig
   );
   if (!expectedNodeVersion) {
