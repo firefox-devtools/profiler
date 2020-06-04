@@ -37,7 +37,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         Occurring Thread
         :
       </div>
-      Renderer (123456)
+      Renderer (TID: 123456)
     </div>
   </div>
   <div

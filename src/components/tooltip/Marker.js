@@ -699,6 +699,58 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     return page ? page.url : null;
   };
 
+  /**
+   * Either print the thread name that marker is in, or get the thread name from
+   * the threadId field if it's given. The second case is useful when a marker
+   * belongs to another thread but in this thread for some limitations in the
+   * platform side. For example, FileIO marker may belong to another thread if
+   * they have threadId field.
+   */
+  _getThreadDetail = (
+    marker: Marker,
+    threadName: ?string,
+    threadIdToNameMap: Map<number, string>
+  ): Array<React.Element<typeof TooltipDetail>> => {
+    const data = marker.data;
+    let threadDetail = null;
+
+    if (data && data.threadId !== undefined) {
+      const threadId = data.threadId;
+
+      const occurringThreadName = threadIdToNameMap.get(threadId);
+      threadDetail = [
+        <TooltipDetail label="Recording Thread" key="recording">
+          {threadName}
+        </TooltipDetail>,
+      ];
+
+      // If we have the thread information of the occurring thread, then show.
+      // Otherwise, only show the thread ID.
+      if (occurringThreadName !== undefined) {
+        threadDetail.push(
+          <TooltipDetail
+            label="Occurring Thread"
+            key="occurring"
+          >{`${occurringThreadName} (TID: ${threadId})`}</TooltipDetail>
+        );
+      } else {
+        threadDetail.push(
+          <TooltipDetail label="Occurring Thread ID" key="occurring">
+            {threadId}
+          </TooltipDetail>
+        );
+      }
+    } else {
+      threadDetail = [
+        <TooltipDetail label="Thread" key="thread">
+          {threadName}
+        </TooltipDetail>,
+      ];
+    }
+
+    return threadDetail;
+  };
+
   render() {
     const {
       marker,
@@ -717,42 +769,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
       zeroAt
     );
-
-    // FileIO markers can belong to different threads.
-    let threadDetail = null;
-    const data = marker.data;
-    if (data && data.type === 'FileIO' && data.threadId !== undefined) {
-      const theadId = data.threadId;
-      const occurringThreadName = threadIdToNameMap.get(theadId);
-      threadDetail = [
-        <TooltipDetail label="Recording Thread" key="recording">
-          {threadName}
-        </TooltipDetail>,
-      ];
-
-      // If we have the thread information of the occurring thread, then show.
-      // Otherwise, only show the thread ID.
-      if (occurringThreadName !== undefined) {
-        threadDetail.push(
-          <TooltipDetail
-            label="Occurring Thread"
-            key="occurring"
-          >{`${occurringThreadName} (${theadId})`}</TooltipDetail>
-        );
-      } else {
-        threadDetail.push(
-          <TooltipDetail label="Occurring Thread ID" key="occurring">
-            {theadId}
-          </TooltipDetail>
-        );
-      }
-    } else {
-      threadDetail = [
-        <TooltipDetail label="Thread" key="thread">
-          {threadName}
-        </TooltipDetail>,
-      ];
-    }
+    const threadDetail = this._getThreadDetail(
+      marker,
+      threadName,
+      threadIdToNameMap
+    );
 
     return (
       <div className={classNames('tooltipMarker', className)}>
