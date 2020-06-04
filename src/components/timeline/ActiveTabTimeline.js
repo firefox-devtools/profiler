@@ -67,7 +67,7 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
       this.setState(prevState => {
         return {
           initialSelected: el,
-          forceLayoutGeneration: ++prevState.forceLayoutGeneration,
+          forceLayoutGeneration: prevState.forceLayoutGeneration + 1,
         };
       });
     } else {

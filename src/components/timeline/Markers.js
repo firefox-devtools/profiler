@@ -280,6 +280,7 @@ type State = {
 };
 
 class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
+  _container: HTMLElement | null = null;
   state = {
     hoveredItem: null,
     mouseDownItem: null,
@@ -410,6 +411,30 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     });
   };
 
+  _stopPropagation(e: TransitionEvent) {
+    e.stopPropagation();
+  }
+
+  componentDidMount() {
+    const container = this._container;
+    if (container !== null) {
+      // Stop the propagation of transitionend so we won't fire multiple events
+      // on the active tab resource track `transitionend` event.
+      container.addEventListener('transitionend', this._stopPropagation);
+    }
+  }
+
+  componentWillUnmount() {
+    const container = this._container;
+    if (container !== null) {
+      container.removeEventListener('transitionend', this._stopPropagation);
+    }
+  }
+
+  _takeContainerRef = (el: HTMLElement | null) => {
+    this._container = el;
+  };
+
   render() {
     const {
       additionalClassName,
@@ -432,6 +457,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           additionalClassName,
           isSelected ? 'selected' : null
         )}
+        ref={this._takeContainerRef}
       >
         <ContextMenuTrigger id="MarkerContextMenu">
           <TimelineMarkersCanvas
