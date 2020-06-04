@@ -16,6 +16,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getEmptyThread } from '../../profile-logic/data-structures';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
@@ -359,7 +360,7 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'FileIO (non-main thread)',
+        'FileIO (non-profiled thread)',
         114.5,
         {
           type: 'FileIO',
@@ -630,6 +631,69 @@ describe('TooltipMarker', function() {
           contentType: null,
         },
       })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders profiled off-main thread FileIO markers properly', () => {
+    const threadId = 123456;
+    // First, create a profile with one stack, so that the stack table contains
+    // something that we can refer to from the FileIO marker cause.
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      _main
+      XRE_main
+      XREMain::XRE_main
+      mozilla::GeckoRestyleManager::PostRestyleEvent
+      nsRefreshDriver::AddStyleFlushObserver
+    `);
+
+    // Add another thread with the thread Id we are going to refer from the marker.
+    profile.threads[1] = getEmptyThread();
+    profile.threads[1].name = 'Renderer';
+    profile.threads[1].tid = threadId;
+
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      [
+        'FileIO (non-main thread)',
+        114.5,
+        {
+          type: 'FileIO',
+          startTime: 114,
+          endTime: 115,
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+          threadId: threadId,
+        },
+      ],
+    ]);
+
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+    const threadIndex = getSelectedThreadIndex(state);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
+      state
+    );
+
+    // Render the first marker
+    const marker = getMarker(markerIndexes[0]);
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          marker={marker}
+          threadIndex={threadIndex}
+          className="propClass"
+        />
+      </Provider>
     );
 
     expect(container.firstChild).toMatchSnapshot();
