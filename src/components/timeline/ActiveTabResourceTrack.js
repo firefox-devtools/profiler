@@ -104,24 +104,31 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
   };
 
   componentDidMount() {
-    if (this._isInitialSelectedPane && this._container !== null) {
-      // Handle the scrolling of the initial selected track into view.
-      this.props.setInitialSelected(this._container);
+    const container = this._container;
+    if (container !== null) {
+      if (this._isInitialSelectedPane) {
+        // Handle the scrolling of the initial selected track into view.
+        this.props.setInitialSelected(container);
+      }
+
+      // Add an event listener for the end of transition so we can make sure
+      // opened tracks are still in the viewport.
+      container.addEventListener('transitionend', this._scrollIfNecessary);
     }
   }
 
-  componentDidUpdate(_, prevState) {
-    const { setInitialSelected } = this.props;
-
-    if (!prevState.isOpen && this.state.isOpen && this._container !== null) {
-      // Scroll to the expanded resource track after it's fully opened.
-      setTimeout(() => {
-        if (this._container !== null) {
-          setInitialSelected(this._container, true);
-        }
-      }, 200); // We need to wait for the transition.
+  componentWillUnmount() {
+    const container = this._container;
+    if (container !== null) {
+      container.removeEventListener('transitionend', this._scrollIfNecessary);
     }
   }
+
+  _scrollIfNecessary = () => {
+    if (this.state.isOpen && this._container !== null) {
+      this.props.setInitialSelected(this._container, true);
+    }
+  };
 
   _takeContainerRef = (el: HTMLElement | null) => {
     const { isSelected } = this.props;
