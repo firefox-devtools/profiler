@@ -1190,6 +1190,7 @@ const _upgraders = {
   },
   [29]: profile => {
     // The sample and allocation properties "duration" were changed to "weight"
+    // The weight and weightType fields were made non-optional.
     for (const thread of profile.threads) {
       if (thread.samples.duration) {
         thread.samples.weightType = 'samples';
@@ -1207,6 +1208,14 @@ const _upgraders = {
         thread.jsAllocations.weightType = 'bytes';
         thread.jsAllocations.weight = thread.jsAllocations.duration;
         delete thread.jsAllocations.duration;
+      }
+
+      if (!thread.weights) {
+        thread.weight = null;
+      }
+
+      if (!thread.weightType) {
+        thread.weightType = 'samples';
       }
     }
   },
