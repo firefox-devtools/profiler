@@ -15,6 +15,7 @@ import {
   getPreviewSelection,
   getActiveTabGlobalTrackFromReference,
   getActiveTabResourceTrackFromReference,
+  getActiveTabGlobalTracks,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -477,6 +478,31 @@ export function selectActiveTabTrack(
       selectedThreadIndex,
       selectedTab,
     });
+  };
+}
+
+/**
+ * An action for selecting the main track of active tab view directly.
+ * This is handy for some cases where we need to select the main track
+ * without actually clicking on it (e.g. closing event of resources panel).
+ */
+export function selectActiveTabMainTrack(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const globalTracks = getActiveTabGlobalTracks(getState());
+    const mainTrackIndex = globalTracks.findIndex(
+      track => track.type === 'tab'
+    );
+
+    if (mainTrackIndex === -1) {
+      throw new Error('Failed to find the main track index in active tab view');
+    }
+
+    dispatch(
+      selectActiveTabTrack({
+        type: 'global',
+        trackIndex: mainTrackIndex,
+      })
+    );
   };
 }
 
