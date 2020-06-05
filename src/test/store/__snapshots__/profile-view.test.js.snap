@@ -351,6 +351,7 @@ Object {
           7,
           8,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -555,6 +556,7 @@ Object {
         "length": 0,
         "stack": Array [],
         "time": Array [],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [],
@@ -849,6 +851,7 @@ Array [
         7,
         8,
       ],
+      "weightType": "samples",
     },
     "stackTable": Object {
       "category": Array [
@@ -1053,6 +1056,7 @@ Array [
       "length": 0,
       "stack": Array [],
       "time": Array [],
+      "weightType": "samples",
     },
     "stackTable": Object {
       "category": Array [],
@@ -2190,6 +2194,7 @@ Object {
       6,
     ],
     "weight": undefined,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -2573,6 +2578,7 @@ Object {
       5,
     ],
     "weight": undefined,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -2884,6 +2890,7 @@ Object {
       6,
     ],
     "weight": undefined,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -3195,6 +3202,7 @@ Object {
       6,
     ],
     "weight": undefined,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -3524,6 +3532,7 @@ Object {
       7,
       8,
     ],
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [

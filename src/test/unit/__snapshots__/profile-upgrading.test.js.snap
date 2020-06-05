@@ -331,6 +331,7 @@ Object {
           2574592843.502,
           2574592844.132,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -539,6 +540,7 @@ Object {
           2574592843.035,
           2574592843.057,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -713,6 +715,7 @@ Object {
           2574592868.3980002,
           2574592868.406,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1077,6 +1080,7 @@ Object {
           2574592869.395,
           2574592870.224,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1334,6 +1338,7 @@ Object {
           2574592877.4830003,
           2574592877.49,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1584,6 +1589,7 @@ Object {
           2574592880.015,
           2574592880.252,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1771,6 +1777,7 @@ Object {
           2574592938.835,
           2574592938.8430004,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1939,6 +1946,7 @@ Object {
           2574592945.479,
           2574592945.4859996,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2113,6 +2121,7 @@ Object {
           2574592945.797,
           2574592945.803,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2291,6 +2300,7 @@ Object {
           2574592946.0769997,
           2574592946.085,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2482,6 +2492,7 @@ Object {
           2574592948.136,
           2574592948.142,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -3183,6 +3194,7 @@ Object {
           2574592948.33,
           2574592948.337,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -4032,6 +4044,7 @@ Object {
           2574592948.337,
           2574592948.342,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -4881,6 +4894,7 @@ Object {
           2574592948.397,
           2574592948.403,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -5734,6 +5748,7 @@ Object {
           2574592948.419,
           2574592948.428,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -6374,6 +6389,7 @@ Object {
         "time": Array [
           2574592949.428,
         ],
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
