@@ -351,6 +351,7 @@ Object {
           7,
           8,
         ],
+        "weight": null,
         "weightType": "samples",
       },
       "stackTable": Object {
@@ -556,6 +557,7 @@ Object {
         "length": 0,
         "stack": Array [],
         "time": Array [],
+        "weight": null,
         "weightType": "samples",
       },
       "stackTable": Object {
@@ -851,6 +853,7 @@ Array [
         7,
         8,
       ],
+      "weight": null,
       "weightType": "samples",
     },
     "stackTable": Object {
@@ -1056,6 +1059,7 @@ Array [
       "length": 0,
       "stack": Array [],
       "time": Array [],
+      "weight": null,
       "weightType": "samples",
     },
     "stackTable": Object {
@@ -2193,7 +2197,7 @@ Object {
       5,
       6,
     ],
-    "weight": undefined,
+    "weight": null,
     "weightType": "samples",
   },
   "stackTable": Object {
@@ -2577,7 +2581,7 @@ Object {
       4,
       5,
     ],
-    "weight": undefined,
+    "weight": null,
     "weightType": "samples",
   },
   "stackTable": Object {
@@ -2889,7 +2893,7 @@ Object {
       5,
       6,
     ],
-    "weight": undefined,
+    "weight": null,
     "weightType": "samples",
   },
   "stackTable": Object {
@@ -3201,7 +3205,7 @@ Object {
       5,
       6,
     ],
-    "weight": undefined,
+    "weight": null,
     "weightType": "samples",
   },
   "stackTable": Object {
@@ -3532,6 +3536,7 @@ Object {
       7,
       8,
     ],
+    "weight": null,
     "weightType": "samples",
   },
   "stackTable": Object {

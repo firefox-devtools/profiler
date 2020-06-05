@@ -798,6 +798,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
     weightType: 'samples',
+    weight: null,
     length: geckoSamples.length,
   };
 
