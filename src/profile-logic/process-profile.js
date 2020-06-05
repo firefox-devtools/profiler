@@ -797,6 +797,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
+    weightType: 'samples',
     length: geckoSamples.length,
   };
 

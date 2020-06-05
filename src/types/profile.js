@@ -130,7 +130,7 @@ type SamplesLikeTableShape = {
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight?: number[],
-  weightType?: WeightType,
+  weightType: WeightType,
   length: number,
 };
 
@@ -161,7 +161,7 @@ export type SamplesTable = {|
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight?: number[],
-  weightType?: WeightType,
+  weightType: WeightType,
   length: number,
 |};
 

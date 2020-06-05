@@ -1237,6 +1237,7 @@ export function filterThreadSamplesToRange(
     weight: samples.weight
       ? samples.weight.slice(beginSampleIndex, endSampleIndex)
       : undefined,
+    weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
   };
 

@@ -913,6 +913,7 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
+    weightType: 'samples',
     length: endOfEvents,
   };
 
