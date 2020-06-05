@@ -126,6 +126,7 @@ export default function getProfile(): Profile {
     stack: [4, 6],
     time: [0, 0],
     weightType: 'samples',
+    weight: null,
     length: 2,
   };
 

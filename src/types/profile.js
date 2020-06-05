@@ -129,7 +129,7 @@ type SamplesLikeTableShape = {
   time: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
-  weight?: number[],
+  weight: null | number[],
   weightType: WeightType,
   length: number,
 };
@@ -160,7 +160,7 @@ export type SamplesTable = {|
   time: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
-  weight?: number[],
+  weight: null | number[],
   weightType: WeightType,
   length: number,
 |};

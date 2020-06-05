@@ -56,6 +56,7 @@ export function getEmptySamplesTableWithEventDelay(): SamplesTable {
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
     weightType: 'samples',
+    weight: null,
     eventDelay: [],
     stack: [],
     time: [],
@@ -75,6 +76,7 @@ export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
     weightType: 'samples',
+    weight: null,
     responsiveness: [],
     stack: [],
     time: [],
