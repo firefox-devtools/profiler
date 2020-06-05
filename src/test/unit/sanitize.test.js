@@ -393,6 +393,68 @@ describe('sanitizePII', function() {
       }
     }
   });
+
+  it('should sanitize the FileIO marker paths', function() {
+    const marker1File = 'permissions.sqlite-journal';
+    const marker2File = 'CustomizableUI.jsm';
+    const profile = getProfileWithMarkers([
+      [
+        'FileIO',
+        2,
+        {
+          type: 'FileIO',
+          startTime: 1,
+          endTime: 2,
+          source: 'PoisonIOInterposer',
+          filename:
+            '/Users/username/Library/Application Support/Firefox/Profiles/profile-id.default/' +
+            marker1File,
+          operation: 'create/open',
+          cause: {
+            time: 1.0,
+            stack: 0,
+          },
+        },
+      ],
+      [
+        'FileIO',
+        4,
+        {
+          type: 'FileIO',
+          startTime: 3,
+          endTime: 4,
+          source: 'PoisonIOInterposer',
+          filename:
+            'C:\\Users\\username\\mozilla-central\\obj-mc-dbg\\dist\\bin\\browser\\modules\\' +
+            marker2File,
+          operation: 'create/open',
+          cause: {
+            time: 1.0,
+            stack: 0,
+          },
+        },
+      ],
+    ]);
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveUrls: true,
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+    expect(sanitizedProfile.threads.length).toEqual(1);
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(2);
+
+    const marker1 = thread.markers.data[0];
+    const marker2 = thread.markers.data[1];
+
+    // Marker filename fields should be there.
+    if (!marker1 || !marker1.filename || !marker2 || !marker2.filename) {
+      throw new Error('Failed to find filename property in the payload');
+    }
+
+    // Now check the filename fields and make sure they are sanitized.
+    expect(marker1.filename).toBe('<PATH>/' + marker1File);
+    expect(marker2.filename).toBe('<PATH>\\' + marker2File);
+  });
 });
 
 describe('getRemoveProfileInformation', function() {
