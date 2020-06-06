@@ -3,7 +3,7 @@ branches:
     - upgrade-to-node-v12
 clone_depth: 5
 environment:
-  nodejs_version: "12"
+  nodejs_version: "12.18"
 platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
