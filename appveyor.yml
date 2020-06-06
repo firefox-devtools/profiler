@@ -1,3 +1,6 @@
+branches:
+  only:
+    - upgrade-to-node-v12
 clone_depth: 5
 environment:
   nodejs_version: "12"
