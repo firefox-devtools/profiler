@@ -8,7 +8,13 @@ platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
   # 1. Select the right node
-  - ps: Install-Product node $env:nodejs_version $env:platform
+  - ps: |
+      try {
+      Install-Product node $env:nodejs_version $env:platform
+      } catch {
+      echo "Unable to install node $env:nodejs_version, trying update..."
+      Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform
+      }
   # 2. Setup the project
   - yarn install --frozen-lockfile
 
