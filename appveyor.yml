@@ -1,6 +1,3 @@
-branches:
-  only:
-    - upgrade-to-node-v12
 clone_depth: 5
 environment:
   nodejs_version: "12.18"
@@ -8,13 +5,7 @@ platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
   # 1. Select the right node
-  - ps: |
-      try {
-      Install-Product node $env:nodejs_version $env:platform
-      } catch {
-      echo "Unable to install node $env:nodejs_version, trying update..."
-      Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform
-      }
+  - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version) $env:platform
   # 2. Setup the project
   - yarn install --frozen-lockfile
 
