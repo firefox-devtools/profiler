@@ -61,6 +61,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
   _orderedImplementations: $ReadOnlyArray<StackImplementation> = [
     'native',
     'interpreter',
+    'blinterp',
     'baseline',
     'ion',
     'unknown',

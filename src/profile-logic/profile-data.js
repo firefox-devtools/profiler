@@ -319,7 +319,12 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+export type JsImplementation =
+  | 'interpreter'
+  | 'blinterp'
+  | 'baseline'
+  | 'ion'
+  | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 export type OneCategoryBreakdown = {|
@@ -368,6 +373,7 @@ export function getJsImplementationForStack(
 
   switch (jsImplementation) {
     case 'baseline':
+    case 'blinterp':
     case 'ion':
       return jsImplementation;
     default:
@@ -2074,11 +2080,12 @@ export function getFriendlyStackTypeName(
   implementation: StackImplementation
 ): string {
   switch (implementation) {
-    case 'ion':
-    case 'baseline':
-      return `JS JIT (${implementation})`;
     case 'interpreter':
       return 'JS interpreter';
+    case 'blinterp':
+    case 'baseline':
+    case 'ion':
+      return `JS JIT (${implementation})`;
     case 'native':
       return 'Native code';
     case 'unknown':
