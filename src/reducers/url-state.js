@@ -121,6 +121,7 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'ISOLATE_LOCAL_TRACK':
+    case 'TOGGLE_RESOURCES_PANEL':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndex: ThreadIndex);
     case 'SANITIZED_PROFILE_PUBLISHED': {
