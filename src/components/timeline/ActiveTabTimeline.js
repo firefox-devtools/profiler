@@ -46,19 +46,33 @@ type Props = {|
 
 type State = {|
   initialSelected: InitialSelectedTrackReference | null,
+  forceLayoutGeneration: number,
 |};
 
 class ActiveTabTimeline extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
+    forceLayoutGeneration: 0,
   };
 
   /**
    * This method collects the initially selected track's HTMLElement. This allows the timeline
    * to scroll the initially selected track into view once the page is loaded.
    */
-  setInitialSelected = (el: InitialSelectedTrackReference) => {
-    this.setState({ initialSelected: el });
+  setInitialSelected = (
+    el: InitialSelectedTrackReference,
+    forceScroll: boolean = false
+  ) => {
+    if (forceScroll) {
+      this.setState(prevState => {
+        return {
+          initialSelected: el,
+          forceLayoutGeneration: prevState.forceLayoutGeneration + 1,
+        };
+      });
+    } else {
+      this.setState({ initialSelected: el });
+    }
   };
 
   render() {
@@ -84,6 +98,7 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
+            forceLayoutGeneration={this.state.forceLayoutGeneration}
           >
             <ol className="timelineThreadList">
               {globalTracks.map((globalTrack, trackIndex) => (

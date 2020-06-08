@@ -35,7 +35,10 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
+  +setInitialSelected: (
+    el: InitialSelectedTrackReference,
+    forceScroll?: boolean
+  ) => void,
 |};
 
 type StateProps = {|
@@ -93,7 +96,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
   }
 
   renderResourcesPanel() {
-    const { resourceTracks } = this.props;
+    const { resourceTracks, setInitialSelected } = this.props;
     if (resourceTracks.length === 0) {
       return null;
     }
@@ -101,7 +104,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     return (
       <ActiveTabResourcesPanel
         resourceTracks={resourceTracks}
-        setIsInitialSelectedPane={this.setIsInitialSelectedPane}
+        setInitialSelected={setInitialSelected}
       />
     );
   }
@@ -111,12 +114,8 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     this._container = el;
 
     if (isSelected) {
-      this.setIsInitialSelectedPane(true);
+      this._isInitialSelectedPane = true;
     }
-  };
-
-  setIsInitialSelectedPane = (value: boolean) => {
-    this._isInitialSelectedPane = value;
   };
 
   componentDidMount() {
