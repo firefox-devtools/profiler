@@ -796,7 +796,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs
+        Include resource URLs and paths
       </label>
       <label
         class="photon-label menuButtonsPublishDataChoicesLabel"
@@ -898,7 +898,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs
+        Include resource URLs and paths
       </label>
       <label
         class="photon-label menuButtonsPublishDataChoicesLabel"
