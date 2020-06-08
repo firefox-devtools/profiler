@@ -22,17 +22,52 @@ import {
 } from '../fixtures/profiles/processed-profile';
 
 import type { CallNodePath } from 'firefox-profiler/types';
+import { ensureExists } from '../../utils/flow';
 
 describe('CallTreeSidebar', function() {
-  function setup() {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+  function getProfileWithCategories() {
+    return getProfileFromTextSamples(`
       A    A    A              A
       B    B    B              B
       Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
       D    F    I[cat:Idle]
       Ejs  Ejs
     `);
+  }
 
+  function getProfileWithSubCategories() {
+    const result = getProfileFromTextSamples(`
+      A              A              A
+      B              B              B
+      C[cat:Layout]  C[cat:Layout]  C[cat:Layout]
+                                    D[cat:Layout]
+    `);
+
+    const {
+      profile,
+      funcNamesDictPerThread: [{ C, D }],
+    } = result;
+    const layout = ensureExists(
+      profile.meta.categories.find(category => category.name === 'Layout'),
+      'Could not find Layout category.'
+    );
+    const [{ frameTable, stackTable }] = profile.threads;
+    const fakeC = layout.subcategories.length;
+    layout.subcategories.push('FakeSubCategoryC');
+    const fakeD = layout.subcategories.length;
+    layout.subcategories.push('FakeSubCategoryD');
+
+    // The frames, funcs, and stacks all share the same indexes with the layout
+    // of the stacks.
+    frameTable.subcategory[C] = fakeC;
+    frameTable.subcategory[D] = fakeD;
+    stackTable.subcategory[C] = fakeC;
+    stackTable.subcategory[D] = fakeD;
+
+    return result;
+  }
+
+  function setup({ profile, funcNamesDictPerThread }) {
     const store = storeWithProfile(profile);
 
     const selectNode = (nodePath: CallNodePath) => {
@@ -48,7 +83,7 @@ describe('CallTreeSidebar', function() {
     );
     return {
       ...renderResult,
-      store,
+      ...store,
       funcNamesDict: funcNamesDictPerThread[0],
       selectNode,
       invertCallstack,
@@ -60,7 +95,7 @@ describe('CallTreeSidebar', function() {
       selectNode,
       funcNamesDict: { A, B, Cjs, D, H, Ejs },
       container,
-    } = setup();
+    } = setup(getProfileWithCategories());
 
     expect(container.firstChild).toMatchSnapshot();
 
@@ -85,7 +120,7 @@ describe('CallTreeSidebar', function() {
       invertCallstack,
       funcNamesDict: { A, B, H, Ejs, I },
       container,
-    } = setup();
+    } = setup(getProfileWithCategories());
 
     invertCallstack();
     expect(container.firstChild).toMatchSnapshot();
@@ -105,36 +140,50 @@ describe('CallTreeSidebar', function() {
 
   it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {
     const {
-      profile,
-      funcNamesDictPerThread: [{ A, B, D }],
-    } = getMergedProfileFromTextSamples(
-      `
-      A  A  A
-      B  B  C
-      D  E  F
-    `,
-      `
-      A  A  A
-      B  B  B
-      G  I  E
-    `
+      dispatch,
+      queryByText,
+      getByText,
+      funcNamesDict: { A, B, D },
+    } = setup(
+      getMergedProfileFromTextSamples(
+        `
+          A  A  A
+          B  B  C
+          D  E  F
+        `,
+        `
+          A  A  A
+          B  B  B
+          G  I  E
+        `
+      )
     );
 
-    const store = storeWithProfile(profile);
-
-    store.dispatch(changeSelectedThread(2));
-    store.dispatch(changeSelectedCallNode(2, [A]));
-
-    const { queryByText, getByText } = render(
-      <Provider store={store}>
-        <CallTreeSidebar />
-      </Provider>
-    );
+    dispatch(changeSelectedThread(2));
+    dispatch(changeSelectedCallNode(2, [A]));
 
     expect(queryByText(/Implementation/)).toBe(null);
 
-    store.dispatch(changeSelectedCallNode(2, [A, B, D]));
-
+    dispatch(changeSelectedCallNode(2, [A, B, D]));
     expect(getByText(/Implementation/)).not.toBe(null);
+  });
+
+  it('can expand subcategories', () => {
+    const {
+      selectNode,
+      container,
+      queryByText,
+      getByText,
+      funcNamesDict: { A, B, C },
+    } = setup(getProfileWithSubCategories());
+    selectNode([A, B, C]);
+    expect(queryByText('FakeSubCategoryC')).toBe(null);
+
+    const layoutCategory = getByText('Layout');
+    layoutCategory.click();
+
+    getByText('FakeSubCategoryC');
+
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

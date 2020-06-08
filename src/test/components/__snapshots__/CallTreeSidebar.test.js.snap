@@ -1,5 +1,238 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CallTreeSidebar can expand subcategories 1`] = `
+<aside
+  class="sidebar sidebar-calltree"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    <header
+      class="sidebar-titlegroup"
+    >
+      <h2
+        class="sidebar-title can-select-content"
+        title="C
+(click to select)"
+      >
+        <input
+          class="can-select-content-input"
+          readonly=""
+          value="C"
+        />
+      </h2>
+    </header>
+    <h4
+      class="sidebar-title3"
+    >
+      <div>
+        Call node details
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      3.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      67%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      <div>
+        <button
+          class="sidebar-toggle expanded"
+          data-category="Layout"
+          type="button"
+        >
+          Layout
+        </button>
+      </div>
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100%;"
+      />
+    </div>
+    <div
+      class="sidebar-label sidebar-label-indent"
+    >
+      FakeSubCategoryC
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      67%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-label sidebar-label-indent"
+    >
+      FakeSubCategoryD
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      33%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100%;"
+      />
+    </div>
+  </div>
+</aside>
+`;
+
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
 <div
   class="sidebar sidebar-calltree"
