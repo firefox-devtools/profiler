@@ -356,32 +356,6 @@ export type TimingsForPath = {|
 |};
 
 /**
- * This function Returns the JS implementation information for a specific stack.
- */
-export function getJsImplementationForStack(
-  stackIndex: IndexIntoStackTable,
-  { stackTable, frameTable, stringTable }: Thread
-): JsImplementation {
-  const frameIndex = stackTable.frame[stackIndex];
-  const jsImplementationStrIndex = frameTable.implementation[frameIndex];
-
-  if (jsImplementationStrIndex === null) {
-    return 'interpreter';
-  }
-
-  const jsImplementation = stringTable.getString(jsImplementationStrIndex);
-
-  switch (jsImplementation) {
-    case 'baseline':
-    case 'blinterp':
-    case 'ion':
-      return jsImplementation;
-    default:
-      return 'unknown';
-  }
-}
-
-/**
  * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
  * instead of a CallNodePath.
  */
@@ -425,12 +399,29 @@ export function getTimingsForCallNodeIndex(
   sampleIndexOffset: number,
   categories: CategoryList
 ): TimingsForPath {
-  const { samples, stackTable, funcTable } = thread;
+  /* ------------ Variables definitions ------------*/
+
+  // This is the data from the filtered thread that we'll loop over.
+  const { samples, stackTable, stringTable } = thread;
+
+  // This is the data from the unfiltered thread that we'll use to gather
+  // category and JS implementation information. Note that samples are offset by
+  // `sampleIndexOffset` because of range filtering.
   const {
     samples: unfilteredSamples,
     stackTable: unfilteredStackTable,
+    funcTable: unfilteredFuncTable,
+    frameTable: unfilteredFrameTable,
   } = unfilteredThread;
 
+  // This holds the category index for the JavaScript category, so that we can
+  // use it to quickly check the category later on.
+  const javascriptCategoryIndex = categories.findIndex(
+    ({ name }) => name === 'JavaScript'
+  );
+
+  // This object holds the timings for the current call node path, specified by
+  // needleNodeIndex.
   const pathTimings: ItemTimings = {
     selfTime: {
       value: 0,
@@ -443,6 +434,9 @@ export function getTimingsForCallNodeIndex(
       breakdownByCategory: null,
     },
   };
+
+  // This object holds the timings for the function (all occurrences) pointed by
+  // the specified call node.
   const funcTimings: ItemTimings = {
     selfTime: {
       value: 0,
@@ -455,14 +449,91 @@ export function getTimingsForCallNodeIndex(
       breakdownByCategory: null,
     },
   };
+
+  // This holds the root time, it's incremented for all samples and is useful to
+  // have an absolute value to compare the other values with.
   let rootTime = 0;
 
-  if (needleNodeIndex === null) {
-    // No index was provided, return empty timing information.
-    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  /* -------- End of variable definitions ------- */
+
+  /* ------------ Functions definitions --------- *
+   * We define functions here so that they have easy access to the variables and
+   * the algorithm's parameters. */
+
+  /**
+   * This function is called for native stacks. If the native stack has the
+   * 'JavaScript' category, then we move up the call tree to find the nearest
+   * ancestor that's JS and returns its JS implementation.
+   */
+  function getImplementationForNativeStack(
+    unfilteredStackIndex: IndexIntoStackTable
+  ): StackImplementation {
+    const category = unfilteredStackTable.category[unfilteredStackIndex];
+    if (category !== javascriptCategoryIndex) {
+      return 'native';
+    }
+
+    for (
+      let currentStackIndex = unfilteredStackIndex;
+      currentStackIndex !== null;
+      currentStackIndex = unfilteredStackTable.prefix[currentStackIndex]
+    ) {
+      const frameIndex = unfilteredStackTable.frame[currentStackIndex];
+      const funcIndex = unfilteredFrameTable.func[frameIndex];
+      const isJS = unfilteredFuncTable.isJS[funcIndex];
+      if (isJS) {
+        return getImplementationForJsStack(frameIndex);
+      }
+    }
+
+    // No JS frame was found in the ancestors, this is weird but why not?
+    return 'native';
   }
 
-  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
+  /**
+   * This function Returns the JS implementation information for a specific JS stack.
+   */
+  function getImplementationForJsStack(
+    unfilteredFrameIndex: IndexIntoFrameTable
+  ): JsImplementation {
+    const jsImplementationStrIndex =
+      unfilteredFrameTable.implementation[unfilteredFrameIndex];
+
+    if (jsImplementationStrIndex === null) {
+      return 'interpreter';
+    }
+
+    const jsImplementation = stringTable.getString(jsImplementationStrIndex);
+
+    switch (jsImplementation) {
+      case 'baseline':
+      case 'blinterp':
+      case 'ion':
+        return jsImplementation;
+      default:
+        return 'unknown';
+    }
+  }
+
+  function getImplementationForStack(
+    thisSampleIndex: IndexIntoSamplesTable
+  ): StackImplementation {
+    const stackIndex =
+      unfilteredSamples.stack[thisSampleIndex + sampleIndexOffset];
+    if (stackIndex === null) {
+      // This should not happen in the unfiltered thread.
+      console.error('We got a null stack, this should not happen.');
+      return 'native';
+    }
+
+    const frameIndex = unfilteredStackTable.frame[stackIndex];
+    const funcIndex = unfilteredFrameTable.func[frameIndex];
+    const implementation = unfilteredFuncTable.isJS[funcIndex]
+      ? getImplementationForJsStack(frameIndex)
+      : getImplementationForNativeStack(stackIndex);
+
+    return implementation;
+  }
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
@@ -477,16 +548,13 @@ export function getTimingsForCallNodeIndex(
     },
     sampleIndex: IndexIntoSamplesTable,
     stackIndex: IndexIntoStackTable,
-    funcIndex: IndexIntoFuncTable,
     duration: Milliseconds
   ): void {
     // Step 1: increment the total value
     timings.value += duration;
 
-    // Step 2: find the implementation value for this stack
-    const implementation = funcTable.isJS[funcIndex]
-      ? getJsImplementationForStack(stackIndex, thread)
-      : 'native';
+    // Step 2: find the implementation value for this sample
+    const implementation = getImplementationForStack(sampleIndex);
 
     // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
@@ -521,6 +589,16 @@ export function getTimingsForCallNodeIndex(
       ] += duration;
     }
   }
+  /* ------------- End of function definitions ------------- */
+
+  /* ------------ Start of the algorithm itself ------------ */
+  if (needleNodeIndex === null) {
+    // No index was provided, return empty timing information.
+    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  }
+
+  // This is the function index for this call node.
+  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
 
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
@@ -546,7 +624,6 @@ export function getTimingsForCallNodeIndex(
           pathTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          thisFunc,
           duration
         );
       }
@@ -556,7 +633,6 @@ export function getTimingsForCallNodeIndex(
           funcTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          thisFunc,
           duration
         );
       }
@@ -590,7 +666,6 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            thisFunc,
             duration
           );
         }
@@ -609,7 +684,6 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            thisFunc,
             duration
           );
         }
@@ -643,7 +717,6 @@ export function getTimingsForCallNodeIndex(
             funcTimings.selfTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
             duration
           );
         }
@@ -655,7 +728,6 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
             duration
           );
         }
@@ -667,7 +739,6 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
             duration
           );
         }
