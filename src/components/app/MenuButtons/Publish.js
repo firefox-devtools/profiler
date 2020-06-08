@@ -137,7 +137,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               'Include hidden time range'
             )}
             {this._renderCheckbox('includeScreenshots', 'Include screenshots')}
-            {this._renderCheckbox('includeUrls', 'Include resource URLs')}
+            {this._renderCheckbox(
+              'includeUrls',
+              'Include resource URLs and paths'
+            )}
             {this._renderCheckbox(
               'includeExtension',
               'Include extension information'
