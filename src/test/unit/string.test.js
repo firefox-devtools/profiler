@@ -4,7 +4,7 @@
 
 // @flow
 
-import { removeURLs } from '../../utils/string';
+import { removeURLs, removeFilePath } from '../../utils/string';
 
 describe('utils/string', function() {
   describe('removeURLs', function() {
@@ -142,6 +142,56 @@ describe('utils/string', function() {
 
       string = 'moz-extension://foo/bar/index.js';
       expect(removeURLs(string, false)).toEqual(string);
+    });
+  });
+
+  describe('removeFilePath', function() {
+    it('should remove Unix-like paths', () => {
+      // A file in the root dir.
+      let string = '/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file in a non-root dir.
+      string = '/var/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file in the Linux home dir.
+      string = 'home/username/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file in a Unix derived home dir.
+      string = 'users/username/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file in another Unix derived home dir.
+      string = 'user/username/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file in the macOS home dir.
+      string = '/Users/username/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file path with spaces.
+      string = '/path/with spaces in it/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+    });
+
+    it('should remove windows paths', () => {
+      // A file in the root dir.
+      let string = `C:\\test.txt`;
+      expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
+      // A file in a non-root dir.
+      string = 'C:\\Documents\\test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
+      // A file in the Windows home dir.
+      string = 'C:\\Users\\username\\test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
+      // A file path with spaces.
+      string = 'C:\\path\\with spaces in it\\test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
+    });
+
+    it('should not remove non paths', () => {
+      // It can be an empty string.
+      let string = '';
+      expect(removeFilePath(string)).toEqual(string);
+      // Or less likely, something else
+      string = 'not a path';
+      expect(removeFilePath(string)).toEqual(string);
     });
   });
 });

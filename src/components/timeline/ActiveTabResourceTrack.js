@@ -19,13 +19,17 @@ import type { ActiveTabTrackReference } from '../../types/actions';
 import type {
   TrackIndex,
   ActiveTabResourceTrack,
+  InitialSelectedTrackReference,
 } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +resourceTrack: ActiveTabResourceTrack,
   +trackIndex: TrackIndex,
-  +setIsInitialSelectedPane: (value: boolean) => void,
+  +setInitialSelected: (
+    el: InitialSelectedTrackReference,
+    forceScroll?: boolean
+  ) => void,
 |};
 
 type StateProps = {|
@@ -44,6 +48,8 @@ type State = {|
 |};
 
 class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
+  _container: HTMLElement | null = null;
+  _isInitialSelectedPane: boolean | null = null;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -93,12 +99,45 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     }
   }
 
+  setIsInitialSelectedPane = (value: boolean) => {
+    this._isInitialSelectedPane = value;
+  };
+
   componentDidMount() {
-    const { isSelected } = this.props;
-    if (isSelected) {
-      this.props.setIsInitialSelectedPane(true);
+    const container = this._container;
+    if (container !== null) {
+      if (this._isInitialSelectedPane) {
+        // Handle the scrolling of the initial selected track into view.
+        this.props.setInitialSelected(container);
+      }
+
+      // Add an event listener for the end of transition so we can make sure
+      // opened tracks are still in the viewport.
+      container.addEventListener('transitionend', this._scrollIfNecessary);
     }
   }
+
+  componentWillUnmount() {
+    const container = this._container;
+    if (container !== null) {
+      container.removeEventListener('transitionend', this._scrollIfNecessary);
+    }
+  }
+
+  _scrollIfNecessary = () => {
+    if (this.state.isOpen && this._container !== null) {
+      this.props.setInitialSelected(this._container, true);
+    }
+  };
+
+  _takeContainerRef = (el: HTMLElement | null) => {
+    const { isSelected } = this.props;
+    this._container = el;
+
+    if (isSelected) {
+      this.setIsInitialSelectedPane(true);
+    }
+  };
 
   render() {
     const { isSelected, resourceTrack } = this.props;
@@ -120,7 +159,10 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     }
 
     return (
-      <li className="timelineTrack timelineTrackResource">
+      <li
+        ref={this._takeContainerRef}
+        className="timelineTrack timelineTrackResource"
+      >
         {/* This next div is used to mirror the structure of the TimelineGlobalTrack */}
         <div
           className={classNames('timelineTrackRow timelineTrackResourceRow', {

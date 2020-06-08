@@ -3,11 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getSelectedTab, getDataSource } from '../selectors/url-state';
+import {
+  getSelectedTab,
+  getDataSource,
+  getIsActiveTabResourcesPanelOpen,
+  getSelectedThreadIndex,
+} from '../selectors/url-state';
 import { getTrackThreadHeights } from '../selectors/app';
+import { getActiveTabGlobalTracks } from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
+
 import type { Profile, ThreadIndex } from '../types/profile';
 import type { CssPixels } from '../types/units';
 import type { Action, ThunkAction } from '../types/store';
@@ -185,6 +192,30 @@ export function unregisterDragAndDropOverlay(): Action {
 /**
  * Toggle the active tab resources panel
  */
-export function toggleResourcesPanel(): Action {
-  return { type: 'TOGGLE_RESOURCES_PANEL' };
+export function toggleResourcesPanel(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
+    let selectedThreadIndex = getSelectedThreadIndex(getState());
+
+    if (isResourcesPanelOpen) {
+      // If it was open when we dispatched that action, it means we are closing this panel.
+      // We would like to also select the main track when we close this panel.
+      const globalTracks = getActiveTabGlobalTracks(getState());
+      const mainTrack = globalTracks.find(track => track.type === 'tab');
+
+      if (mainTrack === undefined) {
+        throw new Error(
+          'Failed to find the main track index in active tab view'
+        );
+      }
+
+      selectedThreadIndex = mainTrack.threadIndex;
+    }
+
+    // Toggle the resources panel eventually.
+    dispatch({
+      type: 'TOGGLE_RESOURCES_PANEL',
+      selectedThreadIndex,
+    });
+  };
 }

@@ -15,6 +15,7 @@ type Props = {
   children: React.Node,
   panelLayoutGeneration: number,
   initialSelected: InitialSelectedTrackReference | null,
+  forceLayoutGeneration?: number,
 };
 
 type State = {
@@ -52,14 +53,34 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     this._updateIndicatorStatus();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._updateIndicatorStatus();
+    const { initialSelected, forceLayoutGeneration } = this.props;
+    const container = this._container;
+
+    if (
+      forceLayoutGeneration !== undefined &&
+      forceLayoutGeneration !== prevProps.forceLayoutGeneration &&
+      initialSelected &&
+      container !== null
+    ) {
+      // If forceLayoutGeneration exists and incremented, scroll to the selected
+      // element even though it's already scrolled before.
+      const childPosition =
+        initialSelected.offsetTop + initialSelected.offsetHeight;
+      const parentPosition = container.offsetTop + container.offsetHeight;
+
+      if (childPosition > parentPosition) {
+        container.scrollTop = initialSelected.offsetTop;
+      }
+    }
+
     if (
       !this._scrolledToInitialSelected &&
-      this.props.initialSelected &&
+      initialSelected &&
       this._container
     ) {
-      this._container.scrollTop = this.props.initialSelected.offsetTop;
+      this._container.scrollTop = initialSelected.offsetTop;
       this._scrolledToInitialSelected = true;
     }
   }
