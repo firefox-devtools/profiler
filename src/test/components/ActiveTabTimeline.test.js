@@ -166,10 +166,12 @@ describe('ActiveTabTimeline', function() {
       const { profile, ...pageInfo } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
       );
+      const mainThreadIndex = 0;
+      const resourceThreadIndex = 1;
       // Setting the first thread as parent track and the second as the iframe track.
-      profile.threads[0].frameTable.innerWindowID[0] =
+      profile.threads[mainThreadIndex].frameTable.innerWindowID[0] =
         pageInfo.parentInnerWindowIDsWithChildren;
-      profile.threads[1].frameTable.innerWindowID[0] =
+      profile.threads[resourceThreadIndex].frameTable.innerWindowID[0] =
         pageInfo.iframeInnerWindowIDsWithChild;
       const store = storeWithProfile(profile);
       store.dispatch(
@@ -203,6 +205,8 @@ describe('ActiveTabTimeline', function() {
         store,
         getResourcesPanelHeader,
         getResourceFrameTrack,
+        mainThreadIndex,
+        resourceThreadIndex,
       };
     }
 
@@ -229,6 +233,30 @@ describe('ActiveTabTimeline', function() {
 
       fireEvent.click(resourcesPanelHeader);
       expect(getResourceFrameTrack()).toBeTruthy();
+    });
+
+    it('selects the main track when panel is being closed', () => {
+      const {
+        getResourcesPanelHeader,
+        getResourceFrameTrack,
+        getState,
+        mainThreadIndex,
+        resourceThreadIndex,
+      } = setup();
+      // At first, make sure the main thread is selected.
+      expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
+
+      // 1. Open the panel.
+      fireEvent.click(getResourcesPanelHeader());
+      // 2. Select the reource track.
+      fireEvent.mouseUp(ensureExists(getResourceFrameTrack()));
+      // Selected thread should be the resource now.
+      expect(getSelectedThreadIndex(getState())).toBe(resourceThreadIndex);
+
+      // 3. Close the panel.
+      fireEvent.click(getResourcesPanelHeader());
+      // Now the main thread should be selected again.
+      expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
     });
   });
 
