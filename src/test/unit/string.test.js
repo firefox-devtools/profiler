@@ -165,6 +165,9 @@ describe('utils/string', function() {
       // A file in the macOS home dir.
       string = '/Users/username/test.txt';
       expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
+      // A file path with spaces.
+      string = '/path/with spaces in it/test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>/test.txt');
     });
 
     it('should remove windows paths', () => {
@@ -177,15 +180,18 @@ describe('utils/string', function() {
       // A file in the Windows home dir.
       string = 'C:\\Users\\username\\test.txt';
       expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
+      // A file path with spaces.
+      string = 'C:\\path\\with spaces in it\\test.txt';
+      expect(removeFilePath(string)).toEqual('<PATH>\\test.txt');
     });
 
     it('should not remove non paths', () => {
       // It can be an empty string.
       let string = '';
-      expect(removeURLs(string)).toEqual(string);
+      expect(removeFilePath(string)).toEqual(string);
       // Or less likely, something else
       string = 'not a path';
-      expect(removeURLs(string)).toEqual(string);
+      expect(removeFilePath(string)).toEqual(string);
     });
   });
 });

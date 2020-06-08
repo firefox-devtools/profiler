@@ -42,13 +42,17 @@ export function removeFilePath(
 ): string {
   let pathSeparator = null;
 
-  // Figure out which separator the path uses.
-  if (filePath.includes('/')) {
+  // Figure out which separator the path uses and the last separator index.
+  let lastSeparatorIndex = filePath.lastIndexOf('/');
+  if (lastSeparatorIndex !== -1) {
     // This is a Unix-like path.
     pathSeparator = '/';
-  } else if (filePath.includes('\\')) {
-    // This is a Windows path.
-    pathSeparator = '\\';
+  } else {
+    lastSeparatorIndex = filePath.lastIndexOf('\\');
+    if (lastSeparatorIndex !== -1) {
+      // This is a Windows path.
+      pathSeparator = '\\';
+    }
   }
 
   if (pathSeparator === null) {
@@ -56,9 +60,5 @@ export function removeFilePath(
     return filePath;
   }
 
-  return (
-    redactedText +
-    pathSeparator +
-    filePath.substring(filePath.lastIndexOf(pathSeparator) + 1)
-  );
+  return redactedText + pathSeparator + filePath.slice(lastSeparatorIndex + 1);
 }
