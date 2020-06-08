@@ -46,6 +46,10 @@ type State = {
   mouseY: CssPixels,
 };
 
+function _stopPropagation(e: TransitionEvent) {
+  e.stopPropagation();
+}
+
 class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
@@ -90,10 +94,6 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     }
   }
 
-  _stopPropagation(e: TransitionEvent) {
-    e.stopPropagation();
-  }
-
   componentDidMount() {
     window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
@@ -101,7 +101,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     if (container !== null) {
       // Stop the propagation of transitionend so we won't fire multiple events
       // on the active tab resource track `transitionend` event.
-      container.addEventListener('transitionend', this._stopPropagation);
+      container.addEventListener('transitionend', _stopPropagation);
     }
   }
 
@@ -109,7 +109,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     window.removeEventListener('resize', this._resizeListener);
     const container = this._container;
     if (container !== null) {
-      container.removeEventListener('transitionend', this._stopPropagation);
+      container.removeEventListener('transitionend', _stopPropagation);
     }
   }
 

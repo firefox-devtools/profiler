@@ -32,6 +32,10 @@ type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
 type MouseEventHandler = (SyntheticMouseEvent<HTMLCanvasElement>) => any;
 
+function _stopPropagation(e: TransitionEvent) {
+  e.stopPropagation();
+}
+
 /**
  * When adding properties to these props, please consider the comment above the component.
  */
@@ -411,23 +415,19 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     });
   };
 
-  _stopPropagation(e: TransitionEvent) {
-    e.stopPropagation();
-  }
-
   componentDidMount() {
     const container = this._container;
     if (container !== null) {
       // Stop the propagation of transitionend so we won't fire multiple events
       // on the active tab resource track `transitionend` event.
-      container.addEventListener('transitionend', this._stopPropagation);
+      container.addEventListener('transitionend', _stopPropagation);
     }
   }
 
   componentWillUnmount() {
     const container = this._container;
     if (container !== null) {
-      container.removeEventListener('transitionend', this._stopPropagation);
+      container.removeEventListener('transitionend', _stopPropagation);
     }
   }
 
