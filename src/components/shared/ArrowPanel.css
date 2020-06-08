@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.arrowPanelAnchor {
+ .arrowPanelAnchor {
   position: absolute;
   z-index: 10;
   top: 75%;
@@ -45,28 +45,25 @@
 }
 
 .arrowPanel.open {
-  animation: arrowPanelAppear 400ms;
-  opacity: 1;
-  transition: none;
+  animation: arrowPanelAppear 200ms cubic-bezier(.07, .95, 0, 1);
+}
+
+@media (prefers-reduced-motion) {
+  .arrowPanel.open {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 @keyframes arrowPanelAppear {
   from {
-    animation-timing-function: ease-out;
     opacity: 0;
-    transform: scale(0);
+    transform: translateY(-25px);
   }
 
-  40% {
-    animation-timing-function: ease-in-out;
-    opacity: 0.6;
-    transform: scale(1);
-  }
-
-  60% {
-    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
-    opacity: 0.9;
-    transform: scale(0.96);
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
