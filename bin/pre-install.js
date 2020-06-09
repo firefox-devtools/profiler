@@ -54,7 +54,7 @@ function checkNode(agents /*: AgentsVersion */) {
   const expectedNodeVersion = parseExpectedNodeVersion();
   if (versionCompare(nodeVersion, expectedNodeVersion) < 0) {
     console.error(
-      `This project expects at least Node version ${expectedNodeVersion}.`
+      `This project expects at least Node version ${expectedNodeVersion} but version ${nodeVersion} is currently used.`
     );
     console.error(
       'You can use a tool like `nvm` to install and manage installed node versions.'
