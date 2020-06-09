@@ -5,6 +5,7 @@
 
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
+import { removeFilePath } from '../utils/string';
 
 import type {
   Thread,
@@ -22,6 +23,7 @@ import type {
   NetworkPayload,
   PrefMarkerPayload,
   InvalidationPayload,
+  FileIoPayload,
 } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
@@ -1311,6 +1313,18 @@ export function removePrefMarkerPreferenceValues(
   payload: PrefMarkerPayload
 ): PrefMarkerPayload {
   return { ...payload, prefValue: '' };
+}
+
+/**
+ * Sanitize FileIO marker's filename property if it's non-empty.
+ */
+export function sanitizeFileIOMarkerFilenamePath(
+  payload: FileIoPayload
+): FileIoPayload {
+  return {
+    ...payload,
+    filename: removeFilePath(payload.filename),
+  };
 }
 
 export function getMarkerFullDescription(marker: Marker) {

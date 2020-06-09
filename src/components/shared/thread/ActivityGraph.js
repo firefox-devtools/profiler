@@ -46,11 +46,16 @@ type State = {
   mouseY: CssPixels,
 };
 
+function _stopPropagation(e: TransitionEvent) {
+  e.stopPropagation();
+}
+
 class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
+  _container: HTMLElement | null = null;
 
   state = {
     hoveredSample: null,
@@ -92,10 +97,20 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
   componentDidMount() {
     window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
+    const container = this._container;
+    if (container !== null) {
+      // Stop the propagation of transitionend so we won't fire multiple events
+      // on the active tab resource track `transitionend` event.
+      container.addEventListener('transitionend', _stopPropagation);
+    }
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._resizeListener);
+    const container = this._container;
+    if (container !== null) {
+      container.removeEventListener('transitionend', _stopPropagation);
+    }
   }
 
   /**
@@ -241,6 +256,10 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     }
   };
 
+  _takeContainerRef = (el: HTMLElement | null) => {
+    this._container = el;
+  };
+
   render() {
     this._renderCanvas();
     const { fullThread, categories } = this.props;
@@ -250,6 +269,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
         className={this.props.className}
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
+        ref={this._takeContainerRef}
       >
         <canvas
           className={classNames(

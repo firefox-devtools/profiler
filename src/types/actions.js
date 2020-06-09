@@ -388,7 +388,10 @@ type UrlStateAction =
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
     |}
-  | {| +type: 'TOGGLE_RESOURCES_PANEL' |};
+  | {|
+      +type: 'TOGGLE_RESOURCES_PANEL',
+      +selectedThreadIndex: ThreadIndex,
+    |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}

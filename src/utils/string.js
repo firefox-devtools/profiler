@@ -29,3 +29,36 @@ export function removeURLs(
   );
   return string.replace(regExp, '$1' + redactedText);
 }
+
+/**
+ * Take an absolute file path string and sanitize it except the last file name segment.
+ *
+ * Note: Do not use this function if the string not only contains a file path but
+ * also contains more text. This function is intended to use only for path strings.
+ */
+export function removeFilePath(
+  filePath: string,
+  redactedText: string = '<PATH>'
+): string {
+  let pathSeparator = null;
+
+  // Figure out which separator the path uses and the last separator index.
+  let lastSeparatorIndex = filePath.lastIndexOf('/');
+  if (lastSeparatorIndex !== -1) {
+    // This is a Unix-like path.
+    pathSeparator = '/';
+  } else {
+    lastSeparatorIndex = filePath.lastIndexOf('\\');
+    if (lastSeparatorIndex !== -1) {
+      // This is a Windows path.
+      pathSeparator = '\\';
+    }
+  }
+
+  if (pathSeparator === null) {
+    // There is no path separator, which means it's either not a file path or empty.
+    return filePath;
+  }
+
+  return redactedText + pathSeparator + filePath.slice(lastSeparatorIndex + 1);
+}

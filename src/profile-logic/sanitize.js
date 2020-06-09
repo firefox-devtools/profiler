@@ -13,6 +13,7 @@ import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
   removePrefMarkerPreferenceValues,
+  sanitizeFileIOMarkerFilenamePath,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
@@ -219,6 +220,17 @@ function sanitizeThreadPII(
         // Strip the URL from the marker name
         const stringIndex = markerTable.name[i];
         stringArray[stringIndex] = stringArray[stringIndex].replace(/:.*/, '');
+      }
+
+      // Remove the all OS paths from FileIO markers if user wants to remove them.
+      if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'FileIO'
+      ) {
+        // Remove the filename path from marker payload.
+        markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
       }
 
       // Remove the screenshots if the current thread index is in the
