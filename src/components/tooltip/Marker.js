@@ -18,7 +18,11 @@ import {
 import explicitConnect from '../../utils/connect';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getImplementationFilter } from '../../selectors/url-state';
-import { getPageList, getZeroAt } from '../../selectors/profile';
+import {
+  getPageList,
+  getZeroAt,
+  getThreadIdToNameMap,
+} from '../../selectors/profile';
 
 import { TooltipNetworkMarker } from './NetworkMarker';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
@@ -235,9 +239,6 @@ function getMarkerDetails(
           <TooltipDetails>
             <TooltipDetail label="Operation">{data.operation}</TooltipDetail>
             <TooltipDetail label="Source">{data.source}</TooltipDetail>
-            {data.threadId !== undefined ? (
-              <TooltipDetail label="Thread ID">{data.threadId}</TooltipDetail>
-            ) : null}
             <TooltipDetail label="Filename">{data.filename}</TooltipDetail>
           </TooltipDetails>
         );
@@ -680,6 +681,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +pages: PageList | null,
   +zeroAt: Milliseconds,
+  +threadIdToNameMap: Map<number, string>,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -697,6 +699,58 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     return page ? page.url : null;
   };
 
+  /**
+   * Either print the thread name that marker is in, or get the thread name from
+   * the threadId field if it's given. The second case is useful when a marker
+   * belongs to another thread but in this thread for some limitations in the
+   * platform side. For example, FileIO marker may belong to another thread if
+   * they have threadId field.
+   */
+  _getThreadDetail = (
+    marker: Marker,
+    threadName: ?string,
+    threadIdToNameMap: Map<number, string>
+  ): Array<React.Element<typeof TooltipDetail>> => {
+    const data = marker.data;
+    let threadDetail = null;
+
+    if (data && data.threadId !== undefined) {
+      const threadId = data.threadId;
+
+      const occurringThreadName = threadIdToNameMap.get(threadId);
+      threadDetail = [
+        <TooltipDetail label="Recording Thread" key="recording">
+          {threadName}
+        </TooltipDetail>,
+      ];
+
+      // If we have the thread information of the occurring thread, then show.
+      // Otherwise, only show the thread ID.
+      if (occurringThreadName !== undefined) {
+        threadDetail.push(
+          <TooltipDetail
+            label="Occurring Thread"
+            key="occurring"
+          >{`${occurringThreadName} (TID: ${threadId})`}</TooltipDetail>
+        );
+      } else {
+        threadDetail.push(
+          <TooltipDetail label="Occurring Thread ID" key="occurring">
+            {threadId}
+          </TooltipDetail>
+        );
+      }
+    } else {
+      threadDetail = [
+        <TooltipDetail label="Thread" key="thread">
+          {threadName}
+        </TooltipDetail>,
+      ];
+    }
+
+    return threadDetail;
+  };
+
   render() {
     const {
       marker,
@@ -705,6 +759,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       thread,
       implementationFilter,
       zeroAt,
+      threadIdToNameMap,
     } = this.props;
 
     const url = this._getUrl(marker);
@@ -714,6 +769,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
       zeroAt
     );
+    const threadDetail = this._getThreadDetail(
+      marker,
+      threadName,
+      threadIdToNameMap
+    );
+
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
@@ -728,9 +789,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
-          {threadName || url ? (
+          {threadDetail || url ? (
             <TooltipDetails>
-              <TooltipDetail label="Thread">{threadName}</TooltipDetail>
+              {threadDetail}
               <TooltipDetail label="URL">{url}</TooltipDetail>
             </TooltipDetails>
           ) : null}
@@ -750,12 +811,14 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
     const implementationFilter = getImplementationFilter(state);
     const pages = getPageList(state);
     const zeroAt = getZeroAt(state);
+    const threadIdToNameMap = getThreadIdToNameMap(state);
     return {
       threadName,
       thread,
       implementationFilter,
       pages,
       zeroAt,
+      threadIdToNameMap,
     };
   },
   component: MarkerTooltipContents,

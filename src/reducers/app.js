@@ -127,6 +127,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_LOCAL_TRACK':
     case 'SHOW_LOCAL_TRACK':
     case 'ISOLATE_LOCAL_TRACK':
+    case 'TOGGLE_RESOURCES_PANEL':
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':
