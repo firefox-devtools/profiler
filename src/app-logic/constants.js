@@ -54,3 +54,38 @@ export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;
 
 // Height of the active tab resources panel header.
 export const ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT = 20;
+
+// =============================================================================
+// Storage and server-related constants
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// For the 2 values GOOGLE_STORAGE_BUCKET and PROFILER_SERVER_ORIGIN, several
+// values are possible, so that you can easily switch between existing server
+// (both local or remote).
+//
+// GOOGLE_STORAGE_BUCKET
+// ---------------------
+// This defines which bucket we fetch profile data at load time.
+
+// Google storage bucket, where production profile data is stored:
+export const GOOGLE_STORAGE_BUCKET = 'profile-store';
+
+// You can also use one of the following values instead:
+// To use the bucket used by the server deployment for the master branch:
+// export const GOOGLE_STORAGE_BUCKET = 'moz-fx-dev-firefoxprofiler-bucket';
+
+// To use the bucket developers usually use on their local working copy:
+// export const GOOGLE_STORAGE_BUCKET = 'profile-store-julien-dev';
+
+// PROFILER_SERVER_ORIGIN
+// ----------------------
+// This defines our server-side endpoint. This is currently used to publish
+// profiles and manage shortlinks.
+
+// This is the production server:
+export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
+
+// This is the deployment from the master branch:
+// export const PROFILER_SERVER_ORIGIN = 'https://dev.firefoxprofiler.nonprod.cloudops.mozgcp.net';
+
+// This is your local server:
+// export const PROFILER_SERVER_ORIGIN = 'http://localhost:5252';
