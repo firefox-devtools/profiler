@@ -54,7 +54,7 @@ function checkNode(agents /*: AgentsVersion */) {
   const expectedNodeVersion = parseExpectedNodeVersion();
   if (versionCompare(nodeVersion, expectedNodeVersion) < 0) {
     console.error(
-      `This project expects at least Node version ${expectedNodeVersion}.`
+      `This project expects at least Node version ${expectedNodeVersion} but version ${nodeVersion} is currently used.`
     );
     console.error(
       'You can use a tool like `nvm` to install and manage installed node versions.'
@@ -104,9 +104,7 @@ function parseExpectedNodeVersion() {
   const circleConfig = fs.readFileSync('.circleci/config.yml', {
     encoding: 'utf8',
   });
-  const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(
-    circleConfig
-  );
+  const expectedNodeVersion = /image: cimg\/node:([\d.]+)/.exec(circleConfig);
   if (!expectedNodeVersion) {
     throw new Error(
       `Couldn't extract the node version from .circleci/config.yml.`
