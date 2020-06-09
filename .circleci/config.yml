@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node:
     docker:
-      - image: circleci/node:10.15
+      - image: cimg/node:12.18
 
 commands:
   checkout-and-dependencies:
