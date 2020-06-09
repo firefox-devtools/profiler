@@ -3,9 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { oneLine } from 'common-tags';
+import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
 // This is the server we use to publish new profiles.
-const PUBLISHING_ENDPOINT = 'https://api.profiler.firefox.com/compressed-store';
+const PUBLISHING_ENDPOINT = `${PROFILER_SERVER_ORIGIN}/compressed-store`;
 // Uncomment the following endpoint instead to use your local server.
 //const PUBLISHING_ENDPOINT = 'http://localhost:5252/compressed-store';
 

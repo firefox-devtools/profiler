@@ -4,7 +4,8 @@
 
 // @flow
 
-const SERVER_HOST = 'https://api.profiler.firefox.com';
+import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
+
 const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
 
 export async function shortenUrl(urlToShorten: string): Promise<string> {
@@ -17,7 +18,7 @@ export async function shortenUrl(urlToShorten: string): Promise<string> {
     longUrl = parsedUrl.toString();
   }
 
-  const ENDPOINT = `${SERVER_HOST}/shorten`;
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/shorten`;
   const payload = {
     longUrl,
   };
@@ -42,7 +43,7 @@ export async function shortenUrl(urlToShorten: string): Promise<string> {
 }
 
 export async function expandUrl(shortUrl: string): Promise<string> {
-  const ENDPOINT = `${SERVER_HOST}/expand`;
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/expand`;
   const payload = {
     shortUrl,
   };

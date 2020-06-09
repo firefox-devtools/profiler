@@ -50,6 +50,7 @@ import {
 } from '../profile-logic/tracks';
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
+import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type { RequestedLib, ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
@@ -1143,13 +1144,10 @@ function getProfileUrlForHash(hash: string): string {
   // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
   // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
   // is not documented nowadays.
+
   // By convention, "profile-store" is the name of our bucket, and the file path
   // is the hash we receive in the URL.
-
-  return `https://storage.googleapis.com/profile-store/${hash}`;
-
-  // Use the following return value to use the development bucket instead.
-  //return `https://storage.googleapis.com/profile-store-julien-dev/${hash}`;
+  return `https://storage.googleapis.com/${GOOGLE_STORAGE_BUCKET}/${hash}`;
 }
 
 export function retrieveProfileFromStore(
