@@ -1,7 +1,7 @@
 ports:
 - port: 4242
 tasks:
-- before: nvm install 10
+- before: nvm install 12
   init: yarn install
   command: FX_PROFILER_HOST="0.0.0.0" yarn start
 - openMode: split-right
