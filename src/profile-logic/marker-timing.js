@@ -2,19 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import type { CategoryList } from '../types/profile';
 import type {
+  CategoryList,
   DOMEventMarkerPayload,
   UserTimingMarkerPayload,
   MarkerPayload,
   TextMarkerPayload,
-} from '../types/markers';
-import type {
   Marker,
   MarkerIndex,
   MarkerTiming,
   MarkerTimingAndBuckets,
-} from '../types/profile-derived';
+} from 'firefox-profiler/types';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
 const MAX_STACKING_DEPTH = 300;

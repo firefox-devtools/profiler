@@ -14,8 +14,10 @@ import type {
   IndexIntoFuncTable,
   IndexIntoFrameTable,
   IndexIntoResourceTable,
-} from '../types/profile';
-import type { MemoryOffset, Address } from '../types/units';
+  MemoryOffset,
+  Address,
+} from 'firefox-profiler/types';
+
 import type {
   AbstractSymbolStore,
   AddressResult,

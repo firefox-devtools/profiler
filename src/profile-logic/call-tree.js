@@ -20,16 +20,15 @@ import type {
   SamplesTable,
   JsAllocationsTable,
   NativeAllocationsTable,
-} from '../types/profile';
-import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodeData,
   CallNodeDisplayData,
-} from '../types/profile-derived';
-import type { CallTreeSummaryStrategy } from '../types/actions';
-import type { Milliseconds } from '../types/units';
+  CallTreeSummaryStrategy,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck } from '../utils/flow';

@@ -9,8 +9,9 @@ import type {
   GCMajorMarkerPayload_Gecko,
   GCMajorCompleted,
   PhaseTimes,
-} from '../types/markers';
-import type { Milliseconds, Microseconds } from '../types/units';
+  Milliseconds,
+  Microseconds,
+} from 'firefox-profiler/types';
 
 export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
   if ('nursery' in marker8) {
