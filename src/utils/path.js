@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { CallNodePath } from '../types/profile-derived';
+import type { CallNodePath } from 'firefox-profiler/types';
 
 export function arePathsEqual(a: CallNodePath, b: CallNodePath): boolean {
   if (a === b) {
