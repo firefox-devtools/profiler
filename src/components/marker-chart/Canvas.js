@@ -23,13 +23,12 @@ import type {
   Milliseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
-} from '../../types/units';
-import type { ThreadIndex } from '../../types/profile';
-import type {
+  ThreadIndex,
   Marker,
   MarkerTimingAndBuckets,
   MarkerIndex,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 type MarkerDrawingInformation = {

@@ -12,8 +12,7 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { TooltipMarker } from '../tooltip/Marker';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { ThreadIndex } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { ThreadIndex, Marker } from 'firefox-profiler/types';
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,

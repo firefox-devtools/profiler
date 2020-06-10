@@ -14,15 +14,18 @@ import {
 } from '../../profile-logic/profile-data';
 
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
+  Thread,
+  CategoryList,
+  PageList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   CallNodeInfo,
-} from '../../types/profile-derived';
+  Milliseconds,
+  CallTreeSummaryStrategy,
+} from 'firefox-profiler/types';
+
 import type { TimingsForPath } from '../../profile-logic/profile-data';
-import type { Milliseconds } from '../../types/units';
-import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 import './CallNode.css';
 

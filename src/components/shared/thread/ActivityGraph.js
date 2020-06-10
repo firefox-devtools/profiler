@@ -17,9 +17,11 @@ import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../../types/profile';
-import type { SelectedState } from '../../../types/profile-derived';
-import type { Milliseconds, CssPixels } from '../../../types/units';
+  SelectedState,
+  Milliseconds,
+  CssPixels,
+} from 'firefox-profiler/types';
+
 import type {
   CategoryDrawStyles,
   ActivityFillGraphQuerier,

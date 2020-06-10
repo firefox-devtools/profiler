@@ -17,8 +17,9 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   StartEndRange,
-} from '../../../types/units';
-import type { PreviewSelection } from '../../../types/actions';
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../../utils/connect';
 import {
   getObjectValuesAsUnion,

@@ -29,18 +29,17 @@ import {
 } from '../../actions/profile-view';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { State } from '../../types/state';
-import type { CallTree } from '../../profile-logic/call-tree';
 import type {
+  State,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../../types/actions';
-import type { ThreadIndex } from '../../types/profile';
-import type {
+  ThreadIndex,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+import type { CallTree } from '../../profile-logic/call-tree';
+
 import type { Column } from '../shared/TreeView';
 import type { ConnectedProps } from '../../utils/connect';
 

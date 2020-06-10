@@ -23,8 +23,13 @@ import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import './Selection.css';
 
 import type { OnMove } from '../shared/Draggable';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+import type {
+  Milliseconds,
+  CssPixels,
+  StartEndRange,
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;

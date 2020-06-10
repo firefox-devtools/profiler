@@ -10,9 +10,12 @@ import { displayNiceUrl } from '../../utils';
 import { formatSeconds } from '../../utils/format-numbers';
 
 import type { SizeProps } from '../shared/WithSize';
-import type { PageList } from '../../types/profile';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
+import type {
+  PageList,
+  Marker,
+  MarkerIndex,
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 import './VerticalIndicators.css';
 

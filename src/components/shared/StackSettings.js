@@ -32,7 +32,7 @@ import './StackSettings.css';
 import type {
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../../types/actions';
+} from 'firefox-profiler/types';
 
 type OwnProps = {|
   +hideInvertCallstack?: true,

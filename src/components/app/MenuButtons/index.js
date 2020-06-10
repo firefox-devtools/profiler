@@ -31,11 +31,15 @@ import {
 
 import { resymbolicateProfile } from '../../../actions/receive-profile';
 
-import type { StartEndRange } from '../../../types/units';
-import type { Profile } from '../../../types/profile';
-import type { DataSource } from '../../../types/actions';
+import type {
+  StartEndRange,
+  Profile,
+  DataSource,
+  UploadPhase,
+  SymbolicationStatus,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../../utils/connect';
-import type { UploadPhase, SymbolicationStatus } from '../../../types/state';
 
 require('./index.css');
 

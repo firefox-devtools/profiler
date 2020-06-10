@@ -29,9 +29,13 @@ import {
 
 import './index.css';
 
-import type { ThreadIndex } from '../../types/profile';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
+import type {
+  ThreadIndex,
+  Marker,
+  MarkerIndex,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerDisplayData = {|

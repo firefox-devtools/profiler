@@ -28,19 +28,16 @@ import type {
   CategoryList,
   PageList,
   ThreadIndex,
-} from '../../types/profile';
-import type { UserTimingMarkerPayload } from '../../types/markers';
-import type {
+  UserTimingMarkerPayload,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
-} from '../../types/profile-derived';
-import type {
   Milliseconds,
   CssPixels,
   DevicePixels,
   UnitIntervalOfProfileRange,
-} from '../../types/units';
+} from 'firefox-profiler/types';
+
 import type {
   StackTimingDepth,
   IndexIntoStackTiming,

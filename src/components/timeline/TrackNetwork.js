@@ -20,13 +20,15 @@ import {
   TRACK_NETWORK_HEIGHT,
 } from '../../app-logic/constants';
 
-import type { ThreadIndex, PageList } from '../../types/profile';
 import type {
+  ThreadIndex,
+  PageList,
   Marker,
   MarkerIndex,
   MarkerTiming,
-} from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
 

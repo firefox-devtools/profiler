@@ -11,8 +11,11 @@ import {
   convertStackToCallNodePath,
 } from '../../profile-logic/profile-data';
 
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
-import type { ImplementationFilter } from '../../types/actions';
+import type {
+  Thread,
+  IndexIntoStackTable,
+  ImplementationFilter,
+} from 'firefox-profiler/types';
 
 require('./Backtrace.css');
 

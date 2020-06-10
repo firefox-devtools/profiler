@@ -10,8 +10,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
-import type { Thread } from '../../types/profile';
-import type { State } from '../../types/store';
+import type { Thread, State } from 'firefox-profiler/types';
 
 type StateProps = {|
   threadName: string,
