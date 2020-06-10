@@ -10,7 +10,7 @@ import icons from './icons';
 import zippedProfiles from './zipped-profiles';
 import publish from './publish';
 import { combineReducers } from 'redux';
-import type { Reducer, State } from '../types/state';
+import type { Reducer, State } from 'firefox-profiler/types';
 
 /**
  * This function provides a mechanism to swap out to an old state that we have

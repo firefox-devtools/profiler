@@ -8,28 +8,25 @@ import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
 import { arePathsEqual, PathSet } from '../utils/path';
 
-import type { Profile, Pid } from '../types/profile';
 import type {
+  Profile,
+  Pid,
   LocalTrack,
   GlobalTrack,
   ActiveTabGlobalTrack,
   OriginsTimeline,
   ActiveTabResourceTrack,
-} from '../types/profile-derived';
-import type { StartEndRange } from '../types/units';
-import type {
+  StartEndRange,
   PreviewSelection,
   RequestedLib,
   TrackReference,
-} from '../types/actions';
-import type {
   Reducer,
   ProfileViewState,
   SymbolicationStatus,
   ThreadViewOptions,
   RightClickedCallNode,
   RightClickedMarker,
-} from '../types/state';
+} from 'firefox-profiler/types';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
