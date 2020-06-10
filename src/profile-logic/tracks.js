@@ -3,13 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { ScreenshotPayload } from '../types/markers';
-import type { Profile, Thread, ThreadIndex, Pid } from '../types/profile';
 import type {
+  ScreenshotPayload,
+  Profile,
+  Thread,
+  ThreadIndex,
+  Pid,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-} from '../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 

@@ -7,19 +7,17 @@ import { getThreadSelectors } from '../selectors/per-thread';
 import { isMainThread } from './tracks';
 import { ensureExists } from '../utils/flow';
 
-import type { State } from '../types/state';
 import type {
+  State,
   ThreadIndex,
   Profile,
   InnerWindowID,
   Page,
   Thread,
-} from '../types/profile';
-import type {
   ActiveTabGlobalTrack,
   ActiveTabResourceTrack,
-} from '../types/profile-derived';
-import type { ScreenshotPayload } from '../types/markers';
+  ScreenshotPayload,
+} from 'firefox-profiler/types';
 
 const ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER = {
   screenshots: 0,

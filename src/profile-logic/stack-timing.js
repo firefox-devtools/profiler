@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Thread } from '../types/profile';
-import type { Milliseconds } from '../types/units';
 import type {
+  Thread,
+  Milliseconds,
   CallNodeInfo,
   CallNodeTable,
   IndexIntoCallNodeTable,
-} from '../types/profile-derived';
+} from 'firefox-profiler/types';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
  * and end times. This optimizes sample data for Stack Chart views. It

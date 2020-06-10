@@ -4,7 +4,7 @@
 // @flow
 import * as colors from 'photon-colors';
 
-import type { CssPixels } from '../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 type MarkerStyles = {
   +[styleName: string]: {|

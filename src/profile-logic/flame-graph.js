@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { UnitIntervalOfProfileRange } from '../types/units';
-import type { Thread } from '../types/profile';
 import type {
+  UnitIntervalOfProfileRange,
   CallNodeInfo,
   CallNodeTable,
   IndexIntoCallNodeTable,
-} from '../types/profile-derived';
+  Thread,
+} from 'firefox-profiler/types';
 import type { CallTreeCountsAndTimings } from './call-tree';
 
 export type FlameGraphDepth = number;

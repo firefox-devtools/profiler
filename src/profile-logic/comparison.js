@@ -48,11 +48,11 @@ import type {
   ResourceTable,
   StackTable,
   SamplesTable,
-} from '../types/profile';
-import type { UrlState } from '../types/state';
-import type { ImplementationFilter } from '../types/actions';
-import type { TransformStacksPerThread } from '../types/transforms';
-import type { Milliseconds } from '../types/units';
+  UrlState,
+  ImplementationFilter,
+  TransformStacksPerThread,
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 /**
  * This function is the entry point for this file. From a list of profile

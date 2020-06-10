@@ -15,9 +15,8 @@ import type {
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
   InnerWindowID,
-} from '../types/profile';
-import type { Marker, MarkerIndex } from '../types/profile-derived';
-import type {
+  Marker,
+  MarkerIndex,
   IPCPairData,
   BailoutPayload,
   NetworkPayload,
@@ -25,9 +24,10 @@ import type {
   InvalidationPayload,
   FileIoPayload,
   TextMarkerPayload,
-} from '../types/markers';
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import type { StartEndRange } from '../types/units';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler

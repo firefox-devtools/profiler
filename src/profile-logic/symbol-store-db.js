@@ -12,7 +12,7 @@ import type {
   IDBObjectStore,
   IDBIndex,
   IDBKeyRange,
-} from '../types/indexeddb';
+} from 'firefox-profiler/types';
 
 // Contains a symbol table, which can be used to map addresses to strings.
 // Symbol tables of this format are created within Firefox's implementation of
