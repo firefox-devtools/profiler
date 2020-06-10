@@ -34,8 +34,6 @@ import type {
   InnerWindowID,
   BrowsingContextID,
   Page,
-} from '../types/profile';
-import type {
   LocalTrack,
   TrackIndex,
   GlobalTrack,
@@ -44,9 +42,8 @@ import type {
   ActiveTabGlobalTrack,
   OriginsTimeline,
   ActiveTabResourceTrack,
-} from '../types/profile-derived';
-import type { Milliseconds, StartEndRange } from '../types/units';
-import type {
+  Milliseconds,
+  StartEndRange,
   GlobalTrackReference,
   LocalTrackReference,
   TrackReference,
@@ -54,17 +51,16 @@ import type {
   HiddenTrackCount,
   ActiveTabGlobalTrackReference,
   ActiveTabResourceTrackReference,
-} from '../types/actions';
-import type { Selector, DangerousSelectorWithArguments } from '../types/store';
-import type {
+  Selector,
+  DangerousSelectorWithArguments,
   State,
   ProfileViewState,
   SymbolicationStatus,
   FullProfileViewState,
   ActiveTabProfileViewState,
   OriginsViewState,
-} from '../types/state';
-import type { $ReturnType } from '../types/utils';
+  $ReturnType,
+} from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;

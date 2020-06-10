@@ -23,8 +23,8 @@ import {
 } from './composed';
 import * as ProfileSelectors from '../profile';
 
-import type { ThreadIndex } from '../../types/profile';
-import type { Selector } from '../../types/store';
+import type { ThreadIndex, Selector } from 'firefox-profiler/types';
+
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 
 /**

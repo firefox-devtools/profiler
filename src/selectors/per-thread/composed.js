@@ -8,14 +8,16 @@ import { createSelector } from 'reselect';
 import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
 import { getTimelineTrackOrganization } from '../url-state';
 
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
-import type { Thread, JsTracerTable } from '../../types/profile';
 import type {
+  Selector,
+  $ReturnType,
+  Thread,
+  JsTracerTable,
   MarkerTimingRows,
   CombinedTimingRows,
   MarkerTiming,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type {
   StackTiming,
   StackTimingByDepth,
