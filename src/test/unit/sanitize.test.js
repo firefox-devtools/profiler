@@ -8,7 +8,7 @@ import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
-import type { RemoveProfileInformation } from '../../types/profile-derived';
+import type { RemoveProfileInformation } from 'firefox-profiler/types/profile-derived';
 import { storeWithProfile } from '../fixtures/stores';
 import { getHasPreferenceMarkers } from '../../selectors/profile';
 import {

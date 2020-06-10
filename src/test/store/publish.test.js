@@ -43,7 +43,7 @@ import {
   hideGlobalTrack,
 } from '../../actions/profile-view';
 
-import type { Store } from '../../types/store';
+import type { Store } from 'firefox-profiler/types/store';
 
 // Mocks:
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
