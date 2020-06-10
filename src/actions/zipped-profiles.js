@@ -7,7 +7,7 @@ import { getZipFileTable, getZipFileState } from '../selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import { loadProfile } from './receive-profile';
 
-import type { Action, ThunkAction } from '../types/store';
+import type { Action, ThunkAction } from 'firefox-profiler/types';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 
 export function changeSelectedZipFile(
