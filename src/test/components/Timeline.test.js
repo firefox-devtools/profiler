@@ -16,7 +16,7 @@ import ReactDOM from 'react-dom';
 import { getTimelineTrackOrganization } from '../../selectors/url-state';
 import { getRightClickedTrack } from '../../selectors/profile';
 
-import type { Profile } from 'firefox-profiler/types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(

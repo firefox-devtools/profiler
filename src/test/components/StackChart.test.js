@@ -45,9 +45,11 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
-import type { Profile } from 'firefox-profiler/types/profile';
-import type { UserTimingMarkerPayload } from 'firefox-profiler/types/markers';
-import type { CssPixels } from 'firefox-profiler/types/units';
+import type {
+  Profile,
+  UserTimingMarkerPayload,
+  CssPixels,
+} from 'firefox-profiler/types';
 
 jest.useFakeTimers();
 

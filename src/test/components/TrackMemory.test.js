@@ -4,8 +4,7 @@
 
 // @flow
 
-import type { IndexIntoSamplesTable } from 'firefox-profiler/types/profile';
-import type { CssPixels } from 'firefox-profiler/types/units';
+import type { IndexIntoSamplesTable, CssPixels } from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';

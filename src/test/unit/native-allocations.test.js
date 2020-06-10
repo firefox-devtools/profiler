@@ -17,7 +17,7 @@ import {
   updatePreviewSelection,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import type { CallTreeSummaryStrategy } from 'firefox-profiler/types/actions';
+import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
 
 /**
  * Test that the NativeAllocationTable structure can by used with all of the call tree

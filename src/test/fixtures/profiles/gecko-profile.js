@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib, ProfilerOverheadStats } from 'firefox-profiler/types/profile';
-
 import type {
+  Lib,
+  ProfilerOverheadStats,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoProfileFullMeta,
@@ -14,7 +14,7 @@ import type {
   GeckoCounter,
   GeckoMarkerStack,
   GeckoProfilerOverhead,
-} from 'firefox-profiler/types/gecko-profile';
+} from 'firefox-profiler/types';
 
 import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
 

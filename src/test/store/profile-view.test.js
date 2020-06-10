@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { TrackReference } from 'firefox-profiler/types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
@@ -46,9 +45,12 @@ import {
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
-import type { Milliseconds } from 'firefox-profiler/types/units';
 import type { BreakdownByCategory } from '../../profile-logic/profile-data';
-import type { BrowsingContextID } from 'firefox-profiler/types/profile';
+import type {
+  TrackReference,
+  Milliseconds,
+  BrowsingContextID,
+} from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function() {
   const {
