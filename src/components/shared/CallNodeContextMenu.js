@@ -28,16 +28,18 @@ import {
   assertExhaustiveCheck,
 } from '../../utils/flow';
 
-import type { TransformType } from '../../types/transforms';
-import type { ImplementationFilter } from '../../types/actions';
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { ConnectedProps } from '../../utils/connect';
 import type {
+  TransformType,
+  ImplementationFilter,
   IndexIntoCallNodeTable,
   CallNodeInfo,
   CallNodePath,
-} from '../../types/profile-derived';
-import type { Thread, ThreadIndex } from '../../types/profile';
+  Thread,
+  ThreadIndex,
+} from 'firefox-profiler/types';
+
+import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +thread: Thread | null,

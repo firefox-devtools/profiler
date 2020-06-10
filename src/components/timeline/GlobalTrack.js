@@ -38,14 +38,16 @@ import Reorderable from '../shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { GlobalTrackReference } from '../../types/actions';
-import type { Pid, ProgressGraphData } from '../../types/profile';
 import type {
+  GlobalTrackReference,
+  Pid,
+  ProgressGraphData,
   TrackIndex,
   GlobalTrack,
   LocalTrack,
   InitialSelectedTrackReference,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|

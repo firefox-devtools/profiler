@@ -26,9 +26,11 @@ import type { SizeProps } from '../shared/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
-} from '../../types/profile-derived';
-import type { GlobalTrackReference } from '../../types/actions';
-import type { Milliseconds, StartEndRange } from '../../types/units';
+  GlobalTrackReference,
+  Milliseconds,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|

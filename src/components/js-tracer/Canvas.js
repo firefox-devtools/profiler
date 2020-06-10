@@ -25,13 +25,12 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   DevicePixels,
-} from '../../types/units';
-import type {
   ThreadIndex,
   IndexIntoJsTracerEvents,
   JsTracerTable,
-} from '../../types/profile';
-import type { JsTracerTiming } from '../../types/profile-derived';
+  JsTracerTiming,
+} from 'firefox-profiler/types';
+
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 

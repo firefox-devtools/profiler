@@ -30,11 +30,17 @@ import Backtrace from '../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 
-import type { Milliseconds, Microseconds } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
-import type { ImplementationFilter } from '../../types/actions';
-import type { Thread, ThreadIndex, PageList } from '../../types/profile';
-import type { PhaseTimes } from '../../types/markers';
+import type {
+  Milliseconds,
+  Microseconds,
+  Marker,
+  ImplementationFilter,
+  Thread,
+  ThreadIndex,
+  PageList,
+  PhaseTimes,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};

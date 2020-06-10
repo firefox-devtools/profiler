@@ -9,7 +9,7 @@ import {
   formatPercent,
 } from '../../../utils/format-numbers';
 
-import type { ProfilerOverhead } from '../../../types/profile';
+import type { ProfilerOverhead } from 'firefox-profiler/types';
 
 import './MetaOverheadStatistics.css';
 

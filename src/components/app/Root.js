@@ -11,7 +11,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
 
-import type { Store } from '../../types/store';
+import type { Store } from 'firefox-profiler/types';
 
 type RootProps = {
   store: Store,

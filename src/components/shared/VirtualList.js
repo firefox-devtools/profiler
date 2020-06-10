@@ -37,7 +37,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 type RenderItem<Item> = (Item, number, number) => React.Node;
 

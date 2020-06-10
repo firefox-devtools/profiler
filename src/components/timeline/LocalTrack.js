@@ -27,9 +27,13 @@ import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
-import type { TrackReference } from '../../types/actions';
-import type { Pid } from '../../types/profile';
-import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
+import type {
+  TrackReference,
+  Pid,
+  TrackIndex,
+  LocalTrack,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|

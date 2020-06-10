@@ -24,9 +24,12 @@ import type {
   Counter,
   Thread,
   ThreadIndex,
-} from '../../types/profile';
-import type { AccumulatedCounterSamples } from '../../types/profile-derived';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
+  AccumulatedCounterSamples,
+  Milliseconds,
+  CssPixels,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
 

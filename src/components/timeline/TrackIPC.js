@@ -11,8 +11,8 @@ import { TimelineMarkersIPC } from './Markers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { TRACK_IPC_MARKERS_HEIGHT } from '../../app-logic/constants';
 
-import type { ThreadIndex } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackIPC.css';

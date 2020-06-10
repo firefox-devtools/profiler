@@ -23,13 +23,16 @@ import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import { changeSelectedThread } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
-import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
+  Thread,
+  ThreadIndex,
   InitialSelectedTrackReference,
   OriginsTimeline,
   OriginsTimelineTrack,
-} from '../../types/profile-derived';
-import type { Milliseconds, StartEndRange } from '../../types/units';
+  Milliseconds,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 import './OriginsTimeline.css';

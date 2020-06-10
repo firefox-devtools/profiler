@@ -23,13 +23,14 @@ import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { GlobalTrackReference } from '../../types/actions';
 import type {
+  GlobalTrackReference,
   TrackIndex,
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
   ActiveTabResourceTrack,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|

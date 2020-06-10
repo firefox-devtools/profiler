@@ -28,9 +28,8 @@ import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import classNames from 'classnames';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
-import type { IconWithClassName } from '../../types/state';
 
 require('./ProfileViewer.css');
 
