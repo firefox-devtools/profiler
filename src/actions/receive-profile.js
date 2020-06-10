@@ -52,19 +52,23 @@ import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
-import type { RequestedLib, ImplementationFilter } from '../types/actions';
-import type { TransformStacksPerThread } from '../types/transforms';
-import type { Action, ThunkAction, Dispatch } from '../types/store';
-import type { TimelineTrackOrganization } from '../types/state';
 import type {
+  RequestedLib,
+  ImplementationFilter,
+  TransformStacksPerThread,
+  Action,
+  ThunkAction,
+  Dispatch,
+  TimelineTrackOrganization,
   Profile,
   ThreadIndex,
   BrowsingContextID,
   Page,
   InnerWindowID,
   Pid,
-} from '../types/profile';
-import type { OriginsTimelineRoot } from '../types/profile-derived';
+  OriginsTimelineRoot,
+} from 'firefox-profiler/types';
+
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 

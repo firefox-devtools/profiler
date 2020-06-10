@@ -19,11 +19,14 @@ import { ensureExists } from '../utils/flow';
 import { extractProfileTokenFromJwt } from '../utils/jwt';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
 
-import type { Action, ThunkAction } from '../types/store';
-import type { CheckedSharingOptions } from '../types/actions';
-import type { StartEndRange } from '../types/units';
-import type { ThreadIndex } from '../types/profile';
-import type { State } from '../types/state';
+import type {
+  Action,
+  ThunkAction,
+  CheckedSharingOptions,
+  StartEndRange,
+  ThreadIndex,
+  State,
+} from 'firefox-profiler/types';
 
 export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
