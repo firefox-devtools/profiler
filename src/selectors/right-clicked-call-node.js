@@ -7,9 +7,11 @@ import { createSelector } from 'reselect';
 
 import { getProfileViewOptions } from './profile';
 
-import type { ThreadIndex } from '../types/profile';
-import type { CallNodePath } from '../types/profile-derived';
-import type { Selector } from '../types/store';
+import type {
+  ThreadIndex,
+  CallNodePath,
+  Selector,
+} from 'firefox-profiler/types';
 
 export type RightClickedCallNodeInfo = {|
   +threadIndex: ThreadIndex,

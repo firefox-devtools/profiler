@@ -4,8 +4,12 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import type { IconWithClassName, IconState } from '../types/state';
-import type { Selector, DangerousSelectorWithArguments } from '../types/store';
+import type {
+  IconWithClassName,
+  IconState,
+  Selector,
+  DangerousSelectorWithArguments,
+} from 'firefox-profiler/types';
 
 /**
  * A simple selector into the icon state.
