@@ -22,7 +22,7 @@ import {
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
-import type { Profile } from 'firefox-profiler/types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
 function callTreeFromProfile(
   profile: Profile,

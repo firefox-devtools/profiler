@@ -9,8 +9,7 @@ import { createGeckoProfileWithJsTimings } from './profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from './profiles/processed-profile';
 
-import type { Store } from 'firefox-profiler/types/store';
-import type { Profile } from 'firefox-profiler/types/profile';
+import type { Store, Profile } from 'firefox-profiler/types';
 
 export function blankStore() {
   return createStore();

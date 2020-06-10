@@ -4,10 +4,12 @@
 
 // @flow
 
-import type { TrackReference } from 'firefox-profiler/types/actions';
-import type { Store } from 'firefox-profiler/types/store';
-import type { ThreadIndex } from 'firefox-profiler/types/profile';
-import type { LocalTrack } from 'firefox-profiler/types/profile-derived';
+import type {
+  TrackReference,
+  Store,
+  ThreadIndex,
+  LocalTrack,
+} from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';

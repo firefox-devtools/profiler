@@ -37,7 +37,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 
-import type { CssPixels } from 'firefox-profiler/types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;

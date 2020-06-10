@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Profile } from 'firefox-profiler/types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
 import { oneLineTrim } from 'common-tags';
 

@@ -20,8 +20,8 @@ import { ensureExists } from '../../utils/flow';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
-} from 'firefox-profiler/types/markers';
-import type { GeckoThread } from 'firefox-profiler/types/gecko-profile';
+  GeckoThread,
+} from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function() {
   // These location strings are turned into the proper funcs.

@@ -7,7 +7,7 @@ import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
-import type { CallNodeDisplayData } from 'firefox-profiler/types/profile-derived';
+import type { CallNodeDisplayData } from 'firefox-profiler/types';
 
 describe('actions/icons', function() {
   const validIcons = [

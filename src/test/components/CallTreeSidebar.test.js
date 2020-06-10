@@ -22,7 +22,7 @@ import {
   getMergedProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
 
-import type { CallNodePath } from 'firefox-profiler/types/profile-derived';
+import type { CallNodePath } from 'firefox-profiler/types';
 
 describe('CallTreeSidebar', function() {
   function setup() {
