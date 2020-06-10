@@ -18,8 +18,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
-import type { Profile } from '../../types/profile';
-import type { SymbolicationStatus } from '../../types/state';
+import type { Profile } from 'firefox-profiler/types/profile';
+import type { SymbolicationStatus } from 'firefox-profiler/types/state';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';

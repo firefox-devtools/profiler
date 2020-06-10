@@ -7,7 +7,7 @@ import type {
   Profile,
   Thread,
   IndexIntoRawMarkerTable,
-} from '../../types/profile';
+} from 'firefox-profiler/types/profile';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';

@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types/profile';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
@@ -35,7 +35,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
-import type { FileIoPayload } from '../../types/markers';
+import type { FileIoPayload } from 'firefox-profiler/types/markers';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and

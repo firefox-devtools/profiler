@@ -18,7 +18,7 @@ import {
   type TestDefinedJsTracerEvent,
 } from '../fixtures/profiles/processed-profile';
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types/profile';
 
 describe('jsTracerFixed', function() {
   function fixTiming(events: *) {
