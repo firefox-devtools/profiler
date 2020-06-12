@@ -5,7 +5,7 @@
 
 import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
-import { removeFilePath } from '../utils/string';
+import { removeFilePath, removeURLs } from '../utils/string';
 
 import type {
   Thread,
@@ -24,6 +24,7 @@ import type {
   PrefMarkerPayload,
   InvalidationPayload,
   FileIoPayload,
+  TextMarkerPayload,
 } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
@@ -1324,6 +1325,18 @@ export function sanitizeFileIOMarkerFilenamePath(
   return {
     ...payload,
     filename: removeFilePath(payload.filename),
+  };
+}
+
+/**
+ * Sanitize Text marker's name property for potential URLs.
+ */
+export function sanitizeTextMarker(
+  payload: TextMarkerPayload
+): TextMarkerPayload {
+  return {
+    ...payload,
+    name: removeURLs(payload.name),
   };
 }
 
