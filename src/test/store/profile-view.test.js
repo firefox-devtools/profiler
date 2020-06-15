@@ -1835,21 +1835,30 @@ describe('snapshots of selectors/profile', function() {
 });
 
 describe('getTimingsForSidebar', () => {
-  function setup() {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+  function getGenericProfileString() {
+    // Note that the first column won't be counted because a range is used,
+    // excluding that first column.
+    return `
       A    A                  A             A             A              A
       B    B                  B             B             B              B
       Cjs  Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
       D    D                  D             F             I[cat:Idle]
       E    Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
-    `);
+    `;
+  }
 
+  function setup(profileString = getGenericProfileString()) {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(
+      profileString
+    );
     const store = storeWithProfile(profile);
 
     // Committing a range exercizes the offset code for committed ranges.
     // Note that we'll exercize the offset code for preview selections in a
     // specific test below.
-    store.dispatch(ProfileView.commitRange(1, 6));
+    // We just exclude the first column.
+    const threadLength = profile.threads[0].samples.length;
+    store.dispatch(ProfileView.commitRange(1, threadLength));
 
     const getTimingsForPath = path => {
       store.dispatch(ProfileView.changeSelectedCallNode(0, path));
@@ -1875,6 +1884,12 @@ describe('getTimingsForSidebar', () => {
     }));
   }
 
+  const EMPTY_TIMING = {
+    value: 0,
+    breakdownByImplementation: null,
+    breakdownByCategory: null,
+  };
+
   describe('in a non-inverted tree', function() {
     it('returns good timings for a root node', () => {
       const {
@@ -1883,50 +1898,31 @@ describe('getTimingsForSidebar', () => {
       } = setup();
 
       // This is a root node: it should have no self time but all the total time.
+      // Also, because the function is only present once in the tree, forPath
+      // and forFunc timings are the same, so we're extracting them in one
+      // object for a better readability.
       const timings = getTimingsForPath([A]);
+
+      const expectedTiming = {
+        selfTime: EMPTY_TIMING,
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+          breakdownByCategory: withSingleSubcategory([
+            1, // Idle
+            0, // Other
+            1, // Layout
+            3, // JavaScript
+            0,
+            0,
+            0,
+            0,
+          ]),
+        },
+      };
       expect(timings).toEqual({
-        forPath: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              1, // Idle
-              0, // Other
-              1, // Layout
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
-        forFunc: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
-          totalTime: {
-            value: 5,
-            breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              1, // Idle
-              0, // Other
-              1, // Layout
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
+        forPath: expectedTiming,
+        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2020,68 +2016,45 @@ describe('getTimingsForSidebar', () => {
       // This is a node that has both children and some self time. So it should
       // have some running time that's different than the self time.
       const timings = getTimingsForPath([A, B, H]);
-      expect(timings).toEqual({
-        forPath: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
 
-            breakdownByCategory: withSingleSubcategory([
-              1, // Idle
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
+      // This node is present only once in the tree, so its forPath and forFunc
+      // timing values are identical. Extracting them provides a better
+      // readability.
+      const expectedTiming = {
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: withSingleSubcategory([
+            0,
+            0,
+            1, // Layout
+            0,
+            0,
+            0,
+            0,
+            0,
+          ]),
         },
-        forFunc: {
-          selfTime: {
-            value: 1,
-            breakdownByImplementation: { native: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 2,
-            breakdownByImplementation: { native: 2 },
-            breakdownByCategory: withSingleSubcategory([
-              1, // Idle
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { native: 2 },
+
+          breakdownByCategory: withSingleSubcategory([
+            1, // Idle
+            0,
+            1, // Layout
+            0,
+            0,
+            0,
+            0,
+            0,
+          ]),
         },
+      };
+
+      expect(timings).toEqual({
+        forPath: expectedTiming,
+        forFunc: expectedTiming,
         rootTime: 5,
       });
     });
@@ -2122,15 +2095,241 @@ describe('getTimingsForSidebar', () => {
         ]),
       });
     });
+
+    describe('for profiles with JS nodes', () => {
+      function getJsHeavyProfileString() {
+        // Remember that the first column is ignored in timings because we use a
+        // range in the setup.
+        return `
+          A    A    A              A             A
+          Bjs  Bjs  Bjs            Bjs[jit:ion]  Bjs[jit:blinterp]
+          C    C    C              E
+                    D[cat:Layout]
+        `;
+      }
+
+      it('returns good timings for a root node', () => {
+        const {
+          funcNamesDict: { A },
+          getTimingsForPath,
+        } = setup(getJsHeavyProfileString());
+
+        // This is a root node: it should have no self time but all the total time.
+        const timings = getTimingsForPath([A]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. So we extract the
+        // expectation to make this a bit more readable.
+        const expectedTiming = {
+          selfTime: EMPTY_TIMING,
+          totalTime: {
+            value: 4,
+            breakdownByImplementation: {
+              interpreter: 1,
+              native: 1,
+              ion: 1,
+              blinterp: 1,
+            },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        };
+        expect(timings).toEqual({
+          forPath: expectedTiming,
+          forFunc: expectedTiming,
+          rootTime: 4,
+        });
+      });
+
+      it('returns good timings for a JS node with various implementations', () => {
+        const {
+          funcNamesDict: { A, Bjs },
+          getTimingsForPath,
+        } = setup(getJsHeavyProfileString());
+
+        const timings = getTimingsForPath([A, Bjs]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. So we extract the
+        // expectation to make this a bit more readable.
+        const expectedTiming = {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { blinterp: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              1, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 4,
+            breakdownByImplementation: {
+              ion: 1,
+              blinterp: 1,
+              interpreter: 1,
+              native: 1,
+            },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        };
+        expect(timings).toEqual({
+          forPath: expectedTiming,
+          forFunc: expectedTiming,
+          rootTime: 4,
+        });
+      });
+
+      it('assign the right jit information to inherited native stacks', () => {
+        const {
+          funcNamesDict: { A, Bjs, E },
+          getTimingsForPath,
+        } = setup(getJsHeavyProfileString());
+
+        // This node is a native stack inhering the ion jit information.
+        const timings = getTimingsForPath([A, Bjs, E]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. Also it only has a self
+        // time occurrence, so selfTime and totalTime show the same timing.
+        // We extract the expectations to make this a bit more readable.
+        const expectedTiming = {
+          value: 1,
+          breakdownByImplementation: { ion: 1 },
+          breakdownByCategory: withSingleSubcategory([
+            0,
+            0,
+            0,
+            1, // JavaScript
+            0,
+            0,
+            0,
+            0,
+          ]),
+        };
+        expect(timings).toEqual({
+          forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
+          rootTime: 4,
+        });
+      });
+
+      it('returns good timings for a native node inheriting the JS category with some self time', () => {
+        const {
+          funcNamesDict: { A, Bjs, C },
+          getTimingsForPath,
+        } = setup(getJsHeavyProfileString());
+
+        const timings = getTimingsForPath([A, Bjs, C]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. So we extract the
+        // expectation to make this a bit more readable.
+        const expectedTiming = {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { interpreter: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              1, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: {
+              interpreter: 1,
+              native: 1,
+            },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              1, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        };
+        expect(timings).toEqual({
+          forPath: expectedTiming,
+          forFunc: expectedTiming,
+          rootTime: 4,
+        });
+      });
+
+      it('returns a native implementation for a node that does not have the JS category', () => {
+        const {
+          funcNamesDict: { A, Bjs, C, D },
+          getTimingsForPath,
+        } = setup(getJsHeavyProfileString());
+
+        // This node is a native stack inhering the ion jit information.
+        const timings = getTimingsForPath([A, Bjs, C, D]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. Also it only has a self
+        // time occurrence, so selfTime and totalTime show the same timing.
+        // We extract the expectations to make this a bit more readable.
+        const expectedTiming = {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: withSingleSubcategory([
+            0,
+            0,
+            1, // Layout
+            0, // JavaScript
+            0,
+            0,
+            0,
+            0,
+          ]),
+        };
+        expect(timings).toEqual({
+          forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
+          rootTime: 4,
+        });
+      });
+    });
   });
 
   describe('for an inverted tree', function() {
-    function setupForInvertedTree() {
-      const setupResult = setup();
+    function setupForInvertedTree(profileString) {
+      const setupResult = setup(profileString);
       const { dispatch } = setupResult;
 
       dispatch(ProfileView.changeInvertCallstack(true));
-      // Now the profile should look like this:
+      // Now the generic profile should look like this:
       //
       // E    Ejs  Ejs  Ejs  I[cat:Idle]    H[cat:Layout]
       // D    D    D    F    H[cat:Layout]  B
@@ -2147,58 +2346,36 @@ describe('getTimingsForSidebar', () => {
         funcNamesDict: { Ejs },
       } = setupForInvertedTree();
       const timings = getTimingsForPath([Ejs]);
+
+      // A root node will have the same values for total and selftime. Also this
+      // function is present once so forPath and forFunc will have the same
+      // values.
+      const expectedTiming = {
+        value: 3,
+        breakdownByImplementation: { ion: 2, baseline: 1 },
+        breakdownByCategory: withSingleSubcategory([
+          0, // Idle
+          0, // Other
+          0, // Layout
+          3, // JavaScript
+          0,
+          0,
+          0,
+          0,
+        ]),
+      };
       expect(timings).toEqual({
         forPath: {
           selfTime: {
+            // Inverted trees have an empty breakdown for the selftime because
+            // it's always the same values as for totaltime, or 0. For a root
+            // node, the value is non-0 though.
+            ...EMPTY_TIMING,
             value: 3,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
           },
-          totalTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0, // Idle
-              0, // Other
-              0, // Layout
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
+          totalTime: expectedTiming,
         },
-        forFunc: {
-          selfTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-          totalTime: {
-            value: 3,
-            breakdownByImplementation: { ion: 2, baseline: 1 },
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              0,
-              3, // JavaScript
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
-        },
+        forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
         rootTime: 5,
       });
     });
@@ -2211,11 +2388,7 @@ describe('getTimingsForSidebar', () => {
       const timings = getTimingsForPath([Ejs, D, Cjs, B]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
+          selfTime: EMPTY_TIMING,
           totalTime: {
             value: 2,
             breakdownByImplementation: { ion: 1, baseline: 1 },
@@ -2232,11 +2405,7 @@ describe('getTimingsForSidebar', () => {
           },
         },
         forFunc: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
+          selfTime: EMPTY_TIMING,
           totalTime: {
             value: 5,
             breakdownByImplementation: {
@@ -2271,9 +2440,8 @@ describe('getTimingsForSidebar', () => {
       expect(timings).toEqual({
         forPath: {
           selfTime: {
+            ...EMPTY_TIMING,
             value: 1,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
           },
           totalTime: {
             value: 1,
@@ -2327,11 +2495,7 @@ describe('getTimingsForSidebar', () => {
       timings = getTimingsForPath([I, H]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
+          selfTime: EMPTY_TIMING,
           totalTime: {
             value: 1,
             breakdownByImplementation: { native: 1 },
@@ -2389,11 +2553,7 @@ describe('getTimingsForSidebar', () => {
       const timings = getTimingsForPath([H, B, A]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
+          selfTime: EMPTY_TIMING,
           totalTime: {
             value: 1,
             breakdownByImplementation: { native: 1 },
@@ -2410,11 +2570,7 @@ describe('getTimingsForSidebar', () => {
           },
         },
         forFunc: {
-          selfTime: {
-            value: 0,
-            breakdownByImplementation: null,
-            breakdownByCategory: null,
-          },
+          selfTime: EMPTY_TIMING,
           totalTime: {
             value: 5,
             breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
@@ -2470,6 +2626,179 @@ describe('getTimingsForSidebar', () => {
         ]),
       });
     });
+
+    describe('for profiles with JS nodes', () => {
+      function getJsHeavyProfileString() {
+        // Remember that the first column is ignored in timings because we use a
+        // range in the setup.
+        return `
+          A    A    A              A             A
+          Bjs  Bjs  Bjs            Bjs[jit:ion]  Bjs[jit:blinterp]
+          C    C    C              E
+                    D[cat:Layout]
+        `;
+
+        // This is how the inverted tree looks like:
+        //
+        // C    C    D[cat:Layout]  E             Bjs[jit:blinterp]
+        // Bjs  Bjs  C              Bjs[jit:ion]  A
+        // A    A    Bjs            A
+        //           A
+      }
+
+      it('returns good timings for a root native non-js node', () => {
+        const {
+          funcNamesDict: { D },
+          getTimingsForPath,
+        } = setupForInvertedTree(getJsHeavyProfileString());
+
+        // This is a root node: it should have all self time.
+        const timings = getTimingsForPath([D]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. Also it's a root node in
+        // an inverted tree, so selfTime and totalTime show the same timing.
+        // We extract the expectations to make this a bit more readable.
+        const expectedTiming = {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: withSingleSubcategory([
+            0,
+            0,
+            1, // Layout
+            0,
+            0,
+            0,
+            0,
+            0,
+          ]),
+        };
+        expect(timings).toEqual({
+          forPath: {
+            selfTime: {
+              // selftime breakdowns are always empty for inverted trees because
+              // they're the same than the total time.
+              ...EMPTY_TIMING,
+              // But root nodes have self time value of course!
+              value: 1,
+            },
+            totalTime: expectedTiming,
+          },
+          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
+          rootTime: 4,
+        });
+      });
+
+      it('returns good timings for a root native JS node', () => {
+        const {
+          funcNamesDict: { E },
+          getTimingsForPath,
+        } = setupForInvertedTree(getJsHeavyProfileString());
+
+        // This is a root node: it should have all self time.
+        const timings = getTimingsForPath([E]);
+
+        // This function is present only once in the call tree, so we'll get the
+        // same timing results for forPath and forFunc. Also it's a root node in
+        // an inverted tree, so selfTime and totalTime show the same timing.
+        // We extract the expectations to make this a bit more readable.
+        const expectedTiming = {
+          value: 1,
+          breakdownByImplementation: { ion: 1 },
+          breakdownByCategory: withSingleSubcategory([
+            0,
+            0,
+            0,
+            1, // JavaScript
+            0,
+            0,
+            0,
+            0,
+          ]),
+        };
+        expect(timings).toEqual({
+          forPath: {
+            selfTime: {
+              // selftime breakdowns are always empty for inverted trees because
+              // they're the same than the total time.
+              ...EMPTY_TIMING,
+              // But root nodes have a selftime value
+              value: 1,
+            },
+            totalTime: expectedTiming,
+          },
+          forFunc: { selfTime: expectedTiming, totalTime: expectedTiming },
+          rootTime: 4,
+        });
+      });
+
+      it('returns good timings for a JS node with various implementations', () => {
+        const {
+          funcNamesDict: { D, C, Bjs },
+          getTimingsForPath,
+        } = setupForInvertedTree(getJsHeavyProfileString());
+
+        const timings = getTimingsForPath([D, C, Bjs]);
+
+        expect(timings).toEqual({
+          forPath: {
+            selfTime: EMPTY_TIMING,
+            totalTime: {
+              value: 1,
+              breakdownByImplementation: {
+                native: 1,
+              },
+              breakdownByCategory: withSingleSubcategory([
+                0,
+                0,
+                1, // Layout
+                0,
+                0,
+                0,
+                0,
+                0,
+              ]),
+            },
+          },
+          forFunc: {
+            selfTime: {
+              value: 1,
+              breakdownByImplementation: { blinterp: 1 },
+              breakdownByCategory: withSingleSubcategory([
+                0,
+                0,
+                0,
+                1, // JavaScript
+                0,
+                0,
+                0,
+                0,
+              ]),
+            },
+            totalTime: {
+              value: 4,
+              breakdownByImplementation: {
+                ion: 1,
+                blinterp: 1,
+                interpreter: 1,
+                native: 1,
+              },
+              breakdownByCategory: withSingleSubcategory([
+                0,
+                0,
+                1, // Layout
+                3, // JavaScript
+                0,
+                0,
+                0,
+                0,
+              ]),
+            },
+          },
+          rootTime: 4,
+        });
+      });
+    });
   });
 
   describe('for a diffing track', function() {
@@ -2484,9 +2813,9 @@ describe('getTimingsForSidebar', () => {
         D[cat:Layout]  E  F
       `,
         `
-        A                  A  A
-        B                  B  B
-        G[cat:JavaScript]  I  E
+        A    A  A
+        B    B  B
+        Gjs  I  E
       `
       );
 
@@ -2511,15 +2840,12 @@ describe('getTimingsForSidebar', () => {
       } = setup();
       const timings = getTimingsForPath([A]);
       expect(timings.forPath).toEqual({
-        selfTime: {
-          breakdownByCategory: null,
-          breakdownByImplementation: null,
-          value: 0,
-        },
+        selfTime: EMPTY_TIMING,
         totalTime: {
           breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
           breakdownByImplementation: {
-            native: 0,
+            interpreter: 1,
+            native: -1,
           },
           value: 0,
         },
