@@ -15,6 +15,7 @@ import {
   removePrefMarkerPreferenceValues,
   sanitizeFileIOMarkerFilenamePath,
   filterRawMarkerTableToRangeWithMarkersToDelete,
+  sanitizeTextMarker,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
 import type { Profile, Thread, ThreadIndex } from '../types/profile';
@@ -231,6 +232,16 @@ function sanitizeThreadPII(
       ) {
         // Remove the filename path from marker payload.
         markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
+      }
+
+      if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'Text'
+      ) {
+        // Sanitize all the name fields of text markers in case they contain URLs.
+        markerTable.data[i] = sanitizeTextMarker(currentMarker);
       }
 
       // Remove the screenshots if the current thread index is in the

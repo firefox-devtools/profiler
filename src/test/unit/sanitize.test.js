@@ -255,6 +255,34 @@ describe('sanitizePII', function() {
     }
   });
 
+  it('should sanitize the URLs inside text markers', function() {
+    const unsanitizedNameField =
+      'onBeforeRequest https://profiler.firefox.com/ by extension';
+    const sanitizedNameField = 'onBeforeRequest https://<URL> by extension';
+    const profile = getProfileWithMarkers([
+      [
+        'Extension Suspend',
+        1,
+        {
+          type: 'Text',
+          startTime: 0,
+          endTime: 1,
+          name: unsanitizedNameField,
+        },
+      ],
+    ]);
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveUrls: true,
+    });
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+    const marker = sanitizedProfile.threads[0].markers.data[0];
+    if (!marker || marker.type !== 'Text') {
+      throw new Error('Expected a Text marker');
+    }
+    expect(marker.name).toBe(sanitizedNameField);
+  });
+
   it('should sanitize all the URLs inside string table', function() {
     const profile = processProfile(createGeckoProfile());
     const PIIToRemove = getRemoveProfileInformation({
