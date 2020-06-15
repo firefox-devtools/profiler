@@ -7,7 +7,7 @@ import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 import bisection from 'bisection';
 
-import type { RequestedLib } from '../types/actions';
+import type { RequestedLib } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 
 export type LibSymbolicationRequest = {

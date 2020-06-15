@@ -36,8 +36,6 @@ import type {
   BalancedNativeAllocationsTable,
   IndexIntoFrameTable,
   PageList,
-} from '../types/profile';
-import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
@@ -45,16 +43,17 @@ import type {
   AccumulatedCounterSamples,
   SelectedState,
   ProfileFilterPageData,
-} from '../types/profile-derived';
-import { assertExhaustiveCheck } from '../utils/flow';
-
-import type { Milliseconds, StartEndRange } from '../types/units';
-import { timeCode } from '../utils/time-code';
-import { hashPath } from '../utils/path';
-import type {
+  Milliseconds,
+  StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../types/actions';
+} from 'firefox-profiler/types';
+
+import { assertExhaustiveCheck } from '../utils/flow';
+
+import { timeCode } from '../utils/time-code';
+import { hashPath } from '../utils/path';
+
 import bisection from 'bisection';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 

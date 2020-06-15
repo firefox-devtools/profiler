@@ -21,7 +21,7 @@ import {
 } from '../../selectors/url-state';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { DataSource } from '../../types/actions';
+import type { DataSource } from 'firefox-profiler/types';
 
 type StateProps = {|
   +dataSource: DataSource,

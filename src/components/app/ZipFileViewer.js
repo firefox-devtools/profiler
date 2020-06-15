@@ -28,7 +28,7 @@ import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { ZipFileState } from '../../types/state';
+import type { ZipFileState } from 'firefox-profiler/types';
 import type {
   ZipFileTable,
   ZipDisplayData,

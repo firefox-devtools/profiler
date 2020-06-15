@@ -15,11 +15,15 @@ import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 
-import type { Profile, ThreadIndex } from '../types/profile';
-import type { CssPixels } from '../types/units';
-import type { Action, ThunkAction } from '../types/store';
+import type {
+  Profile,
+  ThreadIndex,
+  CssPixels,
+  Action,
+  ThunkAction,
+  UrlState,
+} from 'firefox-profiler/types';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState } from '../types/state';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {

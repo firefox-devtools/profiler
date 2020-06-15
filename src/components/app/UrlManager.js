@@ -30,7 +30,7 @@ import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from '../../utils/connect';
-import type { UrlState, Phase, UrlSetupPhase } from '../../types/state';
+import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {|
   +phase: Phase,

@@ -30,13 +30,12 @@ import type {
   Marker,
   MarkerIndex,
   MarkerTimingAndBuckets,
-} from '../../types/profile-derived';
-import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
   StartEndRange,
-} from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');

@@ -4,7 +4,7 @@
 // @flow
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { TransformType } from '../types/transforms';
+import type { TransformType } from 'firefox-profiler/types';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally

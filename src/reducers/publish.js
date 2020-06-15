@@ -6,14 +6,14 @@
 import { combineReducers } from 'redux';
 import { getShouldSanitizeByDefault } from '../profile-logic/sanitize';
 
-import type { CheckedSharingOptions } from '../types/actions';
 import type {
+  CheckedSharingOptions,
   PublishState,
   UploadState,
   UploadPhase,
   Reducer,
   State,
-} from '../types/state';
+} from 'firefox-profiler/types';
 
 function _getDefaultSharingOptions(): CheckedSharingOptions {
   return {

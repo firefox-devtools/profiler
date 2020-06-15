@@ -22,14 +22,17 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import type { JsTracerTable, ThreadIndex, Profile } from '../../types/profile';
-import type { JsTracerTiming } from '../../types/profile-derived';
 import type {
+  JsTracerTable,
+  ThreadIndex,
+  Profile,
+  JsTracerTiming,
   UnitIntervalOfProfileRange,
   CssPixels,
   StartEndRange,
-} from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');

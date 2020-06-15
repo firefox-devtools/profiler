@@ -19,16 +19,18 @@ import {
 } from '../utils/flow';
 import { toValidCallTreeSummaryStrategy } from '../profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import type { UrlState, TimelineTrackOrganization } from '../types/state';
-import type { DataSource } from '../types/actions';
 import type {
+  UrlState,
+  TimelineTrackOrganization,
+  DataSource,
   Pid,
   Profile,
   Thread,
   IndexIntoStackTable,
   BrowsingContextID,
-} from '../types/profile';
-import type { TrackIndex, CallNodePath } from '../types/profile-derived';
+  TrackIndex,
+  CallNodePath,
+} from 'firefox-profiler/types';
 
 export const CURRENT_URL_VERSION = 4;
 

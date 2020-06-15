@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import type { Milliseconds } from '../../types/units';
+import type { Milliseconds } from 'firefox-profiler/types';
 
 export type OnMove = (
   originalValue: { +selectionEnd: Milliseconds, +selectionStart: Milliseconds },

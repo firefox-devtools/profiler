@@ -12,9 +12,12 @@ import {
 import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
-import type { OriginsTimelineTrack } from '../../../types/profile-derived';
-import type { Profile } from '../../../types/profile';
-import type { State } from '../../../types/state';
+import type {
+  OriginsTimelineTrack,
+  Profile,
+  State,
+} from 'firefox-profiler/types';
+
 import { assertExhaustiveCheck } from '../../../utils/flow';
 import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
 

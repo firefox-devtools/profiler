@@ -11,7 +11,7 @@ import { oneLine } from 'common-tags';
 
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
-import type { State } from '../../types/store';
+import type { State } from 'firefox-profiler/types';
 
 type StateProps = {|
   +threadName: string,

@@ -8,8 +8,8 @@
 import type {
   $ReplaceCauseWithStack,
   CauseBacktrace,
-} from '../../types/markers';
-import type { GeckoMarkerStack } from '../../types/gecko-profile';
+  GeckoMarkerStack,
+} from 'firefox-profiler/types';
 
 type ObjectWithCause = {| a: number, cause: CauseBacktrace |};
 type ObjectWithOptionalCause = {| a: number, cause?: CauseBacktrace |};

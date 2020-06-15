@@ -28,8 +28,8 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State } from '../types/state';
-import type { CssPixels, StartEndRange } from '../types/units';
+import type { UrlState, UploadState, State } from './state';
+import type { CssPixels, StartEndRange } from './units';
 
 export type DataSource =
   | 'none'

@@ -36,20 +36,21 @@ import {
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 
-import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
+  Thread,
+  CategoryList,
+  PageList,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
   MarkerIndex,
   Marker,
-} from '../../types/profile-derived';
-import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
   StartEndRange,
-} from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');

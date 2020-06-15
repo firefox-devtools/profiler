@@ -24,7 +24,7 @@ import type {
   ExtensionTable,
   CategoryList,
   JsTracerTable,
-} from '../types/profile';
+} from 'firefox-profiler/types';
 
 /**
  * This module collects all of the creation of new empty profile data structures.

@@ -9,8 +9,12 @@ import ArrowPanel from '../../shared/ArrowPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 
-import type { Profile, ProfileMeta } from '../../../types/profile';
-import type { SymbolicationStatus } from '../../../types/state';
+import type {
+  Profile,
+  ProfileMeta,
+  SymbolicationStatus,
+} from 'firefox-profiler/types';
+
 import { typeof resymbolicateProfile } from '../../../actions/receive-profile';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 

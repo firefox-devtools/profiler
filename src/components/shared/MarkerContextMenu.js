@@ -18,15 +18,18 @@ import {
 import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
-import type { Marker } from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
 import type {
+  Marker,
+  StartEndRange,
   PreviewSelection,
   ImplementationFilter,
-} from '../../types/actions';
+  IndexIntoStackTable,
+  Thread,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 import { getImplementationFilter } from '../../selectors/url-state';
-import type { IndexIntoStackTable, Thread } from '../../types/profile';
+
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
 import {
   convertStackToCallNodePath,

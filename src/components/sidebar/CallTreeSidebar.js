@@ -21,12 +21,14 @@ import {
 import CanSelectContent from './CanSelectContent';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { ThreadIndex, CategoryList } from '../../types/profile';
 import type {
+  ThreadIndex,
+  CategoryList,
   CallNodeTable,
   IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import type {
   BreakdownByImplementation,
   BreakdownByCategory,

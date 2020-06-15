@@ -47,18 +47,19 @@ import type {
   TimelineType,
   DataSource,
   ActiveTabTrackReference,
-} from '../types/actions';
-import type { State } from '../types/state';
-import type { Action, ThunkAction } from '../types/store';
-import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
-import type {
+  State,
+  Action,
+  ThunkAction,
+  ThreadIndex,
+  Pid,
+  IndexIntoSamplesTable,
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   TrackIndex,
   MarkerIndex,
-} from '../types/profile-derived';
-import type { Transform } from '../types/transforms';
+  Transform,
+} from 'firefox-profiler/types';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including

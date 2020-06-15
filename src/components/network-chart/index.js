@@ -24,9 +24,13 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
-import type { NetworkPayload } from '../../types/markers';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
+import type {
+  NetworkPayload,
+  Marker,
+  MarkerIndex,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');

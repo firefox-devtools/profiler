@@ -30,18 +30,14 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
-} from '../types/profile';
-import type {
   CallNodePath,
   CallNodeTable,
   StackType,
-} from '../types/profile-derived';
-import type { ImplementationFilter } from '../types/actions';
-import type {
+  ImplementationFilter,
   Transform,
   TransformType,
   TransformStack,
-} from '../types/transforms';
+} from 'firefox-profiler/types';
 
 /**
  * This file contains the functions and logic for working with and applying transforms

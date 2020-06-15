@@ -22,17 +22,16 @@ import type {
   NativeAllocationsTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
-} from '../../types/profile';
-import type {
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
   SelectedState,
-} from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
-import type { CallTreeSummaryStrategy } from '../../types/actions';
+  StartEndRange,
+  Selector,
+  $ReturnType,
+  CallTreeSummaryStrategy,
+} from 'firefox-profiler/types';
+
 import type { ThreadSelectorsPerThread } from './thread';
 
 /**

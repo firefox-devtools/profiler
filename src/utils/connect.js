@@ -5,7 +5,12 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import type { Dispatch, State, ThunkAction, Action } from '../types/store';
+import type {
+  Dispatch,
+  State,
+  ThunkAction,
+  Action,
+} from 'firefox-profiler/types';
 
 type MapStateToProps<OwnProps: Object, StateProps: Object> = (
   state: State,

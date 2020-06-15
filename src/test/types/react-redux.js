@@ -17,7 +17,7 @@ import type {
   ThunkAction,
   Dispatch,
   GetState,
-} from '../../types/store';
+} from 'firefox-profiler/types';
 /* eslint-disable no-unused-vars, react/prefer-stateless-function, flowtype/no-unused-expressions */
 
 // Use this any value to create fake variables as a type. Consider using

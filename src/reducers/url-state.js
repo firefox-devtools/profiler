@@ -7,21 +7,21 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 
-import type { ThreadIndex, Pid } from '../types/profile';
-import type { TrackIndex } from '../types/profile-derived';
-import type { StartEndRange } from '../types/units';
-import type { TransformStacksPerThread } from '../types/transforms';
 import type {
+  ThreadIndex,
+  Pid,
+  TrackIndex,
+  StartEndRange,
+  TransformStacksPerThread,
   DataSource,
   ImplementationFilter,
   CallTreeSummaryStrategy,
   TimelineType,
-} from '../types/actions';
-import type {
   UrlState,
   Reducer,
   TimelineTrackOrganization,
-} from '../types/state';
+} from 'firefox-profiler/types';
+
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 /*

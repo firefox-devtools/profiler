@@ -17,8 +17,7 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getThreadWithMarkers } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 
-import type { Thread } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type { Thread, Milliseconds } from 'firefox-profiler/types';
 
 describe('deriveMarkersFromRawMarkerTable', function() {
   function setup() {

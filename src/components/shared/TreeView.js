@@ -11,7 +11,7 @@ import VirtualList from './VirtualList';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 /**
  * This number is used to decide how many lines the selection moves when the

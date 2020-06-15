@@ -18,14 +18,15 @@ import type {
   JsTracerTable,
   SamplesTable,
   NativeAllocationsTable,
-} from '../../types/profile';
-import type { Selector } from '../../types/store';
-import type { ThreadViewOptions } from '../../types/state';
-import type { TransformStack } from '../../types/transforms';
+  Selector,
+  ThreadViewOptions,
+  TransformStack,
+  JsTracerTiming,
+  $ReturnType,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import type { JsTracerTiming } from '../../types/profile-derived';
-import type { $ReturnType } from '../../types/utils';
-import type { StartEndRange } from '../../types/units';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This

@@ -26,17 +26,20 @@ import {
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
 
-import type { Thread, CategoryList, PageList } from '../../types/profile';
-import type { Milliseconds, StartEndRange } from '../../types/units';
-import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type {
+  Thread,
+  CategoryList,
+  PageList,
+  Milliseconds,
+  StartEndRange,
   PreviewSelection,
   CallTreeSummaryStrategy,
-} from '../../types/actions';
-import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
+import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
+
 import type { CallTree } from '../../profile-logic/call-tree';
 
 import type { ConnectedProps } from '../../utils/connect';

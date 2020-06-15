@@ -12,15 +12,16 @@ import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 
-import type { RawMarkerTable, ThreadIndex } from '../../types/profile';
 import type {
+  RawMarkerTable,
+  ThreadIndex,
   MarkerIndex,
   Marker,
   MarkerTiming,
   MarkerTimingAndBuckets,
-} from '../../types/profile-derived';
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
+  Selector,
+  $ReturnType,
+} from 'firefox-profiler/types';
 
 /**
  * Infer the return type from the getMarkerSelectorsPerThread function. This

@@ -17,7 +17,11 @@ import {
 } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
+import type {
+  Profile,
+  JsTracerTable,
+  ThreadIndex,
+} from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');

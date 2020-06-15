@@ -24,7 +24,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import type { Milliseconds } from '../../types/units';
+import type { Milliseconds } from 'firefox-profiler/types';
 
 // The following define the magic values used for the mocked bounding box of the
 // the rendered component.

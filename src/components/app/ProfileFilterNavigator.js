@@ -19,8 +19,10 @@ import FilterNavigatorBar from '../shared/FilterNavigatorBar';
 import Icon from '../shared/Icon';
 
 import type { ElementProps } from 'react';
-import type { ProfileFilterPageData } from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
+import type {
+  ProfileFilterPageData,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
 type Props = {|
   +filterPageData: ProfileFilterPageData | null,

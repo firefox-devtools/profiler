@@ -17,7 +17,7 @@ import type { SizeProps } from '../shared/WithSize';
 import type {
   ActiveTabResourceTrack,
   InitialSelectedTrackReference,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|

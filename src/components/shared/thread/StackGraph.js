@@ -20,12 +20,10 @@ import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../../types/profile';
-import type { Milliseconds } from '../../../types/units';
-import type {
+  Milliseconds,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-} from '../../../types/profile-derived';
+} from 'firefox-profiler/types';
 
 type Props = {|
   +className: string,

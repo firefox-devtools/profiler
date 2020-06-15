@@ -26,15 +26,13 @@ import type {
   JsTracerTable,
   Counter,
   BrowsingContextID,
-} from '../../../types/profile';
-import type {
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
   IPCMarkerPayload,
   UserTimingMarkerPayload,
-} from '../../../types/markers';
-import type { Milliseconds } from '../../../types/units';
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;

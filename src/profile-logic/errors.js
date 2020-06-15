@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { RequestedLib } from '../types/actions';
+import type { RequestedLib } from 'firefox-profiler/types';
 
 // Used during the symbolication process to express that we couldn't find
 // symbols for a specific library

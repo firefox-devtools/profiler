@@ -13,8 +13,8 @@ import type {
   IsSidebarOpenPerPanelState,
   Reducer,
   UrlSetupPhase,
-} from '../types/state';
-import type { ThreadIndex } from '../types/profile';
+  ThreadIndex,
+} from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },

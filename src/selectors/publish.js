@@ -31,10 +31,10 @@ import type {
   UploadState,
   UploadPhase,
   State,
-} from '../types/state';
-import type { Selector } from '../types/store';
-import type { CheckedSharingOptions } from '../types/actions';
-import type { RemoveProfileInformation } from '../types/profile-derived';
+  Selector,
+  CheckedSharingOptions,
+  RemoveProfileInformation,
+} from 'firefox-profiler/types';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
 

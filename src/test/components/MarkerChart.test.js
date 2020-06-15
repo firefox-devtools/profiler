@@ -32,8 +32,10 @@ import {
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-import type { UserTimingMarkerPayload } from '../../types/markers';
-import type { CssPixels } from '../../types/units';
+import type {
+  UserTimingMarkerPayload,
+  CssPixels,
+} from 'firefox-profiler/types';
 
 const MARKERS = [
   ['Marker A', 0, { startTime: 0, endTime: 10 }],
