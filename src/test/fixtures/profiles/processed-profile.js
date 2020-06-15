@@ -378,7 +378,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
-const JIT_IMPLEMENTATIONS = ['ion', 'baseline'];
+const JIT_IMPLEMENTATIONS = ['ion', 'baseline', 'blinterp'];
 
 function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
@@ -387,8 +387,13 @@ function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
     jitType = findJitTypeResult[1];
   }
 
-  if (jitType && JIT_IMPLEMENTATIONS.includes(jitType)) {
-    return jitType;
+  if (jitType) {
+    if (JIT_IMPLEMENTATIONS.includes(jitType)) {
+      return jitType;
+    }
+    throw new Error(
+      `The jitType '${jitType}' is unknown to this tool. Is it a typo or should you update the list of possible values?`
+    );
   }
 
   return null;
