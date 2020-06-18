@@ -147,7 +147,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     let trackLabel;
     switch (resourceTrack.type) {
       case 'sub-frame':
-        trackLabel = 'Frame:';
+        trackLabel = 'Iframe:';
         break;
       case 'thread':
         trackLabel = 'Thread:';
