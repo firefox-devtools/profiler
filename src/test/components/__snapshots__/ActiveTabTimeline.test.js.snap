@@ -70,7 +70,7 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
       class="timelineTrackResourceLabel"
     >
       <span>
-        Iframe:
+        IFrame:
       </span>
        
       Page #3
@@ -155,7 +155,7 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           class="timelineTrackResourceLabel"
         >
           <span>
-            Iframe:
+            IFrame:
           </span>
            
           Page #2

@@ -194,7 +194,7 @@ describe('ActiveTabTimeline', function() {
 
       const { getByText, queryByText } = renderResult;
       const getResourcesPanelHeader = () => getByText(/Resources/);
-      const getResourceFrameTrack = () => queryByText(/Iframe:/);
+      const getResourceFrameTrack = () => queryByText(/IFrame:/);
 
       return {
         ...renderResult,
