@@ -103,15 +103,13 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     <div
       class="sidebar-label"
     >
-      <div>
-        <button
-          class="sidebar-toggle expanded"
-          data-category="Layout"
-          type="button"
-        >
-          Layout
-        </button>
-      </div>
+      <button
+        class="sidebar-toggle expanded"
+        data-category="Layout"
+        type="button"
+      >
+        Layout
+      </button>
     </div>
     <div
       class="sidebar-percentage"
@@ -344,9 +342,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        JavaScript
-      </div>
+      JavaScript
     </div>
     <div
       class="sidebar-percentage"
@@ -507,9 +503,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        JavaScript
-      </div>
+      JavaScript
     </div>
     <div
       class="sidebar-percentage"
@@ -670,9 +664,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        Idle
-      </div>
+      Idle
     </div>
     <div
       class="sidebar-percentage"
@@ -695,9 +687,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        Layout
-      </div>
+      Layout
     </div>
     <div
       class="sidebar-percentage"
@@ -892,9 +882,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        JavaScript
-      </div>
+      JavaScript
     </div>
     <div
       class="sidebar-percentage"
@@ -1097,9 +1085,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        JavaScript
-      </div>
+      JavaScript
     </div>
     <div
       class="sidebar-percentage"
@@ -1260,9 +1246,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        Layout
-      </div>
+      Layout
     </div>
     <div
       class="sidebar-percentage"
@@ -1423,9 +1407,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        Idle
-      </div>
+      Idle
     </div>
     <div
       class="sidebar-percentage"
@@ -1586,9 +1568,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      <div>
-        Layout
-      </div>
+      Layout
     </div>
     <div
       class="sidebar-percentage"
