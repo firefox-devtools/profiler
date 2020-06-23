@@ -9198,6 +9198,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -9247,8 +9249,6 @@ Object {
         "frobnicate",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -9560,6 +9560,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -9609,8 +9611,6 @@ Object {
         "frobnicate",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -9922,6 +9922,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -9971,8 +9973,6 @@ Object {
         "frobnicate",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
   ],
 }
@@ -10417,6 +10417,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -10469,8 +10471,6 @@ Object {
         "FileIO",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -10782,6 +10782,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -10831,8 +10833,6 @@ Object {
         "frobnicate",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -11212,6 +11212,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -11273,8 +11275,6 @@ Object {
         "setTimeout handler",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
   ],
 }
@@ -11791,6 +11791,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -11843,8 +11845,6 @@ Object {
         "FileIO",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -12158,6 +12158,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -12207,8 +12209,6 @@ Object {
         "frobnicate",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
     Object {
       "frameTable": Object {
@@ -12590,6 +12590,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -12651,8 +12653,6 @@ Object {
         "setTimeout handler",
       ],
       "unregisterTime": null,
-      "weight": null,
-      "weightType": "samples",
     },
   ],
 }
