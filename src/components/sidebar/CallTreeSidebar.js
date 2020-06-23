@@ -96,7 +96,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
   render() {
     const { breakdown, number } = this.props;
 
-    const data = [];
+    const data: Array<{| +group: string, +value: Milliseconds | number |}> = [];
 
     for (const implementation of this._orderedImplementations) {
       const value = breakdown[implementation];
@@ -110,7 +110,34 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
       });
     }
 
-    return <Breakdown data={data} number={number} />;
+    const totalTime = data.reduce<number>(
+      (result, item) => result + item.value,
+      0
+    );
+
+    return data
+      .filter(({ value }) => value)
+      .map(({ group, value }) => {
+        return (
+          <React.Fragment key={group}>
+            <SidebarDetail
+              label={group}
+              value={number(value)}
+              percentage={formatPercent(value / totalTime)}
+            />
+            {/* Draw a histogram bar. */}
+            <div className="sidebar-histogram-bar">
+              <div
+                className="sidebar-histogram-bar-color"
+                style={{
+                  width: formatPercent(value / totalTime),
+                  backgroundColor: 'var(--grey-50)',
+                }}
+              ></div>
+            </div>
+          </React.Fragment>
+        );
+      });
   }
 }
 
@@ -193,23 +220,21 @@ class CategoryBreakdown extends React.PureComponent<
             <React.Fragment key={category.name}>
               <SidebarDetail
                 label={
-                  <div>
-                    {hasSubcategory ? (
-                      <button
-                        type="button"
-                        data-category={category.name}
-                        onClick={this._toggleCategory}
-                        className={classNames({
-                          'sidebar-toggle': true,
-                          expanded,
-                        })}
-                      >
-                        {category.name}
-                      </button>
-                    ) : (
-                      category.name
-                    )}
-                  </div>
+                  hasSubcategory ? (
+                    <button
+                      type="button"
+                      data-category={category.name}
+                      onClick={this._toggleCategory}
+                      className={classNames({
+                        'sidebar-toggle': true,
+                        expanded,
+                      })}
+                    >
+                      {category.name}
+                    </button>
+                  ) : (
+                    category.name
+                  )
                 }
                 value={number(value)}
                 percentage={formatPercent(value / totalTime)}
@@ -242,44 +267,6 @@ class CategoryBreakdown extends React.PureComponent<
   }
 }
 
-type BreakdownProps = {|
-  +data: $ReadOnlyArray<{|
-    group: string,
-    value: Milliseconds,
-  |}>,
-  number: number => string,
-|};
-
-// This stateless component is responsible for displaying the implementation
-// breakdown. It also computes the percentage from the total time.
-function Breakdown({ data, number }: BreakdownProps) {
-  const totalTime = data.reduce((result, item) => result + item.value, 0);
-
-  return data
-    .filter(({ value }) => value)
-    .map(({ group, value }) => {
-      return (
-        <React.Fragment key={group}>
-          <SidebarDetail
-            label={group}
-            value={number(value)}
-            percentage={formatPercent(value / totalTime)}
-          />
-          {/* Draw a histogram bar, colored by the category. */}
-          <div className="sidebar-histogram-bar">
-            <div
-              className="sidebar-histogram-bar-color"
-              style={{
-                width: formatPercent(value / totalTime),
-                backgroundColor: 'var(--grey-50)',
-              }}
-            ></div>
-          </div>
-        </React.Fragment>
-      );
-    });
-}
-
 type StateProps = {|
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
   +callNodeTable: CallNodeTable,
@@ -294,11 +281,11 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type WeightDetails = {
-  running: string,
-  self: string,
-  number: (n: number) => string,
-};
+type WeightDetails = {|
+  +running: string,
+  +self: string,
+  +number: (n: number) => string,
+|};
 
 function getWeightTypeLabel(weightType: WeightType): string {
   switch (weightType) {
@@ -314,30 +301,33 @@ function getWeightTypeLabel(weightType: WeightType): string {
 }
 
 class CallTreeSidebar extends React.PureComponent<Props> {
-  _getWeightDetails = memoize((weightType: WeightType): WeightDetails => {
-    switch (weightType) {
-      case 'tracing-ms':
-        return {
-          running: 'Running time',
-          self: 'Self time',
-          number: n => formatMilliseconds(n, 3, 1),
-        };
-      case 'samples':
-        return {
-          running: 'Running samples',
-          self: 'Self samples',
-          number: n => formatNumber(n, 0),
-        };
-      case 'bytes':
-        return {
-          running: 'Running size',
-          self: 'Self size',
-          number: n => formatBytes(n),
-        };
-      default:
-        throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
-    }
-  });
+  _getWeightTypeDetails = memoize(
+    (weightType: WeightType): WeightDetails => {
+      switch (weightType) {
+        case 'tracing-ms':
+          return {
+            running: 'Running time',
+            self: 'Self time',
+            number: n => formatMilliseconds(n, 3, 1),
+          };
+        case 'samples':
+          return {
+            running: 'Running samples',
+            self: 'Self samples',
+            number: n => formatNumber(n, 0),
+          };
+        case 'bytes':
+          return {
+            running: 'Running size',
+            self: 'Self size',
+            number: n => formatBytes(n),
+          };
+        default:
+          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+      }
+    },
+    { cache: new Map() }
+  );
 
   render() {
     const {
@@ -362,7 +352,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       );
     }
 
-    const { number, running, self } = this._getWeightDetails(weightType);
+    const { number, running, self } = this._getWeightTypeDetails(weightType);
 
     const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
     const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
@@ -465,41 +455,6 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             </React.Fragment>
           ) : null}
-          {/* <h3 className="sidebar-title2">
-            This function across the entire tree
-          </h3>
-          <SidebarDetail
-            label="Running Time"
-            value={
-              totalTimeForFunc.value ? number(totalTimeForFunc.value) : '—'
-            }
-            percentage={totalTimeForFuncPercent}
-          />
-          <SidebarDetail
-            label="Self Time"
-            value={selfTimeForFunc.value ? number(selfTimeForFunc.value) : '—'}
-            percentage={selfTimeForFuncPercent}
-          />
-          {totalTimeForFunc.breakdownByImplementation &&
-          totalTimeForFunc.value ? (
-            <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – running time</h4>
-              <ImplementationBreakdown
-                breakdown={totalTimeForFunc.breakdownByImplementation}
-                number={number}
-              />
-            </React.Fragment>
-          ) : null}
-          {selfTimeForFunc.breakdownByImplementation &&
-          selfTimeForFunc.value ? (
-            <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – self time</h4>
-              <ImplementationBreakdown
-                breakdown={selfTimeForFunc.breakdownByImplementation}
-                number={number}
-              />
-            </React.Fragment>
-          ) : null} */}
         </div>
       </aside>
     );

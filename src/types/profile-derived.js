@@ -330,6 +330,6 @@ export type ProfileFilterPageData = {|
  * counts.
  */
 export type TracedTiming = {|
-  self: Milliseconds[],
-  running: Milliseconds[],
+  +self: Float32Array,
+  +running: Float32Array,
 |};

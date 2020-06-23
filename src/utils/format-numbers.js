@@ -126,10 +126,16 @@ export function formatCallNodeNumberWithUnit(
       const precision = isHighPrecision ? 3 : 1;
       return formatNumber(number, 3, precision) + 'ms';
     }
-    case 'samples':
-      return formatNumber(number, 3, 0) + ' samples';
-    case 'bytes':
-      return formatNumber(number, 3, 0) + ' bytes';
+    case 'samples': {
+      // TODO - L10n properly
+      const unit = number === 1 ? ' sample' : ' samples';
+      return formatNumber(number, 3, 0) + unit;
+    }
+    case 'bytes': {
+      // TODO - L10n properly
+      const unit = number === 1 ? ' byte' : ' bytes';
+      return formatNumber(number, 3, 0) + unit;
+    }
     default:
       throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
   }

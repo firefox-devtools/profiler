@@ -29,10 +29,10 @@ type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
 
 export type Column = {|
-  propName: string,
-  title: string,
-  tooltip?: string,
-  component?: React.ComponentType<*>,
+  +propName: string,
+  +title: string,
+  +tooltip?: string,
+  +component?: React.ComponentType<*>,
 |};
 
 type TreeViewHeaderProps = {|
