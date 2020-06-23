@@ -12,7 +12,10 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
-import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
+import {
+  formatCallNodeNumberWithUnit,
+  formatPercent,
+} from '../../utils/format-numbers';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
@@ -289,7 +292,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     const ratio =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
-    let percentage = (100 * ratio).toFixed(2) + '%';
+
+    let percentage = formatPercent(ratio);
     if (tracedTiming) {
       const time = formatCallNodeNumberWithUnit(
         'tracing-ms',

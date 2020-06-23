@@ -142,6 +142,17 @@
   border: 0;
   background: 0;
   color: var(--grey-50);
+  font-size: inherit;
+}
+
+/* Opt out of the default photon styling, as it doesn't look very nice with the
+   overflow: hidden of the container */
+.sidebar-toggle:focus {
+  border: 0;
+  border-radius: 2px;
+  box-shadow: none;
+  color: var(--blue-60);
+  text-decoration: underline;
 }
 
 /* This is the twisty arrow */
@@ -156,6 +167,10 @@
   background: none;
   content: '';
   margin-inline-start: -9px;
+}
+
+.sidebar-toggle:active:hover {
+  color: var(--grey-60);
 }
 
 .sidebar-toggle.expanded::before {

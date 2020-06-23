@@ -1210,12 +1210,12 @@ const _upgraders = {
         delete thread.jsAllocations.duration;
       }
 
-      if (!thread.weights) {
-        thread.weight = null;
+      if (!thread.samples.weight) {
+        thread.samples.weight = null;
       }
 
-      if (!thread.weightType) {
-        thread.weightType = 'samples';
+      if (!thread.samples.weightType) {
+        thread.samples.weightType = 'samples';
       }
     }
   },

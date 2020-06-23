@@ -105,21 +105,23 @@ export type StackTable = {|
  *
  *     0 1 2 3 4 5 6 7 8 9 10
  *     | | | | | | | | | | |
- *     ---------------------
- *     [AAAAAAAAAAAAAAAAAA]
- *         [BB][DDDDDD]
- *         [CC][EEEEEE]
+ *     - - - - - - - - - - -
+ *     A A A A A A A A A A A
+ *         B B D D D D
+ *         C C E E E E
  *                                     .
  * This chart represents the self time.
  *
- *     [AA][CCCC][EEEEEEEEEE][DDD][AAA]
+ *     0 1 2 3 4 5 6 7 8 9 10
+ *     | | | | | | | | | | |
+ *     A A C C E E E E A A A
  *
  * And finally this is what the samples table would look like.
  *
  *     SamplesTable = {
  *       time:   [0,   2,   4, 8],
  *       stack:  [A, ABC, ADE, A],
- *       weight: [2,   2,   8, 4],
+ *       weight: [2,   2,   8, 3],
  *     }
  */
 export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
@@ -174,11 +176,10 @@ export type JsAllocationsTable = {|
   className: string[],
   typeName: string[], // Currently only 'JSObject'
   coarseType: string[], // Currently only 'Object',
-  // "weight" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and JsAllocationsTable in the same call tree
-  // computation functions.
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
   weight: Bytes[],
-  weightType: WeightType, // Bytes only.
+  weightType: 'bytes',
   inNursery: boolean[],
   stack: Array<IndexIntoStackTable | null>,
   length: number,
@@ -190,11 +191,10 @@ export type JsAllocationsTable = {|
  */
 export type UnbalancedNativeAllocationsTable = {|
   time: Milliseconds[],
-  // "weight" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and NativeAllocationsTable in the same call
-  // tree computation functions.
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
   weight: Bytes[],
-  weightType: WeightType, // Bytes only.
+  weightType: 'bytes',
   stack: Array<IndexIntoStackTable | null>,
   length: number,
 |};

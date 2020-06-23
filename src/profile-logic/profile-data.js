@@ -2527,8 +2527,8 @@ export function computeTracedTiming(
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
 
   const timing = {
-    self: Array(callNodeTable.length).fill(0),
-    running: Array(callNodeTable.length).fill(0),
+    self: new Float32Array(callNodeTable.length),
+    running: new Float32Array(callNodeTable.length),
   };
 
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
