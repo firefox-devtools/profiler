@@ -19,14 +19,22 @@ export type CauseBacktrace = {|
 |};
 
 /**
- * This type holds data that should be synchronized between the sender and
- * recipient sides of an IPC marker.
+ * This type holds data that should be synchronized across the various phases
+ * associated with an IPC message.
  */
-export type IPCPairData = {|
-  startTime: Milliseconds,
-  endTime: Milliseconds,
-  otherTid: number,
-  otherThreadName: string,
+export type IPCSharedData = {|
+  // Each of these fields comes from a specific marker corresponding to each
+  // phase of an IPC message; since we can't guarantee that any particular
+  // marker was recorded, all of the fields are optional.
+  startTime?: Milliseconds,
+  sendStartTime?: Milliseconds,
+  sendEndTime?: Milliseconds,
+  recvEndTime?: Milliseconds,
+  endTime?: Milliseconds,
+  sendTid?: number,
+  recvTid?: number,
+  sendThreadName?: string,
+  recvThreadName?: string,
 |};
 
 /**
@@ -572,18 +580,35 @@ export type NativeAllocationPayload_Gecko = {|
   threadId?: number,
 |};
 
-export type IPCMarkerPayload = {|
+export type IPCMarkerPayload_Gecko = {|
   type: 'IPC',
   startTime: Milliseconds,
   endTime: Milliseconds,
   otherPid: number,
-  otherTid?: number,
-  otherThreadName?: string,
   messageType: string,
   messageSeqno: number,
   side: 'parent' | 'child',
   direction: 'sending' | 'receiving',
+  // Phase is not present in older profiles (in this case the phase is "endpoint").
+  phase?: 'endpoint' | 'transferStart' | 'transferEnd',
   sync: boolean,
+|};
+
+export type IPCMarkerPayload = {|
+  ...IPCMarkerPayload_Gecko,
+
+  // These fields are added in the deriving process from `IPCSharedData`, and
+  // correspond to data from all the markers associated with a particular IPC
+  // message.
+  startTime?: Milliseconds,
+  sendStartTime?: Milliseconds,
+  sendEndTime?: Milliseconds,
+  recvEndTime?: Milliseconds,
+  endTime?: Milliseconds,
+  sendTid?: number,
+  recvTid?: number,
+  sendThreadName?: string,
+  recvThreadName?: string,
 |};
 
 export type MediaSampleMarkerPayload = {|
@@ -648,7 +673,7 @@ export type MarkerPayload_Gecko =
   | JsAllocationPayload_Gecko
   | NativeAllocationPayload_Gecko
   | PrefMarkerPayload
-  | IPCMarkerPayload
+  | IPCMarkerPayload_Gecko
   | MediaSampleMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type

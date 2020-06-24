@@ -2440,6 +2440,116 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       :
     </div>
     false
+    <div
+      class="tooltipLabel"
+    >
+      Send Thread Latency
+      :
+    </div>
+    1.0ms
+    <div
+      class="tooltipLabel"
+    >
+      IPC Speed
+      :
+    </div>
+    unknown
+    <div
+      class="tooltipLabel"
+    >
+      IPC Latency
+      :
+    </div>
+    unknown
+    <div
+      class="tooltipLabel"
+    >
+      Recv Thread Latency
+      :
+    </div>
+    unknown
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
+<div
+  class="tooltipMarker propClass"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        unknown duration
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        IPC — sent to 2222
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Main Thread
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Type
+      :
+    </div>
+    PContent::Msg_PreferenceUpdate
+    <div
+      class="tooltipLabel"
+    >
+      Sync
+      :
+    </div>
+    false
+    <div
+      class="tooltipLabel"
+    >
+      Send Thread Latency
+      :
+    </div>
+    1.0ms
+    <div
+      class="tooltipLabel"
+    >
+      IPC Speed
+      :
+    </div>
+    unknown
+    <div
+      class="tooltipLabel"
+    >
+      IPC Latency
+      :
+    </div>
+    unknown
+    <div
+      class="tooltipLabel"
+    >
+      Recv Thread Latency
+      :
+    </div>
+    unknown
   </div>
 </div>
 `;
