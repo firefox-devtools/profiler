@@ -47,6 +47,13 @@ type Props = {|
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
+// For debugging purposes, allow tooltips to persist. This aids in inspecting
+// the DOM structure.
+window.persistTooltips = false;
+if (process.env.NODE_ENV === 'development') {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
+}
+
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.
  * This includes the Flame Graph and Stack Chart.
