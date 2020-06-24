@@ -256,9 +256,10 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
     getSamplesForCallTree,
-    ProfileSelectors.getProfileInterval,
     getCallNodeInfo,
-    ProfileData.computeTracedTiming
+    ProfileSelectors.getProfileInterval,
+    UrlState.getInvertCallstack,
+    CallTree.computeTracedTiming
   );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(

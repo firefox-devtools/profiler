@@ -26,6 +26,8 @@ import type {
   CallNodeData,
   CallNodeDisplayData,
   Milliseconds,
+  TracedTiming,
+  SamplesTable,
 } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
@@ -583,4 +585,90 @@ export function extractSamplesLikeTable(
     default:
       throw assertExhaustiveCheck(strategy);
   }
+}
+
+/**
+ * This function is extremely similar to computeCallTreeCountsAndTimings,
+ * but is specialized for converting sample counts into traced timing. Samples
+ * don't have duration information associated with them, it's mostly how long they
+ * were observed to be running. This function computes the timing the exact same
+ * way that the stack chart will display the information, so that timing information
+ * will agree. In the past, timing was computed by samplingInterval * sampleCount.
+ * This caused confusion when switching to the trace-based views when the numbers
+ * did not agree. In order to remove confusion, we can show the sample counts,
+ * plus the traced timing, which is a compromise between correctness, and consistency.
+ */
+export function computeTracedTiming(
+  samples: SamplesLikeTable,
+  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  interval: Milliseconds,
+  invertCallstack: boolean
+): TracedTiming | null {
+  if (samples.weightType && samples.weightType !== 'samples') {
+    // Only compute for the samples table.
+    return null;
+  }
+
+  // Compute the timing duration, which is the time between this sample and the next.
+  const weight = [];
+  for (let sampleIndex = 0; sampleIndex < samples.length - 1; sampleIndex++) {
+    weight.push(samples.time[sampleIndex + 1] - samples.time[sampleIndex]);
+  }
+  if (samples.length > 0) {
+    // Use the sampling interval for the last sample.
+    weight.push(interval);
+  }
+  const samplesWithWeight: SamplesTable = {
+    ...samples,
+    weight,
+  };
+
+  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+    samples.stack,
+    stackIndexToCallNodeIndex
+  );
+  // Inverted trees need a different method for computing the timing.
+  const { callNodeSelfTime, callNodeLeafTime } = invertCallstack
+    ? _getInvertedStackSelfTimes(
+        samplesWithWeight,
+        callNodeTable,
+        sampleIndexToCallNodeIndex
+      )
+    : _getStackSelfTimes(
+        samplesWithWeight,
+        callNodeTable,
+        sampleIndexToCallNodeIndex
+      );
+
+  // Compute the following variables:
+  const callNodeTotalTime = new Float32Array(callNodeTable.length);
+  const callNodeChildCount = new Uint32Array(callNodeTable.length);
+
+  // We loop the call node table in reverse, so that we find the children
+  // before their parents, and the total time is known at the time we reach a
+  // node.
+  for (
+    let callNodeIndex = callNodeTable.length - 1;
+    callNodeIndex >= 0;
+    callNodeIndex--
+  ) {
+    callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
+    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasTotalTime = callNodeTotalTime[callNodeIndex] !== 0;
+
+    if (!hasChildren && !hasTotalTime) {
+      continue;
+    }
+
+    const prefixCallNode = callNodeTable.prefix[callNodeIndex];
+    if (prefixCallNode !== -1) {
+      callNodeTotalTime[prefixCallNode] += callNodeTotalTime[callNodeIndex];
+      callNodeChildCount[prefixCallNode]++;
+    }
+  }
+
+  return {
+    self: callNodeSelfTime,
+    running: callNodeTotalTime,
+  };
 }

@@ -1035,7 +1035,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      —
+      2.0ms
     </div>
     <div
       class="sidebar-label"
@@ -1196,7 +1196,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      —
+      1.0ms
     </div>
     <div
       class="sidebar-label"
@@ -1518,7 +1518,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1.0ms
+      —
     </div>
     <div
       class="sidebar-label"
