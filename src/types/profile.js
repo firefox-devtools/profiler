@@ -98,8 +98,9 @@ export type StackTable = {|
  *
  * In addition, tracing formats can fit into the sample-based format by reporting
  * the "self time" of the profile. Each of these "self time" samples would then
- * provide the weight, in duration. Currently, the only supported duration is
- * milliseconds.
+ * provide the weight, in duration. Currently, the tracing format assumes that
+ * the timing comes in milliseconds (see 'tracing-ms') but if needed, microseconds
+ * or nanoseconds support could be added.
  *
  * e.g. The following tracing data could be represented as samples:
  *
