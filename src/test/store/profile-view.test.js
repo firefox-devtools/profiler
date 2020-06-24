@@ -3291,6 +3291,60 @@ describe('traced timing', function() {
     expect(self[stack_C]).toBe(profile.meta.interval);
   });
 
+  it('computes traced timing for an inverted tree', function() {
+    const { profile } = getProfileFromTextSamples(`
+      0  1  5  6
+      A  A  A  C
+         B  B
+            C
+    `);
+    profile.meta.interval = 0.5;
+    // Inverted this tree looks like this:
+    //
+    // 0 1 5 6
+    // A B C C
+    //   A B
+    //     A
+
+    // The stack indexes appear in the order they were listed in the samples.
+    const stack_A = 0;
+    const stack_B = 1;
+    const stack_BA = 2;
+    const stack_C = 3;
+    const stack_CB = 4;
+    const stack_CBA = 5;
+
+    const { getState, dispatch } = storeWithProfile(profile);
+    dispatch(ProfileView.changeInvertCallstack(true));
+    // Rename self to self___ to make the assertions more readable.
+    const { running, self: self___ } = ensureExists(
+      selectedThreadSelectors.getTracedTiming(getState()),
+      'Expected to get a traced timing.'
+    );
+
+    // This test is a bit hard to assert in a really readable fasshion.
+    // Running: [ 1, 4, 4, 1.5, 1, 1 ]
+    // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
+
+    expect(running[stack_A]).toBe(1);
+    expect(self___[stack_A]).toBe(1);
+
+    expect(running[stack_B]).toBe(4);
+    expect(self___[stack_B]).toBe(4);
+
+    expect(running[stack_BA]).toBe(4);
+    expect(self___[stack_BA]).toBe(0);
+
+    expect(running[stack_C]).toBe(1.5);
+    expect(self___[stack_C]).toBe(1.5);
+
+    expect(running[stack_CB]).toBe(1);
+    expect(self___[stack_CB]).toBe(0);
+
+    expect(running[stack_CBA]).toBe(1);
+    expect(self___[stack_CBA]).toBe(0);
+  });
+
   it('does not compute traced timing for other types', function() {
     const { profile } = getProfileFromTextSamples(`
       A  A  A  C
