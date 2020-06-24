@@ -63,6 +63,10 @@ export function addDataToWindowObject(
   target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
   target.actions = actions;
+
+  // For debugging purposes, allow tooltips to persist. This aids in inspecting
+  // the DOM structure.
+  target.persistTooltips = false;
 }
 
 export function logFriendlyPreamble() {
@@ -150,4 +154,8 @@ export function logFriendlyPreamble() {
     link,
     reset
   );
+}
+
+export function logDevelopmentTips() {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
 }

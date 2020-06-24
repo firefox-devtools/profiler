@@ -354,7 +354,12 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         mouseX: event.pageX,
         mouseY: event.pageY,
       });
-    } else if (this.state.hoveredItem !== null) {
+    } else if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({
         hoveredItem: null,
       });
@@ -415,9 +420,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   };
 
   _onMouseOut = () => {
-    this.setState({
-      hoveredItem: null,
-    });
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (!window.persistTooltips) {
+      this.setState({
+        hoveredItem: null,
+      });
+    }
   };
 
   componentDidMount() {
