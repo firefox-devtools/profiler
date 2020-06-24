@@ -197,6 +197,16 @@ function _sumMaybeEntries(
     .reduce((a, x) => a + x, 0);
 }
 
+function _maybeFormatDuration(
+  start: number | void,
+  end: number | void
+): string {
+  if (start !== undefined && end !== undefined) {
+    return formatMilliseconds(end - start);
+  }
+  return 'unknown';
+}
+
 const MaybeBacktrace = ({
   marker,
   thread,
@@ -635,6 +645,18 @@ function getMarkerDetails(
           <TooltipDetails>
             <TooltipDetail label="Type">{data.messageType}</TooltipDetail>
             <TooltipDetail label="Sync">{data.sync.toString()}</TooltipDetail>
+            <TooltipDetail label="Send Thread Latency">
+              {_maybeFormatDuration(data.startTime, data.sendStartTime)}
+            </TooltipDetail>
+            <TooltipDetail label="IPC Speed">
+              {_maybeFormatDuration(data.sendStartTime, data.sendEndTime)}
+            </TooltipDetail>
+            <TooltipDetail label="IPC Latency">
+              {_maybeFormatDuration(data.sendEndTime, data.recvEndTime)}
+            </TooltipDetail>
+            <TooltipDetail label="Recv Thread Latency">
+              {_maybeFormatDuration(data.recvEndTime, data.endTime)}
+            </TooltipDetail>
           </TooltipDetails>
         );
         break;

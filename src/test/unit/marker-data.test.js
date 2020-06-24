@@ -60,9 +60,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('creates 17 markers given the test data', function() {
+  it('creates 18 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(17);
+    expect(markers.length).toEqual(18);
   });
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
@@ -84,7 +84,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(17);
+    expect(markers.length).toEqual(18);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -99,6 +99,40 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 1,
       name: 'Rasterize',
       title: null,
+    });
+  });
+  it('should correlate the IPC markers together and fold transferStart/transferEnd markers', function() {
+    const { markers, contentMarkers } = setup();
+    expect(markers[14]).toMatchObject({
+      start: 30,
+      dur: 1001,
+      name: 'IPCOut',
+      data: { phase: 'endpoint' },
+    });
+    expect(markers[15]).toMatchObject({
+      start: 30,
+      dur: 1001,
+      name: 'IPCOut',
+      data: { phase: 'transferStart' },
+    });
+    expect(contentMarkers[0]).toMatchObject({
+      start: 30,
+      dur: 1001,
+      name: 'IPCIn',
+      data: { phase: 'transferEnd' },
+    });
+    expect(contentMarkers[1]).toMatchObject({
+      start: 30,
+      dur: 1001,
+      name: 'IPCIn',
+      data: { phase: 'endpoint' },
+    });
+
+    expect(markers[16]).toMatchObject({
+      start: 40,
+      dur: 0,
+      name: 'IPCOut',
+      data: { phase: 'endpoint' },
     });
   });
   it('should create a marker for the MinorGC startTime/endTime marker', function() {
@@ -139,7 +173,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should handle markers without an end', function() {
     const { markers } = setup();
-    expect(markers[16]).toMatchObject({
+    expect(markers[17]).toMatchObject({
       start: 100,
       dur: 0,
       name: 'Rasterize',
@@ -210,63 +244,58 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       data: {
         type: 'IPC',
         startTime: 30,
+        sendStartTime: 30.1,
+        sendEndTime: 30.2,
+        recvEndTime: 1030.3,
         endTime: 1031,
         otherPid: 2222,
-        otherTid: 1111,
-        otherThreadName: 'Content Process (Thread ID: 1111)',
+        sendTid: 3333,
+        recvTid: 1111,
+        sendThreadName: 'Parent Process (Thread ID: 3333)',
+        recvThreadName: 'Content Process (Thread ID: 1111)',
         messageSeqno: 1,
         messageType: 'PContent::Msg_PreferenceUpdate',
         side: 'parent',
         direction: 'sending',
+        phase: 'endpoint',
         sync: false,
       },
       dur: 1001,
+      incomplete: false,
       name: 'IPCOut',
       start: 30,
       title: 'IPC — sent to Content Process (Thread ID: 1111)',
       category: 0,
     });
-    expect(markers[15]).toEqual({
-      data: {
-        type: 'IPC',
-        startTime: 40,
-        endTime: 40,
-        otherPid: 9999,
-        messageSeqno: 2,
-        messageType: 'PContent::Msg_PreferenceUpdate',
-        side: 'parent',
-        direction: 'sending',
-        sync: false,
-      },
-      dur: 0,
-      incomplete: true,
-      name: 'IPCOut',
-      start: 40,
-      title: 'IPC — sent to 9999',
-      category: 0,
-    });
 
-    expect(contentMarkers[0]).toEqual({
+    expect(contentMarkers[1]).toEqual({
       data: {
         type: 'IPC',
         startTime: 30,
+        sendStartTime: 30.1,
+        sendEndTime: 30.2,
+        recvEndTime: 1030.3,
         endTime: 1031,
         otherPid: 3333,
-        otherTid: 3333,
-        otherThreadName: 'Parent Process (Thread ID: 3333)',
+        sendTid: 3333,
+        recvTid: 1111,
+        sendThreadName: 'Parent Process (Thread ID: 3333)',
+        recvThreadName: 'Content Process (Thread ID: 1111)',
         messageSeqno: 1,
         messageType: 'PContent::Msg_PreferenceUpdate',
         side: 'child',
         direction: 'receiving',
+        phase: 'endpoint',
         sync: false,
       },
       dur: 1001,
+      incomplete: false,
       name: 'IPCIn',
       start: 30,
       title: 'IPC — received from Parent Process (Thread ID: 3333)',
       category: 0,
     });
-    expect(contentMarkers[11]).toEqual({
+    expect(contentMarkers[12]).toEqual({
       data: {
         type: 'Network',
         startTime: 1022,
@@ -293,7 +322,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       category: 0,
     });
-    expect(contentMarkers[12]).toEqual({
+    expect(contentMarkers[13]).toEqual({
       data: {
         // Stack property is converted to a cause.
         cause: {

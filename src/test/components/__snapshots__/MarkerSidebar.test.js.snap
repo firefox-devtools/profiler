@@ -56,6 +56,34 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           :
         </div>
         false
+        <div
+          class="tooltipLabel"
+        >
+          Send Thread Latency
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          IPC Speed
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          IPC Latency
+          :
+        </div>
+        unknown
+        <div
+          class="tooltipLabel"
+        >
+          Recv Thread Latency
+          :
+        </div>
+        unknown
       </div>
     </div>
   </div>
