@@ -3266,15 +3266,10 @@ describe('pages and active tab selectors', function() {
 describe('traced timing', function() {
   it('computes traced timing', function() {
     const { profile } = getProfileFromTextSamples(`
+      0  1  5  6
       A  A  A  C
          B
     `);
-    const [{ samples }] = profile.threads;
-    profile.meta.interval = 0.5;
-    samples.time[0] = 0; // A
-    samples.time[1] = 1; // A B
-    samples.time[2] = 5; // A
-    samples.time[3] = 6; // C
     const stack_A = 0;
     const stack_AB = 1;
     const stack_C = 2;

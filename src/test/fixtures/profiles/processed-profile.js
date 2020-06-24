@@ -239,6 +239,15 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  * this: [jit:baseline] or [jit:ion], right after the function name (see below
  * for an example). The default is no JIT.
  *
+ * The time of the sample can also be set by making the first row all numbers:
+ * ```
+ *   const { profile } = getProfileFromTextSamples(`
+ *    0  1  5  6
+ *    A  A  A  C
+ *       B
+ *  `);
+ * ```
+ *
  * The funcNamesDictPerThread array can be useful when using it like this:
  * ```
  * const {
@@ -272,6 +281,30 @@ export function getProfileFromTextSamples(
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
 
+    // See if the bottom row contains only nubers, if so this is the time of the sample.
+    const rootFunctions: string[] = textOnlyStacks.map(stack => stack[0]);
+    let sampleTimes = null;
+
+    if (
+      rootFunctions.every(name => {
+        if (name === undefined) {
+          // This can happen for [[]] valued textOnlyStacks.
+          return false;
+        }
+        return name.match(
+          // Ensure that the number is a base 10 integer. 0x200 and other will parse
+          // as numbers, but they can be used as valid function names.
+          /^\d+$/
+        );
+      })
+    ) {
+      sampleTimes = textOnlyStacks.map(stack => parseInt(stack[0]));
+      for (const stack of textOnlyStacks) {
+        // Remove the number.
+        stack.shift();
+      }
+    }
+
     // Flatten the textOnlyStacks into into a list of function names.
     const funcNamesSet = new Set();
     const removeModifiers = /\[.*/;
@@ -295,7 +328,8 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      categories
+      categories,
+      sampleTimes
     );
   });
 
@@ -438,7 +472,8 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
-  categories: CategoryList
+  categories: CategoryList,
+  sampleTimes: number[] | null
 ): Thread {
   const thread = getEmptyThread();
 
@@ -590,6 +625,11 @@ function _buildThreadFromTextOnlyStacks(
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
+
+  if (sampleTimes) {
+    samples.time = sampleTimes;
+  }
+
   return thread;
 }
 
