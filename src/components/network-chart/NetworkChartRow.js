@@ -348,9 +348,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   _hoverOut = () => {
-    this.setState({
-      hovered: false,
-    });
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (!window.persistTooltips) {
+      this.setState({
+        hovered: false,
+      });
+    }
   };
 
   _onMouseDown = (e: SyntheticMouseEvent<>) => {

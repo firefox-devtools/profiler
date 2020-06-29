@@ -36,6 +36,10 @@ declare class Window {
     install: Object => {},
   };
 
+  // For debugging purposes, allow tooltips to persist. This aids in inspecting
+  // the DOM structure.
+  persistTooltips?: boolean;
+
   // WebChannel events.
   // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.jsm
   addEventListener: $PropertyType<EventTarget, 'addEventListener'> &

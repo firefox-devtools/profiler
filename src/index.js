@@ -22,6 +22,7 @@ import createStore from './app-logic/create-store';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,
+  logDevelopmentTips,
 } from './utils/window-console';
 import { ensureExists } from './utils/flow';
 
@@ -54,4 +55,7 @@ addDataToWindowObject(store.getState, store.dispatch);
 if (process.env.NODE_ENV === 'production') {
   // Don't clutter the console in development mode.
   logFriendlyPreamble();
+}
+if (process.env.NODE_ENV === 'development') {
+  logDevelopmentTips();
 }

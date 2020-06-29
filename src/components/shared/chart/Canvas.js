@@ -224,7 +224,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
         pageX: event.pageX,
         pageY: event.pageY,
       });
-    } else if (this.state.hoveredItem !== null) {
+    } else if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({
         hoveredItem: null,
       });
@@ -232,7 +237,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   };
 
   _onMouseOut = () => {
-    if (this.state.hoveredItem !== null) {
+    if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({ hoveredItem: null });
     }
   };
