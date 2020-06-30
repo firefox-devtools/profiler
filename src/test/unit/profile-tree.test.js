@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
-  computeCallTreeCountsAndTimings,
+  computeCallTreeCountsAndSummary,
   CallTree,
 } from '../../profile-logic/call-tree';
 import { getRootsAndChildren } from '../../profile-logic/flame-graph';
@@ -37,7 +37,7 @@ function callTreeFromProfile(
     thread.funcTable,
     defaultCategory
   );
-  const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
     thread.samples,
     callNodeInfo,
     interval,
@@ -49,7 +49,7 @@ function callTreeFromProfile(
     callNodeInfo,
     categories,
     'combined',
-    callTreeCountsAndTimings,
+    callTreeCountsAndSummary,
     'samples'
   );
 }
@@ -97,7 +97,7 @@ describe('unfiltered call tree', function() {
 
     it('yields expected results', function() {
       expect(
-        computeCallTreeCountsAndTimings(
+        computeCallTreeCountsAndSummary(
           thread.samples,
           callNodeInfo,
           profile.meta.interval,
@@ -105,11 +105,11 @@ describe('unfiltered call tree', function() {
         )
       ).toEqual({
         rootCount: 1,
-        rootTotalTime: 3,
+        rootTotalSummary: 3,
         callNodeChildCount: new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
-        callNodeTimes: {
-          selfTime: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          totalTime: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        callNodeSummary: {
+          self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
     });
@@ -167,7 +167,7 @@ describe('unfiltered call tree', function() {
      *         v    v
      *         E    G
      *
-     * Assert this form for each node where (FuncName:TotalTime,SelfTime)
+     * Assert this form for each node where (FuncName:Total,Self)
      *
      *             A:3,0
      *               |
@@ -309,10 +309,10 @@ describe('unfiltered call tree', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getNodeData(A)).toEqual({
           funcName: 'A',
-          totalTime: 3,
-          totalTimeRelative: 1,
-          selfTime: 0,
-          selfTimeRelative: 0,
+          total: 3,
+          totalRelative: 1,
+          self: 0,
+          selfRelative: 0,
         });
       });
     });
@@ -326,11 +326,11 @@ describe('unfiltered call tree', function() {
           icon: null,
           lib: '',
           name: 'A',
-          selfTime: '—',
-          selfTimeWithUnit: '—',
-          totalTime: '3',
-          totalTimeWithUnit: '3 samples',
-          totalTimePercent: '100%',
+          self: '—',
+          selfWithUnit: '—',
+          total: '3',
+          totalWithUnit: '3 samples',
+          totalPercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
@@ -341,11 +341,11 @@ describe('unfiltered call tree', function() {
           icon: null,
           lib: 'libI.so',
           name: 'I',
-          selfTime: '1',
-          selfTimeWithUnit: '1 sample',
-          totalTime: '1',
-          totalTimeWithUnit: '1 sample',
-          totalTimePercent: '33%',
+          self: '1',
+          selfWithUnit: '1 sample',
+          total: '1',
+          totalWithUnit: '1 sample',
+          totalPercent: '33%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
@@ -445,7 +445,7 @@ describe('inverted call tree', function() {
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
       callNodeInfo,
       interval,
@@ -457,7 +457,7 @@ describe('inverted call tree', function() {
       callNodeInfo,
       categories,
       'combined',
-      callTreeCountsAndTimings,
+      callTreeCountsAndSummary,
       'samples'
     );
 
@@ -485,7 +485,7 @@ describe('inverted call tree', function() {
       invertedThread.funcTable,
       defaultCategory
     );
-    const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const invertedCallTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       invertedThread.samples,
       invertedCallNodeInfo,
       interval,
@@ -497,7 +497,7 @@ describe('inverted call tree', function() {
       invertedCallNodeInfo,
       categories,
       'combined',
-      invertedCallTreeCountsAndTimings,
+      invertedCallTreeCountsAndSummary,
       'samples'
     );
 
@@ -570,7 +570,7 @@ describe('diffing trees', function() {
     return profile;
   }
 
-  it('displays a proper call tree, including nodes with totalTime = 0', () => {
+  it('displays a proper call tree, including nodes with total = 0', () => {
     const profile = getProfile();
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
@@ -607,7 +607,7 @@ describe('diffing trees', function() {
     ]);
   });
 
-  it('computes a rootTotalTime that is the absolute count of all intervals', () => {
+  it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
     const profile = getProfile();
 
     const thread = profile.threads[2];
@@ -619,13 +619,13 @@ describe('diffing trees', function() {
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
       callNodeInfo,
       interval,
       false
     );
-    expect(callTreeCountsAndTimings.rootTotalTime).toBe(4);
+    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);
   });
 });
 

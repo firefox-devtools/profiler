@@ -240,9 +240,9 @@ class TreeViewRowScrolledColumns<
       ariaExpanded = true;
     }
     // Cleaning up self time display so we can use it in aria-label below.
-    let selfTimeDisplay = displayData.selfTimeWithUnit;
-    if (selfTimeDisplay === '—') {
-      selfTimeDisplay = '0ms';
+    let selfDisplay = displayData.selfTimeUnit;
+    if (selfDisplay === '—') {
+      selfDisplay = '0ms';
     }
 
     return (

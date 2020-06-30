@@ -1684,6 +1684,28 @@ CallTree {
     0,
     0,
   ],
+  "_callNodeSummary": Object {
+    "self": Float32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+    ],
+    "total": Float32Array [
+      2,
+      2,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+    ],
+  },
   "_callNodeTable": Object {
     "category": Int32Array [
       1,
@@ -1743,28 +1765,6 @@ CallTree {
       0,
       0,
       0,
-      0,
-      0,
-    ],
-  },
-  "_callNodeTimes": Object {
-    "selfTime": Float32Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-    ],
-    "totalTime": Float32Array [
-      2,
-      2,
-      0,
-      0,
-      2,
-      2,
       0,
       0,
     ],
@@ -1931,7 +1931,7 @@ CallTree {
     "type": Array [],
   },
   "_rootCount": 1,
-  "_rootTotalTime": 2,
+  "_rootTotalSummary": 2,
   "_stringTable": UniqueStringArray {
     "_array": Array [
       "A",
@@ -2282,7 +2282,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2297,7 +2297,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2312,7 +2312,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2327,7 +2327,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       1,
     ],
     "start": Array [

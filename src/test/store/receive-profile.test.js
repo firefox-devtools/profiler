@@ -1636,7 +1636,7 @@ describe('actions/receive-profile', function() {
       const callTree = selectors.getCallTree(getState());
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
-      expect(nodeData.selfTime).toBe(4);
+      expect(nodeData.self).toBe(4);
     });
   });
 

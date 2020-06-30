@@ -112,10 +112,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           />
         </div>
         <div className="tooltipCallNodeImplementationTiming">
-          {displayData.totalTimeWithUnit}
+          {displayData.totalWithUnit}
         </div>
         <div className="tooltipCallNodeImplementationTiming">
-          {displayData.selfTimeWithUnit}
+          {displayData.selfWithUnit}
         </div>
         {/* grid row -------------------------------------------------- */}
         {sortedTotalBreakdownByImplementation.map(
@@ -316,10 +316,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
               {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
               <div className="tooltipLabel">Total Bytes:</div>
-              <div>{displayData.totalTimeWithUnit}</div>
+              <div>{displayData.totalWithUnit}</div>
               {/* --------------------------------------------------------------- */}
               <div className="tooltipLabel">Self Bytes:</div>
-              <div>{displayData.selfTimeWithUnit}</div>
+              <div>{displayData.selfWithUnit}</div>
               {/* --------------------------------------------------------------- */}
             </div>
           ) : null}
