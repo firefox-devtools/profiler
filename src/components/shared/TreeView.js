@@ -28,11 +28,12 @@ const PAGE_KEYS_DELTA = 15;
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
 
-export type Column = {
-  propName: string,
-  title: string,
-  component?: React.ComponentType<*>,
-};
+export type Column = {|
+  +propName: string,
+  +title: string,
+  +tooltip?: string,
+  +component?: React.ComponentType<*>,
+|};
 
 type TreeViewHeaderProps = {|
   +fixedColumns: Column[],
@@ -50,6 +51,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
         <span
           className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
           key={col.propName}
+          title={col.tooltip}
         >
           {col.title}
         </span>
@@ -238,9 +240,9 @@ class TreeViewRowScrolledColumns<
       ariaExpanded = true;
     }
     // Cleaning up self time display so we can use it in aria-label below.
-    let selfTimeDisplay = displayData.selfTimeWithUnit;
-    if (selfTimeDisplay === '—') {
-      selfTimeDisplay = '0ms';
+    let selfDisplay = displayData.selfTimeUnit;
+    if (selfDisplay === '—') {
+      selfDisplay = '0ms';
     }
 
     return (

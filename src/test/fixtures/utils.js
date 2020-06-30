@@ -134,12 +134,12 @@ export function formatTree(
   const whitespace = Array(depth * 2 + 1).join(' ');
 
   children.forEach(callNodeIndex => {
-    const { name, totalTime, selfTime, categoryName } = callTree.getDisplayData(
+    const { name, total, self, categoryName } = callTree.getDisplayData(
       callNodeIndex
     );
     const displayName = includeCategories ? `${name} [${categoryName}]` : name;
     lines.push(
-      `${whitespace}- ${displayName} (total: ${totalTime}, self: ${selfTime})`
+      `${whitespace}- ${displayName} (total: ${total}, self: ${self})`
     );
     formatTree(
       callTree,

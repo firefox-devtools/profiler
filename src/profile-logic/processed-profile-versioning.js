@@ -1188,5 +1188,37 @@ const _upgraders = {
       }
     }
   },
+  [29]: profile => {
+    // The sample and allocation properties "duration" were changed to "weight"
+    // The weight and weightType fields were made non-optional. The sample
+    // "duration" field was used for diffing profiles.
+    for (const thread of profile.threads) {
+      if (thread.samples.duration) {
+        thread.samples.weightType = 'samples';
+        thread.samples.weight = thread.samples.duration;
+        delete thread.samples.duration;
+      }
+
+      if (thread.nativeAllocations) {
+        thread.nativeAllocations.weightType = 'bytes';
+        thread.nativeAllocations.weight = thread.nativeAllocations.duration;
+        delete thread.nativeAllocations.duration;
+      }
+
+      if (thread.jsAllocations) {
+        thread.jsAllocations.weightType = 'bytes';
+        thread.jsAllocations.weight = thread.jsAllocations.duration;
+        delete thread.jsAllocations.duration;
+      }
+
+      if (!thread.samples.weight) {
+        thread.samples.weight = null;
+      }
+
+      if (!thread.samples.weightType) {
+        thread.samples.weightType = 'samples';
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -44,8 +44,11 @@ import {
   getThreadSelectors,
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
+import {
+  getCallNodeIndexFromPath,
+  type BreakdownByCategory,
+} from '../../profile-logic/profile-data';
 
-import type { BreakdownByCategory } from '../../profile-logic/profile-data';
 import type {
   TrackReference,
   Milliseconds,
@@ -3260,5 +3263,126 @@ describe('pages and active tab selectors', function() {
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set());
+  });
+});
+
+describe('traced timing', function() {
+  function setup(
+    { inverted }: {| inverted: boolean |},
+    textSamples: string
+  ): * {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(
+      textSamples
+    );
+
+    profile.meta.interval = 0.5;
+
+    const { getState, dispatch } = storeWithProfile(profile);
+    dispatch(ProfileView.changeInvertCallstack(inverted));
+    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+      getState()
+    );
+
+    const { running, self } = ensureExists(
+      selectedThreadSelectors.getTracedTiming(getState()),
+      'Expected to get a traced timing.'
+    );
+
+    return {
+      funcNames: funcNamesDictPerThread[0],
+      getCallNode: (...callNodePath) =>
+        ensureExists(getCallNodeIndexFromPath(callNodePath, callNodeTable)),
+      running,
+      self,
+      profile,
+    };
+  }
+
+  it('computes traced timing', function() {
+    const {
+      funcNames: { A, B, C },
+      getCallNode,
+      running,
+      self,
+      profile,
+    } = setup(
+      { inverted: false },
+      `
+        0  1  5  6
+        A  A  A  C
+           B
+      `
+    );
+
+    expect(running[getCallNode(A)]).toBe(6);
+    expect(self[getCallNode(A)]).toBe(2);
+
+    expect(running[getCallNode(A, B)]).toBe(4);
+    expect(self[getCallNode(A, B)]).toBe(4);
+
+    // This is the last sample, which is deduced to be the interval length.
+    expect(running[getCallNode(C)]).toBe(profile.meta.interval);
+    expect(self[getCallNode(C)]).toBe(profile.meta.interval);
+  });
+
+  it('computes traced timing for an inverted tree', function() {
+    const {
+      funcNames: { A, B, C },
+      getCallNode,
+      running,
+      // Rename self to make the assertions more readable.
+      self: self___,
+    } = setup(
+      { inverted: true },
+      `
+        0  1  5  6
+        A  A  A  C
+           B  B
+              C
+      `
+      // Inverted this tree looks like this:
+      //
+      // 0  1  5  6
+      // A  B  C  C
+      //    A  B
+      //       A
+    );
+
+    // This test is a bit hard to assert in a really readable fasshion.
+    // Running: [ 1, 4, 4, 1.5, 1, 1 ]
+    // Self:    [ 1, 4, 0, 1.5, 0, 0 ]
+
+    expect(running[getCallNode(A)]).toBe(1);
+    expect(self___[getCallNode(A)]).toBe(1);
+
+    expect(running[getCallNode(B)]).toBe(4);
+    expect(self___[getCallNode(B)]).toBe(4);
+
+    expect(running[getCallNode(B, A)]).toBe(4);
+    expect(self___[getCallNode(B, A)]).toBe(0);
+
+    expect(running[getCallNode(C)]).toBe(1.5);
+    expect(self___[getCallNode(C)]).toBe(1.5);
+
+    expect(running[getCallNode(C, B)]).toBe(1);
+    expect(self___[getCallNode(C, B)]).toBe(0);
+
+    expect(running[getCallNode(C, B, A)]).toBe(1);
+    expect(self___[getCallNode(C, B, A)]).toBe(0);
+  });
+
+  it('does not compute traced timing for other types', function() {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  C
+         B
+    `);
+
+    // Create a weighted samples table.
+    const [{ samples }] = profile.threads;
+    samples.weightType = 'tracing-ms';
+    samples.weight = samples.time.map(() => 1);
+
+    const { getState } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
   });
 });

@@ -21,7 +21,7 @@ import type { Profile } from 'firefox-profiler/types';
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(
     // The base thread is 9 samples long.
-    '1  2  3  4  5  6  7  8  9',
+    'S1  S2  S3  S4  S5  S6  S7  S8  S9',
     // Create a second thread where `x` is when the thread wasn't yet initialized
     // and where e is an empty sample. The profile fixture will be mutated below
     // to follow this.

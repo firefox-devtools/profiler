@@ -420,7 +420,7 @@ describe('js allocation processing', function() {
 
     // Assert that the transformation makes sense.
     expect(jsAllocations.time).toEqual([0, 1, 2]);
-    expect(jsAllocations.duration).toEqual([3, 5, 7]);
+    expect(jsAllocations.weight).toEqual([3, 5, 7]);
     expect(jsAllocations.stack).toEqual([11, 13, null]);
   });
 });
@@ -492,7 +492,7 @@ describe('native allocation processing', function() {
 
     // Assert that the transformation makes sense.
     expect(nativeAllocations.time).toEqual([0, 1, 2]);
-    expect(nativeAllocations.duration).toEqual([3, 5, 7]);
+    expect(nativeAllocations.weight).toEqual([3, 5, 7]);
     expect(nativeAllocations.stack).toEqual([11, 13, null]);
   });
 });

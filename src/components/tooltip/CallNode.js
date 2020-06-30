@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
-import { formatCallNodeNumber } from '../../utils/format-numbers';
+import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
 import Icon from '../shared/Icon';
 import {
   getFriendlyStackTypeName,
@@ -21,6 +21,7 @@ import type {
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   CallNodeInfo,
+  WeightType,
   Milliseconds,
   CallTreeSummaryStrategy,
 } from 'firefox-profiler/types';
@@ -34,6 +35,7 @@ const GRAPH_HEIGHT = 10;
 
 type Props = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
@@ -46,6 +48,13 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
+
+// For debugging purposes, allow tooltips to persist. This aids in inspecting
+// the DOM structure.
+window.persistTooltips = false;
+if (process.env.NODE_ENV === 'development') {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
+}
 
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.
@@ -68,7 +77,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const sortedTotalBreakdownByImplementation = objectEntries(
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
-    const { interval, thread } = this.props;
+    const { thread, weightType } = this.props;
 
     // JS Tracer threads have data relevant to the microsecond level.
     const isHighPrecision = Boolean(thread.isJsTracer);
@@ -102,8 +111,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             }}
           />
         </div>
-        <div>{displayData.totalTimeWithUnit}</div>
-        <div>{displayData.selfTimeWithUnit}</div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.totalWithUnit}
+        </div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.selfWithUnit}
+        </div>
         {/* grid row -------------------------------------------------- */}
         {sortedTotalBreakdownByImplementation.map(
           ([implementation, time], index) => {
@@ -133,16 +146,20 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatCallNodeNumber(interval, isHighPrecision, time)}ms
+                  {formatCallNodeNumberWithUnit(
+                    weightType,
+                    isHighPrecision,
+                    time
+                  )}
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
-                    : `${formatCallNodeNumber(
-                        interval,
+                    : formatCallNodeNumberWithUnit(
+                        weightType,
                         isHighPrecision,
                         selfTimeValue
-                      )}ms`}
+                      )}
                 </div>
               </React.Fragment>
             );
@@ -299,10 +316,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
               {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
               <div className="tooltipLabel">Total Bytes:</div>
-              <div>{displayData.totalTimeWithUnit}</div>
+              <div>{displayData.totalWithUnit}</div>
               {/* --------------------------------------------------------------- */}
               <div className="tooltipLabel">Self Bytes:</div>
-              <div>{displayData.selfTimeWithUnit}</div>
+              <div>{displayData.selfWithUnit}</div>
               {/* --------------------------------------------------------------- */}
             </div>
           ) : null}

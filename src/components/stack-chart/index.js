@@ -49,6 +49,7 @@ import type {
   UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -59,6 +60,7 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +maxStackDepth: number,
   +combinedTimingRows: CombinedTimingRows,
@@ -155,6 +157,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       pages,
       getMarker,
       userTimings,
+      weightType,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -192,6 +195,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                 chartProps={{
                   interval,
                   thread,
+                  weightType,
                   pages,
                   threadIndex,
                   combinedTimingRows,
@@ -228,6 +232,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
+      // Use the raw WeightType here, as the stack chart does not use the call tree
+      weightType: selectedThreadSelectors.getSamplesWeightType(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
       combinedTimingRows,
       timeRange: getCommittedRange(state),

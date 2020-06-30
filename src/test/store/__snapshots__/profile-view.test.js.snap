@@ -81,7 +81,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 28,
+    "preprocessedProfileVersion": 29,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -351,6 +351,8 @@ Object {
           7,
           8,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -555,6 +557,8 @@ Object {
         "length": 0,
         "stack": Array [],
         "time": Array [],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [],
@@ -849,6 +853,8 @@ Array [
         7,
         8,
       ],
+      "weight": null,
+      "weightType": "samples",
     },
     "stackTable": Object {
       "category": Array [
@@ -1053,6 +1059,8 @@ Array [
       "length": 0,
       "stack": Array [],
       "time": Array [],
+      "weight": null,
+      "weightType": "samples",
     },
     "stackTable": Object {
       "category": Array [],
@@ -1676,6 +1684,28 @@ CallTree {
     0,
     0,
   ],
+  "_callNodeSummary": Object {
+    "self": Float32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      0,
+      0,
+    ],
+    "total": Float32Array [
+      2,
+      2,
+      0,
+      0,
+      2,
+      2,
+      0,
+      0,
+    ],
+  },
   "_callNodeTable": Object {
     "category": Int32Array [
       1,
@@ -1739,29 +1769,6 @@ CallTree {
       0,
     ],
   },
-  "_callNodeTimes": Object {
-    "selfTime": Float32Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-    ],
-    "totalTime": Float32Array [
-      2,
-      2,
-      0,
-      0,
-      2,
-      2,
-      0,
-      0,
-    ],
-  },
-  "_callTreeSummaryStrategy": "timing",
   "_categories": Array [
     Object {
       "color": "transparent",
@@ -1924,7 +1931,7 @@ CallTree {
     "type": Array [],
   },
   "_rootCount": 1,
-  "_rootTotalTime": 2,
+  "_rootTotalSummary": 2,
   "_stringTable": UniqueStringArray {
     "_array": Array [
       "A",
@@ -1949,6 +1956,7 @@ CallTree {
       "I" => 8,
     },
   },
+  "_weightType": "samples",
 }
 `;
 
@@ -2170,7 +2178,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -2190,6 +2197,8 @@ Object {
       5,
       6,
     ],
+    "weight": null,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -2273,7 +2282,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2288,7 +2297,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2303,7 +2312,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       0,
     ],
     "start": Array [
@@ -2318,7 +2327,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfRelative": Array [
       1,
     ],
     "start": Array [
@@ -2559,7 +2568,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       100,
       0,
@@ -2573,6 +2581,8 @@ Object {
       4,
       5,
     ],
+    "weight": null,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -2864,7 +2874,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -2884,6 +2893,8 @@ Object {
       5,
       6,
     ],
+    "weight": null,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -3175,7 +3186,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "duration": undefined,
     "eventDelay": Array [
       0,
       100,
@@ -3195,6 +3205,8 @@ Object {
       5,
       6,
     ],
+    "weight": null,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [
@@ -3524,6 +3536,8 @@ Object {
       7,
       8,
     ],
+    "weight": null,
+    "weightType": "samples",
   },
   "stackTable": Object {
     "category": Array [

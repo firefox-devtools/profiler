@@ -12,16 +12,15 @@ import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
-import { assertExhaustiveCheck, ensureExists } from '../../utils/flow';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   Thread,
   ThreadIndex,
-  SamplesTable,
-  JsAllocationsTable,
-  NativeAllocationsTable,
+  SamplesLikeTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
+  WeightType,
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
@@ -30,6 +29,7 @@ import type {
   Selector,
   $ReturnType,
   CallTreeSummaryStrategy,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -212,78 +212,35 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getSamplesForCallTree: Selector<
-    SamplesTable | JsAllocationsTable | NativeAllocationsTable
-  > = createSelector(
+  const getSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallTreeSummaryStrategy,
-    (thread, strategy) => {
-      switch (strategy) {
-        case 'timing':
-          return thread.samples;
-        case 'js-allocations':
-          return ensureExists(
-            thread.jsAllocations,
-            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-          );
-        case 'native-retained-allocations': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
-          );
-
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-          return ProfileData.filterToRetainedAllocations(nativeAllocations);
-        }
-        case 'native-allocations':
-          return ProfileData.filterToAllocations(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-allocations" strategy'
-            )
-          );
-        case 'native-deallocations-sites':
-          return ProfileData.filterToDeallocationsSites(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-deallocations-sites" strategy'
-            )
-          );
-        case 'native-deallocations-memory': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-deallocations-memory" strategy'
-          );
-
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-
-          return ProfileData.filterToDeallocationsMemory(
-            ensureExists(
-              nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-            )
-          );
-        }
-        default:
-          throw assertExhaustiveCheck(strategy);
-      }
-    }
+    CallTree.extractSamplesLikeTable
   );
 
-  const getCallTreeCountsAndTimings: Selector<CallTree.CallTreeCountsAndTimings> = createSelector(
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  /**
+   * When computing the call tree, a "samples" table is used, which
+   * can represent a variety of formats with different weight types.
+   * This selector uses that table's weight type if it exists, or
+   * defaults to samples, which the Gecko Profiler outputs by default.
+   */
+  const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
+    getSamplesForCallTree,
+    samples => samples.weightType || 'samples'
+  );
+
+  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> = createSelector(
     getSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
-    CallTree.computeCallTreeCountsAndTimings
+    CallTree.computeCallTreeCountsAndSummary
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
@@ -292,9 +249,17 @@ export function getStackAndSampleSelectorsPerThread(
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
-    getCallTreeCountsAndTimings,
-    getCallTreeSummaryStrategy,
+    getCallTreeCountsAndSummary,
+    getWeightTypeForCallTree,
     CallTree.getCallTree
+  );
+
+  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
+    getSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileSelectors.getProfileInterval,
+    UrlState.getInvertCallstack,
+    CallTree.computeTracedTiming
   );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
@@ -314,7 +279,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
-    getCallTreeCountsAndTimings,
+    getCallTreeCountsAndSummary,
     FlameGraph.getFlameGraphTiming
   );
 
@@ -338,8 +303,11 @@ export function getStackAndSampleSelectorsPerThread(
 
   return {
     unfilteredSamplesRange,
+    getWeightTypeForCallTree,
     getCallNodeInfo,
     getCallNodeMaxDepth,
+    getSamplesForCallTree,
+    getUnfilteredSamplesForCallTree,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -348,6 +316,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTreeSummaryStrategy,
     getCallTree,
+    getTracedTiming,
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,

@@ -91,6 +91,59 @@ export type StackTable = {|
 |};
 
 /**
+ * Profile samples can come in a variety of forms and represent different information.
+ * The Gecko Profiler by default uses sample counts, as it samples on a fixed interval.
+ * These samples are all weighted equally by default, with a weight of one. However in
+ * comparison profiles, some weights are negative, creating a "diff" profile.
+ *
+ * In addition, tracing formats can fit into the sample-based format by reporting
+ * the "self time" of the profile. Each of these "self time" samples would then
+ * provide the weight, in duration. Currently, the tracing format assumes that
+ * the timing comes in milliseconds (see 'tracing-ms') but if needed, microseconds
+ * or nanoseconds support could be added.
+ *
+ * e.g. The following tracing data could be represented as samples:
+ *
+ *     0 1 2 3 4 5 6 7 8 9 10
+ *     | | | | | | | | | | |
+ *     - - - - - - - - - - -
+ *     A A A A A A A A A A A
+ *         B B D D D D
+ *         C C E E E E
+ *                                     .
+ * This chart represents the self time.
+ *
+ *     0 1 2 3 4 5 6 7 8 9 10
+ *     | | | | | | | | | | |
+ *     A A C C E E E E A A A
+ *
+ * And finally this is what the samples table would look like.
+ *
+ *     SamplesTable = {
+ *       time:   [0,   2,   4, 8],
+ *       stack:  [A, ABC, ADE, A],
+ *       weight: [2,   2,   4, 3],
+ *     }
+ */
+export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
+
+type SamplesLikeTableShape = {
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  length: number,
+};
+
+export type SamplesLikeTable =
+  | SamplesLikeTableShape
+  | SamplesTable
+  | NativeAllocationsTable
+  | JsAllocationsTable;
+
+/**
  * The Gecko Profiler records samples of what function was currently being executed, and
  * the callstack that is associated with it. This is done at a fixed but configurable
  * rate, e.g. every 1 millisecond. This table represents the minimal amount of
@@ -108,7 +161,10 @@ export type SamplesTable = {|
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
-  duration?: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
   length: number,
 |};
 
@@ -121,10 +177,10 @@ export type JsAllocationsTable = {|
   className: string[],
   typeName: string[], // Currently only 'JSObject'
   coarseType: string[], // Currently only 'Object',
-  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and JsAllocationsTable in the same call tree
-  // computation functions.
-  duration: Bytes[],
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
+  weight: Bytes[],
+  weightType: 'bytes',
   inNursery: boolean[],
   stack: Array<IndexIntoStackTable | null>,
   length: number,
@@ -136,10 +192,10 @@ export type JsAllocationsTable = {|
  */
 export type UnbalancedNativeAllocationsTable = {|
   time: Milliseconds[],
-  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and NativeAllocationsTable in the same call
-  // tree computation functions.
-  duration: Bytes[],
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
+  weight: Bytes[],
+  weightType: 'bytes',
   stack: Array<IndexIntoStackTable | null>,
   length: number,
 |};
