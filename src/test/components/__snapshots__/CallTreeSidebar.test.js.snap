@@ -126,7 +126,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <div
@@ -190,7 +190,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -224,7 +224,7 @@ exports[`CallTreeSidebar can expand subcategories 1`] = `
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -359,7 +359,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -393,7 +393,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -520,7 +520,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -554,7 +554,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -681,7 +681,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-transparent"
-        style="width: 50%;"
+        style="width: 50.0000%;"
       />
     </div>
     <div
@@ -704,7 +704,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 50%;"
+        style="width: 50.0000%;"
       />
     </div>
     <h4
@@ -738,7 +738,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -772,7 +772,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -899,7 +899,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -933,7 +933,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -967,7 +967,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -1102,7 +1102,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-yellow"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -1136,7 +1136,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -1263,7 +1263,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -1297,7 +1297,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -1424,7 +1424,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-transparent"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -1458,7 +1458,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>
@@ -1585,7 +1585,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color category-color-purple"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
     <h4
@@ -1619,7 +1619,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     >
       <div
         class="sidebar-histogram-bar-color"
-        style="width: 100%;"
+        style="width: 100.0000%;"
       />
     </div>
   </div>

@@ -91,20 +91,20 @@ class CallTreeComponent extends PureComponent<Props> {
               propName: 'total',
               title: 'Running Time (ms)',
               tooltip: oneLine`
-              The "total" running time includes a summary of all the time where this
-              function was observed to be on the stack. This includes the time where
-              the function was actually running, and the time spent in the callers from
-              this function.
+                The "total" running time includes a summary of all the time where this
+                function was observed to be on the stack. This includes the time where
+                the function was actually running, and the time spent in the callers from
+                this function.
             `,
             },
             {
               propName: 'self',
               title: 'Self (ms)',
               tooltip: oneLine`
-              The "self" time only includes the time where the function was
-              the leaf-most one on the stack. If this function called into other functions,
-              then the "other" functions' time is not included. The "self" time is useful
-              for understanding where time was actually spent in a program.
+                The "self" time only includes the time where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' time is not included. The "self" time is useful
+                for understanding where time was actually spent in a program.
             `,
             },
             { propName: 'icon', title: '', component: Icon },
@@ -116,20 +116,20 @@ class CallTreeComponent extends PureComponent<Props> {
               propName: 'total',
               title: 'Total (samples)',
               tooltip: oneLine`
-              The "total" sample count includes a summary of every sample where this
-              function was observed to be on the stack. This includes the time where the
-              function was actually running, and the time spent in the callers from this
-              function.
+                The "total" sample count includes a summary of every sample where this
+                function was observed to be on the stack. This includes the time where the
+                function was actually running, and the time spent in the callers from this
+                function.
             `,
             },
             {
               propName: 'self',
               title: 'Self',
               tooltip: oneLine`
-              The "self" sample count only includes the samples where the function was
-              the leaf-most one on the stack. If this function called into other functions,
-              then the "other" functions' counts are not included. The "self" count is useful
-              for understanding where time was actually spent in a program.
+                The "self" sample count only includes the samples where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' counts are not included. The "self" count is useful
+                for understanding where time was actually spent in a program.
             `,
             },
             { propName: 'icon', title: '', component: Icon },
@@ -141,21 +141,21 @@ class CallTreeComponent extends PureComponent<Props> {
               propName: 'total',
               title: 'Total Size (bytes)',
               tooltip: oneLine`
-              The "total size" includes a summary of all of the bytes allocated or
-              deallocated while this function was observed to be on the stack. This
-              includes both the bytes where the function was actually running, and the
-              bytes of the callers from this function.
+                The "total size" includes a summary of all of the bytes allocated or
+                deallocated while this function was observed to be on the stack. This
+                includes both the bytes where the function was actually running, and the
+                bytes of the callers from this function.
             `,
             },
             {
               propName: 'self',
               title: 'Self (bytes)',
               tooltip: oneLine`
-              The "self" bytes includes the bytes allocated or deallocated while this
-              function was the leaf-most one on the stack. If this function called into
-              other functions, then the "other" functions' bytes are not included.
-              The "self" bytes are useful for understanding where memory was actually
-              allocated or deallocated in the program.
+                The "self" bytes includes the bytes allocated or deallocated while this
+                function was the leaf-most one on the stack. If this function called into
+                other functions, then the "other" functions' bytes are not included.
+                The "self" bytes are useful for understanding where memory was actually
+                allocated or deallocated in the program.
             `,
             },
             { propName: 'icon', title: '', component: Icon },

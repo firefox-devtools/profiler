@@ -43,6 +43,7 @@ import {
   formatPercent,
   formatBytes,
   formatNumber,
+  ratioToCssPercent,
 } from '../../utils/format-numbers';
 import classNames from 'classnames';
 
@@ -130,7 +131,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
               <div
                 className="sidebar-histogram-bar-color"
                 style={{
-                  width: formatPercent(value / totalTime),
+                  width: ratioToCssPercent(value / totalTime),
                   backgroundColor: 'var(--grey-50)',
                 }}
               ></div>
@@ -244,7 +245,7 @@ class CategoryBreakdown extends React.PureComponent<
               <div className="sidebar-histogram-bar">
                 <div
                   className={`sidebar-histogram-bar-color category-color-${category.color}`}
-                  style={{ width: formatPercent(value / totalTime) }}
+                  style={{ width: ratioToCssPercent(value / totalTime) }}
                 ></div>
               </div>
 
