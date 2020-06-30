@@ -70,7 +70,7 @@ export const ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT = 20;
 export const GOOGLE_STORAGE_BUCKET = 'profile-store';
 
 // You can also use one of the following values instead:
-// To use the bucket used by the server deployment for the master branch:
+// To use the bucket used by the server deployment for the main branch:
 // export const GOOGLE_STORAGE_BUCKET = 'moz-fx-dev-firefoxprofiler-bucket';
 
 // To use the bucket developers usually use on their local working copy:
@@ -84,7 +84,7 @@ export const GOOGLE_STORAGE_BUCKET = 'profile-store';
 // This is the production server:
 export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 
-// This is the deployment from the master branch:
+// This is the deployment from the main branch:
 // export const PROFILER_SERVER_ORIGIN = 'https://dev.firefoxprofiler.nonprod.cloudops.mozgcp.net';
 
 // This is your local server:

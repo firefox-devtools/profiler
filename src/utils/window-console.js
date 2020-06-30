@@ -115,10 +115,10 @@ export function logFriendlyPreamble() {
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
 
       The profile format is documented here:
-      %chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c
     `,
     // "The following profiler..."
     intro,
