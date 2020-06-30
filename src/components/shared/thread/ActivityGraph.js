@@ -154,9 +154,13 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
     const canvasPixelWidth = Math.round(rect.width * window.devicePixelRatio);
-    const canvasPixelHeight = Math.round(rect.height * window.devicePixelRatio);
+    let canvasPixelHeight = Math.round(rect.height * window.devicePixelRatio);
     canvas.width = canvasPixelWidth;
     canvas.height = canvasPixelHeight;
+    const overflowRadiusCSS = 5; // '5px' at the top and at the bottom
+    const overflowRadiusPixels = Math.round(5 * window.devicePixelRatio);
+    canvasPixelHeight -= 2 * overflowRadiusPixels;
+    ctx.translate(0, overflowRadiusPixels);
 
     const { fills, fillsQuerier } = computeActivityGraphFills({
       canvasPixelWidth,
@@ -174,6 +178,8 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
 
     this._fillsQuerier = fillsQuerier;
 
+    const selectedPath = new Path2D();
+
     // Draw adjacent filled paths using Operator ADD and disjoint paths.
     // This avoids any bleeding and seams.
     // lighter === OP_ADD
@@ -182,53 +188,50 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     // The previousUpperEdge keeps track of where the "mountain ridge" is after the
     // previous fill.
     let previousUpperEdge = new Float32Array(canvasPixelWidth);
-    for (const { fillStyle, accumulatedUpperEdge } of fills) {
-      ctx.fillStyle = fillStyle;
+    for (const { selected, fillStyle, accumulatedUpperEdge } of fills) {
+      const fillPath = _computeFillPath(
+        previousUpperEdge,
+        accumulatedUpperEdge,
+        canvasPixelWidth,
+        canvasPixelHeight
+      );
 
-      // Some fills might not span the full width of the graph - they have parts where
-      // their contribution stays zero for some time. So instead of having one fill call
-      // with a path that is mostly empty, we split the shape of the fill so that we have
-      // potentially multiple fill calls, one fill call for each range during which the
-      // fill has an uninterrupted sequence of non-zero-contribution pixels.
-      let lastNonZeroRangeEnd = 0;
-      while (lastNonZeroRangeEnd < canvasPixelWidth) {
-        const currentNonZeroRangeStart = _findNextDifferentIndex(
-          accumulatedUpperEdge,
-          previousUpperEdge,
-          lastNonZeroRangeEnd
-        );
-        if (currentNonZeroRangeStart >= canvasPixelWidth) {
-          break;
-        }
-        let currentNonZeroRangeEnd = canvasPixelWidth;
-        ctx.beginPath();
-        ctx.moveTo(
-          currentNonZeroRangeStart,
-          (1 - previousUpperEdge[currentNonZeroRangeStart]) * canvasPixelHeight
-        );
-        for (let i = currentNonZeroRangeStart + 1; i < canvasPixelWidth; i++) {
-          const lastVal = previousUpperEdge[i];
-          const thisVal = accumulatedUpperEdge[i];
-          ctx.lineTo(i, (1 - lastVal) * canvasPixelHeight);
-          if (lastVal === thisVal) {
-            currentNonZeroRangeEnd = i;
-            break;
-          }
-        }
-        for (
-          let i = currentNonZeroRangeEnd - 1;
-          i >= currentNonZeroRangeStart;
-          i--
-        ) {
-          ctx.lineTo(i, (1 - accumulatedUpperEdge[i]) * canvasPixelHeight);
-        }
-        ctx.closePath();
-        ctx.fill();
-
-        lastNonZeroRangeEnd = currentNonZeroRangeEnd;
+      if (selected) {
+        selectedPath.addPath(fillPath);
       }
+
+      ctx.fillStyle = fillStyle;
+      ctx.fill(fillPath);
+
       previousUpperEdge = accumulatedUpperEdge;
     }
+
+    const strokeColor = 'black';
+    const strokeWidth = 1;
+
+    if (!document.querySelector('#selected-activity-graph-fill-overlay')) {
+      let t = document.createElement('template');
+      t.innerHTML = `
+        <svg width="0" height="0">
+          <filter id="selected-activity-graph-fill-overlay" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+            <feMorphology operator="dilate" in="SourceGraphic" radius="${strokeWidth}" result="stroke"/>
+            <feGaussianBlur stdDeviation="1"/>
+            <feOffset dy="3" result="offsetblur"/>
+            <feFlood flood-color="black" flood-opacity="0.4"/>
+            <feComposite in2="offsetblur" operator="in" result="shadow"/>
+            <feComposite in="stroke" in2="shadow" operator="over"/>
+            <feComposite in2="SourceGraphic" operator="out"/>
+          </filter>
+        </svg>`;
+      document.body.appendChild(t.content);
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.filter = 'url(#selected-activity-graph-fill-overlay)';
+    ctx.fillStyle = strokeColor;
+    ctx.fill(selectedPath);
+
+    ctx.shadowColor = 'transparent';
   }
 
   _getSampleAtMouseEvent(
@@ -326,6 +329,60 @@ function _createDiagonalStripePattern(
   patternContext.fillRect(0, 0, 4, 4);
 
   return chartCtx.createPattern(patternCanvas, 'repeat');
+}
+
+function _computeFillPath(
+  lowerEdge: Float32Array,
+  upperEdge: Float32Array,
+  canvasPixelWidth: number,
+  canvasPixelHeight: number
+): Path2D {
+  const fillPath = new Path2D();
+
+  // Some fills might not span the full width of the graph - they have parts where
+  // their contribution stays zero for some time. So instead of having one fill call
+  // with a path that is mostly empty, we split the shape of the fill so that we have
+  // potentially multiple fill calls, one fill call for each range during which the
+  // fill has an uninterrupted sequence of non-zero-contribution pixels.
+  let lastNonZeroRangeEnd = 0;
+  while (lastNonZeroRangeEnd < canvasPixelWidth) {
+    const currentNonZeroRangeStart = _findNextDifferentIndex(
+      upperEdge,
+      lowerEdge,
+      lastNonZeroRangeEnd
+    );
+    if (currentNonZeroRangeStart >= canvasPixelWidth) {
+      break;
+    }
+    let currentNonZeroRangeEnd = canvasPixelWidth;
+    const subpath = new Path2D();
+    subpath.moveTo(
+      currentNonZeroRangeStart,
+      (1 - lowerEdge[currentNonZeroRangeStart]) * canvasPixelHeight
+    );
+    for (let i = currentNonZeroRangeStart + 1; i < canvasPixelWidth; i++) {
+      const lastVal = lowerEdge[i];
+      const thisVal = upperEdge[i];
+      subpath.lineTo(i, (1 - lastVal) * canvasPixelHeight);
+      if (lastVal === thisVal) {
+        currentNonZeroRangeEnd = i;
+        break;
+      }
+    }
+    for (
+      let i = currentNonZeroRangeEnd - 1;
+      i >= currentNonZeroRangeStart;
+      i--
+    ) {
+      subpath.lineTo(i, (1 - upperEdge[i]) * canvasPixelHeight);
+    }
+    subpath.closePath();
+    fillPath.addPath(subpath);
+
+    lastNonZeroRangeEnd = currentNonZeroRangeEnd;
+  }
+
+  return fillPath;
 }
 
 /**

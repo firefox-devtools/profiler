@@ -51,6 +51,7 @@
     "bisection": "^0.0.3",
     "clamp": "^1.0.1",
     "classnames": "^2.2.6",
+    "color-space": "^1.16.0",
     "common-tags": "^1.8.0",
     "copy-to-clipboard": "^3.1.0",
     "escape-string-regexp": "^1.0.5",

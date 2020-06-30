@@ -23,10 +23,6 @@
   background-color: #fff;
 }
 
-.timelineTrackRow.selected {
-  background-color: #edf6ff;
-}
-
 .timelineTrackHidden {
   height: 0;
   pointer-events: none;

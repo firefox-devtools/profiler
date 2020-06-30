@@ -56,6 +56,7 @@ type SampleContributionToPixel = {|
  * in place, but should be consumed immutably.
  */
 type CategoryFill = {|
+  +selected: bool,
   +category: IndexIntoCategoryList,
   +fillStyle: string | CanvasPattern,
   // The Float32Arrays are mutated in place during the computation step.
@@ -90,7 +91,7 @@ const SMOOTHING_KERNEL: Float32Array = _getSmoothingKernel(
 
 export function computeActivityGraphFills(
   renderedComponentSettings: RenderedComponentSettings
-) {
+): { fills: CategoryFill[], fillsQuerier: ActivityFillGraphQuerier } {
   const mutablePercentageBuffers = _createSelectedPercentageAtPixelBuffers(
     renderedComponentSettings
   );
@@ -165,6 +166,7 @@ export class ActivityGraphFillComputer {
     {
       // Only copy the first array, as there is no accumulation.
       const { accumulatedUpperEdge, perPixelContribution } = mutableFills[0];
+      // accumulatedUpperEdge.set()
       for (let i = 0; i < perPixelContribution.length; i++) {
         accumulatedUpperEdge[i] = perPixelContribution[i];
       }
@@ -686,6 +688,7 @@ function _getCategoryFills(
       // For every category we draw four fills, for the four selection kinds:
       return [
         {
+          selected: false,
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
           perPixelContribution: buffer.beforeSelectedPercentageAtPixel,
@@ -694,6 +697,7 @@ function _getCategoryFills(
           ),
         },
         {
+          selected: true,
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.selectedFillStyle,
           perPixelContribution: buffer.selectedPercentageAtPixel,
@@ -702,6 +706,7 @@ function _getCategoryFills(
           ),
         },
         {
+          selected: false,
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
           perPixelContribution: buffer.afterSelectedPercentageAtPixel,
@@ -710,6 +715,7 @@ function _getCategoryFills(
           ),
         },
         {
+          selected: false,
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.filteredOutByTransformFillStyle,
           perPixelContribution: buffer.filteredOutByTransformPercentageAtPixel,

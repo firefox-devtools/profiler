@@ -9,5 +9,7 @@
 .threadActivityGraphCanvas {
   display: block;
   width: 100%;
-  height: 100%;
+  margin-top: -5px;
+  margin-bottom: -5px;
+  height: calc(100% + 2 * 5px);
 }

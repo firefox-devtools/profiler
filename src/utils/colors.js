@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { lchab } from 'color-space';
+
 /**
  * These are the colors from Photon. They are inlined to provide easy access. If updating
  * please change the CSS variables as well.
@@ -89,6 +91,30 @@ type ColorStyles = {|
  * Category color names come from:
  * https://searchfox.org/mozilla-central/rev/9193635dca8cfdcb68f114306194ffc860456044/js/public/ProfilingCategory.h#33
  */
+
+const purpleLCH = [80, 50, 313];
+const greenLCH = [80, 50, 151];
+const orangeLCH = [90, 50, 69];
+const yellowLCH = [90, 60, 84];
+const lightblueLCH = [90, 60, 276];
+const greyLCH = [90, 0, 0];
+const blueLCH = [56, 50, 263];
+const brownLCH = [56, 50, 68];
+const lightgreenLCH = [86, 55, 137];
+
+function makeInactive([l, c, h]) {
+  return [100 - (100 - l) * 0.4, c * 0.4, h];
+}
+
+const toCSSColor = {
+  lchab: function (lch) {
+    const [r, g, b] = lchab.rgb(lch);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+};
+
+window.lchab = lchab;
+
 export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
   switch (colorName) {
     case 'transparent':
@@ -100,66 +126,64 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       };
     case 'purple':
       return {
-        selectedFillStyle: PURPLE_70,
-        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
-        // the end defines the transparency #RRGGBBAA.
-        unselectedFillStyle: PURPLE_70 + '60',
+        selectedFillStyle: toCSSColor.lchab(purpleLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(purpleLCH)),
         selectedTextColor: '#fff',
         gravity: 5,
       };
     case 'green':
       return {
-        selectedFillStyle: GREEN_60,
-        unselectedFillStyle: GREEN_60 + '60',
+        selectedFillStyle: toCSSColor.lchab(greenLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(greenLCH)),
         selectedTextColor: '#fff',
         gravity: 4,
       };
     case 'orange':
       return {
-        selectedFillStyle: ORANGE_50,
-        unselectedFillStyle: ORANGE_50 + '60',
+        selectedFillStyle: toCSSColor.lchab(orangeLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(orangeLCH)),
         selectedTextColor: '#fff',
         gravity: 2,
       };
     case 'yellow':
       return {
-        selectedFillStyle: YELLOW_50,
-        unselectedFillStyle: YELLOW_50 + '60',
+        selectedFillStyle: toCSSColor.lchab(yellowLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(yellowLCH)),
         selectedTextColor: '#000',
         gravity: 6,
       };
     case 'lightblue':
       return {
-        selectedFillStyle: BLUE_40,
-        unselectedFillStyle: BLUE_40 + '60',
+        selectedFillStyle: toCSSColor.lchab(lightblueLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(lightblueLCH)),
         selectedTextColor: '#000',
         gravity: 1,
       };
     case 'grey':
       return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
+        selectedFillStyle: toCSSColor.lchab(greyLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(greyLCH)),
         selectedTextColor: '#000',
         gravity: 9,
       };
     case 'blue':
       return {
-        selectedFillStyle: BLUE_60,
-        unselectedFillStyle: BLUE_60 + '60',
+        selectedFillStyle: toCSSColor.lchab(blueLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(blueLCH)),
         selectedTextColor: '#fff',
         gravity: 3,
       };
     case 'brown':
       return {
-        selectedFillStyle: MAGENTA_60,
-        unselectedFillStyle: MAGENTA_60 + '60',
+        selectedFillStyle: toCSSColor.lchab(brownCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(brownCH)),
         selectedTextColor: '#fff',
         gravity: 7,
       };
     case 'lightgreen':
       return {
-        selectedFillStyle: GREEN_50,
-        unselectedFillStyle: GREEN_50 + '60',
+        selectedFillStyle: toCSSColor.lchab(lightgreenLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(lightgreenLCH)),
         selectedTextColor: '#fff',
         gravity: 8,
       };
@@ -168,8 +192,8 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
       );
       return {
-        selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
+        selectedFillStyle: toCSSColor.lchab(greyLCH),
+        unselectedFillStyle: toCSSColor.lchab(makeInactive(greyLCH)),
         selectedTextColor: '#000',
         gravity: 9,
       };
