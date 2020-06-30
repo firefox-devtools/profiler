@@ -648,10 +648,10 @@ function getMarkerDetails(
             <TooltipDetail label="Send Thread Latency">
               {_maybeFormatDuration(data.startTime, data.sendStartTime)}
             </TooltipDetail>
-            <TooltipDetail label="IPC Speed">
+            <TooltipDetail label="IPC Send Duration">
               {_maybeFormatDuration(data.sendStartTime, data.sendEndTime)}
             </TooltipDetail>
-            <TooltipDetail label="IPC Latency">
+            <TooltipDetail label="IPC Recv Latency">
               {_maybeFormatDuration(data.sendEndTime, data.recvEndTime)}
             </TooltipDetail>
             <TooltipDetail label="Recv Thread Latency">

@@ -66,14 +66,14 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
         <div
           class="tooltipLabel"
         >
-          IPC Speed
+          IPC Send Duration
           :
         </div>
         unknown
         <div
           class="tooltipLabel"
         >
-          IPC Latency
+          IPC Recv Latency
           :
         </div>
         unknown
