@@ -15,10 +15,14 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 
-import type { ScreenshotPayload } from '../../types/markers';
-import type { ThreadIndex, Thread } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
+import type {
+  ScreenshotPayload,
+  ThreadIndex,
+  Thread,
+  Marker,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 import { ensureExists } from '../../utils/flow';

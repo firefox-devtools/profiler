@@ -11,7 +11,7 @@ import {
 } from '../../selectors/profile';
 import explicitConnect from '../../utils/connect';
 
-import type { RequestedLib } from '../../types/actions';
+import type { RequestedLib } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 function englishSgPlLibrary(count) {

@@ -18,9 +18,13 @@ import {
   sanitizeTextMarker,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
-import type { Profile, Thread, ThreadIndex } from '../types/profile';
-import type { RemoveProfileInformation } from '../types/profile-derived';
-import type { StartEndRange } from '../types/units';
+import type {
+  Profile,
+  Thread,
+  ThreadIndex,
+  RemoveProfileInformation,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
   +profile: Profile,

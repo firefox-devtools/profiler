@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib, ProfilerOverheadStats } from '../../../types/profile';
-
 import type {
+  Lib,
+  ProfilerOverheadStats,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoProfileFullMeta,
@@ -14,7 +14,7 @@ import type {
   GeckoCounter,
   GeckoMarkerStack,
   GeckoProfilerOverhead,
-} from '../../../types/gecko-profile';
+} from 'firefox-profiler/types';
 
 import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
 
@@ -203,24 +203,41 @@ export function createGeckoProfile(): GeckoProfile {
     },
   };
 
-  const [parentIPCMarker, childIPCMarker] = _createIPCMarkerPair({
+  const [
+    startIPCMarker,
+    sendStartIPCMarker,
+    sendEndIPCMarker,
+    recvEndIPCMarker,
+    endIPCMarker,
+  ] = _createIPCMarkerSet({
     srcPid: 3333,
     destPid: 2222,
     startTime: 30,
+    sendStartTime: 30.1,
+    sendEndTime: 30.2,
+    recvEndTime: 30.3,
     endTime: 31,
     messageSeqno: 1,
   });
-  const parentIPCMarker2 = _createIPCMarkerPair({
+  const startIPCMarker2 = _createIPCMarkerSet({
     srcPid: 3333,
     destPid: 9999,
     startTime: 40,
+    sendStartTime: 40.1,
+    sendEndTime: 40.2,
+    recvEndTime: 40.3,
     endTime: 41,
     messageSeqno: 2,
   })[0];
 
   const parentProcessThreads: GeckoThread[] = [
     {
-      ..._createGeckoThread([parentIPCMarker, parentIPCMarker2]),
+      ..._createGeckoThread([
+        startIPCMarker,
+        sendStartIPCMarker,
+        sendEndIPCMarker,
+        startIPCMarker2,
+      ]),
       name: 'GeckoMain',
       processType: 'default',
       pid: 3333,
@@ -255,53 +272,92 @@ export function createGeckoProfile(): GeckoProfile {
   };
 
   const contentProcessProfile = createGeckoSubprocessProfile(profile, [
-    childIPCMarker,
+    recvEndIPCMarker,
+    endIPCMarker,
   ]);
   profile.processes.push(contentProcessProfile);
 
   return profile;
 }
 
-function _createIPCMarkerPair({
+function _createIPCMarker({
+  time,
+  otherPid,
+  messageSeqno,
+  side,
+  direction,
+  phase,
+}) {
+  return [
+    18, // IPC: see string table in _createGeckoThread
+    time,
+    0, // Other
+    {
+      type: 'IPC',
+      startTime: time,
+      endTime: time,
+      otherPid,
+      messageType: 'PContent::Msg_PreferenceUpdate',
+      messageSeqno,
+      side,
+      direction,
+      phase,
+      sync: false,
+    },
+  ];
+}
+
+function _createIPCMarkerSet({
   srcPid,
   destPid,
   startTime,
+  sendStartTime,
+  sendEndTime,
+  recvEndTime,
   endTime,
   messageSeqno,
 }) {
   return [
-    [
-      18, // IPC: see string table in _createGeckoThread
-      startTime,
-      0, // Other
-      {
-        type: 'IPC',
-        startTime: startTime,
-        endTime: startTime,
-        otherPid: destPid,
-        messageType: 'PContent::Msg_PreferenceUpdate',
-        messageSeqno,
-        side: 'parent',
-        direction: 'sending',
-        sync: false,
-      },
-    ],
-    [
-      18, // IPC: see string table in _createGeckoThread
-      endTime,
-      0, // Other
-      {
-        type: 'IPC',
-        startTime: endTime,
-        endTime: endTime,
-        otherPid: srcPid,
-        messageType: 'PContent::Msg_PreferenceUpdate',
-        messageSeqno,
-        side: 'child',
-        direction: 'receiving',
-        sync: false,
-      },
-    ],
+    _createIPCMarker({
+      time: startTime,
+      otherPid: destPid,
+      messageSeqno,
+      side: 'parent',
+      direction: 'sending',
+      phase: 'endpoint',
+    }),
+    _createIPCMarker({
+      time: sendStartTime,
+      otherPid: destPid,
+      messageSeqno,
+      side: 'parent',
+      direction: 'sending',
+      phase: 'transferStart',
+    }),
+    _createIPCMarker({
+      time: sendEndTime,
+      otherPid: destPid,
+      messageSeqno,
+      side: 'parent',
+      direction: 'sending',
+      phase: 'transferEnd',
+    }),
+    _createIPCMarker({
+      time: recvEndTime,
+      otherPid: srcPid,
+      messageSeqno,
+      side: 'child',
+      direction: 'receiving',
+      phase: 'transferEnd',
+    }),
+    _createIPCMarker({
+      time: endTime,
+      otherPid: srcPid,
+      messageSeqno,
+      side: 'child',
+      direction: 'receiving',
+      phase: 'endpoint',
+    }),
   ];
 }
 

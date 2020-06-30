@@ -8,7 +8,7 @@ import type {
   SamplesTable,
   FrameTable,
   Profile,
-} from '../../../types/profile';
+} from 'firefox-profiler/types';
 
 import {
   getEmptyThread,

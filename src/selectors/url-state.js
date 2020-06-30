@@ -9,20 +9,24 @@ import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 
-import type { ThreadIndex, Pid } from '../types/profile';
-import type { TransformStack } from '../types/transforms';
 import type {
+  ThreadIndex,
+  Pid,
+  TransformStack,
   Action,
   TimelineType,
   DataSource,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../types/actions';
+  UrlState,
+  TimelineTrackOrganization,
+  Selector,
+  DangerousSelectorWithArguments,
+  StartEndRange,
+  TrackIndex,
+} from 'firefox-profiler/types';
+
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, TimelineTrackOrganization } from '../types/state';
-import type { Selector, DangerousSelectorWithArguments } from '../types/store';
-import type { StartEndRange } from '../types/units';
-import type { TrackIndex } from '../types/profile-derived';
 
 import urlStateReducer from '../reducers/url-state';
 

@@ -40,20 +40,21 @@ import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
-import type { TimelineType } from '../../types/actions';
 import type {
+  TimelineType,
   Thread,
   ThreadIndex,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../types/profile';
-import type { Milliseconds, StartEndRange } from '../../types/units';
-import type {
+  Milliseconds,
+  StartEndRange,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   SelectedState,
-} from '../../types/profile-derived';
-import type { State, TimelineTrackOrganization } from '../../types/state';
+  State,
+  TimelineTrackOrganization,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|

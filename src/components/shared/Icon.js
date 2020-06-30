@@ -9,7 +9,7 @@ import explicitConnect from '../../utils/connect';
 import { getIconClassName } from '../../selectors/icons';
 import { iconStartLoading } from '../../actions/icons';
 
-import type { CallNodeDisplayData } from '../../types/profile-derived';
+import type { CallNodeDisplayData } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps =

@@ -12,8 +12,11 @@ import { getView } from '../../selectors/app';
 import { getSymbolicationStatus } from '../../selectors/profile';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { DataSource } from '../../types/actions';
-import type { Phase, SymbolicationStatus } from '../../types/state';
+import type {
+  DataSource,
+  Phase,
+  SymbolicationStatus,
+} from 'firefox-profiler/types';
 
 import './ServiceWorkerManager.css';
 

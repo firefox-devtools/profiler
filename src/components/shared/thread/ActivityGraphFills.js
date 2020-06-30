@@ -12,13 +12,11 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
-} from '../../../types/profile';
-import type { SelectedState } from '../../../types/profile-derived';
-import type {
+  SelectedState,
   Milliseconds,
   DevicePixels,
   CssPixels,
-} from '../../../types/units';
+} from 'firefox-profiler/types';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React

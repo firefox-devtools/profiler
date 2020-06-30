@@ -19,8 +19,8 @@ import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { AppViewState, State } from '../../types/state';
-import type { DataSource } from '../../types/actions';
+import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({

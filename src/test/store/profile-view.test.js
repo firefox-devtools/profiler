@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { TrackReference } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
@@ -46,9 +45,12 @@ import {
 } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
-import type { Milliseconds } from '../../types/units';
 import type { BreakdownByCategory } from '../../profile-logic/profile-data';
-import type { BrowsingContextID } from '../../types/profile';
+import type {
+  TrackReference,
+  Milliseconds,
+  BrowsingContextID,
+} from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -915,35 +917,45 @@ describe('actions/ProfileView', function() {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
         [
-          'b',
+          'IPC',
           1,
           {
             type: 'IPC',
             startTime: 30,
+            sendStartTime: undefined,
+            sendEndTime: undefined,
+            recvEndTime: undefined,
             endTime: 1031,
             otherPid: 3333,
-            otherTid: 3333,
-            otherThreadName: 'Parent Process (Thread ID: 3333)',
+            sendTid: 3333,
+            recvTid: 1111,
+            sendThreadName: 'Parent Process (Thread ID: 3333)',
+            recvThreadName: 'Content Process (Thread ID: 1111)',
             messageSeqno: 1,
             messageType: 'PContent::Msg_PreferenceUpdate',
             side: 'child',
             direction: 'receiving',
+            phase: 'endpoint',
             sync: false,
           },
         ],
         ['c', 2, null],
         [
-          'd',
+          'IPC',
           3,
           {
             type: 'IPC',
             startTime: 40,
+            sendStartTime: undefined,
+            sendEndTime: undefined,
+            recvEndTime: undefined,
             endTime: 40,
             otherPid: 9999,
             messageSeqno: 2,
             messageType: 'PContent::Msg_PreferenceUpdate',
             side: 'parent',
             direction: 'sending',
+            phase: 'endpoint',
             sync: false,
           },
         ],

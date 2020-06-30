@@ -3,8 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { CallTree } from '../../profile-logic/call-tree';
-import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
-import type { Store, State } from '../../types/store';
+import type {
+  IndexIntoCallNodeTable,
+  Store,
+  State,
+} from 'firefox-profiler/types';
+
 import { ensureExists } from '../../utils/flow';
 import { fireEvent, type RenderResult } from 'react-testing-library';
 

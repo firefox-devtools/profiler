@@ -19,8 +19,12 @@ import {
   TRACK_MEMORY_LINE_WIDTH,
 } from '../../app-logic/constants';
 
-import type { CounterIndex, ThreadIndex } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type {
+  CounterIndex,
+  ThreadIndex,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackMemory.css';

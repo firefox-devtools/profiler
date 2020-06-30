@@ -26,15 +26,13 @@ import type {
   JsTracerTable,
   Counter,
   BrowsingContextID,
-} from '../../../types/profile';
-import type {
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
   IPCMarkerPayload,
   UserTimingMarkerPayload,
-} from '../../../types/markers';
-import type { Milliseconds } from '../../../types/units';
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
@@ -184,6 +182,7 @@ export function getMarkerTableProfile() {
           messageSeqno: 1,
           side: 'parent',
           direction: 'sending',
+          phase: 'endpoint',
           sync: false,
         },
       ],
@@ -771,6 +770,7 @@ type IPCMarkersOptions = {|
   messageSeqno: number,
   side: 'parent' | 'child',
   direction: 'sending' | 'receiving',
+  phase: 'endpoint' | 'transferStart' | 'transferEnd',
   sync: boolean,
 |};
 
@@ -784,6 +784,7 @@ function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
     messageSeqno: 0,
     side: 'parent',
     direction: 'sending',
+    phase: 'endpoint',
     sync: false,
     ...options,
   };

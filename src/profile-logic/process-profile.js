@@ -58,14 +58,10 @@ import type {
   JsAllocationsTable,
   ProfilerOverhead,
   NativeAllocationsTable,
-} from '../types/profile';
-import type {
   Milliseconds,
   Microseconds,
   Address,
   MemoryOffset,
-} from '../types/units';
-import type {
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
@@ -74,8 +70,6 @@ import type {
   GeckoSampleStruct,
   GeckoStackStruct,
   GeckoProfilerOverhead,
-} from '../types/gecko-profile';
-import type {
   GCSliceMarkerPayload,
   GCMajorMarkerPayload,
   MarkerPayload,
@@ -84,7 +78,7 @@ import type {
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
-} from '../types/markers';
+} from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
 /**

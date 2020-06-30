@@ -19,11 +19,16 @@ import { changeRightClickedMarker } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import './Markers.css';
 
-import type { Milliseconds, CssPixels } from '../../types/units';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
+import type {
+  Milliseconds,
+  CssPixels,
+  Marker,
+  MarkerIndex,
+  ThreadIndex,
+} from 'firefox-profiler/types';
+
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
-import type { ThreadIndex } from '../../types/profile';
 
 // Exported for tests.
 export const MIN_MARKER_WIDTH = 0.3;
@@ -349,7 +354,12 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         mouseX: event.pageX,
         mouseY: event.pageY,
       });
-    } else if (this.state.hoveredItem !== null) {
+    } else if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({
         hoveredItem: null,
       });
@@ -410,9 +420,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   };
 
   _onMouseOut = () => {
-    this.setState({
-      hoveredItem: null,
-    });
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (!window.persistTooltips) {
+      this.setState({
+        hoveredItem: null,
+      });
+    }
   };
 
   componentDidMount() {

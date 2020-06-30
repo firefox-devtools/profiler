@@ -30,11 +30,17 @@ import Backtrace from '../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 
-import type { Milliseconds, Microseconds } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
-import type { ImplementationFilter } from '../../types/actions';
-import type { Thread, ThreadIndex, PageList } from '../../types/profile';
-import type { PhaseTimes } from '../../types/markers';
+import type {
+  Milliseconds,
+  Microseconds,
+  Marker,
+  ImplementationFilter,
+  Thread,
+  ThreadIndex,
+  PageList,
+  PhaseTimes,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};
@@ -189,6 +195,16 @@ function _sumMaybeEntries(
   return selectEntries
     .map(name => (entries[name] ? entries[name] : 0))
     .reduce((a, x) => a + x, 0);
+}
+
+function _maybeFormatDuration(
+  start: number | void,
+  end: number | void
+): string {
+  if (start !== undefined && end !== undefined) {
+    return formatMilliseconds(end - start);
+  }
+  return 'unknown';
 }
 
 const MaybeBacktrace = ({
@@ -629,6 +645,18 @@ function getMarkerDetails(
           <TooltipDetails>
             <TooltipDetail label="Type">{data.messageType}</TooltipDetail>
             <TooltipDetail label="Sync">{data.sync.toString()}</TooltipDetail>
+            <TooltipDetail label="Send Thread Latency">
+              {_maybeFormatDuration(data.startTime, data.sendStartTime)}
+            </TooltipDetail>
+            <TooltipDetail label="IPC Speed">
+              {_maybeFormatDuration(data.sendStartTime, data.sendEndTime)}
+            </TooltipDetail>
+            <TooltipDetail label="IPC Latency">
+              {_maybeFormatDuration(data.sendEndTime, data.recvEndTime)}
+            </TooltipDetail>
+            <TooltipDetail label="Recv Thread Latency">
+              {_maybeFormatDuration(data.recvEndTime, data.endTime)}
+            </TooltipDetail>
           </TooltipDetails>
         );
         break;

@@ -9,7 +9,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
-} from '../../types/profile';
+} from 'firefox-profiler/types';
 
 import {
   getEmptyProfile,

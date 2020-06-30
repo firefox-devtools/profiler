@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import type { InitialSelectedTrackReference } from '../../types/profile-derived';
+import type { InitialSelectedTrackReference } from 'firefox-profiler/types';
 
 import './OverflowEdgeIndicator.css';
 

@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import { getProfileName, getDataSource } from '../../selectors/url-state';
 import { getProfile } from '../../selectors/profile';
 
-import type { Profile, ProfileMeta } from '../../types/profile';
+import type { Profile, ProfileMeta } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|

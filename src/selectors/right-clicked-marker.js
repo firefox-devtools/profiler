@@ -6,9 +6,11 @@
 import { createSelector } from 'reselect';
 import { getProfileViewOptions } from './profile';
 
-import type { ThreadIndex } from '../types/profile';
-import type { MarkerIndex } from '../types/profile-derived';
-import type { Selector } from '../types/store';
+import type {
+  ThreadIndex,
+  MarkerIndex,
+  Selector,
+} from 'firefox-profiler/types';
 
 export type RightClickedMarkerInfo = {|
   +threadIndex: ThreadIndex,

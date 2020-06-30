@@ -13,7 +13,7 @@ import OriginsTimelineView from '../timeline/OriginsTimeline';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { TimelineTrackOrganization } from '../../types/state';
+import type { TimelineTrackOrganization } from 'firefox-profiler/types';
 
 type StateProps = {|
   +timelineTrackOrganization: TimelineTrackOrganization,

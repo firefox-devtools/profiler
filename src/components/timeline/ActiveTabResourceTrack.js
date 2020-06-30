@@ -15,12 +15,13 @@ import explicitConnect from '../../utils/connect';
 import TrackThread from './TrackThread';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { ActiveTabTrackReference } from '../../types/actions';
 import type {
+  ActiveTabTrackReference,
   TrackIndex,
   ActiveTabResourceTrack,
   InitialSelectedTrackReference,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
@@ -146,7 +147,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     let trackLabel;
     switch (resourceTrack.type) {
       case 'sub-frame':
-        trackLabel = 'Frame:';
+        trackLabel = 'IFrame:';
         break;
       case 'thread':
         trackLabel = 'Thread:';

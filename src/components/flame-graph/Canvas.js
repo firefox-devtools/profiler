@@ -16,21 +16,25 @@ import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
-import type { Thread, CategoryList, PageList } from '../../types/profile';
-import type { CssPixels, Milliseconds } from '../../types/units';
+import type {
+  Thread,
+  CategoryList,
+  PageList,
+  CssPixels,
+  Milliseconds,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+  CallTreeSummaryStrategy,
+} from 'firefox-profiler/types';
+
 import type {
   FlameGraphTiming,
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import type {
-  CallNodeInfo,
-  IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
-import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 export type OwnProps = {|
   +thread: Thread,

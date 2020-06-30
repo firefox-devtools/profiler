@@ -43,19 +43,19 @@ import {
 } from '../../actions/profile-view';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
-import type { BrowsingContextID } from '../../types/profile';
 import type {
+  BrowsingContextID,
   TrackIndex,
   GlobalTrack,
   InitialSelectedTrackReference,
-} from '../../types/profile-derived';
-import type { TimelineTrackOrganization } from '../../types/state';
-import type {
+  TimelineTrackOrganization,
   GlobalTrackReference,
   TimelineType,
   HiddenTrackCount,
-} from '../../types/actions';
-import type { Milliseconds, StartEndRange } from '../../types/units';
+  Milliseconds,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|

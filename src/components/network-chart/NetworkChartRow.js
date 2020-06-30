@@ -19,10 +19,15 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 
-import type { CssPixels, Milliseconds, StartEndRange } from '../../types/units';
-import type { ThreadIndex } from '../../types/profile';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { NetworkPayload } from '../../types/markers';
+import type {
+  CssPixels,
+  Milliseconds,
+  StartEndRange,
+  ThreadIndex,
+  Marker,
+  MarkerIndex,
+  NetworkPayload,
+} from 'firefox-profiler/types';
 
 // This regexp is used to split a pathname into a directory path and a filename.
 // On purpose, when there's no "real" filename, the filename will contain the
@@ -343,9 +348,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   _hoverOut = () => {
-    this.setState({
-      hovered: false,
-    });
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (!window.persistTooltips) {
+      this.setState({
+        hovered: false,
+      });
+    }
   };
 
   _onMouseDown = (e: SyntheticMouseEvent<>) => {

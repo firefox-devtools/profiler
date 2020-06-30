@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { StartEndRange } from '../types/units';
+import type { StartEndRange } from 'firefox-profiler/types';
 
 /**
  * Users can make preview range selections on the profile, and then can commit these

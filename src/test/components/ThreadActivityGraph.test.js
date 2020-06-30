@@ -4,8 +4,11 @@
 
 // @flow
 
-import type { Profile, IndexIntoSamplesTable } from '../../types/profile';
-import type { CssPixels } from '../../types/units';
+import type {
+  Profile,
+  IndexIntoSamplesTable,
+  CssPixels,
+} from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';

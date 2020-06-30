@@ -8,7 +8,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import reducers from '../reducers';
-import type { Store } from '../types/store';
+import type { Store } from 'firefox-profiler/types';
 
 /**
  * Isolate the store creation into a function, so that it can be used outside of the

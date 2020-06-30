@@ -35,10 +35,14 @@ import {
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { AppState, AppViewState, UrlSetupPhase } from '../types/state';
-import type { Selector } from '../types/store';
-import type { CssPixels } from '../types/units';
-import type { ThreadIndex } from '../types/profile';
+import type {
+  AppState,
+  AppViewState,
+  UrlSetupPhase,
+  Selector,
+  CssPixels,
+  ThreadIndex,
+} from 'firefox-profiler/types';
 
 /**
  * Simple selectors into the app state.

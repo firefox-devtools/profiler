@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { stripIndent } from 'common-tags';
-import type { GetState, Dispatch } from '../types/store';
+import type { GetState, Dispatch } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from '../actions';
 
@@ -63,6 +63,10 @@ export function addDataToWindowObject(
   target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
   target.actions = actions;
+
+  // For debugging purposes, allow tooltips to persist. This aids in inspecting
+  // the DOM structure.
+  target.persistTooltips = false;
 }
 
 export function logFriendlyPreamble() {
@@ -150,4 +154,8 @@ export function logFriendlyPreamble() {
     link,
     reset
   );
+}
+
+export function logDevelopmentTips() {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
 }

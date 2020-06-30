@@ -11,8 +11,8 @@ import { ProfileRootMessage } from './ProfileRootMessage';
 import { getView } from '../../selectors/app';
 import { getDataSource } from '../../selectors/url-state';
 
-import type { AppViewState, State } from '../../types/state';
-import type { DataSource } from '../../types/actions';
+import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({

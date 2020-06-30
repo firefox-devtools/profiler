@@ -19,9 +19,10 @@ import type {
   IndexIntoStackTable,
   SamplesTable,
   CategoryList,
-} from '../types/profile';
-import type { JsTracerTiming } from '../types/profile-derived';
-import type { Microseconds } from '../types/units';
+  JsTracerTiming,
+  Microseconds,
+} from 'firefox-profiler/types';
+
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { JsImplementation } from '../profile-logic/profile-data';
 

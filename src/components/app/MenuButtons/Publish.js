@@ -33,10 +33,12 @@ import { assertExhaustiveCheck } from '../../../utils/flow';
 
 import explicitConnect, { type ConnectedProps } from '../../../utils/connect';
 
-import type { Profile } from '../../../types/profile';
-import type { CheckedSharingOptions } from '../../../types/actions';
-import type { StartEndRange } from '../../../types/units';
-import type { UploadPhase } from '../../../types/state';
+import type {
+  Profile,
+  CheckedSharingOptions,
+  StartEndRange,
+  UploadPhase,
+} from 'firefox-profiler/types';
 
 require('./Publish.css');
 

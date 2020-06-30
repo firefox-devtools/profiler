@@ -13,8 +13,12 @@ import Tooltip from '../tooltip/Tooltip';
 import bisection from 'bisection';
 import { BLUE_50, BLUE_60 } from 'photon-colors';
 
-import type { ProgressGraphData } from '../../types/profile';
-import type { Milliseconds, CssPixels } from '../../types/units';
+import type {
+  ProgressGraphData,
+  Milliseconds,
+  CssPixels,
+} from 'firefox-profiler/types';
+
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
 

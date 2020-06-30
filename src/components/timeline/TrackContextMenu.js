@@ -35,14 +35,16 @@ import {
 } from '../../selectors/url-state';
 import classNames from 'classnames';
 
-import type { Thread, ThreadIndex, Pid } from '../../types/profile';
 import type {
+  Thread,
+  ThreadIndex,
+  Pid,
   TrackIndex,
   GlobalTrack,
   LocalTrack,
-} from '../../types/profile-derived';
-import type { State } from '../../types/state';
-import type { TrackReference } from '../../types/actions';
+  State,
+  TrackReference,
+} from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
 
