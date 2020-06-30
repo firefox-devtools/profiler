@@ -147,16 +147,16 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
       >
         Self (bytes)
@@ -197,19 +197,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="15"
                 >
                   15
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -228,19 +228,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="15"
                 >
                   15
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -259,19 +259,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="12"
                 >
                   12
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -290,19 +290,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="12"
                 >
                   12
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="5"
                 >
                   5
@@ -321,19 +321,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="7"
                 >
                   7
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -352,19 +352,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="7"
                 >
                   7
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="7"
                 >
                   7
@@ -383,19 +383,19 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="20%"
                 >
                   20%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -809,16 +809,16 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
       >
         Self (bytes)
@@ -859,19 +859,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-15"
                 >
                   -15
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="-3"
                 >
                   -3
@@ -890,19 +890,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-80%"
                 >
                   -80%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-12"
                 >
                   -12
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="-5"
                 >
                   -5
@@ -921,19 +921,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-47%"
                 >
                   -47%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-7"
                 >
                   -7
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="-7"
                 >
                   -7
@@ -1223,16 +1223,16 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
       >
         Self (bytes)
@@ -1273,19 +1273,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="41"
                 >
                   41
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1304,19 +1304,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="41"
                 >
                   41
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1335,19 +1335,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="73%"
                 >
                   73%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="30"
                 >
                   30
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1366,19 +1366,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="73%"
                 >
                   73%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="30"
                 >
                   30
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="13"
                 >
                   13
@@ -1397,19 +1397,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="41%"
                 >
                   41%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="17"
                 >
                   17
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1428,19 +1428,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="41%"
                 >
                   41%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="17"
                 >
                   17
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="17"
                 >
                   17
@@ -1459,19 +1459,19 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="27%"
                 >
                   27%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="11"
                 >
                   11
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1873,16 +1873,16 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
       >
         Self (bytes)
@@ -1923,19 +1923,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="15"
                 >
                   15
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1954,19 +1954,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="15"
                 >
                   15
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -1985,19 +1985,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="12"
                 >
                   12
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2016,19 +2016,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="80%"
                 >
                   80%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="12"
                 >
                   12
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="5"
                 >
                   5
@@ -2047,19 +2047,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="7"
                 >
                   7
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2078,19 +2078,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="47%"
                 >
                   47%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="7"
                 >
                   7
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="7"
                 >
                   7
@@ -2109,19 +2109,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="20%"
                 >
                   20%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2523,16 +2523,16 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
       >
         Self (bytes)
@@ -2573,19 +2573,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-41"
                 >
                   -41
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2604,19 +2604,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-100%"
                 >
                   -100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-41"
                 >
                   -41
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2635,19 +2635,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-73%"
                 >
                   -73%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-30"
                 >
                   -30
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2666,19 +2666,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-73%"
                 >
                   -73%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-30"
                 >
                   -30
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="-13"
                 >
                   -13
@@ -2697,19 +2697,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-41%"
                 >
                   -41%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-17"
                 >
                   -17
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -2728,19 +2728,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-41%"
                 >
                   -41%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-17"
                 >
                   -17
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="-17"
                 >
                   -17
@@ -2759,19 +2759,19 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="-27%"
                 >
                   -27%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-11"
                 >
                   -11
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3597,16 +3597,16 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -3647,19 +3647,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="2"
                 >
                   2
@@ -3678,19 +3678,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3709,19 +3709,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3740,19 +3740,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3771,19 +3771,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3802,19 +3802,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -3833,19 +3833,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -4215,16 +4215,16 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -4265,19 +4265,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4296,19 +4296,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4327,19 +4327,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4358,19 +4358,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4389,19 +4389,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -4420,19 +4420,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4451,19 +4451,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4833,16 +4833,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -4883,19 +4883,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4914,19 +4914,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="3"
                 >
                   3
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4945,19 +4945,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="67%"
                 >
                   67%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -4976,19 +4976,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5007,19 +5007,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -5038,19 +5038,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5069,19 +5069,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="33%"
                 >
                   33%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5451,16 +5451,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -5501,19 +5501,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5532,19 +5532,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5563,19 +5563,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5594,19 +5594,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -5625,19 +5625,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -5656,19 +5656,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6024,16 +6024,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -6074,19 +6074,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6105,19 +6105,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6136,19 +6136,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6167,19 +6167,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6198,19 +6198,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -6229,19 +6229,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6597,16 +6597,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -6647,19 +6647,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6678,19 +6678,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6709,19 +6709,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -6740,19 +6740,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7051,16 +7051,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -7101,19 +7101,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7132,19 +7132,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7163,19 +7163,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7194,19 +7194,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7505,16 +7505,16 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="treeViewHeader"
     >
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+        class="treeViewHeaderColumn treeViewFixedColumn totalPercent"
       />
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+        class="treeViewHeaderColumn treeViewFixedColumn total"
         title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
       >
         Total (samples)
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+        class="treeViewHeaderColumn treeViewFixedColumn self"
         title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
       >
         Self
@@ -7555,19 +7555,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7586,19 +7586,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7617,19 +7617,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="100%"
                 >
                   100%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="2"
                 >
                   2
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7648,19 +7648,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —
@@ -7679,19 +7679,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="1"
                 >
                   1
@@ -7710,19 +7710,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 style="height: 16px; line-height: 16px;"
               >
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
                   title="50%"
                 >
                   50%
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="1"
                 >
                   1
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  class="treeViewRowColumn treeViewFixedColumn self"
                   title="—"
                 >
                   —

@@ -86,9 +86,9 @@ class CallTreeComponent extends PureComponent<Props> {
       switch (weightType) {
         case 'tracing-ms':
           return [
-            { propName: 'totalTimePercent', title: '' },
+            { propName: 'totalPercent', title: '' },
             {
-              propName: 'totalTime',
+              propName: 'total',
               title: 'Running Time (ms)',
               tooltip: oneLine`
               The "total" running time includes a summary of all the time where this
@@ -98,7 +98,7 @@ class CallTreeComponent extends PureComponent<Props> {
             `,
             },
             {
-              propName: 'selfTime',
+              propName: 'self',
               title: 'Self (ms)',
               tooltip: oneLine`
               The "self" time only includes the time where the function was
@@ -111,9 +111,9 @@ class CallTreeComponent extends PureComponent<Props> {
           ];
         case 'samples':
           return [
-            { propName: 'totalTimePercent', title: '' },
+            { propName: 'totalPercent', title: '' },
             {
-              propName: 'totalTime',
+              propName: 'total',
               title: 'Total (samples)',
               tooltip: oneLine`
               The "total" sample count includes a summary of every sample where this
@@ -123,7 +123,7 @@ class CallTreeComponent extends PureComponent<Props> {
             `,
             },
             {
-              propName: 'selfTime',
+              propName: 'self',
               title: 'Self',
               tooltip: oneLine`
               The "self" sample count only includes the samples where the function was
@@ -136,9 +136,9 @@ class CallTreeComponent extends PureComponent<Props> {
           ];
         case 'bytes':
           return [
-            { propName: 'totalTimePercent', title: '' },
+            { propName: 'totalPercent', title: '' },
             {
-              propName: 'totalTime',
+              propName: 'total',
               title: 'Total Size (bytes)',
               tooltip: oneLine`
               The "total size" includes a summary of all of the bytes allocated or
@@ -148,7 +148,7 @@ class CallTreeComponent extends PureComponent<Props> {
             `,
             },
             {
-              propName: 'selfTime',
+              propName: 'self',
               title: 'Self (bytes)',
               tooltip: oneLine`
               The "self" bytes includes the bytes allocated or deallocated while this

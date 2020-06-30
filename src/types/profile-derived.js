@@ -100,19 +100,19 @@ export type MarkerIndex = number;
 
 export type CallNodeData = {
   funcName: string,
-  totalTime: number,
-  totalTimeRelative: number,
-  selfTime: number,
-  selfTimeRelative: number,
+  total: number,
+  totalRelative: number,
+  self: number,
+  selfRelative: number,
 };
 
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
-    totalTime: string,
-    totalTimeWithUnit: string,
-    totalTimePercent: string,
-    selfTime: string,
-    selfTimeWithUnit: string,
+    total: string,
+    totalWithUnit: string,
+    totalPercent: string,
+    self: string,
+    selfWithUnit: string,
     name: string,
     lib: string,
     isFrameLabel: boolean,
