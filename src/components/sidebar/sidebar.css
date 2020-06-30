@@ -166,7 +166,7 @@
   margin-top: 1px;
   background: none;
   content: '';
-  margin-inline-start: -9px;
+  margin-inline-start: -11px;
 }
 
 .sidebar-toggle:active:hover {

@@ -122,7 +122,7 @@ export type StackTable = {|
  *     SamplesTable = {
  *       time:   [0,   2,   4, 8],
  *       stack:  [A, ABC, ADE, A],
- *       weight: [2,   2,   8, 3],
+ *       weight: [2,   2,   4, 3],
  *     }
  */
 export type WeightType = 'samples' | 'tracing-ms' | 'bytes';

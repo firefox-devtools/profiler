@@ -326,8 +326,10 @@ export type ProfileFilterPageData = {|
 |};
 
 /**
- * This is the timing of the samples when interpreted as traced data, not sample
- * counts.
+ * This struct contains the traced timing for each call node. The arrays are indexed
+ * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
+ * traced timing is computed by summing the distance between samples for a given call
+ * node. See the `computeTracedTiming` for more details.
  */
 export type TracedTiming = {|
   +self: Float32Array,

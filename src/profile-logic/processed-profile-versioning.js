@@ -1190,7 +1190,8 @@ const _upgraders = {
   },
   [29]: profile => {
     // The sample and allocation properties "duration" were changed to "weight"
-    // The weight and weightType fields were made non-optional.
+    // The weight and weightType fields were made non-optional. The sample
+    // "duration" field was used for diffing profiles.
     for (const thread of profile.threads) {
       if (thread.samples.duration) {
         thread.samples.weightType = 'samples';

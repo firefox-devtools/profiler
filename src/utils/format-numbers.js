@@ -141,13 +141,30 @@ export function formatCallNodeNumberWithUnit(
   }
 }
 
-export function formatPercent(value: number): string {
+/**
+ * Format a localized percentage. This takes a number valued between 0-1.
+ */
+export function formatPercent(ratio: number): string {
   return formatNumber(
-    value,
+    ratio,
     /* significantDigits */ 2,
     /* maxFractionalDigits */ 1,
     'percent'
   );
+}
+
+/**
+ * Turn a number ranged 0 to 1 into a valid CSS percentage string. Use this over
+ * formatPercent, as the latter is localized and may not be a valid percentage
+ * for CSS.
+ *
+ * e.g.
+ * 0.1       => "10.0000%"
+ * 0.5333333 => "53.3333%"
+ * 1.0       => "100.0000%"
+ */
+export function ratioToCssPercent(ratio: number): string {
+  return (ratio * 100).toFixed(4) + '%';
 }
 
 export function formatBytes(bytes: number): string {

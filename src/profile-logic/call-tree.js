@@ -602,8 +602,14 @@ export function computeTracedTiming(
   interval: Milliseconds,
   invertCallstack: boolean
 ): TracedTiming | null {
-  if (samples.weightType && samples.weightType !== 'samples') {
-    // Only compute for the samples table.
+  if (samples.weightType !== 'samples' || samples.weight) {
+    // Only compute for the samples weight types that have no weights. If a samples
+    // table has weights then it's a diff profile. Currently, we aren't calculating
+    // diff profiles, but it could be possible to compute this information twice,
+    // once for positive weights, and once for negative weights, then sum them
+    // together. At this time it's not really worth it.
+    //
+    // See https://github.com/firefox-devtools/profiler/issues/2615
     return null;
   }
 

@@ -281,23 +281,15 @@ export function getProfileFromTextSamples(
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
 
-    // See if the bottom row contains only nubers, if so this is the time of the sample.
-    const rootFunctions: string[] = textOnlyStacks.map(stack => stack[0]);
+    // See if the first row contains only numbers, if so this is the time of the sample.
     let sampleTimes = null;
 
-    if (
-      rootFunctions.every(name => {
-        if (name === undefined) {
-          // This can happen for [[]] valued textOnlyStacks.
-          return false;
-        }
-        return name.match(
-          // Ensure that the number is a base 10 integer. 0x200 and other will parse
-          // as numbers, but they can be used as valid function names.
-          /^\d+$/
-        );
-      })
-    ) {
+    // Check if the first row is made by base 10 integers. 0x200 and other will parse
+    // as numbers, but they can be used as valid function names.
+    const isFirstRowMadeOfNumbers = textOnlyStacks.every(stack =>
+      /^\d+$/.test(stack[0])
+    );
+    if (isFirstRowMadeOfNumbers) {
       sampleTimes = textOnlyStacks.map(stack => parseInt(stack[0]));
       for (const stack of textOnlyStacks) {
         // Remove the number.
