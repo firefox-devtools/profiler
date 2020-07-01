@@ -249,7 +249,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 96px; width: 3000px;"
+            style="height: 96px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
