@@ -89,6 +89,7 @@ body,
   top: 0;
   left: 0;
   display: flex;
+  width: 100%;
   flex-flow: row nowrap;
 }
 
@@ -96,6 +97,11 @@ body,
   position: sticky;
   z-index: 2;
   left: 0;
+}
+
+.treeViewBodyInner1 {
+  width: 100%;
+  min-width: min-content;
 }
 
 .treeViewBodyInner {
