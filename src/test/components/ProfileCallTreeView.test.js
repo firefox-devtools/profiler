@@ -172,7 +172,7 @@ describe('calltree/ProfileCallTreeView', function() {
     const treeBody = ensureExists(
       container.querySelector('.treeViewBodyInner1')
     );
-    const treeBodyWidth = parseInt(treeBody.style.width);
+    const treeBodyWidth = parseInt(treeBody.style.minWidth);
     expect(treeBodyWidth).toBeGreaterThan(3000);
   });
 
