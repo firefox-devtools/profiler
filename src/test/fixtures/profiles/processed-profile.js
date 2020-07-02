@@ -87,8 +87,27 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
-    markersTable.time.push(time);
-    markersTable.data.push(_refineMockPayload(data));
+    const payload = _refineMockPayload(data);
+    if (
+      payload &&
+      typeof payload.startTime === 'number' &&
+      typeof payload.endTime === 'number'
+    ) {
+      // Flow can't correctly infer the properties here.
+      const { startTime, endTime } = (payload: any);
+      if (time !== startTime && time !== endTime) {
+        console.error([name, time, data]);
+        throw new Error(
+          'The payload startTime or endTime did not match the time of the marker. Is this an error?'
+        );
+      }
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(endTime);
+    } else {
+      markersTable.startTime.push(time);
+      markersTable.endTime.push(null);
+    }
+    markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;
   });
