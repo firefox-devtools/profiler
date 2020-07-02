@@ -21,12 +21,31 @@ import type { Milliseconds, Nanoseconds } from './units';
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
 
+// Taken from the C++
+//
+// enum class MarkerPhase : int {
+//   Instant = 0,
+//   Interval = 1,
+//   IntervalStart = 2,
+//   IntervalEnd = 3,
+// };
+export type MarkerPhase = 0 | 1 | 2 | 3;
+
 export type GeckoMarkers = {
-  schema: { name: 0, time: 1, category: 2, data: 3 },
+  schema: {
+    name: 0,
+    startTime: 1,
+    endTime: 2,
+    phase: 3,
+    category: 4,
+    data: 5,
+  },
   data: Array<
     [
       IndexIntoStringTable,
-      Milliseconds,
+      Milliseconds | null,
+      Milliseconds | null,
+      MarkerPhase,
       IndexIntoCategoryList,
       MarkerPayload_Gecko
     ]
@@ -41,7 +60,9 @@ export type GeckoMarkers = {
  */
 export type GeckoMarkerStruct = {|
   name: IndexIntoStringTable[],
-  time: Milliseconds[],
+  startTime: Milliseconds[],
+  endTime: Milliseconds[],
+  phase: MarkerPhase[],
   data: MarkerPayload_Gecko[],
   category: IndexIntoCategoryList[],
   length: number,
