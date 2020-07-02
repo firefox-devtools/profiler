@@ -778,7 +778,7 @@ function _getTimeRangeForThread(
       const thisStartTime =
         markers.data[i] && typeof markers.data[i].startTime === 'number'
           ? markers.data[i].startTime
-          : markers.time[i];
+          : markers.startTime[i];
 
       // We add `interval` to the read value here. It could be any number, but
       // we use `interval` instead of for example 0.001 so that numbers round a
@@ -787,9 +787,11 @@ function _getTimeRangeForThread(
       const thisEndTime =
         markers.data[i] && typeof markers.data[i].endTime === 'number'
           ? markers.data[i].endTime + interval
-          : markers.time[i] + interval;
+          : markers.startTime[i] + interval;
 
-      result.start = Math.min(result.start, thisStartTime);
+      if (thisStartTime !== null) {
+        result.start = Math.min(result.start, thisStartTime);
+      }
       result.end = Math.max(result.end, thisEndTime);
     }
   }

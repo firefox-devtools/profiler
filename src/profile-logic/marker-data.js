@@ -242,7 +242,9 @@ export function extractMarkerDataFromName(
   const newMarkers: RawMarkerTable = {
     data: markers.data.slice(),
     name: markers.name.slice(),
-    time: markers.time.slice(),
+    startTime: markers.startTime.slice(),
+    endTime: markers.endTime.slice(),
+    phase: markers.phase.slice(),
     category: markers.category.slice(),
     length: markers.length,
   };
@@ -271,10 +273,14 @@ export function extractMarkerDataFromName(
   const invalidationStringIndex = stringTable.indexForString('Invalidate');
   for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
     const nameIndex = markers.name[markerIndex];
-    const time = markers.time[markerIndex];
+    const startTime = markers.startTime[markerIndex];
     const name = stringTable.getString(nameIndex);
     let matchFound = false;
     if (name.startsWith('Bailout_')) {
+      const time = ensureExists(
+        startTime,
+        'Expected to find a startTime for a Bailout marker'
+      );
       matchFound = true;
       const match = name.match(bailoutRegex);
       if (!match) {
@@ -302,6 +308,11 @@ export function extractMarkerDataFromName(
         }: BailoutPayload);
       }
     } else if (name.startsWith('Invalidate ')) {
+      const time = ensureExists(
+        startTime,
+        'Expected to find a startTime for an Invalidate marker'
+      );
+
       matchFound = true;
       const match = name.match(invalidateRegex);
       if (!match) {
@@ -485,6 +496,10 @@ export function deriveMarkersFromRawMarkerTable(
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
 ): Marker[] {
+  const ensureExistsMessage =
+    'At this time, this algorithm does not handle startTimes that are null. A ' +
+    'following commit will add this feature.';
+
   // This is the resulting array.
   const matchedMarkers: Marker[] = [];
 
@@ -510,7 +525,8 @@ export function deriveMarkersFromRawMarkerTable(
 
   for (let i = 0; i < rawMarkers.length; i++) {
     const name = rawMarkers.name[i];
-    const time = rawMarkers.time[i];
+    // TODO - A follow-up commit will correctly handle startTime and endTime.
+    const time = ensureExists(rawMarkers.startTime[i], ensureExistsMessage);
     const data = rawMarkers.data[i];
     const category = rawMarkers.category[i];
 
@@ -566,7 +582,10 @@ export function deriveMarkersFromRawMarkerTable(
 
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            const start = rawMarkers.time[startIndex];
+            const start = ensureExists(
+              rawMarkers.startTime[startIndex],
+              ensureExistsMessage
+            );
             matchedMarkers.push({
               start,
               name: stringTable.getString(name),
@@ -700,7 +719,10 @@ export function deriveMarkersFromRawMarkerTable(
         // duration using the following marker.
 
         if (previousScreenshotMarker !== null) {
-          const start = rawMarkers.time[previousScreenshotMarker];
+          const start = ensureExists(
+            rawMarkers.startTime[previousScreenshotMarker],
+            'Expected to find a start time for a screenshot marker.'
+          );
           const data = rawMarkers.data[previousScreenshotMarker];
 
           matchedMarkers.push({
@@ -805,7 +827,11 @@ export function deriveMarkersFromRawMarkerTable(
   // Loop over "start" markers without any "end" markers.
   for (const markerBucket of openTracingMarkers.values()) {
     for (const startIndex of markerBucket) {
-      const start = rawMarkers.time[startIndex];
+      const start = ensureExists(
+        rawMarkers.startTime[startIndex],
+        'Encountered a marker without a startTime. Eventually this needs to be handled ' +
+          'for phase-style markers.'
+      );
       matchedMarkers.push({
         start,
         dur: Math.max(endOfThread - start, 0),
@@ -834,7 +860,10 @@ export function deriveMarkersFromRawMarkerTable(
 
   // And we also need to add the "last screenshot marker".
   if (previousScreenshotMarker !== null) {
-    const start = rawMarkers.time[previousScreenshotMarker];
+    const start = ensureExists(
+      rawMarkers.startTime[previousScreenshotMarker],
+      'Expected to find a CompositorScreenshot marker with a start time.'
+    );
     matchedMarkers.push({
       start,
       dur: Math.max(endOfThread - start, 0),
@@ -866,7 +895,9 @@ export function filterRawMarkerTableToRange(
   );
 
   for (const index of filteredMarkerIndexesIter) {
-    newMarkerTable.time.push(markers.time[index]);
+    newMarkerTable.startTime.push(markers.startTime[index]);
+    newMarkerTable.endTime.push(markers.endTime[index]);
+    newMarkerTable.phase.push(markers.phase[index]);
     newMarkerTable.name.push(markers.name[index]);
     newMarkerTable.data.push(markers.data[index]);
     newMarkerTable.category.push(markers.category[index]);
@@ -894,6 +925,9 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   rangeStart: number,
   rangeEnd: number
 ): Generator<MarkerIndex, void, void> {
+  const ensureExistsMessage =
+    'At this time, this algorithm does not handle startTimes that are null. A ' +
+    'following commit will add this feature.';
   const isTimeInRange = (time: number): boolean =>
     time < rangeEnd && time >= rangeStart;
   const intersectsRange = (start: number, end: number): boolean =>
@@ -918,7 +952,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
 
   for (let i = 0; i < markers.length; i++) {
     const name = markers.name[i];
-    const time = markers.time[i];
+    const time = ensureExists(markers.startTime[i], ensureExistsMessage);
     const data = markers.data[i];
 
     if (!data) {
@@ -958,7 +992,15 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
           }
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            if (intersectsRange(markers.time[startIndex], time)) {
+            if (
+              intersectsRange(
+                ensureExists(
+                  markers.startTime[startIndex],
+                  ensureExistsMessage
+                ),
+                time
+              )
+            ) {
               // This couple of markers define a marker that's at least partially
               // in the range.
               yield startIndex;
@@ -1074,7 +1116,11 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // start/end come in order.
   for (const markerBucket of openTracingMarkers.values()) {
     for (const startIndex of markerBucket) {
-      if (markers.time[startIndex] < rangeEnd) {
+      const startTime = ensureExists(
+        markers.startTime[startIndex],
+        ensureExistsMessage
+      );
+      if (startTime < rangeEnd) {
         yield startIndex;
       }
     }
@@ -1121,7 +1167,9 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     }
     oldMarkerIndexToNew.set(index, newMarkerTable.length);
     newMarkerTable.name.push(oldMarkers.name[index]);
-    newMarkerTable.time.push(oldMarkers.time[index]);
+    newMarkerTable.startTime.push(oldMarkers.startTime[index]);
+    newMarkerTable.endTime.push(oldMarkers.endTime[index]);
+    newMarkerTable.phase.push(oldMarkers.phase[index]);
     newMarkerTable.data.push(oldMarkers.data[index]);
     newMarkerTable.category.push(oldMarkers.category[index]);
     newMarkerTable.length++;
@@ -1176,7 +1224,8 @@ export function filterMarkerIndexesToRange(
   return filterMarkerIndexes(
     getMarker,
     markerIndexes,
-    marker => marker.start < rangeEnd && marker.start + marker.dur >= rangeStart
+    marker =>
+      marker.start <= rangeEnd && marker.start + marker.dur >= rangeStart
   );
 }
 
