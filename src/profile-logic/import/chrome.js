@@ -16,6 +16,12 @@ import {
   getEmptyThread,
 } from '../../profile-logic/data-structures';
 import { ensureExists } from '../../utils/flow';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 
 import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 
@@ -707,7 +713,9 @@ async function extractScreenshots(
     thread.markers.name.push(
       thread.stringTable.indexForString('CompositorScreenshot')
     );
-    thread.markers.time.push(screenshot.ts / 1000);
+    thread.markers.startTime.push(screenshot.ts / 1000);
+    thread.markers.endTime.push(screenshot.ts / 1000);
+    thread.markers.phase.push(INSTANT);
     thread.markers.category.push(graphicsIndex);
     thread.markers.length++;
   }
@@ -809,13 +817,16 @@ function extractMarkers(
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;
         }
-        markers.time.push(time);
         markers.name.push(stringTable.indexForString(name));
         markers.category.push(otherCategoryIndex);
         if (event.ph === 'X') {
           // Complete Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb
           const duration: number = (event.dur: any) / 1000;
+          markers.phase.push(INTERVAL);
+          markers.startTime.push(time);
+          markers.endTime.push(time + duration);
+
           markers.data.push({
             type: 'CompleteTraceEvent',
             category: event.cat,
@@ -824,6 +835,16 @@ function extractMarkers(
             endTime: time + duration,
           });
         } else if (event.ph === 'B' || event.ph === 'E') {
+          if (event.ph === 'B') {
+            markers.startTime.push(time);
+            markers.endTime.push(null);
+            markers.phase.push(INTERVAL_START);
+          } else {
+            markers.startTime.push(null);
+            markers.endTime.push(time);
+            markers.phase.push(INTERVAL_END);
+          }
+
           // Duration Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
           markers.data.push({
@@ -832,7 +853,12 @@ function extractMarkers(
             interval: event.ph === 'B' ? 'start' : 'end',
             data: argData,
           });
-        } else if (event.ph === 'I') {
+        } else {
+          // This assumes the phase is 'I', or Instant.
+          markers.startTime.push(time);
+          markers.endTime.push(null);
+          markers.phase.push(INSTANT);
+
           // Instant Event
           // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
           markers.data.push({
