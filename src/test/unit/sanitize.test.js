@@ -352,7 +352,7 @@ describe('sanitizePII', function() {
         // `toBeTruthy` doesn't work here because there are marker categories with `0` value.
         // expect.anything() means anything other than null or undefined.
         expect(markersTable.name[i]).toEqual(expect.anything());
-        expect(markersTable.time[i]).toEqual(expect.anything());
+        expect(markersTable.startTime[i]).toEqual(expect.anything());
         expect(markersTable.data[i]).toEqual(expect.anything());
         expect(markersTable.category[i]).toEqual(expect.anything());
       }

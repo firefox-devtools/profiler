@@ -380,7 +380,9 @@ describe('js allocation processing', function() {
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 
@@ -450,7 +452,9 @@ describe('native allocation processing', function() {
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'Native allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 
