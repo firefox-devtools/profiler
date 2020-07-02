@@ -31,7 +31,6 @@ import type {
   MarkerIndex,
   MarkerTimingAndBuckets,
   Milliseconds,
-  UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
 } from 'firefox-profiler/types';
@@ -62,17 +61,6 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerChart extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
-  /**
-   * Determine the maximum zoom of the viewport.
-   */
-  getMaximumZoom(): UnitIntervalOfProfileRange {
-    const {
-      timeRange: { start, end },
-      interval,
-    } = this.props;
-    return interval / (end - start);
-  }
-
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
@@ -130,7 +118,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 previewSelection,
                 maxViewportHeight,
                 viewportNeedsUpdate,
-                maximumZoom: this.getMaximumZoom(),
+                maximumZoom: 0, // In the marker chart, we can zoom in as much as we want.
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 containerRef: this._takeViewportRef,
