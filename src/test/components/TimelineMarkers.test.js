@@ -164,7 +164,7 @@ describe('TimelineMarkers', function() {
         ['Marker C', 5, { startTime: 5, endTime: 15 }],
         [
           'BHR-detected hang',
-          5,
+          2,
           { type: 'BHR-detected hang', startTime: 2, endTime: 13 },
         ],
         [
@@ -269,7 +269,7 @@ describe('TimelineMarkers', function() {
         { rangeStart: 0, rangeEnd: 10 },
         [
           ['Marker A', 0, { startTime: 0, endTime: 3 }],
-          ['Marker B', 0, { startTime: 6, endTime: 10 }],
+          ['Marker B', 6, { startTime: 6, endTime: 10 }],
         ]
       );
 
@@ -300,7 +300,7 @@ describe('TimelineMarkers', function() {
         getContextMenu,
       } = setupWithMarkers({ rangeStart: 0, rangeEnd: 10 }, [
         ['Marker A', 0, { startTime: 0, endTime: 3 }],
-        ['Marker B', 0, { startTime: 6, endTime: 10 }],
+        ['Marker B', 6, { startTime: 6, endTime: 10 }],
       ]);
 
       // The "Marker A" marker is drawn from 0,0 to 5,60.

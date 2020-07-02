@@ -364,7 +364,7 @@ describe('TooltipMarker', function() {
         114.5,
         {
           type: 'FileIO',
-          startTime: 114,
+          startTime: 114.5,
           endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
@@ -679,7 +679,7 @@ describe('TooltipMarker', function() {
         114.5,
         {
           type: 'FileIO',
-          startTime: 114,
+          startTime: 114.5,
           endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
