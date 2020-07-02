@@ -41,7 +41,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *------*  *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 15, endTime: 25 }],
+        ['Marker Name', 15, { startTime: 15, endTime: 25 }],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
@@ -53,7 +53,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       //              :     *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 5, { startTime: 5, endTime: 15 }],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -65,7 +65,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       //              :   *---*
       const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 20 }],
-        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 5, { startTime: 5, endTime: 15 }],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -79,7 +79,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name B':           *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name B', 0, { startTime: 20, endTime: 30 }],
+        ['Marker Name B', 20, { startTime: 20, endTime: 30 }],
       ]);
       expect(markerTiming).toHaveLength(3);
       const [category, markerTimingA, markerTimingB] = markerTiming;

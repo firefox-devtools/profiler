@@ -43,7 +43,7 @@ const MARKERS = [
   ['Marker A', 11, { startTime: 11, endTime: 15 }],
   [
     'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
-    6,
+    5,
     { startTime: 5, endTime: 15 },
   ],
   ['Dot marker E', 4, { startTime: 4, endTime: 4 }],

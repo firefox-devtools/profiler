@@ -13,7 +13,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       <div
         class="tooltipTiming"
       >
-        1ms
+        500μs
       </div>
       <div
         class="tooltipTitle"
@@ -1501,7 +1501,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profiled thread)-114 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profiled thread)-114.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1514,7 +1514,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       <div
         class="tooltipTiming"
       >
-        1ms
+        500μs
       </div>
       <div
         class="tooltipTitle"

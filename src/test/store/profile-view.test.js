@@ -861,7 +861,7 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'd',
-          3,
+          1022,
           {
             cause: { stack: 2, time: 1 },
             endTime: 1024,
@@ -921,7 +921,7 @@ describe('actions/ProfileView', function() {
         ['a', 0, null],
         [
           'IPC',
-          1,
+          30,
           {
             type: 'IPC',
             startTime: 30,
@@ -945,7 +945,7 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'IPC',
-          3,
+          40,
           {
             type: 'IPC',
             startTime: 40,
@@ -1075,7 +1075,7 @@ describe('actions/ProfileView', function() {
         ],
         [
           'b',
-          1,
+          1002,
           {
             type: 'UserTiming',
             startTime: 1002,
@@ -1087,7 +1087,7 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'd',
-          3,
+          1050,
           {
             type: 'UserTiming',
             startTime: 1050,
