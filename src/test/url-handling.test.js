@@ -11,6 +11,7 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  commitRange,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -474,6 +475,120 @@ describe('showTabOnly', function() {
   });
 });
 
+describe('ranges', function() {
+  describe('are serializing correctly', () => {
+    it('when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).not.toContain(`range=`);
+    });
+
+    it('when there is 1 range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1514m23786`); // 1.514s + 23786ms
+    });
+
+    it('when rounding down the start', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1510.58, 1519.59));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1510m10`); // 1.510s + 10ms
+    });
+
+    it('when the duration is 0', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514, 1514));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toMatch(/range=1514000000n(?!0)/); // 1.514s + something non zero
+    });
+
+    it('when there are several ranges', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      dispatch(commitRange(1800, 1800.1));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+
+      // 1- 1.5145s + 23786ms
+      // 2- 1.8s + 100µs
+      expect(queryString).toContain(`range=1514m23786~1800000u100`);
+    });
+
+    it('when there is a small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.08, 1000.09));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000080u10`); // 1s and 80µs + 10µs
+    });
+
+    it('when there is a very small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.00008, 1000.0001));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000000080n20`); // 1s and 80ns + 20ns
+    });
+  });
+
+  describe('are deserializing correctly', () => {
+    it('when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([]);
+    });
+
+    it('when there is 1 range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+      ]);
+    });
+
+    it('when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000~2245m24',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+        { start: 2245, end: 2269 },
+      ]);
+    });
+
+    it('when there is a small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678900u100',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1678.9, end: 1679 },
+      ]);
+    });
+
+    it('when there is a very small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678123900n100',
+      });
+
+      const [committedRange] = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRange.start).toBeCloseTo(1678.1239);
+      expect(committedRange.end).toBeCloseTo(1678.124);
+    });
+  });
+});
+
 describe('url upgrading', function() {
   describe('version 1: legacy URL serialized call tree filters', function() {
     /**
@@ -799,6 +914,45 @@ describe('url upgrading', function() {
       const newTransformNodeString =
         'f-js-' + uintArrayToString(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
+    });
+  });
+
+  describe('version 5: implement ranges differently', () => {
+    it('does not error when there is no range', () => {
+      const { getState } = _getStoreWithURL({
+        v: 4,
+      });
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([]);
+    });
+
+    it('converts when there is only one range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
+    });
+
+    it('converts when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=0.245_18.470~1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([
+        { start: 245, end: 18470 },
+        { start: 1451, end: 1453 },
+      ]);
     });
   });
 

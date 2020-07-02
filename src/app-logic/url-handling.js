@@ -6,6 +6,7 @@
 import queryString from 'query-string';
 import {
   stringifyCommittedRanges,
+  stringifyStartEnd,
   parseCommittedRanges,
 } from '../profile-logic/committed-ranges';
 import {
@@ -32,7 +33,7 @@ import type {
   CallNodePath,
 } from 'firefox-profiler/types';
 
-export const CURRENT_URL_VERSION = 4;
+export const CURRENT_URL_VERSION = 5;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -770,6 +771,30 @@ const _upgraders = {
       );
     }
     processedLocation.query.transforms = stringifyTransforms(transforms);
+  },
+  [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // We changed how the ranges are serialized to the URLs. Before it was the
+    // pair of start/end in seconds unit with 4 digits, now this is a pair of
+    // start/duration, where start and duration are both integers expressed with
+    // a specific unit: for example 10000000u500 is a range from 10000000 microseconds
+    // (that is 10s) to 10s + 500 µs.
+    if (!query.range) {
+      return;
+    }
+
+    query.range = query.range
+      .split('~')
+      .map(committedRange => {
+        const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
+        if (!m) {
+          return null;
+        }
+        const start = Number(m[1]) * 1000;
+        const end = Number(m[2]) * 1000;
+        return stringifyStartEnd({ start, end });
+      })
+      .filter(committedRange => committedRange)
+      .join('~');
   },
 };
 
