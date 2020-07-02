@@ -105,8 +105,8 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
 
@@ -129,8 +129,8 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
     expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();

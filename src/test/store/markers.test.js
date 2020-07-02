@@ -158,7 +158,7 @@ describe('getProcessedRawMarkerTable', function() {
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
       ['Invalidate moz-extension://<URL>', 40, null],
     ]);
-    expect(markers.time).toEqual([10, 20, 30, 40]);
+    expect(markers.startTime).toEqual([10, 20, 30, 40]);
     expect(markers.data).toEqual([
       {
         type: 'Invalidation',
@@ -210,7 +210,7 @@ describe('getProcessedRawMarkerTable', function() {
         null,
       ],
     ]);
-    expect(markers.time).toEqual([10, 20, 30]);
+    expect(markers.startTime).toEqual([10, 20, 30]);
     expect(markers.data).toEqual([
       {
         type: 'Bailout',
