@@ -1504,8 +1504,8 @@ describe('actions/ProfileView', function() {
       expect(markers.length).toBe(20);
       const startIndex = 3;
       const endIndex = 8;
-      const startTime = markers.time[startIndex];
-      const endTime = markers.time[endIndex];
+      const startTime = ensureExists(markers.startTime[startIndex]);
+      const endTime = ensureExists(markers.startTime[endIndex]);
       dispatch(ProfileView.commitRange(startTime, endTime));
 
       // Get out the markers.
