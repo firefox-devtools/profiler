@@ -4,6 +4,8 @@
 
 // @flow
 
+import type { MarkerPhase } from 'firefox-profiler/types';
+
 // The current version of the Gecko profile format.
 export const GECKO_PROFILE_VERSION = 19;
 
@@ -89,3 +91,9 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 
 // This is your local server:
 // export const PROFILER_SERVER_ORIGIN = 'http://localhost:5252';
+
+// See the MarkerPhase type for more information.
+export const INSTANT: MarkerPhase = 0;
+export const INTERVAL: MarkerPhase = 1;
+export const INTERVAL_START: MarkerPhase = 2;
+export const INTERVAL_END: MarkerPhase = 3;
