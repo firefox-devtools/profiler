@@ -674,7 +674,7 @@ export type ProfileMeta = {|
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
   platform?:
-    | 'Android'
+    | 'Android' // It usually has the version embedded in the string
     | 'Windows'
     | 'Macintosh'
     // X11 is used for historic reasons, but this value means that it is a Unix platform.
