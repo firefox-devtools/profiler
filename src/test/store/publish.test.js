@@ -187,6 +187,17 @@ describe('attemptToPublish', function() {
       return waitUntilState(store, state => getUploadPhase(state) === phase);
     }
 
+    async function assertUploadSuccess(publishAttempt: Promise<boolean>) {
+      const publishResult = await publishAttempt;
+      // To find stupid mistakes more easily, check that we didn't get an upload
+      // error here. If we got one, let's rethrow the error.
+      const error = getUploadError(store.getState());
+      if (error) {
+        throw error;
+      }
+      expect(publishResult).toBe(true);
+    }
+
     return {
       ...store,
       resolveUpload,
@@ -194,6 +205,7 @@ describe('attemptToPublish', function() {
       getUpdateUploadProgress,
       waitUntilPhase,
       abortFunction,
+      assertUploadSuccess,
     };
   }
 
@@ -204,13 +216,13 @@ describe('attemptToPublish', function() {
   }
 
   it('cycles through the upload phases on a successful upload', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
     resolveUpload(JWT_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
@@ -218,13 +230,13 @@ describe('attemptToPublish', function() {
   });
 
   it('works when the server returns a bare hash instead of a JWT token', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
     resolveUpload(BARE_PROFILE_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
@@ -250,6 +262,7 @@ describe('attemptToPublish', function() {
       getState,
       resolveUpload,
       getUpdateUploadProgress,
+      assertUploadSuccess,
     } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     await waitUntilPhase('uploading');
@@ -277,7 +290,7 @@ describe('attemptToPublish', function() {
 
     resolveUpload(JWT_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // We still clamp :-)
     expect(getUploadProgress(getState())).toEqual(0.1);
@@ -285,12 +298,12 @@ describe('attemptToPublish', function() {
   });
 
   it('can reset after a successful upload', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     // The generation is incremented twice because of some asynchronous code in
@@ -348,7 +361,7 @@ describe('attemptToPublish', function() {
   it('can revert back to the original state', async function() {
     // This function tests the original state with the trivial operation of
     // testing on the current tab.
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
 
     const originalTab = 'flame-graph';
     const changedTab = 'stack-chart';
@@ -366,7 +379,7 @@ describe('attemptToPublish', function() {
     // Now upload.
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // Check that we are still on this tab.
     expect(getSelectedTab(getState())).toEqual(originalTab);
@@ -393,9 +406,12 @@ describe('attemptToPublish', function() {
     profile.threads[1].pid = 1;
 
     const store = storeWithProfile(profile);
-    const { dispatch, getState, resolveUpload } = setupFakeUploadsWithStore(
-      store
-    );
+    const {
+      dispatch,
+      getState,
+      resolveUpload,
+      assertUploadSuccess,
+    } = setupFakeUploadsWithStore(store);
 
     // Add some transforms
     const B = funcNames.indexOf('B');
@@ -415,7 +431,7 @@ describe('attemptToPublish', function() {
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // The transform still should be there.
     // Also, now it should be index 0.
@@ -433,7 +449,12 @@ describe('attemptToPublish', function() {
     };
 
     it('removes the zip viewer and only shows the profiler after upload', async function() {
-      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -445,7 +466,7 @@ describe('attemptToPublish', function() {
       // Upload the profile.
       const publishAttempt = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt).toEqual(true);
+      await assertUploadSuccess(publishAttempt);
 
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
@@ -453,7 +474,12 @@ describe('attemptToPublish', function() {
     });
 
     it('can revert viewing the original zip file state after publishing', async function() {
-      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -461,7 +487,7 @@ describe('attemptToPublish', function() {
       // Now upload.
       const publishAttempt = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt).toEqual(true);
+      await assertUploadSuccess(publishAttempt);
 
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
@@ -482,7 +508,7 @@ describe('attemptToPublish', function() {
       // Now upload the SECOND profile.
       const publishAttempt2 = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt2).toEqual(true);
+      await assertUploadSuccess(publishAttempt2);
 
       // For the second profile, check that we are reporting as being a public
       // single profile.
