@@ -25,12 +25,14 @@ import {
   getUploadGeneration,
 } from '../../selectors/publish';
 import {
+  getUrlState,
   getSelectedTab,
   getDataSource,
   getProfileName,
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
+import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
@@ -43,6 +45,10 @@ import {
   hideGlobalTrack,
 } from '../../actions/profile-view';
 
+import 'fake-indexeddb/auto';
+import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+import { retrieveProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+
 import type { Store } from 'firefox-profiler/types';
 
 // We mock profile-store but we want the real error, so that we can simulate it.
@@ -51,6 +57,16 @@ jest.mock('../../profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
+
+function resetIndexedDb() {
+  // This is the recommended way to reset the IDB state between test runs, but
+  // neither flow nor eslint like that we assign to indexedDB directly, for
+  // different reasons.
+  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
+  indexedDB = new FDBFactory();
+}
+beforeEach(resetIndexedDb);
+afterEach(resetIndexedDb);
 
 describe('getCheckedSharingOptions', function() {
   describe('default filtering by channel', function() {
@@ -227,6 +243,14 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
+
+    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+    expect(storedProfileData).toMatchObject({
+      jwtToken: JWT_TOKEN,
+      profileToken: BARE_PROFILE_TOKEN,
+      publishedRange: { start: 0, end: 1 },
+      urlPath: urlFromState(getUrlState(getState())),
+    });
   });
 
   it('works when the server returns a bare hash instead of a JWT token', async function() {
@@ -241,6 +265,12 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
+
+    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+    expect(storedProfileData).toMatchObject({
+      jwtToken: null,
+      profileToken: BARE_PROFILE_TOKEN,
+    });
   });
 
   it('can handle upload errors', async function() {
