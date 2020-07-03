@@ -10,7 +10,7 @@
 // The function uses a permissive regexp to support more use cases (like having
 // the version directly without the prefix `rv:`). Also we remove the `.0` at
 // the end of the version if present because this gives no added value.
-export function formatVersionNumber(version?: string): string {
+function formatVersionNumber(version?: string): string {
   if (version) {
     const regex = /[\d.]+$/; // Matches any group of number and dots at the end of the string.
     const match = regex.exec(version);
@@ -42,6 +42,10 @@ export function formatProductAndVersion(meta: {
   return product + (version ? ' ' + version : '');
 }
 
+// This function will extract a nice string out of the meta information. This is
+// very inconsistent depending on the OS so we have very different code for each
+// of them. We may need to tweak this further when we'll deal with importers
+// too.
 export function formatPlatform(meta: {
   +platform?: string,
   +oscpu?: string,

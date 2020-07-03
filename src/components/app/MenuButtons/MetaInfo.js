@@ -93,7 +93,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
         buttonClassName="menuButtonsMetaInfoButtonButton"
-        label={_formatMetainfoString(meta) || 'Profile information'}
+        label={_formatMetaInfoString(meta) || 'Profile information'}
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
             <h2 className="arrowPanelSubTitle">Profile Information</h2>
@@ -264,7 +264,7 @@ function _formatDate(timestamp: number): string {
   return timestampDate;
 }
 
-function _formatMetainfoString(meta: ProfileMeta) {
+function _formatMetaInfoString(meta: ProfileMeta) {
   const productAndVersion = formatProductAndVersion(meta);
   const os = formatPlatform(meta);
   return productAndVersion + (os ? ` – ${os}` : '');
