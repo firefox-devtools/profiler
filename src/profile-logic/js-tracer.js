@@ -505,7 +505,8 @@ export function convertJsTracerToThreadWithoutSamples(
   const stackTable = getEmptyStackTable();
   const samples: SamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
-    duration: [],
+    weight: [],
+    weightType: 'tracing-ms',
   };
   const markers = getEmptyRawMarkerTable();
   const funcTable = { ...fromThread.funcTable };
@@ -826,7 +827,7 @@ export function getSelfTimeSamplesFromJsTracer(
   const { stringTable } = thread;
   const samples = getEmptySamplesTableWithEventDelay();
   const sampleWeights = [];
-  samples.duration = sampleWeights;
+  samples.weight = sampleWeights;
 
   function addSelfTimeAsASample(
     eventIndex: IndexIntoJsTracerEvents,

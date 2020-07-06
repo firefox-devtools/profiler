@@ -8,6 +8,10 @@ import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
+import {
+  formatProductAndVersion,
+  formatPlatform,
+} from '../../../profile-logic/profile-metainfo';
 
 import type {
   Profile,
@@ -20,11 +24,11 @@ import { assertExhaustiveCheck } from '../../../utils/flow';
 
 import './MetaInfo.css';
 
-type Props = {
-  profile: Profile,
-  symbolicationStatus: SymbolicationStatus,
-  resymbolicateProfile: resymbolicateProfile,
-};
+type Props = {|
+  +profile: Profile,
+  +symbolicationStatus: SymbolicationStatus,
+  +resymbolicateProfile: resymbolicateProfile,
+|};
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
@@ -83,11 +87,13 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     const { meta, profilerOverhead } = this.props.profile;
     const { configuration } = meta;
 
+    const platformInformation = formatPlatform(meta);
+
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
         buttonClassName="menuButtonsMetaInfoButtonButton"
-        label={_formatLabel(meta) || 'Profile information'}
+        label={_formatMetaInfoString(meta) || 'Profile information'}
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
             <h2 className="arrowPanelSubTitle">Profile Information</h2>
@@ -144,14 +150,8 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             <div className="arrowPanelSection">
               {meta.product ? (
                 <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Name:</span>
-                  {meta.product}
-                </div>
-              ) : null}
-              {meta.misc ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Version:</span>
-                  {_formatVersionNumber(meta.misc)}
+                  <span className="metaInfoLabel">Name and version:</span>
+                  {formatProductAndVersion(meta)}
                 </div>
               ) : null}
               {meta.updateChannel ? (
@@ -194,16 +194,10 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             </div>
             <h2 className="arrowPanelSubTitle">Platform</h2>
             <div className="arrowPanelSection">
-              {meta.platform ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Platform:</span>
-                  {meta.platform}
-                </div>
-              ) : null}
-              {meta.oscpu ? (
+              {platformInformation ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">OS:</span>
-                  {meta.oscpu}
+                  {platformInformation}
                 </div>
               ) : null}
               {meta.abi ? (
@@ -270,27 +264,8 @@ function _formatDate(timestamp: number): string {
   return timestampDate;
 }
 
-function _formatVersionNumber(version?: string): string | null {
-  const regex = /[0-9]+.+[0-9]/gi;
-
-  if (version) {
-    const match = version.match(regex);
-    if (match) {
-      return match.toString();
-    }
-  }
-  return null;
-}
-
-function _formatLabel(meta: ProfileMeta): string {
-  const product = meta.product || '';
-  const version = _formatVersionNumber(meta.misc) || '';
-  let os;
-  // To displaying Android Version instead of Linux for Android developers.
-  if (meta.platform !== undefined && meta.platform.match(/android/i)) {
-    os = meta.platform;
-  } else {
-    os = meta.oscpu || '';
-  }
-  return product + (version ? ` (${version})` : '') + (os ? ` ${os}` : '');
+function _formatMetaInfoString(meta: ProfileMeta) {
+  const productAndVersion = formatProductAndVersion(meta);
+  const os = formatPlatform(meta);
+  return productAndVersion + (os ? ` – ${os}` : '');
 }

@@ -32,10 +32,13 @@ import type {
   PageList,
   Milliseconds,
   StartEndRange,
+  WeightType,
+  SamplesLikeTable,
   PreviewSelection,
   CallTreeSummaryStrategy,
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
@@ -57,6 +60,7 @@ const SELECTABLE_THRESHOLD = 0.001;
 
 type StateProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
@@ -74,6 +78,9 @@ type StateProps = {|
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +samples: SamplesLikeTable,
+  +unfilteredSamples: SamplesLikeTable,
+  +tracedTiming: TracedTiming | null,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -264,6 +271,10 @@ class FlameGraph extends React.PureComponent<Props> {
       interval,
       isInverted,
       pages,
+      weightType,
+      samples,
+      unfilteredSamples,
+      tracedTiming,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -295,6 +306,7 @@ class FlameGraph extends React.PureComponent<Props> {
             chartProps={{
               thread,
               pages,
+              weightType,
               unfilteredThread,
               sampleIndexOffset,
               maxStackDepth,
@@ -311,6 +323,9 @@ class FlameGraph extends React.PureComponent<Props> {
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
+              samples,
+              unfilteredSamples,
+              tracedTiming,
             }}
           />
         </ContextMenuTrigger>
@@ -331,6 +346,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
       state
     ),
@@ -357,6 +373,11 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     pages: getPageList(state),
+    samples: selectedThreadSelectors.getSamplesForCallTree(state),
+    unfilteredSamples: selectedThreadSelectors.getUnfilteredSamplesForCallTree(
+      state
+    ),
+    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

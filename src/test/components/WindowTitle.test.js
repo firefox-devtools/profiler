@@ -28,14 +28,18 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
+      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
     );
   });
 
   it('shows platform details in the window title if it is available', () => {
     const profile = getEmptyProfile();
     profile.threads.push(getEmptyThread());
-    profile.meta.oscpu = 'Intel Mac OS X 10.14';
+    Object.assign(profile.meta, {
+      oscpu: 'Intel Mac OS X 10.14',
+      platform: 'Macintosh',
+      toolkit: 'cocoa',
+    });
     const store = storeWithProfile(profile);
     render(
       <Provider store={store}>
@@ -44,14 +48,18 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox - Intel Mac OS X 10.14 - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
+      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
     );
   });
 
   it('shows profile name in the window title if it is available', () => {
     const profile = getEmptyProfile();
     profile.threads.push(getEmptyThread());
-    profile.meta.oscpu = 'Intel Mac OS X 10.14';
+    Object.assign(profile.meta, {
+      oscpu: 'Intel Mac OS X 10.14',
+      platform: 'Macintosh',
+      toolkit: 'cocoa',
+    });
     const store = storeWithProfile(profile);
     store.dispatch(changeProfileName('good profile'));
     render(
@@ -61,12 +69,12 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'good profile - Firefox - Intel Mac OS X 10.14 - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
+      'good profile – Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
     );
 
     store.dispatch(changeProfileName('awesome profile'));
     expect(document.title).toBe(
-      'awesome profile - Firefox - Intel Mac OS X 10.14 - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
+      'awesome profile – Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
     );
   });
 });

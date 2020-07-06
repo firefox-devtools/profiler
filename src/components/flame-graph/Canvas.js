@@ -12,6 +12,10 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import {
+  formatCallNodeNumberWithUnit,
+  formatPercent,
+} from '../../utils/format-numbers';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
@@ -25,6 +29,9 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallTreeSummaryStrategy,
+  WeightType,
+  SamplesLikeTable,
+  TracedTiming,
 } from 'firefox-profiler/types';
 
 import type {
@@ -38,6 +45,7 @@ import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
@@ -55,6 +63,9 @@ export type OwnProps = {|
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +samples: SamplesLikeTable,
+  +unfilteredSamples: SamplesLikeTable,
+  +tracedTiming: TracedTiming | null,
 |};
 
 type Props = {|
@@ -266,6 +277,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       isInverted,
       callTreeSummaryStrategy,
       pages,
+      weightType,
+      samples,
+      unfilteredSamples,
+      tracedTiming,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -274,9 +289,19 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
 
     const stackTiming = flameGraphTiming[depth];
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    const duration =
+    const ratio =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
+
+    let percentage = formatPercent(ratio);
+    if (tracedTiming) {
+      const time = formatCallNodeNumberWithUnit(
+        'tracing-ms',
+        false,
+        tracedTiming.running[callNodeIndex]
+      );
+      percentage = `${time} (${percentage})`;
+    }
 
     const shouldComputeTimings =
       // This is currently too slow for JS Tracer threads.
@@ -291,12 +316,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       // doesn't over-render.
       <TooltipCallNode
         thread={thread}
+        weightType={weightType}
         pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
-        durationText={`${(100 * duration).toFixed(2)}%`}
+        durationText={percentage}
         callTree={callTree}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
@@ -309,7 +335,9 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
                 thread,
                 unfilteredThread,
                 sampleIndexOffset,
-                categories
+                categories,
+                samples,
+                unfilteredSamples
               )
             : undefined
         }

@@ -4,6 +4,11 @@
   border-top: 1px solid var(--grey-30);
   background: var(--grey-10);
   font-size: 11px;
+
+  /* Subtract the splitter size. */
+  padding-inline-start: calc(1em - 5px);
+
+  --sidebar-indent: 16px;
 }
 
 .sidebar-contents-wrapper {
@@ -15,15 +20,42 @@
   align-content: start; /* the grid isn't vertically stretched */
   align-items: center;
   grid-gap: 2px 5px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    /* Label */
+    1fr
+    /* Value */
+    min-content
+    /* Percentage */
+    min-content;
 }
 
 .sidebar-titlegroup,
 .sidebar-title2,
-.sidebar-title3,
-.sidebar-categorylist {
+.sidebar-title3 {
   min-width: 0; /* With this, the cell's minimum size is 0 instead of min-content */
-  grid-column-start: span 2;
+  grid-column-start: span 3;
+}
+
+/* Truncate the text with an ellipse */
+.sidebar-label,
+.sidebar-title2,
+.sidebar-title3,
+.sidebar-title-label > :nth-child(2) {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-title-label {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: min-content 1fr;
+}
+
+.sidebar-title-label > :nth-child(2) {
+  color: var(--grey-50);
+  text-align: right;
 }
 
 .sidebar-titlegroup {
@@ -62,10 +94,7 @@
 
 .sidebar-title2,
 .sidebar-title3 {
-  overflow: hidden;
   font-weight: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .sidebar-title2 {
@@ -78,26 +107,76 @@
 
 .sidebar-label {
   color: var(--grey-50);
+  grid-column-start: 1;
+  margin-inline-start: var(--sidebar-indent);
+  white-space: nowrap;
+}
+
+.sidebar-label-indent {
+  margin-inline-start: calc(var(--sidebar-indent) * 2);
+}
+
+.sidebar-value,
+.sidebar-percentage {
   text-align: right;
   white-space: nowrap;
 }
 
-.sidebar-value {
-  text-align: right;
-  white-space: nowrap;
+.sidebar-histogram-bar {
+  background-color: var(--grey-30);
+  grid-column-start: span 3;
+  margin-inline-start: var(--sidebar-indent);
 }
 
-.sidebar-categorylist {
-  display: grid;
-  align-content: start; /* the grid isn't vertically stretched */
-  align-items: center;
-  grid-gap: 2px 5px;
-  grid-template-columns: 1fr max-content;
+.sidebar-histogram-bar-color {
+  height: 5px;
 }
 
-.sidebar-subcategoryname {
-  overflow: hidden;
-  padding-left: 25px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sidebar-histogram-bar-color.category-color-transparent {
+  /* A white bar does not show up well here */
+  background-color: var(--grey-50);
+}
+
+.sidebar-toggle {
+  padding: 0;
+  border: 0;
+  background: 0;
+  color: var(--grey-50);
+  font-size: inherit;
+}
+
+/* Opt out of the default photon styling, as it doesn't look very nice with the
+   overflow: hidden of the container */
+.sidebar-toggle:focus {
+  border: 0;
+  border-radius: 2px;
+  box-shadow: none;
+  color: var(--blue-60);
+  text-decoration: underline;
+}
+
+/* This is the twisty arrow */
+.sidebar-toggle::before {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-width: 5px 4px 5px 8px;
+  border-style: solid;
+  border-color: transparent transparent transparent currentcolor;
+  margin-top: 1px;
+  background: none;
+  content: '';
+  margin-inline-start: -11px;
+}
+
+.sidebar-toggle:active:hover {
+  color: var(--grey-60);
+}
+
+.sidebar-toggle.expanded::before {
+  border-width: 8px 5px 4px;
+  border-style: solid;
+  border-color: currentcolor transparent transparent;
+  margin-top: 3px;
+  margin-inline-start: -12px;
 }

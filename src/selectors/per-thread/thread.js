@@ -24,6 +24,7 @@ import type {
   JsTracerTiming,
   $ReturnType,
   StartEndRange,
+  WeightType,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
@@ -57,6 +58,14 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
       getThread(state),
       ProfileSelectors.getProfileInterval(state)
     );
+
+  /**
+   * This selector gets the weight type from the thread.samples table, but
+   * does not get it for others like the Native Allocations table. The call
+   * tree uses the getWeightTypeForCallTree selector.
+   */
+  const getSamplesWeightType: Selector<WeightType> = state =>
+    getSamplesTable(state).weightType || 'samples';
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
@@ -306,6 +315,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getSamplesWeightType,
     getNativeAllocations,
     getThreadRange,
     getFilteredThread,

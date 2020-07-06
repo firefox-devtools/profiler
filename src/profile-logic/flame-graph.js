@@ -10,7 +10,7 @@ import type {
   IndexIntoCallNodeTable,
   Thread,
 } from 'firefox-profiler/types';
-import type { CallTreeCountsAndTimings } from './call-tree';
+import type { CallTreeCountsAndSummary } from './call-tree';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -27,13 +27,13 @@ export type IndexIntoFlameGraphTiming = number;
  * callNode allows extracting information such as function names which
  * are shown in the flame graph.
  *
- * selfTimeRelative contains the self time relative to the total time,
+ * selfRelative contains the self time relative to the total time,
  * which is used to color the drawn functions.
  */
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
-  selfTimeRelative: Array<number>,
+  selfRelative: Array<number>,
   callNode: IndexIntoCallNodeTable[],
   length: number,
 }>;
@@ -171,19 +171,19 @@ export function getRootsAndChildren(
 export function getFlameGraphTiming(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
-  callTreeCountsAndTimings: CallTreeCountsAndTimings
+  callTreeCountsAndSummary: CallTreeCountsAndSummary
 ): FlameGraphTiming {
   const {
     callNodeChildCount,
-    callNodeTimes,
-    rootTotalTime,
-  } = callTreeCountsAndTimings;
+    callNodeSummary,
+    rootTotalSummary,
+  } = callTreeCountsAndSummary;
 
   const { roots, children } = getRootsAndChildren(
     thread,
     callNodeInfo.callNodeTable,
     callNodeChildCount,
-    callNodeTimes.totalTime
+    callNodeSummary.total
   );
   const timing = [];
 
@@ -206,25 +206,25 @@ export function getFlameGraphTiming(
       row = {
         start: [],
         end: [],
-        selfTimeRelative: [],
+        selfRelative: [],
         callNode: [],
         length: 0,
       };
       timing[depth] = row;
     }
 
-    // Take the absolute time, as native deallocations can be negative.
-    const totalTimeRelative = Math.abs(
-      callNodeTimes.totalTime[nodeIndex] / rootTotalTime
+    // Take the absolute value, as native deallocations can be negative.
+    const totalRelative = Math.abs(
+      callNodeSummary.total[nodeIndex] / rootTotalSummary
     );
-    const selfTimeRelative = Math.abs(
-      callNodeTimes.selfTime[nodeIndex] / rootTotalTime
+    const selfRelative = Math.abs(
+      callNodeSummary.self[nodeIndex] / rootTotalSummary
     );
 
     // Compute the timing information.
     row.start.push(timeOffset[depth]);
-    row.end.push(timeOffset[depth] + totalTimeRelative);
-    row.selfTimeRelative.push(selfTimeRelative);
+    row.end.push(timeOffset[depth] + totalRelative);
+    row.selfRelative.push(selfRelative);
     row.callNode.push(nodeIndex);
     row.length++;
 
@@ -232,7 +232,7 @@ export function getFlameGraphTiming(
     // we'll make sure that the first child (if any) begins with the
     // same time offset.
     timeOffset[depth + 1] = timeOffset[depth];
-    timeOffset[depth] += totalTimeRelative;
+    timeOffset[depth] += totalRelative;
 
     // The items in the children array are sorted in descending order,
     // but since they are popped from the stack at the top of the

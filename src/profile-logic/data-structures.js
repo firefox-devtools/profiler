@@ -55,6 +55,8 @@ export function getEmptySamplesTableWithEventDelay(): SamplesTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
     eventDelay: [],
     stack: [],
     time: [],
@@ -73,6 +75,8 @@ export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
     responsiveness: [],
     stack: [],
     time: [],
@@ -192,7 +196,8 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
     className: [],
     typeName: [],
     coarseType: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     inNursery: [],
     stack: [],
     length: 0,
@@ -210,7 +215,8 @@ export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllo
   // be caught by the type system.
   return {
     time: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     stack: [],
     length: 0,
   };
@@ -227,7 +233,8 @@ export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocati
   // be caught by the type system.
   return {
     time: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     stack: [],
     memoryAddress: [],
     threadId: [],

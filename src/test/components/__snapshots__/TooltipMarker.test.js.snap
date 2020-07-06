@@ -2450,14 +2450,14 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
     <div
       class="tooltipLabel"
     >
-      IPC Speed
+      IPC Send Duration
       :
     </div>
     unknown
     <div
       class="tooltipLabel"
     >
-      IPC Latency
+      IPC Recv Latency
       :
     </div>
     unknown
@@ -2532,14 +2532,14 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
     <div
       class="tooltipLabel"
     >
-      IPC Speed
+      IPC Send Duration
       :
     </div>
     unknown
     <div
       class="tooltipLabel"
     >
-      IPC Latency
+      IPC Recv Latency
       :
     </div>
     unknown

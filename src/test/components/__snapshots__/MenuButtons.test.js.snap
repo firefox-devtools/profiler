@@ -10,7 +10,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
     <input
       class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
       type="button"
-      value="Firefox (48.0) Intel Mac OS X 10.11"
+      value="Firefox 48 – macOS 10.11"
     />
   </div>
   <div
@@ -61,7 +61,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            28
+            29
           </div>
           <div
             class="metaInfoRow"
@@ -171,19 +171,9 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             <span
               class="metaInfoLabel"
             >
-              Name:
+              Name and version:
             </span>
-            Firefox
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Version:
-            </span>
-            48.0
+            Firefox 48
           </div>
           <div
             class="metaInfoRow"
@@ -258,19 +248,9 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             <span
               class="metaInfoLabel"
             >
-              Platform:
-            </span>
-            Macintosh
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
               OS:
             </span>
-            Intel Mac OS X 10.11
+            macOS 10.11
           </div>
           <div
             class="metaInfoRow"
@@ -426,7 +406,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
     <input
       class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
       type="button"
-      value="Firefox (48.0) Intel Mac OS X 10.11"
+      value="Firefox 48 – macOS 10.11"
     />
   </div>
   <div
@@ -477,7 +457,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             >
               Profile Version:
             </span>
-            28
+            29
           </div>
           <div
             class="metaInfoRow"
@@ -517,19 +497,9 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             <span
               class="metaInfoLabel"
             >
-              Name:
+              Name and version:
             </span>
-            Firefox
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Version:
-            </span>
-            48.0
+            Firefox 48
           </div>
           <div
             class="metaInfoRow"
@@ -604,19 +574,9 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             <span
               class="metaInfoLabel"
             >
-              Platform:
-            </span>
-            Macintosh
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
               OS:
             </span>
-            Intel Mac OS X 10.11
+            macOS 10.11
           </div>
           <div
             class="metaInfoRow"
