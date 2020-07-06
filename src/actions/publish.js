@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { stripIndent } from 'common-tags';
+
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
 import {
@@ -128,35 +130,52 @@ async function storeJustPublishedProfileData(
   const profileMeta = getProfile(state).meta;
   const profileFilterPageData = getProfileFilterPageData(state);
 
-  await storeProfileData({
-    profileToken,
-    jwtToken,
-    publishedDate: new Date(),
-    name: getProfileName(state),
-    originHostname: profileFilterPageData
-      ? profileFilterPageData.hostname
-      : null,
-    preset: null, // This is unused for now.
-    meta: {
-      // We don't put the full meta object, but only what we need, so that we
-      // won't have unexpected compatibility problems in the future, if the meta
-      // object changes. By being explicit we make sure this will be handled.
-      product: profileMeta.product,
-      abi: profileMeta.abi,
-      platform: profileMeta.platform,
-      toolkit: profileMeta.toolkit,
-      misc: profileMeta.misc,
-      oscpu: profileMeta.oscpu,
-      updateChannel: profileMeta.updateChannel,
-      appBuildID: profileMeta.appBuildID,
-    },
-    urlPath: predictedUrl,
-    publishedRange:
-      removeProfileInformation &&
-      removeProfileInformation.shouldFilterToCommittedRange
-        ? adjustRange(removeProfileInformation.shouldFilterToCommittedRange)
-        : adjustRange(getCommittedRange(state)),
-  });
+  try {
+    await storeProfileData({
+      profileToken,
+      jwtToken,
+      publishedDate: new Date(),
+      name: getProfileName(state),
+      originHostname: profileFilterPageData
+        ? profileFilterPageData.hostname
+        : null,
+      preset: null, // This is unused for now.
+      meta: {
+        // We don't put the full meta object, but only what we need, so that we
+        // won't have unexpected compatibility problems in the future, if the meta
+        // object changes. By being explicit we make sure this will be handled.
+        product: profileMeta.product,
+        abi: profileMeta.abi,
+        platform: profileMeta.platform,
+        toolkit: profileMeta.toolkit,
+        misc: profileMeta.misc,
+        oscpu: profileMeta.oscpu,
+        updateChannel: profileMeta.updateChannel,
+        appBuildID: profileMeta.appBuildID,
+      },
+      urlPath: predictedUrl,
+      publishedRange:
+        removeProfileInformation &&
+        removeProfileInformation.shouldFilterToCommittedRange
+          ? adjustRange(removeProfileInformation.shouldFilterToCommittedRange)
+          : adjustRange(getCommittedRange(state)),
+    });
+  } catch (e) {
+    if (e.name === 'InvalidStateError') {
+      // It's very likely we are in private mode, so let's catch and ignore it.
+      // We can remove this check once Firefox stops erroring,
+      // see https://bugzilla.mozilla.org/show_bug.cgi?id=1639542
+      console.error(
+        stripIndent`
+          A DOMException 'InvalidStateError' was thrown when storing the profile data to a local indexedDB.
+          Are you in private mode?
+          We'll ignore the error, but you won't be able to act on this profile's data in the future.
+        `
+      );
+    } else {
+      throw e;
+    }
+  }
 }
 
 /**
