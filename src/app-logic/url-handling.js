@@ -592,6 +592,10 @@ function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
   return localTrackOrderByPid;
 }
 
+class UrlUpgradeError extends Error {
+  name = 'UrlUpgradeError';
+}
+
 type ProcessedLocation = {|
   pathname: string,
   hash: string,
@@ -613,7 +617,7 @@ export function upgradeLocationToCurrentVersion(
   }
 
   if (urlVersion > CURRENT_URL_VERSION) {
-    throw new Error(
+    throw new UrlUpgradeError(
       `Unable to parse a url of version ${urlVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
         `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_URL_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'

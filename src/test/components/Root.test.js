@@ -32,10 +32,11 @@ import { render } from 'react-testing-library';
 import { AppViewRouter } from '../../components/app/AppViewRouter';
 import { ProfileLoader } from '../../components/app/ProfileLoader';
 import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
+import { fatalError } from '../../actions/errors';
+
 // Because this module is mocked but we want the real actions in the test, we
 // use `jest.requireActual` here.
 const {
-  fatalError,
   temporaryError,
   viewProfile,
   waitingForProfileFromAddon,

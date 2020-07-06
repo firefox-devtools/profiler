@@ -50,6 +50,7 @@ import {
 } from '../profile-logic/tracks';
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
+import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type {
@@ -893,13 +894,6 @@ export async function doSymbolicateProfile(
   await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
-}
-
-export function fatalError(error: Error): Action {
-  return {
-    type: 'FATAL_ERROR',
-    error,
-  };
 }
 
 export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {

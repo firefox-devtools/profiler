@@ -61,6 +61,8 @@ const urlSetupPhase: Reducer<UrlSetupPhase> = (
   switch (action.type) {
     case 'START_FETCHING_PROFILES':
       return 'loading-profile';
+    case 'ROUTE_NOT_FOUND':
+    case 'FATAL_ERROR':
     case 'URL_SETUP_DONE':
       return 'done';
     default:
