@@ -15,7 +15,7 @@ import {
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
-  urlStateToUrlObject,
+  getQueryStringFromUrlState,
   urlFromState,
   CURRENT_URL_VERSION,
   upgradeLocationToCurrentVersion,
@@ -330,11 +330,10 @@ describe('search strings', function() {
     ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      if (!query.search) {
-        throw new Error('Could not find the search query string');
-      }
-      expect(query.search).toBe(callTreeSearchString);
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(
+        `search=${encodeURIComponent(callTreeSearchString)}`
+      );
     });
   });
 
@@ -348,11 +347,8 @@ describe('search strings', function() {
     ['marker-chart', 'marker-table'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      if (!query.markerSearch) {
-        throw new Error('Could not find the markerSearch query string');
-      }
-      expect(query.markerSearch).toBe(markerSearchString);
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`markerSearch=${markerSearchString}`);
     });
   });
 
@@ -364,11 +360,8 @@ describe('search strings', function() {
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    if (!query.networkSearch) {
-      throw new Error('Could not find the networkSearch query string');
-    }
-    expect(query.networkSearch).toBe(networkSearchString);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`networkSearch=${networkSearchString}`);
   });
 });
 
@@ -379,8 +372,10 @@ describe('profileName', function() {
 
     dispatch(changeProfileName(profileName));
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.profileName).toBe(profileName);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(
+      `profileName=${encodeURIComponent(profileName)}`
+    );
   });
 
   it('reflects in the state from URL', function() {
@@ -407,8 +402,8 @@ describe('showTabOnly', function() {
       changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
     );
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.ctxId).toBe(browsingContextID);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`ctxId=${browsingContextID}`);
   });
 
   it('reflects in the state from URL', function() {
@@ -889,10 +884,9 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToUrlObject(
-      urlStateReducers.getUrlState(getState())
-    );
-    expect(query.transforms).toBe(transformString);
+    const urlState = urlStateReducers.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`transforms=${transformString}`);
   });
 });
 
