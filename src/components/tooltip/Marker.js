@@ -812,7 +812,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
                 ? marker.dur
-                  ? formatTimestamp(marker.dur)
+                  ? formatTimestamp(marker.dur, 3, 1)
                   : '—'
                 : 'unknown duration'}
             </div>

@@ -130,7 +130,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       <div
         class="tooltipTiming"
       >
-        1.433s
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -305,7 +305,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       <div
         class="tooltipTiming"
       >
-        1.433s
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -505,7 +505,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       <div
         class="tooltipTiming"
       >
-        1.433s
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -769,7 +769,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       <div
         class="tooltipTiming"
       >
-        1.433s
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -959,7 +959,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       <div
         class="tooltipTiming"
       >
-        1.434s
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -1217,7 +1217,7 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
       <div
         class="tooltipTiming"
       >
-        18.726s
+        18.7s
       </div>
       <div
         class="tooltipTitle"
@@ -1413,7 +1413,7 @@ exports[`TooltipMarker renders tooltips for various markers: ConstructRootFrame-
       <div
         class="tooltipTiming"
       >
-        800.00μs
+        800μs
       </div>
       <div
         class="tooltipTitle"
@@ -1460,7 +1460,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTiming"
       >
-        800.00μs
+        800μs
       </div>
       <div
         class="tooltipTitle"
