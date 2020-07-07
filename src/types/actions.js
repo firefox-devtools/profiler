@@ -118,7 +118,7 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
-type loadingStateAction = 'CHAGNE_LOAD_PROGRESS'
+type loadingStateAction = 'CHANGE_LOAD_PROGRESS'
 
 type ProfileAction =
   | {|
