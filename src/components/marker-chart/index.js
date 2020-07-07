@@ -15,7 +15,6 @@ import MarkerSettings from '../shared/MarkerSettings';
 
 import {
   getCommittedRange,
-  getProfileInterval,
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -30,7 +29,7 @@ import type {
   Marker,
   MarkerIndex,
   MarkerTimingAndBuckets,
-  Milliseconds,
+  UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
 } from 'firefox-profiler/types';
@@ -51,7 +50,6 @@ type StateProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: StartEndRange,
-  +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
@@ -61,6 +59,19 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerChart extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
+
+  /**
+   * Determine the maximum zoom of the viewport.
+   */
+  getMaximumZoom(): UnitIntervalOfProfileRange {
+    const {
+      timeRange: { start, end },
+    } = this.props;
+
+    const ONE_NS = 1e-6;
+    return ONE_NS / (end - start);
+  }
+
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
@@ -118,7 +129,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 previewSelection,
                 maxViewportHeight,
                 viewportNeedsUpdate,
-                maximumZoom: 0, // In the marker chart, we can zoom in as much as we want.
+                maximumZoom: this.getMaximumZoom(),
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 containerRef: this._takeViewportRef,
@@ -164,7 +175,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
       rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
