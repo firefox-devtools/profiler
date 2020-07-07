@@ -118,6 +118,8 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
+type loadingStateAction = 'CHAGNE_LOAD_PROGRESS'
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',

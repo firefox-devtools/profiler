@@ -52,6 +52,15 @@ export function startFetchingProfiles(): Action {
   return { type: 'START_FETCHING_PROFILES' };
 }
 
+//this is to display the loadingStep while fetching profile from add-on
+export function changeLoadProgress(step:loadingStep,progress:number): Action{
+  return { 
+    type: 'CHANGE_LOAD_PROGRESS',
+    step,
+    progress,
+  };
+}
+
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
     dispatch({ type: 'URL_SETUP_DONE' });
