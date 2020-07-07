@@ -118,7 +118,12 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
-type loadingStateAction = 'CHANGE_LOAD_PROGRESS'
+//to display loading state while importing profile from addon
+type LoadingStateAction = {|
+      +type : 'CHANGE_LOAD_PROGRESS',
+      +step:loadingStep,
+      +progress:number,
+|};
 
 type ProfileAction =
   | {|
@@ -463,4 +468,5 @@ export type Action =
   | UrlStateAction
   | IconsAction
   | PublishAction
-  | DragAndDropAction;
+  | DragAndDropAction
+  | LoadingStateAction;

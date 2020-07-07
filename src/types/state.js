@@ -128,6 +128,9 @@ export type loadingState = {|
   error: Error | mixed,
   abortFunction: () => void,
 |};
+//How to connect this to LoadingStateAction that is imported
+
+
 /**
  * This represents the finite state machine for loading zip files. The phase represents
  * where the state is now.
