@@ -37,6 +37,7 @@ const rootReducer: Reducer<State> = wrapReducerInResetter(
     icons,
     zippedProfiles,
     publish,
+    loading,
   })
 );
 

@@ -115,15 +115,15 @@ export type AppViewState =
 export type Phase = $PropertyType<AppViewState, 'phase'>;
 
 //this enum is for showing the progress while fetching profile from add-on
-export type loadingStep =
+export type LoadingStep =
   | 'promise'
   | 'raw'
   | 'decompress'
   | 'decode'
   | 'done';
 
-export type loadingState = {|
-  loadingStep: loadingStep,
+export type LoadingState = {|
+  LoadingStep: LoadingStep,
   progress: number,
   error: Error | mixed,
   abortFunction: () => void,
@@ -286,6 +286,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
+  +loading: LoadingState,
 |};
 
 export type IconWithClassName = {|

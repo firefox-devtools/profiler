@@ -52,8 +52,8 @@ export function startFetchingProfiles(): Action {
   return { type: 'START_FETCHING_PROFILES' };
 }
 
-//this is to display the loadingStep while fetching profile from add-on
-export function changeLoadProgress(step:loadingStep,progress:number): Action{
+//this is to display the LoadingStep while fetching profile from add-on
+export function changeLoadProgress(step:LoadingStep,progress:number): Action{
   return { 
     type: 'CHANGE_LOAD_PROGRESS',
     step,
