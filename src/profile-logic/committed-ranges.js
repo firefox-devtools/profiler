@@ -16,6 +16,10 @@ import type { StartEndRange } from 'firefox-profiler/types';
  * "<start><unit><duration>~<start><unit><duration>", where `start` and
  * `duration` are both integer numbers expressed with the specified unit.
  * `start` can be negative.
+ * Here is an example: 12345m1500~12345678u1500 => There are 2 ranges:
+ * 1. Starts at 12s 345ms, and is 1.5s (1500ms) wide.
+ * 2. Starts at 12s 345ms 678µs, and is 1.5ms (1500µs) wide.
+ * There are more examples in the function body.
  */
 export function parseCommittedRanges(
   stringValue: string = ''
@@ -26,18 +30,18 @@ export function parseCommittedRanges(
   return (
     stringValue
       .split('~')
-      .map(s => {
+      .map(committedRange => {
         // Strings look like: 12345m25, which means the start is at 12'345ms, and
         // the duration is 25ms. All values are integer.
         // For microseconds: 12345678u25: the start is at 12'345'678µs, and the
         // duration is 25µs.
         // For nanoseconds: 12345678901n25: the start is at 12'345'678'901ns, and the
         // duration is 25ns.
-        const m = s.match(/^(-?[0-9]+)([mun])([0-9]+)$/);
+        const m = committedRange.match(/^(-?[0-9]+)([mun])([0-9]+)$/);
         if (!m) {
-          // Flow doesn't like that we return null, but that's OK
-          // because we filter it out in the last operation.
-          // $FlowExpectError
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
           return null;
         }
 
@@ -45,6 +49,13 @@ export function parseCommittedRanges(
         const start = Number(m[1]);
         const durationUnit = m[2];
         const duration = Number(m[3]);
+        if (isNaN(start) || isNaN(duration)) {
+          // Note that this shouldn't happen because we should have only digits here.
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring. This shouldn't happen.`
+          );
+          return null;
+        }
 
         let startInMs;
         let endInMs;
@@ -61,8 +72,8 @@ export function parseCommittedRanges(
             break;
           case 'n':
             // values are in nanoseconds.
-            startInMs = start / 1000000;
-            endInMs = (start + duration) / 1000000;
+            startInMs = start / 1e6;
+            endInMs = (start + duration) / 1e6;
             break;
           default:
             throw new Error(
@@ -79,7 +90,7 @@ export function parseCommittedRanges(
         return { start: startInMs, end: endInMs };
       })
       // Filter out possible null values coming from bad inputs.
-      .filter(value => value)
+      .filter(Boolean)
   );
 }
 
@@ -91,19 +102,31 @@ export function parseCommittedRanges(
 export function stringifyStartEnd({ start, end }: StartEndRange): string {
   // Let's work in integer nanoseconds for calculations, and with string
   // manipulations, so that we avoid rounding errors due to floats.
-  const startInNs = Math.floor(start * 1000000);
-  const endInNs = Math.ceil(end * 1000000);
+  // The maximum safe integer allows more than 104 days, that should be
+  // enough for our needs.
+  const startInNs = Math.floor(start * 1e6);
+  const endInNs = Math.ceil(end * 1e6);
 
   const durationInNs = endInNs - startInNs;
   const strDurationInNs = String(durationInNs);
 
   let result;
-  if (durationInNs > 9000000) {
+
+  // The rationale to decide the various thresholds is:
+  //
+  // * we want at least 2 integer digits for the duration, because we use only
+  //   integer values. We felt that values between 1 and 9 ms, and between 1 and
+  //   9 µs, do not leave enough "steps".
+  // * we'll round up the resulting value.
+  // * we don't need too much extra precision either.
+  //
+  // That's why we decided to use 9_000_000 ns (9ms) and 9000 ns (9µs).
+  if (durationInNs > 9e6) {
     // If the initial duration is more than 9ms, we'll output milliseconds
     const startInMs = String(startInNs).slice(0, -6);
     let durationInMs = strDurationInNs.slice(0, -6);
     if (!strDurationInNs.endsWith('000000')) {
-      // We round up the duration, this is like Math.ceil on integer parts.
+      // We round up the duration, this is like running Math.ceil on the integer part.
       durationInMs = Number(durationInMs) + 1;
     }
     result = `${startInMs}m${durationInMs}`;
@@ -112,7 +135,7 @@ export function stringifyStartEnd({ start, end }: StartEndRange): string {
     const startInUs = String(startInNs).slice(0, -3);
     let durationInUs = strDurationInNs.slice(0, -3);
     if (!strDurationInNs.endsWith('000')) {
-      // We round up the duration, this is like Math.ceil on integer parts.
+      // We round up the duration, this is like running Math.ceil on the integer part.
       durationInUs = Number(durationInUs) + 1;
     }
     result = `${startInUs}u${durationInUs}`;
@@ -126,7 +149,10 @@ export function stringifyStartEnd({ start, end }: StartEndRange): string {
 }
 
 /**
- * Stringify committed ranges into the following form: "start-end~start-end".
+ * Stringify committed ranges into the following form:
+ * Stringify committed ranges into the following form:
+ * "<start><unit><duration>~<start><unit><duration>", where `start` and
+ * `duration` are both integer numbers expressed with the specified unit.
  */
 export function stringifyCommittedRanges(
   arrayValue: StartEndRange[] = []

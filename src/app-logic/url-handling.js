@@ -787,13 +787,23 @@ const _upgraders = {
       .map(committedRange => {
         const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
         if (!m) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
           return null;
         }
         const start = Number(m[1]) * 1000;
         const end = Number(m[2]) * 1000;
+        if (isNaN(start) || isNaN(end)) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
+          return null;
+        }
+
         return stringifyStartEnd({ start, end });
       })
-      .filter(committedRange => committedRange)
+      .filter(Boolean)
       .join('~');
   },
 };
