@@ -18,6 +18,7 @@ import {
 import {
   getAbortFunction,
   getCheckedSharingOptions,
+  getRemoveProfileInformation,
   getUploadPhase,
   getUploadError,
   getUploadProgress,
@@ -26,6 +27,7 @@ import {
 } from '../../selectors/publish';
 import {
   getUrlState,
+  getAllCommittedRanges,
   getSelectedTab,
   getDataSource,
   getProfileName,
@@ -43,11 +45,15 @@ import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import {
   addTransformToStack,
   hideGlobalTrack,
+  commitRange,
 } from '../../actions/profile-view';
 
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
-import { retrieveProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import {
+  retrieveProfileData,
+  listAllProfileData,
+} from 'firefox-profiler/app-logic/published-profiles-store';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -556,6 +562,191 @@ describe('attemptToPublish', function() {
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
       expect(getProfileName(getState())).toEqual('profile2.json');
+    });
+  });
+
+  describe('store profile information in indexeddb', () => {
+    // Some other basic use cases are also covered in the tests above.
+    it('stores unsanitized profiles just fine', async () => {
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      // This will prevent the profile from being sanitized by default when uploading.
+      profile.meta.updateChannel = 'nightly';
+
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = setupFakeUploadsWithStore(store);
+
+      // Only the last range will be saved in IDB, as an information to display
+      // in the list of profiles.
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+      dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
+
+      // This shouldn't be sanitized, but let's double check.
+      expect(getRemoveProfileInformation(getState())).toBe(null);
+
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      expect(storedProfileData).toMatchObject({
+        jwtToken: JWT_TOKEN,
+        profileToken: BARE_PROFILE_TOKEN,
+        publishedRange: { start: 2, end: 4 },
+        // The url indeed contains the information about the 2 ranges.
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+
+      // Checking the state directly, we make sure we have the 2 ranges stored
+      // in the URL path as checked above.
+      expect(getAllCommittedRanges(getState())).toEqual([
+        { start: 1, end: 4 },
+        { start: 2, end: 4 },
+      ]);
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list.
+      expect(await listAllProfileData()).toEqual([storedProfileData]);
+    });
+
+    it('stores properly sanitized profiles', async () => {
+      // We create a 5-sample profile, to be able to assert ranges later.
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = setupFakeUploadsWithStore(store);
+
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+      dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
+
+      // We want to sanitize by removing the full time range, keeping only the
+      // commited range.
+      // Profiles coming from getProfileFromTextSamples are sanitized by
+      // default, but let's make sure of that so that we don't have surprises in
+      // the future.
+      expect(getCheckedSharingOptions(getState()).includeFullTimeRange).toEqual(
+        false
+      );
+      expect(getRemoveProfileInformation(getState())).toMatchObject({
+        shouldFilterToCommittedRange: {
+          start: 2,
+          end: 4,
+        },
+      });
+
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      expect(storedProfileData).toMatchObject({
+        jwtToken: JWT_TOKEN,
+        profileToken: BARE_PROFILE_TOKEN,
+        // The "old" range is still kept in IDB, because that's what we want to
+        // display in the UI, as an information to the user. However the URL
+        // below won't contain any range.
+        publishedRange: { start: 2, end: 4 },
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+      // Checking the state directly, we make sure we have no range stored in
+      // the url path as checked above.
+      expect(getAllCommittedRanges(getState())).toEqual([]);
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list.
+      expect(await listAllProfileData()).toEqual([storedProfileData]);
+    });
+
+    it('stores the information for 2 uploads that happen in parallel', async () => {
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      // This will prevent the profile from being sanitized by default when uploading.
+      profile.meta.updateChannel = 'nightly';
+
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        resolveUpload: resolveUpload1,
+        assertUploadSuccess,
+        waitUntilPhase,
+      } = setupFakeUploadsWithStore(store);
+
+      // This sets up a second upload.
+      const { resolveUpload: resolveUpload2 } = setupFakeUpload();
+
+      // We need a new set of profileToken/JWT for the second upload.
+      const secondBareProfileToken = 'ANOTHERHASH';
+      // This token was built from jwt.io by setting a payload:
+      // { "profileToken": "ANOTHERHASH" }.
+      const secondJwtToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlVG9rZW4iOiJBTk9USEVSSEFTSCJ9.YvJbxRzTYb9oWArgZ9pQUPS6-bLTSvIQLopuQmqv2u4';
+
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+
+      // This shouldn't be sanitized, but let's double check.
+      expect(getRemoveProfileInformation(getState())).toBe(null);
+
+      const publishAttempt1 = dispatch(attemptToPublish());
+
+      // After all, the user wants to sanitize.
+      // This is a bit of a hack for tests, to make sure we'll resolve the right
+      // call. Indeed we need to make sure that the first attempt is the first
+      // to call uploadBinaryProfileData. Waiting for the 'uploading' phase
+      // accomplishes that.
+      await waitUntilPhase('uploading');
+      dispatch(toggleCheckedSharingOptions('includeFullTimeRange'));
+      expect(getRemoveProfileInformation(getState())).toMatchObject({
+        shouldFilterToCommittedRange: { start: 1, end: 4 },
+      });
+      const publishAttempt2 = dispatch(attemptToPublish());
+
+      // We resolve the second upload first on purpose, because we'd like to
+      // test that out-of-order responses also get the right result.
+      resolveUpload2(secondJwtToken);
+      await assertUploadSuccess(publishAttempt2);
+
+      resolveUpload1(JWT_TOKEN);
+      // Because this was invalidated, the result sould be false.
+      expect(await publishAttempt1).toBe(false);
+
+      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      expect(storedProfileData).toMatchObject({
+        jwtToken: JWT_TOKEN,
+        profileToken: BARE_PROFILE_TOKEN,
+        publishedRange: { start: 1, end: 4 },
+        // We don't have an easy way to get the complete urlPath. Bug because we
+        // didn't sanitize the profile for the first request, we should have the
+        // range information. So we assert this.
+        urlPath: expect.stringContaining('range=1000u3000'), // <-- starts at 1ms and lasts 3ms (in µs values)
+      });
+
+      const secondStoredProfileData = await retrieveProfileData(
+        secondBareProfileToken
+      );
+      expect(secondStoredProfileData).toMatchObject({
+        jwtToken: secondJwtToken,
+        profileToken: secondBareProfileToken,
+        publishedRange: { start: 1, end: 4 },
+        // This is the second request so this should have the final state no
+        // matter what.
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list. The second profile comes first because it was answered
+      // first.
+      expect(await listAllProfileData()).toEqual([
+        secondStoredProfileData,
+        storedProfileData,
+      ]);
     });
   });
 });
