@@ -164,8 +164,8 @@ export function stringifyCommittedRanges(
 export function getFormattedTimeLength(length: number): string {
   return formatTimestamp(
     length,
-    /*significantdigits*/ 3,
-    /*maxFractionalDigits*/ 3
+    /*significantdigits*/ 2,
+    /*maxFractionalDigits*/ 2
   );
 }
 
