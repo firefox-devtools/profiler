@@ -13,6 +13,7 @@ import {
   formatSI,
   formatMicroseconds,
   formatMilliseconds,
+  formatTimestamp,
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
@@ -811,7 +812,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
                 ? marker.dur
-                  ? formatMilliseconds(marker.dur)
+                  ? formatTimestamp(marker.dur, 3, 1)
                   : '—'
                 : 'unknown duration'}
             </div>
