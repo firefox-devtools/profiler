@@ -592,6 +592,9 @@ function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
   return localTrackOrderByPid;
 }
 
+// This Error class is used in other codepaths to detect the specific error of
+// URL upgrading and react differently when this happens, compared to other
+// errors.
 class UrlUpgradeError extends Error {
   name = 'UrlUpgradeError';
 }
