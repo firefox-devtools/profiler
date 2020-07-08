@@ -16,9 +16,12 @@ const localConfigExists = fs.existsSync(
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
+  // We disable hot reloading because this takes lot of CPU and memory in the
+  // case of the profiler, which is a quite heavy program.
+  hot: false,
+  liveReload: false,
   contentBase: config.output.path,
   publicPath: config.output.publicPath,
-  hot: process.env.NODE_ENV === 'development' ? true : false,
   historyApiFallback: {
     disableDotRule: true,
   },
