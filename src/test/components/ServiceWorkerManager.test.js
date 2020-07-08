@@ -12,11 +12,12 @@ import ServiceWorkerManager from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
 import {
-  fatalError,
   viewProfile,
   startSymbolicating,
   doneSymbolicating,
 } from '../../actions/receive-profile';
+import { fatalError } from '../../actions/errors';
+
 import { ensureExists } from '../../utils/flow';
 
 import { blankStore } from '../fixtures/stores';

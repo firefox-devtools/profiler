@@ -19,6 +19,7 @@ import {
   urlFromState,
   CURRENT_URL_VERSION,
   upgradeLocationToCurrentVersion,
+  UrlUpgradeError,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
 import {
@@ -474,11 +475,11 @@ describe('showTabOnly', function() {
 });
 
 describe('url upgrading', function() {
-  /**
-   * Originally transform stacks were called call tree filters. This test asserts that
-   * the upgrade process works correctly.
-   */
   describe('version 1: legacy URL serialized call tree filters', function() {
+    /**
+     * Originally transform stacks were called call tree filters. This test asserts that
+     * the upgrade process works correctly.
+     */
     it('can upgrade callTreeFilters to transforms', function() {
       const { getState } = _getStoreWithURL({
         search:
@@ -802,7 +803,7 @@ describe('url upgrading', function() {
   });
 
   // More general checks
-  it("won't run if the version is specified", function() {
+  it("won't run if the current version is specified", function() {
     const { getState } = _getStoreWithURL({
       pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
       v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
@@ -818,6 +819,14 @@ describe('url upgrading', function() {
     expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
       'marker-table'
     );
+  });
+
+  it('throws a specific error if a more recent version is specified', function() {
+    expect(() =>
+      _getStoreWithURL({
+        v: CURRENT_URL_VERSION + 1,
+      })
+    ).toThrow(UrlUpgradeError);
   });
 });
 
