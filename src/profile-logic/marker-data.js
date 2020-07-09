@@ -995,14 +995,14 @@ export function filterRawMarkerTableIndexesToRange(
  * markers in `markersToDelete` set.
  */
 export function filterRawMarkerTableToRangeWithMarkersToDelete(
-  markerTable: RawMarkerTable,
+  oldMarkerTable: RawMarkerTable,
+  derivedMarkerInfo: DerivedMarkerInfo,
   markersToDelete: Set<IndexIntoRawMarkerTable>,
   filterRange: StartEndRange | null
 ): {
   rawMarkerTable: RawMarkerTable,
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>,
 } {
-  const oldMarkers = markerTable;
   const newMarkerTable = getEmptyRawMarkerTable();
   const oldMarkerIndexToNew: Map<
     IndexIntoRawMarkerTable,
@@ -1013,32 +1013,33 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
       return;
     }
     oldMarkerIndexToNew.set(index, newMarkerTable.length);
-    newMarkerTable.name.push(oldMarkers.name[index]);
-    newMarkerTable.startTime.push(oldMarkers.startTime[index]);
-    newMarkerTable.endTime.push(oldMarkers.endTime[index]);
-    newMarkerTable.phase.push(oldMarkers.phase[index]);
-    newMarkerTable.data.push(oldMarkers.data[index]);
-    newMarkerTable.category.push(oldMarkers.category[index]);
+    newMarkerTable.name.push(oldMarkerTable.name[index]);
+    newMarkerTable.startTime.push(oldMarkerTable.startTime[index]);
+    newMarkerTable.endTime.push(oldMarkerTable.endTime[index]);
+    newMarkerTable.phase.push(oldMarkerTable.phase[index]);
+    newMarkerTable.data.push(oldMarkerTable.data[index]);
+    newMarkerTable.category.push(oldMarkerTable.category[index]);
     newMarkerTable.length++;
   };
 
   if (filterRange === null) {
     // If user doesn't want to filter out the full time range, remove only
     // markers that we want to remove.
-    for (let i = 0; i < oldMarkers.length; i++) {
+    for (let i = 0; i < oldMarkerTable.length; i++) {
       addMarkerIndexIfIncluded(i);
     }
   } else {
     // If user wants to remove full time range, filter all the markers
     // accordingly.
     const { start, end } = filterRange;
-    const filteredMarkerIndexIter = filterRawMarkerTableToRangeIndexGenerator(
-      oldMarkers,
+    const filteredMarkerIndexes = filterRawMarkerTableIndexesToRange(
+      oldMarkerTable,
+      derivedMarkerInfo,
       start,
       end
     );
 
-    for (const index of filteredMarkerIndexIter) {
+    for (const index of filteredMarkerIndexes) {
       addMarkerIndexIfIncluded(index);
     }
   }

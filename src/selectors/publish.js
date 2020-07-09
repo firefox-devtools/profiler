@@ -13,6 +13,7 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
+  getThreads,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -34,7 +35,9 @@ import type {
   Selector,
   CheckedSharingOptions,
   RemoveProfileInformation,
+  DerivedMarkerInfo,
 } from 'firefox-profiler/types';
+import { getThreadSelectors } from './per-thread';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
 
@@ -157,12 +160,33 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 );
 
 /**
+ * The derived markers are needed for profile sanitization, but they are also
+ * needed for each thread. This means that we can't use the createSelector
+ * mechanism to properly memoize the component. We need access to the full state
+ * and to the individual threads. This function therefore implements some simple
+ * memoization behavior on the current list of threads.
+ */
+let _threads = null;
+let _derivedMarkerInfo = null;
+function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
+  const threads = getThreads(state);
+  if (_threads !== threads || _derivedMarkerInfo === null) {
+    _threads = threads;
+    _derivedMarkerInfo = getThreads(state).map((_, threadIndex) =>
+      getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
+    );
+  }
+  return _derivedMarkerInfo;
+}
+
+/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
  */
 export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelector(
   getProfile,
+  getDerivedMarkerInfoForAllThreads,
   getRemoveProfileInformation,
   sanitizePII
 );
