@@ -121,29 +121,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         },
       ]);
     });
-
-    it('renders properly markers ending after profile end', function() {
-      const markerTiming = getMarkerChartTimingAndBuckets([
-        [
-          'Rasterize',
-          20,
-          null,
-          { category: 'Paint', interval: 'start', type: 'tracing' },
-        ],
-      ]);
-      expect(markerTiming).toEqual([
-        'Idle',
-        {
-          name: 'Rasterize',
-          start: [20],
-          end: [21], // Truncated using the time of the last sample.
-          index: [0],
-          label: [''],
-          bucket: 'Idle',
-          length: 1,
-        },
-      ]);
-    });
   });
 });
 
