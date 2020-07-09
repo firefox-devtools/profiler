@@ -691,368 +691,245 @@ describe('deriveMarkersFromRawMarkerTable', function() {
 });
 
 describe('filterRawMarkerTableToRange', () => {
-  function setup(
-    markers: Array<[string, Milliseconds, null | Object]>
-  ): Thread {
-    markers = markers.map(([name, time, payload]) => {
-      if (payload) {
-        // Force a type 'DummyForTests' if it's inexistant
-        payload = { type: 'DummyForTests', ...payload };
-      }
-      return [name, time, payload];
-    });
+  type TestConfig = {|
+    start: Milliseconds,
+    end: Milliseconds,
+    markers: Array<TestDefinedRawMarker>,
+  |};
 
-    // Our marker payload union type is too difficult to work with in a
-    // generic way here.
-    return getThreadWithMarkers((markers: any));
+  function setup({ start, end, markers }: TestConfig) {
+    const thread = getThreadWithRawMarkers(
+      markers.map(({ data, ...rest }) => ({
+        ...rest,
+        data: data ? ({ type: 'DummyForTests', ...data }: any) : null,
+      }))
+    );
+
+    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread);
+    const rawMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      derivedMarkerInfo,
+      start,
+      end
+    );
+    const rawMarkerNames = rawMarkerTable.name.map(i =>
+      thread.stringTable.getString(i)
+    );
+    const processedMarkers = getTestFriendlyDerivedMarkerInfo({
+      ...thread,
+      markers: rawMarkerTable,
+    }).markers;
+
+    const processedMarkerNames = processedMarkers.map(({ name }) => name);
+
+    return {
+      rawMarkerTable,
+      rawMarkerNames,
+      processedMarkers,
+      processedMarkerNames,
+    };
   }
 
-  it('filters generic markers', () => {
-    const markers = [
-      ['0', 0, null],
-      ['1', 1, null],
-      ['2', 2, null],
-      ['3', 3, null],
-      ['4', 4, null],
-      ['5', 5, null],
-      ['6', 6, null],
-      ['7', 7, null],
-    ];
-    const { markers: markerTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      markerTable,
-      2.3,
-      5.6
-    );
+  it('filters instant markers', () => {
+    const { rawMarkerNames } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeInstant('0', 0),
+        makeInstant('1', 1),
+        makeInstant('2', 2),
+        makeInstant('3', 3),
+        makeInstant('4', 4),
+        makeInstant('5', 5),
+        makeInstant('6', 6),
+        makeInstant('7', 7),
+      ],
+    });
     // Note: because the test fixture utility adds the strings in order, the
     // string indices are actually the same as the name themselves, which make
     // it possible to do an easy and readable assertion.
-    expect(filteredMarkerTable.name).toEqual([3, 4, 5]);
+    expect(rawMarkerNames).toEqual(['3', '4', '5']);
   });
 
-  it('filters generic markers with payload', () => {
-    const markers = [
-      ['0', 0, {}],
-      ['1', 1, {}],
-      ['2', 2, {}],
-      ['3', 3, {}],
-      ['4', 4, {}],
-      ['5', 5, {}],
-      ['6', 6, {}],
-      ['7', 7, {}],
-    ];
-    const { markers: markerTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      markerTable,
-      2.3,
-      5.6
-    );
-    expect(filteredMarkerTable.name).toEqual([3, 4, 5]);
+  it('filters interval markers', () => {
+    const { rawMarkerNames } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeInterval('0', 0, 4),
+        makeInterval('1', 1, 7),
+        makeInterval('2', 2, 2.2),
+        makeInterval('3', 3, 4),
+        makeInterval('4', 4, 6),
+        makeInterval('5', 5, 5),
+        makeInterval('6', 6, 8),
+        makeInterval('7', 7, 7),
+      ],
+    });
+
+    expect(rawMarkerNames).toEqual(['0', '1', '3', '4', '5']);
   });
 
-  it('filters markers with start/end in the payload', () => {
-    const markers = [
-      ['0', 0, { startTime: 0, endTime: 4 }],
-      ['1', 1, { startTime: 1, endTime: 7 }],
-      ['2', 2, { startTime: 2, endTime: 2.2 }],
-      ['3', 3, { startTime: 3, endTime: 4 }],
-      ['4', 4, { startTime: 4, endTime: 6 }],
-      ['5', 5, { startTime: 5, endTime: 5 }],
-      ['6', 6, { startTime: 6, endTime: 8 }],
-      ['7', 7, { startTime: 7, endTime: 7 }],
-    ];
-
-    const { markers: markerTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      markerTable,
-      2.3,
-      5.6
-    );
-    expect(filteredMarkerTable.name).toEqual([0, 1, 3, 4, 5]);
-  });
-
-  it('filters tracing markers', () => {
-    // Note: these tracing markers define mostly the same set of markers as in the
-    // previous test. Only the marker without an interval value has been added.
-    const markers = [
-      ['0', 0, { type: 'tracing', interval: 'start' }],
-      ['1', 1, { type: 'tracing', interval: 'start' }],
-      ['2', 2, { type: 'tracing', interval: 'start' }],
-      ['2', 2.2, { type: 'tracing', interval: 'end' }],
-      ['3', 3, { type: 'tracing', interval: 'start' }],
-      ['4', 4, { type: 'tracing', interval: 'start' }],
-      ['3', 4, { type: 'tracing', interval: 'end' }],
-      ['0', 4, { type: 'tracing', interval: 'end' }],
-      ['5', 5, { type: 'tracing', interval: 'start' }],
-      ['5', 5, { type: 'tracing', interval: 'end' }],
-      ['5.5', 5.5, { type: 'tracing' }], // No interval value
-      ['6', 6, { type: 'tracing', interval: 'start' }],
-      ['4', 6, { type: 'tracing', interval: 'end' }],
-      ['7', 7, { type: 'tracing', interval: 'start' }],
-      ['7', 7, { type: 'tracing', interval: 'end' }],
-      ['1', 7, { type: 'tracing', interval: 'end' }],
-      ['6', 8, { type: 'tracing', interval: 'end' }],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
-    };
-
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
-
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    ).sort((markerA, markerB) => markerA.start - markerB.start);
-    expect(processedMarkers.map(marker => marker.name)).toEqual([
-      '0',
-      '1',
-      '3',
-      '4',
-      '5',
-      '5.5',
+  it('filters interval start/end markers', () => {
+    const { processedMarkerNames } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeStart('InA', 0),
+        makeStart('InB', 1),
+        makeStart('OutA', 2),
+        makeEnd__('OutA', 2.2),
+        makeStart('InC', 3),
+        makeStart('InD', 4),
+        makeEnd__('InC', 4),
+        makeEnd__('InA', 4),
+        makeStart('InE', 5),
+        makeEnd__('InE', 5),
+        makeStart('OutB', 6),
+        makeEnd__('InD', 6),
+        makeStart('OutC', 7),
+        makeEnd__('OutC', 7),
+        makeEnd__('InB', 7),
+        makeEnd__('OutB', 8),
+      ],
+    });
+    expect(processedMarkerNames.sort()).toEqual([
+      'InA',
+      'InB',
+      'InC',
+      'InD',
+      'InE',
     ]);
   });
 
   it('filters nested tracing markers', () => {
     // In this test we're testing the more complex case of nested markers
-    const markers = [
-      ['0', 0, { type: 'tracing', interval: 'start' }],
-      ['0', 1, { type: 'tracing', interval: 'start' }],
-      ['0', 2, { type: 'tracing', interval: 'end' }],
-      ['0', 6, { type: 'tracing', interval: 'end' }],
-    ];
+    const { processedMarkerNames } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeStart('Marker', 0),
+        makeStart('Marker', 1),
+        makeEnd__('Marker', 2),
+        makeEnd__('Marker', 6),
+      ],
+    });
 
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
-    };
-
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
-
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    ).sort((markerA, markerB) => markerA.start - markerB.start);
-    expect(processedMarkers).toHaveLength(1);
-    // Only the marker starting from 0 and ending at 6 is kept. The marker
-    // between 1 and 2 is filtered out.
-    expect(processedMarkers[0]).toMatchObject({ start: 0, dur: 6 });
-  });
-
-  it('filters markers without start/end items', () => {
-    const markers = [
-      ['1', 1, { type: 'tracing', interval: 'end' }],
-      ['2', 2, { type: 'tracing', interval: 'start' }],
-      ['3', 3, { type: 'tracing', interval: 'start' }],
-      ['4', 4, { type: 'tracing', interval: 'end' }],
-      ['6', 6, { type: 'tracing', interval: 'end' }],
-      ['7', 7, { type: 'tracing', interval: 'start' }],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
-    };
-
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
-
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    );
-    const markerNames = processedMarkers.map(marker => marker.name);
-
-    // We don't really mind about the order, rather about their only presence.
-    const expectedMarkers = ['2', '3', '4', '6'];
-    expect(markerNames).toEqual(expect.arrayContaining(expectedMarkers));
-    expect(markerNames).toHaveLength(expectedMarkers.length);
+    expect(processedMarkerNames).toEqual(['Marker']);
   });
 
   it('filters screenshot markers', () => {
-    const markers = [
-      ['CompositorScreenshot', 0, { type: 'CompositorScreenshot', url: 0 }],
-      ['CompositorScreenshot', 3, { type: 'CompositorScreenshot', url: 3 }],
-      ['CompositorScreenshot', 7, { type: 'CompositorScreenshot', url: 7 }],
-    ];
+    const { rawMarkerTable } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeCompositorScreenshot(0),
+        makeCompositorScreenshot(3),
+        makeCompositorScreenshot(7),
+      ],
+    });
 
-    const { markers: markerTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      markerTable,
-      2.3,
-      5.6
-    );
-    expect(filteredMarkerTable.startTime).toEqual([0, 3]);
+    expect(rawMarkerTable.startTime).toEqual([0, 3]);
   });
 
   it('keeps a screenshot markers happening before the range if there is no other marker', () => {
-    const markers = [
-      ['CompositorScreenshot', 0, { type: 'CompositorScreenshot', url: 0 }],
-    ];
-
-    const { markers: markerTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      markerTable,
-      2.3,
-      5.6
-    );
-    expect(filteredMarkerTable.startTime).toEqual([0]);
+    const { processedMarkerNames } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        makeCompositorScreenshot(0),
+        // The compositor marker will be all the way to the last marker.
+        makeInstant('EndMarkerOutOfRange', 8),
+      ],
+    });
+    expect(processedMarkerNames).toEqual(['CompositorScreenshot']);
   });
 
   it('filters network markers', () => {
-    const markers = [
-      [
-        'Load 1',
-        0,
-        {
-          type: 'Network',
-          id: 1,
-          status: 'STATUS_START',
-          startTime: 0,
-          endTime: 1,
-        },
-      ],
-      [
-        'Load 2',
-        0,
-        {
-          type: 'Network',
-          id: 2,
-          status: 'STATUS_START',
-          startTime: 0,
-          endTime: 1,
-        },
-      ],
-      [
-        'Load 4 will be filtered',
-        0,
-        {
-          type: 'Network',
-          id: 4,
-          status: 'STATUS_START',
-          startTime: 0,
-          endTime: 1,
-        },
-      ],
-      [
-        'Load 4 will be filtered',
-        1,
-        {
-          type: 'Network',
-          id: 4,
-          status: 'STATUS_STOP',
-          startTime: 1,
-          endTime: 2,
-        },
-      ],
-      [
-        'Load 1',
-        1,
-        {
-          type: 'Network',
-          id: 1,
-          status: 'STATUS_STOP',
-          startTime: 1,
-          endTime: 3,
-        },
-      ],
-      [
-        'Load 2',
-        1,
-        {
-          type: 'Network',
-          id: 2,
-          status: 'STATUS_STOP',
-          startTime: 1,
-          endTime: 7,
-        },
-      ],
-      [
-        'Load 3',
-        2,
-        {
-          type: 'Network',
-          id: 3,
-          status: 'STATUS_START',
-          startTime: 2,
-          endTime: 6,
-        },
-      ],
-      [
-        'Load 3',
-        6,
-        {
-          type: 'Network',
-          id: 3,
-          status: 'STATUS_STOP',
-          startTime: 6,
-          endTime: 7,
-        },
-      ],
-      [
-        'Load 5 will be filtered',
-        6,
-        {
-          type: 'Network',
-          id: 5,
-          status: 'STATUS_START',
-          startTime: 6,
-          endTime: 7,
-        },
-      ],
-      [
-        'Load 5 will be filtered',
-        7,
-        {
-          type: 'Network',
-          id: 5,
-          status: 'STATUS_STOP',
-          startTime: 7,
-          endTime: 8,
-        },
-      ],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    const rest = {
+      type: 'Network',
+      URI: 'https://example.com',
+      pri: 0,
+      startTime: 0,
+      endTime: 0,
     };
 
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
-
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    );
+    const { processedMarkers } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        {
+          name: 'Load 1',
+          startTime: 0,
+          endTime: 1,
+          phase: INTERVAL,
+          data: { ...rest, id: 1, status: 'STATUS_START' },
+        },
+        {
+          name: 'Load 2',
+          startTime: 0,
+          endTime: 1,
+          phase: INTERVAL,
+          data: { ...rest, id: 2, status: 'STATUS_START' },
+        },
+        {
+          name: 'Load 4 will be filtered',
+          startTime: 0,
+          endTime: 1,
+          phase: INTERVAL,
+          data: { ...rest, id: 4, status: 'STATUS_START' },
+        },
+        {
+          name: 'Load 4 will be filtered',
+          startTime: 1,
+          endTime: 2,
+          phase: INTERVAL,
+          data: { ...rest, id: 4, status: 'STATUS_STOP' },
+        },
+        {
+          name: 'Load 1',
+          startTime: 1,
+          endTime: 3,
+          phase: INTERVAL,
+          data: { ...rest, id: 1, status: 'STATUS_STOP' },
+        },
+        {
+          name: 'Load 2',
+          startTime: 1,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { ...rest, id: 2, status: 'STATUS_STOP' },
+        },
+        {
+          name: 'Load 3',
+          startTime: 2,
+          phase: INTERVAL,
+          endTime: 6,
+          data: { ...rest, id: 3, status: 'STATUS_START' },
+        },
+        {
+          name: 'Load 3',
+          startTime: 6,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { ...rest, id: 3, status: 'STATUS_STOP' },
+        },
+        {
+          name: 'Load 5 will be filtered',
+          startTime: 6,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { ...rest, id: 5, status: 'STATUS_START' },
+        },
+        {
+          name: 'Load 5 will be filtered',
+          startTime: 7,
+          endTime: 8,
+          phase: INTERVAL,
+          data: { ...rest, id: 5, status: 'STATUS_STOP' },
+        },
+      ],
+    });
 
     expect(
       processedMarkers.map(marker => [
@@ -1070,99 +947,69 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers with only a start marker', () => {
-    const markers = [
-      [
-        'Load 1',
-        0,
-        {
-          type: 'Network',
-          id: 1,
-          status: 'STATUS_START',
-          startTime: 0,
-          endTime: 1,
-        },
-      ],
-      [
-        'Load 2',
-        2,
-        {
-          type: 'Network',
-          id: 2,
-          status: 'STATUS_START',
-          startTime: 2,
-          endTime: 4,
-        },
-      ],
-      [
-        'Load 3',
-        2,
-        {
-          type: 'Network',
-          id: 3,
-          status: 'STATUS_START',
-          startTime: 2,
-          endTime: 6,
-        },
-      ],
-      [
-        'Load 4',
-        3,
-        {
-          type: 'Network',
-          id: 4,
-          status: 'STATUS_START',
-          startTime: 3,
-          endTime: 5,
-        },
-      ],
-      [
-        'Load 5',
-        3,
-        {
-          type: 'Network',
-          id: 5,
-          status: 'STATUS_START',
-          startTime: 3,
-          endTime: 7,
-        },
-      ],
-      [
-        'Load 6',
-        6,
-        {
-          type: 'Network',
-          id: 6,
-          status: 'STATUS_START',
-          startTime: 6,
-          endTime: 7,
-        },
-      ],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    const rest = {
+      type: 'Network',
+      URI: 'https://example.com',
+      pri: 0,
+      startTime: 0,
+      endTime: 0,
     };
 
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
+    const { processedMarkers } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        {
+          name: 'Load 1',
+          startTime: 0,
+          endTime: 1,
+          phase: INTERVAL,
+          data: { id: 1, status: 'STATUS_START', ...rest },
+        },
+        {
+          name: 'Load 2',
+          startTime: 2,
+          endTime: 4,
+          phase: INTERVAL,
+          data: { id: 2, status: 'STATUS_START', ...rest },
+        },
+        {
+          name: 'Load 3',
+          startTime: 2,
+          endTime: 6,
+          phase: INTERVAL,
+          data: { id: 3, status: 'STATUS_START', ...rest },
+        },
+        {
+          name: 'Load 4',
+          startTime: 3,
+          endTime: 5,
+          phase: INTERVAL,
+          data: { id: 4, status: 'STATUS_START', ...rest },
+        },
+        {
+          name: 'Load 5',
+          startTime: 3,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { id: 5, status: 'STATUS_START', ...rest },
+        },
+        {
+          name: 'Load 6',
+          startTime: 6,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { id: 6, status: 'STATUS_START', ...rest },
+        },
+      ],
+    });
 
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    );
-    expect(
-      processedMarkers.map(marker => [
-        marker.name,
-        marker.data && (marker.data: any).id,
-      ])
-    ).toEqual([
+    const result = processedMarkers.map(marker => [
+      marker.name,
+      marker.data && (marker.data: any).id,
+    ]);
+
+    expect(result).toEqual([
       ['Load 1', 1],
       ['Load 2', 2],
       ['Load 3', 3],
@@ -1172,93 +1019,63 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers with only an end marker', () => {
-    const markers = [
-      [
-        'Load 1',
-        0,
-        {
-          type: 'Network',
-          id: 1,
-          status: 'STATUS_STOP',
-          startTime: 0,
-          endTime: 1,
-        },
-      ],
-      [
-        'Load 2',
-        2,
-        {
-          type: 'Network',
-          id: 2,
-          status: 'STATUS_STOP',
-          startTime: 2,
-          endTime: 4,
-        },
-      ],
-      [
-        'Load 3',
-        2,
-        {
-          type: 'Network',
-          id: 3,
-          status: 'STATUS_STOP',
-          startTime: 2,
-          endTime: 6,
-        },
-      ],
-      [
-        'Load 4',
-        3,
-        {
-          type: 'Network',
-          id: 4,
-          status: 'STATUS_STOP',
-          startTime: 3,
-          endTime: 5,
-        },
-      ],
-      [
-        'Load 5',
-        3,
-        {
-          type: 'Network',
-          id: 5,
-          status: 'STATUS_STOP',
-          startTime: 3,
-          endTime: 7,
-        },
-      ],
-      [
-        'Load 6',
-        6,
-        {
-          type: 'Network',
-          id: 6,
-          status: 'STATUS_STOP',
-          startTime: 6,
-          endTime: 7,
-        },
-      ],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    const rest = {
+      type: 'Network',
+      URI: 'https://example.com',
+      pri: 0,
+      startTime: 0,
+      endTime: 0,
     };
 
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
+    const { processedMarkers } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
+        {
+          name: 'Load 1',
+          startTime: 0,
+          endTime: 1,
+          phase: INTERVAL,
+          data: { id: 1, status: 'STATUS_STOP', ...rest },
+        },
+        {
+          name: 'Load 2',
+          startTime: 2,
+          endTime: 4,
+          phase: INTERVAL,
+          data: { id: 2, status: 'STATUS_STOP', ...rest },
+        },
+        {
+          name: 'Load 3',
+          startTime: 2,
+          endTime: 6,
+          phase: INTERVAL,
+          data: { id: 3, status: 'STATUS_STOP', ...rest },
+        },
+        {
+          name: 'Load 4',
+          startTime: 3,
+          endTime: 5,
+          phase: INTERVAL,
+          data: { id: 4, status: 'STATUS_STOP', ...rest },
+        },
+        {
+          name: 'Load 5',
+          startTime: 3,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { id: 5, status: 'STATUS_STOP', ...rest },
+        },
+        {
+          name: 'Load 6',
+          startTime: 6,
+          endTime: 7,
+          phase: INTERVAL,
+          data: { ...rest, id: 6, status: 'STATUS_STOP' },
+        },
+      ],
+    });
 
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    );
     expect(
       processedMarkers.map(marker => [
         marker.name,
@@ -1274,118 +1091,79 @@ describe('filterRawMarkerTableToRange', () => {
   });
 
   it('filters network markers based on their ids', () => {
+    const rest = {
+      type: 'Network',
+      URI: 'https://example.com',
+      pri: 0,
+      startTime: 0,
+      endTime: 0,
+    };
+
     // Network markers can be unique despite sharing the same name if
     // they are from processes with different process ids which are
     // stored in the highest 4 bytes.
-    const markers = [
-      [
-        'Load 1',
-        0,
+    const { processedMarkers } = setup({
+      start: 2.3,
+      end: 5.6,
+      markers: [
         {
-          type: 'Network',
-          id: 0x0000000100000001,
-          status: 'STATUS_START',
+          name: 'Load 1',
           startTime: 0,
           endTime: 1,
+          phase: INTERVAL,
+          data: { id: 0x0000000100000001, status: 'STATUS_START', ...rest },
         },
-      ],
-      [
-        'Load 1',
-        0,
         {
-          type: 'Network',
-          id: 0x0000000200000001,
-          status: 'STATUS_START',
+          name: 'Load 1',
           startTime: 0,
           endTime: 1,
+          phase: INTERVAL,
+          data: { id: 0x0000000200000001, status: 'STATUS_START', ...rest },
         },
-      ],
-      [
-        'Load 2',
-        1,
         {
-          type: 'Network',
-          id: 0x0000000200000002,
-          status: 'STATUS_STOP',
+          name: 'Load 2',
           startTime: 1,
           endTime: 2,
+          phase: INTERVAL,
+          data: { id: 0x0000000200000002, status: 'STATUS_STOP', ...rest },
         },
-      ],
-      [
-        'Load 1',
-        1,
         {
-          type: 'Network',
-          id: 0x0000000100000001,
-          status: 'STATUS_STOP',
+          name: 'Load 1',
           startTime: 1,
           endTime: 3,
+          phase: INTERVAL,
+          data: { id: 0x0000000100000001, status: 'STATUS_STOP', ...rest },
         },
-      ],
-      [
-        'Load 2',
-        2,
         {
-          type: 'Network',
-          id: 0x0000000100000002,
-          status: 'STATUS_START',
+          name: 'Load 2',
           startTime: 2,
           endTime: 4,
+          phase: INTERVAL,
+          data: { id: 0x0000000100000002, status: 'STATUS_START', ...rest },
         },
-      ],
-      [
-        'Load 2',
-        4,
         {
-          type: 'Network',
-          id: 0x0000000100000002,
-          status: 'STATUS_STOP',
+          name: 'Load 2',
           startTime: 4,
           endTime: 7,
+          phase: INTERVAL,
+          data: { id: 0x0000000100000002, status: 'STATUS_STOP', ...rest },
         },
-      ],
-      [
-        'Load 2',
-        5,
         {
-          type: 'Network',
-          id: 0x0000000300000002,
-          status: 'STATUS_START',
+          name: 'Load 2',
           startTime: 5,
           endTime: 6,
+          phase: INTERVAL,
+          data: { id: 0x0000000300000002, status: 'STATUS_START', ...rest },
         },
-      ],
-      [
-        'Load 2',
-        6,
         {
-          type: 'Network',
-          id: 0x0000000300000002,
-          status: 'STATUS_STOP',
+          name: 'Load 2',
           startTime: 6,
           endTime: 7,
+          phase: INTERVAL,
+          data: { id: 0x0000000300000002, status: 'STATUS_STOP', ...rest },
         },
       ],
-    ];
-
-    const originalThread = setup(markers);
-
-    const filteredThread = {
-      ...originalThread,
-      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
-    };
-
-    const threadRange = getTimeRangeForThread(filteredThread, 1);
-
-    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for tracing markers.
-    const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredThread.markers,
-      filteredThread.stringTable,
-      1 /* thread id */,
-      threadRange,
-      new IPCMarkerCorrelations()
-    );
+    });
 
     expect(
       processedMarkers.map(marker => [
