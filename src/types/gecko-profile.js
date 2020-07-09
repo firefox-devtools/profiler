@@ -21,7 +21,13 @@ import type { Milliseconds, Nanoseconds } from './units';
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
 
-// Taken from the C++
+// These integral values are exported in the JSON of the profile, and are in the
+// RawMarkerTable. They represent a C++ class in Gecko that defines the type of
+// marker it is. These markers are then combined together to form the Marker[] type.
+// See deriveMarkersFromRawMarkerTable for more information. Also see the constants.js
+// file for JS values that can be used to refer to the different phases.
+//
+// From the C++:
 //
 // enum class MarkerPhase : int {
 //   Instant = 0,

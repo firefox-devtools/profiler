@@ -7,6 +7,12 @@ import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs } from '../utils/string';
 import { ensureExists } from '../utils/flow';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 
 import type {
   Thread,
@@ -27,6 +33,8 @@ import type {
   FileIoPayload,
   TextMarkerPayload,
   StartEndRange,
+  IndexedArray,
+  DerivedMarkerInfo,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -489,25 +497,47 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
   return correlations;
 }
 
+/**
+ * This function is the canonical place to turn the RawMarkerTable into our fully
+ * processed Marker type. It handles the phases of markers that can be emitted
+ * by the Gecko profiler. These are defined by the MarkerPhase type.
+ *
+ * Instant - Represents a single point in time.
+ * Interval - A complete marker that represents an interval of time.
+ * IntervalStart, IntervalEnd - These two types represent incomplete markers that
+ *   must be reconstructed into a single marker. If a start and end are found, they
+ *   are matched together. Start and end markers should be correctly nested. If
+ *   a start marker is found without an end, its end time is set to the end of
+ *   the thread range. For the reverse situation, it's set to the start.
+ *
+ * There is also some special handling of different markers.
+ *   - CompositorScreenshot - They are turned from Instant markers to Interval markers
+ *   - IPC - They are matched up.
+ *   - Network - They have different network phases.
+ *
+ * Finally, the Marker format is what we care about in the front-end, but sometimes
+ * we need to modify the RawMarkerTable, e.g. for comparisons and for sanitization.
+ * In order to get back to the RawMarkerTable, this function provides a
+ * markerIndexToRawMarkerIndexes array.
+ */
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
   threadId: number,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
-): Marker[] {
-  const ensureExistsMessage =
-    'At this time, this algorithm does not handle startTimes that are null. A ' +
-    'following commit will add this feature.';
-
-  // This is the resulting array.
-  const matchedMarkers: Marker[] = [];
+): DerivedMarkerInfo {
+  const markers: Marker[] = [];
+  const markerIndexToRawMarkerIndexes: IndexedArray<
+    MarkerIndex,
+    IndexIntoRawMarkerTable[]
+  > = [];
 
   // These maps contain the start markers we find while looping the marker
   // table.
   // The first map contains the start markers for tracing markers. They can be
   // nested and that's why we use an array structure as value.
-  const openTracingMarkers: Map<
+  const openIntervalMarkers: Map<
     IndexIntoStringTable,
     MarkerIndex[]
   > = new Map();
@@ -522,57 +552,257 @@ export function deriveMarkersFromRawMarkerTable(
   // duration we need to wait until the next one or the end of the profile. So
   // we keep it here.
   let previousScreenshotMarker: MarkerIndex | null = null;
+  for (
+    let rawMarkerIndex = 0;
+    rawMarkerIndex < rawMarkers.length;
+    rawMarkerIndex++
+  ) {
+    const name = rawMarkers.name[rawMarkerIndex];
+    const maybeStartTime = rawMarkers.startTime[rawMarkerIndex];
+    const maybeEndTime = rawMarkers.endTime[rawMarkerIndex];
+    const phase = rawMarkers.phase[rawMarkerIndex];
+    const data = rawMarkers.data[rawMarkerIndex];
+    const category = rawMarkers.category[rawMarkerIndex];
 
-  for (let i = 0; i < rawMarkers.length; i++) {
-    const name = rawMarkers.name[i];
-    // TODO - A follow-up commit will correctly handle startTime and endTime.
-    const time = ensureExists(rawMarkers.startTime[i], ensureExistsMessage);
-    const data = rawMarkers.data[i];
-    const category = rawMarkers.category[i];
+    // Normally, we would look at the marker phase, but some types require special
+    // handling. See if these need to be handled first.
+    if (data) {
+      switch (data.type) {
+        case 'Network': {
+          // Network markers are similar to tracing markers in that they also
+          // normally exist in pairs of start/stop markers. But unlike tracing
+          // markers they have a duration and "startTime/endTime" properties like
+          // more generic markers. Lastly they're always adjacent: the start
+          // markers ends when the stop markers starts.
+          //
+          // The timestamps on the start and end markers describe two
+          // non-overlapping parts of the same load. The start marker has a
+          // duration from channel-creation until Start (i.e. AsyncOpen()). The
+          // end marker has a duration from AsyncOpen time until OnStopRequest.
+          // In the merged marker, we want to represent the entire duration, from
+          // channel-creation until OnStopRequest.
+          //
+          // |--- start marker ---|--- stop marker with timings ---|
+          //
+          // Usually the start marker is very small. It's emitted mostly to know
+          // about the start of the request. But most of the interesting bits are
+          // in the stop marker.
 
-    if (!data) {
-      // Add a marker with a zero duration
-      matchedMarkers.push({
-        start: time,
-        dur: 0,
-        name: stringTable.getString(name),
-        title: null,
-        category,
-        data: null,
-      });
-      continue;
+          const ensureMessage =
+            'Network markers are assumed to have a start and end time.';
+          if (data.status === 'STATUS_START') {
+            openNetworkMarkers.set(data.id, rawMarkerIndex);
+          } else {
+            // End status can be any status other than 'STATUS_START'. They are
+            // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
+            const endData = data;
+
+            const startIndex = openNetworkMarkers.get(data.id);
+            if (startIndex !== undefined) {
+              // A start marker matches this end marker.
+              openNetworkMarkers.delete(data.id);
+
+              // We know this startIndex points to a Network marker.
+              const startData: NetworkPayload = (rawMarkers.data[
+                startIndex
+              ]: any);
+
+              const startStartTime = ensureExists(
+                rawMarkers.startTime[startIndex],
+                ensureMessage
+              );
+              const endStartTime = ensureExists(maybeStartTime, ensureMessage);
+              const endEndTime = ensureExists(maybeEndTime, ensureMessage);
+
+              markers.push({
+                start: startStartTime,
+                dur: endEndTime - startStartTime,
+                name: stringTable.getString(name),
+                title: null,
+                category,
+                data: {
+                  ...endData,
+                  startTime: startStartTime,
+                  fetchStart: endStartTime,
+                  cause: startData.cause || endData.cause,
+                },
+              });
+              markerIndexToRawMarkerIndexes.push([startIndex, rawMarkerIndex]);
+            } else {
+              // There's no start marker matching this end marker. This means an
+              // abstract marker exists before the start of the profile.
+              const start = Math.min(
+                threadRange.start,
+                ensureExists(
+                  maybeStartTime,
+                  'Network markers are assumed to have a start time.'
+                )
+              );
+              const end = ensureExists(maybeEndTime, ensureMessage);
+              markers.push({
+                start,
+                dur: end - start,
+                name: stringTable.getString(name),
+                title: null,
+                category,
+                data: {
+                  ...endData,
+                  startTime: start,
+                  fetchStart: endData.startTime,
+                  cause: endData.cause,
+                },
+                incomplete: true,
+              });
+              markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
+            }
+          }
+
+          continue;
+        }
+
+        case 'CompositorScreenshot': {
+          // Screenshot markers are already ordered. In the raw marker table,
+          // they're Instant markers, but since they're valid until the following
+          // raw marker of the same type, we convert them to Interval markers with a
+          // a start and end time.
+
+          if (previousScreenshotMarker !== null) {
+            const previousStartTime = ensureExists(
+              rawMarkers.startTime[previousScreenshotMarker],
+              'Expected to find a start time for a screenshot marker.'
+            );
+            const thisStartTime = ensureExists(
+              maybeStartTime,
+              'The CompositorScreenshot is assumed to have a start time.'
+            );
+            const data = rawMarkers.data[previousScreenshotMarker];
+            markers.push({
+              start: previousStartTime,
+              dur: thisStartTime - previousStartTime,
+              name: 'CompositorScreenshot',
+              title: null,
+              category,
+              data,
+            });
+            markerIndexToRawMarkerIndexes.push([previousScreenshotMarker]);
+          }
+
+          previousScreenshotMarker = rawMarkerIndex;
+
+          continue;
+        }
+
+        case 'IPC': {
+          const sharedData = ipcCorrelations.get(threadId, rawMarkerIndex);
+          if (!sharedData) {
+            // Since shared data is generated for every IPC message, this should
+            // never happen unless something has gone catastrophically wrong.
+            console.error('Unable to find shared data for IPC marker');
+            continue;
+          }
+
+          if (
+            data.direction === 'sending' &&
+            data.phase === 'transferEnd' &&
+            sharedData.sendStartTime !== undefined
+          ) {
+            // This marker corresponds to the end of the data transfer on the
+            // sender's IO thread, but we also have a marker for the *start* of
+            // the transfer. Since we don't need to show two markers for the same
+            // IPC message on the same thread, skip this one.
+            continue;
+          }
+
+          let name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+          if (data.sync) {
+            name = 'Sync' + name;
+          }
+
+          let start = ensureExists(data.startTime),
+            dur = 0,
+            incomplete = true;
+          if (
+            sharedData.startTime !== undefined &&
+            sharedData.endTime !== undefined
+          ) {
+            start = sharedData.startTime;
+            dur = sharedData.endTime - sharedData.startTime;
+            incomplete = false;
+          }
+
+          const allData = { ...data, ...sharedData };
+          markers.push({
+            start,
+            dur,
+            name,
+            title: `IPC — ${_formatIPCMarkerDirection(allData)}`,
+            category,
+            data: allData,
+            incomplete,
+          });
+          // TODO - How do I get the other rawMarkerIndexes?
+          markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
+
+          continue;
+        }
+
+        default:
+        // Do nothing;
+      }
     }
 
-    // Depending on the type we have to do some special handling.
-    switch (data.type) {
-      case 'tracing': {
-        // Markers are created from two distinct raw markers that are created at
-        // the start and end of whatever code that is running that we care about.
-        // This is implemented by AutoProfilerTracing in Gecko.
-        //
-        // In this function we convert both of these raw markers into a single
-        // marker with a non-null duration.
-        //
-        // We also handle nested markers by assuming markers of the same type are
-        // never interwoven: given input markers startA, startB, endC, endD, we'll
-        // get 2 markers A-D and B-C.
-        //
-        // Sometimes we don't have one side of the pair, in this case we still
-        // insert a marker and try to fill it with sensible values.
-        if (data.interval === 'start') {
-          let openMarkersForName = openTracingMarkers.get(name);
+    switch (phase) {
+      case INSTANT:
+        markers.push({
+          start: ensureExists(
+            maybeStartTime,
+            'An Instant marker did not have a startTime.'
+          ),
+          // TODO - Follow-up with changing the duration to a startTime and endTime.
+          dur: 0,
+          name: stringTable.getString(name),
+          title: null,
+          category,
+          data,
+        });
+        markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
+        break;
+      case INTERVAL:
+        {
+          const startTime = ensureExists(
+            maybeStartTime,
+            'An Interval marker did not have a startTime.'
+          );
+          const endTime = ensureExists(
+            maybeEndTime,
+            'An Interval marker did not have a startTime.'
+          );
+          // Add a marker with a zero duration
+          markers.push({
+            start: startTime,
+            // TODO - Follow-up with changing the duration to a startTime and endTime.
+            dur: endTime - startTime,
+            name: stringTable.getString(name),
+            title: null,
+            category,
+            data,
+          });
+          markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
+        }
+        break;
+      case INTERVAL_START:
+        {
+          let openMarkersForName = openIntervalMarkers.get(name);
           if (!openMarkersForName) {
             openMarkersForName = [];
-            openTracingMarkers.set(name, openMarkersForName);
+            openIntervalMarkers.set(name, openMarkersForName);
           }
-          openMarkersForName.push(i);
-
-          // We're not inserting anything to matchedMarkers yet. We wait for the
-          // end marker for that so that we know about the duration.
-          //
-          // We'll loop at all open markers after the main loop.
-        } else if (data.interval === 'end') {
-          const openMarkersForName = openTracingMarkers.get(name);
+          openMarkersForName.push(rawMarkerIndex);
+        }
+        break;
+      case INTERVAL_END:
+        {
+          const openMarkersForName = openIntervalMarkers.get(name);
 
           let startIndex;
 
@@ -580,20 +810,26 @@ export function deriveMarkersFromRawMarkerTable(
             startIndex = openMarkersForName.pop();
           }
 
+          const endTime = ensureExists(
+            maybeEndTime,
+            'An IntervalEnd marker did not have an endTime'
+          );
+
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
             const start = ensureExists(
               rawMarkers.startTime[startIndex],
-              ensureExistsMessage
+              'An IntervalStart marker did not have a startTime'
             );
-            matchedMarkers.push({
+            markers.push({
               start,
               name: stringTable.getString(name),
-              dur: time - start,
+              dur: endTime - start,
               title: null,
               category,
               data: rawMarkers.data[startIndex],
             });
+            markerIndexToRawMarkerIndexes.push([startIndex, rawMarkerIndex]);
           } else {
             // No matching "start" marker has been encountered before this "end".
             // This means it was issued before the capture started. Here we create
@@ -606,233 +842,37 @@ export function deriveMarkersFromRawMarkerTable(
             // first sample. In that case it'll become a dot marker at
             // the location of the end marker. Otherwise we'll use the
             // time of the first sample as its start.
-            const start = Math.min(time, threadRange.start);
+            const start = Math.min(endTime, threadRange.start);
 
-            matchedMarkers.push({
+            markers.push({
               start,
               name: stringTable.getString(name),
-              dur: time - start,
+              dur: endTime - start,
               title: null,
               category,
               data,
               incomplete: true,
             });
-          }
-        } else {
-          if (data.interval !== undefined) {
-            // Undefined values are valid, but others are unexpected.
-            console.error(
-              `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
-            );
-          }
-          matchedMarkers.push({
-            start: time,
-            dur: 0,
-            name: stringTable.getString(name),
-            category,
-            title: null,
-            data,
-          });
-        }
-        break;
-      }
-
-      case 'Network': {
-        // Network markers are similar to tracing markers in that they also
-        // normally exist in pairs of start/stop markers. But unlike tracing
-        // markers they have a duration and "startTime/endTime" properties like
-        // more generic markers. Lastly they're always adjacent: the start
-        // markers ends when the stop markers starts.
-        //
-        // The timestamps on the start and end markers describe two
-        // non-overlapping parts of the same load. The start marker has a
-        // duration from channel-creation until Start (i.e. AsyncOpen()). The
-        // end marker has a duration from AsyncOpen time until OnStopRequest.
-        // In the merged marker, we want to represent the entire duration, from
-        // channel-creation until OnStopRequest.
-        //
-        // |--- start marker ---|--- stop marker with timings ---|
-        //
-        // Usually the start marker is very small. It's emitted mostly to know
-        // about the start of the request. But most of the interesting bits are
-        // in the stop marker.
-
-        if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(data.id, i);
-        } else {
-          // End status can be any status other than 'STATUS_START'. They are
-          // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
-          const endData = data;
-
-          const startIndex = openNetworkMarkers.get(data.id);
-
-          if (startIndex !== undefined) {
-            // A start marker matches this end marker.
-            openNetworkMarkers.delete(data.id);
-
-            // We know this startIndex points to a Network marker.
-            const startData: NetworkPayload = (rawMarkers.data[
-              startIndex
-            ]: any);
-
-            matchedMarkers.push({
-              start: startData.startTime,
-              dur: endData.endTime - startData.startTime,
-              name: stringTable.getString(name),
-              title: null,
-              category,
-              data: {
-                ...endData,
-                startTime: startData.startTime,
-                fetchStart: endData.startTime,
-                cause: startData.cause || endData.cause,
-              },
-            });
-          } else {
-            // There's no start marker matching this end marker. This means an
-            // abstract marker exists before the start of the profile.
-            const start = Math.min(threadRange.start, endData.startTime);
-            matchedMarkers.push({
-              start,
-              dur: endData.endTime - start,
-              name: stringTable.getString(name),
-              title: null,
-              category,
-              data: {
-                ...endData,
-                startTime: start,
-                fetchStart: endData.startTime,
-                cause: endData.cause,
-              },
-              incomplete: true,
-            });
+            markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
           }
         }
-
         break;
-      }
-
-      case 'CompositorScreenshot': {
-        // Screenshot markers are already ordered. In the raw marker table,
-        // they're dot markers, but since they're valid until the following
-        // raw marker of the same type, we convert them to markers with a
-        // duration using the following marker.
-
-        if (previousScreenshotMarker !== null) {
-          const start = ensureExists(
-            rawMarkers.startTime[previousScreenshotMarker],
-            'Expected to find a start time for a screenshot marker.'
-          );
-          const data = rawMarkers.data[previousScreenshotMarker];
-
-          matchedMarkers.push({
-            start,
-            dur: time - start,
-            name: 'CompositorScreenshot',
-            title: null,
-            category,
-            data,
-          });
-        }
-
-        previousScreenshotMarker = i;
-
-        break;
-      }
-
-      case 'IPC': {
-        const sharedData = ipcCorrelations.get(threadId, i);
-        if (!sharedData) {
-          // Since shared data is generated for every IPC message, this should
-          // never happen unless something has gone catastrophically wrong.
-          console.error('Unable to find shared data for IPC marker');
-          break;
-        }
-
-        if (
-          data.direction === 'sending' &&
-          data.phase === 'transferEnd' &&
-          sharedData.sendStartTime !== undefined
-        ) {
-          // This marker corresponds to the end of the data transfer on the
-          // sender's IO thread, but we also have a marker for the *start* of
-          // the transfer. Since we don't need to show two markers for the same
-          // IPC message on the same thread, skip this one.
-          break;
-        }
-
-        let name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
-        if (data.sync) {
-          name = 'Sync' + name;
-        }
-
-        let start = ensureExists(data.startTime),
-          dur = 0,
-          incomplete = true;
-        if (
-          sharedData.startTime !== undefined &&
-          sharedData.endTime !== undefined
-        ) {
-          start = sharedData.startTime;
-          dur = sharedData.endTime - sharedData.startTime;
-          incomplete = false;
-        }
-
-        const allData = { ...data, ...sharedData };
-        matchedMarkers.push({
-          start,
-          dur,
-          name,
-          title: `IPC — ${_formatIPCMarkerDirection(allData)}`,
-          category,
-          data: allData,
-          incomplete,
-        });
-
-        break;
-      }
-
       default:
-        if (
-          typeof data.startTime === 'number' &&
-          typeof data.endTime === 'number'
-        ) {
-          matchedMarkers.push({
-            start: data.startTime,
-            dur: data.endTime - data.startTime,
-            name: stringTable.getString(name),
-            category,
-            data,
-            title: null,
-          });
-        } else {
-          // Ensure all raw markers are converted to markers, even if they have no
-          // more timing information. This ensures that markers can be filtered by time
-          // in a consistent manner.
-
-          matchedMarkers.push({
-            start: time,
-            dur: 0,
-            name: stringTable.getString(name),
-            category,
-            data,
-            title: null,
-          });
-        }
+        throw new Error('Unhandled marker phase type.');
     }
   }
 
   const endOfThread = threadRange.end;
 
   // Loop over "start" markers without any "end" markers.
-  for (const markerBucket of openTracingMarkers.values()) {
+  for (const markerBucket of openIntervalMarkers.values()) {
     for (const startIndex of markerBucket) {
       const start = ensureExists(
         rawMarkers.startTime[startIndex],
         'Encountered a marker without a startTime. Eventually this needs to be handled ' +
           'for phase-style markers.'
       );
-      matchedMarkers.push({
+      markers.push({
         start,
         dur: Math.max(endOfThread - start, 0),
         name: stringTable.getString(rawMarkers.name[startIndex]),
@@ -841,21 +881,25 @@ export function deriveMarkersFromRawMarkerTable(
         title: null,
         incomplete: true,
       });
+      markerIndexToRawMarkerIndexes.push([startIndex]);
     }
   }
 
   for (const startIndex of openNetworkMarkers.values()) {
-    // We know this startIndex points to a Network marker.
-    const startData: NetworkPayload = (rawMarkers.data[startIndex]: any);
-    matchedMarkers.push({
-      start: startData.startTime,
-      dur: Math.max(endOfThread - startData.startTime, 0),
+    const startTime = ensureExists(
+      rawMarkers.startTime[startIndex],
+      'Network markers are assumed to always have a start time.'
+    );
+    markers.push({
+      start: startTime,
+      dur: Math.max(endOfThread - startTime, 0),
       name: stringTable.getString(rawMarkers.name[startIndex]),
       title: null,
       category: rawMarkers.category[startIndex],
-      data: startData,
+      data: rawMarkers.data[startIndex],
       incomplete: true,
     });
+    markerIndexToRawMarkerIndexes.push([startIndex]);
   }
 
   // And we also need to add the "last screenshot marker".
@@ -864,7 +908,7 @@ export function deriveMarkersFromRawMarkerTable(
       rawMarkers.startTime[previousScreenshotMarker],
       'Expected to find a CompositorScreenshot marker with a start time.'
     );
-    matchedMarkers.push({
+    markers.push({
       start,
       dur: Math.max(endOfThread - start, 0),
       name: 'CompositorScreenshot',
@@ -872,9 +916,10 @@ export function deriveMarkersFromRawMarkerTable(
       data: rawMarkers.data[previousScreenshotMarker],
       title: null,
     });
+    markerIndexToRawMarkerIndexes.push([previousScreenshotMarker]);
   }
 
-  return matchedMarkers;
+  return { markers, markerIndexToRawMarkerIndexes };
 }
 
 /**
@@ -882,262 +927,64 @@ export function deriveMarkersFromRawMarkerTable(
  * range specified as parameter.
  */
 export function filterRawMarkerTableToRange(
-  markers: RawMarkerTable,
+  markerTable: RawMarkerTable,
+  derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
 
-  const filteredMarkerIndexesIter = filterRawMarkerTableToRangeIndexGenerator(
-    markers,
+  const filteredMarkerIndexes = filterRawMarkerTableIndexesToRange(
+    markerTable,
+    derivedMarkerInfo,
     rangeStart,
     rangeEnd
   );
 
-  for (const index of filteredMarkerIndexesIter) {
-    newMarkerTable.startTime.push(markers.startTime[index]);
-    newMarkerTable.endTime.push(markers.endTime[index]);
-    newMarkerTable.phase.push(markers.phase[index]);
-    newMarkerTable.name.push(markers.name[index]);
-    newMarkerTable.data.push(markers.data[index]);
-    newMarkerTable.category.push(markers.category[index]);
+  for (const index of filteredMarkerIndexes) {
+    newMarkerTable.startTime.push(markerTable.startTime[index]);
+    newMarkerTable.endTime.push(markerTable.endTime[index]);
+    newMarkerTable.phase.push(markerTable.phase[index]);
+    newMarkerTable.name.push(markerTable.name[index]);
+    newMarkerTable.data.push(markerTable.data[index]);
+    newMarkerTable.category.push(markerTable.category[index]);
     newMarkerTable.length++;
   }
   return newMarkerTable;
 }
 
 /**
- * This function filters marker indexes from a thread's raw marker table using
- * the range specified as parameter.
- * It especially takes care of the markers that need a special handling because
- * of how the rest of the code handles them.
- *
- * There's more explanations about this special handling in the switch block
- * below.
- *
- * This is a generator function and it returns a IndexIntoMarkers every step.
- * You can use that function inside a for..of or use it with `.next()` function.
- * The reason to use generator function is avoiding creating an intermediate
- * markers array on some consumers.
+ * This function filters a raw marker table to just the indexes that are in range.
+ * This is done by going the derived Marker[] list, and finding the original markers
+ * that make up that marker.
  */
-export function* filterRawMarkerTableToRangeIndexGenerator(
-  markers: RawMarkerTable,
+export function filterRawMarkerTableIndexesToRange(
+  markerTable: RawMarkerTable,
+  derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
-): Generator<MarkerIndex, void, void> {
-  const ensureExistsMessage =
-    'At this time, this algorithm does not handle startTimes that are null. A ' +
-    'following commit will add this feature.';
-  const isTimeInRange = (time: number): boolean =>
-    time < rangeEnd && time >= rangeStart;
-  const intersectsRange = (start: number, end: number): boolean =>
-    start < rangeEnd && end >= rangeStart;
-
-  // These maps contain the start markers we find while looping the marker
-  // table.
-  // The first map contains the start markers for tracing markers. They can be
-  // nested and that's why we use an array structure as value.
-  const openTracingMarkers: Map<
-    IndexIntoStringTable,
-    IndexIntoRawMarkerTable[]
-  > = new Map();
-
-  // The second map contains the start markers for network markers.
-  // Note that we don't have more than 2 network markers with the same name as
-  // the name contains an incremented index. Therefore we don't need to use an
-  // array as value like for tracing markers.
-  const openNetworkMarkers: Map<number, IndexIntoRawMarkerTable> = new Map();
-
-  let previousScreenshotMarker = null;
-
-  for (let i = 0; i < markers.length; i++) {
-    const name = markers.name[i];
-    const time = ensureExists(markers.startTime[i], ensureExistsMessage);
-    const data = markers.data[i];
-
-    if (!data) {
-      if (isTimeInRange(time)) {
-        yield i;
+): IndexIntoRawMarkerTable[] {
+  const { markers, markerIndexToRawMarkerIndexes } = derivedMarkerInfo;
+  const inRange: Set<IndexIntoRawMarkerTable> = new Set();
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const { start, dur } = markers[markerIndex];
+    if (dur === null) {
+      if (start < rangeEnd && start >= rangeStart) {
+        for (const rawIndex of markerIndexToRawMarkerIndexes[markerIndex]) {
+          inRange.add(rawIndex);
+        }
       }
-      continue;
-    }
-
-    // Depending on the type we have to do some special handling.
-    switch (data.type) {
-      case 'tracing': {
-        // Tracing markers are pairs of start/end markers. To retain their
-        // duration if we have it, we keep both markers of the pair if they
-        // represent a marker that's partially in the range.
-
-        if (data.interval === 'start') {
-          let openMarkersForName = openTracingMarkers.get(name);
-          if (!openMarkersForName) {
-            openMarkersForName = [];
-            openTracingMarkers.set(name, openMarkersForName);
-          }
-          openMarkersForName.push(i);
-
-          // We're not inserting anything to newMarkerTable yet. We wait for the
-          // end marker to decide whether we should add this start marker, as we
-          // will add start markers from before the range if the end marker is
-          // in or after the range.
-          //
-          // We'll loop at all open markers after the main loop, to add them to
-          // the new marker table if they're in the range.
-        } else if (data.interval === 'end') {
-          const openMarkersForName = openTracingMarkers.get(name);
-          let startIndex;
-          if (openMarkersForName) {
-            startIndex = openMarkersForName.pop();
-          }
-          if (startIndex !== undefined) {
-            // A start marker matches this end marker.
-            if (
-              intersectsRange(
-                ensureExists(
-                  markers.startTime[startIndex],
-                  ensureExistsMessage
-                ),
-                time
-              )
-            ) {
-              // This couple of markers define a marker that's at least partially
-              // in the range.
-              yield startIndex;
-              yield i;
-            }
-          } else {
-            // No start marker matches this end marker, then we'll add it only if
-            // it's in or after the time range.
-            if (time >= rangeStart) {
-              yield i;
-            }
-          }
-        } else {
-          if (data.interval !== undefined) {
-            // Undefined  values are valid, but others are unexpected.
-            console.error(
-              `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
-            );
-          }
-          if (isTimeInRange(time)) {
-            yield i;
-          }
+    } else {
+      const end = start + dur;
+      if (start < rangeEnd && end >= rangeStart) {
+        for (const rawIndex of markerIndexToRawMarkerIndexes[markerIndex]) {
+          inRange.add(rawIndex);
         }
-        break;
-      }
-
-      case 'Network': {
-        // Network markers are similar to tracing markers in that they also
-        // normally exist in pairs of start/stop markers. Just like tracing
-        // markers we keep both markers of the pair if they're partially in the
-        // range so that we keep all the useful data. But unlike tracing markers
-        // they have a duration and "startTime/endTime" properties like more
-        // generic markers. Lastly they're always adjacent.
-
-        if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(data.id, i);
-        } else {
-          // End status can be any status other than 'STATUS_START'
-          const startIndex = openNetworkMarkers.get(data.id);
-          if (startIndex !== undefined) {
-            // A start marker matches this end marker.
-            openNetworkMarkers.delete(data.id);
-
-            // We know this startIndex points to a Network marker.
-            const startData: NetworkPayload = (markers.data[startIndex]: any);
-            const endData = data;
-            if (intersectsRange(startData.startTime, endData.endTime)) {
-              // This couple of markers define a network marker that's at least
-              // partially in the range.
-              yield startIndex;
-              yield i;
-            }
-          } else {
-            // There's no start marker matching this end marker. This means an
-            // abstract marker exists before the start of the profile.
-            // Then we add it if it ends after the start of the range.
-            if (data.endTime >= rangeStart) {
-              yield i;
-            }
-          }
-        }
-
-        break;
-      }
-
-      case 'CompositorScreenshot': {
-        // Between two screenshot markers, we keep on displaying the previous
-        // screenshot. this is why we always keep the last screenshot marker
-        // before the start of the range, if it exists.  These markers are
-        // ordered by time and the rest of our code rely on it, so this
-        // invariant is also kept here.
-
-        if (time < rangeStart) {
-          previousScreenshotMarker = i;
-          continue;
-        }
-
-        if (time < rangeEnd) {
-          if (previousScreenshotMarker !== null) {
-            yield previousScreenshotMarker;
-            previousScreenshotMarker = null;
-          }
-
-          yield i;
-        }
-
-        // If previousScreenshotMarker isn't null after the loop, it will be
-        // considered for addition to the marker table.
-
-        break;
-      }
-
-      default:
-        if (
-          typeof data.startTime === 'number' &&
-          typeof data.endTime === 'number'
-        ) {
-          if (intersectsRange(data.startTime, data.endTime)) {
-            yield i;
-          }
-        } else {
-          if (isTimeInRange(time)) {
-            yield i;
-          }
-        }
-    }
-  }
-
-  // Loop over "start" markers without any "end" markers. We add one only if
-  // it's in or before the specified range.
-  // Note: doing it at the end, we change the order of markers compared to the
-  // source, but it's OK because the only important invariant is that pairs of
-  // start/end come in order.
-  for (const markerBucket of openTracingMarkers.values()) {
-    for (const startIndex of markerBucket) {
-      const startTime = ensureExists(
-        markers.startTime[startIndex],
-        ensureExistsMessage
-      );
-      if (startTime < rangeEnd) {
-        yield startIndex;
       }
     }
   }
 
-  for (const startIndex of openNetworkMarkers.values()) {
-    const data: NetworkPayload = (markers.data[startIndex]: any);
-    if (data.startTime < rangeEnd) {
-      yield startIndex;
-    }
-  }
-
-  // And we should add the "last screenshot marker before the range" if it
-  // hadn't been added yet.
-  if (previousScreenshotMarker !== null) {
-    yield previousScreenshotMarker;
-  }
+  return [...inRange].sort((a, b) => a - b);
 }
 
 /**
