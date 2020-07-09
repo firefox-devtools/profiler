@@ -5,9 +5,7 @@
 .timelineEmptyThreadIndicator {
   --empty-buffer-color1: rgba(69, 160, 255, 0.225);
   --empty-buffer-color2: rgba(69, 160, 255, 0.075);
-
-  /* The following color is based off grey-20, but uses opacity instead. */
-  --shutdown-startup-color: rgba(0, 0, 50, 0.07);
+  --shutdown-startup-color: rgba(249, 249, 250, 0.6);
 }
 
 .timelineEmptyThreadIndicatorBlock {
