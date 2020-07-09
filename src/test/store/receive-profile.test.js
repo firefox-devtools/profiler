@@ -195,6 +195,7 @@ describe('actions/receive-profile', function() {
         [
           'RefreshDriverTick',
           0,
+          null,
           { type: 'tracing', category: 'Paint', interval: 'start' },
         ],
       ]);
@@ -307,6 +308,7 @@ describe('actions/receive-profile', function() {
         [
           'RefreshDriverTick',
           0,
+          null,
           { type: 'tracing', category: 'Paint', interval: 'start' },
         ],
       ]);
@@ -337,6 +339,7 @@ describe('actions/receive-profile', function() {
         [
           'RefreshDriverTick',
           0,
+          null,
           { type: 'tracing', category: 'Paint', interval: 'start' },
         ],
       ]);
@@ -1467,21 +1470,21 @@ describe('actions/receive-profile', function() {
     ): * {
       profile1.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['A', 1, { startTime: 1, endTime: 3 }],
-          ['A', 1, null],
-          ['B', 2, null],
-          ['C', 3, null],
-          ['D', 4, null],
-          ['E', 5, null],
+          ['A', 1, 3],
+          ['A', 1],
+          ['B', 2],
+          ['C', 3],
+          ['D', 4],
+          ['E', 5],
         ])
       );
       profile2.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['F', 1, { startTime: 1, endTime: 3 }],
-          ['G', 2, null],
-          ['H', 3, null],
-          ['I', 4, null],
-          ['J', 5, null],
+          ['F', 1, 3],
+          ['G', 2],
+          ['H', 3],
+          ['I', 4],
+          ['J', 5],
         ])
       );
 

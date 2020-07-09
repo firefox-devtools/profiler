@@ -50,8 +50,25 @@ import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
 type MarkerName = string;
 type MarkerTime = Milliseconds;
 type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
+
+// These markers can create an Instant or a complete Interval marker, depending
+// on if an end time is passed in. The definition uses a union, becaus as far
+// as I can tell, Flow doesn't support multiple arity tuples.
 export type TestDefinedMarkers = Array<
-  [MarkerName, MarkerTime, MarkerPayload | MockPayload]
+  // Instant marker:
+  | [MarkerName, MarkerTime]
+  // No payload:
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null // end time
+    ]
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null, // end time
+      MarkerPayload | MockPayload
+    ]
 >;
 
 // This type is used when needing to create a specific RawMarkerTable.
@@ -128,29 +145,23 @@ export function addMarkersToThreadWithCorrespondingSamples(
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
 
-  markers.forEach(([name, time, data]) => {
+  markers.forEach(tuple => {
+    const name = tuple[0];
+    const startTime = tuple[1];
+    // Flow doesn't support variadic tuple types.
+    const maybeEndTime = (tuple: any)[2] || null;
+    const maybeData = (tuple: any)[3] || null;
+
     markersTable.name.push(stringTable.indexForString(name));
-    const payload = _refineMockPayload(data);
-    if (
-      payload &&
-      typeof payload.startTime === 'number' &&
-      typeof payload.endTime === 'number'
-    ) {
-      // Flow can't correctly infer the properties here.
-      const { startTime, endTime } = (payload: any);
-      if (time !== startTime && time !== endTime) {
-        console.error([name, time, data]);
-        throw new Error(
-          'The payload startTime or endTime did not match the time of the marker. Is this an error?'
-        );
-      }
+    const payload = _refineMockPayload(maybeData);
+    if (maybeEndTime === null) {
+      markersTable.phase.push(INSTANT);
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(null);
+    } else {
       markersTable.phase.push(INTERVAL);
       markersTable.startTime.push(startTime);
-      markersTable.endTime.push(endTime);
-    } else {
-      markersTable.phase.push(INSTANT);
-      markersTable.startTime.push(time);
-      markersTable.endTime.push(null);
+      markersTable.endTime.push(maybeEndTime);
     }
     markersTable.data.push(payload);
     markersTable.category.push(0);
@@ -256,13 +267,15 @@ export function getUserTiming(
   startTime: number,
   duration: number
 ) {
+  const endTime = startTime + duration;
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
       startTime,
-      endTime: startTime + duration,
+      endTime,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),
@@ -294,6 +307,7 @@ export function getMarkerTableProfile() {
       [
         'UserTiming',
         12.5,
+        12.5,
         {
           type: 'UserTiming',
           startTime: 12.5,
@@ -305,6 +319,7 @@ export function getMarkerTableProfile() {
       [
         'NotifyDidPaint',
         14.5,
+        null,
         {
           type: 'tracing',
           category: 'Paint',
@@ -314,6 +329,7 @@ export function getMarkerTableProfile() {
       [
         'setTimeout',
         165.87091900000001,
+        165.871503,
         {
           type: 'Text',
           startTime: 165.87091900000001,
@@ -323,6 +339,7 @@ export function getMarkerTableProfile() {
       ],
       [
         'IPC',
+        120,
         120,
         {
           type: 'IPC',
@@ -340,6 +357,7 @@ export function getMarkerTableProfile() {
       [
         'LogMessages',
         170,
+        null,
         {
           type: 'Log',
           name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
@@ -852,10 +870,8 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   };
 
   return [
-    // Note that the "time" of network markers is generally close to the
-    // payload's endTime. We don't use it at all in our business logic though.
-    [name, startPayload.endTime, startPayload],
-    [name, stopPayload.endTime, stopPayload],
+    [name, startTime, startPayload.endTime, startPayload],
+    [name, startTime, stopPayload.endTime, stopPayload],
   ];
 }
 
@@ -908,36 +924,22 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'Load',
       5,
       ({
         ...loadPayloadBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
-    [
-      'DOMContentLoaded',
-      6,
-      ({
-        ...domContentLoadedBase,
         interval: 'start',
       }: NavigationMarkerPayload),
     ],
+    ['TTI', 6],
+    ['Navigation::Start', 7],
+    ['Contentful paint at something', 8],
     [
       'DOMContentLoaded',
+      6,
       7,
       ({
         ...domContentLoadedBase,
-        interval: 'end',
+        interval: 'start',
       }: NavigationMarkerPayload),
     ],
   ]);
@@ -972,7 +974,7 @@ function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
     ...options,
   };
 
-  return [['IPC', payload.endTime, payload]];
+  return [['IPC', options.startTime || 0, payload.endTime, payload]];
 }
 
 export function getIPCTrackProfile() {
@@ -994,6 +996,7 @@ export function getScreenshotTrackProfile() {
       .map((_, i) => [
         'CompositorScreenshot',
         i,
+        null,
         {
           type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.

@@ -862,6 +862,7 @@ describe('actions/ProfileView', function() {
         [
           'd',
           1022,
+          1024,
           {
             cause: { stack: 2, time: 1 },
             endTime: 1024,
@@ -922,6 +923,7 @@ describe('actions/ProfileView', function() {
         [
           'IPC',
           30,
+          1031,
           {
             type: 'IPC',
             startTime: 30,
@@ -945,6 +947,7 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'IPC',
+          40,
           40,
           {
             type: 'IPC',
@@ -1007,6 +1010,7 @@ describe('actions/ProfileView', function() {
           [
             'd',
             3,
+            null,
             {
               type: 'Log',
               module: 'nsJarProtocol',
@@ -1064,6 +1068,7 @@ describe('actions/ProfileView', function() {
         [
           'a',
           0,
+          null,
           {
             type: 'tracing',
             category: 'DOMEvent',
@@ -1076,6 +1081,7 @@ describe('actions/ProfileView', function() {
         [
           'b',
           1002,
+          1022,
           {
             type: 'UserTiming',
             startTime: 1002,
@@ -1088,6 +1094,7 @@ describe('actions/ProfileView', function() {
         [
           'd',
           1050,
+          1100,
           {
             type: 'UserTiming',
             startTime: 1050,

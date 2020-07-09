@@ -268,13 +268,15 @@ describe('CombinedChart', function() {
 });
 
 function getUserTiming(name: string, startTime: number, duration: number) {
+  const endTime = startTime + duration;
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
       startTime,
-      endTime: startTime + duration,
+      endTime,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),

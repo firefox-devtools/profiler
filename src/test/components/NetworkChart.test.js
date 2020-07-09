@@ -381,7 +381,7 @@ describe('NetworkChartRowBar phase calculations', function() {
       0,
       // With an endTime at 99, the profile's end time is 100 which gives
       // integer values for test results.
-      { startTime: 0, endTime: 99 },
+      99,
     ];
 
     const startMarker = getNetworkMarkers({
