@@ -776,8 +776,11 @@ const _upgraders = {
     // We changed how the ranges are serialized to the URLs. Before it was the
     // pair of start/end in seconds unit with 4 digits, now this is a pair of
     // start/duration, where start and duration are both integers expressed with
-    // a specific unit: for example 10000000u500 is a range from 10000000 microseconds
-    // (that is 10s) to 10s + 500 µs.
+    // a specific unit.
+    // For example we'll convert from 1.2345_2.3456 (that is: a range starting
+    // at 1.2345s and ending at 2.3456s) to 1234m1112 (a range starting at
+    // 1234ms and ending after 1112ms). You notice that the range is slightly
+    // bigger, because this accounts for the loss of precision.
     if (!query.range) {
       return;
     }
@@ -785,6 +788,7 @@ const _upgraders = {
     query.range = query.range
       .split('~')
       .map(committedRange => {
+        // This regexp captures two (positive or negative) numbers, separated by a `_`.
         const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
         if (!m) {
           console.error(

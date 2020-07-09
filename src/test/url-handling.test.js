@@ -508,7 +508,11 @@ describe('committed ranges', function() {
       dispatch(commitRange(1514, 1514));
       const urlState = urlStateReducers.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
-      expect(queryString).toMatch(/range=1514000000n(?!0)/); // 1.514s + something non zero
+      // In the following regexp we want to especially assert that the duration
+      // isn't 0. That's why there's this negative look-ahead assertion.
+      // Therefore here we're matching a start at 1.514s, and a non-zero
+      // duration.
+      expect(queryString).toMatch(/range=1514000000n(?!0)/);
     });
 
     it('serializes when there are several ranges', () => {
