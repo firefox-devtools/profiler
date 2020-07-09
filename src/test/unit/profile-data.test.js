@@ -184,25 +184,25 @@ describe('process-profile', function() {
       expect(thread2.samples.time[1]).toEqual(1001);
 
       // Now about markers
-      expect(thread0.markers.startTime[0]).toEqual(1);
+      expect(thread0.markers.endTime[0]).toEqual(1);
       expect(thread0.markers.startTime[1]).toEqual(2);
       expect(thread0.markers.startTime[2]).toEqual(3);
       expect(thread0.markers.startTime[3]).toEqual(4);
-      expect(thread0.markers.startTime[4]).toEqual(5);
+      expect(thread0.markers.endTime[4]).toEqual(5);
 
       // If this assertion fails with the value 11, then marker sorting is broken.
       expect(thread0.markers.startTime[6]).toEqual(9);
-      expect(thread0.markers.startTime[7]).toEqual(10);
+      expect(thread0.markers.endTime[7]).toEqual(10);
 
       // 1 second later than the same markers in the main process.
-      expect(thread2.markers.startTime[0]).toEqual(1001);
+      expect(thread2.markers.endTime[0]).toEqual(1001);
       expect(thread2.markers.startTime[1]).toEqual(1002);
       expect(thread2.markers.startTime[2]).toEqual(1003);
       expect(thread2.markers.startTime[3]).toEqual(1004);
-      expect(thread2.markers.startTime[4]).toEqual(1005);
+      expect(thread2.markers.endTime[4]).toEqual(1005);
 
       expect(thread2.markers.startTime[6]).toEqual(1009);
-      expect(thread2.markers.startTime[7]).toEqual(1010);
+      expect(thread2.markers.endTime[7]).toEqual(1010);
 
       expect(
         thread2.markers.data[6] &&
