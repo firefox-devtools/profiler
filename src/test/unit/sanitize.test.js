@@ -16,6 +16,11 @@ import {
   getRemoveProfileInformation,
 } from '../../selectors/publish';
 import { toggleCheckedSharingOptions } from '../../actions/publish';
+import {
+  correlateIPCMarkers,
+  deriveMarkersFromRawMarkerTable,
+} from '../../profile-logic/marker-data';
+import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 
 describe('sanitizePII', function() {
   function setup(
@@ -31,7 +36,29 @@ describe('sanitizePII', function() {
       shouldRemovePreferenceValues: false,
       ...piiConfig,
     };
-    const sanitizedProfile = sanitizePII(originalProfile, PIIToRemove).profile;
+
+    const derivedMarkerInfoForAllThreads = originalProfile.threads.map(
+      thread => {
+        const ipcCorrelations = correlateIPCMarkers(originalProfile.threads);
+        const timeRangeForThread = getTimeRangeForThread(
+          thread,
+          originalProfile.meta.interval
+        );
+        return deriveMarkersFromRawMarkerTable(
+          thread.markers,
+          thread.stringTable,
+          thread.tid || 0,
+          timeRangeForThread,
+          ipcCorrelations
+        );
+      }
+    );
+
+    const sanitizedProfile = sanitizePII(
+      originalProfile,
+      derivedMarkerInfoForAllThreads,
+      PIIToRemove
+    ).profile;
 
     return {
       sanitizedProfile,
@@ -352,9 +379,17 @@ describe('sanitizePII', function() {
         // `toBeTruthy` doesn't work here because there are marker categories with `0` value.
         // expect.anything() means anything other than null or undefined.
         expect(markersTable.name[i]).toEqual(expect.anything());
-        expect(markersTable.startTime[i]).toEqual(expect.anything());
+        expect(markersTable.phase[i]).toEqual(expect.anything());
         expect(markersTable.data[i]).toEqual(expect.anything());
         expect(markersTable.category[i]).toEqual(expect.anything());
+        // Do not perform this check on startTime or endTime as these may be null.
+
+        expect(markersTable.name).toHaveLength(markersTable.length);
+        expect(markersTable.phase).toHaveLength(markersTable.length);
+        expect(markersTable.data).toHaveLength(markersTable.length);
+        expect(markersTable.category).toHaveLength(markersTable.length);
+        expect(markersTable.startTime).toHaveLength(markersTable.length);
+        expect(markersTable.endTime).toHaveLength(markersTable.length);
       }
     }
   });
