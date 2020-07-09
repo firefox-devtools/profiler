@@ -115,12 +115,7 @@ export type AppViewState =
 export type Phase = $PropertyType<AppViewState, 'phase'>;
 
 //this enum is for showing the progress while fetching profile from add-on
-export type LoadingStep =
-  | 'promise'
-  | 'raw'
-  | 'decompress'
-  | 'decode'
-  | 'done';
+export type LoadingStep = 'promise' | 'raw' | 'decompress' | 'decode' | 'done';
 
 export type LoadingState = {|
   loadingStep: LoadingStep,
@@ -129,7 +124,6 @@ export type LoadingState = {|
   abortFunction: () => void,
 |};
 //How to connect this to LoadingStateAction that is imported
-
 
 /**
  * This represents the finite state machine for loading zip files. The phase represents
