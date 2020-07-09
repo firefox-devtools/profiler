@@ -14,7 +14,9 @@ import type {
   CounterIndex,
   InnerWindowID,
   Page,
+  IndexIntoRawMarkerTable,
 } from './profile';
+import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
 export type IndexIntoCallNodeTable = number;
 
@@ -76,6 +78,18 @@ export type CallNodeInfo = {
  * that goes from tip to root.
  */
 export type CallNodePath = IndexIntoFuncTable[];
+
+/**
+ * This type contains the first derived `Marker[]` information, plus an IndexedArray
+ * to get back to the RawMarkerTable.
+ */
+export type DerivedMarkerInfo = {|
+  markers: Marker[],
+  markerIndexToRawMarkerIndexes: IndexedArray<
+    MarkerIndex,
+    IndexIntoRawMarkerTable[]
+  >,
+|};
 
 export type Marker = {|
   start: Milliseconds,
