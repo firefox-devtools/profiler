@@ -3,21 +3,322 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { getThreadSelectors } from '../../selectors/per-thread';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from 'firefox-profiler/selectors';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
-  IPCMarkerCorrelations,
-  deriveMarkersFromRawMarkerTable,
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from '../../profile-logic/marker-data';
-import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 
-import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { getThreadWithMarkers } from '../fixtures/profiles/processed-profile';
+import {
+  createGeckoProfile,
+  createGeckoProfileWithMarkers,
+} from '../fixtures/profiles/gecko-profile';
+import {
+  getTestFriendlyDerivedMarkerInfo,
+  type TestDefinedRawMarker,
+  getThreadWithRawMarkers,
+  makeInterval,
+  makeInstant,
+  makeCompositorScreenshot,
+  makeStart,
+  makeEnd__,
+} from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 
-import type { Thread, Milliseconds } from 'firefox-profiler/types';
+import type {
+  IndexIntoRawMarkerTable,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
+describe('Derive markers from Gecko phase markers', function() {
+  function setupWithTestDefinedMarkers(markers) {
+    const profile = processProfile(createGeckoProfileWithMarkers(markers));
+    profile.meta.symbolicated = true; // Avoid symbolication.
+    const { getState } = storeWithProfile(profile);
+    const mainGetMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+    return {
+      profile,
+      getState,
+      markers: selectedThreadSelectors
+        .getFullMarkerListIndexes(getState())
+        .map(mainGetMarker),
+    };
+  }
+
+  it('creates an instant marker', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: 5,
+        endTime: null,
+        phase: INSTANT,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 0,
+        name: 'TestDefinedMarker',
+        start: 5,
+        title: null,
+      },
+    ]);
+  });
+
+  it('creates an interval marker', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: 5,
+        endTime: 6,
+        phase: INTERVAL,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 1,
+        name: 'TestDefinedMarker',
+        start: 5,
+        title: null,
+      },
+    ]);
+  });
+
+  it('matches an IntervalStart and IntervalEnd marker', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: 5,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+      {
+        startTime: null,
+        endTime: 6,
+        phase: INTERVAL_END,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 1,
+        name: 'TestDefinedMarker',
+        start: 5,
+        title: null,
+      },
+    ]);
+  });
+
+  it('completes an unmatched IntervalEnd marker', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: null,
+        endTime: 6,
+        phase: INTERVAL_END,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 6,
+        name: 'TestDefinedMarker',
+        start: 0,
+        title: null,
+        incomplete: true,
+      },
+    ]);
+  });
+
+  it('completes an unmatched IntervalStart marker', function() {
+    const startTime = 2;
+    const { markers, profile } = setupWithTestDefinedMarkers([
+      {
+        startTime,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        // This could fail in the future if we determine thread length some other way.
+        dur: profile.threads[0].samples.length - startTime,
+        name: 'TestDefinedMarker',
+        start: 2,
+        title: null,
+        incomplete: true,
+      },
+    ]);
+  });
+
+  it('handles nested interval start/end markers', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: 2,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+      {
+        startTime: 3,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+      {
+        startTime: null,
+        endTime: 5,
+        phase: INTERVAL_END,
+      },
+      {
+        startTime: null,
+        endTime: 7,
+        phase: INTERVAL_END,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 5,
+        name: 'TestDefinedMarker',
+        start: 2,
+        title: null,
+      },
+      {
+        category: 0,
+        data: null,
+        dur: 2,
+        name: 'TestDefinedMarker',
+        start: 3,
+        title: null,
+      },
+    ]);
+  });
+
+  it('only nests markers of the same name', function() {
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        name: 'Marker A',
+        startTime: 2,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+      {
+        name: 'Marker B',
+        startTime: 3,
+        endTime: null,
+        phase: INTERVAL_START,
+      },
+      {
+        name: 'Marker A',
+        startTime: null,
+        endTime: 5,
+        phase: INTERVAL_END,
+      },
+      {
+        name: 'Marker B',
+        startTime: null,
+        endTime: 7,
+        phase: INTERVAL_END,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: null,
+        dur: 3,
+        name: 'Marker A',
+        start: 2,
+        title: null,
+      },
+      {
+        category: 0,
+        data: null,
+        dur: 4,
+        name: 'Marker B',
+        start: 3,
+        title: null,
+      },
+    ]);
+  });
+
+  it('has special handling for CompositorScreenshot', function() {
+    const payload1 = {
+      type: 'CompositorScreenshot',
+      url: 16,
+      windowID: '0x136888400',
+      windowWidth: 1280,
+      windowHeight: 1000,
+    };
+    const payload2 = {
+      ...payload1,
+      windowWidth: 500,
+    };
+
+    const startTimeA = 2;
+    const startTimeB = 5;
+
+    const { markers, getState } = setupWithTestDefinedMarkers([
+      {
+        name: 'CompositorScreenshot',
+        startTime: startTimeA,
+        endTime: null,
+        phase: INTERVAL_START,
+        data: payload1,
+      },
+      {
+        name: 'CompositorScreenshot',
+        startTime: startTimeB,
+        endTime: null,
+        phase: INTERVAL_START,
+        data: payload2,
+      },
+    ]);
+
+    const threadRange = selectedThreadSelectors.getThreadRange(getState());
+
+    expect(markers).toEqual([
+      // The first has a duration from the first screenshot to the next.
+      {
+        category: 0,
+        data: payload1,
+        dur: startTimeB - startTimeA,
+        name: 'CompositorScreenshot',
+        start: 2,
+        title: null,
+      },
+      // The last has a duration until the end of the thread range.
+      {
+        category: 0,
+        data: payload2,
+        dur: threadRange.end - startTimeB,
+        name: 'CompositorScreenshot',
+        start: startTimeB,
+        title: null,
+      },
+    ]);
+  });
+});
 
 describe('deriveMarkersFromRawMarkerTable', function() {
   function setup() {
