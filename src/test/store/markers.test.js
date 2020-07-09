@@ -8,11 +8,12 @@ import {
   getUserTiming,
   getProfileWithMarkers,
   getNetworkTrackProfile,
+  type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function() {
-  function getMarkerChartTimingAndBuckets(testMarkers) {
+  function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
     return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
@@ -29,8 +30,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *------*
       //              : *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 0, 10],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -40,8 +41,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       //              : 'Category'
       // 'Marker Name': *------*  *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 15, { startTime: 15, endTime: 25 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 15, 25],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
@@ -52,8 +53,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *------*
       //              :     *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 5, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 5, 15],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -64,8 +65,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *--------*
       //              :   *---*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 20 }],
-        ['Marker Name', 5, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 0, 20],
+        ['Marker Name', 5, 15],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -78,8 +79,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name A': *------*
       // 'Marker Name B':           *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name B', 20, { startTime: 20, endTime: 30 }],
+        ['Marker Name A', 0, 10],
+        ['Marker Name B', 20, 30],
       ]);
       expect(markerTiming).toHaveLength(3);
       const [category, markerTimingA, markerTimingB] = markerTiming;
@@ -101,6 +102,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         [
           'Rasterize',
           1,
+          null,
           { category: 'Paint', interval: 'end', type: 'tracing' },
         ],
       ]);
@@ -125,6 +127,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         [
           'Rasterize',
           20,
+          null,
           { category: 'Paint', interval: 'start', type: 'tracing' },
         ],
       ]);
@@ -277,26 +280,25 @@ describe('memory markers', function() {
         [
           'IdleForgetSkippable',
           3,
-          { type: 'tracing', category: 'CC', interval: 'start' },
-        ],
-        [
-          'IdleForgetSkippable',
           4,
           { type: 'tracing', category: 'CC', interval: 'end' },
         ],
         [
           'GCMinor',
           5,
+          null,
           { type: 'GCMinor', startTime: 5, endTime: 5, nursery: any },
         ],
         [
           'GCMajor',
           6,
+          null,
           { type: 'GCMajor', startTime: 6, endTime: 6, timings: any },
         ],
         [
           'GCSlice',
           7,
+          null,
           { type: 'GCSlice', startTime: 7, endTime: 7, timings: any },
         ],
       ])
@@ -379,6 +381,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 1',
           10,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -390,6 +393,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 3',
           30,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -400,6 +404,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 4',
           30,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -407,7 +412,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
             innerWindowID,
           },
         ],
-        ['Dummy 5', 40, null],
+        ['Dummy 5', 40],
       ]
     );
     profile.pages = [

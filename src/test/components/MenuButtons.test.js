@@ -68,6 +68,7 @@ describe('app/MenuButtons', function() {
     const profile = getProfileWithMarkers([
       [
         'PreferenceRead',
+        0,
         1,
         {
           type: 'PreferenceRead',

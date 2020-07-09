@@ -61,10 +61,10 @@ describe('timeline/TrackThread', function() {
 
   function getMarkersProfile(
     testMarkers = [
-      ['Marker A', 0, { startTime: 0, endTime: 1 }],
-      ['Marker B', 1, { startTime: 1, endTime: 2 }],
-      ['Marker C', 2, { startTime: 2, endTime: 3 }],
-      ['Marker D', 3, { startTime: 3, endTime: 4 }],
+      ['Marker A', 0],
+      ['Marker B', 1],
+      ['Marker C', 2],
+      ['Marker D', 3],
     ]
   ) {
     const profile = getProfileWithMarkers(testMarkers);
@@ -268,8 +268,8 @@ describe('timeline/TrackThread', function() {
   it('can click a marker', function() {
     const { getState, markerCanvas, ctx, getFillRectCenterByIndex } = setup(
       getMarkersProfile([
-        ['Marker A', 0, { startTime: 0, endTime: 4 }],
-        ['Marker B', 4, { startTime: 4, endTime: 8 }],
+        ['Marker A', 0, 4],
+        ['Marker B', 4, 8],
       ])
     );
 
@@ -312,6 +312,7 @@ describe('timeline/TrackThread', function() {
       [
         'FileIO',
         2,
+        3,
         ({
           type: 'FileIO',
           startTime: 2,
@@ -331,6 +332,7 @@ describe('timeline/TrackThread', function() {
       [
         'FileIO',
         2,
+        3,
         ({
           type: 'FileIO',
           startTime: 2,

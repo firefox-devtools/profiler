@@ -238,6 +238,7 @@ describe('sanitizePII', function() {
       getProfileWithMarkers([
         [
           'Extension Suspend',
+          0,
           1,
           {
             type: 'Text',
@@ -300,6 +301,7 @@ describe('sanitizePII', function() {
       getProfileWithMarkers([
         [
           'PreferenceRead',
+          0,
           1,
           {
             type: 'PreferenceRead',
@@ -338,6 +340,7 @@ describe('sanitizePII', function() {
       getProfileWithMarkers([
         [
           'PreferenceRead',
+          0,
           1,
           {
             type: 'PreferenceRead',
@@ -404,6 +407,7 @@ describe('sanitizePII', function() {
       getProfileWithMarkers([
         [
           'FileIO',
+          1,
           2,
           {
             type: 'FileIO',
@@ -422,6 +426,7 @@ describe('sanitizePII', function() {
         ],
         [
           'FileIO',
+          3,
           4,
           {
             type: 'FileIO',
