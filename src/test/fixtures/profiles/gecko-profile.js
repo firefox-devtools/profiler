@@ -15,11 +15,18 @@ import type {
   GeckoMarkers,
   GeckoMarkerStack,
   GeckoProfilerOverhead,
+  Milliseconds,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko,
 } from 'firefox-profiler/types';
 
 import {
   GECKO_PROFILE_VERSION,
   INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
 
 function getEmptyMarkers(): GeckoMarkers {
@@ -296,6 +303,65 @@ export function createGeckoProfile(): GeckoProfile {
   profile.processes.push(contentProcessProfile);
 
   return profile;
+}
+
+type TestDefinedGeckoMarker = {|
+  +name?: string,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
+  +category?: IndexIntoCategoryList,
+  +data?: MarkerPayload_Gecko,
+|};
+
+function _createGeckoThreadWithMarkers(
+  markers: TestDefinedGeckoMarker[]
+): GeckoThread {
+  const thread = _createGeckoThread();
+  const { stringTable } = thread;
+  const testDefinedMarkerStringIndex = stringTable.length;
+  thread.stringTable.push('TestDefinedMarker');
+  thread.markers.data = markers.map(marker => {
+    let name = testDefinedMarkerStringIndex;
+    const markerName = marker.name;
+    if (markerName) {
+      const nameIndex = stringTable.indexOf(markerName);
+      if (nameIndex === -1) {
+        name = stringTable.length;
+        stringTable.push(markerName);
+      } else {
+        name = nameIndex;
+      }
+    }
+    return [
+      name,
+      marker.startTime,
+      marker.endTime,
+      marker.phase,
+      0, // category
+      marker.data || null,
+    ];
+  });
+  return thread;
+}
+
+/**
+ * This function creates a gecko profile with some arbitrary JS timings. This was
+ * primarily created for before this project had the richer profile making fixtures.
+ * It most likely shouldn't be used for new tests.
+ */
+export function createGeckoProfileWithMarkers(
+  markers: TestDefinedGeckoMarker[]
+): GeckoProfile {
+  const geckoProfile = createGeckoProfile();
+  return {
+    meta: geckoProfile.meta,
+    libs: geckoProfile.libs,
+    pages: geckoProfile.pages,
+    pausedRanges: [],
+    threads: [_createGeckoThreadWithMarkers(markers)],
+    processes: [],
+  };
 }
 
 function _createIPCMarker({

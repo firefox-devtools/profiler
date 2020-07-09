@@ -16,6 +16,12 @@ import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { ensureExists } from '../../../utils/flow';
+import {
+  INTERVAL,
+  INSTANT,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 
 import type {
   Profile,
@@ -32,7 +38,13 @@ import type {
   IPCMarkerPayload,
   UserTimingMarkerPayload,
   Milliseconds,
+  MarkerPhase,
 } from 'firefox-profiler/types';
+import {
+  deriveMarkersFromRawMarkerTable,
+  IPCMarkerCorrelations,
+} from '../../../profile-logic/marker-data';
+import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
@@ -41,6 +53,17 @@ type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
 export type TestDefinedMarkers = Array<
   [MarkerName, MarkerTime, MarkerPayload | MockPayload]
 >;
+
+// This type is used when needing to create a specific RawMarkerTable.
+export type TestDefinedRawMarker = {|
+  +name?: string,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
+  +category?: IndexIntoCategoryList,
+  +data?: MarkerPayload,
+|};
+
 export type TestDefinedJsTracerEvent = [
   // Event name:
   string,
@@ -78,6 +101,26 @@ function _refineMockPayload(
   return (payload: any);
 }
 
+export function addRawMarkersToThread(
+  thread: Thread,
+  markers: TestDefinedRawMarker[]
+) {
+  const stringTable = thread.stringTable;
+  const markersTable = thread.markers;
+
+  for (const { name, startTime, endTime, phase, category, data } of markers) {
+    markersTable.name.push(
+      stringTable.indexForString(name || 'TestDefinedMarker')
+    );
+    markersTable.phase.push(phase);
+    markersTable.startTime.push(startTime);
+    markersTable.endTime.push(endTime);
+    markersTable.data.push(data ? _refineMockPayload(data) : null);
+    markersTable.category.push(category || 0);
+    markersTable.length++;
+  }
+}
+
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
@@ -101,9 +144,11 @@ export function addMarkersToThreadWithCorrespondingSamples(
           'The payload startTime or endTime did not match the time of the marker. Is this an error?'
         );
       }
+      markersTable.phase.push(INTERVAL);
       markersTable.startTime.push(startTime);
       markersTable.endTime.push(endTime);
     } else {
+      markersTable.phase.push(INSTANT);
       markersTable.startTime.push(time);
       markersTable.endTime.push(null);
     }
@@ -117,6 +162,93 @@ export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   const thread = getEmptyThread();
   addMarkersToThreadWithCorrespondingSamples(thread, markers);
   return thread;
+}
+
+export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+  const thread = getEmptyThread();
+  addRawMarkersToThread(thread, markers);
+  return thread;
+}
+
+/**
+ * This can be a little annoying to derive with all of the dependencies,
+ * so provide an easy interface to do so here.
+ */
+export function getTestFriendlyDerivedMarkerInfo(thread: Thread) {
+  return deriveMarkersFromRawMarkerTable(
+    thread.markers,
+    thread.stringTable,
+    thread.tid || 0,
+    getTimeRangeForThread(thread, 1),
+    new IPCMarkerCorrelations()
+  );
+}
+
+// The following functions are helpers to make TestDefinedRawMarker. They are someone
+// intentionally terse since they are used frequently in long lists of markers.
+
+export function makeStart(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INTERVAL_START,
+  };
+}
+
+export function makeEnd__(
+  name: string,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime: null,
+    endTime,
+    phase: INTERVAL_END,
+  };
+}
+
+export function makeInstant(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INSTANT,
+  };
+}
+
+export function makeInterval(
+  name: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime,
+    phase: INTERVAL,
+  };
+}
+
+export function makeCompositorScreenshot(
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    ...makeInstant('CompositorScreenshot', startTime),
+    data: {
+      type: 'CompositorScreenshot',
+      url: 0,
+      windowID: '',
+      windowWidth: 100,
+      windowHeight: 100,
+    },
+  };
 }
 
 export function getUserTiming(
