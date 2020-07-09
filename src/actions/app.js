@@ -22,6 +22,7 @@ import type {
   Action,
   ThunkAction,
   UrlState,
+  LoadingStep,
 } from 'firefox-profiler/types';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
@@ -53,10 +54,10 @@ export function startFetchingProfiles(): Action {
 }
 
 //this is to display the LoadingStep while fetching profile from add-on
-export function changeLoadProgress(step:LoadingStep,progress:number): Action{
+export function changeLoadProgress(loadingStep:LoadingStep,progress:number): Action{
   return { 
     type: 'CHANGE_LOAD_PROGRESS',
-    step,
+    loadingStep,
     progress,
   };
 }

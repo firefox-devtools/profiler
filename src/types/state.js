@@ -123,7 +123,7 @@ export type LoadingStep =
   | 'done';
 
 export type LoadingState = {|
-  LoadingStep: LoadingStep,
+  loadingStep: LoadingStep,
   progress: number,
   error: Error | mixed,
   abortFunction: () => void,
@@ -286,7 +286,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
-  +loading: LoadingState,
+  // +loading: LoadingState,
 |};
 
 export type IconWithClassName = {|

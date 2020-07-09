@@ -28,7 +28,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State } from './state';
+import type { UrlState, UploadState, State, LoadingStep } from './state';
 import type { CssPixels, StartEndRange } from './units';
 
 export type DataSource =
@@ -121,7 +121,7 @@ export type CheckedSharingOptions = {|
 //to display loading state while importing profile from addon
 type LoadingStateAction = {|
       +type : 'CHANGE_LOAD_PROGRESS',
-      +step:LoadingStep,
+      +loadingStep:LoadingStep,
       +progress:number,
 |};
 
