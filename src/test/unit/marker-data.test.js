@@ -1182,93 +1182,85 @@ describe('filterRawMarkerTableToRange', () => {
 // We don't need to test with other marker types since they are already being
 // tested in `filterRawMarkerTableToRange` tests.
 describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
-  function setup(
-    markers: Array<[string, Milliseconds, null | Object]>
-  ): Thread {
-    markers = markers.map(([name, time, payload]) => {
-      if (payload) {
-        // Force a type 'DummyForTests' if it's inexistant
-        payload = { type: 'DummyForTests', ...payload };
-      }
-      return [name, time, payload];
-    });
+  type TestConfig = {|
+    timeRange: {| start: Milliseconds, end: Milliseconds |} | null,
+    markersToDelete: Set<IndexIntoRawMarkerTable>,
+    markers: Array<TestDefinedRawMarker>,
+  |};
 
-    // Our marker payload union type is too difficult to work with in a
-    // generic way here.
-    return getThreadWithMarkers((markers: any));
+  function setup({ timeRange, markersToDelete, markers }: TestConfig) {
+    const thread = getThreadWithRawMarkers(markers);
+    const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread);
+
+    const { rawMarkerTable } = filterRawMarkerTableToRangeWithMarkersToDelete(
+      thread.markers,
+      derivedMarkerInfo,
+      markersToDelete,
+      timeRange
+    );
+    const markerNames = rawMarkerTable.name.map(stringIndex =>
+      thread.stringTable.getString(stringIndex)
+    );
+
+    return {
+      markerNames,
+    };
   }
 
   it('filters generic markers without markerToDelete', () => {
-    const markers = [
-      ['A', 0, null],
-      ['B', 1, null],
-      ['C', 2, null],
-      ['D', 3, null],
-      ['E', 4, null],
-      ['F', 5, null],
-      ['G', 6, null],
-      ['H', 7, null],
-    ];
-    const { markers: markerTable, stringTable } = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
-      markerTable,
-      new Set(),
-      { start: 2.3, end: 5.6 }
-    ).rawMarkerTable;
-    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
-      stringTable.getString(stringIndex)
-    );
-    expect(filteredMarkerNames).toEqual(['D', 'E', 'F']);
+    const { markerNames } = setup({
+      timeRange: { start: 2.3, end: 5.6 },
+      markersToDelete: new Set(),
+      markers: [
+        makeInstant('A', 0),
+        makeInstant('B', 1),
+        makeInstant('C', 2),
+        makeInstant('D', 3),
+        makeInstant('E', 4),
+        makeInstant('F', 5),
+        makeInstant('G', 6),
+        makeInstant('H', 7),
+      ],
+    });
+
+    expect(markerNames).toEqual(['D', 'E', 'F']);
   });
 
   it('filters generic markers with markerToDelete', () => {
-    const markers = [
-      ['A', 0, null],
-      ['B', 1, null],
-      ['C', 2, null],
-      ['D', 3, null],
-      ['E', 4, null],
-      ['F', 5, null],
-      ['G', 6, null],
-      ['H', 7, null],
-    ];
+    const { markerNames } = setup({
+      timeRange: { start: 2.3, end: 5.6 },
+      markersToDelete: new Set([3, 5]),
+      markers: [
+        makeInstant('A', 0),
+        makeInstant('B', 1),
+        makeInstant('C', 2),
+        makeInstant('D', 3),
+        makeInstant('E', 4),
+        makeInstant('F', 5),
+        makeInstant('G', 6),
+        makeInstant('H', 7),
+      ],
+    });
 
-    const { markers: markerTable, stringTable } = setup(markers);
-    const markersToDelete = new Set([3, 5]);
-    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
-      markerTable,
-      markersToDelete,
-      { start: 2.3, end: 5.6 }
-    ).rawMarkerTable;
-
-    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
-      stringTable.getString(stringIndex)
-    );
-    expect(filteredMarkerNames).toEqual(['E']);
+    expect(markerNames).toEqual(['E']);
   });
 
   it('filters generic markers with markerToDelete but without time range', () => {
-    const markers = [
-      ['A', 0, null],
-      ['B', 1, null],
-      ['C', 2, null],
-      ['D', 3, null],
-      ['E', 4, null],
-      ['F', 5, null],
-      ['G', 6, null],
-      ['H', 7, null],
-    ];
-    const { markers: markerTable, stringTable } = setup(markers);
-    const markersToDelete = new Set([2, 3, 5, 7]);
-    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
-      markerTable,
-      markersToDelete,
-      null
-    ).rawMarkerTable;
+    const { markerNames } = setup({
+      timeRange: null,
+      markersToDelete: new Set([2, 3, 5, 7]),
+      markers: [
+        makeInstant('A', 0),
+        makeInstant('B', 1),
+        makeInstant('C', 2),
+        makeInstant('D', 3),
+        makeInstant('E', 4),
+        makeInstant('F', 5),
+        makeInstant('G', 6),
+        makeInstant('H', 7),
+      ],
+    });
 
-    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
-      stringTable.getString(stringIndex)
-    );
-    expect(filteredMarkerNames).toEqual(['A', 'B', 'E', 'G']);
+    expect(markerNames).toEqual(['A', 'B', 'E', 'G']);
   });
 });
