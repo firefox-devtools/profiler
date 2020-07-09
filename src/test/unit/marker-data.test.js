@@ -67,8 +67,31 @@ describe('deriveMarkersFromRawMarkerTable', function() {
 
   it('creates 18 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(18);
+    const markerNames = markers.map(
+      marker => (marker.data ? marker.data.type : 'null') + ':' + marker.name
+    );
+    expect(markerNames).toEqual([
+      'tracing:Rasterize',
+      'VsyncTimestamp:VsyncTimestamp',
+      'tracing:Reflow',
+      'tracing:Rasterize',
+      'tracing:DOMEvent',
+      'GCMinor:MinorGC',
+      'UserTiming:UserTiming',
+      'tracing:Reflow',
+      'tracing:Reflow',
+      'tracing:ArbitraryName',
+      'Network:Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
+      'FileIO:FileIO',
+      'CompositorScreenshot:CompositorScreenshot',
+      'PreferenceRead:PreferenceRead',
+      'IPC:IPCOut',
+      'IPC:IPCOut',
+      'IPC:IPCOut',
+      'tracing:Rasterize',
+    ]);
   });
+
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
     expect(markers[1]).toMatchObject({
