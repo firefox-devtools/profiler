@@ -775,24 +775,17 @@ function _getTimeRangeForThread(
     // We need to look at those because it can be a marker only profile(no-sampling mode).
     // Finding start and end times sadly requires looping through all markers :(
     for (let i = 0; i < markers.length; i++) {
-      const thisStartTime =
-        markers.data[i] && typeof markers.data[i].startTime === 'number'
-          ? markers.data[i].startTime
-          : markers.startTime[i];
+      const startTime = markers.startTime[i];
+      const endTime = markers.endTime[i];
 
-      // We add `interval` to the read value here. It could be any number, but
-      // we use `interval` instead of for example 0.001 so that numbers round a
-      // bit more in tests, and this doesn't change things much in practice
-      // otherwise.
-      const thisEndTime =
-        markers.data[i] && typeof markers.data[i].endTime === 'number'
-          ? markers.data[i].endTime + interval
-          : markers.startTime[i] + interval;
-
-      if (thisStartTime !== null) {
-        result.start = Math.min(result.start, thisStartTime);
+      if (startTime !== null) {
+        result.start = Math.min(result.start, startTime);
+        result.end = Math.max(result.end, startTime + interval);
       }
-      result.end = Math.max(result.end, thisEndTime);
+      if (endTime !== null) {
+        result.start = Math.min(result.start, endTime);
+        result.end = Math.max(result.end, endTime + interval);
+      }
     }
   }
 
