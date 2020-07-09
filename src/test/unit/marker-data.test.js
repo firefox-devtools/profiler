@@ -60,6 +60,11 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
+  it('matches the snapshot', function() {
+    const { markers } = setup();
+    expect(markers).toMatchSnapshot();
+  });
+
   it('creates 18 markers given the test data', function() {
     const { markers } = setup();
     expect(markers.length).toEqual(18);
