@@ -157,11 +157,13 @@ describe('attemptToPublish', function() {
     delete (window: any).TextEncoder;
   });
 
-  function setupFakeUploadsWithStore(store: Store): * {
+  function setupFakeUpload() {
     let updateUploadProgress;
-    let resolveUpload;
-    let rejectUpload;
-    const abortFunction = jest.fn();
+
+    // These 2 functions get rewritten right away, but flow doesn't know that
+    // and thinks they can be undefined.
+    let resolveUpload = jest.fn();
+    let rejectUpload = jest.fn();
     const promise = new Promise((resolve, reject) => {
       resolveUpload = resolve;
       rejectUpload = reject;
@@ -174,6 +176,7 @@ describe('attemptToPublish', function() {
       // result of startUpload, so any rejection will be handled there.
     });
 
+    const abortFunction = jest.fn();
     const initUploadProcess: typeof uploadBinaryProfileData = () => ({
       abortUpload() {
         // In the real implementation, we call xhr.abort, hwich in turn
@@ -188,9 +191,7 @@ describe('attemptToPublish', function() {
         return promise;
       },
     });
-    (uploadBinaryProfileData: any).mockImplementation(initUploadProcess);
-
-    jest.spyOn(window, 'open').mockImplementation(() => {});
+    (uploadBinaryProfileData: any).mockImplementationOnce(initUploadProcess);
 
     function getUpdateUploadProgress() {
       return ensureExists(
@@ -198,6 +199,18 @@ describe('attemptToPublish', function() {
         'Expected to get a reference to the callback to update the upload progress.'
       );
     }
+
+    return {
+      resolveUpload,
+      rejectUpload,
+      abortFunction,
+      getUpdateUploadProgress,
+    };
+  }
+
+  function setupFakeUploadsWithStore(store: Store) {
+    jest.spyOn(window, 'open').mockImplementation(() => {});
+    const fakeUploadResult = setupFakeUpload();
 
     function waitUntilPhase(phase) {
       return waitUntilState(store, state => getUploadPhase(state) === phase);
@@ -216,11 +229,8 @@ describe('attemptToPublish', function() {
 
     return {
       ...store,
-      resolveUpload,
-      rejectUpload,
-      getUpdateUploadProgress,
+      ...fakeUploadResult,
       waitUntilPhase,
-      abortFunction,
       assertUploadSuccess,
     };
   }
@@ -536,8 +546,9 @@ describe('attemptToPublish', function() {
       await dispatch(viewProfileFromPathInZipFile('profile2.json'));
 
       // Now upload the SECOND profile.
+      const { resolveUpload: resolveUpload2 } = setupFakeUpload();
       const publishAttempt2 = dispatch(attemptToPublish());
-      resolveUpload(JWT_TOKEN);
+      resolveUpload2(JWT_TOKEN);
       await assertUploadSuccess(publishAttempt2);
 
       // For the second profile, check that we are reporting as being a public
