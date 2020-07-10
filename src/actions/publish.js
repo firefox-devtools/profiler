@@ -6,7 +6,6 @@
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
 import {
-  getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
@@ -98,9 +97,19 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // This way we can check inside this async function if we need to bail out early.
       const uploadGeneration = getUploadGeneration(prePublishedState);
 
-      // Create an abort function before the first async call.
+      // Create an abort function before the first async call, but we won't
+      // start the upload until much later.
       const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(uploadCompressionStarted(abortFunction));
+      const augmentedAbortfunction = () => {
+        // We dispatch the action right away, so that the UI is updated.
+        // Otherwise if the user pressed "Cancel" during a long process, like
+        // the compression, we wouldn't get a feedback until the end.
+        // Later on the promise from `startUpload` will get rejected too, and we
+        // handle this in the `catch` block.
+        dispatch({ type: 'UPLOAD_ABORTED' });
+        abortFunction();
+      };
+      dispatch(uploadCompressionStarted(augmentedAbortfunction));
 
       const gzipData: Uint8Array = await getSanitizedProfileData(
         prePublishedState
@@ -179,32 +188,25 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         eventAction: 'succeeded',
       });
     } catch (error) {
-      dispatch(uploadFailed(error));
-      sendAnalytics({
-        hitType: 'event',
-        eventCategory: 'profile upload',
-        eventAction: 'failed',
-      });
+      if (error.name === 'UploadAbortedError') {
+        // We already dispatched an action in the augmentedAbortFunction above,
+        // so we just handle analytics here.
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'aborted',
+        });
+      } else {
+        dispatch(uploadFailed(error));
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
+      }
       return false;
     }
     return true;
-  };
-}
-
-/**
- * Abort the attempt to publish.
- */
-export function abortUpload(): ThunkAction<Promise<void>> {
-  return async (dispatch, getState) => {
-    const abort = getAbortFunction(getState());
-    abort();
-    dispatch({ type: 'UPLOAD_ABORTED' });
-
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'aborted',
-    });
   };
 }
 

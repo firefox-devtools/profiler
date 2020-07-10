@@ -20,9 +20,12 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
-// Mocking SymbolStoreDB
+// We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 jest.mock('../../profile-logic/profile-store');
+const { UploadAbortedError } = jest.requireActual(
+  '../../profile-logic/profile-store'
+);
 
 // Mocking sha1
 import sha1 from '../../utils/sha1';
@@ -47,10 +50,21 @@ describe('app/MenuButtons', function() {
       rejectUpload = reject;
     });
 
+    promise.catch(() => {
+      // Node complains if we don't handle a promise/catch, and this one may reject
+      // before it's properly handled. Catch it here so that Node doesn't complain.
+    });
+
     // Flow doesn't know uploadBinaryProfileData is a jest mock.
     (uploadBinaryProfileData: any).mockImplementation(
       (() => ({
-        abortFunction: () => {},
+        abortFunction: () => {
+          // In the real implementation, we call xhr.abort, hwich in turn
+          // triggers an "abort" event on the XHR object, which in turn rejects
+          // the promise with the error UploadAbortedError. So we do just that
+          // here directly, to simulate this.
+          rejectUpload(new UploadAbortedError());
+        },
         startUpload: () => promise,
       }): typeof uploadBinaryProfileData)
     );
@@ -209,19 +223,17 @@ describe('app/MenuButtons', function() {
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
 
-    it('can publish, cancel, and then publish again', () => {
+    it('can publish, cancel, and then publish again', async () => {
       const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
         getCancelButton,
         getPanelForm,
-        resolveUpload,
         clickAndRunTimers,
       } = setup(profile);
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
-      resolveUpload();
 
       // These shouldn't exist anymore.
       expect(() => getPanel()).toThrow();
@@ -229,6 +241,10 @@ describe('app/MenuButtons', function() {
 
       clickAndRunTimers(getCancelButton());
 
+      // This might be asynchronous, depending on the underlying code.
+      await wait(() => {
+        getPublishButton();
+      });
       expect(getPublishButton()).toBeTruthy();
     });
 
