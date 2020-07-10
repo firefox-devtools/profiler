@@ -105,6 +105,8 @@ describe('timeline/TrackThread', function() {
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
+    // The size update then schedules another rAF draw call for canvas components.
+    flushRafCalls();
 
     const stackGraphCanvas = () =>
       ensureExists(
