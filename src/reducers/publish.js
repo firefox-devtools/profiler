@@ -122,7 +122,7 @@ const abortFunction: Reducer<() => void> = (state = noop, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_FAILED':
       return noop;
-    case 'UPLOAD_STARTED':
+    case 'UPLOAD_COMPRESSION_STARTED':
       return action.abortFunction;
     default:
       return state;

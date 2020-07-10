@@ -37,19 +37,19 @@ export function toggleCheckedSharingOptions(
   };
 }
 
-export function uploadCompressionStarted(): Action {
+export function uploadCompressionStarted(abortFunction: () => void): Action {
   return {
     type: 'UPLOAD_COMPRESSION_STARTED',
+    abortFunction,
   };
 }
 
 /**
  * Start uploading the profile, but save an abort function to be able to cancel it.
  */
-export function uploadStarted(abortFunction: () => void): Action {
+export function uploadStarted(): Action {
   return {
     type: 'UPLOAD_STARTED',
-    abortFunction,
   };
 }
 
@@ -98,7 +98,10 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // This way we can check inside this async function if we need to bail out early.
       const uploadGeneration = getUploadGeneration(prePublishedState);
 
-      dispatch(uploadCompressionStarted());
+      // Create an abort function before the first async call.
+      const { abortFunction, startUpload } = uploadBinaryProfileData();
+      dispatch(uploadCompressionStarted(abortFunction));
+
       const gzipData: Uint8Array = await getSanitizedProfileData(
         prePublishedState
       );
@@ -109,8 +112,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         return false;
       }
 
-      const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(uploadStarted(abortFunction));
+      dispatch(uploadStarted());
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
