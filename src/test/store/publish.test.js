@@ -281,7 +281,9 @@ describe('attemptToPublish', function() {
     expect(await publishAttempt).toEqual(true);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
-    expect(getUploadGeneration(getState())).toEqual(1);
+    // The generation is incremented twice because of some asynchronous code in
+    // the uploader function.
+    expect(getUploadGeneration(getState())).toEqual(2);
     dispatch(resetUploadState());
     expect(getUploadPhase(getState())).toEqual('local');
   });
