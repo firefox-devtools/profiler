@@ -15,7 +15,6 @@ import MarkerSettings from '../shared/MarkerSettings';
 
 import {
   getCommittedRange,
-  getProfileInterval,
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -30,7 +29,6 @@ import type {
   Marker,
   MarkerIndex,
   MarkerTimingAndBuckets,
-  Milliseconds,
   UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
@@ -52,7 +50,6 @@ type StateProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: StartEndRange,
-  +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
@@ -62,15 +59,20 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerChart extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
+
   /**
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
     const {
       timeRange: { start, end },
-      interval,
     } = this.props;
-    return interval / (end - start);
+
+    // This is set to a very small value, that represents 1ns. We can't set it
+    // to zero unless we revamp how ranges are handled in the app to prevent
+    // less-than-1ns ranges, otherwise we can get stuck at a "0" zoom.
+    const ONE_NS = 1e-6;
+    return ONE_NS / (end - start);
   }
 
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
@@ -176,7 +178,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
       rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(

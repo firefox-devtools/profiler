@@ -71,7 +71,7 @@ describe('app/ProfileFilterNavigator', () => {
         hasSelection: true,
         isModifying: false,
         selectionStart: 10,
-        selectionEnd: 20,
+        selectionEnd: 10.1,
       })
     );
     expect(container.firstChild).toMatchSnapshot();
