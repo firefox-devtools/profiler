@@ -1238,7 +1238,7 @@ export function updatePreviewSelection(
 export function commitRange(start: number, end: number): Action {
   if (end === start) {
     // Ensure that the duration of the range is non-zero.
-    end = end + 0.0001;
+    end = end + 0.000001; // Adds 1ns
   }
   return {
     type: 'COMMIT_RANGE',

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { formatTimestamp } from 'firefox-profiler/utils/format-numbers';
 import type { StartEndRange } from 'firefox-profiler/types';
 
 /**
@@ -161,13 +162,11 @@ export function stringifyCommittedRanges(
 }
 
 export function getFormattedTimeLength(length: number): string {
-  if (length >= 10000) {
-    return `${(length / 1000).toFixed(0)} sec`;
-  }
-  if (length >= 1000) {
-    return `${(length / 1000).toFixed(1)} sec`;
-  }
-  return `${length.toFixed(0)} ms`;
+  return formatTimestamp(
+    length,
+    /*significantdigits*/ 2,
+    /*maxFractionalDigits*/ 2
+  );
 }
 
 export function getCommittedRangeLabels(
