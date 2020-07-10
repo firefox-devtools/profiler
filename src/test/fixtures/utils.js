@@ -180,6 +180,10 @@ export function waitUntilState(
   store: Store,
   predicate: State => boolean
 ): Promise<void> {
+  if (predicate(store.getState())) {
+    return Promise.resolve();
+  }
+
   return new Promise(resolve => {
     store.subscribe(() => {
       if (predicate(store.getState())) {
