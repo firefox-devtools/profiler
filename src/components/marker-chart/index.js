@@ -68,6 +68,9 @@ class MarkerChart extends React.PureComponent<Props> {
       timeRange: { start, end },
     } = this.props;
 
+    // This is set to a very small value, that represents 1ns. We can't set it
+    // to zero unless we revamp how ranges are handled in the app to prevent
+    // less-than-1ns ranges, otherwise we can get stuck at a "0" zoom.
     const ONE_NS = 1e-6;
     return ONE_NS / (end - start);
   }
