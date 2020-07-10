@@ -2,28 +2,28 @@ html {
   background-color: #34405d;
 }
 body {
-  font: message-box;
-  box-shadow: 0 5px 25px #0b1f50;
-  background-color: #fff;
-  line-height: 1.5;
+  width: 80%;
+  max-width: 600px;
   padding: 2em;
   margin: 5% auto;
-  max-width: 600px;
-  width: 80%;
+  background-color: #fff;
+  box-shadow: 0 5px 25px #0b1f50;
+  font-family: sans-serif;
   line-height: 2;
 }
 
 #container {
-  margin: 1em 0;
+  overflow: hidden;
   padding: 1em;
   border: 1px solid #ddd;
-  overflow: hidden;
+  margin: 1em 0;
 }
 
 h1 {
   margin-top: 0;
 }
 
-body, input, button {
-  font-size: 100%;
+input,
+button {
+  font: inherit;
 }

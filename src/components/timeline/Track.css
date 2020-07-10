@@ -52,9 +52,7 @@
   border: none;
   margin: auto;
   background: none;
-  font: message-box;
-  font-size: 100%;
-  font-weight: normal;
+  font: inherit;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
