@@ -89,7 +89,7 @@ body,
   top: 0;
   left: 0;
   display: flex;
-  width: 100%;
+  min-width: 100%;
   flex-flow: row nowrap;
 }
 
@@ -100,12 +100,10 @@ body,
 }
 
 .treeViewBodyInner1 {
-  width: 100%;
-  min-width: min-content;
+  flex-grow: 1;
 }
 
 .treeViewBodyInner {
-  overflow: hidden;
   background: white;
 }
 
