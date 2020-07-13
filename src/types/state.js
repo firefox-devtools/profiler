@@ -168,6 +168,7 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 export type AppState = {|
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
+  +loadingState:LoadingState,
   +hasZoomedViaMousewheel: boolean,
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
