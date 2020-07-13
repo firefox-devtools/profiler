@@ -281,7 +281,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
-  +loading: LoadingState,
+  +loadingState: LoadingState,
 |};
 
 export type IconWithClassName = {|
