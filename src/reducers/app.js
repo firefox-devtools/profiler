@@ -14,6 +14,7 @@ import type {
   Reducer,
   UrlSetupPhase,
   ThreadIndex,
+  LoadingState,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -63,6 +64,21 @@ const urlSetupPhase: Reducer<UrlSetupPhase> = (
       return 'loading-profile';
     case 'URL_SETUP_DONE':
       return 'done';
+    default:
+      return state;
+  }
+};
+
+const loadingState:Reducer<LoadingState> = (
+  state = 'promise',
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_LOAD_PROGRESS':
+      return {
+        loadingStep:'promise',
+        progress:action.progress+10,
+      };//returns the object with new loadingStep and increase in progress
     default:
       return state;
   }
@@ -229,6 +245,7 @@ const isDragAndDropOverlayRegistered: Reducer<boolean> = (
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
+  loadingState,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
   panelLayoutGeneration,

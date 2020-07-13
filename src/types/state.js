@@ -280,7 +280,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
-  // +loading: LoadingState,
+  +loading: LoadingState,
 |};
 
 export type IconWithClassName = {|
