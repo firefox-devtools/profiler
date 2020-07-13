@@ -121,7 +121,7 @@ export type LoadingState = {|
   loadingStep: LoadingStep,
   progress: number,
   error: Error | mixed,
-  abortFunction: () => void,
+  // abortFunction: () => void,
 |};
 //How to connect this to LoadingStateAction that is imported
 

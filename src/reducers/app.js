@@ -14,8 +14,10 @@ import type {
   Reducer,
   UrlSetupPhase,
   ThreadIndex,
-  LoadingState,
+  // LoadingState,
 } from 'firefox-profiler/types';
+
+import loadingState from './loadingState';
 
 const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
@@ -69,27 +71,6 @@ const urlSetupPhase: Reducer<UrlSetupPhase> = (
   }
 };
 
-const loadingState:Reducer<LoadingState> = (
-  state = 'promise',
-  action
-) => {
-  switch (action.type) {
-    case 'CHANGE_LOAD_PROGRESS':
-      return {
-        loadingStep:'promise',
-        progress:action.progress+10,
-        error: 0,
-        abortFunction: () => void,
-      };//returns the object with new loadingStep and increase in progress
-    default:
-      return {
-        loadingStep:'promise',
-        progress:action.progress,
-        error: 0,
-        abortFunction: () => void,
-      };
-  }
-};
 
 const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
