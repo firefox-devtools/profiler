@@ -2675,7 +2675,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
       <div
         class="tooltipTiming"
       >
-        unknown duration
+        —
       </div>
       <div
         class="tooltipTitle"
