@@ -546,3 +546,42 @@ describe('selectors/getCombinedTimingRows', function() {
     ]);
   });
 });
+
+describe('selectors/getThreadRange', function() {
+  it('should compute a thread range based on the number of samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
+  });
+
+  it('should compute a thread range based on markers when no samples are present', function() {
+    const { getState } = storeWithProfile(
+      getProfileWithMarkers([['Marker', 10, 20]])
+    );
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 10,
+      end: 21,
+    });
+  });
+
+  it('ignores markers when there are samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    {
+      const markersProfile = getProfileWithMarkers([['Marker', 10, 20]]);
+      // Replace the markers on the samples profile.
+      profile.threads[0].markers = markersProfile.threads[0].markers;
+    }
+
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
+  });
+});
