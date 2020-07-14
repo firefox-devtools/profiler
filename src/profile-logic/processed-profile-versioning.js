@@ -1220,5 +1220,77 @@ const _upgraders = {
       }
     }
   },
+  [30]: profile => {
+    // The idea of phased markers was added to profiles, where the startTime and
+    // endTime is always in the RawMarkerTable directly, not in the payload.
+
+    const INSTANT = 0;
+    const INTERVAL = 1;
+    const INTERVAL_START = 2;
+    const INTERVAL_END = 3;
+
+    type Payload = $Shape<{
+      startTime: number,
+      endTime: number,
+      type: string,
+      interval: string,
+    }>;
+
+    for (const { markers } of profile.threads) {
+      // Set up the data, but with type information.
+      const times: number[] = markers.time;
+      const newStartTimes: Array<number | null> = [];
+      const newEndTimes: Array<number | null> = [];
+      const newPhases: Array<0 | 1 | 2 | 3> = [];
+
+      // Mutate the markers with the new format.
+      delete markers.time;
+      markers.startTime = newStartTimes;
+      markers.endTime = newEndTimes;
+      markers.phase = newPhases;
+
+      // Update the time information.
+      for (let i = 0; i < markers.length; i++) {
+        const data: ?Payload = markers.data[i];
+        const time: number = times[i];
+
+        // Start out by assuming it's an instant marker.
+        let newStartTime = time;
+        let newEndTime = null;
+        let phase = INSTANT;
+
+        // If there is a payload, it MAY change to an interval marker.
+        if (data) {
+          const { startTime, endTime, type, interval } = data;
+          if (type === 'tracing') {
+            if (interval === 'start') {
+              newStartTime = time;
+              newEndTime = null;
+              phase = INTERVAL_START;
+            } else {
+              newStartTime = null;
+              newEndTime = time;
+              phase = INTERVAL_END;
+            }
+          } else if (
+            // This could be considered an instant marker, since the startTime and
+            // endTime are the same.
+            startTime !== endTime &&
+            typeof startTime === 'number' &&
+            typeof endTime === 'number'
+          ) {
+            // This is some marker with both start and endTime markers.
+            newStartTime = startTime;
+            newEndTime = endTime;
+            phase = INTERVAL;
+          }
+        }
+
+        newStartTimes.push(newStartTime);
+        newEndTimes.push(newEndTime);
+        newPhases.push(phase);
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */
