@@ -42,6 +42,23 @@ Array [
     "set fillStyle",
     "#c5e1fe",
   ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    400,
+    50,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
 ]
 `;
 
@@ -58,6 +75,8 @@ exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
     >
       <canvas
         class="timelineMarkersCanvas"
+        height="50"
+        width="400"
       />
     </div>
   </div>
