@@ -1205,6 +1205,25 @@ Array [
     "start": 6,
     "title": null,
   },
+  Object {
+    "category": 0,
+    "data": Object {
+      "URI": "https://mozilla.org",
+      "cause": undefined,
+      "contentType": "text/html",
+      "endTime": 8,
+      "fetchStart": 7.5,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "Load 7: https://mozilla.org",
+    "start": 7,
+    "title": null,
+  },
 ]
 `;
 
@@ -1500,6 +1519,25 @@ Array [
     "dur": 1,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
+    "title": null,
+  },
+  Object {
+    "category": 0,
+    "data": Object {
+      "URI": "https://mozilla.org",
+      "cause": undefined,
+      "contentType": "text/html",
+      "endTime": 8,
+      "fetchStart": 7.5,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "Load 7: https://mozilla.org",
+    "start": 7,
     "title": null,
   },
 ]
