@@ -861,5 +861,96 @@ const _upgraders = {
     }
     convertToVersion19Recursive(profile);
   },
+  [20]: profile => {
+    // The idea of phased markers was added to profiles. This upgrader removes the `time`
+    // field from markers and replaces it with startTime, endTime and phase.
+    type OldSchema = {| name: 0, time: 1, category: 2, data: 3 |};
+    type Payload = $Shape<{
+      startTime: number,
+      endTime: number,
+      type: string,
+      interval: string,
+    }>;
+
+    const INSTANT = 0;
+    const INTERVAL = 1;
+    const INTERVAL_START = 2;
+    const INTERVAL_END = 3;
+
+    // Profiles now have an innerWindowID property in the frameTable.
+    // We are filling this array with 0 values because we have no idea what that value might be.
+    function convertToVersion20Recursive(p) {
+      for (const thread of p.threads) {
+        const { markers } = thread;
+        const oldSchema: OldSchema = markers.schema;
+        const newSchema = {
+          name: 0,
+          startTime: 1,
+          endTime: 2,
+          phase: 3,
+          category: 4,
+          data: 5,
+        };
+        markers.schema = newSchema;
+
+        for (
+          let markerIndex = 0;
+          markerIndex < markers.data.length;
+          markerIndex++
+        ) {
+          const markerTuple = markers.data[markerIndex];
+          const name: number = markerTuple[oldSchema.name];
+          const time: number = markerTuple[oldSchema.time];
+          const category: number = markerTuple[oldSchema.category];
+          const data: Payload = markerTuple[oldSchema.data];
+
+          let newStartTime: null | number = time;
+          let newEndTime: null | number = null;
+          let phase: 0 | 1 | 2 | 3 = INSTANT;
+
+          // If there is a payload, it MAY change to an interval marker.
+          if (data) {
+            const { startTime, endTime, type, interval } = data;
+            if (type === 'tracing') {
+              if (interval === 'start') {
+                newStartTime = time;
+                newEndTime = null;
+                phase = INTERVAL_START;
+              } else {
+                newStartTime = null;
+                newEndTime = time;
+                phase = INTERVAL_END;
+              }
+            } else if (
+              // This could be considered an instant marker, since the startTime and
+              // endTime are the same.
+              startTime !== endTime &&
+              typeof startTime === 'number' &&
+              typeof endTime === 'number'
+            ) {
+              // This is some marker with both start and endTime markers.
+              newStartTime = startTime;
+              newEndTime = endTime;
+              phase = INTERVAL;
+            }
+          }
+
+          // Rewrite the tuple with our new data.
+          const newTuple = [];
+          newTuple[newSchema.name] = name;
+          newTuple[newSchema.startTime] = newStartTime;
+          newTuple[newSchema.endTime] = newEndTime;
+          newTuple[newSchema.phase] = phase;
+          newTuple[newSchema.category] = category;
+          newTuple[newSchema.data] = data;
+          markers.data[markerIndex] = newTuple;
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion20Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion20Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */
