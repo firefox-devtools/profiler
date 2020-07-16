@@ -254,9 +254,16 @@ export type OriginsTimeline = Array<
 /**
  * Active tab view tracks
  */
-export type ActiveTabGlobalTrack =
-  | {| +type: 'tab', +threadIndex: ThreadIndex |}
-  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
+export type ActiveTabMainTrack = {|
+  type: 'tab',
+  threadIndex: ThreadIndex,
+|};
+
+export type ActiveTabScreenshotTrack = {|
+  +type: 'screenshots',
+  +id: string,
+  +threadIndex: ThreadIndex,
+|};
 
 export type ActiveTabResourceTrack =
   | {|
@@ -269,6 +276,16 @@ export type ActiveTabResourceTrack =
       +threadIndex: ThreadIndex,
       +name: string,
     |};
+
+export type ActiveTabTimeline = {
+  mainTrack: ActiveTabMainTrack,
+  screenshots: Array<ActiveTabScreenshotTrack>,
+  resources: Array<ActiveTabResourceTrack>,
+};
+
+export type ActiveTabGlobalTrack =
+  | ActiveTabMainTrack
+  | ActiveTabScreenshotTrack;
 
 export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 

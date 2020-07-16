@@ -19,9 +19,8 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  ActiveTabGlobalTrack,
   OriginsTimeline,
-  ActiveTabResourceTrack,
+  ActiveTabTimeline,
 } from './profile-derived';
 import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -284,8 +283,7 @@ type ReceiveProfileAction =
   | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
-      +globalTracks: ActiveTabGlobalTrack[],
-      +resourceTracks: ActiveTabResourceTrack[],
+      +activeTabTimeline: ActiveTabTimeline,
       +browsingContextID: BrowsingContextID,
     |}
   | {|

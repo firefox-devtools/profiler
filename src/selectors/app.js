@@ -16,8 +16,7 @@ import {
 import {
   getGlobalTracks,
   getLocalTracksByPid,
-  getActiveTabGlobalTracks,
-  getActiveTabResourceTracks,
+  getActiveTabTimeline,
 } from './profile';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
@@ -109,8 +108,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
-  getActiveTabGlobalTracks,
-  getActiveTabResourceTracks,
+  getActiveTabTimeline,
   getIsActiveTabResourcesPanelOpen,
   getScreenshotTrackHeight,
   (
@@ -120,8 +118,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
     trackThreadHeights,
-    activeTabGlobalTracks,
-    activeTabResourceTracks,
+    activeTabTimeline,
     isActiveTabResourcesPanelOpen,
     screenshotTrackHeight
   ) => {
@@ -132,41 +129,34 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         return height + 500;
       }
       case 'active-tab': {
-        if (activeTabResourceTracks.length > 0) {
+        if (activeTabTimeline.resources.length > 0) {
           // Active tab resources panel has a header and we should also add its
           // height if there is a panel there.
           height += ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT;
         }
 
-        for (const globalTrack of activeTabGlobalTracks) {
-          switch (globalTrack.type) {
-            case 'screenshots':
-              height += screenshotTrackHeight + border;
-              break;
-            case 'tab':
-              {
-                // The thread tracks have enough complexity that it warrants measuring
-                // them rather than statically using a value like the other tracks.
-                const { threadIndex } = globalTrack;
-                if (threadIndex === null) {
-                  height += TRACK_PROCESS_BLANK_HEIGHT + border;
-                } else {
-                  const trackThreadHeight = trackThreadHeights[threadIndex];
-                  if (trackThreadHeight === undefined) {
-                    // The height isn't computed yet, return.
-                    return null;
-                  }
-                  height += trackThreadHeight + border;
-                }
-              }
-              break;
-            default:
-              throw assertExhaustiveCheck(globalTrack);
+        // Add the height of the main track.
+        // The thread tracks have enough complexity that it warrants measuring
+        // them rather than statically using a value like the other tracks.
+        const { threadIndex } = activeTabTimeline.mainTrack;
+        if (threadIndex === null) {
+          height += TRACK_PROCESS_BLANK_HEIGHT + border;
+        } else {
+          const trackThreadHeight = trackThreadHeights[threadIndex];
+          if (trackThreadHeight === undefined) {
+            // The height isn't computed yet, return.
+            return null;
           }
+          height += trackThreadHeight + border;
+        }
+
+        // Add the height of screenshot tracks.
+        for (let i = 0; i < activeTabTimeline.screenshots.length; i++) {
+          height += screenshotTrackHeight + border;
         }
 
         if (isActiveTabResourcesPanelOpen) {
-          for (const resourceTrack of activeTabResourceTracks) {
+          for (const resourceTrack of activeTabTimeline.resources) {
             switch (resourceTrack.type) {
               case 'sub-frame':
               case 'thread':
