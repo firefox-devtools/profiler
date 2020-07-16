@@ -6944,10 +6944,7 @@ Object {
                 12,
                 1,
                 1,
-                Object {
-                  "endTime": 12,
-                  "startTime": 11,
-                },
+                Object {},
               ],
               Array [
                 8,
@@ -7232,10 +7229,7 @@ Object {
             12,
             1,
             1,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            Object {},
           ],
           Array [
             8,
@@ -7516,10 +7510,7 @@ Object {
             12,
             1,
             1,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            Object {},
           ],
           Array [
             8,
@@ -8126,10 +8117,7 @@ Object {
                 12,
                 1,
                 1,
-                Object {
-                  "endTime": 12,
-                  "startTime": 11,
-                },
+                Object {},
               ],
               Array [
                 8,
@@ -8198,11 +8186,9 @@ Object {
                     "stack": 0,
                     "time": 13.5,
                   },
-                  "endTime": 14,
                   "filename": "",
                   "operation": "stat",
                   "source": "NSPRIOInterposer",
-                  "startTime": 13.5,
                   "type": "FileIO",
                 },
               ],
@@ -8473,10 +8459,7 @@ Object {
             12,
             1,
             1,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            Object {},
           ],
           Array [
             8,
@@ -8784,10 +8767,7 @@ Object {
             12,
             1,
             1,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            Object {},
           ],
           Array [
             8,
@@ -9246,10 +9226,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
         ],
         "endTime": Array [
           null,
@@ -9628,10 +9605,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
         ],
         "endTime": Array [
           null,
@@ -10010,10 +9984,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
         ],
         "endTime": Array [
           null,
@@ -10504,10 +10475,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
             "connectEnd": 9,
@@ -10912,10 +10880,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
         ],
         "endTime": Array [
           null,
@@ -11331,10 +11296,7 @@ Object {
             "timeStamp": 1001,
             "type": "tracing",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
             "connectEnd": 1009,
@@ -11942,10 +11904,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
             "connectEnd": 9,
@@ -12352,10 +12311,7 @@ Object {
             "phase": 3,
             "type": "tracing",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
         ],
         "endTime": Array [
           null,
@@ -12773,10 +12729,7 @@ Object {
             "timeStamp": 1001,
             "type": "tracing",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
             "connectEnd": 1009,
