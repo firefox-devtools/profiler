@@ -19,6 +19,7 @@ import type {
   MarkerPhase,
   IndexIntoCategoryList,
   MarkerPayload_Gecko,
+  IPCMarkerPayload_Gecko,
 } from 'firefox-profiler/types';
 
 import {
@@ -378,7 +379,7 @@ function _createIPCMarker({
     null, // End time
     INSTANT,
     0, // Other
-    {
+    ({
       type: 'IPC',
       startTime: time,
       endTime: time,
@@ -389,7 +390,7 @@ function _createIPCMarker({
       direction,
       phase,
       sync: false,
-    },
+    }: IPCMarkerPayload_Gecko),
   ];
 }
 
@@ -584,12 +585,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           12, // End time
           INTERVAL,
           0, // Other
-          {
-            // MinorGC at time 11ms from 11ms to 12ms
-            type: 'GCMinor',
-            startTime: 11,
-            endTime: 12,
-          },
+          { type: 'GCMinor' },
         ],
         [
           8,
@@ -630,8 +626,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           INTERVAL,
           0, // Other
           {
-            startTime: 12,
-            endTime: 13,
             type: 'UserTiming',
             name: 'processing-thread',
             entryType: 'measure',
@@ -782,8 +776,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             type: 'FileIO',
-            startTime: 22,
-            endTime: 24,
             source: 'PoisionOIInterposer',
             filename: '/foo/bar/',
             operation: 'create/open',
@@ -829,8 +821,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             type: 'PreferenceRead',
-            startTime: 26,
-            endTime: 27,
             prefAccessTime: 114.9,
             prefName: 'layout.css.dpi',
             prefKind: 'User',

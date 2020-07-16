@@ -162,33 +162,18 @@ describe('TimelineMarkers', function() {
         ['Marker A', 0, 10],
         ['Marker B', 0, 10],
         ['Marker C', 5, 15],
-        [
-          'BHR-detected hang',
-          2,
-          13,
-          { type: 'BHR-detected hang', startTime: 2, endTime: 13 },
-        ],
+        ['BHR-detected hang', 2, 13, { type: 'BHR-detected hang' }],
         [
           'LongTask',
           2,
           6,
-          {
-            type: 'MainThreadLongTask',
-            category: 'LongTask',
-            startTime: 2,
-            endTime: 6,
-          },
+          { type: 'MainThreadLongTask', category: 'LongTask' },
         ],
         [
           'LongIdleTask',
           6,
           8,
-          {
-            type: 'MainThreadLongTask',
-            category: 'LongTask',
-            startTime: 6,
-            endTime: 8,
-          },
+          { type: 'MainThreadLongTask', category: 'LongTask' },
         ],
       ]
     );

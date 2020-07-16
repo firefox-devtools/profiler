@@ -281,14 +281,9 @@ export function extractMarkerDataFromName(
   const invalidationStringIndex = stringTable.indexForString('Invalidate');
   for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
     const nameIndex = markers.name[markerIndex];
-    const startTime = markers.startTime[markerIndex];
     const name = stringTable.getString(nameIndex);
     let matchFound = false;
     if (name.startsWith('Bailout_')) {
-      const time = ensureExists(
-        startTime,
-        'Expected to find a startTime for a Bailout marker'
-      );
       matchFound = true;
       const match = name.match(bailoutRegex);
       if (!match) {
@@ -311,16 +306,9 @@ export function extractMarkerDataFromName(
           script: script,
           bailoutLine: +bailoutLine,
           functionLine: functionLine === undefined ? null : +functionLine,
-          startTime: time,
-          endTime: time,
         }: BailoutPayload);
       }
     } else if (name.startsWith('Invalidate ')) {
-      const time = ensureExists(
-        startTime,
-        'Expected to find a startTime for an Invalidate marker'
-      );
-
       matchFound = true;
       const match = name.match(invalidateRegex);
       if (!match) {
@@ -332,8 +320,6 @@ export function extractMarkerDataFromName(
           type: 'Invalidation',
           url,
           line: line === undefined ? null : line,
-          startTime: time,
-          endTime: time,
         }: InvalidationPayload);
       }
     }
@@ -718,7 +704,10 @@ export function deriveMarkersFromRawMarkerTable(
             name = 'Sync' + name;
           }
 
-          let start = ensureExists(data.startTime),
+          let start = ensureExists(
+              data.startTime,
+              'Expected IPC startTime to exist in the payload.'
+            ),
             dur = 0,
             incomplete = true;
           if (

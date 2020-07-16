@@ -315,8 +315,6 @@ describe('timeline/TrackThread', function() {
         3,
         ({
           type: 'FileIO',
-          startTime: 2,
-          endTime: 3,
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
@@ -335,8 +333,6 @@ describe('timeline/TrackThread', function() {
         3,
         ({
           type: 'FileIO',
-          startTime: 2,
-          endTime: 3,
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
