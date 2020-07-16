@@ -138,11 +138,11 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         // Add the height of the main track.
         // The thread tracks have enough complexity that it warrants measuring
         // them rather than statically using a value like the other tracks.
-        const { threadIndex } = activeTabTimeline.mainTrack;
-        if (threadIndex === null) {
+        const { mainThreadIndex } = activeTabTimeline.mainTrack;
+        if (mainThreadIndex === null) {
           height += TRACK_PROCESS_BLANK_HEIGHT + border;
         } else {
-          const trackThreadHeight = trackThreadHeights[threadIndex];
+          const trackThreadHeight = trackThreadHeights[mainThreadIndex];
           if (trackThreadHeight === undefined) {
             // The height isn't computed yet, return.
             return null;

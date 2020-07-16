@@ -72,10 +72,10 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     const { globalTrack } = this.props;
     switch (globalTrack.type) {
       case 'tab': {
-        const { threadIndex } = globalTrack;
+        const { mainThreadIndex } = globalTrack;
         return (
           <TimelineTrackThread
-            threadIndex={threadIndex}
+            threadIndex={mainThreadIndex}
             showMemoryMarkers={false}
             trackType="expanded"
           />
@@ -165,8 +165,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     switch (globalTrack.type) {
       case 'tab': {
         // Look up the thread information for the process if it exists.
-        if (globalTrack.threadIndex !== null) {
-          const threadIndex = globalTrack.threadIndex;
+        if (globalTrack.mainThreadIndex !== null) {
+          const threadIndex = globalTrack.mainThreadIndex;
           isSelected =
             threadIndex === getSelectedThreadIndex(state) &&
             selectedTab !== 'network-chart';

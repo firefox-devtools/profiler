@@ -444,7 +444,8 @@ describe('showTabOnly', function() {
     expect(globalTracks).toEqual([
       {
         type: 'tab',
-        threadIndex: 0,
+        mainThreadIndex: 0,
+        threadIndexes: [0],
       },
     ]);
     // TODO: Resource track type will be changed soon.

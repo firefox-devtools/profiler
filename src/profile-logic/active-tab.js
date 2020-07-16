@@ -60,7 +60,7 @@ export function computeActiveTabTracks(
   state: State
 ): ActiveTabTimeline {
   // Global tracks that are certainly global tracks.
-  const mainTrack: ActiveTabMainTrack = { type: 'tab', threadIndex: 0 };
+  const mainTrackIndexes = [];
   const resources = [];
   const screenshots = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
@@ -80,8 +80,7 @@ export function computeActiveTabTracks(
 
       if (isTopmostThread(thread, topmostInnerWindowIDs)) {
         // This is a topmost thread, add it to global tracks.
-        // FIXME: there can be multiple topmost threads. Will resolve that in the following commit.
-        mainTrack.threadIndex = threadIndex;
+        mainTrackIndexes.push(threadIndex);
       } else {
         if (!isTabFilteredThreadEmpty(threadIndex, state)) {
           resources.push({
@@ -124,6 +123,11 @@ export function computeActiveTabTracks(
     }
   }
 
+  const mainTrack: ActiveTabMainTrack = {
+    type: 'tab',
+    mainThreadIndex: mainTrackIndexes[0] || 0,
+    threadIndexes: mainTrackIndexes,
+  };
   return { mainTrack, screenshots, resources };
 }
 

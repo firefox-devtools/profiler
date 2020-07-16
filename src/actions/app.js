@@ -214,7 +214,7 @@ export function toggleResourcesPanel(): ThunkAction<void> {
       // If it was open when we dispatched that action, it means we are closing this panel.
       // We would like to also select the main track when we close this panel.
       const mainTrack = getActiveTabMainTrack(getState());
-      selectedThreadIndex = mainTrack.threadIndex;
+      selectedThreadIndex = mainTrack.mainThreadIndex;
     }
 
     // Toggle the resources panel eventually.

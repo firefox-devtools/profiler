@@ -217,10 +217,15 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
   for (const globalTrack of globalTracks) {
     switch (globalTrack.type) {
       case 'tab': {
-        const selected =
-          globalTrack.threadIndex === selectedThreadIndex ? ' SELECTED' : '';
-        text.push(`main track [tab]${selected}`);
-        // TODO: Add resource tracks
+        // Only print the main track if we actually managed to find it.
+        if (globalTrack.threadIndexes.length > 0) {
+          const selected =
+            globalTrack.mainThreadIndex === selectedThreadIndex
+              ? ' SELECTED'
+              : '';
+          text.push(`main track [tab]${selected}`);
+          // TODO: Add resource tracks
+        }
         break;
       }
       case 'screenshots': {
