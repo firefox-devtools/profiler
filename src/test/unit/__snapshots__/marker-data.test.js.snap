@@ -71,8 +71,6 @@ Array [
   Object {
     "category": 0,
     "data": Object {
-      "endTime": 12,
-      "startTime": 11,
       "type": "GCMinor",
     },
     "dur": 1,
@@ -83,10 +81,8 @@ Array [
   Object {
     "category": 0,
     "data": Object {
-      "endTime": 13,
       "entryType": "measure",
       "name": "processing-thread",
-      "startTime": 12,
       "type": "UserTiming",
     },
     "dur": 1,
@@ -172,11 +168,9 @@ Array [
         "stack": 2,
         "time": 1,
       },
-      "endTime": 24,
       "filename": "/foo/bar/",
       "operation": "create/open",
       "source": "PoisionOIInterposer",
-      "startTime": 22,
       "type": "FileIO",
     },
     "dur": 2,
@@ -201,13 +195,11 @@ Array [
   Object {
     "category": 0,
     "data": Object {
-      "endTime": 27,
       "prefAccessTime": 114.9,
       "prefKind": "User",
       "prefName": "layout.css.dpi",
       "prefType": "Int",
       "prefValue": "-1",
-      "startTime": 26,
       "type": "PreferenceRead",
     },
     "dur": 1,
