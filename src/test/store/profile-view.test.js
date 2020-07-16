@@ -865,11 +865,9 @@ describe('actions/ProfileView', function() {
           1024,
           {
             cause: { stack: 2, time: 1 },
-            endTime: 1024,
             filename: '/foo/bar/',
             operation: 'create/open',
             source: 'PoisionOIInterposer',
-            startTime: 1022,
             type: 'FileIO',
           },
         ],
@@ -1084,8 +1082,6 @@ describe('actions/ProfileView', function() {
           1022,
           {
             type: 'UserTiming',
-            startTime: 1002,
-            endTime: 1022,
             name: 'mark-1',
             entryType: 'mark',
           },
@@ -1097,8 +1093,6 @@ describe('actions/ProfileView', function() {
           1100,
           {
             type: 'UserTiming',
-            startTime: 1050,
-            endTime: 1100,
             name: 'measure-1',
             entryType: 'measure',
           },

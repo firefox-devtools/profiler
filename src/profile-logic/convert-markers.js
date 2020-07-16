@@ -110,16 +110,12 @@ export function upgradeGCMajorMarker_Processed8to9(
       };
       return {
         type: 'GCMajor',
-        startTime: marker9.startTime,
-        endTime: marker9.endTime,
         timings: timings,
       };
     }
     case 'aborted': {
       return {
         type: 'GCMajor',
-        startTime: marker9.startTime,
-        endTime: marker9.endTime,
         timings: { status: 'aborted' },
       };
     }

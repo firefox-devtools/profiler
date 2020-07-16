@@ -831,8 +831,6 @@ function extractMarkers(
             type: 'CompleteTraceEvent',
             category: event.cat,
             data: argData,
-            startTime: time,
-            endTime: time + duration,
           });
         } else if (event.ph === 'B' || event.ph === 'E') {
           if (event.ph === 'B') {
@@ -865,8 +863,6 @@ function extractMarkers(
             type: 'InstantTraceEvent',
             category: event.cat,
             data: argData,
-            startTime: time,
-            endTime: time,
           });
         }
         markers.length++;

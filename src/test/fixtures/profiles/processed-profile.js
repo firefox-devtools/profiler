@@ -108,8 +108,6 @@ function _refineMockPayload(
   ) {
     return {
       type: 'DummyForTests',
-      endTime: payload.endTime,
-      startTime: payload.startTime,
     };
   }
   // There is no way to refine the payload type to just the { startTime, endTime }
@@ -274,8 +272,6 @@ export function getUserTiming(
     endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),
@@ -310,8 +306,6 @@ export function getMarkerTableProfile() {
         12.5,
         {
           type: 'UserTiming',
-          startTime: 12.5,
-          endTime: 12.5,
           name: 'foobar',
           entryType: 'mark',
         },
@@ -332,8 +326,6 @@ export function getMarkerTableProfile() {
         165.871503,
         {
           type: 'Text',
-          startTime: 165.87091900000001,
-          endTime: 165.871503,
           name: '5.5',
         },
       ],
@@ -853,25 +845,23 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   const startPayload: NetworkPayload = {
     type: 'Network',
     id,
+    startTime,
+    endTime,
     pri: 0,
     status: 'STATUS_START',
-    startTime,
-    endTime: fetchStart,
     URI: uri,
   };
 
   const stopPayload: NetworkPayload = {
     ...startPayload,
     status: 'STATUS_STOP',
-    startTime: fetchStart,
-    endTime,
     contentType: 'text/html',
     ...payload,
   };
 
   return [
-    [name, startTime, startPayload.endTime, startPayload],
-    [name, startTime, stopPayload.endTime, stopPayload],
+    [name, startTime, fetchStart, startPayload],
+    [name, startTime, endTime, stopPayload],
   ];
 }
 
@@ -959,7 +949,9 @@ type IPCMarkersOptions = {|
   sync: boolean,
 |};
 
-function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
+function _getIPCMarkers(
+  options: $Shape<IPCMarkersOptions> = {}
+): TestDefinedMarkers {
   const payload: IPCMarkerPayload = {
     type: 'IPC',
     startTime: 0,
@@ -974,7 +966,17 @@ function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
     ...options,
   };
 
-  return [['IPC', options.startTime || 0, payload.endTime, payload]];
+  return [
+    [
+      'IPC',
+      options.startTime || 0,
+      ensureExists(
+        payload.endTime,
+        'Expected to find an endTime on the IPC marker'
+      ),
+      payload,
+    ],
+  ];
 }
 
 export function getIPCTrackProfile() {

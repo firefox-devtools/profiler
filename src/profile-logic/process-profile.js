@@ -634,7 +634,12 @@ function _processMarkers(
         case 'JS allocation': {
           // Build up a separate table for the JS allocation data, and do not
           // include it in the marker information.
-          jsAllocations.time.push(geckoPayload.startTime);
+          jsAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'JS Allocations are assumed to have a startTime'
+            )
+          );
           jsAllocations.className.push(geckoPayload.className);
           jsAllocations.typeName.push(geckoPayload.typeName);
           jsAllocations.coarseType.push(geckoPayload.coarseType);
@@ -653,7 +658,12 @@ function _processMarkers(
           }
           // Build up a separate table for the native allocation data, and do not
           // include it in the marker information.
-          inProgressNativeAllocations.time.push(geckoPayload.startTime);
+          inProgressNativeAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'Native Allocations are assumed to have a startTime'
+            )
+          );
           inProgressNativeAllocations.weight.push(geckoPayload.size);
           inProgressNativeAllocations.stack.push(
             _convertPayloadStackToIndex(geckoPayload)
@@ -763,8 +773,6 @@ function _processMarkerPayload(
 
       return ({
         type: 'GCSlice',
-        startTime: payload.startTime,
-        endTime: payload.endTime,
         timings: {
           ...partialTimings,
           phase_times: times ? convertPhaseTimes(times) : {},
@@ -785,16 +793,12 @@ function _processMarkerPayload(
           };
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: timings,
           }: GCMajorMarkerPayload);
         }
         case 'aborted':
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: { status: 'aborted' },
           }: GCMajorMarkerPayload);
         default:

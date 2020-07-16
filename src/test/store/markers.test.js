@@ -144,29 +144,21 @@ describe('getProcessedRawMarkerTable', function() {
         type: 'Invalidation',
         url: 'http://mozilla.com/script.js',
         line: '1234',
-        startTime: 10,
-        endTime: 10,
       },
       {
         type: 'Invalidation',
         url: 'self-hosted',
         line: '2345',
-        startTime: 20,
-        endTime: 20,
       },
       {
         type: 'Invalidation',
         url: 'resource://foo -> resource://bar',
         line: '3456',
-        startTime: 30,
-        endTime: 30,
       },
       {
         type: 'Invalidation',
         url: 'moz-extension://<URL>',
         line: null,
-        startTime: 40,
-        endTime: 40,
       },
     ]);
   });
@@ -199,8 +191,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'resource://foo.js -> resource://bar.js',
         bailoutLine: 3666,
         functionLine: 3662,
-        startTime: 10,
-        endTime: 10,
       },
       {
         type: 'Bailout',
@@ -209,8 +199,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'self-hosted',
         bailoutLine: 1021,
         functionLine: 970,
-        startTime: 20,
-        endTime: 20,
       },
       {
         type: 'Bailout',
@@ -219,8 +207,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'moz-extension://<URL>',
         bailoutLine: 7,
         functionLine: null,
-        startTime: 30,
-        endTime: 30,
       },
     ]);
   });
@@ -260,24 +246,9 @@ describe('memory markers', function() {
           4,
           { type: 'tracing', category: 'CC', interval: 'end' },
         ],
-        [
-          'GCMinor',
-          5,
-          null,
-          { type: 'GCMinor', startTime: 5, endTime: 5, nursery: any },
-        ],
-        [
-          'GCMajor',
-          6,
-          null,
-          { type: 'GCMajor', startTime: 6, endTime: 6, timings: any },
-        ],
-        [
-          'GCSlice',
-          7,
-          null,
-          { type: 'GCSlice', startTime: 7, endTime: 7, timings: any },
-        ],
+        ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
+        ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
+        ['GCSlice', 7, null, { type: 'GCSlice', timings: any }],
       ])
     );
   }

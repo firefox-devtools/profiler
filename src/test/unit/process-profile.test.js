@@ -369,8 +369,6 @@ describe('js allocation processing', function() {
       const markerTuple: any = [];
       const payload: JsAllocationPayload_Gecko = {
         type: 'JS allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         className: 'Function',
         typeName: 'JSObject',
         coarseType: 'Object',
@@ -445,8 +443,6 @@ describe('native allocation processing', function() {
       const markerTuple: any = [];
       const payload: NativeAllocationPayload_Gecko = {
         type: 'Native allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         size: byteSize,
         stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
       };

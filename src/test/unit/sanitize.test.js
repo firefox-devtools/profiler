@@ -242,8 +242,6 @@ describe('sanitizePII', function() {
           1,
           {
             type: 'Text',
-            startTime: 0,
-            endTime: 1,
             name: unsanitizedNameField,
           },
         ],
@@ -305,8 +303,6 @@ describe('sanitizePII', function() {
           1,
           {
             type: 'PreferenceRead',
-            startTime: 0,
-            endTime: 1,
             prefAccessTime: 0,
             prefName: 'preferenceName',
             prefKind: 'preferenceKind',
@@ -344,8 +340,6 @@ describe('sanitizePII', function() {
           1,
           {
             type: 'PreferenceRead',
-            startTime: 0,
-            endTime: 1,
             prefAccessTime: 0,
             prefName: 'preferenceName',
             prefKind: 'preferenceKind',
@@ -411,8 +405,6 @@ describe('sanitizePII', function() {
           2,
           {
             type: 'FileIO',
-            startTime: 1,
-            endTime: 2,
             source: 'PoisonIOInterposer',
             filename:
               '/Users/username/Library/Application Support/Firefox/Profiles/profile-id.default/' +
@@ -430,8 +422,6 @@ describe('sanitizePII', function() {
           4,
           {
             type: 'FileIO',
-            startTime: 3,
-            endTime: 4,
             source: 'PoisonIOInterposer',
             filename:
               'C:\\Users\\username\\mozilla-central\\obj-mc-dbg\\dist\\bin\\browser\\modules\\' +

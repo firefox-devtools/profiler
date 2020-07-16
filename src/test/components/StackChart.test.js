@@ -275,8 +275,6 @@ function getUserTiming(name: string, startTime: number, duration: number) {
     endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),

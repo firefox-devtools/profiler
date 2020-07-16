@@ -88,8 +88,6 @@ describe('TooltipMarker', function() {
         12.5,
         {
           type: 'UserTiming',
-          startTime: 12.5,
-          endTime: 12.5,
           name: 'foobar',
           entryType: 'mark',
         },
@@ -110,8 +108,6 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'GCMinor',
-          startTime: 15.5,
-          endTime: 15.5,
           // nursery is only present in newer profile format.
           nursery: {
             bytes_tenured: 1366368,
@@ -152,8 +148,6 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'GCMajor',
-          startTime: 16.5,
-          endTime: 16.5,
           timings: {
             added_chunks: 50,
             allocated_bytes: 48377856,
@@ -233,8 +227,6 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'GCSlice',
-          startTime: 17.5,
-          endTime: 17.5,
           timings: {
             reason: 'CC_WAITING',
             slice: 1,
@@ -280,8 +272,6 @@ describe('TooltipMarker', function() {
         {
           type: 'Text',
           name: 'TTFI after 100.01ms (longTask was 100.001ms)',
-          startTime: 21.4,
-          endTime: 21.4,
         },
       ],
       [
@@ -301,8 +291,6 @@ describe('TooltipMarker', function() {
         {
           type: 'Styles',
           category: 'Paint',
-          startTime: 20.0,
-          endTime: 20.5,
           elementsTraversed: 100,
           elementsStyled: 50,
           elementsMatched: 10,
@@ -330,8 +318,6 @@ describe('TooltipMarker', function() {
         115,
         {
           type: 'FileIO',
-          startTime: 114,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
@@ -347,8 +333,6 @@ describe('TooltipMarker', function() {
         115,
         {
           type: 'FileIO',
-          startTime: 114.5,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
@@ -399,8 +383,6 @@ describe('TooltipMarker', function() {
         null,
         {
           type: 'PreferenceRead',
-          startTime: 114.9,
-          endTime: 114.9,
           prefAccessTime: 114.9,
           prefName: 'layout.css.dpi',
           prefKind: 'User',
@@ -667,8 +649,6 @@ describe('TooltipMarker', function() {
         115,
         {
           type: 'FileIO',
-          startTime: 114.5,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',

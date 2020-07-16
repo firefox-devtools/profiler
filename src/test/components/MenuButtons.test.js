@@ -72,8 +72,6 @@ describe('app/MenuButtons', function() {
         1,
         {
           type: 'PreferenceRead',
-          startTime: 0,
-          endTime: 1,
           prefAccessTime: 0,
           prefName: 'testing',
           prefKind: 'testing',
