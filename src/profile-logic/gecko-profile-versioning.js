@@ -864,6 +864,9 @@ const _upgraders = {
   [20]: profile => {
     // The idea of phased markers was added to profiles. This upgrader removes the `time`
     // field from markers and replaces it with startTime, endTime and phase.
+    //
+    // It also removes the startTime and endTime from payloads, except for IPC and
+    // Network markers.
     type OldSchema = {| name: 0, time: 1, category: 2, data: 3 |};
     type Payload = $Shape<{
       startTime: number,
@@ -932,6 +935,13 @@ const _upgraders = {
               newStartTime = startTime;
               newEndTime = endTime;
               phase = INTERVAL;
+            }
+
+            if (data.type !== 'IPC' && data.type !== 'Network') {
+              // These two properties were removed, except for in these two markers
+              // as they are needed for special processing.
+              delete data.startTime;
+              delete data.endTime;
             }
           }
 

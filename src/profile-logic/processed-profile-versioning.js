@@ -1223,7 +1223,9 @@ const _upgraders = {
   [30]: profile => {
     // The idea of phased markers was added to profiles, where the startTime and
     // endTime is always in the RawMarkerTable directly, not in the payload.
-
+    //
+    // It also removes the startTime and endTime from payloads, except for IPC and
+    // Network markers.
     const INSTANT = 0;
     const INTERVAL = 1;
     const INTERVAL_START = 2;
@@ -1283,6 +1285,13 @@ const _upgraders = {
             newStartTime = startTime;
             newEndTime = endTime;
             phase = INTERVAL;
+          }
+
+          if (data.type !== 'IPC' && data.type !== 'Network') {
+            // These two properties were removed, except for in these two markers
+            // as they are needed for special processing.
+            delete data.startTime;
+            delete data.endTime;
           }
         }
 
