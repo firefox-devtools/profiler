@@ -46,6 +46,7 @@ import type { Column } from '../shared/TreeView';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
+  +thread: Thread,
   +threadIndex: ThreadIndex,
   +scrollToSelectionGeneration: number,
   +focusCallTreeGeneration: number,
@@ -200,6 +201,80 @@ class CallTreeComponent extends PureComponent<Props> {
     }
   }
 
+  _onTransformKeyPress = (event: KeyboardEvent) => {
+    const { addTransformToStack, implementationFilter, invertCallstack, threadIndex, thread, selectedCallNodeIndex, callNodeInfo } = this.props;
+    const callNodePath = getCallNodePathFromIndex(selectedCallNodeIndex, callNodeInfo.callNodeTable);
+    const selectedFunc = callNodePath[callNodePath.length - 1];
+    if (event.ctrlKey && event.altKey) {
+      switch (event.key) {
+        case 'z':
+          addTransformToStack(threadIndex, {
+            type: 'focus-subtree',
+            callNodePath: callNodePath,
+            implementation: implementationFilter,
+            inverted: invertCallstack,
+          });
+          break;
+        case 'b':
+          addTransformToStack(threadIndex, {
+            type: 'focus-function',
+            funcIndex: selectedFunc,
+          });
+          break;
+        case 'c':
+          addTransformToStack(threadIndex, {
+            type: 'merge-call-node',
+            callNodePath: callNodePath,
+            implementation: implementationFilter,
+          });
+          break;
+        case 'd':
+          addTransformToStack(threadIndex, {
+            type: 'merge-function',
+            funcIndex: selectedFunc,
+          });
+          break;
+        case 'e':
+          addTransformToStack(threadIndex, {
+            type: 'drop-function',
+            funcIndex: selectedFunc,
+          });
+          break;
+        case 'f': {
+          const { funcTable } = thread;
+          const resourceIndex = funcTable.resource[selectedFunc];
+          // A new collapsed func will be inserted into the table at the end. Deduce
+          // the index here.
+          const collapsedFuncIndex = funcTable.length;
+          addTransformToStack(threadIndex, {
+            type: 'collapse-resource',
+            resourceIndex,
+            collapsedFuncIndex,
+            implementation: implementationFilter,
+          });
+          break;
+        }
+        case 'g': {
+          addTransformToStack(threadIndex, {
+            type: 'collapse-direct-recursion',
+            funcIndex: selectedFunc,
+            implementation: implementationFilter,
+          });
+          break;
+        }
+        case 'h': {
+          addTransformToStack(threadIndex, {
+            type: 'collapse-function-subtree',
+            funcIndex: selectedFunc,
+          });
+          break;
+        }
+        default:
+          return;
+      }
+    }
+  };
+
   _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
@@ -284,6 +359,7 @@ class CallTreeComponent extends PureComponent<Props> {
         fixedColumns={this._weightTypeToColumns(weightType)}
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
+        onTransformKeyPress={this._onTransformKeyPress}
         onSelectionChange={this._onSelectedCallNodeChange}
         onRightClickSelection={this._onRightClickSelection}
         onExpandedNodesChange={this._onExpandedCallNodesChange}
@@ -304,6 +380,7 @@ class CallTreeComponent extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
+    thread: selectedThreadSelectors.getThread(state),
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),

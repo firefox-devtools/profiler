@@ -336,6 +336,7 @@ type TreeViewProps<DisplayData> = {|
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
+  +onTransformKeyPress: KeyboardEvent => mixed,
   +onSelectionChange: NodeIndex => mixed,
   +onRightClickSelection?: NodeIndex => mixed,
   +onEnterKey?: NodeIndex => mixed,
@@ -521,6 +522,10 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     this._toggle(nodeId, newExpanded, true);
   }
 
+  _transform(event: KeyboardEvent) {
+    this.props.onTransformKeyPress(event);
+  }
+
   _select(nodeId: NodeIndex) {
     this.props.onSelectionChange(nodeId);
   }
@@ -562,7 +567,6 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
   };
 
   _onKeyDown = (event: KeyboardEvent) => {
-    const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
       event.key.startsWith('Page') ||
@@ -571,10 +575,6 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     const isAsteriskKey = event.key === '*';
     const isEnterKey = event.key === 'Enter';
 
-    if (hasModifier || (!isNavigationKey && !isAsteriskKey && !isEnterKey)) {
-      // No key events that we care about were found, so don't try and handle them.
-      return;
-    }
     event.stopPropagation();
     event.preventDefault();
 
@@ -587,6 +587,11 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     if (selected === null || selectedRowIndex === -1) {
       // the first condition is redundant, but it makes flow happy
       this._select(visibleRows[0]);
+      return;
+    }
+
+    if (!isNavigationKey && !isAsteriskKey && !isEnterKey) {
+      this._transform(event);
       return;
     }
 
