@@ -40,14 +40,11 @@ const LOCAL_TRACK_INDEX_ORDER = {
   'event-delay': 4,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
-  // It's okay to make the event delay the first because it will be disabled by
-  // default. If a user wants to enable that track, that means they want to see
-  // that data first.
-  'event-delay': 0,
-  network: 1,
-  memory: 2,
-  thread: 3,
-  ipc: 4,
+  network: 0,
+  memory: 1,
+  thread: 2,
+  ipc: 3,
+  'event-delay': 4,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -303,16 +300,6 @@ export function addEventDelayTracksForThreads(
 
     tracks.push({ type: 'event-delay', threadIndex });
     newLocalTracksByPid.set(pid, tracks);
-  }
-
-  // When adding a new track type, this for loop ensures that the newer tracks are
-  // added at the end so that the local track indexes are stable and backwards compatible.
-  for (const localTracks of newLocalTracksByPid.values()) {
-    // In place sort!
-    localTracks.sort(
-      (a, b) =>
-        LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
-    );
   }
 
   return newLocalTracksByPid;
