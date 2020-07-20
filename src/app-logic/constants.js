@@ -37,6 +37,10 @@ export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
 
+// The following values are for expermintal event delay track.
+export const TRACK_EVENT_DELAY_HEIGHT = 40;
+export const TRACK_EVENT_DELAY_LINE_WIDTH = 2;
+
 // The following values are for IPC track.
 export const TRACK_IPC_MARKERS_HEIGHT = 25;
 export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;

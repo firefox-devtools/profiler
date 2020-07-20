@@ -24,7 +24,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-import './TrackMemory.css';
+import './TrackEventDelay.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
@@ -157,7 +157,10 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
     this._scheduleDraw();
 
     return (
-      <canvas className="timelineTrackMemoryCanvas" ref={this._takeCanvasRef} />
+      <canvas
+        className="timelineTrackEventDelayCanvas"
+        ref={this._takeCanvasRef}
+      />
     );
   }
 }
@@ -241,15 +244,15 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
     const { eventDelays } = this.props.eventDelays;
     const { delayRange } = this.props.eventDelays;
     return (
-      <div className="timelineTrackMemoryTooltip">
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
+      <div className="timelineTrackEventDelayTooltip">
+        <div className="timelineTrackEventDelayTooltipLine">
+          <span className="timelineTrackEventDelayTooltipNumber">
             {formatMilliseconds(eventDelays[delayIndex])}
           </span>
           {' event delay'}
         </div>
-        <div className="timelineTrackMemoryTooltipLine">
-          <span className="timelineTrackMemoryTooltipNumber">
+        <div className="timelineTrackEventDelayTooltipLine">
+          <span className="timelineTrackEventDelayTooltipNumber">
             {formatMilliseconds(delayRange)}
           </span>
           {' delay range in graph'}
@@ -284,7 +287,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
     return (
-      <div style={{ left, top }} className="timelineTrackMemoryGraphDot" />
+      <div style={{ left, top }} className="timelineTrackEventDelayGraphDot" />
     );
   }
 
@@ -305,7 +308,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        className="timelineTrackMemoryGraph eventDelay"
+        className="timelineTrackEventDelayGraph"
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
       >

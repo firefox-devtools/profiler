@@ -7,14 +7,14 @@
 import * as React from 'react';
 import { TrackEventDelayGraph } from './TrackEventDelayGraph';
 import {
-  TRACK_MEMORY_GRAPH_HEIGHT,
-  TRACK_MEMORY_LINE_WIDTH,
+  TRACK_EVENT_DELAY_HEIGHT,
+  TRACK_EVENT_DELAY_LINE_WIDTH,
 } from '../../app-logic/constants';
 
 import type { ThreadIndex } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-import './TrackMemory.css';
+import './TrackEventDelay.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
@@ -25,10 +25,10 @@ type Props = ConnectedProps<OwnProps, {||}, {||}>;
 export class TrackEventDelay extends React.PureComponent<Props, {||}> {
   render() {
     const { threadIndex } = this.props;
-    const graphHeight = TRACK_MEMORY_GRAPH_HEIGHT + 15;
+    const graphHeight = TRACK_EVENT_DELAY_HEIGHT;
     return (
       <div
-        className="timelineTrackMemory"
+        className="timelineTrackEventDelay"
         style={{
           height: graphHeight,
           '--graph-height': `${graphHeight}px`,
@@ -37,7 +37,7 @@ export class TrackEventDelay extends React.PureComponent<Props, {||}> {
       >
         <TrackEventDelayGraph
           threadIndex={threadIndex}
-          lineWidth={TRACK_MEMORY_LINE_WIDTH}
+          lineWidth={TRACK_EVENT_DELAY_LINE_WIDTH}
           graphHeight={graphHeight}
         />
       </div>

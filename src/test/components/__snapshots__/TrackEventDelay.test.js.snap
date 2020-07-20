@@ -2,30 +2,30 @@
 
 exports[`TrackEventDelay draws a dot that matches the snapshot 1`] = `
 <div
-  class="timelineTrackMemoryGraphDot"
+  class="timelineTrackEventDelayGraphDot"
   style="left: 15.466666666666667px; top: 39.327586206896555px;"
 />
 `;
 
 exports[`TrackEventDelay has a tooltip that matches the snapshot 1`] = `
 <div
-  class="timelineTrackMemoryTooltip"
+  class="timelineTrackEventDelayTooltip"
 >
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackEventDelayTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackEventDelayTooltipNumber"
     >
       36ms
     </span>
      event delay
   </div>
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackEventDelayTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackEventDelayTooltipNumber"
     >
       58ms
     </span>
@@ -834,14 +834,14 @@ Array [
 
 exports[`TrackEventDelay matches the component snapshot 1`] = `
 <div
-  class="timelineTrackMemory"
+  class="timelineTrackEventDelay"
   style="height: 40px; --graph-height: 40px; --markers-height: 0px;"
 >
   <div
-    class="timelineTrackMemoryGraph eventDelay"
+    class="timelineTrackEventDelayGraph"
   >
     <canvas
-      class="timelineTrackMemoryCanvas"
+      class="timelineTrackEventDelayCanvas"
     />
     <div
       class="timelineEmptyThreadIndicator"

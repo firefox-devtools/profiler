@@ -73,13 +73,13 @@ describe('TrackEventDelay', function() {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackMemoryCanvas'),
-      `Couldn't find the event delay canvas, with selector .timelineTrackMemoryCanvas`
+      container.querySelector('.timelineTrackEventDelayCanvas'),
+      `Couldn't find the event delay canvas, with selector .timelineTrackEventDelayCanvas`
     );
     const getTooltipContents = () =>
-      document.querySelector('.timelineTrackMemoryTooltip');
+      document.querySelector('.timelineTrackEventDelayTooltip');
     const getEventDelayDot = () =>
-      container.querySelector('.timelineTrackMemoryGraphDot');
+      container.querySelector('.timelineTrackEventDelayGraphDot');
     const moveMouseAtEventDelay = index =>
       fireEvent(
         canvas,
