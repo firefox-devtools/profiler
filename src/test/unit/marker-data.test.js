@@ -69,7 +69,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 0,
+        end: null,
         name: 'TestDefinedMarker',
         start: 5,
         title: null,
@@ -90,7 +90,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 1,
+        end: 6,
         name: 'TestDefinedMarker',
         start: 5,
         title: null,
@@ -116,7 +116,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 1,
+        end: 6,
         name: 'TestDefinedMarker',
         start: 5,
         title: null,
@@ -137,7 +137,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 6,
+        end: 6,
         name: 'TestDefinedMarker',
         start: 0,
         title: null,
@@ -161,7 +161,7 @@ describe('Derive markers from Gecko phase markers', function() {
         category: 0,
         data: null,
         // This could fail in the future if we determine thread length some other way.
-        dur: profile.threads[0].samples.length - startTime,
+        end: profile.threads[0].samples.length,
         name: 'TestDefinedMarker',
         start: 2,
         title: null,
@@ -198,7 +198,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 5,
+        end: 7,
         name: 'TestDefinedMarker',
         start: 2,
         title: null,
@@ -206,7 +206,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 2,
+        end: 5,
         name: 'TestDefinedMarker',
         start: 3,
         title: null,
@@ -246,7 +246,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 3,
+        end: 5,
         name: 'Marker A',
         start: 2,
         title: null,
@@ -254,7 +254,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: null,
-        dur: 4,
+        end: 7,
         name: 'Marker B',
         start: 3,
         title: null,
@@ -302,7 +302,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: payload1,
-        dur: startTimeB - startTimeA,
+        end: startTimeB,
         name: 'CompositorScreenshot',
         start: 2,
         title: null,
@@ -311,7 +311,7 @@ describe('Derive markers from Gecko phase markers', function() {
       {
         category: 0,
         data: payload2,
-        dur: threadRange.end - startTimeB,
+        end: threadRange.end,
         name: 'CompositorScreenshot',
         start: startTimeB,
         title: null,
@@ -397,7 +397,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[1]).toMatchObject({
       start: 2,
-      dur: 0,
+      end: null,
       name: 'VsyncTimestamp',
       title: null,
     });
@@ -406,7 +406,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[2]).toMatchObject({
       start: 3,
-      dur: 5,
+      end: 8,
       name: 'Reflow',
       title: null,
     });
@@ -416,7 +416,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(markers.length).toEqual(18);
     expect(markers[2]).toMatchObject({
       start: 3,
-      dur: 5,
+      end: 8,
       name: 'Reflow',
       title: null,
     });
@@ -425,7 +425,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[3]).toMatchObject({
       start: 4,
-      dur: 1,
+      end: 5,
       name: 'Rasterize',
       title: null,
     });
@@ -434,32 +434,32 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers, contentMarkers } = setup();
     expect(markers[14]).toMatchObject({
       start: 30,
-      dur: 1001,
+      end: 1031,
       name: 'IPCOut',
       data: { phase: 'endpoint' },
     });
     expect(markers[15]).toMatchObject({
       start: 30,
-      dur: 1001,
+      end: 1031,
       name: 'IPCOut',
       data: { phase: 'transferStart' },
     });
     expect(contentMarkers[0]).toMatchObject({
       start: 30,
-      dur: 1001,
+      end: 1031,
       name: 'IPCIn',
       data: { phase: 'transferEnd' },
     });
     expect(contentMarkers[1]).toMatchObject({
       start: 30,
-      dur: 1001,
+      end: 1031,
       name: 'IPCIn',
       data: { phase: 'endpoint' },
     });
 
     expect(markers[16]).toMatchObject({
       start: 40,
-      dur: 0,
+      end: 40,
       name: 'IPCOut',
       data: { phase: 'endpoint' },
     });
@@ -468,7 +468,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[5]).toMatchObject({
       start: 11,
-      dur: 1,
+      end: 12,
       name: 'MinorGC',
       title: null,
     });
@@ -476,7 +476,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   it('should create a marker for the DOMEvent marker', function() {
     const { markers } = setup();
     expect(markers[4]).toMatchObject({
-      dur: 1,
+      end: 10,
       name: 'DOMEvent',
       start: 9,
       title: null,
@@ -485,7 +485,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   it('should create a marker for the marker UserTiming', function() {
     const { markers } = setup();
     expect(markers[6]).toMatchObject({
-      dur: 1,
+      end: 13,
       name: 'UserTiming',
       start: 12,
       title: null,
@@ -495,7 +495,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[0]).toMatchObject({
       start: 0, // Truncated to the time of the first captured sample.
-      dur: 1,
+      end: 1,
       name: 'Rasterize',
       title: null,
     });
@@ -504,7 +504,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[17]).toMatchObject({
       start: 100,
-      dur: 0,
+      end: 100,
       name: 'Rasterize',
       title: null,
       incomplete: true,
@@ -514,13 +514,13 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[7]).toMatchObject({
       start: 13,
-      dur: 5,
+      end: 18,
       name: 'Reflow',
       title: null,
     });
     expect(markers[8]).toMatchObject({
       start: 14,
-      dur: 1,
+      end: 15,
       name: 'Reflow',
       title: null,
     });
@@ -529,7 +529,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[9]).toMatchObject({
       start: 21,
-      dur: 0,
+      end: null,
       name: 'ArbitraryName',
       title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
@@ -563,7 +563,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         responseStart: 23.8,
         responseEnd: 23.9,
       },
-      dur: 2,
+      end: 24,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 22,
       title: null,
@@ -589,7 +589,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         phase: 'endpoint',
         sync: false,
       },
-      dur: 1001,
+      end: 1031,
       incomplete: false,
       name: 'IPCOut',
       start: 30,
@@ -617,7 +617,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         phase: 'endpoint',
         sync: false,
       },
-      dur: 1001,
+      end: 1031,
       incomplete: false,
       name: 'IPCIn',
       start: 30,
@@ -645,7 +645,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         responseStart: 1023.8,
         responseEnd: 1023.9,
       },
-      dur: 2,
+      end: 1024,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 1022,
       title: null,
@@ -663,7 +663,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         source: 'PoisionOIInterposer',
         type: 'FileIO',
       },
-      dur: 2,
+      end: 1024,
       name: 'FileIO',
       start: 1022,
       title: null,
@@ -682,7 +682,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       },
       name: 'CompositorScreenshot',
       start: 25,
-      dur: 0,
+      end: 25,
       title: null,
     });
   });
@@ -935,7 +935,7 @@ describe('filterRawMarkerTableToRange', () => {
         marker.data && (marker.data: any).id,
         marker.data && (marker.data: any).status,
         marker.start,
-        marker.start + marker.dur,
+        marker.end,
       ])
     ).toEqual([
       ['Load 1', 1, 'STATUS_STOP', 0, 3],

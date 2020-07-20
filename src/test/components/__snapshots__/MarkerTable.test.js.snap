@@ -142,9 +142,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  title="—"
+                  title="0s"
                 >
-                  —
+                  0s
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn category"
@@ -165,10 +165,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  title="—"
-                >
-                  —
-                </span>
+                  title=""
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn category"
                   title="Paint"
@@ -211,9 +209,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  title="0.001ms"
+                  title="584.00ns"
                 >
-                  0.001ms
+                  584.00ns
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn category"
@@ -234,10 +232,8 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn duration"
-                  title="—"
-                >
-                  —
-                </span>
+                  title=""
+                />
                 <span
                   class="treeViewRowColumn treeViewFixedColumn category"
                   title="Log"

@@ -116,7 +116,11 @@ export function getMarkerTimingAndBuckets(
       const otherEnd = markerTiming.end[markerTiming.length - 1];
       if (otherEnd === undefined || otherEnd <= marker.start) {
         markerTiming.start.push(marker.start);
-        markerTiming.end.push(marker.start + marker.dur);
+        markerTiming.end.push(
+          // If this is an instant marker, the start time and end time will match.
+          // The chart will then be responsible for drawing this as a dot.
+          marker.end === null ? marker.start : marker.end
+        );
         markerTiming.label.push(computeMarkerLabel(marker.data));
         markerTiming.index.push(markerIndex);
         markerTiming.length++;

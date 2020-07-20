@@ -1325,11 +1325,6 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         Bailout
@@ -2043,11 +2038,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         GCMajor
@@ -2202,11 +2192,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         GCMinor
@@ -2325,11 +2310,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
     <div
       class="tooltipOneLine"
     >
-      <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
       <div
         class="tooltipTitle"
       >
@@ -2565,11 +2545,6 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         Invalidate
@@ -2618,11 +2593,6 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
     <div
       class="tooltipOneLine"
     >
-      <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
       <div
         class="tooltipTitle"
       >
@@ -2673,11 +2643,6 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         NotifyDidPaint
@@ -2708,11 +2673,6 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
     <div
       class="tooltipOneLine"
     >
-      <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
       <div
         class="tooltipTitle"
       >
@@ -2762,11 +2722,6 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
     <div
       class="tooltipOneLine"
     >
-      <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
       <div
         class="tooltipTitle"
       >
@@ -3351,11 +3306,6 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
       class="tooltipOneLine"
     >
       <div
-        class="tooltipTiming"
-      >
-        —
-      </div>
-      <div
         class="tooltipTitle"
       >
         TTFI
@@ -3400,7 +3350,7 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       <div
         class="tooltipTiming"
       >
-        —
+        0s
       </div>
       <div
         class="tooltipTitle"

@@ -846,7 +846,7 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
     type: 'Network',
     id,
     startTime,
-    endTime,
+    endTime: fetchStart,
     pri: 0,
     status: 'STATUS_START',
     URI: uri,
@@ -855,13 +855,15 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   const stopPayload: NetworkPayload = {
     ...startPayload,
     status: 'STATUS_STOP',
+    startTime: fetchStart,
+    endTime,
     contentType: 'text/html',
     ...payload,
   };
 
   return [
     [name, startTime, fetchStart, startPayload],
-    [name, startTime, endTime, stopPayload],
+    [name, fetchStart, endTime, stopPayload],
   ];
 }
 
