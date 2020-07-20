@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { oneLine } from 'common-tags';
 import {
   getSelectedTab,
   getDataSource,
@@ -27,6 +28,7 @@ import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
 } from '../profile-logic/tracks';
+import { selectedThreadSelectors } from '../selectors/per-thread';
 
 import type {
   Profile,
@@ -248,6 +250,18 @@ export function enableEventDelayTracks(): ThunkAction<void> {
     if (getIsEventDelayTracksEnabled(getState())) {
       console.error(
         'Tried to enable the event delay tracks, but they are already enabled.'
+      );
+      return;
+    }
+
+    if (
+      selectedThreadSelectors.getSamplesTable(getState()).eventDelay ===
+      undefined
+    ) {
+      // Return early if the profile doesn't have eventDelay values.
+      console.error(
+        oneLine`Tried to enable the event delay tracks, but this profile does
+        not have eventDelay values. It is likely an older profile.`
       );
       return;
     }
