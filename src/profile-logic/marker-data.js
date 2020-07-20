@@ -74,7 +74,7 @@ export function deriveJankMarkers(
   const addMarker = () =>
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
-      dur: lastResponsiveness,
+      end: lastTimestamp,
       title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
       category: otherCategoryIndex,
@@ -602,7 +602,7 @@ export function deriveMarkersFromRawMarkerTable(
 
               markers.push({
                 start: startStartTime,
-                dur: endEndTime - startStartTime,
+                end: endEndTime,
                 name: stringTable.getString(name),
                 title: null,
                 category,
@@ -627,7 +627,7 @@ export function deriveMarkersFromRawMarkerTable(
               const end = ensureExists(maybeEndTime, ensureMessage);
               markers.push({
                 start,
-                dur: end - start,
+                end,
                 name: stringTable.getString(name),
                 title: null,
                 category,
@@ -664,7 +664,7 @@ export function deriveMarkersFromRawMarkerTable(
             const data = rawMarkers.data[previousScreenshotMarker];
             markers.push({
               start: previousStartTime,
-              dur: thisStartTime - previousStartTime,
+              end: thisStartTime,
               name: 'CompositorScreenshot',
               title: null,
               category,
@@ -705,24 +705,24 @@ export function deriveMarkersFromRawMarkerTable(
           }
 
           let start = ensureExists(
-              data.startTime,
-              'Expected IPC startTime to exist in the payload.'
-            ),
-            dur = 0,
-            incomplete = true;
+            data.startTime,
+            'Expected IPC startTime to exist in the payload.'
+          );
+          let end = start;
+          let incomplete = true;
           if (
             sharedData.startTime !== undefined &&
             sharedData.endTime !== undefined
           ) {
             start = sharedData.startTime;
-            dur = sharedData.endTime - sharedData.startTime;
+            end = sharedData.endTime;
             incomplete = false;
           }
 
           const allData = { ...data, ...sharedData };
           markers.push({
             start,
-            dur,
+            end,
             name,
             title: `IPC — ${_formatIPCMarkerDirection(allData)}`,
             category,
@@ -747,8 +747,7 @@ export function deriveMarkersFromRawMarkerTable(
             maybeStartTime,
             'An Instant marker did not have a startTime.'
           ),
-          // TODO - Follow-up with changing the duration to a startTime and endTime.
-          dur: 0,
+          end: null,
           name: stringTable.getString(name),
           title: null,
           category,
@@ -769,8 +768,7 @@ export function deriveMarkersFromRawMarkerTable(
           // Add a marker with a zero duration
           markers.push({
             start: startTime,
-            // TODO - Follow-up with changing the duration to a startTime and endTime.
-            dur: endTime - startTime,
+            end: endTime,
             name: stringTable.getString(name),
             title: null,
             category,
@@ -813,7 +811,7 @@ export function deriveMarkersFromRawMarkerTable(
             markers.push({
               start,
               name: stringTable.getString(name),
-              dur: endTime - start,
+              end: endTime,
               title: null,
               category,
               data: rawMarkers.data[startIndex],
@@ -836,7 +834,7 @@ export function deriveMarkersFromRawMarkerTable(
             markers.push({
               start,
               name: stringTable.getString(name),
-              dur: endTime - start,
+              end: endTime,
               title: null,
               category,
               data,
@@ -863,7 +861,7 @@ export function deriveMarkersFromRawMarkerTable(
       );
       markers.push({
         start,
-        dur: Math.max(endOfThread - start, 0),
+        end: Math.max(endOfThread, start),
         name: stringTable.getString(rawMarkers.name[startIndex]),
         data: rawMarkers.data[startIndex],
         category: rawMarkers.category[startIndex],
@@ -881,7 +879,7 @@ export function deriveMarkersFromRawMarkerTable(
     );
     markers.push({
       start: startTime,
-      dur: Math.max(endOfThread - startTime, 0),
+      end: Math.max(endOfThread, startTime),
       name: stringTable.getString(rawMarkers.name[startIndex]),
       title: null,
       category: rawMarkers.category[startIndex],
@@ -899,7 +897,7 @@ export function deriveMarkersFromRawMarkerTable(
     );
     markers.push({
       start,
-      dur: Math.max(endOfThread - start, 0),
+      end: Math.max(endOfThread, start),
       name: 'CompositorScreenshot',
       category: rawMarkers.category[previousScreenshotMarker],
       data: rawMarkers.data[previousScreenshotMarker],
@@ -956,15 +954,14 @@ export function filterRawMarkerTableIndexesToRange(
   const { markers, markerIndexToRawMarkerIndexes } = derivedMarkerInfo;
   const inRange: Set<IndexIntoRawMarkerTable> = new Set();
   for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const { start, dur } = markers[markerIndex];
-    if (dur === null) {
+    const { start, end } = markers[markerIndex];
+    if (end === null) {
       if (start < rangeEnd && start >= rangeStart) {
         for (const rawIndex of markerIndexToRawMarkerIndexes[markerIndex]) {
           inRange.add(rawIndex);
         }
       }
     } else {
-      const end = start + dur;
       if (start < rangeEnd && end >= rangeStart) {
         for (const rawIndex of markerIndexToRawMarkerIndexes[markerIndex]) {
           inRange.add(rawIndex);
@@ -1062,7 +1059,7 @@ export function filterMarkerIndexesToRange(
     getMarker,
     markerIndexes,
     marker =>
-      marker.start <= rangeEnd && marker.start + marker.dur >= rangeStart
+      marker.start <= rangeEnd && (marker.end || marker.start) >= rangeStart
   );
 }
 

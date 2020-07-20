@@ -429,6 +429,9 @@ describe('NetworkChartRowBar phase calculations', function() {
       },
     });
 
+    // Force the start time to be 10.
+    endMarker[1] = 10;
+
     const { getPhaseElementStyles } = setupWithPayload([endMarker]);
 
     expect(getPhaseElementStyles()).toEqual([

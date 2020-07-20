@@ -21,7 +21,7 @@ import {
   changeRightClickedMarker,
 } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
-import { formatSeconds } from '../../utils/format-numbers';
+import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
 import {
   getMarkerFullDescription,
   getMarkerCategory,
@@ -40,7 +40,7 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerDisplayData = {|
   start: string,
-  duration: string,
+  duration: string | null,
   name: string,
   category: string,
 |};
@@ -98,9 +98,16 @@ class MarkerTree {
       const name = getMarkerFullDescription(marker);
       const category = getMarkerCategory(marker);
 
+      let duration = null;
+      if (marker.incomplete) {
+        duration = 'unknown';
+      } else if (marker.end !== null) {
+        duration = formatTimestamp(marker.end - marker.start);
+      }
+
       displayData = {
         start: _formatStart(marker.start, this._zeroAt),
-        duration: marker.incomplete ? 'unknown' : _formatDuration(marker.dur),
+        duration,
         name,
         category,
       };
@@ -112,24 +119,6 @@ class MarkerTree {
 
 function _formatStart(start: number, zeroAt) {
   return formatSeconds(start - zeroAt);
-}
-
-function _formatDuration(duration: number): string {
-  if (duration === 0) {
-    return '—';
-  }
-  let maximumFractionDigits = 1;
-  if (duration < 0.01) {
-    maximumFractionDigits = 3;
-  } else if (duration < 1) {
-    maximumFractionDigits = 2;
-  }
-  return (
-    duration.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits,
-    }) + 'ms'
-  );
 }
 
 type StateProps = {|

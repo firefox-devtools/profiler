@@ -216,6 +216,13 @@ describe('getJankMarkersForHeader', function() {
     expect(jankInstances).toEqual([]);
   });
 
+  function getJankInstantDuration(marker) {
+    return (
+      ensureExists(marker.end, 'Jank markers are assumed to have an end.') -
+      marker.start
+    );
+  }
+
   it('will create a jank instance', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
@@ -224,7 +231,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will create a jank instance with eventDelay values', function() {
@@ -235,7 +242,7 @@ describe('getJankMarkersForHeader', function() {
       eventDelay,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will skip null responsiveness values', function() {
@@ -246,7 +253,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will skip null responsiveness values after a breaking point', function() {
@@ -257,7 +264,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 });
 
