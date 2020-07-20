@@ -238,15 +238,17 @@ export function toggleResourcesPanel(): ThunkAction<void> {
 }
 /*
  * This action enables the event delay tracks. They are hidden by default because
- * they are usually for power users and not so meaningful for avarage users.
+ * they are usually for power users and not so meaningful for average users.
  * There is no UI that triggers this action in the profiler interface. Instead,
- * users have to anable this from the developer console by writing this line:
+ * users have to enable this from the developer console by writing this line:
  * `experimental.enableEventDelayTracks()`
  */
 export function enableEventDelayTracks(): ThunkAction<void> {
   return (dispatch, getState) => {
     if (getIsEventDelayTracksEnabled(getState())) {
-      console.error('Event delay tracks are already enabled');
+      console.error(
+        'Tried to enable the event delay tracks, but they are already enabled.'
+      );
       return;
     }
 

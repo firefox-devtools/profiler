@@ -25,7 +25,7 @@ import type {
   $ReturnType,
   StartEndRange,
   WeightType,
-  EventDelayTable,
+  EventDelayInfo,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
@@ -312,7 +312,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
-  const getProcessedEventDelays: Selector<EventDelayTable | null> = createSelector(
+  const getProcessedEventDelays: Selector<EventDelayInfo | null> = createSelector(
     getSamplesTable,
     ProfileSelectors.getProfileInterval,
     (samplesTable, interval) =>

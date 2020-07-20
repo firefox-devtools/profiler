@@ -48,7 +48,7 @@ import type {
   StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-  EventDelayTable,
+  EventDelayInfo,
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
@@ -1467,7 +1467,7 @@ export function accumulateCounterSamples(
  * This reduces the calculation overhead a lot.
  * So we used the second algorithm in this function to make it faster.
  *
- *  For instance the procesed eventDelay values will be something like this:
+ *  For instance the processed eventDelay values will be something like this:
 
  *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
  *         |___|              |___|              |___|
@@ -1480,7 +1480,7 @@ export function accumulateCounterSamples(
 export function processEventDelays(
   samples: SamplesTable,
   interval: Milliseconds
-): EventDelayTable {
+): EventDelayInfo {
   if (!samples.eventDelay) {
     throw new Error(
       'processEventDelays step should not be called for older profiles'
@@ -1498,7 +1498,7 @@ export function processEventDelays(
   // Skipping the first element because we don't have any sample of its past.
   for (let i = 1; i < samples.length; i++) {
     const currentEventDelay = rawEventDelays[i];
-    const nextEventDelay = rawEventDelays[i + 1] || 0; // it can be null or undefined(for the last element)
+    const nextEventDelay = rawEventDelays[i + 1] || 0; // it can be null or undefined (for the last element)
     const now = samples.time[i];
     if (currentEventDelay === null || currentEventDelay === undefined) {
       // Ignore anything that's not numeric. This can happen if there is no responsiveness

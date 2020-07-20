@@ -59,16 +59,11 @@ export function addDataToWindowObject(
     },
   });
 
-  defineProperty(target, 'experimental', {
-    enumerable: true,
-    get() {
-      return {
-        enableEventDelayTracks: async () => {
-          await dispatch(actions.enableEventDelayTracks());
-        },
-      };
+  target.experimental = {
+    async enableEventDelayTracks() {
+      await dispatch(actions.enableEventDelayTracks());
     },
-  });
+  };
 
   target.getState = getState;
   target.selectors = selectorsForConsole;

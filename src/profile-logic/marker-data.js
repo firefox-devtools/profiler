@@ -26,7 +26,7 @@ import type {
   MarkerIndex,
   IPCSharedData,
   IPCMarkerPayload,
-  EventDelayTable,
+  EventDelayInfo,
   BailoutPayload,
   NetworkPayload,
   PrefMarkerPayload,
@@ -82,7 +82,7 @@ function _formatIPCMarkerDirection(data) {
  *     but under 50ms,      responsiveness was
  *     no jank.             reset from 71 to 3.
  *
- *  For instance, take an array of procesed (new) eventDelay values (it's like the numbers are reversed):
+ *  For instance, take an array of processed (new) eventDelay values (it's like the numbers are reversed):
  *
  *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
  *         |___|              |___|              |___|
@@ -94,7 +94,7 @@ function _formatIPCMarkerDirection(data) {
 export function deriveJankMarkers(
   samples: SamplesTable,
   thresholdInMs: number,
-  eventDelayTable: EventDelayTable | null,
+  eventDelayInfo: EventDelayInfo | null,
   otherCategoryIndex: IndexIntoCategoryList
 ): Marker[] {
   const addMarker = (start, duration) =>
@@ -110,10 +110,10 @@ export function deriveJankMarkers(
   const jankInstances = [];
   // As mentioned in the comment above, we have to support two values types.
   // They are slightly different from each other.
-  if (eventDelayTable !== null) {
+  if (eventDelayInfo !== null) {
     // This is a new profile with eventDelays and we should take a look at the
     // processed event delay values to be able to create Jank markers.
-    const { eventDelays } = eventDelayTable;
+    const { eventDelays } = eventDelayInfo;
 
     let lastEventDelay: Milliseconds = 0;
     for (let i = 0; i < samples.length; i++) {

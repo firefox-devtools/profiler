@@ -49,11 +49,11 @@ Array [
   ],
   Array [
     "set strokeStyle",
-    "#ff9400",
+    "rgba(255, 0, 57, 0.7)",
   ],
   Array [
     "set fillStyle",
-    "#ff940088",
+    "rgba(255, 0, 57, 0.3)",
   ],
   Array [
     "beginPath",

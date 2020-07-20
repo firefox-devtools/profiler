@@ -237,8 +237,8 @@ describe('getJankMarkersForHeader', function() {
 
   it('will create a jank instance with eventDelay values', function() {
     const breakingPoint = 50;
-    // We need to fill the samples before, because the new algorithm is different
-    // and the numbers usually means that we have a delay before that time.
+    // We need to fill the samples before, because the algorithm looks at the
+    // later event delay values and determines the previous event delays from them.
     const eventDelay = Array(50).fill(0);
     eventDelay.push(5, 10, 15, 25, 30, 40, breakingPoint, 1);
     const jankInstances = setupWithEventDelay({
@@ -1607,9 +1607,9 @@ describe('snapshots of selectors/profile', function() {
       ...getNetworkMarkers({ id: 7, startTime: 7 }),
     ]);
     profile.threads.push(markersThread);
-    const { getState, dispatch } = storeWithProfile(profile);
     samplesThread.name = 'Thread with samples';
     markersThread.name = 'Thread with markers';
+
     // Creating jank sample
     samplesThread.samples.eventDelay = Array(50).fill(0);
     const eventDelay = ensureExists(samplesThread.samples.eventDelay);
@@ -1625,6 +1625,8 @@ describe('snapshots of selectors/profile', function() {
       ),
     ];
     samplesThread.samples.length = eventDelay.length;
+
+    const { getState, dispatch } = storeWithProfile(profile);
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
@@ -3439,6 +3441,7 @@ describe('getProcessedEventDelays', function() {
     samples.time = Array(samples.length)
       .fill(0)
       .map((_, i) => i);
+    samples.stack = Array(samples.length).fill(null);
     profile.threads.push(getEmptyThread({ samples }));
 
     const { dispatch, getState } = storeWithProfile(profile);
@@ -3572,7 +3575,9 @@ describe('getProcessedEventDelays', function() {
           21,
           20,
           19,
-          39, // <---- Second event delay peak. This happens while we are still no done with the first even delay and sums up the both delay values.
+          // |---- Second event delay peak. This happens while we are still not
+          // v     done with the first even delay and sums up both delay values.
+          39,
           37,
           35,
           33,
@@ -3589,7 +3594,7 @@ describe('getProcessedEventDelays', function() {
           10,
           8,
           6,
-          4, // <--- First event delay is done here.
+          4, // <---- First event delay is done here.
           3,
           2,
           1, // <---- Second event delay is done now too.

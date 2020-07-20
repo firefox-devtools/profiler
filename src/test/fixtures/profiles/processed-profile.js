@@ -1168,9 +1168,11 @@ export function getCounterForThread(
 /**
  * Creates a profile that includes a thread with eventDelay values.
  */
-export function getProfileWithEventDelays(): Profile {
+export function getProfileWithEventDelays(
+  userEventDelay?: Milliseconds[]
+): Profile {
   const profile = getEmptyProfile();
-  profile.threads = [getThreadWithEventDelay()];
+  profile.threads = [getThreadWithEventDelay(userEventDelay)];
   return profile;
 }
 
@@ -1178,7 +1180,7 @@ export function getProfileWithEventDelays(): Profile {
  * Creates a thread with eventDelay values.
  */
 export function getThreadWithEventDelay(
-  userEventDelay: ?(Milliseconds[])
+  userEventDelay?: Milliseconds[]
 ): Thread {
   const thread = getEmptyThread();
 
@@ -1193,13 +1195,11 @@ export function getThreadWithEventDelay(
     }
   }
 
-  // Re-create the table so that it creates a Flow error if we don't handle part of it.
+  // Re-construct the samples table with new event delay values.
   thread.samples = {
     eventDelay: eventDelay,
     stack: Array(eventDelay.length).fill(null),
-    time: Array(eventDelay.length)
-      .fill(0)
-      .map((_, i) => i),
+    time: Array.from({ length: eventDelay.length }, (_, i) => i),
     weight: null,
     weightType: 'samples',
     length: eventDelay.length,

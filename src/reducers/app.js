@@ -229,9 +229,9 @@ const isDragAndDropOverlayRegistered: Reducer<boolean> = (
 };
 
 /*
- * This reducer hold the state for wheter or not the event delay tracks are
- * enabled. This way we can hide the event delay tracks by default and display
- * if we change the state.
+ * This reducer hold the state for whether the event delay tracks are enabled.
+ * This way we can hide the event delay tracks by default and display if we
+ * change the state.
  */
 const isEventDelayTracksEnabled: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {

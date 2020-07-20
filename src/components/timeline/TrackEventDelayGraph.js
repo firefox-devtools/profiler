@@ -5,19 +5,23 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from '../shared/WithSize';
+import { withSize, type SizeProps } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import { ORANGE_50 } from 'photon-colors';
 import Tooltip from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import bisection from 'bisection';
 
-import type { Thread, ThreadIndex } from '../../types/profile';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
-import type { SizeProps } from '../shared/WithSize';
+import type {
+  Thread,
+  ThreadIndex,
+  Milliseconds,
+  CssPixels,
+  StartEndRange,
+  EventDelayInfo,
+} from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackMemory.css';
@@ -33,7 +37,7 @@ type CanvasProps = {|
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
-  +eventDelays: Object, // TODO: add a real type for this object
+  +eventDelays: EventDelayInfo,
 |};
 
 /**
@@ -89,8 +93,8 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
       // Draw the chart.
       const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
-      ctx.strokeStyle = ORANGE_50;
-      ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
+      ctx.strokeStyle = 'rgba(255, 0, 57, 0.7)'; // Red 50 with transparency.
+      ctx.fillStyle = 'rgba(255, 0, 57, 0.3)'; // Red 50 with transparency.
       ctx.beginPath();
 
       // The x and y are used after the loop.

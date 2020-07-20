@@ -278,7 +278,8 @@ export function computeLocalTracksByPid(
 }
 
 /**
- * Take a profile and figure out all of the local tracks, and organize them by PID.
+ * Take threads and add event delay tracks for them. Return the new
+ * localTracksByPid map.
  */
 export function addEventDelayTracksForThreads(
   threads: Thread[],

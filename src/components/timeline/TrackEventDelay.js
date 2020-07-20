@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
 import { TrackEventDelayGraph } from './TrackEventDelayGraph';
 import {
   TRACK_MEMORY_GRAPH_HEIGHT,
@@ -23,7 +22,7 @@ type OwnProps = {|
 
 type Props = ConnectedProps<OwnProps, {||}, {||}>;
 
-export class TrackEventDelayImpl extends React.PureComponent<Props, {||}> {
+export class TrackEventDelay extends React.PureComponent<Props, {||}> {
   render() {
     const { threadIndex } = this.props;
     const graphHeight = TRACK_MEMORY_GRAPH_HEIGHT + 15;
@@ -45,7 +44,3 @@ export class TrackEventDelayImpl extends React.PureComponent<Props, {||}> {
     );
   }
 }
-
-export const TrackEventDelay = explicitConnect<OwnProps, {||}, {||}>({
-  component: TrackEventDelayImpl,
-});

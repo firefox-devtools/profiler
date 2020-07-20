@@ -387,9 +387,10 @@ export type TracedTiming = {|
  * Event delay table that holds the pre-processed event delay values and other
  * statistics about it.
  * Gecko sends the non processed event delay values to the front-end and we have
- * to make a calculation to find out their real values.
+ * to make a calculation to find out their real values. Also see:
+ * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
-export type EventDelayTable = {|
+export type EventDelayInfo = {|
   +eventDelays: Milliseconds[],
   +minDelay: Milliseconds,
   +maxDelay: Milliseconds,
