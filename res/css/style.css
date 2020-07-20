@@ -7,7 +7,16 @@ body {
   height: 100%;
   padding: 0;
   margin: 0;
-  font: message-box;
+
+  /* This line has been stolen from
+   * https://css-tricks.com/os-specific-fonts-css/
+   * Just Noto Sans and Liberation Sans have been inserted before "Cantarell"
+   * (used on Linux Gnome), because it lacks a glyph for the symbol µ.
+   * Please keep it synced with res/photon/style.css.
+   */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
+    'Helvetica Neue', sans-serif;
   font-size: 11px;
 
   /* Disable the "rubberband" overscrolling effect in Chrome. This happens when
@@ -129,8 +138,8 @@ body,
   background: #e5e5e5;
   content: '';
 }
-.treeViewHeaderColumn.totalTime,
-.treeViewHeaderColumn.selfTime {
+.treeViewHeaderColumn.total,
+.treeViewHeaderColumn.self {
   text-align: right;
 }
 .treeViewRowColumn.treeViewFixedColumn {
@@ -139,20 +148,20 @@ body,
   border-right: 1px solid var(--grey-30);
   text-overflow: ellipsis;
 }
-.treeViewFixedColumn.totalTime {
+.treeViewFixedColumn.total {
   left: 0;
   width: 70px;
 }
-.treeViewFixedColumn.totalTimePercent {
+.treeViewFixedColumn.totalPercent {
   left: 70px;
   width: 50px;
   border-right: none;
 }
-.treeViewFixedColumn.selfTime {
+.treeViewFixedColumn.self {
   left: 120px;
   width: 70px;
 }
-.treeViewHeaderColumn.totalTime {
+.treeViewHeaderColumn.total {
   width: 120px;
 }
 .treeViewFixedColumn.icon {
@@ -162,9 +171,9 @@ body,
   flex-flow: column nowrap;
   align-items: center;
 }
-.treeViewRowColumn.totalTime,
-.treeViewRowColumn.totalTimePercent,
-.treeViewRowColumn.selfTime,
+.treeViewRowColumn.total,
+.treeViewRowColumn.totalPercent,
+.treeViewRowColumn.self,
 .treeViewRowColumn.timestamp {
   padding-right: 5px;
   text-align: right;

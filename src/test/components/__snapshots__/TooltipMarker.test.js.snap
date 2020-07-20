@@ -13,7 +13,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       <div
         class="tooltipTiming"
       >
-        1.0ms
+        1ms
       </div>
       <div
         class="tooltipTitle"
@@ -130,7 +130,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       <div
         class="tooltipTiming"
       >
-        1,433ms
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -305,7 +305,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       <div
         class="tooltipTiming"
       >
-        1,433ms
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -505,7 +505,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       <div
         class="tooltipTiming"
       >
-        1,433ms
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -769,7 +769,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       <div
         class="tooltipTiming"
       >
-        1,433ms
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -959,7 +959,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       <div
         class="tooltipTiming"
       >
-        1,434ms
+        1.4s
       </div>
       <div
         class="tooltipTitle"
@@ -1217,7 +1217,7 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
       <div
         class="tooltipTiming"
       >
-        18,726ms
+        18.7s
       </div>
       <div
         class="tooltipTitle"
@@ -1413,7 +1413,7 @@ exports[`TooltipMarker renders tooltips for various markers: ConstructRootFrame-
       <div
         class="tooltipTiming"
       >
-        0.80ms
+        800μs
       </div>
       <div
         class="tooltipTitle"
@@ -1460,7 +1460,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTiming"
       >
-        0.80ms
+        800μs
       </div>
       <div
         class="tooltipTitle"
@@ -1514,7 +1514,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       <div
         class="tooltipTiming"
       >
-        1.0ms
+        1ms
       </div>
       <div
         class="tooltipTitle"
@@ -1783,7 +1783,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       <div
         class="tooltipTiming"
       >
-        1.0ms
+        1ms
       </div>
       <div
         class="tooltipTitle"
@@ -2450,14 +2450,14 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
     <div
       class="tooltipLabel"
     >
-      IPC Speed
+      IPC Send Duration
       :
     </div>
     unknown
     <div
       class="tooltipLabel"
     >
-      IPC Latency
+      IPC Recv Latency
       :
     </div>
     unknown
@@ -2532,14 +2532,14 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
     <div
       class="tooltipLabel"
     >
-      IPC Speed
+      IPC Send Duration
       :
     </div>
     unknown
     <div
       class="tooltipLabel"
     >
-      IPC Latency
+      IPC Recv Latency
       :
     </div>
     unknown
@@ -2833,7 +2833,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
       <div
         class="tooltipTiming"
       >
-        0.50ms
+        500μs
       </div>
       <div
         class="tooltipTitle"
@@ -3070,7 +3070,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       <div
         class="tooltipTiming"
       >
-        0.50ms
+        500μs
       </div>
       <div
         class="tooltipTitle"

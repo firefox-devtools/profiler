@@ -11,21 +11,23 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  commitRange,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
-  urlStateToUrlObject,
+  getQueryStringFromUrlState,
   urlFromState,
   CURRENT_URL_VERSION,
   upgradeLocationToCurrentVersion,
+  UrlUpgradeError,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
 import {
   viewProfile,
   changeTimelineTrackOrganization,
 } from '../actions/receive-profile';
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, StartEndRange } from 'firefox-profiler/types';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
@@ -330,11 +332,10 @@ describe('search strings', function() {
     ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      if (!query.search) {
-        throw new Error('Could not find the search query string');
-      }
-      expect(query.search).toBe(callTreeSearchString);
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(
+        `search=${encodeURIComponent(callTreeSearchString)}`
+      );
     });
   });
 
@@ -348,11 +349,8 @@ describe('search strings', function() {
     ['marker-chart', 'marker-table'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      if (!query.markerSearch) {
-        throw new Error('Could not find the markerSearch query string');
-      }
-      expect(query.markerSearch).toBe(markerSearchString);
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`markerSearch=${markerSearchString}`);
     });
   });
 
@@ -364,11 +362,8 @@ describe('search strings', function() {
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    if (!query.networkSearch) {
-      throw new Error('Could not find the networkSearch query string');
-    }
-    expect(query.networkSearch).toBe(networkSearchString);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`networkSearch=${networkSearchString}`);
   });
 });
 
@@ -379,8 +374,10 @@ describe('profileName', function() {
 
     dispatch(changeProfileName(profileName));
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.profileName).toBe(profileName);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(
+      `profileName=${encodeURIComponent(profileName)}`
+    );
   });
 
   it('reflects in the state from URL', function() {
@@ -407,8 +404,8 @@ describe('showTabOnly', function() {
       changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
     );
     const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.ctxId).toBe(browsingContextID);
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`ctxId=${browsingContextID}`);
   });
 
   it('reflects in the state from URL', function() {
@@ -478,12 +475,193 @@ describe('showTabOnly', function() {
   });
 });
 
+describe('committed ranges', function() {
+  describe('serialization', () => {
+    it('serializes when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).not.toContain(`range=`);
+    });
+
+    it('serializes when there is 1 range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1514m23786`); // 1.514s + 23786ms
+    });
+
+    it('serializes when rounding down the start', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1510.58, 1519.59));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1510m10`); // 1.510s + 10ms
+    });
+
+    it('serializes when the duration is 0', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514, 1514));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      // In the following regexp we want to especially assert that the duration
+      // isn't 0. That's why there's this negative look-ahead assertion.
+      // Therefore here we're matching a start at 1.514s, and a non-zero
+      // duration.
+      expect(queryString).toMatch(/range=1514000000n(?!0)/);
+    });
+
+    it('serializes when there are several ranges', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      dispatch(commitRange(1800, 1800.1));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+
+      // 1- 1.5145s + 23786ms
+      // 2- 1.8s + 100µs
+      expect(queryString).toContain(`range=1514m23786~1800000u100`);
+    });
+
+    it('serializes when there is a small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.08, 1000.09));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000080u10`); // 1s and 80µs + 10µs
+    });
+
+    it('serializes when there is a very small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.00008, 1000.0001));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000000080n20`); // 1s and 80ns + 20ns
+    });
+  });
+
+  describe('parsing', () => {
+    it('deserializes when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([]);
+    });
+
+    it('deserializes when there is 1 range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+      ]);
+    });
+
+    it('deserializes when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000~2245m24',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+        { start: 2245, end: 2269 },
+      ]);
+    });
+
+    it('deserializes when there is a small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678900u100',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1678.9, end: 1679 },
+      ]);
+    });
+
+    it('deserializes when there is a very small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678123900n100',
+      });
+
+      const [committedRange] = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRange.start).toBeCloseTo(1678.1239);
+      expect(committedRange.end).toBeCloseTo(1678.124);
+    });
+
+    it('is permissive with invalid input', () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getState } = _getStoreWithURL({
+        search: '?range=invalid~2245m24',
+      });
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 2245, end: 2269 },
+      ]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('serializing and parsing', () => {
+    function getQueryStringForRanges(
+      ranges: $ReadOnlyArray<StartEndRange>
+    ): string {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      ranges.forEach(({ start, end }) => dispatch(commitRange(start, end)));
+
+      const urlState = urlStateReducers.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      return queryString;
+    }
+
+    function setup(ranges: $ReadOnlyArray<StartEndRange>) {
+      const queryString = getQueryStringForRanges(ranges);
+
+      return _getStoreWithURL({
+        search: '?' + queryString,
+      });
+    }
+
+    it('can parse the serialized values', () => {
+      const { getState } = setup([
+        { start: 1514.587845, end: 25300 },
+        { start: 1800, end: 1800.1 },
+        { start: 1800.00008, end: 1800.0001 },
+      ]);
+
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 1514, end: 25300 },
+        { start: 1800, end: 1800.1 },
+        { start: 1800.00008, end: 1800.0001 },
+      ]);
+    });
+
+    it('will round values near the threshold', () => {
+      const { getState } = setup([{ start: 50000, end: 50009.9 }]);
+
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 50000, end: 50010 },
+      ]);
+    });
+
+    it('supports negative start values', () => {
+      const { getState } = setup([{ start: -1000, end: 1000 }]);
+
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: -1000, end: 1000 },
+      ]);
+    });
+  });
+});
+
 describe('url upgrading', function() {
-  /**
-   * Originally transform stacks were called call tree filters. This test asserts that
-   * the upgrade process works correctly.
-   */
   describe('version 1: legacy URL serialized call tree filters', function() {
+    /**
+     * Originally transform stacks were called call tree filters. This test asserts that
+     * the upgrade process works correctly.
+     */
     it('can upgrade callTreeFilters to transforms', function() {
       const { getState } = _getStoreWithURL({
         search:
@@ -806,8 +984,63 @@ describe('url upgrading', function() {
     });
   });
 
+  describe('version 5: implement ranges differently', () => {
+    it('does not error when there is no range', () => {
+      const { getState } = _getStoreWithURL({
+        v: 4,
+      });
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([]);
+    });
+
+    it('converts when there is only one range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
+    });
+
+    it('converts when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=0.245_18.470~1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([
+        { start: 245, end: 18470 },
+        { start: 1451, end: 1453 },
+      ]);
+    });
+
+    it('is permissive with invalid input', () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getState } = _getStoreWithURL({
+        // The first range has several dots, the second range is fully invalid,
+        // only the 3rd range is valid.
+        search: '?range=0.24.5_18.470~invalid~1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
   // More general checks
-  it("won't run if the version is specified", function() {
+  it("won't run if the current version is specified", function() {
     const { getState } = _getStoreWithURL({
       pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
       v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
@@ -823,6 +1056,14 @@ describe('url upgrading', function() {
     expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
       'marker-table'
     );
+  });
+
+  it('throws a specific error if a more recent version is specified', function() {
+    expect(() =>
+      _getStoreWithURL({
+        v: CURRENT_URL_VERSION + 1,
+      })
+    ).toThrow(UrlUpgradeError);
   });
 });
 
@@ -889,10 +1130,9 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToUrlObject(
-      urlStateReducers.getUrlState(getState())
-    );
-    expect(query.transforms).toBe(transformString);
+    const urlState = urlStateReducers.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`transforms=${transformString}`);
   });
 });
 

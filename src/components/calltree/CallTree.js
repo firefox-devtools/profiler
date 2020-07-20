@@ -4,6 +4,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import memoize from 'memoize-immutable';
+import { oneLine } from 'common-tags';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import CallTreeEmptyReasons from './CallTreeEmptyReasons';
@@ -32,11 +34,11 @@ import { assertExhaustiveCheck } from '../../utils/flow';
 import type {
   State,
   ImplementationFilter,
-  CallTreeSummaryStrategy,
   ThreadIndex,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
+  WeightType,
 } from 'firefox-profiler/types';
 import type { CallTree } from '../../profile-logic/call-tree';
 
@@ -57,7 +59,7 @@ type StateProps = {|
   +invertCallstack: boolean,
   +implementationFilter: ImplementationFilter,
   +callNodeMaxDepth: number,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +weightType: WeightType,
 |};
 
 type DispatchProps = {|
@@ -70,22 +72,101 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeComponent extends PureComponent<Props> {
-  _fixedColumnsTiming: Column[] = [
-    { propName: 'totalTimePercent', title: '' },
-    { propName: 'totalTime', title: 'Running Time (ms)' },
-    { propName: 'selfTime', title: 'Self (ms)' },
-    { propName: 'icon', title: '', component: Icon },
-  ];
-  _fixedColumnsAllocations: Column[] = [
-    { propName: 'totalTimePercent', title: '' },
-    { propName: 'totalTime', title: 'Total Size (bytes)' },
-    { propName: 'selfTime', title: 'Self (bytes)' },
-    { propName: 'icon', title: '', component: Icon },
-  ];
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
+
+  /**
+   * Call Trees can have different types of "weights" for the data. Choose the
+   * appropriate labels for the call tree based on this weight.
+   */
+  _weightTypeToColumns = memoize(
+    (weightType: WeightType): Column[] => {
+      switch (weightType) {
+        case 'tracing-ms':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Running Time (ms)',
+              tooltip: oneLine`
+                The "total" running time includes a summary of all the time where this
+                function was observed to be on the stack. This includes the time where
+                the function was actually running, and the time spent in the callers from
+                this function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self (ms)',
+              tooltip: oneLine`
+                The "self" time only includes the time where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' time is not included. The "self" time is useful
+                for understanding where time was actually spent in a program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        case 'samples':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Total (samples)',
+              tooltip: oneLine`
+                The "total" sample count includes a summary of every sample where this
+                function was observed to be on the stack. This includes the time where the
+                function was actually running, and the time spent in the callers from this
+                function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self',
+              tooltip: oneLine`
+                The "self" sample count only includes the samples where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' counts are not included. The "self" count is useful
+                for understanding where time was actually spent in a program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        case 'bytes':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Total Size (bytes)',
+              tooltip: oneLine`
+                The "total size" includes a summary of all of the bytes allocated or
+                deallocated while this function was observed to be on the stack. This
+                includes both the bytes where the function was actually running, and the
+                bytes of the callers from this function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self (bytes)',
+              tooltip: oneLine`
+                The "self" bytes includes the bytes allocated or deallocated while this
+                function was the leaf-most one on the stack. If this function called into
+                other functions, then the "other" functions' bytes are not included.
+                The "self" bytes are useful for understanding where memory was actually
+                allocated or deallocated in the program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        default:
+          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+      }
+    },
+    // Use a Map cache, as the function only takes one argument, which is a simple string.
+    { cache: new Map() }
+  );
 
   componentDidMount() {
     this.focus();
@@ -192,30 +273,15 @@ class CallTreeComponent extends PureComponent<Props> {
       searchStringsRegExp,
       disableOverscan,
       callNodeMaxDepth,
-      callTreeSummaryStrategy,
+      weightType,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
     }
-    let fixedColumns;
-    switch (callTreeSummaryStrategy) {
-      case 'timing':
-        fixedColumns = this._fixedColumnsTiming;
-        break;
-      case 'native-retained-allocations':
-      case 'native-allocations':
-      case 'native-deallocations-memory':
-      case 'native-deallocations-sites':
-      case 'js-allocations':
-        fixedColumns = this._fixedColumnsAllocations;
-        break;
-      default:
-        throw assertExhaustiveCheck(callTreeSummaryStrategy);
-    }
     return (
       <TreeView
         tree={tree}
-        fixedColumns={fixedColumns}
+        fixedColumns={this._weightTypeToColumns(weightType)}
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
         onSelectionChange={this._onSelectedCallNodeChange}
@@ -257,9 +323,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

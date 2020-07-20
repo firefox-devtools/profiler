@@ -9,8 +9,12 @@ import explicitConnect from '../../utils/connect';
 
 import { getProfileName, getDataSource } from '../../selectors/url-state';
 import { getProfile } from '../../selectors/profile';
+import {
+  formatProductAndVersion,
+  formatPlatform,
+} from '../../profile-logic/profile-metainfo';
 
-import type { Profile, ProfileMeta } from 'firefox-profiler/types';
+import type { Profile } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
@@ -21,6 +25,8 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
+const SEPARATOR = ' – ';
+
 class WindowTitle extends PureComponent<Props> {
   // This component updates window title in the form of:
   // profile name - version - platform - date time - data source - 'Firefox profiler'
@@ -30,17 +36,18 @@ class WindowTitle extends PureComponent<Props> {
     let title = '';
 
     if (profileName) {
-      title = title.concat(profileName, ' - ');
+      title += profileName + SEPARATOR;
     }
-    title = title.concat(_formatVersion(meta), ' - ');
-    if (meta.oscpu) {
-      title = title.concat(_formatPlatform(meta), ' - ');
+    title += formatProductAndVersion(meta) + SEPARATOR;
+    const os = formatPlatform(meta);
+    if (os) {
+      title += os + SEPARATOR;
     }
-    title = title.concat(_formatDateTime(meta.startTime));
+    title += _formatDateTime(meta.startTime);
     if (dataSource === 'public') {
-      title = title.concat(' (', dataSource, ')');
+      title += ` (${dataSource})`;
     }
-    title = title.concat(' - ', 'Firefox profiler');
+    title += SEPARATOR + 'Firefox profiler';
     document.title = title;
   }
 
@@ -55,39 +62,6 @@ class WindowTitle extends PureComponent<Props> {
   render() {
     return null;
   }
-}
-
-function _formatVersionNumber(version?: string): string | null {
-  const regex = /[0-9]+.+[0-9]/gi;
-
-  if (version) {
-    const match = version.match(regex);
-    if (match) {
-      return match.toString();
-    }
-  }
-
-  return null;
-}
-
-function _formatVersion(meta: ProfileMeta): string {
-  const product = meta.product || '';
-  const version = _formatVersionNumber(meta.misc) || '';
-  const versionLabel = product + ' ' + version + ' ';
-
-  return versionLabel;
-}
-
-function _formatPlatform(meta: ProfileMeta): string {
-  let os;
-  // To display Android Version instead of Linux for Android developers.
-  if (meta.platform !== undefined && meta.platform.match(/android/i)) {
-    os = meta.platform;
-  } else {
-    os = meta.oscpu || '';
-  }
-
-  return os;
 }
 
 function _formatDateTime(timestamp: number): string {

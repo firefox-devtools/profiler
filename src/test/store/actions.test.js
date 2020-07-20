@@ -177,13 +177,13 @@ describe('selectors/getFlameGraphTiming', function() {
       store.getState()
     );
 
-    return flameGraphTiming.map(({ selfTimeRelative, callNode, length }) => {
+    return flameGraphTiming.map(({ selfRelative, callNode, length }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
         const funcIndex = callNodeTable.func[callNodeIndex];
         const funcName = funcNames[funcIndex];
-        lines.push(`${funcName} (${selfTimeRelative[i]})`);
+        lines.push(`${funcName} (${selfRelative[i]})`);
       }
       return lines.join(' | ');
     });
@@ -254,7 +254,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('contains totalTime, selfTime and selfTimeRelative', function() {
+  it('contains totalTime, selfTime and selfRelative', function() {
     const {
       profile,
       funcNamesPerThread: [funcNames],

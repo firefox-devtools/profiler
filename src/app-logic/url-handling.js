@@ -6,6 +6,7 @@
 import queryString from 'query-string';
 import {
   stringifyCommittedRanges,
+  stringifyStartEnd,
   parseCommittedRanges,
 } from '../profile-logic/committed-ranges';
 import {
@@ -32,7 +33,7 @@ import type {
   CallNodePath,
 } from 'firefox-profiler/types';
 
-export const CURRENT_URL_VERSION = 4;
+export const CURRENT_URL_VERSION = 5;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -58,25 +59,27 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
-function getDataSourceDirs(
-  urlState: UrlState
-): [] | [DataSource] | [DataSource, string] {
+function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
-    case 'from-addon':
-      return ['from-addon'];
-    case 'from-file':
-      return ['from-file'];
-    case 'local':
-      return ['local', urlState.hash];
-    case 'public':
-      return ['public', urlState.hash];
-    case 'from-url':
-      return ['from-url', encodeURIComponent(urlState.profileUrl)];
-    case 'compare':
-      return ['compare'];
     case 'none':
       return [];
+    case 'compare':
+      return ['compare'];
+    case 'from-addon':
+      return ['from-addon', urlState.selectedTab];
+    case 'from-file':
+      return ['from-file', urlState.selectedTab];
+    case 'local':
+      return ['local', urlState.hash, urlState.selectedTab];
+    case 'public':
+      return ['public', urlState.hash, urlState.selectedTab];
+    case 'from-url':
+      return [
+        'from-url',
+        encodeURIComponent(urlState.profileUrl),
+        urlState.selectedTab,
+      ];
     default:
       throw assertExhaustiveCheck(dataSource);
   }
@@ -189,35 +192,31 @@ type QueryShape =
   | StackChartQueryShape
   | JsTracerQueryShape;
 
-type UrlObject = {|
-  pathParts: string[],
-  query: QueryShape,
-|};
-
 /**
- * Take the UrlState and map it into a serializable UrlObject, that represents the
- * target URL.
+ * Take the UrlState and map it into a query string.
  */
-export function urlStateToUrlObject(urlState: UrlState): UrlObject {
+export function getQueryStringFromUrlState(urlState: UrlState): string {
   const { dataSource } = urlState;
-  if (dataSource === 'none') {
-    return {
-      pathParts: [],
-      query: {},
-    };
+  switch (dataSource) {
+    case 'none':
+      return '';
+    case 'compare':
+      // Special handling for CompareHome: we shouldn't append the default
+      // parameters when the user is on the comparison form.
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      break;
+    case 'public':
+    case 'local':
+    case 'from-addon':
+    case 'from-file':
+    case 'from-url':
+      break;
+    default:
+      throw assertExhaustiveCheck(dataSource);
   }
 
-  // Special handling for CompareHome: we shouldn't append the default
-  // parameters when the user is on the comparison form.
-  if (dataSource === 'compare' && urlState.profilesToCompare === null) {
-    return {
-      pathParts: ['compare'],
-      query: {},
-    };
-  }
-
-  const dataSourceDirs = getDataSourceDirs(urlState);
-  const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active panel.
@@ -396,11 +395,15 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       throw assertExhaustiveCheck(selectedTab);
   }
 
-  return { query, pathParts };
+  const qString = queryString.stringify(query, {
+    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+  });
+  return qString;
 }
 
 export function urlFromState(urlState: UrlState): string {
-  const { pathParts, query } = urlStateToUrlObject(urlState);
+  const pathParts = getPathParts(urlState);
+  const qString = getQueryStringFromUrlState(urlState);
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return '/';
@@ -408,9 +411,6 @@ export function urlFromState(urlState: UrlState): string {
   const pathname =
     pathParts.length === 0 ? '/' : '/' + pathParts.join('/') + '/';
 
-  const qString = queryString.stringify(query, {
-    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-  });
   return pathname + (qString ? '?' + qString : '');
 }
 
@@ -593,6 +593,14 @@ function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
   return localTrackOrderByPid;
 }
 
+// This Error class is used in other codepaths to detect the specific error of
+// URL upgrading and react differently when this happens, compared to other
+// errors.
+// Exported for tests.
+export class UrlUpgradeError extends Error {
+  name = 'UrlUpgradeError';
+}
+
 type ProcessedLocation = {|
   pathname: string,
   hash: string,
@@ -614,7 +622,7 @@ export function upgradeLocationToCurrentVersion(
   }
 
   if (urlVersion > CURRENT_URL_VERSION) {
-    throw new Error(
+    throw new UrlUpgradeError(
       `Unable to parse a url of version ${urlVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
         `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_URL_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
@@ -763,6 +771,44 @@ const _upgraders = {
       );
     }
     processedLocation.query.transforms = stringifyTransforms(transforms);
+  },
+  [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // We changed how the ranges are serialized to the URLs. Before it was the
+    // pair of start/end in seconds unit with 4 digits, now this is a pair of
+    // start/duration, where start and duration are both integers expressed with
+    // a specific unit.
+    // For example we'll convert from 1.2345_2.3456 (that is: a range starting
+    // at 1.2345s and ending at 2.3456s) to 1234m1112 (a range starting at
+    // 1234ms and ending after 1112ms). You notice that the range is slightly
+    // bigger, because this accounts for the loss of precision.
+    if (!query.range) {
+      return;
+    }
+
+    query.range = query.range
+      .split('~')
+      .map(committedRange => {
+        // This regexp captures two (positive or negative) numbers, separated by a `_`.
+        const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
+        if (!m) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
+          return null;
+        }
+        const start = Number(m[1]) * 1000;
+        const end = Number(m[2]) * 1000;
+        if (isNaN(start) || isNaN(end)) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
+          return null;
+        }
+
+        return stringifyStartEnd({ start, end });
+      })
+      .filter(Boolean)
+      .join('~');
   },
 };
 

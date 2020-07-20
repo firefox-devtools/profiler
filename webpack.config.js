@@ -103,10 +103,6 @@ const config = {
 
 if (process.env.NODE_ENV === 'development') {
   config.mode = 'development';
-  config.devtool = 'source-map';
-  config.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(
-    config.entry
-  );
 }
 
 if (process.env.NODE_ENV === 'production') {

@@ -13,6 +13,7 @@ import {
   formatSI,
   formatMicroseconds,
   formatMilliseconds,
+  formatTimestamp,
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
@@ -648,10 +649,10 @@ function getMarkerDetails(
             <TooltipDetail label="Send Thread Latency">
               {_maybeFormatDuration(data.startTime, data.sendStartTime)}
             </TooltipDetail>
-            <TooltipDetail label="IPC Speed">
+            <TooltipDetail label="IPC Send Duration">
               {_maybeFormatDuration(data.sendStartTime, data.sendEndTime)}
             </TooltipDetail>
-            <TooltipDetail label="IPC Latency">
+            <TooltipDetail label="IPC Recv Latency">
               {_maybeFormatDuration(data.sendEndTime, data.recvEndTime)}
             </TooltipDetail>
             <TooltipDetail label="Recv Thread Latency">
@@ -811,7 +812,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
                 ? marker.dur
-                  ? formatMilliseconds(marker.dur)
+                  ? formatTimestamp(marker.dur, 3, 1)
                   : '—'
                 : 'unknown duration'}
             </div>

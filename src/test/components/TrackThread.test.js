@@ -14,6 +14,7 @@ import { oneLine } from 'common-tags';
 import {
   changeTimelineType,
   changeInvertCallstack,
+  changeSelectedCallNode,
 } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
@@ -40,10 +41,6 @@ import {
 // incrementing by steps of 100 pixels to get to the next stack.
 const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = 50;
-const STACK_1_X_POSITION = 50;
-const STACK_2_X_POSITION = 150;
-const STACK_3_X_POSITION = 250;
-const STACK_4_X_POSITION = 350;
 
 /**
  * This test is asserting behavior more for the ThreadStackGraph component. The
@@ -83,6 +80,23 @@ describe('timeline/TrackThread', function() {
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
+
+    type Coordinate = {| pageX: number, pageY: number |};
+
+    // Look through the draw log and find the center of a specific fillRect
+    // call. This is a good way to know where the canvas drew something.
+    function getFillRectCenterByIndex(log: any[], index: number): Coordinate {
+      type FillRectCall = [string, number, number, number, number];
+      const calls: FillRectCall[] = log.filter(call => call[0] === 'fillRect');
+      const call = calls[index];
+      if (!call) {
+        console.error(log);
+        throw new Error(`Could not find a fillRect call at ${index}.`);
+      }
+      const [, x, y, w, h] = call;
+      return { pageX: x + w * 0.5, pageY: y + h * 0.5 };
+    }
+
     jest
       .spyOn(HTMLCanvasElement.prototype, 'getContext')
       .mockImplementation(() => ctx);
@@ -104,6 +118,8 @@ describe('timeline/TrackThread', function() {
     const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
+    flushRafCalls();
+    // The size update then schedules another rAF draw call for canvas components.
     flushRafCalls();
 
     const stackGraphCanvas = () =>
@@ -131,6 +147,7 @@ describe('timeline/TrackThread', function() {
       stackGraphCanvas,
       markerCanvas,
       ctx,
+      getFillRectCenterByIndex,
     };
   }
 
@@ -145,7 +162,15 @@ describe('timeline/TrackThread', function() {
   });
 
   it('can click a stack in the stack graph in normal call trees', function() {
-    const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
+    const {
+      getState,
+      stackGraphCanvas,
+      thread,
+      ctx,
+      getFillRectCenterByIndex,
+    } = setup(getSamplesProfile());
+
+    const log = ctx.__flushDrawLog();
 
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
@@ -157,33 +182,38 @@ describe('timeline/TrackThread', function() {
 
     fireEvent(
       stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
+      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
     );
     expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
     fireEvent(
       stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_2_X_POSITION })
+      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 1))
     );
     expect(getCallNodePath()).toEqual(['d', 'e', 'f']);
 
     fireEvent(
       stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
+      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
     );
     expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
 
     fireEvent(
       stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_4_X_POSITION })
+      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 3))
     );
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
 
   it('can click a stack in the stack graph in inverted call trees', function() {
-    const { dispatch, getState, stackGraphCanvas, thread } = setup(
-      getSamplesProfile()
-    );
+    const {
+      dispatch,
+      getState,
+      stackGraphCanvas,
+      thread,
+      ctx,
+      getFillRectCenterByIndex,
+    } = setup(getSamplesProfile());
 
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
@@ -193,54 +223,81 @@ describe('timeline/TrackThread', function() {
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
+    function changeInvertCallstackAndGetDrawLog(value) {
+      // We don't want a selected stack graph to change fillRect ordering.
+      dispatch(changeSelectedCallNode(0, []));
+      ctx.__flushDrawLog();
+      dispatch(changeInvertCallstack(value));
+      return ctx.__flushDrawLog();
+    }
+
     // Switch to "inverted" mode to test with this state
-    dispatch(changeInvertCallstack(true));
+    {
+      const log = changeInvertCallstackAndGetDrawLog(true);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
-    );
-    expect(getCallNodePath()).toEqual(['c']);
+      fireEvent(
+        stackGraphCanvas(),
+        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
+      );
+      expect(getCallNodePath()).toEqual(['c']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
-    );
-    expect(getCallNodePath()).toEqual(['i']);
+      fireEvent(
+        stackGraphCanvas(),
+        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
+      );
+      expect(getCallNodePath()).toEqual(['i']);
+    }
+    {
+      // Switch back to "uninverted" mode
+      const log = changeInvertCallstackAndGetDrawLog(false);
 
-    // Switch back to "uninverted" mode
-    dispatch(changeInvertCallstack(false));
+      fireEvent(
+        stackGraphCanvas(),
+        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
+      );
+      expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
-    );
-    expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
-
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
-    );
-    expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
+      fireEvent(
+        stackGraphCanvas(),
+        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
+      );
+      expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
+    }
   });
 
   it('can click a marker', function() {
-    const { getState, markerCanvas } = setup(getMarkersProfile());
+    const { getState, markerCanvas, ctx, getFillRectCenterByIndex } = setup(
+      getMarkersProfile([
+        ['Marker A', 0, { startTime: 0, endTime: 4 }],
+        ['Marker B', 4, { startTime: 4, endTime: 8 }],
+      ])
+    );
 
-    function clickAndGetMarkerName(pageX: number) {
-      fireEvent(markerCanvas(), getMouseEvent('mousedown', { pageX }));
-      fireEvent(markerCanvas(), getMouseEvent('mouseup', { pageX }));
+    const log = ctx.__flushDrawLog();
+
+    function clickAndGetMarkerName(event) {
+      fireEvent(markerCanvas(), getMouseEvent('mousedown', event));
+      fireEvent(markerCanvas(), getMouseEvent('mouseup', event));
       return getPreviewSelection(getState());
     }
 
-    expect(clickAndGetMarkerName(STACK_1_X_POSITION)).toMatchObject({
+    // Currently markers are drawn with 3 fillRects, the middle of the three is the
+    // big interesting one. If this test breaks, likely the drawing strategy
+    // has changed.
+    const determineIndex = i => i * 3 + 1;
+
+    expect(
+      clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(0)))
+    ).toMatchObject({
       selectionStart: 0,
-      selectionEnd: 1,
+      selectionEnd: 4,
     });
 
-    expect(clickAndGetMarkerName(STACK_2_X_POSITION)).toMatchObject({
-      selectionStart: 1,
-      selectionEnd: 2,
+    expect(
+      clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(1)))
+    ).toMatchObject({
+      selectionStart: 4,
+      selectionEnd: 8,
     });
   });
 

@@ -100,19 +100,19 @@ export type MarkerIndex = number;
 
 export type CallNodeData = {
   funcName: string,
-  totalTime: number,
-  totalTimeRelative: number,
-  selfTime: number,
-  selfTimeRelative: number,
+  total: number,
+  totalRelative: number,
+  self: number,
+  selfRelative: number,
 };
 
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
-    totalTime: string,
-    totalTimeWithUnit: string,
-    totalTimePercent: string,
-    selfTime: string,
-    selfTimeWithUnit: string,
+    total: string,
+    totalWithUnit: string,
+    totalPercent: string,
+    self: string,
+    selfWithUnit: string,
     name: string,
     lib: string,
     isFrameLabel: boolean,
@@ -323,4 +323,15 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {|
   hostname: string,
   favicon: string,
+|};
+
+/**
+ * This struct contains the traced timing for each call node. The arrays are indexed
+ * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
+ * traced timing is computed by summing the distance between samples for a given call
+ * node. See the `computeTracedTiming` for more details.
+ */
+export type TracedTiming = {|
+  +self: Float32Array,
+  +running: Float32Array,
 |};

@@ -41,6 +41,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
+  SamplesLikeTable,
   SelectedState,
   ProfileFilterPageData,
   Milliseconds,
@@ -366,7 +367,9 @@ export function getTimingsForPath(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ) {
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
@@ -376,7 +379,9 @@ export function getTimingsForPath(
     thread,
     unfilteredThread,
     sampleIndexOffset,
-    categories
+    categories,
+    samples,
+    unfilteredSamples
   );
 }
 
@@ -396,18 +401,19 @@ export function getTimingsForCallNodeIndex(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
   // This is the data from the filtered thread that we'll loop over.
-  const { samples, stackTable, stringTable } = thread;
+  const { stackTable, stringTable } = thread;
 
   // This is the data from the unfiltered thread that we'll use to gather
   // category and JS implementation information. Note that samples are offset by
   // `sampleIndexOffset` because of range filtering.
   const {
-    samples: unfilteredSamples,
     stackTable: unfilteredStackTable,
     funcTable: unfilteredFuncTable,
     frameTable: unfilteredFrameTable,
@@ -607,11 +613,9 @@ export function getTimingsForCallNodeIndex(
       continue;
     }
 
-    const duration = samples.duration
-      ? samples.duration[sampleIndex]
-      : interval;
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
 
-    rootTime += Math.abs(duration);
+    rootTime += Math.abs(weight);
 
     const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
     const thisFunc = callNodeTable.func[thisNodeIndex];
@@ -623,7 +627,7 @@ export function getTimingsForCallNodeIndex(
           pathTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          duration
+          weight
         );
       }
 
@@ -632,7 +636,7 @@ export function getTimingsForCallNodeIndex(
           funcTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          duration
+          weight
         );
       }
     }
@@ -665,7 +669,7 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            duration
+            weight
           );
         }
 
@@ -683,7 +687,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            duration
+            weight
           );
         }
         funcFound = true;
@@ -707,7 +711,7 @@ export function getTimingsForCallNodeIndex(
           // This root node matches the passed call node path.
           // This is the only place where we don't accumulate timings, mainly
           // because this would be the same as for the total time.
-          pathTimings.selfTime.value += duration;
+          pathTimings.selfTime.value += weight;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
@@ -716,7 +720,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.selfTime,
             sampleIndex,
             currentStackIndex,
-            duration
+            weight
           );
         }
 
@@ -727,7 +731,7 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            duration
+            weight
           );
         }
 
@@ -738,7 +742,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            duration
+            weight
           );
         }
       }
@@ -1229,9 +1233,10 @@ export function filterThreadSamplesToRange(
   const newSamples: SamplesTable = {
     length: endSampleIndex - beginSampleIndex,
     time: samples.time.slice(beginSampleIndex, endSampleIndex),
-    duration: samples.duration
-      ? samples.duration.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
+    weight: samples.weight
+      ? samples.weight.slice(beginSampleIndex, endSampleIndex)
+      : null,
+    weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
   };
 
@@ -1266,7 +1271,8 @@ export function filterThreadSamplesToRange(
         startAllocIndex,
         endAllocIndex
       ),
-      duration: jsAllocations.duration.slice(startAllocIndex, endAllocIndex),
+      weight: jsAllocations.weight.slice(startAllocIndex, endAllocIndex),
+      weightType: jsAllocations.weightType,
       inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
       stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
       length: endAllocIndex - startAllocIndex,
@@ -1280,7 +1286,7 @@ export function filterThreadSamplesToRange(
       rangeEnd
     );
     const time = nativeAllocations.time.slice(startAllocIndex, endAllocIndex);
-    const duration = nativeAllocations.duration.slice(
+    const weight = nativeAllocations.weight.slice(
       startAllocIndex,
       endAllocIndex
     );
@@ -1289,7 +1295,8 @@ export function filterThreadSamplesToRange(
     if (nativeAllocations.memoryAddress) {
       newThread.nativeAllocations = {
         time,
-        duration,
+        weight,
+        weightType: nativeAllocations.weightType,
         stack,
         memoryAddress: nativeAllocations.memoryAddress.slice(
           startAllocIndex,
@@ -1304,7 +1311,8 @@ export function filterThreadSamplesToRange(
     } else {
       newThread.nativeAllocations = {
         time,
-        duration,
+        weight,
+        weightType: nativeAllocations.weightType,
         stack,
         length,
       };
@@ -1774,16 +1782,16 @@ export function getSampleIndexClosestToTime(
   // and its predecessor.
   const previousIndex = index - 1;
 
-  let duration = interval;
-  let previousDuration = interval;
-  if (samples.duration) {
-    duration = Math.abs(samples.duration[index]);
-    previousDuration = Math.abs(samples.duration[previousIndex]);
+  let weight = interval;
+  let previousWeight = interval;
+  if (samples.weight) {
+    weight = Math.abs(samples.weight[index]);
+    previousWeight = Math.abs(samples.weight[previousIndex]);
   }
 
-  const distanceToThis = samples.time[index] + duration / 2 - time;
+  const distanceToThis = samples.time[index] + weight / 2 - time;
   const distanceToLast =
-    time - (samples.time[previousIndex] + previousDuration / 2);
+    time - (samples.time[previousIndex] + previousWeight / 2);
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
@@ -2196,11 +2204,11 @@ export function filterToAllocations(
   if (nativeAllocations.memoryAddress) {
     newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration > 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight > 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.memoryAddress.push(
           nativeAllocations.memoryAddress[i]
         );
@@ -2211,11 +2219,11 @@ export function filterToAllocations(
   } else {
     newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration > 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight > 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.length++;
       }
     }
@@ -2234,11 +2242,11 @@ export function filterToDeallocationsSites(
   if (nativeAllocations.memoryAddress) {
     newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration < 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight < 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.memoryAddress.push(
           nativeAllocations.memoryAddress[i]
         );
@@ -2249,11 +2257,11 @@ export function filterToDeallocationsSites(
   } else {
     newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration < 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight < 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.length++;
       }
     }
@@ -2281,7 +2289,7 @@ export function filterToDeallocationsMemory(
     allocationIndex < nativeAllocations.length;
     allocationIndex++
   ) {
-    const bytes = nativeAllocations.duration[allocationIndex];
+    const bytes = nativeAllocations.weight[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
     if (bytes >= 0) {
       // Handle the allocation.
@@ -2307,12 +2315,12 @@ export function filterToDeallocationsMemory(
 
   const newDeallocations = getEmptyBalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.duration[i];
+    const duration = nativeAllocations.weight[i];
     const stackIndex = stackOfOriginalAllocation[i];
     if (stackIndex !== null) {
       newDeallocations.time.push(nativeAllocations.time[i]);
       newDeallocations.stack.push(stackIndex);
-      newDeallocations.duration.push(duration);
+      newDeallocations.weight.push(duration);
       newDeallocations.memoryAddress.push(nativeAllocations.memoryAddress[i]);
       newDeallocations.threadId.push(nativeAllocations.threadId[i]);
       newDeallocations.length++;
@@ -2347,7 +2355,7 @@ export function filterToRetainedAllocations(
     allocationIndex < nativeAllocations.length;
     allocationIndex++
   ) {
-    const bytes = nativeAllocations.duration[allocationIndex];
+    const bytes = nativeAllocations.weight[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
     if (bytes >= 0) {
       // Handle the allocation.
@@ -2374,11 +2382,11 @@ export function filterToRetainedAllocations(
 
   const newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.duration[i];
+    const weight = nativeAllocations.weight[i];
     if (retainedAllocation[i]) {
       newNativeAllocations.time.push(nativeAllocations.time[i]);
       newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-      newNativeAllocations.duration.push(duration);
+      newNativeAllocations.weight.push(weight);
       newNativeAllocations.memoryAddress.push(
         nativeAllocations.memoryAddress[i]
       );

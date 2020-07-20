@@ -239,6 +239,15 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  * this: [jit:baseline] or [jit:ion], right after the function name (see below
  * for an example). The default is no JIT.
  *
+ * The time of the sample can also be set by making the first row all numbers:
+ * ```
+ *   const { profile } = getProfileFromTextSamples(`
+ *    0  1  5  6
+ *    A  A  A  C
+ *       B
+ *  `);
+ * ```
+ *
  * The funcNamesDictPerThread array can be useful when using it like this:
  * ```
  * const {
@@ -272,6 +281,22 @@ export function getProfileFromTextSamples(
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
 
+    // See if the first row contains only numbers, if so this is the time of the sample.
+    let sampleTimes = null;
+
+    // Check if the first row is made by base 10 integers. 0x200 and other will parse
+    // as numbers, but they can be used as valid function names.
+    const isFirstRowMadeOfNumbers = textOnlyStacks.every(stack =>
+      /^\d+$/.test(stack[0])
+    );
+    if (isFirstRowMadeOfNumbers) {
+      sampleTimes = textOnlyStacks.map(stack => parseInt(stack[0]));
+      for (const stack of textOnlyStacks) {
+        // Remove the number.
+        stack.shift();
+      }
+    }
+
     // Flatten the textOnlyStacks into into a list of function names.
     const funcNamesSet = new Set();
     const removeModifiers = /\[.*/;
@@ -295,7 +320,8 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      categories
+      categories,
+      sampleTimes
     );
   });
 
@@ -438,7 +464,8 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
-  categories: CategoryList
+  categories: CategoryList,
+  sampleTimes: number[] | null
 ): Thread {
   const thread = getEmptyThread();
 
@@ -590,6 +617,11 @@ function _buildThreadFromTextOnlyStacks(
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
+
+  if (sampleTimes) {
+    samples.time = sampleTimes;
+  }
+
   return thread;
 }
 
@@ -913,6 +945,8 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
+    weightType: 'samples',
+    weight: null,
     length: endOfEvents,
   };
 
@@ -1012,7 +1046,7 @@ export function getProfileWithJsAllocations(): * {
     jsAllocations.className.push('Function');
     jsAllocations.typeName.push('JSObject');
     jsAllocations.coarseType.push('Object');
-    jsAllocations.duration.push(byteSize);
+    jsAllocations.weight.push(byteSize);
     jsAllocations.inNursery.push(true);
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
@@ -1090,7 +1124,7 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
   for (const { byteSize, stack } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.length++;
   }
@@ -1167,7 +1201,7 @@ export function getProfileWithBalancedNativeAllocations(): * {
   for (const { byteSize, stack, memoryAddress } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.memoryAddress.push(memoryAddress);
     nativeAllocations.threadId.push(threadId);

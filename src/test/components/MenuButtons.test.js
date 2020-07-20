@@ -298,7 +298,7 @@ describe('<MenuButtonsMetaInfo>', function() {
     };
 
     const { container, getByValue } = setup(profile);
-    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -318,7 +318,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
     const { getByValue, container } = setup(profile);
 
-    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 

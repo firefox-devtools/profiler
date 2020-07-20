@@ -6,7 +6,7 @@
 
 /**
  * This object contains all our tab slugs with their associated title. This is
- * the "master list of tabs". This is in object form because that's how we can
+ * the "main list of tabs". This is in object form because that's how we can
  * easily derive the TabSlug type with Flow.
  */
 export const tabsWithTitle = {

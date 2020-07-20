@@ -150,6 +150,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getThread,
     selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
+    selectedThreadSelectors.getSamplesForCallTree,
+    selectedThreadSelectors.getUnfilteredSamplesForCallTree,
     ProfileData.getTimingsForPath
   );
 

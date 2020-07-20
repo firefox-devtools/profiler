@@ -125,6 +125,8 @@ export default function getProfile(): Profile {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
+    weightType: 'samples',
+    weight: null,
     length: 2,
   };
 

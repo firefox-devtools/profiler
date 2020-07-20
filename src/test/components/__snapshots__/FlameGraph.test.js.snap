@@ -67,7 +67,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
       <div
         class="tooltipTiming"
       >
-        100.00%
+        3.0ms (100%)
       </div>
       <div
         class="tooltipTitle"
@@ -121,10 +121,14 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
             style="width: 0px;"
           />
         </div>
-        <div>
-          3ms
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          3 samples
         </div>
-        <div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
           —
         </div>
         <div
@@ -147,8 +151,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
         <div
           class="tooltipCallNodeImplementationTiming"
         >
-          3
-          ms
+          3 samples
         </div>
         <div
           class="tooltipCallNodeImplementationTiming"

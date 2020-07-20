@@ -14,6 +14,7 @@ import { getActiveTabGlobalTracks } from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
+import { fatalError } from './errors';
 
 import type {
   Profile,
@@ -105,6 +106,14 @@ export function setupInitialUrlState(
     try {
       urlState = stateFromLocation(location, profile);
     } catch (e) {
+      if (e.name === 'UrlUpgradeError') {
+        // The error is an URL upgrade error, let's fire a fatal error.
+        // If there's a service worker update, the class `ServiceWorkerManager`
+        // will automatically reload in case the new code knows how to handle
+        // this URL version.
+        dispatch(fatalError(e));
+        return;
+      }
       // The location could not be parsed, show a 404 instead.
       console.error(e);
       dispatch(show404(location.pathname + location.search));
