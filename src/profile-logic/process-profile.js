@@ -135,9 +135,11 @@ function _sortMarkers(markers: GeckoMarkers): GeckoMarkers {
     const aTime: null | Milliseconds = a[endTime] || a[startTime];
     const bTime: null | Milliseconds = b[endTime] || b[startTime];
     if (aTime === null) {
+      console.error(a);
       throw new Error('A marker had null start and end time.');
     }
     if (bTime === null) {
+      console.error(b);
       throw new Error('A marker had null start and end time.');
     }
     return aTime - bTime;
