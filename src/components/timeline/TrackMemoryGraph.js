@@ -121,6 +121,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // The x and y are used after the loop.
       let x = 0;
       let y = 0;
+      let firstX = 0;
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
@@ -134,6 +135,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
           deviceLineHalfWidth;
         if (i === 0) {
           // This is the first iteration, only move the line.
+          firstX = x;
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
@@ -149,10 +151,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // After doing the stroke, continue the path to complete the fill to the bottom
       // of the canvas.
       ctx.lineTo(x + interval, deviceHeight);
-      ctx.lineTo(
-        (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
-        deviceHeight
-      );
+      ctx.lineTo(firstX, deviceHeight);
       ctx.fill();
     }
   }
