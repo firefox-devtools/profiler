@@ -22,6 +22,7 @@ import {
   setupInitialUrlState,
 } from '../../actions/app';
 import { setDataSource } from 'firefox-profiler/actions/profile-view';
+import { viewProfileFromPathInZipFile } from 'firefox-profiler/actions/zipped-profiles';
 import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
@@ -63,6 +64,7 @@ type DispatchProps = {|
   +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
   +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  +viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile,
   +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 |};
 
@@ -117,6 +119,7 @@ class UrlManager extends React.PureComponent<Props> {
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
+      viewProfileFromPathInZipFile,
       retrieveProfilesToCompare,
     } = this.props;
     const pathParts = location.pathname.split('/').filter(d => d);
@@ -148,6 +151,20 @@ class UrlManager extends React.PureComponent<Props> {
           decodeURIComponent(pathParts[1]),
           true
         );
+
+        // By checking the value on this.props directly, we get the latest
+        // value, that was updated during the call to
+        // retrieveProfileOrZipFromUrl above.
+        if (this.props.hasZipLoaded) {
+          const query = queryString.parse(location.search.substr(1), {
+            arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+          });
+
+          // Note: we use "typeof" to appease Flow
+          if (typeof query.file === 'string') {
+            await viewProfileFromPathInZipFile(query.file, true);
+          }
+        }
         break;
       case 'compare': {
         const query = queryString.parse(location.search.substr(1), {
@@ -320,6 +337,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     retrieveProfileFromAddon,
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
+    viewProfileFromPathInZipFile,
     retrieveProfilesToCompare,
   },
   component: UrlManager,

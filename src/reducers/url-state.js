@@ -391,9 +391,9 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
 
 const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
-    // Update the URL the moment the zip file is starting to be
-    // processed, not when it is viewed. The processing is async.
     case 'PROCESS_PROFILE_FROM_ZIP_FILE':
+      // Update the URL the moment the zip file is starting to be
+      // processed, not when it is viewed. The processing is async.
       return action.pathInZipFile ? action.pathInZipFile : null;
     case 'RETURN_TO_ZIP_FILE_LIST':
       return null;
