@@ -5,9 +5,7 @@
 .timelineEmptyThreadIndicator {
   --empty-buffer-color1: rgba(69, 160, 255, 0.225);
   --empty-buffer-color2: rgba(69, 160, 255, 0.075);
-
-  /* The following color is based off grey-20, but uses opacity instead. */
-  --shutdown-startup-color: rgba(0, 0, 50, 0.07);
+  --shutdown-startup-color: #f4f4f6;
 }
 
 .timelineEmptyThreadIndicatorBlock {
@@ -20,15 +18,25 @@
 }
 
 .timelineEmptyThreadIndicatorStartup {
-  border-right: solid 1px var(--grey-30);
-  background-color: var(--shutdown-startup-color);
-  box-shadow: inset -4px 0 4px rgba(0, 0, 0, 0.05);
+  border-right: solid 1px #cecece;
+  background: linear-gradient(
+      270deg,
+      rgba(173, 173, 173, 0.3) 0.5px,
+      rgba(196, 196, 196, 0.170312) 4px,
+      rgba(196, 196, 196, 0) 9.5px
+    )
+    var(--shutdown-startup-color);
 }
 
 .timelineEmptyThreadIndicatorShutdown {
-  border-left: solid 1px var(--grey-30);
-  background-color: var(--shutdown-startup-color);
-  box-shadow: inset 4px 0 4px rgba(0, 0, 0, 0.05);
+  border-left: solid 1px #cecece;
+  background: linear-gradient(
+      90deg,
+      rgba(173, 173, 173, 0.3) 0.5px,
+      rgba(196, 196, 196, 0.170312) 4px,
+      rgba(196, 196, 196, 0) 9.5px
+    )
+    var(--shutdown-startup-color);
 }
 
 .timelineEmptyThreadIndicatorEmptyBuffer {

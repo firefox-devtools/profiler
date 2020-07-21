@@ -20,11 +20,12 @@
 .timelineTrackRow {
   display: flex;
   flex-flow: row nowrap;
+  border-left: 4px solid transparent;
   background-color: #fff;
 }
 
 .timelineTrackRow.selected {
-  background-color: #edf6ff;
+  border-left: 4px solid #0a84ff;
 }
 
 .timelineTrackHidden {
