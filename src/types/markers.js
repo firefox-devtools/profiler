@@ -135,8 +135,6 @@ export type GCMajorAborted = {|
 
 type GCMajorCompleted_Shared = {|
   status: 'completed',
-  // timestamp is present but is usually 0
-  timestamp: number,
   max_pause: Milliseconds,
 
   // The sum of all the slice durations

@@ -225,7 +225,6 @@ describe('TooltipMarker', function() {
             slices: 2,
             status: 'completed',
             store_buffer_overflows: 1,
-            timestamp: 0,
             total_compartments: 19,
             total_time: 85.578,
             total_zones: 4,
