@@ -4,7 +4,6 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import queryString from 'query-string';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
@@ -34,10 +33,7 @@ import {
   getView,
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
-import {
-  stateFromLocation,
-  getDataSourceFromPathParts,
-} from '../app-logic/url-handling';
+import { stateFromLocation } from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -49,7 +45,6 @@ import {
   getVisibleThreads,
 } from '../profile-logic/tracks';
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
-import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
@@ -1374,72 +1369,5 @@ export function retrieveProfilesToCompare(
     } catch (error) {
       dispatch(fatalError(error));
     }
-  };
-}
-
-// This function takes location(most probably `window.location`) as parameter
-// and loads the profile in that given location, then returns the profile data.
-// This function is being used to get the initial profile data before upgrading
-// the url and processing the UrlState.
-export function getProfilesFromRawUrl(
-  location: Location
-): ThunkAction<
-  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
-> {
-  return async (dispatch, getState) => {
-    const pathParts = location.pathname.split('/').filter(d => d);
-    let dataSource = getDataSourceFromPathParts(pathParts);
-    if (dataSource === 'from-file') {
-      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
-      // be 'from-file' and needs to be redirected to home page.
-      dataSource = 'none';
-    }
-    dispatch(setDataSource(dataSource));
-
-    let shouldSetupInitialUrlState = true;
-    switch (dataSource) {
-      case 'from-addon':
-        shouldSetupInitialUrlState = false;
-        // We don't need to `await` the result because there's no url upgrading
-        // when retrieving the profile from the addon and we don't need to wait
-        // for the process. Moreover we don't want to wait for the end of
-        // symbolication and rather want to show the UI as soon as we get
-        // the profile data.
-        dispatch(retrieveProfileFromAddon());
-        break;
-      case 'public':
-        await dispatch(retrieveProfileFromStore(pathParts[1], true));
-        break;
-      case 'from-url':
-        await dispatch(
-          retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
-        );
-        break;
-      case 'compare': {
-        const query = queryString.parse(location.search.substr(1), {
-          arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-        });
-        if (Array.isArray(query.profiles)) {
-          await dispatch(retrieveProfilesToCompare(query.profiles, true));
-        }
-        break;
-      }
-      case 'none':
-      case 'from-file':
-      case 'local':
-        throw new Error(`There is no profile to download`);
-      default:
-        throw assertExhaustiveCheck(
-          dataSource,
-          `Unknown dataSource ${dataSource}.`
-        );
-    }
-
-    // Profile may be null only for the `from-addon` dataSource since we do
-    // not `await` for retrieveProfileFromAddon function.
-    return {
-      profile: getProfileOrNull(getState()),
-      shouldSetupInitialUrlState,
-    };
   };
 }

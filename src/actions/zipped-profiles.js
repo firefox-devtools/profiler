@@ -84,7 +84,8 @@ export function viewProfileFromZip(
  * don't really trust it.
  */
 export function viewProfileFromPathInZipFile(
-  pathInZipFile: string
+  pathInZipFile: string,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return (dispatch, getState) => {
     const zipFileTable = getZipFileTable(getState());
@@ -93,7 +94,7 @@ export function viewProfileFromPathInZipFile(
       dispatch(showErrorForNoFileInZip(pathInZipFile));
       return Promise.resolve();
     }
-    return dispatch(viewProfileFromZip(zipFileIndex));
+    return dispatch(viewProfileFromZip(zipFileIndex, initialLoad));
   };
 }
 

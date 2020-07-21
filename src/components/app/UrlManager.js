@@ -5,8 +5,15 @@
 // @flow
 
 import * as React from 'react';
+import queryString from 'query-string';
+
 import explicitConnect from '../../utils/connect';
-import { getView, getUrlSetupPhase } from '../../selectors/app';
+import {
+  getView,
+  getUrlSetupPhase,
+  getZipFile,
+  getProfileOrNull,
+} from 'firefox-profiler/selectors';
 import {
   updateUrlState,
   startFetchingProfiles,
@@ -14,28 +21,36 @@ import {
   show404,
   setupInitialUrlState,
 } from '../../actions/app';
+import { setDataSource } from 'firefox-profiler/actions/profile-view';
+import {
+  retrieveProfileFromAddon,
+  retrieveProfileFromStore,
+  retrieveProfileOrZipFromUrl,
+  retrieveProfilesToCompare,
+} from 'firefox-profiler/actions/receive-profile';
 import {
   urlFromState,
   stateFromLocation,
   getIsHistoryReplaceState,
+  getDataSourceFromPathParts,
 } from '../../app-logic/url-handling';
-import {
-  getProfilesFromRawUrl,
-  typeof getProfilesFromRawUrl as GetProfilesFromRawUrl,
-} from '../../actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
+import type { ConnectedProps } from '../../utils/connect';
 import type {
-  ConnectedProps,
-  WrapFunctionInDispatch,
-} from '../../utils/connect';
-import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+  UrlState,
+  Phase,
+  Profile,
+  UrlSetupPhase,
+} from 'firefox-profiler/types';
 
 type StateProps = {|
   +phase: Phase,
   +urlState: UrlState,
   +urlSetupPhase: UrlSetupPhase,
+  +hasZipLoaded: boolean,
+  +profileOrNull: Profile | null,
 |};
 
 type DispatchProps = {|
@@ -43,8 +58,12 @@ type DispatchProps = {|
   +startFetchingProfiles: typeof startFetchingProfiles,
   +urlSetupDone: typeof urlSetupDone,
   +show404: typeof show404,
-  +getProfilesFromRawUrl: typeof getProfilesFromRawUrl,
   +setupInitialUrlState: typeof setupInitialUrlState,
+  +setDataSource: typeof setDataSource,
+  +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
+  +retrieveProfileFromStore: typeof retrieveProfileFromStore,
+  +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 |};
 
 type OwnProps = {|
@@ -83,15 +102,89 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  *    4. Display the profile view.
  */
 class UrlManager extends React.PureComponent<Props> {
+  // This function takes location (most probably `window.location`) as parameter
+  // and loads the profile in that given location, then returns the profile data.
+  // This function is being used to get the initial profile data before upgrading
+  // the url and processing the UrlState.
+  async _getProfilesFromRawUrl(
+    location: Location
+  ): Promise<{|
+    profile: Profile | null,
+    shouldSetupInitialUrlState: boolean,
+  |}> {
+    const {
+      setDataSource,
+      retrieveProfileFromAddon,
+      retrieveProfileFromStore,
+      retrieveProfileOrZipFromUrl,
+      retrieveProfilesToCompare,
+    } = this.props;
+    const pathParts = location.pathname.split('/').filter(d => d);
+    let dataSource = getDataSourceFromPathParts(pathParts);
+    if (dataSource === 'from-file') {
+      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
+      // be 'from-file' and needs to be redirected to home page.
+      // Remember that this function runs only from componentDidMount.
+      dataSource = 'none';
+    }
+    setDataSource(dataSource);
+
+    let shouldSetupInitialUrlState = true;
+    switch (dataSource) {
+      case 'from-addon':
+        shouldSetupInitialUrlState = false;
+        // We don't need to `await` the result because there's no url upgrading
+        // when retrieving the profile from the addon and we don't need to wait
+        // for the process. Moreover we don't want to wait for the end of
+        // symbolication and rather want to show the UI as soon as we get
+        // the profile data.
+        retrieveProfileFromAddon();
+        break;
+      case 'public':
+        await retrieveProfileFromStore(pathParts[1], true);
+        break;
+      case 'from-url':
+        await retrieveProfileOrZipFromUrl(
+          decodeURIComponent(pathParts[1]),
+          true
+        );
+        break;
+      case 'compare': {
+        const query = queryString.parse(location.search.substr(1), {
+          arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+        });
+        if (Array.isArray(query.profiles)) {
+          await retrieveProfilesToCompare(query.profiles, true);
+        }
+        break;
+      }
+      case 'none':
+      case 'from-file':
+      case 'local':
+        throw new Error(`There is no profile to download`);
+      default:
+        throw assertExhaustiveCheck(
+          dataSource,
+          `Unknown dataSource ${dataSource}.`
+        );
+    }
+
+    // Profile may be null only for the `from-addon` dataSource since we do
+    // not `await` for retrieveProfileFromAddon function.
+    // We get it directly from `this.props` so that we have the value after
+    // everything asynchronous happened.
+    return {
+      profile: this.props.profileOrNull,
+      shouldSetupInitialUrlState,
+    };
+  }
+
   async _processInitialUrls() {
     const {
       startFetchingProfiles,
       setupInitialUrlState,
       urlSetupDone,
     } = this.props;
-    // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
-    const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> = (this
-      .props.getProfilesFromRawUrl: any);
     startFetchingProfiles();
 
     try {
@@ -108,7 +201,7 @@ class UrlManager extends React.PureComponent<Props> {
       const {
         profile,
         shouldSetupInitialUrlState,
-      } = await getProfilesFromRawUrl(window.location);
+      } = await this._getProfilesFromRawUrl(window.location);
 
       if (profile !== null && shouldSetupInitialUrlState) {
         setupInitialUrlState(window.location, profile);
@@ -214,6 +307,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
     phase: getView(state).phase,
+    hasZipLoaded: !!getZipFile(state),
+    profileOrNull: getProfileOrNull(state),
   }),
   mapDispatchToProps: {
     updateUrlState,
@@ -221,7 +316,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     urlSetupDone,
     show404,
     setupInitialUrlState,
-    getProfilesFromRawUrl,
+    setDataSource,
+    retrieveProfileFromAddon,
+    retrieveProfileFromStore,
+    retrieveProfileOrZipFromUrl,
+    retrieveProfilesToCompare,
   },
   component: UrlManager,
 });
