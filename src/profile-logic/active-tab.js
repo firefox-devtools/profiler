@@ -125,6 +125,8 @@ export function computeActiveTabTracks(
 
   const mainTrack: ActiveTabMainTrack = {
     type: 'tab',
+    // FIXME: We should revert back to full view if we failed to find a track
+    // index for the main track.
     mainThreadIndex: mainTrackIndexes[0] || 0,
     threadIndexes: mainTrackIndexes,
   };
