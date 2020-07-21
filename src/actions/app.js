@@ -10,7 +10,7 @@ import {
   getSelectedThreadIndex,
 } from '../selectors/url-state';
 import { getTrackThreadHeights } from '../selectors/app';
-import { getActiveTabGlobalTracks } from '../selectors/profile';
+import { getActiveTabMainTrack } from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
@@ -213,16 +213,8 @@ export function toggleResourcesPanel(): ThunkAction<void> {
     if (isResourcesPanelOpen) {
       // If it was open when we dispatched that action, it means we are closing this panel.
       // We would like to also select the main track when we close this panel.
-      const globalTracks = getActiveTabGlobalTracks(getState());
-      const mainTrack = globalTracks.find(track => track.type === 'tab');
-
-      if (mainTrack === undefined) {
-        throw new Error(
-          'Failed to find the main track index in active tab view'
-        );
-      }
-
-      selectedThreadIndex = mainTrack.threadIndex;
+      const mainTrack = getActiveTabMainTrack(getState());
+      selectedThreadIndex = mainTrack.mainThreadIndex;
     }
 
     // Toggle the resources panel eventually.

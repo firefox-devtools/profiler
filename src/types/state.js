@@ -25,9 +25,8 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  ActiveTabGlobalTrack,
+  ActiveTabTimeline,
   OriginsTimeline,
-  ActiveTabResourceTrack,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -74,8 +73,7 @@ export type OriginsViewState = {|
  * They should not be used from the full view.
  */
 export type ActiveTabProfileViewState = {|
-  globalTracks: ActiveTabGlobalTrack[],
-  resourceTracks: ActiveTabResourceTrack[],
+  activeTabTimeline: ActiveTabTimeline,
 |};
 
 /**

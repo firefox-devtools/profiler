@@ -526,7 +526,7 @@ export function finalizeActiveTabProfileView(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
-    const { globalTracks, resourceTracks } = computeActiveTabTracks(
+    const activeTabTimeline = computeActiveTabTracks(
       profile,
       relevantPages,
       getState()
@@ -536,8 +536,7 @@ export function finalizeActiveTabProfileView(
 
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
-      globalTracks,
-      resourceTracks,
+      activeTabTimeline,
       selectedThreadIndex,
       browsingContextID,
     });

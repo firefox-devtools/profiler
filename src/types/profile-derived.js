@@ -254,9 +254,24 @@ export type OriginsTimeline = Array<
 /**
  * Active tab view tracks
  */
-export type ActiveTabGlobalTrack =
-  | {| +type: 'tab', +threadIndex: ThreadIndex |}
-  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
+
+/**
+ * Main track for active tab view.
+ * Currently it holds mainThreadIndex to make things easier because most of the
+ * places require a single thread index instead of thread indexes array.
+ * This will go away soon.
+ */
+export type ActiveTabMainTrack = {|
+  type: 'tab',
+  mainThreadIndex: ThreadIndex,
+  threadIndexes: Array<ThreadIndex>,
+|};
+
+export type ActiveTabScreenshotTrack = {|
+  +type: 'screenshots',
+  +id: string,
+  +threadIndex: ThreadIndex,
+|};
 
 export type ActiveTabResourceTrack =
   | {|
@@ -269,6 +284,23 @@ export type ActiveTabResourceTrack =
       +threadIndex: ThreadIndex,
       +name: string,
     |};
+
+/**
+ * Timeline for active tab view.
+ * It holds main track for the current tab, screenshots and resource tracks.
+ * Main track is being computed during profile load and rest is being added to resources.
+ * This timeline type is different compared to full view. This makes making main
+ * track acess a lot easier.
+ */
+export type ActiveTabTimeline = {
+  mainTrack: ActiveTabMainTrack,
+  screenshots: Array<ActiveTabScreenshotTrack>,
+  resources: Array<ActiveTabResourceTrack>,
+};
+
+export type ActiveTabGlobalTrack =
+  | ActiveTabMainTrack
+  | ActiveTabScreenshotTrack;
 
 export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 

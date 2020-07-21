@@ -13,9 +13,7 @@ import type {
   Pid,
   LocalTrack,
   GlobalTrack,
-  ActiveTabGlobalTrack,
   OriginsTimeline,
-  ActiveTabResourceTrack,
   StartEndRange,
   PreviewSelection,
   RequestedLib,
@@ -26,6 +24,7 @@ import type {
   ThreadViewOptions,
   RightClickedCallNode,
   RightClickedMarker,
+  ActiveTabTimeline,
 } from 'firefox-profiler/types';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
@@ -99,29 +98,13 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
  * function update would force it to be recomputed on every symbolication update
  * pass. It is valid for the lifetime of the profile.
  */
-const activeTabGlobalTracks: Reducer<ActiveTabGlobalTrack[]> = (
-  state = [],
+const activeTabTimeline: Reducer<ActiveTabTimeline | null> = (
+  state = null,
   action
 ) => {
   switch (action.type) {
     case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.globalTracks;
-    default:
-      return state;
-  }
-};
-
-/**
- * This can be derived like the globalTracks information, but is stored in the state
- * for the same reason.
- */
-const activeTabResourceTracks: Reducer<ActiveTabResourceTrack[]> = (
-  state = [],
-  action
-) => {
-  switch (action.type) {
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.resourceTracks;
+      return action.activeTabTimeline;
     default:
       return state;
   }
@@ -613,8 +596,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       localTracksByPid,
     }),
     activeTab: combineReducers({
-      globalTracks: activeTabGlobalTracks,
-      resourceTracks: activeTabResourceTracks,
+      activeTabTimeline,
     }),
     origins: combineReducers({
       originsTimeline,

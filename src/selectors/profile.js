@@ -59,6 +59,8 @@ import type {
   FullProfileViewState,
   ActiveTabProfileViewState,
   OriginsViewState,
+  ActiveTabTimeline,
+  ActiveTabMainTrack,
   $ReturnType,
 } from 'firefox-profiler/types';
 
@@ -427,16 +429,25 @@ export const getLocalTrackName = (
 /**
  * Returns global tracks for the active tab view.
  */
+export const getActiveTabTimeline: Selector<ActiveTabTimeline> = state =>
+  getActiveTabProfileView(state).activeTabTimeline;
+
+export const getActiveTabMainTrack: Selector<ActiveTabMainTrack> = state =>
+  getActiveTabTimeline(state).mainTrack;
+
 export const getActiveTabGlobalTracks: Selector<
   ActiveTabGlobalTrack[]
-> = state => getActiveTabProfileView(state).globalTracks;
+> = state => [
+  ...getActiveTabTimeline(state).screenshots,
+  getActiveTabTimeline(state).mainTrack,
+];
 
 /**
  * Returns resource tracks for the active tab view.
  */
 export const getActiveTabResourceTracks: Selector<
   ActiveTabResourceTrack[]
-> = state => getActiveTabProfileView(state).resourceTracks;
+> = state => getActiveTabTimeline(state).resources;
 
 /**
  * This returns all TrackReferences for global tracks.

@@ -93,7 +93,7 @@ describe('ActiveTabTimeline', function() {
       if (track.type !== 'tab') {
         throw new Error('Expected a tab track.');
       }
-      const threadIndex = track.threadIndex;
+      const threadIndex = track.mainThreadIndex;
 
       if (threadIndex !== null) {
         // The assertions are simpler if the GeckoMain tab thread is not already selected.
