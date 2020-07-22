@@ -283,7 +283,7 @@ describe('UrlManager', function() {
     expect(window.history.length).toBe(1);
 
     // Now the user publishes.
-    dispatch(profilePublished('SOME_HASH', null));
+    dispatch(profilePublished('SOME_HASH', '', null));
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_HASH');
     expect(window.history.length).toBe(2);
@@ -300,7 +300,7 @@ describe('UrlManager', function() {
     expect(window.history.length).toBe(2);
 
     // Now let's publish again
-    dispatch(profilePublished('SOME_OTHER_HASH', null));
+    dispatch(profilePublished('SOME_OTHER_HASH', '', null));
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
 
