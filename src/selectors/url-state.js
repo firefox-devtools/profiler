@@ -234,6 +234,34 @@ export const getUrlPredictor: Selector<
   }
 );
 
+// This function extracts a profile name from the path of a file inside a zip.
+function getProfileNameFromZipPath(path: string): string {
+  // This regular expression keeps only the 2 last parts of a path.
+  // Here are some examples:
+  //   profile1.json -> profile1.json
+  //   directory/profile1.json -> directory/profile1.json
+  //   very/deep/directory/structure/profile1.json -> structure/profile1.json
+  //
+  // The logic for this regexp is that we match "not slash characters"
+  // between slash characters. Also there may be no directory path so the
+  // first element is optional.
+  //
+  //                           --- a non capturing group
+  //                           |  --- several "no slash" characters
+  //                           |  |   --- 1 "slash" character
+  //                           |  |   |  --- this first group is optional
+  //                           |  |   |  | --- several "no slash" characters again
+  //                           |  |   |  | |   --- all this at the end of the string
+  //                           v  v   v  v v   v
+  const directoryAndPathRe = /(?:[^/]+\/)?[^/]+$/;
+  const matchResult = directoryAndPathRe.exec(path);
+  if (matchResult !== null) {
+    return matchResult[0];
+  }
+
+  return '';
+}
+
 /**
  * Get the current path for a zip file that is being used.
  */
@@ -241,7 +269,8 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
   getUrlState(state).pathInZipFile;
 
 /**
- * For now only provide a name for a profile if it came from a zip file.
+ * This reducer returns a profile name if it's been set. Otherwise it tries to
+ * compute one, for now only when looking at a file in a zip files.
  */
 export const getProfileName: Selector<string> = createSelector(
   getProfileNameFromUrl,
@@ -250,12 +279,11 @@ export const getProfileName: Selector<string> = createSelector(
     if (profileName) {
       return profileName;
     }
+
     if (pathInZipFile) {
-      const matchResult = pathInZipFile.match(/(?:[^/]+\/)?[^/]+$/);
-      if (matchResult !== null) {
-        return matchResult[0];
-      }
+      return getProfileNameFromZipPath(pathInZipFile);
     }
+
     return '';
   }
 );

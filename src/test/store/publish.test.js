@@ -30,6 +30,7 @@ import {
   getAllCommittedRanges,
   getSelectedTab,
   getDataSource,
+  getPathInZipFileFromUrl,
   getProfileName,
   getHash,
   getTransformStack,
@@ -508,6 +509,7 @@ describe('attemptToPublish', function() {
       // Check that the initial state makes sense for viewing a zip file.
       expect(getHasZipFile(getState())).toEqual(true);
       expect(getDataSource(getState())).toEqual('from-file');
+      expect(getProfileName(getState())).toEqual('profile1.json');
 
       // Upload the profile.
       const publishAttempt = dispatch(attemptToPublish());
@@ -538,6 +540,7 @@ describe('attemptToPublish', function() {
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
+      expect(getPathInZipFileFromUrl(getState())).toEqual(null);
       expect(getProfileName(getState())).toEqual('profile1.json');
 
       // Revert the profile.

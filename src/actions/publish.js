@@ -101,6 +101,10 @@ async function storeJustPublishedProfileData(
     end: range.end - zeroAt,
   });
 
+  // We'll persist any computed profileName, because we may lose it otherwise
+  // (This is the case with zip files).
+  const profileName = getProfileName(prepublishedState);
+
   // The url predictor returns the URL that would be serialized out of the state
   // resulting of the actions passed in argument.
   // We need this here because the action of storing the profile data in the DB
@@ -123,13 +127,14 @@ async function storeJustPublishedProfileData(
         profileToken,
         committedRanges,
         oldThreadIndexToNew,
+        profileName,
         null /* prepublished State */
       )
     );
   } else {
     // Predicts the URL we'll have after the process is finished.
     predictedUrl = urlPredictor(
-      profilePublished(profileToken, null /* prepublished State */)
+      profilePublished(profileToken, profileName, null /* prepublished State */)
     );
   }
 
@@ -213,6 +218,10 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // Grab the original pre-published state, so that we can revert back to it if needed.
       const prePublishedState = getState();
 
+      // We'll persist any computed profileName, because we may lose it otherwise
+      // (This is the case with zip files).
+      const profileName = getProfileName(prePublishedState);
+
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
       const uploadGeneration = getUploadGeneration(prePublishedState);
@@ -289,6 +298,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             hash,
             committedRanges,
             oldThreadIndexToNew,
+            profileName,
             prePublishedState
           )
         );
@@ -305,6 +315,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         dispatch(
           profilePublished(
             hash,
+            profileName,
             // Only include the pre-published state if we want to be able to revert
             // the profile. If we are viewing from-addon, then it's only a single
             // profile.
@@ -357,6 +368,7 @@ export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  profileName: string | null,
   prePublishedState: State | null
 ): Action {
   return {
@@ -364,6 +376,7 @@ export function profileSanitized(
     hash,
     committedRanges,
     oldThreadIndexToNew,
+    profileName,
     prePublishedState,
   };
 }
@@ -373,6 +386,7 @@ export function profileSanitized(
  */
 export function profilePublished(
   hash: string,
+  profileName: string | null,
   // If we're publishing from a URL or Zip file, then offer to revert to the previous
   // state.
   prePublishedState: State | null
@@ -380,6 +394,7 @@ export function profilePublished(
   return {
     type: 'PROFILE_PUBLISHED',
     hash,
+    profileName,
     prePublishedState,
   };
 }
