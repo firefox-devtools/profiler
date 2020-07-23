@@ -81,6 +81,9 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     const deviceLineWidth = lineWidth * devicePixelRatio;
     const deviceLineHalfWidth = deviceLineWidth * 0.5;
     const innerDeviceHeight = deviceHeight - deviceLineWidth;
+    const rangeLength = rangeEnd - rangeStart;
+    const millisecondWidth = deviceWidth / rangeLength;
+    const intervalWidth = interval * millisecondWidth;
 
     // Resize and clear the canvas.
     canvas.width = Math.round(deviceWidth);
@@ -121,7 +124,6 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // Start by drawing from 1 - 2. This will be the top of all the peaks of the
       // memory graph.
 
-      const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = ORANGE_50;
       ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
@@ -134,7 +136,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = (deviceWidth * (samples.time[i] - rangeStart)) / rangeLength;
+        x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
@@ -154,7 +156,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       }
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
-      ctx.lineTo(x + interval, y);
+      ctx.lineTo(x + intervalWidth, y);
 
       // Don't do the fill yet, just stroke the top line. This will draw a line from
       // point 1 to 2 in the diagram above.
@@ -164,7 +166,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // of the canvas. This continues the path to point 3 and then 4.
 
       // Create a line from 2 to 3.
-      ctx.lineTo(x + interval, deviceHeight);
+      ctx.lineTo(x + intervalWidth, deviceHeight);
 
       // Create a line from 3 to 4.
       ctx.lineTo(firstX, deviceHeight);
