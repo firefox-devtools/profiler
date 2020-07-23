@@ -159,7 +159,7 @@ describe('attemptToPublish', function() {
     });
 
     const initUploadProcess: typeof uploadBinaryProfileData = () => ({
-      abortFunction() {
+      abortUpload() {
         // In the real implementation, we call xhr.abort, hwich in turn
         // triggers an "abort" event on the XHR object, which in turn rejects
         // the promise with the error UploadAbortedError. So we do just that

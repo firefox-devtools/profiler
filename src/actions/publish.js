@@ -99,17 +99,17 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Create an abort function before the first async call, but we won't
       // start the upload until much later.
-      const { abortFunction, startUpload } = uploadBinaryProfileData();
-      const augmentedAbortfunction = () => {
+      const { abortUpload, startUpload } = uploadBinaryProfileData();
+      const abortfunction = () => {
         // We dispatch the action right away, so that the UI is updated.
         // Otherwise if the user pressed "Cancel" during a long process, like
         // the compression, we wouldn't get a feedback until the end.
         // Later on the promise from `startUpload` will get rejected too, and we
         // handle this in the `catch` block.
         dispatch({ type: 'UPLOAD_ABORTED' });
-        abortFunction();
+        abortUpload();
       };
-      dispatch(uploadCompressionStarted(augmentedAbortfunction));
+      dispatch(uploadCompressionStarted(abortfunction));
 
       const gzipData: Uint8Array = await getSanitizedProfileData(
         prePublishedState

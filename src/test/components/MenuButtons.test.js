@@ -60,7 +60,7 @@ describe('app/MenuButtons', function() {
     // Flow doesn't know uploadBinaryProfileData is a jest mock.
     (uploadBinaryProfileData: any).mockImplementation(
       (() => ({
-        abortFunction: () => {
+        abortUpload: () => {
           // In the real implementation, we call xhr.abort, which in turn
           // triggers an "abort" event on the XHR object, which in turn rejects
           // the promise with the error UploadAbortedError. So we do just that

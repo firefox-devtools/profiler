@@ -26,7 +26,7 @@ export function uploadBinaryProfileData(): * {
   let isAborted = false;
 
   return {
-    abortFunction: (): void => {
+    abortUpload: (): void => {
       isAborted = true;
       xhr.abort();
     },
