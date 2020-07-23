@@ -7,7 +7,6 @@
 import {
   attemptToPublish,
   resetUploadState,
-  abortUpload,
   toggleCheckedSharingOptions,
   revertToPrePublishedState,
 } from '../../actions/publish';
@@ -17,6 +16,7 @@ import {
   returnToZipFileList,
 } from '../../actions/zipped-profiles';
 import {
+  getAbortFunction,
   getCheckedSharingOptions,
   getUploadPhase,
   getUploadError,
@@ -45,9 +45,12 @@ import {
 
 import type { Store } from 'firefox-profiler/types';
 
-// Mocks:
+// We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 jest.mock('../../profile-logic/profile-store');
+const { UploadAbortedError } = jest.requireActual(
+  '../../profile-logic/profile-store'
+);
 
 describe('getCheckedSharingOptions', function() {
   describe('default filtering by channel', function() {
@@ -151,10 +154,19 @@ describe('attemptToPublish', function() {
     promise.catch(() => {
       // Node complains if we don't handle a promise/catch, and this one rejects
       // before it's properly handled. Catch it here so that Node doesn't complain.
+      // This won't hide problems in our code because the app code "awaits" the
+      // result of startUpload, so any rejection will be handled there.
     });
 
     const initUploadProcess: typeof uploadBinaryProfileData = () => ({
-      abortFunction,
+      abortUpload() {
+        // In the real implementation, we call xhr.abort, hwich in turn
+        // triggers an "abort" event on the XHR object, which in turn rejects
+        // the promise with the error UploadAbortedError. So we do just that
+        // here directly, to simulate this.
+        rejectUpload(new UploadAbortedError());
+        abortFunction();
+      },
       startUpload: (data, callback) => {
         updateUploadProgress = callback;
         return promise;
@@ -281,7 +293,9 @@ describe('attemptToPublish', function() {
     expect(await publishAttempt).toEqual(true);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
-    expect(getUploadGeneration(getState())).toEqual(1);
+    // The generation is incremented twice because of some asynchronous code in
+    // the uploader function.
+    expect(getUploadGeneration(getState())).toBeGreaterThan(0);
     dispatch(resetUploadState());
     expect(getUploadPhase(getState())).toEqual('local');
   });
@@ -290,10 +304,11 @@ describe('attemptToPublish', function() {
     const { dispatch, getState } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadGeneration(getState())).toEqual(0);
-    dispatch(abortUpload());
-    expect(getUploadGeneration(getState())).toEqual(1);
+    const abortFunction = getAbortFunction(getState());
+    abortFunction();
 
     expect(await publishAttempt).toEqual(false);
+    expect(getUploadGeneration(getState())).toEqual(1);
     expect(getUploadPhase(getState())).toEqual('local');
   });
 
@@ -306,22 +321,24 @@ describe('attemptToPublish', function() {
       abortFunction,
     } = setup();
     // Kick off a download.
-    const promise = dispatch(attemptToPublish());
+    const publishPromise = dispatch(attemptToPublish());
     expect(getUploadGeneration(getState())).toEqual(0);
 
     // Wait until it finishes compressing, and starts uploading.
     await waitUntilPhase('uploading');
 
     // Abort the download.
-    dispatch(abortUpload());
+    const abortFunctionFromState = getAbortFunction(getState());
+    abortFunctionFromState();
 
-    // Make sure the abort function was called.
+    // Make sure the abort function was called. This means that the abort
+    // function in the state has been properly set up.
     expect(abortFunction).toHaveBeenCalled();
     expect(getUploadGeneration(getState())).toEqual(1);
 
     // Resolve the previous upload.
     resolveUpload(JWT_TOKEN);
-    await promise;
+    expect(await publishPromise).toBe(false);
 
     // Make sure that the attemptToPublish workflow doesn't continue to the
     // uploaded state.

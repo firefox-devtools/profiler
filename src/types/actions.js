@@ -408,7 +408,6 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_STARTED',
-      +abortFunction: () => void,
     |}
   | {|
       +type: 'UPDATE_UPLOAD_PROGRESS',
@@ -426,6 +425,7 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_COMPRESSION_STARTED',
+      +abortFunction: () => void,
     |}
   | {|
       +type: 'CHANGE_UPLOAD_STATE',

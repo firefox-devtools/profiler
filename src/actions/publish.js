@@ -6,7 +6,6 @@
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
 import {
-  getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
@@ -37,19 +36,19 @@ export function toggleCheckedSharingOptions(
   };
 }
 
-export function uploadCompressionStarted(): Action {
+export function uploadCompressionStarted(abortFunction: () => void): Action {
   return {
     type: 'UPLOAD_COMPRESSION_STARTED',
+    abortFunction,
   };
 }
 
 /**
  * Start uploading the profile, but save an abort function to be able to cancel it.
  */
-export function uploadStarted(abortFunction: () => void): Action {
+export function uploadStarted(): Action {
   return {
     type: 'UPLOAD_STARTED',
-    abortFunction,
   };
 }
 
@@ -96,23 +95,33 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
-      const uploadGeneration = getUploadGeneration(getState());
+      const uploadGeneration = getUploadGeneration(prePublishedState);
 
-      dispatch(uploadCompressionStarted());
-      const gzipData: Uint8Array = await getSanitizedProfileData(getState());
+      // Create an abort function before the first async call, but we won't
+      // start the upload until much later.
+      const { abortUpload, startUpload } = uploadBinaryProfileData();
+      const abortfunction = () => {
+        // We dispatch the action right away, so that the UI is updated.
+        // Otherwise if the user pressed "Cancel" during a long process, like
+        // the compression, we wouldn't get a feedback until the end.
+        // Later on the promise from `startUpload` will get rejected too, and we
+        // handle this in the `catch` block.
+        dispatch({ type: 'UPLOAD_ABORTED' });
+        abortUpload();
+      };
+      dispatch(uploadCompressionStarted(abortfunction));
+
+      const gzipData: Uint8Array = await getSanitizedProfileData(
+        prePublishedState
+      );
 
       // The previous line was async, check to make sure that this request is still valid.
+      // The upload could have been aborted while we were compressing the data.
       if (uploadGeneration !== getUploadGeneration(getState())) {
         return false;
       }
 
-      const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(uploadStarted(abortFunction));
-
-      if (uploadGeneration !== getUploadGeneration(getState())) {
-        // The upload could have been aborted while we were compressing the data.
-        return false;
-      }
+      dispatch(uploadStarted());
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
@@ -122,18 +131,22 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       const hash = extractProfileTokenFromJwt(hashOrToken);
 
-      // The previous line was async, check to make sure that this request is still valid.
+      // The previous lines were async, check to make sure that this request is still valid.
+      // Make sure that the generation is incremented again when there's an
+      // asynchronous operation later on, so that this works well as a guard.
       if (uploadGeneration !== getUploadGeneration(getState())) {
         return false;
       }
 
-      const removeProfileInformation = getRemoveProfileInformation(getState());
+      const removeProfileInformation = getRemoveProfileInformation(
+        prePublishedState
+      );
       if (removeProfileInformation) {
         const {
           committedRanges,
           oldThreadIndexToNew,
           profile,
-        } = getSanitizedProfile(getState());
+        } = getSanitizedProfile(prePublishedState);
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -162,7 +175,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             // Only include the pre-published state if we want to be able to revert
             // the profile. If we are viewing from-addon, then it's only a single
             // profile.
-            getDataSource(getState()) === 'from-addon'
+            getDataSource(prePublishedState) === 'from-addon'
               ? null
               : prePublishedState
           )
@@ -175,32 +188,25 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         eventAction: 'succeeded',
       });
     } catch (error) {
-      dispatch(uploadFailed(error));
-      sendAnalytics({
-        hitType: 'event',
-        eventCategory: 'profile upload',
-        eventAction: 'failed',
-      });
+      if (error.name === 'UploadAbortedError') {
+        // We already dispatched an action in the augmentedAbortFunction above,
+        // so we just handle analytics here.
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'aborted',
+        });
+      } else {
+        dispatch(uploadFailed(error));
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
+      }
       return false;
     }
     return true;
-  };
-}
-
-/**
- * Abort the attempt to publish.
- */
-export function abortUpload(): ThunkAction<Promise<void>> {
-  return async (dispatch, getState) => {
-    const abort = getAbortFunction(getState());
-    abort();
-    dispatch({ type: 'UPLOAD_ABORTED' });
-
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'aborted',
-    });
   };
 }
 
