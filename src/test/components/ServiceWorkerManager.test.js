@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
 import ServiceWorkerManager from '../../components/app/ServiceWorkerManager';

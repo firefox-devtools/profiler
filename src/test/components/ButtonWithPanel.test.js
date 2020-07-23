@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
 import ArrowPanel from '../../components/shared/ArrowPanel';
 import { ensureExists } from '../../utils/flow';

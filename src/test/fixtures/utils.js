@@ -10,7 +10,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { ensureExists } from '../../utils/flow';
-import { fireEvent, type RenderResult } from 'react-testing-library';
+import { fireEvent, type RenderResult } from '@testing-library/react';
 
 export function getBoundingBox(width: number, height: number) {
   return {

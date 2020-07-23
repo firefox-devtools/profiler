@@ -6,7 +6,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithUnbalancedNativeAllocations,

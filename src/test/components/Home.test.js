@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Home from '../../components/app/Home';
-import { render, waitForElement } from 'react-testing-library';
+import { render, waitForElement } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
