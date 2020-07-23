@@ -53,13 +53,15 @@ describe('app/MenuButtons', function() {
     promise.catch(() => {
       // Node complains if we don't handle a promise/catch, and this one may reject
       // before it's properly handled. Catch it here so that Node doesn't complain.
+      // This won't hide problems in our code because the app code "awaits" the
+      // result of startUpload, so any rejection will be handled there.
     });
 
     // Flow doesn't know uploadBinaryProfileData is a jest mock.
     (uploadBinaryProfileData: any).mockImplementation(
       (() => ({
         abortFunction: () => {
-          // In the real implementation, we call xhr.abort, hwich in turn
+          // In the real implementation, we call xhr.abort, which in turn
           // triggers an "abort" event on the XHR object, which in turn rejects
           // the promise with the error UploadAbortedError. So we do just that
           // here directly, to simulate this.
