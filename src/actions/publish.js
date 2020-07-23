@@ -85,13 +85,17 @@ export function uploadFailed(error: mixed): Action {
 
 // This function stores information about the published profile, depending on
 // various states. Especially it handles the case that we sanitized part of the
-// profile.
+// profile. The sanitized information is passed along because it can be costly
+// to rerun in case the selectors have been invalidated.
+// Note that the returned promise won't ever be rejected, all errors are handled
+// here.
 async function storeJustPublishedProfileData(
   profileToken: string,
   jwtToken: string | null,
-  state: State
+  sanitizedInformation: *,
+  prepublishedState: State
 ): Promise<void> {
-  const zeroAt = getZeroAt(state);
+  const zeroAt = getZeroAt(prepublishedState);
   const adjustRange = range => ({
     start: range.start - zeroAt,
     end: range.end - zeroAt,
@@ -102,14 +106,16 @@ async function storeJustPublishedProfileData(
   // We need this here because the action of storing the profile data in the DB
   // happens before the sanitization really happens in the main state, so we
   // need to simulate it.
-  const urlPredictor = getUrlPredictor(state);
+  const urlPredictor = getUrlPredictor(prepublishedState);
   let predictedUrl;
 
-  const removeProfileInformation = getRemoveProfileInformation(state);
+  const removeProfileInformation = getRemoveProfileInformation(
+    prepublishedState
+  );
   if (removeProfileInformation) {
     // In case you wonder, committedRanges is either an empty array (if the
     // range was sanitized) or `null` (otherwise).
-    const { committedRanges, oldThreadIndexToNew } = getSanitizedProfile(state);
+    const { committedRanges, oldThreadIndexToNew } = sanitizedInformation;
 
     // Predicts the URL we'll have after local sanitization.
     predictedUrl = urlPredictor(
@@ -127,15 +133,15 @@ async function storeJustPublishedProfileData(
     );
   }
 
-  const profileMeta = getProfile(state).meta;
-  const profileFilterPageData = getProfileFilterPageData(state);
+  const profileMeta = getProfile(prepublishedState).meta;
+  const profileFilterPageData = getProfileFilterPageData(prepublishedState);
 
   try {
     await storeProfileData({
       profileToken,
       jwtToken,
       publishedDate: new Date(),
-      name: getProfileName(state),
+      name: getProfileName(prepublishedState),
       originHostname: profileFilterPageData
         ? profileFilterPageData.hostname
         : null,
@@ -158,9 +164,12 @@ async function storeJustPublishedProfileData(
         removeProfileInformation &&
         removeProfileInformation.shouldFilterToCommittedRange
           ? adjustRange(removeProfileInformation.shouldFilterToCommittedRange)
-          : adjustRange(getCommittedRange(state)),
+          : adjustRange(getCommittedRange(prepublishedState)),
     });
   } catch (e) {
+    // In the future we'll probably want to show a warning somewhere in the
+    // UI (see issue #2670). But for now we'll just display messages to the
+    // console.
     if (e.name === 'InvalidStateError') {
       // It's very likely we are in private mode, so let's catch and ignore it.
       // We can remove this check once Firefox stops erroring,
@@ -173,7 +182,10 @@ async function storeJustPublishedProfileData(
         `
       );
     } else {
-      throw e;
+      console.error(
+        'An error was thrown while storing the profile data to a local indexedDB.',
+        e
+      );
     }
   }
 }
@@ -219,6 +231,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       };
       dispatch(uploadCompressionStarted(abortfunction));
 
+      const sanitizedInformation = getSanitizedProfile(prePublishedState);
       const gzipData: Uint8Array = await getSanitizedProfileData(
         prePublishedState
       );
@@ -242,9 +255,12 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // Because we want to store the published profile even when the upload
       // generation changed, we store the data here, before the state is fully
       // updated, and we'll have to predict the state inside this function.
-      await storeJustPublishedProfileData(
+      // Note that this function is asynchronous, we don't await it on purpose.
+      // We catch all errors in this function.
+      storeJustPublishedProfileData(
         hash,
         hashOrToken === hash ? null : hashOrToken,
+        sanitizedInformation,
         prePublishedState
       );
 
@@ -263,7 +279,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
           committedRanges,
           oldThreadIndexToNew,
           profile,
-        } = getSanitizedProfile(prePublishedState);
+        } = sanitizedInformation;
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 

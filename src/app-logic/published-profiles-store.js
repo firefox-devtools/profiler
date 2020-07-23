@@ -7,6 +7,7 @@
 // published profiles.
 
 import { openDB, deleteDB } from 'idb';
+import { stripIndent } from 'common-tags';
 import type { DB as Database } from 'idb';
 import type { StartEndRange } from 'firefox-profiler/types';
 
@@ -16,7 +17,7 @@ export type ProfileData = {|
   +publishedDate: Date,
   +name: string,
   +preset: string | null,
-  +originHostname: string | null,
+  +originHostname: string | null, // This key is indexed as well.
   +meta: {|
     // We're using some of the properties of the profile meta, but we're not
     // reusing the type ProfileMeta completely because we don't want to be
@@ -64,18 +65,6 @@ async function reallyOpen(): Promise<Database> {
       });
       store.createIndex('originHostname', 'originHostname');
     },
-    blocked() {
-      // Ideally we should throw this error, but idb doesn't allow this, so
-      // instead we just output this in the console.
-      // See https://github.com/jakearchibald/idb/issues/186
-      console.error(
-        new Error(
-          'The published profiles store database could not be upgraded because it is ' +
-            'open in another tab. Please close all your other profiler.firefox.com ' +
-            'tabs and refresh.'
-        )
-      );
-    },
   });
 
   return db;
@@ -97,12 +86,22 @@ async function open(): Promise<Database> {
       // to change this database format (and increased the version number)
       // and then downgraded to a version of profiler.firefox.com without those
       // changes.
-      // We delete the database and try again.
-      await deleteDB(DATABASE_NAME);
-      db = await reallyOpen();
-    } else {
-      throw e;
+      // Let's explain that in an error, that will be output to the console by
+      // the caller.
+      (window: any).deleteDB = () => deleteDB(DATABASE_NAME);
+      throw new Error(stripIndent`
+        We tried to open an existing published profiles store database with a
+        smaller version than the current one. We can't do that with IndexedDB.
+        The only way to recover is to delete the database and create a new one,
+        but we don't want to do this automatically.
+        Until this is fixed we won't be able to store newly published profiles
+        or retrieve previously published profiles.
+
+        If you want to delete the database, you can do so by running 'deleteDB()'
+        in the console, or using the developer tools.
+      `);
     }
+    throw e;
   }
 
   return db;

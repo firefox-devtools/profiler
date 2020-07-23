@@ -233,10 +233,32 @@ describe('attemptToPublish', function() {
       expect(publishResult).toBe(true);
     }
 
+    async function waitUntilData<T>(
+      predicate: () => Promise<T> | T,
+      times: number = 10
+    ): Promise<T> {
+      function wait() {
+        return new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      for (let i = 0; i < times; i++) {
+        await wait();
+        const value = await predicate();
+        if (value !== undefined) {
+          return value;
+        }
+      }
+
+      throw new Error(
+        `We waited more than ${times} times for a defined value.`
+      );
+    }
+
     return {
       ...store,
       ...fakeUploadResult,
       waitUntilPhase,
+      waitUntilData,
       assertUploadSuccess,
     };
   }
@@ -578,6 +600,7 @@ describe('attemptToPublish', function() {
         getState,
         resolveUpload,
         assertUploadSuccess,
+        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       // Only the last range will be saved in IDB, as an information to display
@@ -592,7 +615,11 @@ describe('attemptToPublish', function() {
       resolveUpload(JWT_TOKEN);
       await assertUploadSuccess(publishAttempt);
 
-      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      // The upload function doesn't wait for the data store to finish, but this
+      // should still be fairly quick.
+      const storedProfileData = await waitUntilData(() =>
+        retrieveProfileData(BARE_PROFILE_TOKEN)
+      );
       expect(storedProfileData).toMatchObject({
         jwtToken: JWT_TOKEN,
         profileToken: BARE_PROFILE_TOKEN,
@@ -622,6 +649,7 @@ describe('attemptToPublish', function() {
         getState,
         resolveUpload,
         assertUploadSuccess,
+        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
@@ -646,7 +674,11 @@ describe('attemptToPublish', function() {
       resolveUpload(JWT_TOKEN);
       await assertUploadSuccess(publishAttempt);
 
-      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      // The upload function doesn't wait for the data store to finish, but this
+      // should still be fairly quick.
+      const storedProfileData = await waitUntilData(() =>
+        retrieveProfileData(BARE_PROFILE_TOKEN)
+      );
       expect(storedProfileData).toMatchObject({
         jwtToken: JWT_TOKEN,
         profileToken: BARE_PROFILE_TOKEN,
@@ -665,7 +697,7 @@ describe('attemptToPublish', function() {
       expect(await listAllProfileData()).toEqual([storedProfileData]);
     });
 
-    it('stores the information for 2 uploads that happen in parallel', async () => {
+    it('stores the information for the right upload when the user aborts and uploads again', async () => {
       const { profile } = getProfileFromTextSamples('A  B  C  D  E');
       // This will prevent the profile from being sanitized by default when uploading.
       profile.meta.updateChannel = 'nightly';
@@ -674,9 +706,9 @@ describe('attemptToPublish', function() {
       const {
         dispatch,
         getState,
-        resolveUpload: resolveUpload1,
         assertUploadSuccess,
         waitUntilPhase,
+        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       // This sets up a second upload.
@@ -696,42 +728,37 @@ describe('attemptToPublish', function() {
 
       const publishAttempt1 = dispatch(attemptToPublish());
 
-      // After all, the user wants to sanitize.
+      // After all, the user wants to sanitize. So they abort first then attempt
+      // to publish again.
       // This is a bit of a hack for tests, to make sure we'll resolve the right
       // call. Indeed we need to make sure that the first attempt is the first
       // to call uploadBinaryProfileData. Waiting for the 'uploading' phase
       // accomplishes that.
       await waitUntilPhase('uploading');
+
+      // First, we abort.
+      const abortFunction = getAbortFunction(getState());
+      abortFunction();
+
+      // Then we check new options to sanitize the profile, and attempt a new publish.
       dispatch(toggleCheckedSharingOptions('includeFullTimeRange'));
       expect(getRemoveProfileInformation(getState())).toMatchObject({
         shouldFilterToCommittedRange: { start: 1, end: 4 },
       });
       const publishAttempt2 = dispatch(attemptToPublish());
 
-      // We resolve the second upload first on purpose, because we'd like to
-      // test that out-of-order responses also get the right result.
       resolveUpload2(secondJwtToken);
       await assertUploadSuccess(publishAttempt2);
 
-      resolveUpload1(JWT_TOKEN);
-      // Because this was invalidated, the result sould be false.
+      // Because the first upload was stopped, the result sould be false.
       expect(await publishAttempt1).toBe(false);
 
-      const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
-      expect(storedProfileData).toMatchObject({
-        jwtToken: JWT_TOKEN,
-        profileToken: BARE_PROFILE_TOKEN,
-        publishedRange: { start: 1, end: 4 },
-        // We don't have an easy way to get the complete urlPath. Bug because we
-        // didn't sanitize the profile for the first request, we should have the
-        // range information. So we assert this.
-        urlPath: expect.stringContaining('range=1000u3000'), // <-- starts at 1ms and lasts 3ms (in µs values)
-      });
-
-      const secondStoredProfileData = await retrieveProfileData(
-        secondBareProfileToken
+      // Now let's check the data stored in the IDB is correct.
+      // The second request should have been stored just fine.
+      const secondRequestData = await waitUntilData(() =>
+        retrieveProfileData(secondBareProfileToken)
       );
-      expect(secondStoredProfileData).toMatchObject({
+      expect(secondRequestData).toMatchObject({
         jwtToken: secondJwtToken,
         profileToken: secondBareProfileToken,
         publishedRange: { start: 1, end: 4 },
@@ -740,13 +767,15 @@ describe('attemptToPublish', function() {
         urlPath: urlFromState(getUrlState(getState())),
       });
 
+      // This is the first request, it hasn't been added because the request was
+      // aborted before the end.
+      const firstRequestData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      expect(firstRequestData).toBe(undefined);
+
       // And now, checking that we can retrieve this data when retrieving the
       // full list. The second profile comes first because it was answered
       // first.
-      expect(await listAllProfileData()).toEqual([
-        secondStoredProfileData,
-        storedProfileData,
-      ]);
+      expect(await listAllProfileData()).toEqual([secondRequestData]);
     });
   });
 });
