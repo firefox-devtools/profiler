@@ -112,6 +112,15 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
 
     {
       // Draw the chart.
+      //
+      //                 ...--`
+      //  1 ...---```..--      `--. 2
+      //    |_____________________|
+      //  4                        3
+      //
+      // Start by drawing from 1 - 2. This will be the top of all the peaks of the
+      // memory graph.
+
       const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = ORANGE_50;
@@ -121,6 +130,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // The x and y are used after the loop.
       let x = 0;
       let y = 0;
+      let firstX = 0;
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
@@ -133,7 +143,10 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
           innerDeviceHeight * unitGraphCount +
           deviceLineHalfWidth;
         if (i === 0) {
-          // This is the first iteration, only move the line.
+          // This is the first iteration, only move the line, do not draw it. Also
+          // remember this first X, as the bottom of the graph will need to connect
+          // back up to it.
+          firstX = x;
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
@@ -143,16 +156,20 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // Draw this last bit.
       ctx.lineTo(x + interval, y);
 
-      // Don't do the fill yet, just stroke the top line.
+      // Don't do the fill yet, just stroke the top line. This will draw a line from
+      // point 1 to 2 in the diagram above.
       ctx.stroke();
 
       // After doing the stroke, continue the path to complete the fill to the bottom
-      // of the canvas.
+      // of the canvas. This continues the path to point 3 and then 4.
+
+      // Create a line from 2 to 3.
       ctx.lineTo(x + interval, deviceHeight);
-      ctx.lineTo(
-        (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
-        deviceHeight
-      );
+
+      // Create a line from 3 to 4.
+      ctx.lineTo(firstX, deviceHeight);
+
+      // The line from 4 to 1 will be implicitly filled in.
       ctx.fill();
     }
   }
