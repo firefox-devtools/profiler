@@ -6,7 +6,7 @@
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
 import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, wait } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -266,7 +266,7 @@ describe('app/MenuButtons', function() {
       rejectUpload('This is a mock error');
 
       // Wait until the error button is visible.
-      await wait(() => {
+      await waitFor(() => {
         getErrorButton();
       });
 
@@ -315,8 +315,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       duration: 20,
     };
 
-    const { container, getByValue } = setup(profile);
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const { container, getByText } = setup(profile);
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -334,9 +334,9 @@ describe('<MenuButtonsMetaInfo>', function() {
       }
     }
 
-    const { getByValue, container } = setup(profile);
+    const { getByText, container } = setup(profile);
 
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -356,8 +356,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       const setupResult = setup(profile, config.symbolicationStatus);
 
       // Open up the arrow panel for the test.
-      const { getByValue } = setupResult;
-      fireEvent.click(getByValue('Firefox'));
+      const { getByText } = setupResult;
+      fireEvent.click(getByText('Firefox'));
       jest.runAllTimers();
 
       return setupResult;

@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Home from '../../components/app/Home';
-import { render, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
@@ -32,8 +32,12 @@ describe('app/Home', function() {
     );
 
     function getInstructions(testId: string) {
-      const { container, getByTestId } = renderResults;
-      return waitForElement(() => getByTestId(testId), { container });
+      const { queryByTestId } = renderResults;
+      return waitFor(() => {
+        const element = queryByTestId(testId);
+        expect(element).toBeTruthy();
+        return element;
+      });
     }
 
     return { ...renderResults, getInstructions };

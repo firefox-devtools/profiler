@@ -137,12 +137,12 @@ describe('timeline/TrackScreenshots', function() {
   });
 
   it('is created in the <Timeline /> with a profile with screenshots', function() {
-    const { getByText } = setup(getScreenshotTrackProfile(), <Timeline />);
+    const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
 
     // The function `getByText` throws already, with a useful Error, if it can't
     // find the element. But we still use `expect` to keep a "test-like"
     // assertion, even if it's useless.
-    expect(getByText('Screenshots')).toBeTruthy();
+    expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
   });
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function() {

@@ -89,9 +89,9 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {
-    const { getByValue, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireEvent.click(getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -105,9 +105,9 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking outside the panel', () => {
-    const { getByValue, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireEvent.click(getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -121,23 +121,23 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking the button again', () => {
-    const { getByValue, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireEvent.click(getByText('My Button'));
     jest.runAllTimers();
 
     ensureExists(container.querySelector('.arrowPanel.open'));
 
-    fireEvent.click(getByValue('My Button'));
+    fireEvent.click(getByText('My Button'));
     jest.runAllTimers();
 
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
 
   it('opens the panel when the button is clicked and does not close the panel by clicking inside the panel', () => {
-    const { getByValue, getByText, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireEvent.click(getByText('My Button'));
     jest.runAllTimers();
     ensureExists(container.querySelector('.arrowPanel.open'));
 
