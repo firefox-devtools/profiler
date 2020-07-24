@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 
 import WindowTitle from '../../components/shared/WindowTitle';
 import {

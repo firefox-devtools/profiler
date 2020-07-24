@@ -10,7 +10,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { ensureExists } from '../../utils/flow';
-import { fireEvent, type RenderResult } from 'react-testing-library';
+import { fireEvent, type RenderResult } from '@testing-library/react';
 
 export function getBoundingBox(width: number, height: number) {
   return {
@@ -227,7 +227,7 @@ export function removeRootOverlayElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function createSelectChanger(renderResult: RenderResult) {
+export function createSelectChanger(renderResult: RenderResult<*>) {
   return function changeSelect({ from, to }: {| from: string, to: string |}) {
     // Look up the <option> with the text label.
     const option = renderResult.getByText(to);
