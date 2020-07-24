@@ -92,6 +92,8 @@ class UrlManager extends React.PureComponent<Props> {
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
     const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> = (this
       .props.getProfilesFromRawUrl: any);
+
+    // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
 
     try {
@@ -109,14 +111,15 @@ class UrlManager extends React.PureComponent<Props> {
         profile,
         shouldSetupInitialUrlState,
       } = await getProfilesFromRawUrl(window.location);
-
       if (profile !== null && shouldSetupInitialUrlState) {
         setupInitialUrlState(window.location, profile);
       } else {
         urlSetupDone();
       }
     } catch (error) {
-      // Silently complete the url setup.
+      // Complete the URL setup, as values can come from the user, so we should
+      // still proceed with loading the app.
+      console.error('There was an error in the initial URL setup.', error);
       urlSetupDone();
     }
   }
