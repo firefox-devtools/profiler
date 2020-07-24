@@ -48,7 +48,21 @@ let _isReplaceState: boolean = false;
  * history API's behavior.
  */
 export function setHistoryReplaceState(value: boolean): void {
+  if (_isReplaceState === value) {
+    throw new Error(
+      `Trying to toggle the history replace state to: ${value.toString()} but it was already ${_isReplaceState.toString()}.`
+    );
+  }
   _isReplaceState = value;
+}
+
+/**
+ * This function only handles sync callbacks, but async could be handled if needed.
+ */
+export function withHistoryReplaceState(fn: () => void): void {
+  setHistoryReplaceState(true);
+  fn();
+  setHistoryReplaceState(false);
 }
 
 /**
