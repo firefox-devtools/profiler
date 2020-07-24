@@ -880,8 +880,6 @@ const _upgraders = {
     const INTERVAL_START = 2;
     const INTERVAL_END = 3;
 
-    // Profiles now have an innerWindowID property in the frameTable.
-    // We are filling this array with 0 values because we have no idea what that value might be.
     function convertToVersion20Recursive(p) {
       for (const thread of p.threads) {
         const { markers } = thread;
