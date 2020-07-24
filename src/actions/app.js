@@ -21,7 +21,10 @@ import {
   getThreads,
 } from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
-import { stateFromLocation } from '../app-logic/url-handling';
+import {
+  stateFromLocation,
+  withHistoryReplaceState,
+} from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 import { fatalError } from './errors';
 import {
@@ -145,9 +148,13 @@ export function setupInitialUrlState(
     // other parts of the code.
     // The first dispatch here updates the url state, then changes state as the url
     // setup is done, and lastly finalizes the profile view since everything is set up now.
-    dispatch(updateUrlState(urlState));
-    dispatch(urlSetupDone());
-    dispatch(finalizeProfileView());
+    // All of this is done while the history is replaced, as this is part of the initial
+    // load process.
+    withHistoryReplaceState(() => {
+      dispatch(updateUrlState(urlState));
+      dispatch(urlSetupDone());
+      dispatch(finalizeProfileView());
+    });
   };
 }
 
