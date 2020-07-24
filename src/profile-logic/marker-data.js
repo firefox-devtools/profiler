@@ -534,6 +534,11 @@ export function deriveMarkersFromRawMarkerTable(
   // array as value like for tracing markers.
   const openNetworkMarkers: Map<number, MarkerIndex> = new Map();
 
+  function addMarker(indexes: IndexIntoRawMarkerTable[], marker: Marker) {
+    markerIndexToRawMarkerIndexes.push(indexes);
+    markers.push(marker);
+  }
+
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
   // we keep it here.
@@ -600,7 +605,7 @@ export function deriveMarkersFromRawMarkerTable(
               const endStartTime = ensureExists(maybeStartTime, ensureMessage);
               const endEndTime = ensureExists(maybeEndTime, ensureMessage);
 
-              markers.push({
+              addMarker([startIndex, rawMarkerIndex], {
                 start: startStartTime,
                 end: endEndTime,
                 name: stringTable.getString(name),
@@ -613,7 +618,6 @@ export function deriveMarkersFromRawMarkerTable(
                   cause: startData.cause || endData.cause,
                 },
               });
-              markerIndexToRawMarkerIndexes.push([startIndex, rawMarkerIndex]);
             } else {
               // There's no start marker matching this end marker. This means an
               // abstract marker exists before the start of the profile.
@@ -625,7 +629,7 @@ export function deriveMarkersFromRawMarkerTable(
                 )
               );
               const end = ensureExists(maybeEndTime, ensureMessage);
-              markers.push({
+              addMarker([rawMarkerIndex], {
                 start,
                 end,
                 name: stringTable.getString(name),
@@ -639,7 +643,6 @@ export function deriveMarkersFromRawMarkerTable(
                 },
                 incomplete: true,
               });
-              markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
             }
           }
 
@@ -662,7 +665,7 @@ export function deriveMarkersFromRawMarkerTable(
               'The CompositorScreenshot is assumed to have a start time.'
             );
             const data = rawMarkers.data[previousScreenshotMarker];
-            markers.push({
+            addMarker([previousScreenshotMarker], {
               start: previousStartTime,
               end: thisStartTime,
               name: 'CompositorScreenshot',
@@ -670,7 +673,6 @@ export function deriveMarkersFromRawMarkerTable(
               category,
               data,
             });
-            markerIndexToRawMarkerIndexes.push([previousScreenshotMarker]);
           }
 
           previousScreenshotMarker = rawMarkerIndex;
@@ -720,7 +722,9 @@ export function deriveMarkersFromRawMarkerTable(
           }
 
           const allData = { ...data, ...sharedData };
-          markers.push({
+
+          // TODO - How do I get the other rawMarkerIndexes
+          addMarker([rawMarkerIndex], {
             start,
             end,
             name,
@@ -729,8 +733,6 @@ export function deriveMarkersFromRawMarkerTable(
             data: allData,
             incomplete,
           });
-          // TODO - How do I get the other rawMarkerIndexes?
-          markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
 
           continue;
         }
@@ -742,7 +744,7 @@ export function deriveMarkersFromRawMarkerTable(
 
     switch (phase) {
       case INSTANT:
-        markers.push({
+        addMarker([rawMarkerIndex], {
           start: ensureExists(
             maybeStartTime,
             'An Instant marker did not have a startTime.'
@@ -753,7 +755,6 @@ export function deriveMarkersFromRawMarkerTable(
           category,
           data,
         });
-        markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
         break;
       case INTERVAL:
         {
@@ -766,7 +767,7 @@ export function deriveMarkersFromRawMarkerTable(
             'An Interval marker did not have a startTime.'
           );
           // Add a marker with a zero duration
-          markers.push({
+          addMarker([rawMarkerIndex], {
             start: startTime,
             end: endTime,
             name: stringTable.getString(name),
@@ -774,7 +775,6 @@ export function deriveMarkersFromRawMarkerTable(
             category,
             data,
           });
-          markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
         }
         break;
       case INTERVAL_START:
@@ -808,7 +808,7 @@ export function deriveMarkersFromRawMarkerTable(
               rawMarkers.startTime[startIndex],
               'An IntervalStart marker did not have a startTime'
             );
-            markers.push({
+            addMarker([startIndex, rawMarkerIndex], {
               start,
               name: stringTable.getString(name),
               end: endTime,
@@ -816,7 +816,6 @@ export function deriveMarkersFromRawMarkerTable(
               category,
               data: rawMarkers.data[startIndex],
             });
-            markerIndexToRawMarkerIndexes.push([startIndex, rawMarkerIndex]);
           } else {
             // No matching "start" marker has been encountered before this "end".
             // This means it was issued before the capture started. Here we create
@@ -831,7 +830,7 @@ export function deriveMarkersFromRawMarkerTable(
             // time of the first sample as its start.
             const start = Math.min(endTime, threadRange.start);
 
-            markers.push({
+            addMarker([rawMarkerIndex], {
               start,
               name: stringTable.getString(name),
               end: endTime,
@@ -840,7 +839,6 @@ export function deriveMarkersFromRawMarkerTable(
               data,
               incomplete: true,
             });
-            markerIndexToRawMarkerIndexes.push([rawMarkerIndex]);
           }
         }
         break;
@@ -859,7 +857,7 @@ export function deriveMarkersFromRawMarkerTable(
         'Encountered a marker without a startTime. Eventually this needs to be handled ' +
           'for phase-style markers.'
       );
-      markers.push({
+      addMarker([startIndex], {
         start,
         end: Math.max(endOfThread, start),
         name: stringTable.getString(rawMarkers.name[startIndex]),
@@ -868,7 +866,6 @@ export function deriveMarkersFromRawMarkerTable(
         title: null,
         incomplete: true,
       });
-      markerIndexToRawMarkerIndexes.push([startIndex]);
     }
   }
 
@@ -877,7 +874,7 @@ export function deriveMarkersFromRawMarkerTable(
       rawMarkers.startTime[startIndex],
       'Network markers are assumed to always have a start time.'
     );
-    markers.push({
+    addMarker([startIndex], {
       start: startTime,
       end: Math.max(endOfThread, startTime),
       name: stringTable.getString(rawMarkers.name[startIndex]),
@@ -886,7 +883,6 @@ export function deriveMarkersFromRawMarkerTable(
       data: rawMarkers.data[startIndex],
       incomplete: true,
     });
-    markerIndexToRawMarkerIndexes.push([startIndex]);
   }
 
   // And we also need to add the "last screenshot marker".
@@ -895,7 +891,7 @@ export function deriveMarkersFromRawMarkerTable(
       rawMarkers.startTime[previousScreenshotMarker],
       'Expected to find a CompositorScreenshot marker with a start time.'
     );
-    markers.push({
+    addMarker([previousScreenshotMarker], {
       start,
       end: Math.max(endOfThread, start),
       name: 'CompositorScreenshot',
@@ -903,7 +899,6 @@ export function deriveMarkersFromRawMarkerTable(
       data: rawMarkers.data[previousScreenshotMarker],
       title: null,
     });
-    markerIndexToRawMarkerIndexes.push([previousScreenshotMarker]);
   }
 
   return { markers, markerIndexToRawMarkerIndexes };
