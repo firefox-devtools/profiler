@@ -139,8 +139,8 @@ describe('timeline/TrackScreenshots', function() {
   it('is created in the <Timeline /> with a profile with screenshots', function() {
     const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
 
-    // The function `getByText` throws already, with a useful Error, if it can't
-    // find the element. But we still use `expect` to keep a "test-like"
+    // The function `getAllByText` throws already if none are found, with a useful Error,
+    // if it can't find any elements. But we still use `expect` to keep a "test-like"
     // assertion, even if it's useless.
     expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
   });

@@ -16,9 +16,9 @@ using more specific expectations.
 
 ## react-testing-library
 
-We use [react-testing-library](https://github.com/kentcdodds/react-testing-library)
+We use [React Testing Library](https://github.com/testing-library/react-testing-library)
 to tests our React components. Generally we try to test our components by
-exercizing them just like a user would do: finding a control by text using [the
+exercising them just like a user would do: finding a control by text using [the
 queries provided by the library](https://testing-library.com/docs/api-queries)
 and [fire events](https://testing-library.com/docs/api-events) to these targets.
 
@@ -72,7 +72,7 @@ describe('app/Details', function() {
 
 ## Solutions to common problems
 
-The library `react-testing-library` relies a lot on the underlying DOM library.
+React Testing Library relies a lot on the underlying DOM library.
 In our case we use [jsdom](https://github.com/jsdom/jsdom) which is excellent
 but has a few shortcomings.
 
@@ -124,4 +124,3 @@ it('renders a lot of things', () => {
   ...
 });
 ```
-

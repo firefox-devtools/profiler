@@ -122,8 +122,15 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { container, getByTestId, getByText, queryByText } = renderResult;
+    const {
+      container,
+      getByTestId,
+      getByText,
+      queryByText,
+      findByText,
+    } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const findPublishButton = () => findByText('Publish…');
     const getErrorButton = () => getByText('Error publishing…');
     const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
@@ -143,6 +150,7 @@ describe('app/MenuButtons', function() {
       store,
       ...renderResult,
       getPanel,
+      findPublishButton,
       getPublishButton,
       getErrorButton,
       getCancelButton,
@@ -230,6 +238,7 @@ describe('app/MenuButtons', function() {
       const {
         getPanel,
         getPublishButton,
+        findPublishButton,
         getCancelButton,
         getPanelForm,
         clickAndRunTimers,
@@ -244,10 +253,7 @@ describe('app/MenuButtons', function() {
       clickAndRunTimers(getCancelButton());
 
       // This might be asynchronous, depending on the underlying code.
-      await wait(() => {
-        getPublishButton();
-      });
-      expect(getPublishButton()).toBeTruthy();
+      expect(await findPublishButton()).toBeTruthy();
     });
 
     it('matches the snapshot for an error', async () => {
