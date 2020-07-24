@@ -777,12 +777,18 @@ function _getTimeRangeForThread(
     for (let i = 0; i < markers.length; i++) {
       const startTime = markers.startTime[i];
       const endTime = markers.endTime[i];
+      // The resulting range needs to adjust BOTH the start and end of the range, as
+      // each marker type could adjust the total range beyond the current bounds.
+      // Note the use of Math.min and Math.max are different for the start and end
+      // of the markers.
 
       if (startTime !== null) {
+        // This is either an Instant, IntervalStart, or Interval marker.
         result.start = Math.min(result.start, startTime);
         result.end = Math.max(result.end, startTime + interval);
       }
       if (endTime !== null) {
+        // This is either an Interval or IntervalEnd marker.
         result.start = Math.min(result.start, endTime);
         result.end = Math.max(result.end, endTime + interval);
       }

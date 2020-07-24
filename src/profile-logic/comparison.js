@@ -224,7 +224,8 @@ export function mergeProfiles(
 
 /**
  * This is a small utility function that makes it easier to filter a thread
- * completely (both markers and samples).
+ * completely (both raw markers and samples). This is not part of the normal
+ * filtering pipeline, but is used with comparison profiles.
  */
 function filterThreadToRange(
   thread: Thread,

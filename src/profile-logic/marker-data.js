@@ -906,7 +906,8 @@ export function deriveMarkersFromRawMarkerTable(
 
 /**
  * This function filters markers from a thread's raw marker table using the
- * range specified as parameter.
+ * range specified as parameter. It's not used by the normal marker filtering
+ * pipeline, but is used in profile comparison.
  */
 export function filterRawMarkerTableToRange(
   markerTable: RawMarkerTable,
@@ -972,7 +973,7 @@ export function filterRawMarkerTableIndexesToRange(
  * This function filters markers from a thread's raw marker table using the
  * range and marker indexes array specified as parameters.
  *
- * Uses `filterRawMarkerTableToRangeIndexGenerator` function and excludes
+ * Uses `filterRawMarkerTableIndexesToRange` function and excludes
  * markers in `markersToDelete` set.
  */
 export function filterRawMarkerTableToRangeWithMarkersToDelete(
