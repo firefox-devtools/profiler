@@ -193,10 +193,10 @@ export function getTestFriendlyDerivedMarkerInfo(thread: Thread) {
   );
 }
 
-// The following functions are helpers to make TestDefinedRawMarker. They are someone
-// intentionally terse since they are used frequently in long lists of markers.
-
-export function makeStart(
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeStartMarker(
   name: string,
   startTime: Milliseconds
 ): TestDefinedRawMarker {
@@ -208,7 +208,10 @@ export function makeStart(
   };
 }
 
-export function makeEnd__(
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeEndMarker(
   name: string,
   endTime: Milliseconds
 ): TestDefinedRawMarker {
@@ -220,7 +223,10 @@ export function makeEnd__(
   };
 }
 
-export function makeInstant(
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeInstantMarker(
   name: string,
   startTime: Milliseconds
 ): TestDefinedRawMarker {
@@ -232,7 +238,10 @@ export function makeInstant(
   };
 }
 
-export function makeInterval(
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeIntervalMarker(
   name: string,
   startTime: Milliseconds,
   endTime: Milliseconds
@@ -245,11 +254,14 @@ export function makeInterval(
   };
 }
 
+/**
+ * A utility to make TestDefinedRawMarker
+ */
 export function makeCompositorScreenshot(
   startTime: Milliseconds
 ): TestDefinedRawMarker {
   return {
-    ...makeInstant('CompositorScreenshot', startTime),
+    ...makeInstantMarker('CompositorScreenshot', startTime),
     data: {
       type: 'CompositorScreenshot',
       url: 0,
