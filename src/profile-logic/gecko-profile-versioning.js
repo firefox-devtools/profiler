@@ -11,10 +11,6 @@
  * to the current format.
  */
 
-import {
-  upgradeGCMinorMarker,
-  upgradeGCMajorMarker_Gecko8To9,
-} from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 
@@ -247,6 +243,73 @@ const _upgraders = {
     convertToVersionEightRecursive(profile);
   },
   [9]: profile => {
+    // Upgrade GC markers
+
+    /*
+     * Upgrade a GCMajor marker in the Gecko profile format.
+     */
+    function upgradeGCMajorMarker_Gecko8To9(marker) {
+      if ('timings' in marker) {
+        if (!('status' in marker.timings)) {
+          /*
+           * This is the old version of the GCMajor marker.
+           */
+
+          const timings = marker.timings;
+
+          timings.status = 'completed';
+
+          /*
+           * The old version had a bug where the slices field could be included
+           * twice with different meanings.  So we attempt to read it as either
+           * the number of slices or a list of slices.
+           */
+          if (Array.isArray(timings.sices)) {
+            timings.slices_list = timings.slices;
+            timings.slices = timings.slices.length;
+          }
+
+          timings.allocated_bytes = timings.allocated * 1024 * 1024;
+        }
+      }
+
+      return marker;
+    }
+
+    function upgradeGCMinorMarker(marker8) {
+      if ('nursery' in marker8) {
+        if ('status' in marker8.nursery) {
+          if (marker8.nursery.status === 'no collection') {
+            marker8.nursery.status = 'nursery empty';
+          }
+          return Object.assign(marker8);
+        }
+        /*
+         * This is the old format for GCMinor, rename some
+         * properties to the more sensible names in the newer
+         * format and set the status.
+         *
+         * Note that we don't delete certain properties such as
+         * promotion_rate, leave them so that anyone opening the
+         * raw json data can still see them in converted profiles.
+         */
+        const marker = Object.assign(marker8, {
+          nursery: Object.assign(marker8.nursery, {
+            status: 'complete',
+            bytes_used: marker8.nursery.nursery_bytes,
+            // cur_capacity cannot be filled in.
+            new_capacity: marker8.nursery.new_nursery_bytes,
+            phase_times: marker8.nursery.timings,
+          }),
+        });
+        delete marker.nursery.nursery_bytes;
+        delete marker.nursery.new_nursery_bytes;
+        delete marker.nursery.timings;
+        return marker;
+      }
+      return marker8;
+    }
+
     function convertToVersionNineRecursive(p) {
       for (const thread of p.threads) {
         //const stringTable = new UniqueStringArray(thread.stringTable);
@@ -860,6 +923,105 @@ const _upgraders = {
       }
     }
     convertToVersion19Recursive(profile);
+  },
+  [20]: profile => {
+    // The idea of phased markers was added to profiles. This upgrader removes the `time`
+    // field from markers and replaces it with startTime, endTime and phase.
+    //
+    // It also removes the startTime and endTime from payloads, except for IPC and
+    // Network markers.
+    type OldSchema = {| name: 0, time: 1, category: 2, data: 3 |};
+    type Payload = $Shape<{
+      startTime: number,
+      endTime: number,
+      type: string,
+      interval: string,
+    }>;
+
+    const INSTANT = 0;
+    const INTERVAL = 1;
+    const INTERVAL_START = 2;
+    const INTERVAL_END = 3;
+
+    function convertToVersion20Recursive(p) {
+      for (const thread of p.threads) {
+        const { markers } = thread;
+        const oldSchema: OldSchema = markers.schema;
+        const newSchema = {
+          name: 0,
+          startTime: 1,
+          endTime: 2,
+          phase: 3,
+          category: 4,
+          data: 5,
+        };
+        markers.schema = newSchema;
+
+        for (
+          let markerIndex = 0;
+          markerIndex < markers.data.length;
+          markerIndex++
+        ) {
+          const markerTuple = markers.data[markerIndex];
+          const name: number = markerTuple[oldSchema.name];
+          const time: number = markerTuple[oldSchema.time];
+          const category: number = markerTuple[oldSchema.category];
+          const data: Payload = markerTuple[oldSchema.data];
+
+          let newStartTime: null | number = time;
+          let newEndTime: null | number = null;
+          let phase: 0 | 1 | 2 | 3 = INSTANT;
+
+          // If there is a payload, it MAY change to an interval marker.
+          if (data) {
+            const { startTime, endTime, type, interval } = data;
+            if (type === 'tracing') {
+              if (interval === 'start') {
+                newStartTime = time;
+                newEndTime = null;
+                phase = INTERVAL_START;
+              } else {
+                newStartTime = null;
+                newEndTime = time;
+                phase = INTERVAL_END;
+              }
+            } else if (
+              // This could be considered an instant marker, since the startTime and
+              // endTime are the same.
+              startTime !== endTime &&
+              typeof startTime === 'number' &&
+              typeof endTime === 'number'
+            ) {
+              // This is some marker with both start and endTime markers.
+              newStartTime = startTime;
+              newEndTime = endTime;
+              phase = INTERVAL;
+            }
+
+            if (data.type !== 'IPC' && data.type !== 'Network') {
+              // These two properties were removed, except for in these two markers
+              // as they are needed for special processing.
+              delete data.startTime;
+              delete data.endTime;
+            }
+          }
+
+          // Rewrite the tuple with our new data.
+          const newTuple = [];
+          newTuple[newSchema.name] = name;
+          newTuple[newSchema.startTime] = newStartTime;
+          newTuple[newSchema.endTime] = newEndTime;
+          newTuple[newSchema.phase] = phase;
+          newTuple[newSchema.category] = category;
+          newTuple[newSchema.data] = data;
+          markers.data[markerIndex] = newTuple;
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion20Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion20Recursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

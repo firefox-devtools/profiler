@@ -381,15 +381,17 @@ describe('NetworkChartRowBar phase calculations', function() {
       0,
       // With an endTime at 99, the profile's end time is 100 which gives
       // integer values for test results.
-      { startTime: 0, endTime: 99 },
+      99,
     ];
 
-    const startMarker = getNetworkMarkers({
+    // Create a start marker, but discard the end marker.
+    const [startMarker] = getNetworkMarkers({
       uri: 'https://mozilla.org/img/',
       id: 100,
       startTime: 10,
+      fetchStart: 20,
       endTime: 60,
-    })[0];
+    });
 
     const { getPhaseElementStyles } = setupWithPayload([
       markerForProfileRange,
@@ -403,11 +405,12 @@ describe('NetworkChartRowBar phase calculations', function() {
   });
 
   it('divides the phases when only the end marker is present', () => {
-    const endMarker = getNetworkMarkers({
+    // Get the end marker, but not the start.
+    const [, endMarker] = getNetworkMarkers({
       uri: 'https://mozilla.org/img/',
       id: 100,
-      startTime: 5,
-      fetchStart: 10,
+      startTime: 10,
+      fetchStart: 15,
       // With an endTime at 109, the profile's end time is 110, and so the
       // profile's length is 100, which gives integer values for test results.
       endTime: 109,
@@ -424,7 +427,10 @@ describe('NetworkChartRowBar phase calculations', function() {
         responseStart: 60,
         responseEnd: 80,
       },
-    })[1];
+    });
+
+    // Force the start time to be 10.
+    endMarker[1] = 10;
 
     const { getPhaseElementStyles } = setupWithPayload([endMarker]);
 

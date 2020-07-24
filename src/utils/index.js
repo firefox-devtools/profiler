@@ -3,6 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import type {
+  StartEndRange,
+  Marker,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
 /**
  * Firefox has issues switching quickly between fill style colors, as the CSS color
  * is fully parsed each time it is set. As a mitigation, provide a class that only
@@ -57,4 +63,26 @@ export function displayNiceUrl(rawUrl: string): string {
     return rawUrl;
   }
   return `${rawUrl.slice(0, 150)}...${rawUrl.slice(-20)}`;
+}
+
+/**
+ * This function handles the logic of converting both Interval and Instant markers
+ * into a range selection. For instant markers, it creates a range that is 5%
+ * of the range selection (typically the committed range).
+ */
+export function getStartEndRangeForMarker(
+  rangeStart: Milliseconds,
+  rangeEnd: Milliseconds,
+  marker: Marker
+): StartEndRange {
+  let start = marker.start;
+  let end = marker.end;
+
+  if (end === null) {
+    const delta = (rangeEnd - rangeStart) / 40;
+    start = marker.start - delta;
+    end = marker.start + delta;
+  }
+
+  return { start, end };
 }

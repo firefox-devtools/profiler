@@ -29,6 +29,7 @@ import type {
 
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
+import { getStartEndRangeForMarker } from '../../utils';
 
 // Exported for tests.
 export const MIN_MARKER_WIDTH = 0.3;
@@ -139,7 +140,8 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     let previousPos = null;
     for (const markerIndex of markerIndexes) {
       const marker = getMarker(markerIndex);
-      const { start, dur, name } = marker;
+      const { start, end, name } = marker;
+      const dur = end === null ? 0 : end - start;
       let pos = ((start - rangeStart) / (rangeEnd - rangeStart)) * width;
       pos = Math.round(pos * devicePixelRatio) / devicePixelRatio;
 
@@ -320,7 +322,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     for (let i = markerIndexes.length - 1; i >= 0; i--) {
       const markerIndex = markerIndexes[i];
       const marker = getMarker(markerIndex);
-      const { start, dur, name } = marker;
+      const { start, end, name } = marker;
+      const dur = end === null ? 0 : end - start;
       const duration = Math.max(dur, onePixelTime);
       if (time < start || time >= start + duration) {
         continue;
@@ -405,12 +408,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           null /* extra null check because flow doesn't realize it's unnecessary */
       ) {
         e.stopPropagation();
-        const { onSelect, threadIndex } = this.props;
-        onSelect(
-          threadIndex,
-          mouseUpItem.start,
-          mouseUpItem.start + mouseUpItem.dur
+        const { onSelect, threadIndex, rangeStart, rangeEnd } = this.props;
+        const { start, end } = getStartEndRangeForMarker(
+          rangeStart,
+          rangeEnd,
+          mouseUpItem
         );
+        onSelect(threadIndex, start, end);
       }
       this.setState({
         hoveredItem: mouseUpItem,

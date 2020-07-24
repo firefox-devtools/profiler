@@ -72,6 +72,7 @@ describe('TooltipMarker', function() {
       [
         'DOMEvent',
         10.5,
+        11.3,
         {
           type: 'tracing',
           category: 'DOMEvent',
@@ -82,23 +83,11 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'DOMEvent',
-        11.3,
-        {
-          type: 'tracing',
-          category: 'DOMEvent',
-          eventType: 'commandupdate',
-          interval: 'end',
-          phase: 2,
-        },
-      ],
-      [
         'UserTiming',
+        12.5,
         12.5,
         {
           type: 'UserTiming',
-          startTime: 12.5,
-          endTime: 12.5,
           name: 'foobar',
           entryType: 'mark',
         },
@@ -106,6 +95,7 @@ describe('TooltipMarker', function() {
       [
         'NotifyDidPaint',
         14.5,
+        null,
         {
           type: 'tracing',
           category: 'Paint',
@@ -115,10 +105,9 @@ describe('TooltipMarker', function() {
       [
         'GCMinor',
         15.5,
+        null,
         {
           type: 'GCMinor',
-          startTime: 15.5,
-          endTime: 15.5,
           // nursery is only present in newer profile format.
           nursery: {
             bytes_tenured: 1366368,
@@ -156,10 +145,9 @@ describe('TooltipMarker', function() {
       [
         'GCMajor',
         16.5,
+        null,
         {
           type: 'GCMajor',
-          startTime: 16.5,
-          endTime: 16.5,
           timings: {
             added_chunks: 50,
             allocated_bytes: 48377856,
@@ -236,10 +224,9 @@ describe('TooltipMarker', function() {
       [
         'GCSlice',
         17.5,
+        null,
         {
           type: 'GCSlice',
-          startTime: 17.5,
-          endTime: 17.5,
           timings: {
             reason: 'CC_WAITING',
             slice: 1,
@@ -262,12 +249,12 @@ describe('TooltipMarker', function() {
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,
-        null,
       ],
-      ['Invalidate http://mozilla.com/script.js:1234', 10, null],
+      ['Invalidate http://mozilla.com/script.js:1234', 10],
       [
         'Styles',
         18.5,
+        19,
         {
           type: 'tracing',
           category: 'Paint',
@@ -279,27 +266,18 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'Styles',
-        19,
-        {
-          type: 'tracing',
-          category: 'Paint',
-          interval: 'end',
-        },
-      ],
-      [
         'TTFI',
         21.4,
+        null,
         {
           type: 'Text',
           name: 'TTFI after 100.01ms (longTask was 100.001ms)',
-          startTime: 21.4,
-          endTime: 21.4,
         },
       ],
       [
         'Log',
         21.7,
+        null,
         {
           type: 'Log',
           name: 'Random log message',
@@ -308,12 +286,11 @@ describe('TooltipMarker', function() {
       ],
       [
         'Styles',
+        20.0,
         20.5,
         {
           type: 'Styles',
           category: 'Paint',
-          startTime: 20.0,
-          endTime: 20.5,
           elementsTraversed: 100,
           elementsStyled: 50,
           elementsMatched: 10,
@@ -328,6 +305,7 @@ describe('TooltipMarker', function() {
       [
         'ConstructRootFrame',
         112.5,
+        113.3,
         {
           type: 'tracing',
           category: 'Frame Construction',
@@ -335,21 +313,11 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'ConstructRootFrame',
-        113.3,
-        {
-          type: 'tracing',
-          category: 'Frame Construction',
-          interval: 'end',
-        },
-      ],
-      [
         'FileIO',
         114,
+        115,
         {
           type: 'FileIO',
-          startTime: 114,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
@@ -362,10 +330,9 @@ describe('TooltipMarker', function() {
       [
         'FileIO (non-profiled thread)',
         114.5,
+        115,
         {
           type: 'FileIO',
-          startTime: 114,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
@@ -379,6 +346,7 @@ describe('TooltipMarker', function() {
       [
         'IPC',
         120,
+        null,
         {
           type: 'IPC',
           startTime: 120,
@@ -395,6 +363,7 @@ describe('TooltipMarker', function() {
       [
         'IPC',
         121,
+        null,
         {
           type: 'IPC',
           startTime: 121,
@@ -411,10 +380,9 @@ describe('TooltipMarker', function() {
       [
         'PreferenceRead',
         114.9,
+        null,
         {
           type: 'PreferenceRead',
-          startTime: 114.9,
-          endTime: 114.9,
           prefAccessTime: 114.9,
           prefName: 'layout.css.dpi',
           prefKind: 'User',
@@ -425,6 +393,7 @@ describe('TooltipMarker', function() {
       [
         'PlayAudio',
         115,
+        null,
         {
           type: 'MediaSample',
           sampleStartTimeUs: 3632654500,
@@ -677,10 +646,9 @@ describe('TooltipMarker', function() {
       [
         'FileIO (non-main thread)',
         114.5,
+        115,
         {
           type: 'FileIO',
-          startTime: 114,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',

@@ -246,7 +246,9 @@ export type ProfilerMarkerPayload = {
 export type RawMarkerTable = {|
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
-  time: number[],
+  startTime: Array<number | null>,
+  endTime: Array<number | null>,
+  phase: number[],
   category: IndexIntoCategoryList[],
   length: number,
 |};

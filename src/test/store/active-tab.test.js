@@ -72,6 +72,7 @@ describe('ActiveTab', function() {
         [
           'Load 1 will be filtered',
           7,
+          8,
           {
             type: 'Network',
             URI: 'URI 1',
