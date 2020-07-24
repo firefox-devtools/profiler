@@ -38,6 +38,7 @@ import fakeIndexedDB from 'fake-indexeddb';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
 import {
+  makeProfileSerializable,
   serializeProfile,
   processProfile,
 } from '../../profile-logic/process-profile';
@@ -677,8 +678,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      json: () => Promise.resolve(makeProfileSerializable(_getSimpleProfile())),
     }: any): Response);
 
     beforeEach(function() {
@@ -727,9 +727,7 @@ describe('actions/receive-profile', function() {
         (({
           ...fetch200Response,
           json: () =>
-            Promise.resolve(
-              JSON.parse(serializeProfile(unsymbolicatedProfile))
-            ),
+            Promise.resolve(makeProfileSerializable(unsymbolicatedProfile)),
         }: any): Response)
       );
 
@@ -847,8 +845,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      json: () => Promise.resolve(makeProfileSerializable(_getSimpleProfile())),
     }: any): Response);
 
     beforeEach(function() {

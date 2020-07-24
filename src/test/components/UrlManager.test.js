@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -31,7 +31,7 @@ describe('UrlManager', function() {
       },
       json: () =>
         Promise.resolve(
-          JSON.parse(serializeProfile(getProfileFromTextSamples('A').profile))
+          makeProfileSerializable(getProfileFromTextSamples('A').profile)
         ),
     }: any): Response);
     return fetch200Response;
