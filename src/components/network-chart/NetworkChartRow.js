@@ -230,7 +230,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     );
     const dur = end - marker.start;
     // Compute the positioning of this network marker.
-    const startPosition = this._timeToCssPixels(marker.start);
+    const startPosition = this._timeToCssPixels(start);
     const endPosition = this._timeToCssPixels(end);
 
     // Set min-width for marker bar.
