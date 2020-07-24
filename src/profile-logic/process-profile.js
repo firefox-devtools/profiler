@@ -79,6 +79,7 @@ import type {
   GCMajorCompleted_Gecko,
   GCMajorAborted,
   PhaseTimes,
+  SerializableProfile,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1378,42 +1379,49 @@ export function processProfile(
 }
 
 /**
+ * The UniqueStringArray is a class, and is not serializable. This function turns
+ * a profile into the serializable variant.
+ */
+export function makeProfileSerializable({
+  threads,
+  ...restOfProfile
+}: Profile): SerializableProfile {
+  return {
+    ...restOfProfile,
+    threads: threads.map(({ stringTable, ...restOfThread }) => {
+      return {
+        ...restOfThread,
+        stringArray: stringTable.serializeToArray(),
+      };
+    }),
+  };
+}
+
+/**
  * Take a processed profile and remove any non-serializable classes such as the
  * StringTable class.
  */
 export function serializeProfile(profile: Profile): string {
-  // stringTable -> stringArray
-  const newProfile = {
-    ...profile,
-    threads: profile.threads.map(thread => {
-      const stringArray = thread.stringTable.serializeToArray();
-      // Has to be any since Threads don't have stringArray.
-      const newThread: any = Object.assign({}, thread);
-      delete newThread.stringTable;
-      newThread.stringArray = stringArray;
-      return newThread;
-    }),
-  };
-
-  return JSON.stringify(newProfile);
+  return JSON.stringify(makeProfileSerializable(profile));
 }
 
 /**
  * Take a serialized processed profile from some saved source, and re-initialize
  * any non-serializable classes.
  */
-function _unserializeProfile(profile: Object): Profile {
-  // stringArray -> stringTable
-  const newProfile = Object.assign({}, profile, {
-    threads: profile.threads.map(thread => {
-      const { stringArray, ...newThread } = thread;
-
-      newThread.stringTable = new UniqueStringArray(stringArray);
-
-      return newThread;
+function _unserializeProfile({
+  threads,
+  ...restOfProfile
+}: SerializableProfile): Profile {
+  return {
+    ...restOfProfile,
+    threads: threads.map(({ stringArray, ...restOfThread }) => {
+      return {
+        ...restOfThread,
+        stringTable: new UniqueStringArray(stringArray),
+      };
     }),
-  });
-  return newProfile;
+  };
 }
 
 /**
