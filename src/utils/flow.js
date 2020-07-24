@@ -102,6 +102,21 @@ export function convertToTransformType(type: string): TransformType | null {
 }
 
 /**
+ * This function coerces one type into another type.
+ * This is equivalent to: (((value: A): any): B)
+ */
+export function coerce<A, B>(item: A): B {
+  return (item: any);
+}
+
+/**
+ * It can be helpful to coerce one type that matches the shape of another.
+ */
+export function coerceMatchingShape<T>(item: $Shape<T>): T {
+  return (item: any);
+}
+
+/**
  * This is a type-friendly version of Object.values that assumes the object has
  * a Map-like structure.
  */
