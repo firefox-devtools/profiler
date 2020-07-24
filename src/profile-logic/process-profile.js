@@ -29,7 +29,6 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
-import { convertPhaseTimes } from './convert-markers';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
@@ -79,6 +78,7 @@ import type {
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
+  PhaseTimes,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -740,6 +740,16 @@ function _processMarkers(
     jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
     nativeAllocations,
   };
+}
+
+function convertPhaseTimes(
+  old_phases: PhaseTimes<Milliseconds>
+): PhaseTimes<Microseconds> {
+  const phases = {};
+  for (const phase in old_phases) {
+    phases[phase] = old_phases[phase] * 1000;
+  }
+  return phases;
 }
 
 /**
