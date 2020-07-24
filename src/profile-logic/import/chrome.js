@@ -714,7 +714,7 @@ async function extractScreenshots(
       thread.stringTable.indexForString('CompositorScreenshot')
     );
     thread.markers.startTime.push(screenshot.ts / 1000);
-    thread.markers.endTime.push(screenshot.ts / 1000);
+    thread.markers.endTime.push(null);
     thread.markers.phase.push(INSTANT);
     thread.markers.category.push(graphicsIndex);
     thread.markers.length++;
@@ -834,10 +834,12 @@ function extractMarkers(
           });
         } else if (event.ph === 'B' || event.ph === 'E') {
           if (event.ph === 'B') {
+            // The 'B' phase stand for "begin", and is the Chrome equivalent of IntervalStart.
             markers.startTime.push(time);
             markers.endTime.push(null);
             markers.phase.push(INTERVAL_START);
           } else {
+            // The 'E' phase stand for "end", and is the Chrome equivalent of IntervalEnd.
             markers.startTime.push(null);
             markers.endTime.push(time);
             markers.phase.push(INTERVAL_END);
