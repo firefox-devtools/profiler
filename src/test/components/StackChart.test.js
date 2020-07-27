@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import * as UrlStateSelectors from '../../selectors/url-state';
 
@@ -268,13 +268,13 @@ describe('CombinedChart', function() {
 });
 
 function getUserTiming(name: string, startTime: number, duration: number) {
+  const endTime = startTime + duration;
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime: startTime + duration,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),

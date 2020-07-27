@@ -7,7 +7,7 @@ import * as React from 'react';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,

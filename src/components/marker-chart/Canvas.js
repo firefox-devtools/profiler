@@ -28,6 +28,7 @@ import type {
   MarkerTimingAndBuckets,
   MarkerIndex,
 } from 'firefox-profiler/types';
+import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
@@ -476,13 +477,24 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     if (markerIndex === null) {
       return;
     }
-    const { getMarker, updatePreviewSelection } = this.props;
+    const {
+      getMarker,
+      updatePreviewSelection,
+      rangeStart,
+      rangeEnd,
+    } = this.props;
     const marker = getMarker(markerIndex);
+    const { start, end } = getStartEndRangeForMarker(
+      rangeStart,
+      rangeEnd,
+      marker
+    );
+
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.start,
-      selectionEnd: marker.start + marker.dur,
+      selectionStart: start,
+      selectionEnd: end,
     });
   };
 

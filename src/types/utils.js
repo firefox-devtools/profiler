@@ -13,6 +13,15 @@ export type NotVoidOrNull = number | string | boolean | Array<any> | Object;
 export type ExtractReturnType = <V>((...args: any[]) => V) => V;
 
 /**
+ * This type serves as documentation for how an array is meant to be used, but does
+ * not support type checking. We often use an Array instead of a Map to translate
+ * one type of index into another type of index. This is similar to how we use the
+ * Map<K,V> type, but with the Array.
+ */
+// eslint-disable-next-line no-unused-vars
+export type IndexedArray<_IndexType, Value> = Array<Value>;
+
+/**
  * This is a utility type that extracts the return type of a function.
  */
 export type $ReturnType<Fn> = $Call<ExtractReturnType, Fn>;

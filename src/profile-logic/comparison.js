@@ -28,7 +28,11 @@ import {
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
 } from './profile-data';
-import { filterRawMarkerTableToRange } from './marker-data';
+import {
+  filterRawMarkerTableToRange,
+  deriveMarkersFromRawMarkerTable,
+  correlateIPCMarkers,
+} from './marker-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
 import type {
@@ -52,6 +56,7 @@ import type {
   ImplementationFilter,
   TransformStacksPerThread,
   Milliseconds,
+  DerivedMarkerInfo,
 } from 'firefox-profiler/types';
 
 /**
@@ -108,6 +113,8 @@ export function mergeProfiles(
   // to the states we computed earlier.
   const transformStacks = {};
   const implementationFilters = [];
+  // These may be needed for filtering markers.
+  let ipcCorrelations;
 
   for (let i = 0; i < profileStates.length; i++) {
     const { profileSpecific } = profileStates[i];
@@ -137,8 +144,21 @@ export function mergeProfiles(
       profileSpecific.committedRanges && profileSpecific.committedRanges.pop();
 
     if (committedRange) {
+      // Filtering markers in a thread happens with the derived markers, so they
+      // will need to be computed.
+      if (!ipcCorrelations) {
+        ipcCorrelations = correlateIPCMarkers(profile.threads);
+      }
+      const derivedMarkerInfo = deriveMarkersFromRawMarkerTable(
+        thread.markers,
+        thread.stringTable,
+        thread.tid || 0,
+        committedRange,
+        ipcCorrelations
+      );
       thread = filterThreadToRange(
         thread,
+        derivedMarkerInfo,
         committedRange.start + zeroAt,
         committedRange.end + zeroAt
       );
@@ -204,16 +224,19 @@ export function mergeProfiles(
 
 /**
  * This is a small utility function that makes it easier to filter a thread
- * completely (both markers and samples).
+ * completely (both raw markers and samples). This is not part of the normal
+ * filtering pipeline, but is used with comparison profiles.
  */
 function filterThreadToRange(
   thread: Thread,
+  derivedMarkerInfo: DerivedMarkerInfo,
   rangeStart: number,
   rangeEnd: number
 ): Thread {
   thread = filterThreadSamplesToRange(thread, rangeStart, rangeEnd);
   thread.markers = filterRawMarkerTableToRange(
     thread.markers,
+    derivedMarkerInfo,
     rangeStart,
     rangeEnd
   );

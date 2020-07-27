@@ -12,11 +12,37 @@ import type {
   GeckoProfileShortMeta,
   GeckoThread,
   GeckoCounter,
+  GeckoMarkers,
   GeckoMarkerStack,
   GeckoProfilerOverhead,
+  Milliseconds,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko,
+  IPCMarkerPayload_Gecko,
 } from 'firefox-profiler/types';
 
-import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
+import {
+  GECKO_PROFILE_VERSION,
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
+
+function getEmptyMarkers(): GeckoMarkers {
+  return {
+    schema: {
+      name: 0,
+      startTime: 1,
+      endTime: 2,
+      phase: 3,
+      category: 4,
+      data: 5,
+    },
+    data: [],
+  };
+}
 
 export function createGeckoMarkerStack({
   stackIndex,
@@ -31,7 +57,7 @@ export function createGeckoMarkerStack({
     processType: 'default',
     tid: 1111,
     pid: 2222,
-    markers: { schema: { name: 0, time: 1, category: 2, data: 3 }, data: [] },
+    markers: getEmptyMarkers(),
     name: 'SyncProfile',
     samples: {
       schema: {
@@ -280,6 +306,65 @@ export function createGeckoProfile(): GeckoProfile {
   return profile;
 }
 
+type TestDefinedGeckoMarker = {|
+  +name?: string,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
+  +category?: IndexIntoCategoryList,
+  +data?: MarkerPayload_Gecko,
+|};
+
+function _createGeckoThreadWithMarkers(
+  markers: TestDefinedGeckoMarker[]
+): GeckoThread {
+  const thread = _createGeckoThread();
+  const { stringTable } = thread;
+  const testDefinedMarkerStringIndex = stringTable.length;
+  thread.stringTable.push('TestDefinedMarker');
+  thread.markers.data = markers.map(marker => {
+    let name = testDefinedMarkerStringIndex;
+    const markerName = marker.name;
+    if (markerName) {
+      const nameIndex = stringTable.indexOf(markerName);
+      if (nameIndex === -1) {
+        name = stringTable.length;
+        stringTable.push(markerName);
+      } else {
+        name = nameIndex;
+      }
+    }
+    return [
+      name,
+      marker.startTime,
+      marker.endTime,
+      marker.phase,
+      0, // category
+      marker.data || null,
+    ];
+  });
+  return thread;
+}
+
+/**
+ * This function creates a gecko profile with some arbitrary JS timings. This was
+ * primarily created for before this project had the richer profile making fixtures.
+ * It most likely shouldn't be used for new tests.
+ */
+export function createGeckoProfileWithMarkers(
+  markers: TestDefinedGeckoMarker[]
+): GeckoProfile {
+  const geckoProfile = createGeckoProfile();
+  return {
+    meta: geckoProfile.meta,
+    libs: geckoProfile.libs,
+    pages: geckoProfile.pages,
+    pausedRanges: [],
+    threads: [_createGeckoThreadWithMarkers(markers)],
+    processes: [],
+  };
+}
+
 function _createIPCMarker({
   time,
   otherPid,
@@ -291,8 +376,10 @@ function _createIPCMarker({
   return [
     18, // IPC: see string table in _createGeckoThread
     time,
+    null, // End time
+    INSTANT,
     0, // Other
-    {
+    ({
       type: 'IPC',
       startTime: time,
       endTime: time,
@@ -303,7 +390,7 @@ function _createIPCMarker({
       direction,
       phase,
       sync: false,
-    },
+    }: IPCMarkerPayload_Gecko),
   ];
 }
 
@@ -416,7 +503,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       ],
     },
     markers: {
-      schema: { name: 0, time: 1, category: 2, data: 3 },
+      schema: getEmptyMarkers().schema,
       data: [
         // Please keep the next marker at the start if you add more markers in
         // this structure.
@@ -424,7 +511,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         // here is only the "end" marker without a matching "start" marker.
         [
           10, // Rasterize
-          1,
+          null, // Start time
+          1, // End time
+          INTERVAL_END,
           0, // Other
           {
             category: 'Paint',
@@ -433,10 +522,19 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           },
         ],
         // This marker is filtered out
-        [4, 2, 0, { type: 'VsyncTimestamp' }],
+        [
+          4, // VsyncTimestamp
+          2, // Start time
+          null, // End time
+          INSTANT,
+          0,
+          { type: 'VsyncTimestamp' },
+        ],
         [
           5, // Reflow
           3,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             category: 'Paint',
@@ -448,6 +546,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           10, // Rasterize
           4,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             category: 'Paint',
@@ -457,7 +557,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           10, // Rasterize
-          5,
+          null, // Start time
+          5, // End time
+          INTERVAL_END,
           0, // Other
           {
             category: 'Paint',
@@ -467,7 +569,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           5, // Reflow
-          8,
+          null, // Start time
+          8, // End time
+          INTERVAL_END,
           0, // Other
           {
             category: 'Paint',
@@ -478,17 +582,16 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           9,
           11, // Note: this marker is out of order on purpose, to test we correctly sort
+          12, // End time
+          INTERVAL,
           0, // Other
-          {
-            // MinorGC at time 11ms from 11ms to 12ms
-            type: 'GCMinor',
-            startTime: 11,
-            endTime: 12,
-          },
+          { type: 'GCMinor' },
         ],
         [
           8,
           9,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the start marker
@@ -502,7 +605,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           8,
-          10,
+          null, // Start time
+          10, // End Time
+          INTERVAL_END,
           0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the end marker
@@ -516,11 +621,11 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           11, // UserTiming
-          12,
+          12, // Start time
+          13, // End time
+          INTERVAL,
           0, // Other
           {
-            startTime: 12,
-            endTime: 13,
             type: 'UserTiming',
             name: 'processing-thread',
             entryType: 'measure',
@@ -530,15 +635,14 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           5, // Reflow
           13,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: {
-                schema: { name: 0, time: 1, category: 2, data: 3 },
-                data: [],
-              },
+              markers: getEmptyMarkers(),
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -560,15 +664,14 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           5, // Reflow
           14,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: {
-                schema: { name: 0, time: 1, category: 2, data: 3 },
-                data: [],
-              },
+              markers: getEmptyMarkers(),
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -589,7 +692,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           5, // Reflow
-          15,
+          null, // Start time
+          15, // End time
+          INTERVAL_END,
           0, // Other
           {
             category: 'Paint',
@@ -599,7 +704,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           5, // Reflow
-          18,
+          null, // Start time
+          18, // End time
+          INTERVAL_END,
           0, // Other
           {
             category: 'Paint',
@@ -610,6 +717,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           12, // ArbitraryName
           21,
+          null, // End time
+          INSTANT,
           0, // Other
           {
             category: 'ArbitraryCategory',
@@ -618,7 +727,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
-          23,
+          22, // Start time
+          23, // End time
+          INTERVAL,
           0, // Other
           {
             type: 'Network',
@@ -633,7 +744,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
-          24,
+          23, // Start time
+          24, // End time
+          INTERVAL,
           0, // Other
           {
             type: 'Network',
@@ -657,20 +770,17 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         ],
         [
           14, // FileIO
-          24,
+          22, // Start time
+          24, // End time
+          INTERVAL,
           0, // Other
           {
             type: 'FileIO',
-            startTime: 22,
-            endTime: 24,
             source: 'PoisionOIInterposer',
             filename: '/foo/bar/',
             operation: 'create/open',
             stack: {
-              markers: {
-                schema: { name: 0, time: 1, category: 2, data: 3 },
-                data: [],
-              },
+              markers: getEmptyMarkers(),
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -691,6 +801,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           15, // CompositorScreenshot
           25,
+          null, // End time
+          INSTANT,
           0, // Other
           {
             type: 'CompositorScreenshot',
@@ -703,12 +815,12 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
 
         [
           17, // PreferenceRead
-          27,
+          26, // Start time
+          27, // End time
+          INTERVAL,
           0, // Other
           {
             type: 'PreferenceRead',
-            startTime: 26,
-            endTime: 27,
             prefAccessTime: 114.9,
             prefName: 'layout.css.dpi',
             prefKind: 'User',
@@ -727,6 +839,8 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
         [
           10, // Rasterize
           100,
+          null, // End time
+          INTERVAL_START,
           0, // Other
           {
             category: 'Paint',
@@ -845,10 +959,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
         [11, false, 0, null, null, 3, null, null, null], // 8: javascriptThree, implementation null, line 3
       ],
     },
-    markers: {
-      schema: { name: 0, time: 1, category: 2, data: 3 },
-      data: [],
-    },
+    markers: getEmptyMarkers(),
     stringTable: [
       '(root)', // 0
       '0x100000f84', // 1

@@ -20,6 +20,7 @@ import type {
 
 import { assertExhaustiveCheck } from '../../../utils/flow';
 import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
+import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
  * This function takes the current timeline tracks, and generates a human readable result
@@ -149,7 +150,9 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.name.push(
     thread2.stringTable.indexForString('RefreshDriverTick')
   );
-  thread2.markers.time.push(0);
+  thread2.markers.startTime.push(0);
+  thread2.markers.endTime.push(null);
+  thread2.markers.phase.push(INSTANT);
   thread2.markers.length++;
 
   thread3.name = 'DOM Worker';

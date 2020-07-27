@@ -6,7 +6,7 @@
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
 import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, wait } from 'react-testing-library';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -84,11 +84,10 @@ describe('app/MenuButtons', function() {
     const profile = getProfileWithMarkers([
       [
         'PreferenceRead',
+        0,
         1,
         {
           type: 'PreferenceRead',
-          startTime: 0,
-          endTime: 1,
           prefAccessTime: 0,
           prefName: 'testing',
           prefKind: 'testing',
@@ -122,8 +121,15 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { container, getByTestId, getByText, queryByText } = renderResult;
+    const {
+      container,
+      getByTestId,
+      getByText,
+      queryByText,
+      findByText,
+    } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const findPublishButton = () => findByText('Publish…');
     const getErrorButton = () => getByText('Error publishing…');
     const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
@@ -143,6 +149,7 @@ describe('app/MenuButtons', function() {
       store,
       ...renderResult,
       getPanel,
+      findPublishButton,
       getPublishButton,
       getErrorButton,
       getCancelButton,
@@ -230,6 +237,7 @@ describe('app/MenuButtons', function() {
       const {
         getPanel,
         getPublishButton,
+        findPublishButton,
         getCancelButton,
         getPanelForm,
         clickAndRunTimers,
@@ -244,10 +252,7 @@ describe('app/MenuButtons', function() {
       clickAndRunTimers(getCancelButton());
 
       // This might be asynchronous, depending on the underlying code.
-      await wait(() => {
-        getPublishButton();
-      });
-      expect(getPublishButton()).toBeTruthy();
+      expect(await findPublishButton()).toBeTruthy();
     });
 
     it('matches the snapshot for an error', async () => {
@@ -266,7 +271,7 @@ describe('app/MenuButtons', function() {
       rejectUpload('This is a mock error');
 
       // Wait until the error button is visible.
-      await wait(() => {
+      await waitFor(() => {
         getErrorButton();
       });
 
@@ -315,8 +320,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       duration: 20,
     };
 
-    const { container, getByValue } = setup(profile);
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const { container, getByText } = setup(profile);
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -334,9 +339,9 @@ describe('<MenuButtonsMetaInfo>', function() {
       }
     }
 
-    const { getByValue, container } = setup(profile);
+    const { getByText, container } = setup(profile);
 
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -356,8 +361,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       const setupResult = setup(profile, config.symbolicationStatus);
 
       // Open up the arrow panel for the test.
-      const { getByValue } = setupResult;
-      fireEvent.click(getByValue('Firefox'));
+      const { getByText } = setupResult;
+      fireEvent.click(getByText('Firefox'));
       jest.runAllTimers();
 
       return setupResult;

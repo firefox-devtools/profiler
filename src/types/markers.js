@@ -56,8 +56,6 @@ export type $ReplaceCauseWithStack<T: Object> = {|
  */
 export type GPUMarkerPayload = {|
   type: 'gpu_timer_query',
-  startTime: Milliseconds, // Same as cpustart
-  endTime: Milliseconds, // Same as cpuend
   cpustart: Milliseconds,
   cpuend: Milliseconds,
   gpustart: Milliseconds, // Always 0.
@@ -206,15 +204,11 @@ export type GCMajorCompleted_Gecko = {|
 
 export type GCMajorMarkerPayload = {|
   type: 'GCMajor',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   timings: GCMajorAborted | GCMajorCompleted,
 |};
 
 export type GCMajorMarkerPayload_Gecko = {|
   type: 'GCMajor',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   timings: GCMajorAborted | GCMajorCompleted_Gecko,
 |};
 
@@ -274,23 +268,17 @@ export type GCMinorEmptyData = {|
 
 export type GCMinorMarkerPayload = {|
   type: 'GCMinor',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   // nursery is only present in newer profile format.
   nursery?: GCMinorCompletedData | GCMinorDisabledData | GCMinorEmptyData,
 |};
 
 export type GCSliceMarkerPayload = {|
   type: 'GCSlice',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   timings: GCSliceData,
 |};
 
 export type GCSliceMarkerPayload_Gecko = {|
   type: 'GCSlice',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   timings: GCSliceData_Gecko,
 |};
 
@@ -306,8 +294,6 @@ export type BailoutPayload = {|
   script: string,
   bailoutLine: number,
   functionLine: number | null,
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 /**
@@ -317,8 +303,6 @@ export type InvalidationPayload = {|
   type: 'Invalidation',
   url: string,
   line: number | null,
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 /**
@@ -396,8 +380,6 @@ export type NetworkPayload = {|
 
 export type FileIoPayload = {|
   type: 'FileIO',
-  startTime: number,
-  endTime: number,
   cause?: CauseBacktrace,
   source: string,
   operation: string,
@@ -418,8 +400,6 @@ export type FileIoPayload = {|
  */
 export type UserTimingMarkerPayload = {|
   type: 'UserTiming',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   name: string,
   entryType: 'measure' | 'mark',
 |};
@@ -427,8 +407,6 @@ export type UserTimingMarkerPayload = {|
 export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 // ph: 'X' in the Trace Event Format
@@ -436,8 +414,6 @@ export type ChromeCompleteTraceEventPayload = {|
   type: 'CompleteTraceEvent',
   category: string,
   data: Object | null,
-  startTime: number,
-  endTime: number,
 |};
 
 // ph: 'I' in the Trace Event Format
@@ -445,8 +421,6 @@ export type ChromeInstantTraceEventPayload = {|
   type: 'InstantTraceEvent',
   category: string,
   data: Object | null,
-  startTime: number,
-  endTime: number,
 |};
 
 // ph: 'B' | 'E' in the Trace Event Format
@@ -480,8 +454,6 @@ export type DOMEventMarkerPayload = {|
 
 export type PrefMarkerPayload = {|
   type: 'PreferenceRead',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   prefAccessTime: Milliseconds,
   prefName: string,
   prefKind: string,
@@ -517,8 +489,6 @@ export type ScreenshotPayload = {|
 export type StyleMarkerPayload = {|
   type: 'Styles',
   category: 'Paint',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   cause?: CauseBacktrace,
 
   // Counts
@@ -531,15 +501,11 @@ export type StyleMarkerPayload = {|
 
 export type BHRMarkerPayload = {|
   type: 'BHR-detected hang',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 export type LongTaskMarkerPayload = {|
   type: 'MainThreadLongTask',
   category: 'LongTask',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 /*
@@ -553,14 +519,10 @@ export type FrameConstructionMarkerPayload = {|
 
 export type DummyForTestsMarkerPayload = {|
   type: 'DummyForTests',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
 |};
 
 export type JsAllocationPayload_Gecko = {|
   type: 'JS allocation',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   className: string,
   typeName: string, // Currently only 'JSObject'
   coarseType: string, // Currently only 'Object',
@@ -571,8 +533,6 @@ export type JsAllocationPayload_Gecko = {|
 
 export type NativeAllocationPayload_Gecko = {|
   type: 'Native allocation',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   size: Bytes,
   stack: GeckoMarkerStack,
   // Older versions of the Gecko format did not have these values.

@@ -369,8 +369,6 @@ describe('js allocation processing', function() {
       const markerTuple: any = [];
       const payload: JsAllocationPayload_Gecko = {
         type: 'JS allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         className: 'Function',
         typeName: 'JSObject',
         coarseType: 'Object',
@@ -380,7 +378,9 @@ describe('js allocation processing', function() {
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 
@@ -443,14 +443,14 @@ describe('native allocation processing', function() {
       const markerTuple: any = [];
       const payload: NativeAllocationPayload_Gecko = {
         type: 'Native allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         size: byteSize,
         stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'Native allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 

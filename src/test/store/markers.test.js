@@ -8,11 +8,12 @@ import {
   getUserTiming,
   getProfileWithMarkers,
   getNetworkTrackProfile,
+  type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function() {
-  function getMarkerChartTimingAndBuckets(testMarkers) {
+  function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
     return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
@@ -29,8 +30,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *------*
       //              : *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 0, 10],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -40,8 +41,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       //              : 'Category'
       // 'Marker Name': *------*  *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 15, endTime: 25 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 15, 25],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
@@ -52,8 +53,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *------*
       //              :     *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 0, 10],
+        ['Marker Name', 5, 15],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -64,8 +65,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name': *--------*
       //              :   *---*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name', 0, { startTime: 0, endTime: 20 }],
-        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
+        ['Marker Name', 0, 20],
+        ['Marker Name', 5, 15],
       ]);
       expect(markerTiming).toHaveLength(3);
     });
@@ -78,8 +79,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       // 'Marker Name A': *------*
       // 'Marker Name B':           *------*
       const markerTiming = getMarkerChartTimingAndBuckets([
-        ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
-        ['Marker Name B', 0, { startTime: 20, endTime: 30 }],
+        ['Marker Name A', 0, 10],
+        ['Marker Name B', 20, 30],
       ]);
       expect(markerTiming).toHaveLength(3);
       const [category, markerTimingA, markerTimingB] = markerTiming;
@@ -101,6 +102,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         [
           'Rasterize',
           1,
+          null,
           { category: 'Paint', interval: 'end', type: 'tracing' },
         ],
       ]);
@@ -112,28 +114,6 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
           // marker will start at that same point.
           start: [1],
           end: [1],
-          index: [0],
-          label: [''],
-          bucket: 'Idle',
-          length: 1,
-        },
-      ]);
-    });
-
-    it('renders properly markers ending after profile end', function() {
-      const markerTiming = getMarkerChartTimingAndBuckets([
-        [
-          'Rasterize',
-          20,
-          { category: 'Paint', interval: 'start', type: 'tracing' },
-        ],
-      ]);
-      expect(markerTiming).toEqual([
-        'Idle',
-        {
-          name: 'Rasterize',
-          start: [20],
-          end: [21], // Truncated using the time of the last sample.
           index: [0],
           label: [''],
           bucket: 'Idle',
@@ -158,35 +138,27 @@ describe('getProcessedRawMarkerTable', function() {
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
       ['Invalidate moz-extension://<URL>', 40, null],
     ]);
-    expect(markers.time).toEqual([10, 20, 30, 40]);
+    expect(markers.startTime).toEqual([10, 20, 30, 40]);
     expect(markers.data).toEqual([
       {
         type: 'Invalidation',
         url: 'http://mozilla.com/script.js',
         line: '1234',
-        startTime: 10,
-        endTime: 10,
       },
       {
         type: 'Invalidation',
         url: 'self-hosted',
         line: '2345',
-        startTime: 20,
-        endTime: 20,
       },
       {
         type: 'Invalidation',
         url: 'resource://foo -> resource://bar',
         line: '3456',
-        startTime: 30,
-        endTime: 30,
       },
       {
         type: 'Invalidation',
         url: 'moz-extension://<URL>',
         line: null,
-        startTime: 40,
-        endTime: 40,
       },
     ]);
   });
@@ -210,7 +182,7 @@ describe('getProcessedRawMarkerTable', function() {
         null,
       ],
     ]);
-    expect(markers.time).toEqual([10, 20, 30]);
+    expect(markers.startTime).toEqual([10, 20, 30]);
     expect(markers.data).toEqual([
       {
         type: 'Bailout',
@@ -219,8 +191,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'resource://foo.js -> resource://bar.js',
         bailoutLine: 3666,
         functionLine: 3662,
-        startTime: 10,
-        endTime: 10,
       },
       {
         type: 'Bailout',
@@ -229,8 +199,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'self-hosted',
         bailoutLine: 1021,
         functionLine: 970,
-        startTime: 20,
-        endTime: 20,
       },
       {
         type: 'Bailout',
@@ -239,8 +207,6 @@ describe('getProcessedRawMarkerTable', function() {
         script: 'moz-extension://<URL>',
         bailoutLine: 7,
         functionLine: null,
-        startTime: 30,
-        endTime: 30,
       },
     ]);
   });
@@ -277,28 +243,12 @@ describe('memory markers', function() {
         [
           'IdleForgetSkippable',
           3,
-          { type: 'tracing', category: 'CC', interval: 'start' },
-        ],
-        [
-          'IdleForgetSkippable',
           4,
           { type: 'tracing', category: 'CC', interval: 'end' },
         ],
-        [
-          'GCMinor',
-          5,
-          { type: 'GCMinor', startTime: 5, endTime: 5, nursery: any },
-        ],
-        [
-          'GCMajor',
-          6,
-          { type: 'GCMajor', startTime: 6, endTime: 6, timings: any },
-        ],
-        [
-          'GCSlice',
-          7,
-          { type: 'GCSlice', startTime: 7, endTime: 7, timings: any },
-        ],
+        ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
+        ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
+        ['GCSlice', 7, null, { type: 'GCSlice', timings: any }],
       ])
     );
   }
@@ -379,6 +329,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 1',
           10,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -390,6 +341,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 3',
           30,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -400,6 +352,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         [
           'Dummy 4',
           30,
+          null,
           {
             type: 'tracing',
             category: 'Navigation',
@@ -407,7 +360,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
             innerWindowID,
           },
         ],
-        ['Dummy 5', 40, null],
+        ['Dummy 5', 40],
       ]
     );
     profile.pages = [
