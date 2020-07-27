@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Home from '../../components/app/Home';
-import { render, waitForElement } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
@@ -31,12 +31,7 @@ describe('app/Home', function() {
       </Provider>
     );
 
-    function getInstructions(testId: string) {
-      const { container, getByTestId } = renderResults;
-      return waitForElement(() => getByTestId(testId), { container });
-    }
-
-    return { ...renderResults, getInstructions };
+    return { ...renderResults };
   }
 
   it('renders the install screen for the extension', () => {
@@ -65,7 +60,7 @@ describe('app/Home', function() {
     // No one has asked anything to the WebChannel.
     expect(listeners).toHaveLength(0);
 
-    const { getInstructions } = setup(FIREFOX);
+    const { findByTestId } = setup(FIREFOX);
 
     // There is an outstanding question to the WebChannel
     expect(listeners.length).toBeGreaterThan(0);
@@ -79,9 +74,7 @@ describe('app/Home', function() {
 
     // The UI should update for the record instructions, which is an async
     // handle of the WebChannel message.
-    const instructions = await getInstructions(
-      'home-enable-popup-instructions'
-    );
+    const instructions = await findByTestId('home-enable-popup-instructions');
 
     expect(instructions).toMatchSnapshot();
   });
@@ -92,7 +85,7 @@ describe('app/Home', function() {
     // No one has asked anything to the WebChannel.
     expect(listeners).toHaveLength(0);
 
-    const { getInstructions } = setup(FIREFOX);
+    const { findByTestId } = setup(FIREFOX);
 
     // There is an outstanding question to the WebChannel
     expect(listeners.length).toBeGreaterThan(0);
@@ -106,7 +99,7 @@ describe('app/Home', function() {
 
     // The UI should update for the record instructions, which is an async
     // handle of the WebChannel message.
-    const instructions = await getInstructions('home-record-instructions');
+    const instructions = await findByTestId('home-record-instructions');
 
     expect(instructions).toMatchSnapshot();
   });
@@ -115,7 +108,7 @@ describe('app/Home', function() {
   // eslint-disable-next-line jest/expect-expect
   it('will switch to recording instructions when enabling the popup', async () => {
     const { triggerResponse, getLastRequestId } = mockWebChannel();
-    const { getInstructions, getByText } = setup(FIREFOX);
+    const { findByTestId, getByText } = setup(FIREFOX);
 
     // Respond back from the browser that the menu button is not yet enabled.
     triggerResponse({
@@ -123,7 +116,7 @@ describe('app/Home', function() {
       menuButtonIsEnabled: false,
       requestId: getLastRequestId(),
     });
-    await getInstructions('home-enable-popup-instructions');
+    await findByTestId('home-enable-popup-instructions');
 
     getByText('Enable Profiler Menu Button').click();
 
@@ -132,6 +125,6 @@ describe('app/Home', function() {
       type: 'ENABLE_MENU_BUTTON_DONE',
       requestId: getLastRequestId(),
     });
-    await getInstructions('home-record-instructions');
+    await findByTestId('home-record-instructions');
   });
 });

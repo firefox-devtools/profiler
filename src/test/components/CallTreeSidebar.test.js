@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 
 import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
 import {
@@ -142,7 +142,7 @@ describe('CallTreeSidebar', function() {
     const {
       dispatch,
       queryByText,
-      getByText,
+      getAllByText,
       funcNamesDict: { A, B, D },
     } = setup(
       getMergedProfileFromTextSamples(
@@ -165,7 +165,7 @@ describe('CallTreeSidebar', function() {
     expect(queryByText(/Implementation/)).toBe(null);
 
     dispatch(changeSelectedCallNode(2, [A, B, D]));
-    expect(getByText(/Implementation/)).not.toBe(null);
+    expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
   });
 
   it('can expand subcategories', () => {

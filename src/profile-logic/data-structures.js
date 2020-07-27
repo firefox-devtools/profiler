@@ -180,7 +180,9 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   return {
     data: [],
     name: [],
-    time: [],
+    startTime: [],
+    endTime: [],
+    phase: [],
     category: [],
     length: 0,
   };
@@ -252,7 +254,9 @@ export function shallowCloneRawMarkerTable(
     // be caught by the type system.
     data: markerTable.data.slice(),
     name: markerTable.name.slice(),
-    time: markerTable.time.slice(),
+    startTime: markerTable.startTime.slice(),
+    endTime: markerTable.endTime.slice(),
+    phase: markerTable.phase.slice(),
     category: markerTable.category.slice(),
     length: markerTable.length,
   };

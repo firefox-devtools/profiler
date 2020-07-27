@@ -155,9 +155,9 @@ describe('profile upload', () => {
   it('can abort the request', async () => {
     const { getLastXhr } = setup();
 
-    const { startUpload, abortFunction } = uploadBinaryProfileData();
+    const { startUpload, abortUpload } = uploadBinaryProfileData();
     startUpload(new Uint8Array(10));
-    abortFunction();
+    abortUpload();
     expect(getLastXhr().abort).toHaveBeenCalled();
   });
 });

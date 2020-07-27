@@ -238,18 +238,23 @@ export function formatTimestamp(
       significantDigits,
       Number.isInteger(time / 1000) ? 0 : maxFractionalDigits
     );
-  } else if (time >= 1) {
+  }
+  if (time >= 1) {
     return formatMilliseconds(
       time,
       significantDigits,
       Number.isInteger(time) ? 0 : maxFractionalDigits
     );
-  } else if (time * 1000 >= 1) {
+  }
+  if (time * 1000 >= 1) {
     return formatMicroseconds(
       time * 1000,
       significantDigits,
       Number.isInteger(time * 1000) ? 0 : maxFractionalDigits
     );
+  }
+  if (time === 0) {
+    return '0s';
   }
   return formatNanoseconds(
     time * 1000 * 1000,

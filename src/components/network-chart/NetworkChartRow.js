@@ -18,6 +18,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
+import { ensureExists } from '../../utils/flow';
 
 import type {
   CssPixels,
@@ -221,14 +222,16 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
   }
 
   render() {
-    const {
-      marker: { start, dur },
-      networkPayload,
-    } = this.props;
-
+    const { marker, networkPayload } = this.props;
+    const start = marker.start;
+    const end = ensureExists(
+      marker.end,
+      'Network markers are assumed to have an end time.'
+    );
+    const dur = end - marker.start;
     // Compute the positioning of this network marker.
     const startPosition = this._timeToCssPixels(start);
-    const endPosition = this._timeToCssPixels(start + dur);
+    const endPosition = this._timeToCssPixels(end);
 
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;

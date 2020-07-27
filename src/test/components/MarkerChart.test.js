@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -22,7 +22,10 @@ import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithMarkers,
+  type TestDefinedMarkers,
+} from '../fixtures/profiles/processed-profile';
 import {
   getBoundingBox,
   getMouseEvent,
@@ -37,20 +40,21 @@ import type {
   CssPixels,
 } from 'firefox-profiler/types';
 
-const MARKERS = [
-  ['Marker A', 0, { startTime: 0, endTime: 10 }],
-  ['Marker A', 0, { startTime: 0, endTime: 10 }],
-  ['Marker A', 11, { startTime: 11, endTime: 15 }],
+const MARKERS: TestDefinedMarkers = [
+  ['Marker A', 0, 10],
+  ['Marker A', 0, 10],
+  ['Marker A', 11, 15],
   [
     'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
-    6,
-    { startTime: 5, endTime: 15 },
+    5,
+    15,
   ],
-  ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
+  ['Dot marker E', 4, null],
   ['Non-interval marker F without data', 7, null],
   [
     'Marker G type DOMEvent',
     5,
+    10,
     {
       type: 'tracing',
       category: 'DOMEvent',
@@ -60,18 +64,8 @@ const MARKERS = [
     },
   ],
   [
-    'Marker G type DOMEvent',
-    10,
-    {
-      type: 'tracing',
-      category: 'DOMEvent',
-      eventType: 'click',
-      interval: 'end',
-      phase: 2,
-    },
-  ],
-  [
     'Marker H with no start',
+    0,
     3,
     {
       type: 'tracing',
@@ -82,6 +76,7 @@ const MARKERS = [
   [
     'Marker H with no end',
     9,
+    10,
     {
       type: 'tracing',
       category: 'Paint',
@@ -170,19 +165,19 @@ describe('MarkerChart', function() {
 
     const markers = [
       // RENDERED: This marker defines the start of our range.
-      [rowName, 0, null],
+      [rowName, 0],
       // RENDERED: Now create three "dot" markers that should only be rendered once.
-      [rowName, 5000, null],
+      [rowName, 5000],
       // NOT-RENDERED: This marker has a duration, but it's very small, and would get
       // rendered as a dot.
-      [rowName, 5001, { startTime: 5001, endTime: 5001.1 }],
+      [rowName, 5001, 5001.1],
       // NOT-RENDERED: The final dot marker
-      [rowName, 5002, null],
+      [rowName, 5002],
       // RENDERED: This is a longer marker, it should always be drawn even if it starts
       // at the same location as a dot marker
-      [rowName, 5002, { startTime: 5002, endTime: 7000 }],
+      [rowName, 5002, 7000],
       // RENDERED: Add a final marker that's quite far away to have a big time range.
-      [rowName, 15000, null],
+      [rowName, 15000],
     ];
 
     const profile = getProfileWithMarkers(markers);
@@ -520,10 +515,9 @@ function getUserTiming(name: string, startTime: number, endTime: number): * {
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),

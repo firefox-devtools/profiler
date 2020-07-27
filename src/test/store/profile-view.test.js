@@ -216,6 +216,13 @@ describe('getJankMarkersForHeader', function() {
     expect(jankInstances).toEqual([]);
   });
 
+  function getJankInstantDuration(marker) {
+    return (
+      ensureExists(marker.end, 'Jank markers are assumed to have an end.') -
+      marker.start
+    );
+  }
+
   it('will create a jank instance', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
@@ -224,7 +231,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will create a jank instance with eventDelay values', function() {
@@ -235,7 +242,7 @@ describe('getJankMarkersForHeader', function() {
       eventDelay,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will skip null responsiveness values', function() {
@@ -246,7 +253,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will skip null responsiveness values after a breaking point', function() {
@@ -257,7 +264,7 @@ describe('getJankMarkersForHeader', function() {
       responsiveness,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(jankInstances[0].dur).toEqual(breakingPoint);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 });
 
@@ -861,14 +868,13 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'd',
-          3,
+          1022,
+          1024,
           {
             cause: { stack: 2, time: 1 },
-            endTime: 1024,
             filename: '/foo/bar/',
             operation: 'create/open',
             source: 'PoisionOIInterposer',
-            startTime: 1022,
             type: 'FileIO',
           },
         ],
@@ -921,7 +927,8 @@ describe('actions/ProfileView', function() {
         ['a', 0, null],
         [
           'IPC',
-          1,
+          30,
+          1031,
           {
             type: 'IPC',
             startTime: 30,
@@ -945,7 +952,8 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'IPC',
-          3,
+          40,
+          40,
           {
             type: 'IPC',
             startTime: 40,
@@ -1007,6 +1015,7 @@ describe('actions/ProfileView', function() {
           [
             'd',
             3,
+            null,
             {
               type: 'Log',
               module: 'nsJarProtocol',
@@ -1064,6 +1073,7 @@ describe('actions/ProfileView', function() {
         [
           'a',
           0,
+          null,
           {
             type: 'tracing',
             category: 'DOMEvent',
@@ -1075,11 +1085,10 @@ describe('actions/ProfileView', function() {
         ],
         [
           'b',
-          1,
+          1002,
+          1022,
           {
             type: 'UserTiming',
-            startTime: 1002,
-            endTime: 1022,
             name: 'mark-1',
             entryType: 'mark',
           },
@@ -1087,11 +1096,10 @@ describe('actions/ProfileView', function() {
         ['c', 2, null],
         [
           'd',
-          3,
+          1050,
+          1100,
           {
             type: 'UserTiming',
-            startTime: 1050,
-            endTime: 1100,
             name: 'measure-1',
             entryType: 'measure',
           },
@@ -1504,8 +1512,8 @@ describe('actions/ProfileView', function() {
       expect(markers.length).toBe(20);
       const startIndex = 3;
       const endIndex = 8;
-      const startTime = markers.time[startIndex];
-      const endTime = markers.time[endIndex];
+      const startTime = ensureExists(markers.startTime[startIndex]);
+      const endTime = ensureExists(markers.startTime[endIndex]) - 0.1;
       dispatch(ProfileView.commitRange(startTime, endTime));
 
       // Get out the markers.

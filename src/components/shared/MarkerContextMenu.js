@@ -94,14 +94,20 @@ class MarkerContextMenu extends PureComponent<Props> {
       ? previewSelection.selectionStart
       : committedRange.start;
 
+    let selectionEnd = rightClickedMarker.end || rightClickedMarker.start;
+
+    if (selectionEnd === selectionStart) {
+      // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
+      // small bit of time at the end to make sure the selected marker doesn't disappear
+      // from view.
+      selectionEnd += 0.0001;
+    }
+
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart,
-      // For markers without a duration, add an arbitrarily small bit of time at
-      // the end to make sure the selected marker doesn't disappear from view.
-      selectionEnd:
-        rightClickedMarker.start + (rightClickedMarker.dur || 0.0001),
+      selectionEnd,
     });
   };
 
@@ -112,7 +118,7 @@ class MarkerContextMenu extends PureComponent<Props> {
       return;
     }
 
-    if (this._isZeroDurationMarker(rightClickedMarker)) {
+    if (rightClickedMarker.end === null) {
       return;
     }
 
@@ -120,12 +126,12 @@ class MarkerContextMenu extends PureComponent<Props> {
       hasSelection: true,
       isModifying: false,
       selectionStart: rightClickedMarker.start,
-      selectionEnd: rightClickedMarker.start + rightClickedMarker.dur,
+      selectionEnd: rightClickedMarker.end,
     });
   };
 
   _isZeroDurationMarker(marker: ?Marker): boolean {
-    return !marker || !marker.dur;
+    return !marker || marker.end === null;
   }
 
   _convertStackToString(stack: IndexIntoStackTable): string {

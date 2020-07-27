@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import TabBar from '../../components/app/TabBar';
 
 describe('app/TabBar', () => {

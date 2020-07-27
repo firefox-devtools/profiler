@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Timeline from '../../components/timeline';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -179,7 +179,7 @@ describe('Timeline', function() {
         .mockImplementation(() => ctx);
 
       const store = storeWithProfile(profile);
-      const { getByText } = render(
+      const { getByText, getByRole } = render(
         <Provider store={store}>
           <Timeline />
         </Provider>
@@ -187,7 +187,9 @@ describe('Timeline', function() {
 
       expect(getRightClickedTrack(store.getState())).toEqual(null);
 
-      fireEvent.mouseDown(getByText('Process 0'), { button: 2 });
+      fireEvent.mouseDown(getByRole('button', { name: 'Process 0' }), {
+        button: 2,
+      });
       expect(getRightClickedTrack(store.getState())).toEqual({
         trackIndex: 0,
         type: 'global',
