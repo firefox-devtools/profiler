@@ -75,6 +75,9 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
     // smaller space than the deviceHeight, so that the stroke will be fully visible
     // both at the top and bottom of the chart.
     const innerDeviceHeight = deviceHeight - deviceLineWidth;
+    const rangeLength = rangeEnd - rangeStart;
+    const millisecondWidth = deviceWidth / rangeLength;
+    const intervalWidth = interval * millisecondWidth;
 
     // Resize and clear the canvas.
     canvas.width = Math.round(deviceWidth);
@@ -91,7 +94,6 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
 
     {
       // Draw the chart.
-      const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = 'rgba(255, 0, 57, 0.7)'; // Red 50 with transparency.
       ctx.fillStyle = 'rgba(255, 0, 57, 0.3)'; // Red 50 with transparency.
@@ -103,7 +105,7 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = (deviceWidth * (samples.time[i] - rangeStart)) / rangeLength;
+        x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = eventDelays.eventDelays[i] / delayRange;
@@ -120,14 +122,14 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
       }
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
-      ctx.lineTo(x + interval, y);
+      ctx.lineTo(x + intervalWidth, y);
 
       // Don't do the fill yet, just stroke the top line.
       ctx.stroke();
 
       // After doing the stroke, continue the path to complete the fill to the bottom
       // of the canvas.
-      ctx.lineTo(x + interval, deviceHeight);
+      ctx.lineTo(x + intervalWidth, deviceHeight);
       ctx.lineTo(
         (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
         deviceHeight
