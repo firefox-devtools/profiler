@@ -16,7 +16,8 @@ import type { StartEndRange } from 'firefox-profiler/types';
  * Parse URL encoded committed ranges with the form:
  * "<start><unit><duration>~<start><unit><duration>", where `start` and
  * `duration` are both integer numbers expressed with the specified unit.
- * `start` can be negative.
+ * `start` can be negative. If `start` is missing, this is 0, that is the start
+ * of the profile.
  * Here is an example: 12345m1500~12345678u1500 => There are 2 ranges:
  * 1. Starts at 12s 345ms, and is 1.5s (1500ms) wide.
  * 2. Starts at 12s 345ms 678µs, and is 1.5ms (1500µs) wide.
@@ -33,12 +34,13 @@ export function parseCommittedRanges(
       .split('~')
       .map(committedRange => {
         // Strings look like: 12345m25, which means the start is at 12'345ms, and
-        // the duration is 25ms. All values are integer.
+        // the duration is 25ms. All values are integer, but the start can be
+        // missing.
         // For microseconds: 12345678u25: the start is at 12'345'678µs, and the
         // duration is 25µs.
         // For nanoseconds: 12345678901n25: the start is at 12'345'678'901ns, and the
         // duration is 25ns.
-        const m = committedRange.match(/^(-?[0-9]+)([mun])([0-9]+)$/);
+        const m = committedRange.match(/^(-?[0-9]+)?([mun])([0-9]+)$/);
         if (!m) {
           console.error(
             `The range "${committedRange}" couldn't be parsed, ignoring.`
@@ -47,7 +49,7 @@ export function parseCommittedRanges(
         }
 
         // Let's convert values to milliseconds.
-        const start = Number(m[1]);
+        const start = m[1] ? Number(m[1]) : 0; // A missing start means this is 0.
         const durationUnit = m[2];
         const duration = Number(m[3]);
         if (isNaN(start) || isNaN(duration)) {
@@ -99,6 +101,7 @@ export function parseCommittedRanges(
 // the form of the start + a duration: "<start><unit><duration>". We may lose
 // some precision, which is OK. We just need to take care that the resulting
 // range is close in length _and_ includes the requested range.
+// The <start> part will be left out if it's 0.
 // Note that start and end inputs are in milliseconds.
 export function stringifyStartEnd({ start, end }: StartEndRange): string {
   // Let's work in integer nanoseconds for calculations, and with string
