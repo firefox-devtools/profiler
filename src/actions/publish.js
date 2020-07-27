@@ -92,7 +92,7 @@ export function uploadFailed(error: mixed): Action {
 async function storeJustPublishedProfileData(
   profileToken: string,
   jwtToken: string | null,
-  sanitizedInformation: *,
+  sanitizedInformation,
   prepublishedState: State
 ): Promise<void> {
   const zeroAt = getZeroAt(prepublishedState);
