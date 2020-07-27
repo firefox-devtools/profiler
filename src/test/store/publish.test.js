@@ -18,6 +18,7 @@ import {
 import {
   getAbortFunction,
   getCheckedSharingOptions,
+  getRemoveProfileInformation,
   getUploadPhase,
   getUploadError,
   getUploadProgress,
@@ -25,23 +26,34 @@ import {
   getUploadGeneration,
 } from '../../selectors/publish';
 import {
+  getUrlState,
+  getAllCommittedRanges,
   getSelectedTab,
   getDataSource,
   getProfileName,
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
+import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { ensureExists } from '../../utils/flow';
-import { waitUntilState } from '../fixtures/utils';
+import { waitUntilData, waitUntilState } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import {
   addTransformToStack,
   hideGlobalTrack,
+  commitRange,
 } from '../../actions/profile-view';
+
+import 'fake-indexeddb/auto';
+import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+import {
+  retrieveProfileData,
+  listAllProfileData,
+} from 'firefox-profiler/app-logic/published-profiles-store';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -51,6 +63,16 @@ jest.mock('../../profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
+
+function resetIndexedDb() {
+  // This is the recommended way to reset the IDB state between test runs, but
+  // neither flow nor eslint like that we assign to indexedDB directly, for
+  // different reasons.
+  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
+  indexedDB = new FDBFactory();
+}
+beforeEach(resetIndexedDb);
+afterEach(resetIndexedDb);
 
 describe('getCheckedSharingOptions', function() {
   describe('default filtering by channel', function() {
@@ -141,11 +163,13 @@ describe('attemptToPublish', function() {
     delete (window: any).TextEncoder;
   });
 
-  function setupFakeUploadsWithStore(store: Store): * {
+  function setupFakeUpload() {
     let updateUploadProgress;
-    let resolveUpload;
-    let rejectUpload;
-    const abortFunction = jest.fn();
+
+    // These 2 functions get rewritten right away, but flow doesn't know that
+    // and thinks they can be undefined.
+    let resolveUpload = jest.fn();
+    let rejectUpload = jest.fn();
     const promise = new Promise((resolve, reject) => {
       resolveUpload = resolve;
       rejectUpload = reject;
@@ -158,6 +182,7 @@ describe('attemptToPublish', function() {
       // result of startUpload, so any rejection will be handled there.
     });
 
+    const abortFunction = jest.fn();
     const initUploadProcess: typeof uploadBinaryProfileData = () => ({
       abortUpload() {
         // In the real implementation, we call xhr.abort, hwich in turn
@@ -172,9 +197,7 @@ describe('attemptToPublish', function() {
         return promise;
       },
     });
-    (uploadBinaryProfileData: any).mockImplementation(initUploadProcess);
-
-    jest.spyOn(window, 'open').mockImplementation(() => {});
+    (uploadBinaryProfileData: any).mockImplementationOnce(initUploadProcess);
 
     function getUpdateUploadProgress() {
       return ensureExists(
@@ -183,17 +206,38 @@ describe('attemptToPublish', function() {
       );
     }
 
+    return {
+      resolveUpload,
+      rejectUpload,
+      abortFunction,
+      getUpdateUploadProgress,
+    };
+  }
+
+  function setupFakeUploadsWithStore(store: Store) {
+    jest.spyOn(window, 'open').mockImplementation(() => {});
+    const fakeUploadResult = setupFakeUpload();
+
     function waitUntilPhase(phase) {
       return waitUntilState(store, state => getUploadPhase(state) === phase);
     }
 
+    async function assertUploadSuccess(publishAttempt: Promise<boolean>) {
+      const publishResult = await publishAttempt;
+      // To find stupid mistakes more easily, check that we didn't get an upload
+      // error here. If we got one, let's rethrow the error.
+      const error = getUploadError(store.getState());
+      if (error) {
+        throw error;
+      }
+      expect(publishResult).toBe(true);
+    }
+
     return {
       ...store,
-      resolveUpload,
-      rejectUpload,
-      getUpdateUploadProgress,
+      ...fakeUploadResult,
       waitUntilPhase,
-      abortFunction,
+      assertUploadSuccess,
     };
   }
 
@@ -204,31 +248,45 @@ describe('attemptToPublish', function() {
   }
 
   it('cycles through the upload phases on a successful upload', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
     resolveUpload(JWT_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
+
+    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+    expect(storedProfileData).toMatchObject({
+      jwtToken: JWT_TOKEN,
+      profileToken: BARE_PROFILE_TOKEN,
+      publishedRange: { start: 0, end: 1 },
+      urlPath: urlFromState(getUrlState(getState())),
+    });
   });
 
   it('works when the server returns a bare hash instead of a JWT token', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
     resolveUpload(BARE_PROFILE_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
+
+    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+    expect(storedProfileData).toMatchObject({
+      jwtToken: null,
+      profileToken: BARE_PROFILE_TOKEN,
+    });
   });
 
   it('can handle upload errors', async function() {
@@ -250,6 +308,7 @@ describe('attemptToPublish', function() {
       getState,
       resolveUpload,
       getUpdateUploadProgress,
+      assertUploadSuccess,
     } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     await waitUntilPhase('uploading');
@@ -277,7 +336,7 @@ describe('attemptToPublish', function() {
 
     resolveUpload(JWT_TOKEN);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // We still clamp :-)
     expect(getUploadProgress(getState())).toEqual(0.1);
@@ -285,12 +344,12 @@ describe('attemptToPublish', function() {
   });
 
   it('can reset after a successful upload', async function() {
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
 
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
     // The generation is incremented twice because of some asynchronous code in
@@ -348,7 +407,7 @@ describe('attemptToPublish', function() {
   it('can revert back to the original state', async function() {
     // This function tests the original state with the trivial operation of
     // testing on the current tab.
-    const { dispatch, getState, resolveUpload } = setup();
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
 
     const originalTab = 'flame-graph';
     const changedTab = 'stack-chart';
@@ -366,7 +425,7 @@ describe('attemptToPublish', function() {
     // Now upload.
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // Check that we are still on this tab.
     expect(getSelectedTab(getState())).toEqual(originalTab);
@@ -393,9 +452,12 @@ describe('attemptToPublish', function() {
     profile.threads[1].pid = 1;
 
     const store = storeWithProfile(profile);
-    const { dispatch, getState, resolveUpload } = setupFakeUploadsWithStore(
-      store
-    );
+    const {
+      dispatch,
+      getState,
+      resolveUpload,
+      assertUploadSuccess,
+    } = setupFakeUploadsWithStore(store);
 
     // Add some transforms
     const B = funcNames.indexOf('B');
@@ -415,7 +477,7 @@ describe('attemptToPublish', function() {
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
-    expect(await publishAttempt).toEqual(true);
+    await assertUploadSuccess(publishAttempt);
 
     // The transform still should be there.
     // Also, now it should be index 0.
@@ -433,7 +495,12 @@ describe('attemptToPublish', function() {
     };
 
     it('removes the zip viewer and only shows the profiler after upload', async function() {
-      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -445,7 +512,7 @@ describe('attemptToPublish', function() {
       // Upload the profile.
       const publishAttempt = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt).toEqual(true);
+      await assertUploadSuccess(publishAttempt);
 
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
@@ -453,7 +520,12 @@ describe('attemptToPublish', function() {
     });
 
     it('can revert viewing the original zip file state after publishing', async function() {
-      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -461,7 +533,7 @@ describe('attemptToPublish', function() {
       // Now upload.
       const publishAttempt = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt).toEqual(true);
+      await assertUploadSuccess(publishAttempt);
 
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
@@ -480,15 +552,205 @@ describe('attemptToPublish', function() {
       await dispatch(viewProfileFromPathInZipFile('profile2.json'));
 
       // Now upload the SECOND profile.
+      const { resolveUpload: resolveUpload2 } = setupFakeUpload();
       const publishAttempt2 = dispatch(attemptToPublish());
-      resolveUpload(JWT_TOKEN);
-      expect(await publishAttempt2).toEqual(true);
+      resolveUpload2(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt2);
 
       // For the second profile, check that we are reporting as being a public
       // single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
       expect(getProfileName(getState())).toEqual('profile2.json');
+    });
+  });
+
+  describe('store profile information in indexeddb', () => {
+    // Some other basic use cases are also covered in the tests above.
+    it('stores unsanitized profiles just fine', async () => {
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      // This will prevent the profile from being sanitized by default when uploading.
+      profile.meta.updateChannel = 'nightly';
+
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = setupFakeUploadsWithStore(store);
+
+      // Only the last range will be saved in IDB, as an information to display
+      // in the list of profiles.
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+      dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
+
+      // This shouldn't be sanitized, but let's double check.
+      expect(getRemoveProfileInformation(getState())).toBe(null);
+
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      // The upload function doesn't wait for the data store to finish, but this
+      // should still be fairly quick.
+      const storedProfileData = await waitUntilData(() =>
+        retrieveProfileData(BARE_PROFILE_TOKEN)
+      );
+      expect(storedProfileData).toMatchObject({
+        jwtToken: JWT_TOKEN,
+        profileToken: BARE_PROFILE_TOKEN,
+        publishedRange: { start: 2, end: 4 },
+        // The url indeed contains the information about the 2 ranges.
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+
+      // Checking the state directly, we make sure we have the 2 ranges stored
+      // in the URL path as checked above.
+      expect(getAllCommittedRanges(getState())).toEqual([
+        { start: 1, end: 4 },
+        { start: 2, end: 4 },
+      ]);
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list.
+      expect(await listAllProfileData()).toEqual([storedProfileData]);
+    });
+
+    it('stores properly sanitized profiles', async () => {
+      // We create a 5-sample profile, to be able to assert ranges later.
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        resolveUpload,
+        assertUploadSuccess,
+      } = setupFakeUploadsWithStore(store);
+
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+      dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
+
+      // We want to sanitize by removing the full time range, keeping only the
+      // commited range.
+      // Profiles coming from getProfileFromTextSamples are sanitized by
+      // default, but let's make sure of that so that we don't have surprises in
+      // the future.
+      expect(getCheckedSharingOptions(getState()).includeFullTimeRange).toEqual(
+        false
+      );
+      expect(getRemoveProfileInformation(getState())).toMatchObject({
+        shouldFilterToCommittedRange: {
+          start: 2,
+          end: 4,
+        },
+      });
+
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      // The upload function doesn't wait for the data store to finish, but this
+      // should still be fairly quick.
+      const storedProfileData = await waitUntilData(() =>
+        retrieveProfileData(BARE_PROFILE_TOKEN)
+      );
+      expect(storedProfileData).toMatchObject({
+        jwtToken: JWT_TOKEN,
+        profileToken: BARE_PROFILE_TOKEN,
+        // The "old" range is still kept in IDB, because that's what we want to
+        // display in the UI, as an information to the user. However the URL
+        // below won't contain any range.
+        publishedRange: { start: 2, end: 4 },
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+      // Checking the state directly, we make sure we have no range stored in
+      // the url path as checked above.
+      expect(getAllCommittedRanges(getState())).toEqual([]);
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list.
+      expect(await listAllProfileData()).toEqual([storedProfileData]);
+    });
+
+    it('stores the information for the right upload when the user aborts and uploads again', async () => {
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      // This will prevent the profile from being sanitized by default when uploading.
+      profile.meta.updateChannel = 'nightly';
+
+      const store = storeWithProfile(profile);
+      const {
+        dispatch,
+        getState,
+        assertUploadSuccess,
+        waitUntilPhase,
+      } = setupFakeUploadsWithStore(store);
+
+      // This sets up a second upload.
+      const { resolveUpload: resolveUpload2 } = setupFakeUpload();
+
+      // We need a new set of profileToken/JWT for the second upload.
+      const secondBareProfileToken = 'ANOTHERHASH';
+      // This token was built from jwt.io by setting a payload:
+      // { "profileToken": "ANOTHERHASH" }.
+      const secondJwtToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlVG9rZW4iOiJBTk9USEVSSEFTSCJ9.YvJbxRzTYb9oWArgZ9pQUPS6-bLTSvIQLopuQmqv2u4';
+
+      dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
+
+      // This shouldn't be sanitized, but let's double check.
+      expect(getRemoveProfileInformation(getState())).toBe(null);
+
+      const publishAttempt1 = dispatch(attemptToPublish());
+
+      // After all, the user wants to sanitize. So they abort first then attempt
+      // to publish again.
+      // This is a bit of a hack for tests, to make sure we'll resolve the right
+      // call. Indeed we need to make sure that the first attempt is the first
+      // to call uploadBinaryProfileData. Waiting for the 'uploading' phase
+      // accomplishes that.
+      await waitUntilPhase('uploading');
+
+      // First, we abort.
+      const abortFunction = getAbortFunction(getState());
+      abortFunction();
+
+      // Then we check new options to sanitize the profile, and attempt a new publish.
+      dispatch(toggleCheckedSharingOptions('includeFullTimeRange'));
+      expect(getRemoveProfileInformation(getState())).toMatchObject({
+        shouldFilterToCommittedRange: { start: 1, end: 4 },
+      });
+      const publishAttempt2 = dispatch(attemptToPublish());
+
+      resolveUpload2(secondJwtToken);
+      await assertUploadSuccess(publishAttempt2);
+
+      // Because the first upload was stopped, the result sould be false.
+      expect(await publishAttempt1).toBe(false);
+
+      // Now let's check the data stored in the IDB is correct.
+      // The second request should have been stored just fine.
+      const secondRequestData = await waitUntilData(() =>
+        retrieveProfileData(secondBareProfileToken)
+      );
+      expect(secondRequestData).toMatchObject({
+        jwtToken: secondJwtToken,
+        profileToken: secondBareProfileToken,
+        publishedRange: { start: 1, end: 4 },
+        // This is the second request so this should have the final state no
+        // matter what.
+        urlPath: urlFromState(getUrlState(getState())),
+      });
+
+      // This is the first request, it hasn't been added because the request was
+      // aborted before the end.
+      const firstRequestData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      expect(firstRequestData).toBe(undefined);
+
+      // And now, checking that we can retrieve this data when retrieving the
+      // full list. The second profile comes first because it was answered
+      // first.
+      expect(await listAllProfileData()).toEqual([secondRequestData]);
     });
   });
 });

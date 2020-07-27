@@ -19,7 +19,7 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +profile: Profile,
-  +profileName: string | null,
+  +profileName: string,
   +dataSource: string,
 |};
 
