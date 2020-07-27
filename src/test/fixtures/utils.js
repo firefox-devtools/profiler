@@ -196,6 +196,29 @@ export function waitUntilState(
 }
 
 /**
+ * This waits until the predicate returns something non-undefined.
+ * The predicate can return either a direct value or a promise.
+ */
+export async function waitUntilData<T>(
+  predicate: () => Promise<T> | T,
+  times: number = 10
+): Promise<T> {
+  function wait() {
+    return new Promise(resolve => setTimeout(resolve, 50));
+  }
+
+  for (let i = 0; i < times; i++) {
+    await wait();
+    const value = await predicate();
+    if (value !== undefined || value !== null) {
+      return value;
+    }
+  }
+
+  throw new Error(`We waited more than ${times} times for a defined value.`);
+}
+
+/**
  * Tests with components using React portals (tooltips for instance)
  * need to have a mountpoint in the DOM.
  */

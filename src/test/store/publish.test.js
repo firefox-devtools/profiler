@@ -40,7 +40,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { ensureExists } from '../../utils/flow';
-import { waitUntilState } from '../fixtures/utils';
+import { waitUntilData, waitUntilState } from '../fixtures/utils';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import {
   addTransformToStack,
@@ -233,32 +233,10 @@ describe('attemptToPublish', function() {
       expect(publishResult).toBe(true);
     }
 
-    async function waitUntilData<T>(
-      predicate: () => Promise<T> | T,
-      times: number = 10
-    ): Promise<T> {
-      function wait() {
-        return new Promise(resolve => setTimeout(resolve, 50));
-      }
-
-      for (let i = 0; i < times; i++) {
-        await wait();
-        const value = await predicate();
-        if (value !== undefined) {
-          return value;
-        }
-      }
-
-      throw new Error(
-        `We waited more than ${times} times for a defined value.`
-      );
-    }
-
     return {
       ...store,
       ...fakeUploadResult,
       waitUntilPhase,
-      waitUntilData,
       assertUploadSuccess,
     };
   }
@@ -600,7 +578,6 @@ describe('attemptToPublish', function() {
         getState,
         resolveUpload,
         assertUploadSuccess,
-        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       // Only the last range will be saved in IDB, as an information to display
@@ -649,7 +626,6 @@ describe('attemptToPublish', function() {
         getState,
         resolveUpload,
         assertUploadSuccess,
-        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
@@ -708,7 +684,6 @@ describe('attemptToPublish', function() {
         getState,
         assertUploadSuccess,
         waitUntilPhase,
-        waitUntilData,
       } = setupFakeUploadsWithStore(store);
 
       // This sets up a second upload.
