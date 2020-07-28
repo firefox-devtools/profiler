@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import {
   toggleCheckedSharingOptions,
   attemptToPublish,
-  abortUpload,
   resetUploadState,
 } from '../../../actions/publish';
 import {
@@ -18,6 +17,7 @@ import {
   getHasPreferenceMarkers,
 } from '../../../selectors/profile';
 import {
+  getAbortFunction,
   getCheckedSharingOptions,
   getFilenameString,
   getDownloadSize,
@@ -59,12 +59,12 @@ type StateProps = {|
   +uploadProgressString: string,
   +shouldSanitizeByDefault: boolean,
   +error: mixed,
+  +abortFunction: () => mixed,
 |};
 
 type DispatchProps = {|
   +toggleCheckedSharingOptions: typeof toggleCheckedSharingOptions,
   +attemptToPublish: typeof attemptToPublish,
-  +abortUpload: typeof abortUpload,
   +resetUploadState: typeof resetUploadState,
 |};
 
@@ -192,7 +192,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
     const {
       uploadProgress,
       uploadProgressString,
-      abortUpload,
+      abortFunction,
       downloadFileName,
       compressedProfileBlobPromise,
       downloadSizePromise,
@@ -226,7 +226,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           <button
             type="button"
             className="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
-            onClick={abortUpload}
+            onClick={abortFunction}
           >
             Cancel Upload
           </button>
@@ -306,11 +306,11 @@ export const MenuButtonsPublish = explicitConnect<
     uploadProgressString: getUploadProgressString(state),
     error: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
+    abortFunction: getAbortFunction(state),
   }),
   mapDispatchToProps: {
     toggleCheckedSharingOptions,
     attemptToPublish,
-    abortUpload,
     resetUploadState,
   },
   component: MenuButtonsPublishImpl,

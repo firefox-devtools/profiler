@@ -276,7 +276,7 @@ Array [
   Array [
     "fillRect",
     150,
-    48,
+    64,
     199.4,
     15,
   ],
@@ -292,7 +292,7 @@ Array [
     "fillText",
     "A",
     153,
-    59,
+    75,
   ],
   Array [
     "set fillStyle",
@@ -301,7 +301,7 @@ Array [
   Array [
     "fillRect",
     150,
-    64,
+    80,
     199.4,
     15,
   ],
@@ -317,7 +317,7 @@ Array [
     "fillText",
     "B",
     153,
-    75,
+    91,
   ],
   Array [
     "set fillStyle",
@@ -326,7 +326,7 @@ Array [
   Array [
     "fillRect",
     150,
-    80,
+    96,
     133.4,
     15,
   ],
@@ -342,81 +342,6 @@ Array [
     "fillText",
     "C",
     153,
-    91,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff60",
-  ],
-  Array [
-    "fillRect",
-    284,
-    80,
-    65.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "H",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "H",
-    286.3333333333333,
-    91,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    150,
-    96,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "D",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "D",
-    153,
-    107,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    217,
-    96,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "F",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "F",
-    219.66666666666666,
     107,
   ],
   Array [
@@ -432,7 +357,7 @@ Array [
   ],
   Array [
     "measureText",
-    "I",
+    "H",
   ],
   Array [
     "set fillStyle",
@@ -440,7 +365,7 @@ Array [
   ],
   Array [
     "fillText",
-    "I",
+    "H",
     286.3333333333333,
     107,
   ],
@@ -457,7 +382,7 @@ Array [
   ],
   Array [
     "measureText",
-    "E",
+    "D",
   ],
   Array [
     "set fillStyle",
@@ -465,7 +390,7 @@ Array [
   ],
   Array [
     "fillText",
-    "E",
+    "D",
     153,
     123,
   ],
@@ -482,6 +407,81 @@ Array [
   ],
   Array [
     "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    219.66666666666666,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    284,
+    112,
+    65.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    286.3333333333333,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    128,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    153,
+    139,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    217,
+    128,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
     "G",
   ],
   Array [
@@ -492,7 +492,7 @@ Array [
     "fillText",
     "G",
     219.66666666666666,
-    123,
+    139,
   ],
   Array [
     "set fillStyle",

@@ -10,7 +10,7 @@ import Timeline from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -93,7 +93,7 @@ describe('ActiveTabTimeline', function() {
       if (track.type !== 'tab') {
         throw new Error('Expected a tab track.');
       }
-      const threadIndex = track.threadIndex;
+      const threadIndex = track.mainThreadIndex;
 
       if (threadIndex !== null) {
         // The assertions are simpler if the GeckoMain tab thread is not already selected.

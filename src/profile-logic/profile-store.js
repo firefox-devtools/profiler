@@ -12,12 +12,21 @@ const PUBLISHING_ENDPOINT = `${PROFILER_SERVER_ORIGIN}/compressed-store`;
 
 const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
 
+// This error is used when we get an "abort" event. This happens when we call
+// "abort" expliitely, and so when the user actually cancels the upload.
+// We use a specific class error to distinguish this case from other cases from
+// the caller function.
+// It's exported because we use it in tests.
+export class UploadAbortedError extends Error {
+  name = 'UploadAbortedError';
+}
+
 export function uploadBinaryProfileData(): * {
   const xhr = new XMLHttpRequest();
   let isAborted = false;
 
   return {
-    abortFunction: (): void => {
+    abortUpload: (): void => {
       isAborted = true;
       xhr.abort();
     },
@@ -27,7 +36,7 @@ export function uploadBinaryProfileData(): * {
     ): Promise<string> =>
       new Promise((resolve, reject) => {
         if (isAborted) {
-          reject(new Error('The request was already aborted.'));
+          reject(new UploadAbortedError('The request was already aborted.'));
           return;
         }
 
@@ -69,6 +78,12 @@ export function uploadBinaryProfileData(): * {
             errorMessage += ` The error response was: ${xhr.statusText}`;
           }
           reject(new Error(errorMessage));
+        };
+
+        xhr.onabort = () => {
+          reject(
+            new UploadAbortedError('The error has been aborted by the user.')
+          );
         };
 
         xhr.upload.onprogress = e => {

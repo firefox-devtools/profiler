@@ -529,11 +529,59 @@ describe('selectors/getCombinedTimingRows', function() {
         bucket: 'None',
         length: 1,
       },
+      {
+        bucket: 'None',
+        end: [4],
+        index: [3],
+        label: ['componentC'],
+        length: 1,
+        name: 'A',
+        start: [3],
+      },
       { start: [0], end: [3], callNode: [0], length: 1 },
       { start: [0], end: [3], callNode: [1], length: 1 },
       { start: [0, 2], end: [2, 3], callNode: [2, 7], length: 2 },
       { start: [0, 1, 2], end: [1, 2, 3], callNode: [3, 5, 8], length: 3 },
       { start: [0, 1], end: [1, 2], callNode: [4, 6], length: 2 },
     ]);
+  });
+});
+
+describe('selectors/getThreadRange', function() {
+  it('should compute a thread range based on the number of samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
+  });
+
+  it('should compute a thread range based on markers when no samples are present', function() {
+    const { getState } = storeWithProfile(
+      getProfileWithMarkers([['Marker', 10, 20]])
+    );
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 10,
+      end: 21,
+    });
+  });
+
+  it('ignores markers when there are samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    {
+      const markersProfile = getProfileWithMarkers([['Marker', 10, 20]]);
+      // Replace the markers on the samples profile.
+      profile.threads[0].markers = markersProfile.threads[0].markers;
+    }
+
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
   });
 });

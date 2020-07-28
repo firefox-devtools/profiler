@@ -14,7 +14,7 @@ import {
 } from '../../components/timeline/Markers';
 import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
@@ -159,33 +159,21 @@ describe('TimelineMarkers', function() {
     const { container, flushDrawLog } = setupWithMarkers(
       { rangeStart: 0, rangeEnd: 15 },
       [
-        ['Marker A', 0, { startTime: 0, endTime: 10 }],
-        ['Marker B', 0, { startTime: 0, endTime: 10 }],
-        ['Marker C', 5, { startTime: 5, endTime: 15 }],
-        [
-          'BHR-detected hang',
-          5,
-          { type: 'BHR-detected hang', startTime: 2, endTime: 13 },
-        ],
+        ['Marker A', 0, 10],
+        ['Marker B', 0, 10],
+        ['Marker C', 5, 15],
+        ['BHR-detected hang', 2, 13, { type: 'BHR-detected hang' }],
         [
           'LongTask',
+          2,
           6,
-          {
-            type: 'MainThreadLongTask',
-            category: 'LongTask',
-            startTime: 2,
-            endTime: 6,
-          },
+          { type: 'MainThreadLongTask', category: 'LongTask' },
         ],
         [
           'LongIdleTask',
+          6,
           8,
-          {
-            type: 'MainThreadLongTask',
-            category: 'LongTask',
-            startTime: 6,
-            endTime: 8,
-          },
+          { type: 'MainThreadLongTask', category: 'LongTask' },
         ],
       ]
     );
@@ -205,10 +193,10 @@ describe('TimelineMarkers', function() {
       { rangeStart: 0, rangeEnd: 15000 },
       [
         // 2 very close dot markers. They shouldn't be drawn both together.
-        ['Marker A', 5000, null],
-        ['Marker B', 5001, null],
+        ['Marker A', 5000],
+        ['Marker B', 5001],
         // This is a longer marker starting at the same place, it should always be drawn
-        ['Marker C', 5001, { startTime: 5001, endTime: 7000 }],
+        ['Marker C', 5001, 7000],
       ]
     );
 
@@ -244,7 +232,7 @@ describe('TimelineMarkers', function() {
     it('when right clicking on a marker', () => {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
-        [['Marker A', 0, { startTime: 0, endTime: 10 }]]
+        [['Marker A', 0, 10]]
       );
 
       // The "Marker A" marker is drawn from 0,0 to 5,200.
@@ -268,8 +256,8 @@ describe('TimelineMarkers', function() {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
         [
-          ['Marker A', 0, { startTime: 0, endTime: 3 }],
-          ['Marker B', 0, { startTime: 6, endTime: 10 }],
+          ['Marker A', 0, 3],
+          ['Marker B', 6, 10],
         ]
       );
 
@@ -299,8 +287,8 @@ describe('TimelineMarkers', function() {
         flushDrawLog,
         getContextMenu,
       } = setupWithMarkers({ rangeStart: 0, rangeEnd: 10 }, [
-        ['Marker A', 0, { startTime: 0, endTime: 3 }],
-        ['Marker B', 0, { startTime: 6, endTime: 10 }],
+        ['Marker A', 0, 3],
+        ['Marker B', 6, 10],
       ]);
 
       // The "Marker A" marker is drawn from 0,0 to 5,60.

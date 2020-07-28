@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { BlobUrlLink } from '../../components/shared/BlobUrlLink';
 import { ensureExists } from '../../utils/flow';
 

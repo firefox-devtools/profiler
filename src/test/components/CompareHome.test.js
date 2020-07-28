@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent, cleanup } from 'react-testing-library';
+import { render, fireEvent, cleanup } from '@testing-library/react';
 
 import CompareHome from '../../components/app/CompareHome';
 import { getProfilesToCompare } from '../../selectors/url-state';

@@ -11,7 +11,7 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots from '../../components/timeline/TrackScreenshots';
@@ -105,8 +105,8 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
 
@@ -129,20 +129,20 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
     expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();
   });
 
   it('is created in the <Timeline /> with a profile with screenshots', function() {
-    const { getByText } = setup(getScreenshotTrackProfile(), <Timeline />);
+    const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
 
-    // The function `getByText` throws already, with a useful Error, if it can't
-    // find the element. But we still use `expect` to keep a "test-like"
+    // The function `getAllByText` throws already if none are found, with a useful Error,
+    // if it can't find any elements. But we still use `expect` to keep a "test-like"
     // assertion, even if it's useless.
-    expect(getByText('Screenshots')).toBeTruthy();
+    expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
   });
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function() {

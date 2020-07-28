@@ -6,7 +6,7 @@
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
 import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, wait } from 'react-testing-library';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -20,9 +20,12 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
-// Mocking SymbolStoreDB
+// We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 jest.mock('../../profile-logic/profile-store');
+const { UploadAbortedError } = jest.requireActual(
+  '../../profile-logic/profile-store'
+);
 
 // Mocking sha1
 import sha1 from '../../utils/sha1';
@@ -47,10 +50,23 @@ describe('app/MenuButtons', function() {
       rejectUpload = reject;
     });
 
+    promise.catch(() => {
+      // Node complains if we don't handle a promise/catch, and this one may reject
+      // before it's properly handled. Catch it here so that Node doesn't complain.
+      // This won't hide problems in our code because the app code "awaits" the
+      // result of startUpload, so any rejection will be handled there.
+    });
+
     // Flow doesn't know uploadBinaryProfileData is a jest mock.
     (uploadBinaryProfileData: any).mockImplementation(
       (() => ({
-        abortFunction: () => {},
+        abortUpload: () => {
+          // In the real implementation, we call xhr.abort, which in turn
+          // triggers an "abort" event on the XHR object, which in turn rejects
+          // the promise with the error UploadAbortedError. So we do just that
+          // here directly, to simulate this.
+          rejectUpload(new UploadAbortedError());
+        },
         startUpload: () => promise,
       }): typeof uploadBinaryProfileData)
     );
@@ -68,11 +84,10 @@ describe('app/MenuButtons', function() {
     const profile = getProfileWithMarkers([
       [
         'PreferenceRead',
+        0,
         1,
         {
           type: 'PreferenceRead',
-          startTime: 0,
-          endTime: 1,
           prefAccessTime: 0,
           prefName: 'testing',
           prefKind: 'testing',
@@ -106,8 +121,15 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { container, getByTestId, getByText, queryByText } = renderResult;
+    const {
+      container,
+      getByTestId,
+      getByText,
+      queryByText,
+      findByText,
+    } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const findPublishButton = () => findByText('Publish…');
     const getErrorButton = () => getByText('Error publishing…');
     const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
@@ -127,6 +149,7 @@ describe('app/MenuButtons', function() {
       store,
       ...renderResult,
       getPanel,
+      findPublishButton,
       getPublishButton,
       getErrorButton,
       getCancelButton,
@@ -209,19 +232,18 @@ describe('app/MenuButtons', function() {
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
 
-    it('can publish, cancel, and then publish again', () => {
+    it('can publish, cancel, and then publish again', async () => {
       const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
+        findPublishButton,
         getCancelButton,
         getPanelForm,
-        resolveUpload,
         clickAndRunTimers,
       } = setup(profile);
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
-      resolveUpload();
 
       // These shouldn't exist anymore.
       expect(() => getPanel()).toThrow();
@@ -229,7 +251,8 @@ describe('app/MenuButtons', function() {
 
       clickAndRunTimers(getCancelButton());
 
-      expect(getPublishButton()).toBeTruthy();
+      // This might be asynchronous, depending on the underlying code.
+      expect(await findPublishButton()).toBeTruthy();
     });
 
     it('matches the snapshot for an error', async () => {
@@ -248,7 +271,7 @@ describe('app/MenuButtons', function() {
       rejectUpload('This is a mock error');
 
       // Wait until the error button is visible.
-      await wait(() => {
+      await waitFor(() => {
         getErrorButton();
       });
 
@@ -297,8 +320,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       duration: 20,
     };
 
-    const { container, getByValue } = setup(profile);
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const { container, getByText } = setup(profile);
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -316,9 +339,9 @@ describe('<MenuButtonsMetaInfo>', function() {
       }
     }
 
-    const { getByValue, container } = setup(profile);
+    const { getByText, container } = setup(profile);
 
-    const metaInfoButton = getByValue('Firefox 48 – macOS 10.11');
+    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
     fireEvent.click(metaInfoButton);
     jest.runAllTimers();
 
@@ -338,8 +361,8 @@ describe('<MenuButtonsMetaInfo>', function() {
       const setupResult = setup(profile, config.symbolicationStatus);
 
       // Open up the arrow panel for the test.
-      const { getByValue } = setupResult;
-      fireEvent.click(getByValue('Firefox'));
+      const { getByText } = setupResult;
+      fireEvent.click(getByText('Firefox'));
       jest.runAllTimers();
 
       return setupResult;

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import StackSettings from '../../components/shared/StackSettings';
 import { storeWithProfile } from '../fixtures/stores';

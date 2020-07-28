@@ -12,6 +12,8 @@
 }
 
 .sidebar-contents-wrapper {
+  /* Allow absolute positioning that is dependent of the scrolling. */
+  position: relative;
   line-height: 1.5;
 }
 

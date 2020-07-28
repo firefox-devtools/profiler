@@ -19,6 +19,9 @@ import type {
   Marker,
   MarkerTiming,
   MarkerTimingAndBuckets,
+  DerivedMarkerInfo,
+  IndexedArray,
+  IndexIntoRawMarkerTable,
   Selector,
   $ReturnType,
 } from 'firefox-profiler/types';
@@ -82,13 +85,25 @@ export function getMarkerSelectorsPerThread(
   /* This selector exposes the result of the processing of the raw marker table
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
-  const _getDerivedMarkers: Selector<Marker[]> = createSelector(
+  const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
     getProcessedRawMarkerTable,
     threadSelectors.getStringTable,
     _getThreadId,
     threadSelectors.getThreadRange,
     ProfileSelectors.getIPCMarkerCorrelations,
     MarkerData.deriveMarkersFromRawMarkerTable
+  );
+
+  const _getDerivedMarkers: Selector<Marker[]> = createSelector(
+    getDerivedMarkerInfo,
+    ({ markers }) => markers
+  );
+
+  const getMarkerIndexToRawMarkerIndexes: Selector<
+    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>
+  > = createSelector(
+    getDerivedMarkerInfo,
+    ({ markerIndexToRawMarkerIndexes }) => markerIndexToRawMarkerIndexes
   );
 
   /**
@@ -490,6 +505,8 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getJankMarkerIndexesForHeader,
     getProcessedRawMarkerTable,
+    getDerivedMarkerInfo,
+    getMarkerIndexToRawMarkerIndexes,
     getFullMarkerListIndexes,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,

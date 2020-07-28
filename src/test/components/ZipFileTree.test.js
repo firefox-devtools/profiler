@@ -6,7 +6,7 @@
 import * as React from 'react';
 import ZipFileViewer from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';

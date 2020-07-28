@@ -12,7 +12,7 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';

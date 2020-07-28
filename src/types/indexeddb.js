@@ -97,7 +97,12 @@ export interface IDBObjectStore<K, V> {
   delete(key: K): IDBRequest<void>;
   deleteIndex(indexName: string): void;
   get(key: K): IDBRequest<V>;
+  getAll(query?: K | IDBKeyRange<K> | null, count?: number): IDBRequest<V[]>;
   getKey(key: K | IDBKeyRange<K>): IDBRequest<K>;
+  getAllKeys(
+    query?: K | IDBKeyRange<K> | null,
+    count?: number
+  ): IDBRequest<K[]>;
   index<L>(indexName: string): IDBIndex<K, L, V>;
   indexNames: string[];
   name: string;
@@ -117,7 +122,12 @@ export interface IDBObjectStore<K, V> {
 export interface IDBIndex<K, L, V> extends EventTarget {
   count(key?: L | IDBKeyRange<L>): IDBRequest<number>;
   get(key: L | IDBKeyRange<L>): IDBRequest<V>;
+  getAll(query?: L | IDBKeyRange<L> | null, count?: number): IDBRequest<V[]>;
   getKey(key: L | IDBKeyRange<L>): IDBRequest<K>;
+  getAllKeys(
+    query?: L | IDBKeyRange<L> | null,
+    count?: number
+  ): IDBRequest<K[]>;
   openCursor(
     range?: L | IDBKeyRange<L>,
     direction?: IDBDirection
