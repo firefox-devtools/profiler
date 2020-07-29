@@ -1373,12 +1373,16 @@ const _upgraders = {
               newEndTime = null;
               phase = INTERVAL_START;
             } else {
+              // OOOPS this `else` should have been `else if (interval == 'end')`,
+              // because interval could be inexistant, and in that case this
+              // should be an instant marker.
+              // We're fixing this in the upgrader for v31.
               newStartTime = null;
               newEndTime = time;
               phase = INTERVAL_END;
             }
           } else if (
-            // This could be considered an instant marker, since the startTime and
+            // This could be considered an instant marker, if the startTime and
             // endTime are the same.
             startTime !== endTime &&
             typeof startTime === 'number' &&
@@ -1401,6 +1405,28 @@ const _upgraders = {
         newStartTimes.push(newStartTime);
         newEndTimes.push(newEndTime);
         newPhases.push(phase);
+      }
+    }
+  },
+  [31]: profile => {
+    // The upgrader for 30 messed up markers with type "tracing" but that don't
+    // have an interval. This upgrader fixes them.
+
+    const INSTANT = 0;
+
+    for (const { markers } of profile.threads) {
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (data) {
+          const { type, interval } = data;
+          if (type === 'tracing') {
+            if (interval !== 'start' && interval !== 'end') {
+              markers.phase[i] = INSTANT;
+              markers.startTime[i] = markers.endTime[i];
+              markers.endTime[i] = null;
+            }
+          }
+        }
       }
     }
   },

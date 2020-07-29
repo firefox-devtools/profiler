@@ -138,6 +138,7 @@ describe('upgrading gecko profiles', function() {
     //  - nothing other than what gecko-1.json already tests, but it uses
     //    version 13 so it's easier to modify for future tests
     //  - upgrading pages array and page information inside markers
+    //  - upgrading tracing markers without interval information
     testProfileUpgrading(require('../fixtures/upgrades/gecko-2.json'));
   });
 });
@@ -170,6 +171,7 @@ describe('upgrading processed profiles', function() {
   it('should upgrade processed-3.json all the way to the current version', async function() {
     // This tests:
     //  - Upgrading pages array and page information inside markers
+    //  - Upgrading instant markers
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-3.json')
     );

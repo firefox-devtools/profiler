@@ -980,13 +980,16 @@ const _upgraders = {
                 newStartTime = time;
                 newEndTime = null;
                 phase = INTERVAL_START;
-              } else {
+              } else if (interval === 'end') {
                 newStartTime = null;
                 newEndTime = time;
                 phase = INTERVAL_END;
+              } else {
+                // The interval property could also be inexistant. In that case we
+                // decide this is an instance marker.
               }
             } else if (
-              // This could be considered an instant marker, since the startTime and
+              // This could be considered an instant marker, if the startTime and
               // endTime are the same.
               startTime !== endTime &&
               typeof startTime === 'number' &&
