@@ -14,15 +14,10 @@ import type {
   InnerWindowID,
   Page,
   Thread,
-  ActiveTabGlobalTrack,
-  ActiveTabResourceTrack,
   ScreenshotPayload,
+  ActiveTabTimeline,
+  ActiveTabMainTrack,
 } from 'firefox-profiler/types';
-
-const ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER = {
-  screenshots: 0,
-  tab: 1,
-};
 
 /**
  * Checks whether the tab filtered thread is empty or not.
@@ -63,13 +58,11 @@ export function computeActiveTabTracks(
   profile: Profile,
   relevantPages: Page[],
   state: State
-): {|
-  globalTracks: ActiveTabGlobalTrack[],
-  resourceTracks: ActiveTabResourceTrack[],
-|} {
+): ActiveTabTimeline {
   // Global tracks that are certainly global tracks.
-  const globalTracks: ActiveTabGlobalTrack[] = [];
-  const resourceTracks = [];
+  const mainTrackIndexes = [];
+  const resources = [];
+  const screenshots = [];
   const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
   const innerWindowIDToPageMap = _getInnerWindowIDToPageMap(relevantPages);
 
@@ -87,13 +80,10 @@ export function computeActiveTabTracks(
 
       if (isTopmostThread(thread, topmostInnerWindowIDs)) {
         // This is a topmost thread, add it to global tracks.
-        globalTracks.push({
-          type: 'tab',
-          threadIndex: threadIndex,
-        });
+        mainTrackIndexes.push(threadIndex);
       } else {
         if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-          resourceTracks.push({
+          resources.push({
             type: 'sub-frame',
             threadIndex,
             name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
@@ -105,7 +95,7 @@ export function computeActiveTabTracks(
       // track. Find out if that thread contains the active tab data, and add it
       // as a resource track if it does.
       if (!isTabFilteredThreadEmpty(threadIndex, state)) {
-        resourceTracks.push({
+        resources.push({
           type: 'thread',
           threadIndex,
           name: _getActiveTabResourceName(thread, innerWindowIDToPageMap),
@@ -128,21 +118,19 @@ export function computeActiveTabTracks(
         }
       }
       for (const id of windowIDs) {
-        globalTracks.push({ type: 'screenshots', id, threadIndex });
+        screenshots.push({ type: 'screenshots', id, threadIndex });
       }
     }
   }
 
-  // When adding a new track type, this sort ensures that the newer tracks are added
-  // at the end so that the global track indexes are stable and backwards compatible.
-  globalTracks.sort(
-    // In place sort!
-    (a, b) =>
-      ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER[a.type] -
-      ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER[b.type]
-  );
-
-  return { globalTracks, resourceTracks };
+  const mainTrack: ActiveTabMainTrack = {
+    type: 'tab',
+    // FIXME: We should revert back to full view if we failed to find a track
+    // index for the main track.
+    mainThreadIndex: mainTrackIndexes[0] || 0,
+    threadIndexes: mainTrackIndexes,
+  };
+  return { mainTrack, screenshots, resources };
 }
 
 /**

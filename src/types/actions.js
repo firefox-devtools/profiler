@@ -19,9 +19,8 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
-  ActiveTabGlobalTrack,
   OriginsTimeline,
-  ActiveTabResourceTrack,
+  ActiveTabTimeline,
 } from './profile-derived';
 import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -284,8 +283,7 @@ type ReceiveProfileAction =
   | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
-      +globalTracks: ActiveTabGlobalTrack[],
-      +resourceTracks: ActiveTabResourceTrack[],
+      +activeTabTimeline: ActiveTabTimeline,
       +browsingContextID: BrowsingContextID,
     |}
   | {|
@@ -382,7 +380,7 @@ type UrlStateAction =
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-      +prePublishedState: State,
+      +prePublishedState: State | null,
     |}
   | {|
       +type: 'SET_DATA_SOURCE',
@@ -410,7 +408,6 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_STARTED',
-      +abortFunction: () => void,
     |}
   | {|
       +type: 'UPDATE_UPLOAD_PROGRESS',
@@ -428,6 +425,7 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_COMPRESSION_STARTED',
+      +abortFunction: () => void,
     |}
   | {|
       +type: 'CHANGE_UPLOAD_STATE',

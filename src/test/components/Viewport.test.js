@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {

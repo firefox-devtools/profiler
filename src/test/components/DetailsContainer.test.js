@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 
 import DetailsContainer from '../../components/app/DetailsContainer';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';

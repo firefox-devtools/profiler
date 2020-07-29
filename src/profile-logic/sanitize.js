@@ -24,6 +24,7 @@ import type {
   ThreadIndex,
   RemoveProfileInformation,
   StartEndRange,
+  DerivedMarkerInfo,
 } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
@@ -40,6 +41,7 @@ export type SanitizeProfileResult = {|
  */
 export function sanitizePII(
   profile: Profile,
+  derivedMarkerInfoForAllThreads: DerivedMarkerInfo[],
   maybePIIToBeRemoved: RemoveProfileInformation | null
 ): SanitizeProfileResult {
   if (maybePIIToBeRemoved === null) {
@@ -83,6 +85,7 @@ export function sanitizePII(
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
       const newThread: Thread | null = sanitizeThreadPII(
         thread,
+        derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
         PIIToBeRemoved
       );
@@ -174,6 +177,7 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
  */
 function sanitizeThreadPII(
   thread: Thread,
+  derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation
 ): Thread | null {
@@ -278,6 +282,7 @@ function sanitizeThreadPII(
     // Filter marker table with given range and marker indexes array.
     markerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
       markerTable,
+      derivedMarkerInfo,
       markersToDelete,
       PIIToBeRemoved.shouldFilterToCommittedRange
     ).rawMarkerTable;

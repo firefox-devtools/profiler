@@ -122,7 +122,7 @@ const abortFunction: Reducer<() => void> = (state = noop, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_FAILED':
       return noop;
-    case 'UPLOAD_STARTED':
+    case 'UPLOAD_COMPRESSION_STARTED':
       return action.abortFunction;
     default:
       return state;
@@ -138,6 +138,7 @@ const generation: Reducer<number> = (state = 0, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_ABORTED':
     case 'UPLOAD_FAILED':
+    case 'HIDE_STALE_PROFILE':
       // Increment the generation value when exiting out of the profile uploading.
       return state + 1;
     default:

@@ -19,12 +19,10 @@ import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
 import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import {
-  revertToPrePublishedState,
-  abortUpload,
-} from '../../../actions/publish';
+import { revertToPrePublishedState } from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
 import {
+  getAbortFunction,
   getUploadPhase,
   getHasPrePublishedState,
 } from '../../../selectors/publish';
@@ -59,12 +57,12 @@ type StateProps = {|
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
   +symbolicationStatus: SymbolicationStatus,
+  +abortFunction: () => mixed,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +abortUpload: typeof abortUpload,
   +resymbolicateProfile: typeof resymbolicateProfile,
 |};
 
@@ -77,7 +75,7 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 
   _renderPublishPanel() {
-    const { uploadPhase, dataSource, abortUpload } = this.props;
+    const { uploadPhase, dataSource, abortFunction } = this.props;
 
     const isUploading =
       uploadPhase === 'uploading' || uploadPhase === 'compressing';
@@ -87,7 +85,7 @@ class MenuButtons extends React.PureComponent<Props> {
         <button
           type="button"
           className="buttonWithPanelButton menuButtonsAbortUploadButton"
-          onClick={abortUpload}
+          onClick={abortFunction}
         >
           Cancel Upload
         </button>
@@ -192,11 +190,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     uploadPhase: getUploadPhase(state),
     hasPrePublishedState: getHasPrePublishedState(state),
     symbolicationStatus: getSymbolicationStatus(state),
+    abortFunction: getAbortFunction(state),
   }),
   mapDispatchToProps: {
     dismissNewlyPublished,
     revertToPrePublishedState,
-    abortUpload,
     resymbolicateProfile,
   },
   component: MenuButtons,

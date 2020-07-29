@@ -243,7 +243,7 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
 /**
  * For now only provide a name for a profile if it came from a zip file.
  */
-export const getProfileName: Selector<null | string> = createSelector(
+export const getProfileName: Selector<string> = createSelector(
   getProfileNameFromUrl,
   getPathInZipFileFromUrl,
   (profileName, pathInZipFile) => {

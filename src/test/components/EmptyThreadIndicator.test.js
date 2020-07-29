@@ -7,7 +7,7 @@ jest.mock('react-dom');
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 
 import EmptyThreadIndicator, {
   getIndicatorPositions,

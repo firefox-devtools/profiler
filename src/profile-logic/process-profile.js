@@ -29,7 +29,6 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
-import { convertPhaseTimes } from './convert-markers';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
@@ -65,6 +64,7 @@ import type {
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
+  GeckoMarkers,
   GeckoMarkerStruct,
   GeckoFrameStruct,
   GeckoSampleStruct,
@@ -78,6 +78,7 @@ import type {
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
+  PhaseTimes,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -125,11 +126,26 @@ function _getRealScriptURI(url: string): string {
   return url;
 }
 
-function _sortByField<T: Object>(fieldName: string, geckoTable: T): T {
-  const fieldIndex: number = geckoTable.schema[fieldName];
-  const sortedData: any[] = geckoTable.data.slice(0);
-  sortedData.sort((a, b) => a[fieldIndex] - b[fieldIndex]);
-  return Object.assign({}, geckoTable, { data: sortedData });
+function _sortMarkers(markers: GeckoMarkers): GeckoMarkers {
+  const { startTime, endTime } = markers.schema;
+  const sortedData = markers.data.slice(0);
+  // Sort the markers based on their startTime. If there is no startTime, then use
+  // endtime.
+  sortedData.sort((a, b) => {
+    const aTime: null | Milliseconds = a[endTime] || a[startTime];
+    const bTime: null | Milliseconds = b[endTime] || b[startTime];
+    if (aTime === null) {
+      console.error(a);
+      throw new Error('A marker had null start and end time.');
+    }
+    if (bTime === null) {
+      console.error(b);
+      throw new Error('A marker had null start and end time.');
+    }
+    return aTime - bTime;
+  });
+
+  return Object.assign({}, markers, { data: sortedData });
 }
 
 function _cleanFunctionName(functionName: string): string {
@@ -618,7 +634,12 @@ function _processMarkers(
         case 'JS allocation': {
           // Build up a separate table for the JS allocation data, and do not
           // include it in the marker information.
-          jsAllocations.time.push(geckoPayload.startTime);
+          jsAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'JS Allocations are assumed to have a startTime'
+            )
+          );
           jsAllocations.className.push(geckoPayload.className);
           jsAllocations.typeName.push(geckoPayload.typeName);
           jsAllocations.coarseType.push(geckoPayload.coarseType);
@@ -637,7 +658,12 @@ function _processMarkers(
           }
           // Build up a separate table for the native allocation data, and do not
           // include it in the marker information.
-          inProgressNativeAllocations.time.push(geckoPayload.startTime);
+          inProgressNativeAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'Native Allocations are assumed to have a startTime'
+            )
+          );
           inProgressNativeAllocations.weight.push(geckoPayload.size);
           inProgressNativeAllocations.stack.push(
             _convertPayloadStackToIndex(geckoPayload)
@@ -668,10 +694,15 @@ function _processMarkers(
 
     const payload = _processMarkerPayload(geckoPayload);
     const name = geckoMarkers.name[markerIndex];
-    const time = geckoMarkers.time[markerIndex];
+    const startTime = geckoMarkers.startTime[markerIndex];
+    const endTime = geckoMarkers.endTime[markerIndex];
+    const phase = geckoMarkers.phase[markerIndex];
     const category = geckoMarkers.category[markerIndex];
+
     markers.name.push(name);
-    markers.time.push(time);
+    markers.startTime.push(startTime);
+    markers.endTime.push(endTime);
+    markers.phase.push(phase);
     markers.category.push(category);
     markers.data.push(payload);
     markers.length++;
@@ -711,6 +742,16 @@ function _processMarkers(
   };
 }
 
+function convertPhaseTimes(
+  old_phases: PhaseTimes<Milliseconds>
+): PhaseTimes<Microseconds> {
+  const phases = {};
+  for (const phase in old_phases) {
+    phases[phase] = old_phases[phase] * 1000;
+  }
+  return phases;
+}
+
 /**
  * Process just the marker payload. This converts stacks into causes, and augments
  * the GC information.
@@ -742,8 +783,6 @@ function _processMarkerPayload(
 
       return ({
         type: 'GCSlice',
-        startTime: payload.startTime,
-        endTime: payload.endTime,
         timings: {
           ...partialTimings,
           phase_times: times ? convertPhaseTimes(times) : {},
@@ -764,16 +803,12 @@ function _processMarkerPayload(
           };
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: timings,
           }: GCMajorMarkerPayload);
         }
         case 'aborted':
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: { status: 'aborted' },
           }: GCMajorMarkerPayload);
         default:
@@ -948,7 +983,7 @@ function _processThread(
   );
   const geckoSamples: GeckoSampleStruct = _toStructOfArrays(thread.samples);
   const geckoMarkers: GeckoMarkerStruct = _toStructOfArrays(
-    _sortByField('time', thread.markers)
+    _sortMarkers(thread.markers)
   );
 
   const { libs, pausedRanges, meta } = processProfile;
@@ -1113,9 +1148,13 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
+  function adjustTimeIfNotNull(time: number | null) {
+    return time === null ? time : time + delta;
+  }
   return {
     ...markers,
-    time: markers.time.map(time => time + delta),
+    startTime: markers.startTime.map(adjustTimeIfNotNull),
+    endTime: markers.endTime.map(adjustTimeIfNotNull),
     data: markers.data.map(data => {
       if (!data) {
         return data;

@@ -16,6 +16,12 @@ import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { ensureExists } from '../../../utils/flow';
+import {
+  INTERVAL,
+  INSTANT,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 
 import type {
   Profile,
@@ -32,15 +38,49 @@ import type {
   IPCMarkerPayload,
   UserTimingMarkerPayload,
   Milliseconds,
+  MarkerPhase,
 } from 'firefox-profiler/types';
+import {
+  deriveMarkersFromRawMarkerTable,
+  IPCMarkerCorrelations,
+} from '../../../profile-logic/marker-data';
+import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
 type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
+
+// These markers can create an Instant or a complete Interval marker, depending
+// on if an end time is passed in. The definition uses a union, becaus as far
+// as I can tell, Flow doesn't support multiple arity tuples.
 export type TestDefinedMarkers = Array<
-  [MarkerName, MarkerTime, MarkerPayload | MockPayload]
+  // Instant marker:
+  | [MarkerName, MarkerTime]
+  // No payload:
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null // end time
+    ]
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null, // end time
+      MarkerPayload | MockPayload
+    ]
 >;
+
+// This type is used when needing to create a specific RawMarkerTable.
+export type TestDefinedRawMarker = {|
+  +name?: string,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
+  +category?: IndexIntoCategoryList,
+  +data?: MarkerPayload,
+|};
+
 export type TestDefinedJsTracerEvent = [
   // Event name:
   string,
@@ -68,14 +108,32 @@ function _refineMockPayload(
   ) {
     return {
       type: 'DummyForTests',
-      endTime: payload.endTime,
-      startTime: payload.startTime,
     };
   }
   // There is no way to refine the payload type to just the { startTime, endTime }
   // mock marker. So check for those conditions above, and coerce the final result
   // into a MarkerPayload using the function signature.
   return (payload: any);
+}
+
+export function addRawMarkersToThread(
+  thread: Thread,
+  markers: TestDefinedRawMarker[]
+) {
+  const stringTable = thread.stringTable;
+  const markersTable = thread.markers;
+
+  for (const { name, startTime, endTime, phase, category, data } of markers) {
+    markersTable.name.push(
+      stringTable.indexForString(name || 'TestDefinedMarker')
+    );
+    markersTable.phase.push(phase);
+    markersTable.startTime.push(startTime);
+    markersTable.endTime.push(endTime);
+    markersTable.data.push(data ? _refineMockPayload(data) : null);
+    markersTable.category.push(category || 0);
+    markersTable.length++;
+  }
 }
 
 export function addMarkersToThreadWithCorrespondingSamples(
@@ -85,10 +143,25 @@ export function addMarkersToThreadWithCorrespondingSamples(
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
 
-  markers.forEach(([name, time, data]) => {
+  markers.forEach(tuple => {
+    const name = tuple[0];
+    const startTime = tuple[1];
+    // Flow doesn't support variadic tuple types.
+    const maybeEndTime = (tuple: any)[2] || null;
+    const maybeData = (tuple: any)[3] || null;
+
     markersTable.name.push(stringTable.indexForString(name));
-    markersTable.time.push(time);
-    markersTable.data.push(_refineMockPayload(data));
+    const payload = _refineMockPayload(maybeData);
+    if (maybeEndTime === null) {
+      markersTable.phase.push(INSTANT);
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(null);
+    } else {
+      markersTable.phase.push(INTERVAL);
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(maybeEndTime);
+    }
+    markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;
   });
@@ -100,18 +173,117 @@ export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   return thread;
 }
 
+export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+  const thread = getEmptyThread();
+  addRawMarkersToThread(thread, markers);
+  return thread;
+}
+
+/**
+ * This can be a little annoying to derive with all of the dependencies,
+ * so provide an easy interface to do so here.
+ */
+export function getTestFriendlyDerivedMarkerInfo(thread: Thread) {
+  return deriveMarkersFromRawMarkerTable(
+    thread.markers,
+    thread.stringTable,
+    thread.tid || 0,
+    getTimeRangeForThread(thread, 1),
+    new IPCMarkerCorrelations()
+  );
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeStartMarker(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INTERVAL_START,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeEndMarker(
+  name: string,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime: null,
+    endTime,
+    phase: INTERVAL_END,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeInstantMarker(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INSTANT,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeIntervalMarker(
+  name: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime,
+    phase: INTERVAL,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeCompositorScreenshot(
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    ...makeInstantMarker('CompositorScreenshot', startTime),
+    data: {
+      type: 'CompositorScreenshot',
+      url: 0,
+      windowID: '',
+      windowWidth: 100,
+      windowHeight: 100,
+    },
+  };
+}
+
 export function getUserTiming(
   name: string,
   startTime: number,
   duration: number
 ) {
+  const endTime = startTime + duration;
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime: startTime + duration,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),
@@ -143,10 +315,9 @@ export function getMarkerTableProfile() {
       [
         'UserTiming',
         12.5,
+        12.5,
         {
           type: 'UserTiming',
-          startTime: 12.5,
-          endTime: 12.5,
           name: 'foobar',
           entryType: 'mark',
         },
@@ -154,6 +325,7 @@ export function getMarkerTableProfile() {
       [
         'NotifyDidPaint',
         14.5,
+        null,
         {
           type: 'tracing',
           category: 'Paint',
@@ -163,15 +335,15 @@ export function getMarkerTableProfile() {
       [
         'setTimeout',
         165.87091900000001,
+        165.871503,
         {
           type: 'Text',
-          startTime: 165.87091900000001,
-          endTime: 165.871503,
           name: '5.5',
         },
       ],
       [
         'IPC',
+        120,
         120,
         {
           type: 'IPC',
@@ -189,6 +361,7 @@ export function getMarkerTableProfile() {
       [
         'LogMessages',
         170,
+        null,
         {
           type: 'Log',
           name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
@@ -684,10 +857,10 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   const startPayload: NetworkPayload = {
     type: 'Network',
     id,
-    pri: 0,
-    status: 'STATUS_START',
     startTime,
     endTime: fetchStart,
+    pri: 0,
+    status: 'STATUS_START',
     URI: uri,
   };
 
@@ -701,10 +874,8 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   };
 
   return [
-    // Note that the "time" of network markers is generally close to the
-    // payload's endTime. We don't use it at all in our business logic though.
-    [name, startPayload.endTime, startPayload],
-    [name, stopPayload.endTime, stopPayload],
+    [name, startTime, fetchStart, startPayload],
+    [name, fetchStart, endTime, stopPayload],
   ];
 }
 
@@ -757,36 +928,22 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'Load',
       5,
       ({
         ...loadPayloadBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
-    [
-      'DOMContentLoaded',
-      6,
-      ({
-        ...domContentLoadedBase,
         interval: 'start',
       }: NavigationMarkerPayload),
     ],
+    ['TTI', 6],
+    ['Navigation::Start', 7],
+    ['Contentful paint at something', 8],
     [
       'DOMContentLoaded',
+      6,
       7,
       ({
         ...domContentLoadedBase,
-        interval: 'end',
+        interval: 'start',
       }: NavigationMarkerPayload),
     ],
   ]);
@@ -806,7 +963,9 @@ type IPCMarkersOptions = {|
   sync: boolean,
 |};
 
-function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
+function _getIPCMarkers(
+  options: $Shape<IPCMarkersOptions> = {}
+): TestDefinedMarkers {
   const payload: IPCMarkerPayload = {
     type: 'IPC',
     startTime: 0,
@@ -821,7 +980,17 @@ function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
     ...options,
   };
 
-  return [['IPC', payload.endTime, payload]];
+  return [
+    [
+      'IPC',
+      options.startTime || 0,
+      ensureExists(
+        payload.endTime,
+        'Expected to find an endTime on the IPC marker'
+      ),
+      payload,
+    ],
+  ];
 }
 
 export function getIPCTrackProfile() {
@@ -843,6 +1012,7 @@ export function getScreenshotTrackProfile() {
       .map((_, i) => [
         'CompositorScreenshot',
         i,
+        null,
         {
           type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.

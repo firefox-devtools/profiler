@@ -405,7 +405,7 @@ export function selectActiveTabTrack(
         // Go through each type, and determine the selected slug and thread index.
         switch (globalTrack.type) {
           case 'tab': {
-            selectedThreadIndex = globalTrack.threadIndex;
+            selectedThreadIndex = globalTrack.mainThreadIndex;
             // Ensure a relevant thread-based tab is used.
             if (selectedTab === 'network-chart') {
               selectedTab = getLastVisibleThreadTabSlug(getState());

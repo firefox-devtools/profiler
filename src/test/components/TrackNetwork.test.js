@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, getByTestId, fireEvent } from 'react-testing-library';
+import { render, getByTestId, fireEvent } from '@testing-library/react';
 
 import TrackNetwork from '../../components/timeline/TrackNetwork';
 import {

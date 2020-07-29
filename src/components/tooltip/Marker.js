@@ -808,14 +808,14 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
-            <div className="tooltipTiming">
-              {/* we don't know the duration if the marker is incomplete */}
-              {!marker.incomplete
-                ? marker.dur
-                  ? formatTimestamp(marker.dur, 3, 1)
-                  : '—'
-                : 'unknown duration'}
-            </div>
+            {marker.end === null ? null : (
+              <div className="tooltipTiming">
+                {/* we don't know the duration if the marker is incomplete */}
+                {!marker.incomplete
+                  ? formatTimestamp(marker.end - marker.start, 3, 1)
+                  : 'unknown duration'}
+              </div>
+            )}
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
           {threadDetail || url ? (

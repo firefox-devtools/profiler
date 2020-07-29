@@ -3,21 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { stripIndent } from 'common-tags';
+
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
 import {
-  getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
   getRemoveProfileInformation,
   getPrePublishedState,
 } from '../selectors/publish';
-import { getDataSource } from '../selectors/url-state';
+import {
+  getDataSource,
+  getProfileName,
+  getUrlPredictor,
+} from '../selectors/url-state';
+import {
+  getProfile,
+  getZeroAt,
+  getCommittedRange,
+  getProfileFilterPageData,
+} from '../selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
 import { extractProfileTokenFromJwt } from '../utils/jwt';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
+import { storeProfileData } from '../app-logic/published-profiles-store';
 
 import type {
   Action,
@@ -37,19 +49,19 @@ export function toggleCheckedSharingOptions(
   };
 }
 
-export function uploadCompressionStarted(): Action {
+export function uploadCompressionStarted(abortFunction: () => void): Action {
   return {
     type: 'UPLOAD_COMPRESSION_STARTED',
+    abortFunction,
   };
 }
 
 /**
  * Start uploading the profile, but save an abort function to be able to cancel it.
  */
-export function uploadStarted(abortFunction: () => void): Action {
+export function uploadStarted(): Action {
   return {
     type: 'UPLOAD_STARTED',
-    abortFunction,
   };
 }
 
@@ -69,6 +81,113 @@ export function updateUploadProgress(uploadProgress: number): Action {
  */
 export function uploadFailed(error: mixed): Action {
   return { type: 'UPLOAD_FAILED', error };
+}
+
+// This function stores information about the published profile, depending on
+// various states. Especially it handles the case that we sanitized part of the
+// profile. The sanitized information is passed along because it can be costly
+// to rerun in case the selectors have been invalidated.
+// Note that the returned promise won't ever be rejected, all errors are handled
+// here.
+async function storeJustPublishedProfileData(
+  profileToken: string,
+  jwtToken: string | null,
+  sanitizedInformation,
+  prepublishedState: State
+): Promise<void> {
+  const zeroAt = getZeroAt(prepublishedState);
+  const adjustRange = range => ({
+    start: range.start - zeroAt,
+    end: range.end - zeroAt,
+  });
+
+  // The url predictor returns the URL that would be serialized out of the state
+  // resulting of the actions passed in argument.
+  // We need this here because the action of storing the profile data in the DB
+  // happens before the sanitization really happens in the main state, so we
+  // need to simulate it.
+  const urlPredictor = getUrlPredictor(prepublishedState);
+  let predictedUrl;
+
+  const removeProfileInformation = getRemoveProfileInformation(
+    prepublishedState
+  );
+  if (removeProfileInformation) {
+    // In case you wonder, committedRanges is either an empty array (if the
+    // range was sanitized) or `null` (otherwise).
+    const { committedRanges, oldThreadIndexToNew } = sanitizedInformation;
+
+    // Predicts the URL we'll have after local sanitization.
+    predictedUrl = urlPredictor(
+      profileSanitized(
+        profileToken,
+        committedRanges,
+        oldThreadIndexToNew,
+        null /* prepublished State */
+      )
+    );
+  } else {
+    // Predicts the URL we'll have after the process is finished.
+    predictedUrl = urlPredictor(
+      profilePublished(profileToken, null /* prepublished State */)
+    );
+  }
+
+  const profileMeta = getProfile(prepublishedState).meta;
+  const profileFilterPageData = getProfileFilterPageData(prepublishedState);
+
+  try {
+    await storeProfileData({
+      profileToken,
+      jwtToken,
+      publishedDate: new Date(),
+      name: getProfileName(prepublishedState),
+      originHostname: profileFilterPageData
+        ? profileFilterPageData.hostname
+        : null,
+      preset: null, // This is unused for now.
+      meta: {
+        // We don't put the full meta object, but only what we need, so that we
+        // won't have unexpected compatibility problems in the future, if the meta
+        // object changes. By being explicit we make sure this will be handled.
+        product: profileMeta.product,
+        abi: profileMeta.abi,
+        platform: profileMeta.platform,
+        toolkit: profileMeta.toolkit,
+        misc: profileMeta.misc,
+        oscpu: profileMeta.oscpu,
+        updateChannel: profileMeta.updateChannel,
+        appBuildID: profileMeta.appBuildID,
+      },
+      urlPath: predictedUrl,
+      publishedRange:
+        removeProfileInformation &&
+        removeProfileInformation.shouldFilterToCommittedRange
+          ? adjustRange(removeProfileInformation.shouldFilterToCommittedRange)
+          : adjustRange(getCommittedRange(prepublishedState)),
+    });
+  } catch (e) {
+    // In the future we'll probably want to show a warning somewhere in the
+    // UI (see issue #2670). But for now we'll just display messages to the
+    // console.
+    if (e.name === 'InvalidStateError') {
+      // It's very likely we are in private mode, so let's catch and ignore it.
+      // We can remove this check once Firefox stops erroring,
+      // see https://bugzilla.mozilla.org/show_bug.cgi?id=1639542
+      console.error(
+        stripIndent`
+          A DOMException 'InvalidStateError' was thrown when storing the profile data to a local indexedDB.
+          Are you in private mode?
+          We'll ignore the error, but you won't be able to act on this profile's data in the future.
+        `
+      );
+    } else {
+      console.error(
+        'An error was thrown while storing the profile data to a local indexedDB.',
+        e
+      );
+    }
+  }
 }
 
 /**
@@ -96,23 +215,34 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
-      const uploadGeneration = getUploadGeneration(getState());
+      const uploadGeneration = getUploadGeneration(prePublishedState);
 
-      dispatch(uploadCompressionStarted());
-      const gzipData: Uint8Array = await getSanitizedProfileData(getState());
+      // Create an abort function before the first async call, but we won't
+      // start the upload until much later.
+      const { abortUpload, startUpload } = uploadBinaryProfileData();
+      const abortfunction = () => {
+        // We dispatch the action right away, so that the UI is updated.
+        // Otherwise if the user pressed "Cancel" during a long process, like
+        // the compression, we wouldn't get a feedback until the end.
+        // Later on the promise from `startUpload` will get rejected too, and we
+        // handle this in the `catch` block.
+        dispatch({ type: 'UPLOAD_ABORTED' });
+        abortUpload();
+      };
+      dispatch(uploadCompressionStarted(abortfunction));
+
+      const sanitizedInformation = getSanitizedProfile(prePublishedState);
+      const gzipData: Uint8Array = await getSanitizedProfileData(
+        prePublishedState
+      );
 
       // The previous line was async, check to make sure that this request is still valid.
+      // The upload could have been aborted while we were compressing the data.
       if (uploadGeneration !== getUploadGeneration(getState())) {
         return false;
       }
 
-      const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(uploadStarted(abortFunction));
-
-      if (uploadGeneration !== getUploadGeneration(getState())) {
-        // The upload could have been aborted while we were compressing the data.
-        return false;
-      }
+      dispatch(uploadStarted());
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
@@ -122,18 +252,34 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       const hash = extractProfileTokenFromJwt(hashOrToken);
 
-      // The previous line was async, check to make sure that this request is still valid.
+      // Because we want to store the published profile even when the upload
+      // generation changed, we store the data here, before the state is fully
+      // updated, and we'll have to predict the state inside this function.
+      // Note that this function is asynchronous, we don't await it on purpose.
+      // We catch all errors in this function.
+      storeJustPublishedProfileData(
+        hash,
+        hashOrToken === hash ? null : hashOrToken,
+        sanitizedInformation,
+        prePublishedState
+      );
+
+      // The previous lines were async, check to make sure that this request is still valid.
+      // Make sure that the generation is incremented again when there's an
+      // asynchronous operation later on, so that this works well as a guard.
       if (uploadGeneration !== getUploadGeneration(getState())) {
         return false;
       }
 
-      const removeProfileInformation = getRemoveProfileInformation(getState());
+      const removeProfileInformation = getRemoveProfileInformation(
+        prePublishedState
+      );
       if (removeProfileInformation) {
         const {
           committedRanges,
           oldThreadIndexToNew,
           profile,
-        } = getSanitizedProfile(getState());
+        } = sanitizedInformation;
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -162,7 +308,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             // Only include the pre-published state if we want to be able to revert
             // the profile. If we are viewing from-addon, then it's only a single
             // profile.
-            getDataSource(getState()) === 'from-addon'
+            getDataSource(prePublishedState) === 'from-addon'
               ? null
               : prePublishedState
           )
@@ -175,32 +321,25 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         eventAction: 'succeeded',
       });
     } catch (error) {
-      dispatch(uploadFailed(error));
-      sendAnalytics({
-        hitType: 'event',
-        eventCategory: 'profile upload',
-        eventAction: 'failed',
-      });
+      if (error.name === 'UploadAbortedError') {
+        // We already dispatched an action in the augmentedAbortFunction above,
+        // so we just handle analytics here.
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'aborted',
+        });
+      } else {
+        dispatch(uploadFailed(error));
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
+      }
       return false;
     }
     return true;
-  };
-}
-
-/**
- * Abort the attempt to publish.
- */
-export function abortUpload(): ThunkAction<Promise<void>> {
-  return async (dispatch, getState) => {
-    const abort = getAbortFunction(getState());
-    abort();
-    dispatch({ type: 'UPLOAD_ABORTED' });
-
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'aborted',
-    });
   };
 }
 
@@ -218,7 +357,7 @@ export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-  prePublishedState: State
+  prePublishedState: State | null
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_PUBLISHED',

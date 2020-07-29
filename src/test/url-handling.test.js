@@ -444,7 +444,8 @@ describe('showTabOnly', function() {
     expect(globalTracks).toEqual([
       {
         type: 'tab',
-        threadIndex: 0,
+        mainThreadIndex: 0,
+        threadIndexes: [0],
       },
     ]);
     // TODO: Resource track type will be changed soon.
@@ -651,6 +652,14 @@ describe('committed ranges', function() {
 
       expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
         { start: -1000, end: 1000 },
+      ]);
+    });
+
+    it('supports zero start values', () => {
+      const { getState } = setup([{ start: 0, end: 1000 }]);
+
+      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 1000 },
       ]);
     });
   });
@@ -1020,6 +1029,18 @@ describe('url upgrading', function() {
         { start: 245, end: 18470 },
         { start: 1451, end: 1453 },
       ]);
+    });
+
+    it('supports ranges that start at the zero timestamp too', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=0.0000_0.2772',
+        v: 4,
+      });
+
+      const committedRanges = urlStateReducers.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 0, end: 278 }]);
     });
 
     it('is permissive with invalid input', () => {
