@@ -12,15 +12,12 @@ import {
 } from '../../app-logic/constants';
 
 import type { ThreadIndex } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackEventDelay.css';
 
-type OwnProps = {|
+type Props = {|
   +threadIndex: ThreadIndex,
 |};
-
-type Props = ConnectedProps<OwnProps, {||}, {||}>;
 
 export class TrackEventDelay extends React.PureComponent<Props, {||}> {
   render() {

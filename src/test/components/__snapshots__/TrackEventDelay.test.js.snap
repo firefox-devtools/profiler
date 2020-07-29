@@ -832,7 +832,7 @@ Array [
 ]
 `;
 
-exports[`TrackEventDelay matches the component snapshot 1`] = `
+exports[`TrackEventDelay matches the component snapshot when event delay tracks are disabled 1`] = `
 <div
   class="timelineTrackEventDelay"
   style="height: 40px; --graph-height: 40px; --markers-height: 0px;"

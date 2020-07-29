@@ -259,10 +259,10 @@ export function enableEventDelayTracks(): ThunkAction<void> {
       undefined
     ) {
       // Return early if the profile doesn't have eventDelay values.
-      console.error(
-        oneLine`Tried to enable the event delay tracks, but this profile does
-        not have eventDelay values. It is likely an older profile.`
-      );
+      console.error(oneLine`
+        Tried to enable the event delay tracks, but this profile does
+        not have eventDelay values. It is likely an older profile.
+      `);
       return;
     }
 

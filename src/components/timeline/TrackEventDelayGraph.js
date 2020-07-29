@@ -96,7 +96,7 @@ class TrackEventDelayCanvas extends React.PureComponent<CanvasProps> {
       // Draw the chart.
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = 'rgba(255, 0, 57, 0.7)'; // Red 50 with transparency.
-      ctx.fillStyle = 'rgba(255, 0, 57, 0.3)'; // Red 50 with transparency.
+      ctx.fillStyle = 'rgba(255, 0, 57, 0.3)'; // Red 50 with more transparency.
       ctx.beginPath();
 
       // The x and y are used after the loop.

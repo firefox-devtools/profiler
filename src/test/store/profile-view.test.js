@@ -17,6 +17,7 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
   addActiveTabInformationToProfile,
+  getProfileWithEventDelays,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -185,14 +186,8 @@ describe('getJankMarkersForHeader', function() {
       .map(getMarker);
   }
 
-  function setupWithEventDelay({ sampleCount, eventDelay }) {
-    const { profile } = getProfileFromTextSamples(
-      Array(sampleCount)
-        .fill('A')
-        .join('  ')
-    );
-    delete profile.threads[0].samples.responsiveness;
-    profile.threads[0].samples.eventDelay = eventDelay;
+  function setupWithEventDelay(eventDelay) {
+    const profile = getProfileWithEventDelays(eventDelay);
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
@@ -239,12 +234,10 @@ describe('getJankMarkersForHeader', function() {
     const breakingPoint = 50;
     // We need to fill the samples before, because the algorithm looks at the
     // later event delay values and determines the previous event delays from them.
+    // If we don't fill them enough, processing can fail to create that triangle shape.
     const eventDelay = Array(50).fill(0);
     eventDelay.push(5, 10, 15, 25, 30, 40, breakingPoint, 1);
-    const jankInstances = setupWithEventDelay({
-      sampleCount: eventDelay.length,
-      eventDelay,
-    });
+    const jankInstances = setupWithEventDelay(eventDelay);
     expect(jankInstances.length).toEqual(1);
     // This is breakingPoint + 2 because that means that the jank actually
     // started two samples before that breaking point, this is done by the

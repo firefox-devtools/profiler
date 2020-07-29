@@ -1467,12 +1467,22 @@ export function accumulateCounterSamples(
  * This reduces the calculation overhead a lot.
  * So we used the second algorithm in this function to make it faster.
  *
- *  For instance the processed eventDelay values will be something like this:
-
+ * For instance the processed eventDelay values will be something like this:
+ *
  *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
  *         |___|              |___|              |___|
  *     A new event is    New event is enqueued   New event is enqueued
  *     enqueued
+ *
+ * A more realistic and minimal example:
+ *  Unprocessed values
+ *
+ *   [0, 0, 1, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]
+ *          ^last submission           ^ effective submission
+ *
+ *  Will be converted to:
+ *
+ *   [0, 0, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
  *
  * If you want to learn more about this eventDelay value on gecko side, see:
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186

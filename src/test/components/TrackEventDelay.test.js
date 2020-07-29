@@ -104,7 +104,7 @@ describe('TrackEventDelay', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
-  it('matches the component snapshot', () => {
+  it('matches the component snapshot when event delay tracks are disabled', () => {
     const { container } = setup(false);
     expect(container.firstChild).toMatchSnapshot();
   });
