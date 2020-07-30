@@ -79,30 +79,31 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
             Firefox Profiler
-          </span>
+          </a>
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -123,15 +124,15 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
@@ -216,7 +217,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
 </div>
 `;
 
@@ -224,30 +225,31 @@ exports[`app/Home renders the install screen for the extension 1`] = `
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
             Firefox Profiler
-          </span>
+          </a>
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -268,15 +270,15 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
@@ -362,7 +364,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
 </div>
 `;
 
@@ -370,30 +372,31 @@ exports[`app/Home renders the usage instructions for pages with the extension in
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
             Firefox Profiler
-          </span>
+          </a>
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -414,15 +417,15 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
@@ -529,7 +532,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
 </div>
 `;
 
