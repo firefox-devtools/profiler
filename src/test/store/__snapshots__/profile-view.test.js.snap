@@ -2746,10 +2746,10 @@ Array [
   Object {
     "category": 1,
     "data": null,
-    "end": 58,
+    "end": 55,
     "name": "Jank",
-    "start": 6,
-    "title": "52.00ms event processing delay",
+    "start": 5,
+    "title": "50.00ms event processing delay",
   },
 ]
 `;

@@ -26,7 +26,6 @@ import type {
   MarkerIndex,
   IPCSharedData,
   IPCMarkerPayload,
-  EventDelayInfo,
   BailoutPayload,
   NetworkPayload,
   PrefMarkerPayload,
@@ -36,7 +35,6 @@ import type {
   StartEndRange,
   IndexedArray,
   DerivedMarkerInfo,
-  Milliseconds,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -49,134 +47,70 @@ function _formatIPCMarkerDirection(data) {
 }
 
 /**
- * Jank instances are created from responsiveness/eventDelay values. Responsiveness is a
- * profiler feature that can be turned on and off. When on, every sample includes a
- * responsiveness value.
+ * Jank instances are created from responsiveness values. Responsiveness is a profiler
+ * feature that can be turned on and off. When on, every sample includes a responsiveness
+ * value.
  *
- * Responsiveness feature values are changed on Firefox 72, previously we had a
- * `responsiveness` array in the samples table but it's been renamed to `eventDelay`
- * to be able to make this distinction.
- *
- * This timing is captured by instrumenting the event queue. For old responsiveness values,
- * a runnable is added to the browser's event queue, then the profiler times how long it
- * takes to come back. Generally, if this takes longer than some threshold, then this can
- * be jank for the browser. See the first example for typical responsiveness values.
- *
- * For eventDelay values, we don't do 16ms event injection anymore. Instead, profiler records
- * the time since running event blocked the input events. But value by itself is not enough
- * to calculate event delays. We need to process these values and turn them into event delays
- * instead. Please see the comment on getProcessedEventDelays function for more details.
- * See the second example for typical eventDelay values.
- *
- * It's impossible to convert the responsiveness values into eventDelay values with an upgrader,
- * that's why we had to keep both values and their algorithms to be able to support both new and
- * old profiles.
+ * This timing is captured by instrumenting the event queue. A runnable is added to the
+ * browser's event queue, then the profiler times how long it takes to come back.
+ * Generally, if this takes longer than some threshold, then this can be jank for the
+ * browser.
  *
  * This function converts those measurings of milliseconds into individual markers.
  *
- * For instance, take an array of (old) responsiveness values:
+ * For instance, take an array of responsiveness values:
  *
  *   [5, 25, 33, 3, 23, 42, 65, 71, 3, 10, 22, 31, 42, 3, 20, 40]
  *           |___|              |___|              |___|
  *     Runnable is reset    Jank of 71ms. The      Runnable reset under threshold.
  *     but under 50ms,      responsiveness was
  *     no jank.             reset from 71 to 3.
- *
- *  For instance, take an array of processed (new) eventDelay values (it's like the numbers are reversed):
- *
- *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
- *         |___|              |___|              |___|
- *     A new event is    New event is enqueued   New enqueued event is under threshold.
- *     enqueued, but     and it went from 3 to
- *     under 50ms        71, jank of 71.
- *     no jank.
  */
 export function deriveJankMarkers(
   samples: SamplesTable,
   thresholdInMs: number,
-  eventDelayInfo: EventDelayInfo | null,
   otherCategoryIndex: IndexIntoCategoryList
 ): Marker[] {
-  const addMarker = (start, duration) =>
+  const addMarker = () =>
     jankInstances.push({
-      start: start,
-      end: start + duration,
-      title: `${duration.toFixed(2)}ms event processing delay`,
+      start: lastTimestamp - lastResponsiveness,
+      end: lastTimestamp,
+      title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
       category: otherCategoryIndex,
       data: null,
     });
 
+  let lastResponsiveness: number = 0;
+  let lastTimestamp: number = 0;
   const jankInstances = [];
-  // As mentioned in the comment above, we have to support two values types.
-  // They are slightly different from each other.
-  if (eventDelayInfo !== null) {
-    // This is a new profile with eventDelays and we should take a look at the
-    // processed event delay values to be able to create Jank markers.
-    const { eventDelays } = eventDelayInfo;
+  for (let i = 0; i < samples.length; i++) {
+    let currentResponsiveness;
+    if (samples.eventDelay) {
+      currentResponsiveness = samples.eventDelay[i];
+    } else if (samples.responsiveness) {
+      currentResponsiveness = samples.responsiveness[i];
+    }
 
-    let lastEventDelay: Milliseconds = 0;
-    for (let i = 0; i < samples.length; i++) {
-      const currentEventDelay = eventDelays[i];
-      if (currentEventDelay === null || currentEventDelay === undefined) {
-        // Ignore anything that's not numeric. This can happen if there is no responsiveness
-        // information, or if the sampler failed to collect a responsiveness value. This
-        // can happen intermittently.
-        //
-        // See Bug 1506226.
-        continue;
-      }
-      if (currentEventDelay > lastEventDelay) {
-        if (currentEventDelay >= thresholdInMs) {
-          addMarker(samples.time[i], currentEventDelay);
-        }
-      }
-      lastEventDelay = currentEventDelay;
+    if (currentResponsiveness === null || currentResponsiveness === undefined) {
+      // Ignore anything that's not numeric. This can happen if there is no responsiveness
+      // information, or if the sampler failed to collect a responsiveness value. This
+      // can happen intermittently.
+      //
+      // See Bug 1506226.
+      continue;
     }
-    // Check the last event delay to see if the threshold is reached.
-    if (lastEventDelay >= thresholdInMs) {
-      addMarker(
-        samples.time[samples.length - 1],
-        eventDelays[samples.length - 1]
-      );
-    }
-  } else {
-    // This is an old profile which still has `responsiveness` values. We are
-    // keeping the old algorithm here to still support the older profiles.
-    let lastResponsiveness: number = 0;
-    let lastTimestamp: number = 0;
-    const responsiveness = ensureExists(
-      samples.responsiveness,
-      'Unable to get the responsiveness array from an old profile'
-    );
-
-    for (let i = 0; i < samples.length; i++) {
-      const currentResponsiveness = responsiveness[i];
-
-      if (
-        currentResponsiveness === null ||
-        currentResponsiveness === undefined
-      ) {
-        // Ignore anything that's not numeric. This can happen if there is no responsiveness
-        // information, or if the sampler failed to collect a responsiveness value. This
-        // can happen intermittently.
-        //
-        // See Bug 1506226.
-        continue;
+    if (currentResponsiveness < lastResponsiveness) {
+      if (lastResponsiveness >= thresholdInMs) {
+        addMarker();
       }
-      if (currentResponsiveness < lastResponsiveness) {
-        if (lastResponsiveness >= thresholdInMs) {
-          addMarker(lastTimestamp - lastResponsiveness, lastResponsiveness);
-        }
-      }
-      lastResponsiveness = currentResponsiveness;
-      lastTimestamp = samples.time[i];
     }
-    if (lastResponsiveness >= thresholdInMs) {
-      addMarker(lastTimestamp - lastResponsiveness, lastResponsiveness);
-    }
+    lastResponsiveness = currentResponsiveness;
+    lastTimestamp = samples.time[i];
   }
-
+  if (lastResponsiveness >= thresholdInMs) {
+    addMarker();
+  }
   return jankInstances;
 }
 

@@ -219,7 +219,7 @@ describe('getJankMarkersForHeader', function() {
     );
   }
 
-  it('will create a jank instance', function() {
+  it('will create a jank instance with responsiveness values', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
     const jankInstances = setupWithResponsiveness({
@@ -231,18 +231,11 @@ describe('getJankMarkersForHeader', function() {
   });
 
   it('will create a jank instance with eventDelay values', function() {
-    const breakingPoint = 50;
-    // We need to fill the samples before, because the algorithm looks at the
-    // later event delay values and determines the previous event delays from them.
-    // If we don't fill them enough, processing can fail to create that triangle shape.
-    const eventDelay = Array(50).fill(0);
-    eventDelay.push(5, 10, 15, 25, 30, 40, breakingPoint, 1);
+    const breakingPoint = 70;
+    const eventDelay = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
     const jankInstances = setupWithEventDelay(eventDelay);
     expect(jankInstances.length).toEqual(1);
-    // This is breakingPoint + 2 because that means that the jank actually
-    // started two samples before that breaking point, this is done by the
-    // pre-processing.
-    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint + 2);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
 
   it('will skip null responsiveness values', function() {
