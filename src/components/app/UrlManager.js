@@ -144,21 +144,6 @@ class UrlManager extends React.PureComponent<Props> {
       }
     }
 
-    if (
-      previousUrlState.dataSource !== newUrlState.dataSource ||
-      previousUrlState.hash !== newUrlState.hash
-    ) {
-      // Profile sanitization and publishing can do weird things for the history API.
-      // Rather than write lots of complicated interactions, just prevent the back button
-      // from working when going between a published profile, and one that is not.
-      window.history.replaceState(
-        previousUrlState,
-        document.title,
-        urlFromState(previousUrlState)
-      );
-      return;
-    }
-
     // Update the Redux store.
     updateUrlState(newUrlState);
   }
