@@ -144,13 +144,31 @@ class UrlManager extends React.PureComponent<Props> {
       }
     }
 
-    if (
-      previousUrlState.dataSource !== newUrlState.dataSource ||
-      previousUrlState.hash !== newUrlState.hash
-    ) {
-      // Profile sanitization and publishing can do weird things for the history API.
-      // Rather than write lots of complicated interactions, just prevent the back button
-      // from working when going between a published profile, and one that is not.
+    // Profile sanitization and publishing can do weird things for the history API
+    // and we could end up having unconsistent state.
+    // That's why we prevent going back in history in these cases:
+    // 1 - between "from-addon" and "public" (in any direction)
+    // 2 - with the "public" datasource when the hash changes (this means the
+    //     user once published again an already public profile, and then wants to go
+    //     back).
+    // But we want to accept the other interactions.
+
+    // 1. Do we move between "from-addon" and "public"?
+    const movesBetweenFromAddonAndPublic =
+      // from-addon -> public
+      (previousUrlState.dataSource === 'from-addon' &&
+        newUrlState.dataSource === 'public') ||
+      // or public -> from-addon
+      (previousUrlState.dataSource === 'public' &&
+        newUrlState.dataSource === 'from-addon');
+
+    // 2. Do we move between 2 different hashes for a public profile
+    const movesBetweenHashValues =
+      previousUrlState.dataSource === 'public' &&
+      newUrlState.dataSource === 'public' &&
+      previousUrlState.hash !== newUrlState.hash;
+
+    if (movesBetweenFromAddonAndPublic || movesBetweenHashValues) {
       window.history.replaceState(
         previousUrlState,
         document.title,
