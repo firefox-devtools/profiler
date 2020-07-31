@@ -77,6 +77,7 @@ export function formatPlatform(meta: {
         : 'Windows';
     }
     case 'gtk':
+    case 'gtk3':
       // Typically `oscpu` contains 'Linux x86_64'.
       // We slice instead of always returning Linux for other Unixes. But we
       // haven't really tried them.
