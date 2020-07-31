@@ -8,13 +8,15 @@
 
 import { openDB, deleteDB } from 'idb';
 import { stripIndent } from 'common-tags';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+
 import type { DB as Database } from 'idb';
 import type { StartEndRange } from 'firefox-profiler/types';
 
 export type ProfileData = {|
   +profileToken: string, // This is the primary key.
   +jwtToken: string | null,
-  +publishedDate: Date,
+  +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
   +name: string,
   +preset: string | null,
   +originHostname: string | null, // This key is indexed as well.
@@ -57,15 +59,30 @@ export type ProfileData = {|
 // Exported for tests.
 export const DATABASE_NAME = 'published-profiles-store';
 export const OBJECTSTORE_NAME = 'published-profiles';
-export const DATABASE_VERSION = 1;
+export const DATABASE_VERSION = 2;
 
 async function reallyOpen(): Promise<Database> {
   const db = await openDB(DATABASE_NAME, DATABASE_VERSION, {
-    upgrade(db) {
-      const store = db.createObjectStore(OBJECTSTORE_NAME, {
-        keyPath: 'profileToken',
-      });
-      store.createIndex('originHostname', 'originHostname');
+    upgrade(db, oldVersion, newVersion, transaction) {
+      switch (oldVersion) {
+        case 0: {
+          // Version 1: this is the first version of the DB.
+          const store = db.createObjectStore(OBJECTSTORE_NAME, {
+            keyPath: 'profileToken',
+          });
+          store.createIndex('originHostname', 'originHostname');
+        }
+        /* fallthrough */
+        case 1: {
+          // Version 2: we create a new index to allow retrieving the values
+          // ordered by date.
+          const store = ensureExists(transaction.store);
+          store.createIndex('publishedDate', 'publishedDate');
+        }
+        /* fallthrough */
+        default:
+        // Nothing more here.
+      }
     },
   });
 
@@ -118,7 +135,7 @@ export async function storeProfileData(
 
 export async function listAllProfileData(): Promise<ProfileData[]> {
   const db = await open();
-  return db.getAll(OBJECTSTORE_NAME);
+  return db.getAllFromIndex(OBJECTSTORE_NAME, 'publishedDate');
 }
 
 export async function retrieveProfileData(
