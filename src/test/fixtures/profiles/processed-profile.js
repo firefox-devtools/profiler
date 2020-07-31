@@ -1166,6 +1166,49 @@ export function getCounterForThread(
 }
 
 /**
+ * Creates a profile that includes a thread with eventDelay values.
+ */
+export function getProfileWithEventDelays(
+  userEventDelay?: Milliseconds[]
+): Profile {
+  const profile = getEmptyProfile();
+  profile.threads = [getThreadWithEventDelay(userEventDelay)];
+  return profile;
+}
+
+/**
+ * Creates a thread with eventDelay values.
+ */
+export function getThreadWithEventDelay(
+  userEventDelay?: Milliseconds[]
+): Thread {
+  const thread = getEmptyThread();
+
+  // Creating some empty event delays because they will be filled with the pre-process.
+  let eventDelay = Array(50).fill(0);
+
+  if (userEventDelay !== undefined && userEventDelay !== null) {
+    eventDelay = [...eventDelay, ...userEventDelay];
+  } else {
+    for (let i = 0; i < 100; i++) {
+      eventDelay.push(i % 30);
+    }
+  }
+
+  // Re-construct the samples table with new event delay values.
+  thread.samples = {
+    eventDelay: eventDelay,
+    stack: Array(eventDelay.length).fill(null),
+    time: Array.from({ length: eventDelay.length }, (_, i) => i),
+    weight: null,
+    weightType: 'samples',
+    length: eventDelay.length,
+  };
+
+  return thread;
+}
+
+/**
  * Get a profile with JS allocations. The allocations will form the following call tree.
  *
  * - A (total: 15, self: —)

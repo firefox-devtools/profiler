@@ -3,18 +3,32 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { oneLine } from 'common-tags';
 import {
   getSelectedTab,
   getDataSource,
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndex,
+  getLocalTrackOrderByPid,
 } from '../selectors/url-state';
-import { getTrackThreadHeights } from '../selectors/app';
-import { getActiveTabMainTrack } from '../selectors/profile';
+import {
+  getTrackThreadHeights,
+  getIsEventDelayTracksEnabled,
+} from '../selectors/app';
+import {
+  getActiveTabMainTrack,
+  getLocalTracksByPid,
+  getThreads,
+} from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 import { fatalError } from './errors';
+import {
+  addEventDelayTracksForThreads,
+  initializeLocalTrackOrderByPid,
+} from '../profile-logic/tracks';
+import { selectedThreadSelectors } from '../selectors/per-thread';
 
 import type {
   Profile,
@@ -221,6 +235,51 @@ export function toggleResourcesPanel(): ThunkAction<void> {
     dispatch({
       type: 'TOGGLE_RESOURCES_PANEL',
       selectedThreadIndex,
+    });
+  };
+}
+/*
+ * This action enables the event delay tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for average users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableEventDelayTracks()`
+ */
+export function enableEventDelayTracks(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (getIsEventDelayTracksEnabled(getState())) {
+      console.error(
+        'Tried to enable the event delay tracks, but they are already enabled.'
+      );
+      return;
+    }
+
+    if (
+      selectedThreadSelectors.getSamplesTable(getState()).eventDelay ===
+      undefined
+    ) {
+      // Return early if the profile doesn't have eventDelay values.
+      console.error(oneLine`
+        Tried to enable the event delay tracks, but this profile does
+        not have eventDelay values. It is likely an older profile.
+      `);
+      return;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addEventDelayTracksForThreads(
+      getThreads(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+    dispatch({
+      type: 'ENABLE_EVENT_DELAY_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
     });
   };
 }

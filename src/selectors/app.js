@@ -31,6 +31,7 @@ import {
   TIMELINE_SETTINGS_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
   ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
+  TRACK_EVENT_DELAY_HEIGHT,
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -64,6 +65,8 @@ export const getTrackThreadHeights: Selector<
 > = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
+export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
+  getApp(state).isEventDelayTracksEnabled;
 
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;
@@ -264,6 +267,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   break;
                 case 'memory':
                   height += TRACK_MEMORY_HEIGHT + border;
+                  break;
+                case 'event-delay':
+                  height += TRACK_EVENT_DELAY_HEIGHT + border;
                   break;
                 case 'ipc':
                   height += TRACK_IPC_HEIGHT + border;

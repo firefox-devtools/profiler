@@ -17,10 +17,12 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
   addActiveTabInformationToProfile,
+  getProfileWithEventDelays,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
   getEmptyProfile,
+  getEmptySamplesTableWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -184,14 +186,8 @@ describe('getJankMarkersForHeader', function() {
       .map(getMarker);
   }
 
-  function setupWithEventDelay({ sampleCount, eventDelay }) {
-    const { profile } = getProfileFromTextSamples(
-      Array(sampleCount)
-        .fill('A')
-        .join('  ')
-    );
-    delete profile.threads[0].samples.eventDelay;
-    profile.threads[0].samples.eventDelay = eventDelay;
+  function setupWithEventDelay(eventDelay) {
+    const profile = getProfileWithEventDelays(eventDelay);
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
@@ -223,7 +219,7 @@ describe('getJankMarkersForHeader', function() {
     );
   }
 
-  it('will create a jank instance', function() {
+  it('will create a jank instance with responsiveness values', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
     const jankInstances = setupWithResponsiveness({
@@ -237,10 +233,7 @@ describe('getJankMarkersForHeader', function() {
   it('will create a jank instance with eventDelay values', function() {
     const breakingPoint = 70;
     const eventDelay = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
-    const jankInstances = setupWithEventDelay({
-      sampleCount: eventDelay.length,
-      eventDelay,
-    });
+    const jankInstances = setupWithEventDelay(eventDelay);
     expect(jankInstances.length).toEqual(1);
     expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
@@ -1600,11 +1593,26 @@ describe('snapshots of selectors/profile', function() {
       ...getNetworkMarkers({ id: 7, startTime: 7 }),
     ]);
     profile.threads.push(markersThread);
-    const { getState, dispatch } = storeWithProfile(profile);
     samplesThread.name = 'Thread with samples';
     markersThread.name = 'Thread with markers';
-    // This is a jank sample:
-    ensureExists(samplesThread.samples.eventDelay)[4] = 100;
+
+    // Creating jank sample
+    samplesThread.samples.eventDelay = Array(50).fill(0);
+    const eventDelay = ensureExists(samplesThread.samples.eventDelay);
+    eventDelay.push(10, 15, 25, 30, 40, 50, 0);
+    samplesThread.samples.time = Array(eventDelay.length)
+      .fill(0)
+      .map((_, i) => i);
+    // Since we addded some eventDelays, we also need to make sure to add null values for the rest of the samples
+    samplesThread.samples.stack = [
+      ...samplesThread.samples.stack,
+      ...Array(eventDelay.length - samplesThread.samples.stack.length).fill(
+        null
+      ),
+    ];
+    samplesThread.samples.length = eventDelay.length;
+
+    const { getState, dispatch } = storeWithProfile(profile);
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
@@ -1829,7 +1837,7 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.unfilteredSamplesRange(getState())).toEqual({
-      end: 9,
+      end: 57,
       start: 0,
     });
   });
@@ -3392,5 +3400,192 @@ describe('traced timing', function() {
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+});
+
+// Verify that getProcessedEventDelays gives the correct values for event delays.
+describe('getProcessedEventDelays', function() {
+  // Setup a profile with meaningful event delay values.
+  function setup(eventDelay: ?Array<?Milliseconds>) {
+    const profile = getEmptyProfile();
+
+    // Create event delay values.
+    const samples = getEmptySamplesTableWithEventDelay();
+    if (eventDelay) {
+      samples.eventDelay = eventDelay;
+    } else {
+      samples.eventDelay = Array(50).fill(0);
+      samples.eventDelay.push(10, 20, 30, 40, 50, 0);
+      //                                      ^
+      //                                      |
+      //                              Event delay peak
+    }
+
+    // Set the samples object length.
+    samples.length = ensureExists(samples.eventDelay).length;
+    // Construct the time array that increments from 0 to `samples.length`.
+    samples.time = Array(samples.length)
+      .fill(0)
+      .map((_, i) => i);
+    samples.stack = Array(samples.length).fill(null);
+    profile.threads.push(getEmptyThread({ samples }));
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    const getProcessedEventDelays = () =>
+      profile.threads.map((_, threadIndex) =>
+        getThreadSelectors(threadIndex).getProcessedEventDelays(getState())
+      );
+
+    return { profile, dispatch, getState, getProcessedEventDelays };
+  }
+
+  it('can process the event delay values and returns meaningful numbers', function() {
+    const { getProcessedEventDelays } = setup();
+    expect(getProcessedEventDelays()).toEqual([
+      {
+        maxDelay: 52,
+        minDelay: 1,
+        delayRange: 51,
+        eventDelays: [
+          0,
+          1,
+          1,
+          1,
+          1,
+          52, // <---- Event delay peak.
+          51,
+          50,
+          49,
+          48,
+          47,
+          46,
+          45,
+          44,
+          43,
+          42,
+          41,
+          40,
+          39,
+          38,
+          37,
+          36,
+          35,
+          34,
+          33,
+          32,
+          31,
+          30,
+          29,
+          28,
+          27,
+          26,
+          25,
+          24,
+          23,
+          22,
+          21,
+          20,
+          19,
+          18,
+          17,
+          16,
+          15,
+          14,
+          13,
+          12,
+          11,
+          10,
+          9,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1, // <---- goes down until it's done.
+        ],
+      },
+    ]);
+  });
+
+  it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
+    const eventDelay = Array(50).fill(0);
+    eventDelay.push(10, 20, 30, 40, 50, 0, 0, 10, 20, 0);
+    //                              ^             ^
+    //                              |             |
+    //                              First peak    Second peak
+    const { getProcessedEventDelays } = setup(eventDelay);
+    expect(getProcessedEventDelays()).toEqual([
+      {
+        maxDelay: 52,
+        minDelay: 1,
+        delayRange: 51,
+        eventDelays: [
+          0,
+          1,
+          1,
+          1,
+          1,
+          52, // <---- First event delay peak.
+          51,
+          50,
+          49,
+          48,
+          47,
+          46,
+          45,
+          44,
+          43,
+          42,
+          41,
+          40,
+          39,
+          38,
+          37,
+          36,
+          35,
+          34,
+          33,
+          32,
+          31,
+          30,
+          29,
+          28,
+          27,
+          26,
+          25,
+          24,
+          23,
+          22,
+          21,
+          20,
+          19,
+          // |---- Second event delay peak. This happens while we are still not
+          // v     done with the first even delay and sums up both delay values.
+          39,
+          37,
+          35,
+          33,
+          31,
+          29,
+          27,
+          25,
+          23,
+          21,
+          18,
+          16,
+          14,
+          12,
+          10,
+          8,
+          6,
+          4, // <---- First event delay is done here.
+          3,
+          2,
+          1, // <---- Second event delay is done now too.
+        ],
+      },
+    ]);
   });
 });

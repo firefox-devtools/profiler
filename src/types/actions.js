@@ -238,7 +238,12 @@ type ProfileAction =
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
     |}
   | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |}
-  | {| +type: 'DISMISS_NEWLY_PUBLISHED' |};
+  | {| +type: 'DISMISS_NEWLY_PUBLISHED' |}
+  | {|
+      +type: 'ENABLE_EVENT_DELAY_TRACKS',
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |};
 
 type ReceiveProfileAction =
   | {|
