@@ -27,7 +27,8 @@
 }
 
 .panelSearchFieldIntroduction.isDisplayed {
-  transition: transform 150ms var(--animation-curve), opacity 150ms ease-in-out;
+  transition: transform 150ms var(--animation-curve), opacity 150ms ease-in-out,
+    visibility 150ms ease-in-out;
 }
 
 .panelSearchFieldIntroduction.isHidden {
@@ -35,5 +36,7 @@
   transform: translateY(-100%);
 
   /* steps(1) is to wait until the end for the transform to happen */
-  transition: transform 150ms steps(1), opacity 150ms ease-in-out;
+  transition: transform 150ms steps(1), opacity 150ms ease-in-out,
+    visibility 150ms ease-in-out;
+  visibility: hidden;
 }
