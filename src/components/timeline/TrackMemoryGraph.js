@@ -269,7 +269,26 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
     } else {
-      let hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      let hoveredCounter;
+      if (
+        bisection.right(samples.time, timeAtMouse) > 0 &&
+        bisection.right(samples.time, timeAtMouse) < samples.time.length
+      ) {
+        const leftDistance =
+          timeAtMouse -
+          samples.time[bisection.right(samples.time, timeAtMouse) - 1];
+        const rightDistance =
+          samples.time[bisection.right(samples.time, timeAtMouse)] -
+          timeAtMouse;
+        if (leftDistance < rightDistance) {
+          hoveredCounter = bisection.right(samples.time, timeAtMouse) - 1;
+        } else {
+          hoveredCounter = bisection.right(samples.time, timeAtMouse);
+        }
+      } else {
+        hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      }
+
       if (hoveredCounter === samples.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the
