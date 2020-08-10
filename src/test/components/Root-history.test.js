@@ -4,37 +4,20 @@
 
 // @flow
 
-// We want to test these components in isolation and tightly control the actions
-// dispatched and avoid any side-effects.  That's why we mock this module and
-// return dummy thunk actions that return a Promise.
-// jest.mock('../../actions/receive-profile', () => ({
-//   // These mocks will get their implementation in the `setup` function.
-//   // Otherwise the implementation is wiped before the test starts.
-//   // See https://github.com/facebook/jest/issues/7573 for more info.
-//   retrieveProfileFromAddon: jest.fn(),
-//   retrieveProfileFromStore: jest.fn(),
-//   retrieveProfilesToCompare: jest.fn(),
-// }));
-
 import * as React from 'react';
 import { render } from '@testing-library/react';
 
 import Root from '../../components/app/Root';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-
-// Because this module is mocked but we want the real actions in the test, we
-// use `jest.requireActual` here.
-// These functions are mocks
 import { getProfileUrlForHash } from '../../actions/receive-profile';
-
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { mockWindowLocation } from '../fixtures/mocks/window-location';
 import { mockWindowHistory } from '../fixtures/mocks/window-history';
 import { coerceMatchingShape } from '../../utils/flow';
+import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
-import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 describe('Root with history', function() {
   // Cleanup the tests through a side-effect.
@@ -69,7 +52,10 @@ describe('Root with history', function() {
       );
       mockFetchProfileAtUrl(getProfileUrlForHash('FAKEHASH'), profile);
     } else {
-      throw new Error('TODO');
+      throw new Error(
+        'TODO - These tests need to add other views, which will not need the ' +
+          'profile hash. This is needed to complete #1789.'
+      );
     }
 
     const ctx = mockCanvasContext();
