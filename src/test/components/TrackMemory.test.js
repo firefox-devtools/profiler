@@ -34,10 +34,11 @@ const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable,
+  samplePosition
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
-  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
+  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
 }
 
 /**
@@ -84,10 +85,12 @@ describe('TrackMemory', function() {
       document.querySelector('.timelineTrackMemoryTooltip');
     const getMemoryDot = () =>
       container.querySelector('.timelineTrackMemoryGraphDot');
-    const moveMouseAtCounter = index =>
+    const moveMouseAtCounter = (index, pos) =>
       fireEvent(
         canvas,
-        getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(index, pos),
+        })
       );
 
     return {
@@ -124,7 +127,7 @@ describe('TrackMemory', function() {
   it('can create a tooltip', function() {
     const { moveMouseAtCounter, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
     expect(getTooltipContents()).toBeTruthy();
     fireEvent.mouseLeave(canvas);
     expect(getTooltipContents()).toBeFalsy();
@@ -132,20 +135,29 @@ describe('TrackMemory', function() {
 
   it('has a tooltip that matches the snapshot', function() {
     const { moveMouseAtCounter, getTooltipContents } = setup();
-    moveMouseAtCounter(5);
+    moveMouseAtCounter(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
   it('draws a dot on the graph', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     expect(getMemoryDot()).toBeFalsy();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
+    expect(getMemoryDot()).toBeTruthy();
+  });
+
+  it('can draw a dot on both extremes of the graph', function() {
+    const { moveMouseAtCounter, getMemoryDot } = setup();
+    expect(getMemoryDot()).toBeFalsy();
+    moveMouseAtCounter(0, 0);
+    expect(getMemoryDot()).toBeTruthy();
+    moveMouseAtCounter(7, 0);
     expect(getMemoryDot()).toBeTruthy();
   });
 
   it('draws a dot that matches the snapshot', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
     expect(getMemoryDot()).toMatchSnapshot();
   });
 });
