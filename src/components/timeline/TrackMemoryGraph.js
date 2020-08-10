@@ -270,23 +270,17 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       this.setState({ hoveredCounter: null });
     } else {
       let hoveredCounter;
-      if (
-        bisection.right(samples.time, timeAtMouse) > 0 &&
-        bisection.right(samples.time, timeAtMouse) < samples.time.length
-      ) {
-        const leftDistance =
-          timeAtMouse -
-          samples.time[bisection.right(samples.time, timeAtMouse) - 1];
-        const rightDistance =
-          samples.time[bisection.right(samples.time, timeAtMouse)] -
-          timeAtMouse;
+      const bisectionCounter = bisection.right(samples.time, timeAtMouse);
+      if (bisectionCounter > 0 && bisectionCounter < samples.time.length) {
+        const leftDistance = timeAtMouse - samples.time[bisectionCounter - 1];
+        const rightDistance = samples.time[bisectionCounter] - timeAtMouse;
         if (leftDistance < rightDistance) {
-          hoveredCounter = bisection.right(samples.time, timeAtMouse) - 1;
+          hoveredCounter = bisectionCounter - 1;
         } else {
-          hoveredCounter = bisection.right(samples.time, timeAtMouse);
+          hoveredCounter = bisectionCounter;
         }
       } else {
-        hoveredCounter = bisection.right(samples.time, timeAtMouse);
+        hoveredCounter = bisectionCounter;
       }
 
       if (hoveredCounter === samples.length) {
