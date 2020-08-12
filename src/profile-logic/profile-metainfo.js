@@ -4,6 +4,8 @@
 
 // @flow
 
+import type { ProfileMeta } from 'firefox-profiler/types';
+
 // This extracts the version number out of the 'misc' value we have in the
 // profile.
 // The 'misc' value looks like `rv:<version>`, we want to return the version.
@@ -89,4 +91,10 @@ export function formatPlatform(meta: {
     default:
       return meta.oscpu || '';
   }
+}
+
+export function formatMetaInfoString(meta: ProfileMeta): string {
+  const productAndVersion = formatProductAndVersion(meta);
+  const os = formatPlatform(meta);
+  return productAndVersion + (os ? ` – ${os}` : '');
 }
