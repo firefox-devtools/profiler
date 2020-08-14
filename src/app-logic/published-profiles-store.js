@@ -35,7 +35,9 @@ export type ProfileData = {|
     +toolkit?: string,
     +misc?: string,
     +oscpu?: string,
-    +toolkit?: 'gtk' | 'windows' | 'cocoa' | 'android' | string,
+    // Older versions of Firefox for Linux had the 2 flavors gtk2/gtk3, and so
+    // we could find the value "gtk3".
+    +toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string,
     +updateChannel?:
       | 'default' // Local builds
       | 'nightly'
