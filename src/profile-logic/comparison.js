@@ -34,6 +34,7 @@ import {
   correlateIPCMarkers,
 } from './marker-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
+import { ensureExists } from '../utils/flow';
 
 import type {
   Profile,
@@ -57,6 +58,8 @@ import type {
   TransformStacksPerThread,
   Milliseconds,
   DerivedMarkerInfo,
+  RawMarkerTable,
+  MarkerIndex,
 } from 'firefox-profiler/types';
 
 /**
@@ -544,7 +547,7 @@ function combineFuncTables(
  * that's not needed to get a diffing call tree.
  */
 function combineFrameTables(
-  translationMapsForCategories: TranslationMapForCategories[],
+  translationMapsForCategories: TranslationMapForCategories[] | null,
   translationMapsForFuncs: TranslationMapForFuncs[],
   newStringTable: UniqueStringArray,
   threads: $ReadOnlyArray<Thread>
@@ -556,12 +559,18 @@ function combineFrameTables(
     const { frameTable, stringTable } = thread;
     const translationMap = new Map();
     const funcTranslationMap = translationMapsForFuncs[threadIndex];
-    const categoryTranslationMap = translationMapsForCategories[threadIndex];
+    const getNewCategory = category => {
+      if (translationMapsForCategories === null) {
+        // Translation map is not provided, return the category itself.
+        return category;
+      }
+      const categoryTranslationMap = translationMapsForCategories[threadIndex];
+      return categoryTranslationMap.get(category);
+    };
 
     for (let i = 0; i < frameTable.length; i++) {
       const category = frameTable.category[i];
-      const newCategory =
-        category === null ? null : categoryTranslationMap.get(category);
+      const newCategory = category === null ? null : getNewCategory(category);
       if (newCategory === undefined) {
         throw new Error(stripIndent`
           We couldn't find the category of frame ${i} in the translation map.
@@ -618,7 +627,7 @@ function combineFrameTables(
  * that's not needed to get a diffing call tree.
  */
 function combineStackTables(
-  translationMapsForCategories: TranslationMapForCategories[],
+  translationMapsForCategories: TranslationMapForCategories[] | null,
   translationMapsForFrames: TranslationMapForFrames[],
   threads: $ReadOnlyArray<Thread>
 ): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
@@ -629,7 +638,14 @@ function combineStackTables(
     const { stackTable } = thread;
     const translationMap = new Map();
     const frameTranslationMap = translationMapsForFrames[threadIndex];
-    const categoryTranslationMap = translationMapsForCategories[threadIndex];
+    const getNewCategory = category => {
+      if (translationMapsForCategories === null) {
+        // Translation map is not provided, return the category itself.
+        return category;
+      }
+      const categoryTranslationMap = translationMapsForCategories[threadIndex];
+      return categoryTranslationMap.get(category);
+    };
 
     for (let i = 0; i < stackTable.length; i++) {
       const newFrameIndex = frameTranslationMap.get(stackTable.frame[i]);
@@ -639,7 +655,7 @@ function combineStackTables(
           This is a programming error.
         `);
       }
-      const newCategory = categoryTranslationMap.get(stackTable.category[i]);
+      const newCategory = getNewCategory(stackTable.category[i]);
       if (newCategory === undefined) {
         throw new Error(stripIndent`
           We couldn't find the category of stack ${i} in the translation map.
@@ -857,4 +873,200 @@ function getComparisonThread(
   };
 
   return mergedThread;
+}
+
+/**
+ * Merge threads inside a profile.
+ * The threads should belong to the same profile because unlike mergeProfilesForDiffing,
+ * this does not merge the profile level information like metadata, categories etc.
+ */
+export function mergeThreads(threads: Thread[]): Thread {
+  const newStringTable = new UniqueStringArray();
+
+  // Combine the table we would need.
+  const {
+    libs: newLibTable,
+    translationMaps: translationMapsForLibs,
+  } = combineLibTables(threads);
+  const {
+    resourceTable: newResourceTable,
+    translationMaps: translationMapsForResources,
+  } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
+  const {
+    funcTable: newFuncTable,
+    translationMaps: translationMapsForFuncs,
+  } = combineFuncTables(translationMapsForResources, newStringTable, threads);
+  const {
+    frameTable: newFrameTable,
+    translationMaps: translationMapsForFrames,
+  } = combineFrameTables(
+    null,
+    translationMapsForFuncs,
+    newStringTable,
+    threads
+  );
+  const {
+    stackTable: newStackTable,
+    translationMaps: translationMapsForStacks,
+  } = combineStackTables(null, translationMapsForFrames, threads);
+
+  // Combine the samples for merging. This
+  const { samples: newSamples } = combineSamplesForMerging(
+    translationMapsForStacks,
+    threads
+  );
+
+  const { markerTable: newMarkers } = mergeMarkers(threads, newStringTable);
+
+  const processStartupTime = Math.min(
+    ...threads.map(thread => thread.processStartupTime)
+  );
+  const processShutdownTime = Math.max(
+    ...threads.map(thread => thread.processShutdownTime || Infinity)
+  );
+  const registerTime = Math.min(...threads.map(thread => thread.registerTime));
+  const unregisterTime = Math.max(
+    ...threads.map(thread => thread.unregisterTime || Infinity)
+  );
+
+  const mergedThread = {
+    processType: 'merged',
+    processStartupTime,
+    processShutdownTime: processShutdownTime === 0 ? null : processShutdownTime,
+    registerTime,
+    unregisterTime: unregisterTime === 0 ? null : unregisterTime,
+    pausedRanges: [],
+    name: 'Merged thread',
+    pid: 'Merged thread',
+    tid: undefined,
+    samples: newSamples,
+    markers: newMarkers,
+    stackTable: newStackTable,
+    frameTable: newFrameTable,
+    stringTable: newStringTable,
+    libs: newLibTable,
+    funcTable: newFuncTable,
+    resourceTable: newResourceTable,
+  };
+
+  return mergedThread;
+}
+
+/**
+ * This combines the sample tables for multiple threads.
+ * This is similar to combineSamplesDiffing function, but differently, this
+ * function adds all the samples as a positive value so they all add up in the end.
+ * And it does not handle different interval values since threads should belong to
+ * the same profile.
+ * It returns the new sample table with the translation maps to be used in
+ * subsequent merging functions, if necessary.
+ */
+function combineSamplesForMerging(
+  translationMapsForStacks: TranslationMapForStacks[],
+  threads: Thread[]
+): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
+  const translationMaps = [new Map(), new Map()];
+  const samples = threads.map(thread => thread.samples);
+  const sampleIndexes = Array(samples.length).fill(0);
+
+  const newSamples = getEmptySamplesTableWithEventDelay();
+
+  while (true) {
+    let selectedSamplesIndex: number | null = null;
+    let time = Infinity;
+    // 1. Find out which sample to consume.
+    for (let samplesIndex = 0; samplesIndex < samples.length; samplesIndex++) {
+      const currentSamples = samples[samplesIndex];
+      const currentSamplesIndex = sampleIndexes[samplesIndex];
+      const currentSampleTime = currentSamples.time[currentSamplesIndex];
+      if (
+        currentSamplesIndex < currentSamples.length &&
+        currentSampleTime < time
+      ) {
+        selectedSamplesIndex = samplesIndex;
+        time = currentSampleTime;
+      }
+    }
+
+    if (selectedSamplesIndex === null) {
+      // All samples from every thread have been consumed.
+      break;
+    }
+
+    // 2. Add the earliest sampel to the new sample table.
+    const currentSamples = samples[selectedSamplesIndex];
+    const index: number = sampleIndexes[selectedSamplesIndex];
+
+    const stackIndex: number | null = currentSamples.stack[index];
+    const newStackIndex =
+      stackIndex === null
+        ? null
+        : translationMapsForStacks[selectedSamplesIndex].get(stackIndex);
+    if (newStackIndex === undefined) {
+      throw new Error(stripIndent`
+          We couldn't find the stack of sample ${index} in the translation map.
+          This is a programming error.
+        `);
+    }
+    newSamples.stack.push(newStackIndex);
+    // It doesn't make sense to combine event delay values. We need to use junk markers
+    // from independent threads instead.
+    ensureExists(newSamples.eventDelay).push(null);
+    newSamples.time.push(currentSamples.time[index]);
+
+    translationMaps[0].set(index, newSamples.length);
+    newSamples.length++;
+
+    sampleIndexes[selectedSamplesIndex]++;
+  }
+
+  return {
+    samples: newSamples,
+    translationMaps,
+  };
+}
+
+type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
+
+/**
+ * Merge markers from diffent threads. And update the new string table while doing it.
+ */
+function mergeMarkers(
+  threads: Thread[],
+  newStringTable: UniqueStringArray
+): {
+  markerTable: RawMarkerTable,
+  translationMaps: TranslationMapForMarkers[],
+} {
+  const newMarkerTable = getEmptyRawMarkerTable();
+  const translationMaps = [];
+
+  threads.forEach(thread => {
+    const translationMap = new Map();
+    const { markers, stringTable } = thread;
+
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      // We need to move the name string to the new string table if doesn't exist.
+      const nameIndex = markers.name[markerIndex];
+      const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+
+      // Move marker data to the new marker table.
+      newMarkerTable.data.push(markers.data[markerIndex]);
+      newMarkerTable.name.push(
+        newName === null ? -1 : newStringTable.indexForString(newName)
+      );
+      newMarkerTable.startTime.push(markers.startTime[markerIndex]);
+      newMarkerTable.endTime.push(markers.endTime[markerIndex]);
+      newMarkerTable.phase.push(markers.phase[markerIndex]);
+      newMarkerTable.category.push(markers.category[markerIndex]);
+
+      // Set the translation map and increase the table length.
+      translationMap.set(markerIndex, newMarkerTable.length);
+      newMarkerTable.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { markerTable: newMarkerTable, translationMaps };
 }
