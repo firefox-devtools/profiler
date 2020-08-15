@@ -269,14 +269,17 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
     } else {
+      // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredCounter;
       const bisectionCounter = bisection.right(samples.time, timeAtMouse);
       if (bisectionCounter > 0 && bisectionCounter < samples.time.length) {
         const leftDistance = timeAtMouse - samples.time[bisectionCounter - 1];
         const rightDistance = samples.time[bisectionCounter] - timeAtMouse;
         if (leftDistance < rightDistance) {
+          // Left point is closer
           hoveredCounter = bisectionCounter - 1;
         } else {
+          // Right point is closer
           hoveredCounter = bisectionCounter;
         }
       } else {

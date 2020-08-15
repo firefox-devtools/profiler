@@ -149,7 +149,7 @@ describe('TrackMemory', function() {
   it('can draw a dot on both extremes of the graph', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     expect(getMemoryDot()).toBeFalsy();
-    moveMouseAtCounter(0, 0);
+    moveMouseAtCounter(0, 0.25);
     expect(getMemoryDot()).toBeTruthy();
     moveMouseAtCounter(7, 0);
     expect(getMemoryDot()).toBeTruthy();
