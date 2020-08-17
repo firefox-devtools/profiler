@@ -12,7 +12,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
-import { mergeProfiles } from '../../../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { ensureExists } from '../../../utils/flow';
@@ -817,7 +817,7 @@ export function getMergedProfileFromTextSamples(
     search: '?thread=0&v=3',
     hash: '',
   });
-  const { profile } = mergeProfiles(
+  const { profile } = mergeProfilesForDiffing(
     profiles,
     profiles.map(() => profileState)
   );

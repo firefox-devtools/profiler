@@ -15,7 +15,7 @@ import {
   applySymbolicationStep,
 } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { mergeProfiles } from '../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
 import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
@@ -1356,7 +1356,7 @@ export function retrieveProfilesToCompare(
         profile: resultProfile,
         implementationFilters,
         transformStacks,
-      } = mergeProfiles(profiles, profileStates);
+      } = mergeProfilesForDiffing(profiles, profileStates);
 
       // We define an implementationFilter if both profiles agree with the value.
       let implementationFilter;

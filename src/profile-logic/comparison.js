@@ -70,7 +70,7 @@ import type {
  * It returns this merged profile along the transforms and implementation
  * filters as decided by the source states.
  */
-export function mergeProfiles(
+export function mergeProfilesForDiffing(
   profiles: Profile[],
   profileStates: UrlState[]
 ): {|

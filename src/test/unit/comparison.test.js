@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { mergeProfiles } from '../../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../../profile-logic/comparison';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-describe('mergeProfiles function', function() {
+describe('mergeProfilesForDiffing function', function() {
   it('merges the various tables properly in the diffing profile', function() {
     const sampleProfileA = getProfileFromTextSamples(
       'A[lib:libA]  B[lib:libA]'
@@ -19,7 +19,7 @@ describe('mergeProfiles function', function() {
       search: '?thread=0&v=3',
       hash: '',
     });
-    const { profile: mergedProfile } = mergeProfiles(
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
       [sampleProfileA.profile, sampleProfileB.profile],
       [profileState, profileState]
     );
@@ -94,7 +94,7 @@ describe('mergeProfiles function', function() {
     sampleProfileA.profile.meta.interval = 10;
     sampleProfileB.profile.meta.interval = 20;
 
-    const mergedProfile = mergeProfiles(
+    const mergedProfile = mergeProfilesForDiffing(
       [sampleProfileA.profile, sampleProfileB.profile],
       [profileState1, profileState2]
     );
@@ -123,8 +123,10 @@ describe('mergeProfiles function', function() {
     });
 
     function getMergedProfilesSymbolication(profile1, profile2) {
-      return mergeProfiles([profile1, profile2], [profileState1, profileState2])
-        .profile.meta.symbolicated;
+      return mergeProfilesForDiffing(
+        [profile1, profile2],
+        [profileState1, profileState2]
+      ).profile.meta.symbolicated;
     }
 
     expect(
