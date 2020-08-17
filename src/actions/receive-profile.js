@@ -15,7 +15,7 @@ import {
   applySymbolicationStep,
 } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { mergeProfilesForDiffing } from '../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../profile-logic/merge-compare';
 import { decompress } from '../utils/gz';
 import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';

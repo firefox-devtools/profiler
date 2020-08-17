@@ -5,7 +5,7 @@
 import {
   mergeProfilesForDiffing,
   mergeThreads,
-} from '../../profile-logic/comparison';
+} from '../../profile-logic/merge-compare';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
