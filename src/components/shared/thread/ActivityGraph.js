@@ -34,7 +34,10 @@ export type Props = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
+  +onSampleClick: (
+    event: SyntheticMouseEvent<>,
+    sampleIndex: IndexIntoSamplesTable
+  ) => void,
   +categories: CategoryList,
   +samplesSelectedStates: null | SelectedState[],
   +treeOrderSampleComparator: (
@@ -254,8 +257,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _onMouseUp = (event: SyntheticMouseEvent<>) => {
     const sample = this._getSampleAtMouseEvent(event);
     if (sample !== null) {
-      event.stopPropagation();
-      this.props.onSampleClick(sample);
+      this.props.onSampleClick(event, sample);
     }
   };
 

@@ -158,6 +158,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           selectionEnd,
           isModifying: false,
         });
+        // Stop propagation so that no thread is selected when creating a preview
+        // selection.
         event.stopPropagation();
         this._uninstallMoveAndUpHandlers();
         return;
@@ -171,6 +173,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           committedRange.start;
         const { selectionStart, selectionEnd } = previewSelection;
         if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
+          // Stop propagation so that no thread is selected when removing the preview
+          // selections.
+          event.stopPropagation();
+
           // Unset preview selection.
           this.props.updatePreviewSelection({
             hasSelection: false,

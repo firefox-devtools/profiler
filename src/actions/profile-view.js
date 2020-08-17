@@ -261,10 +261,12 @@ export function changeSelectedThreads(
  * thread index, and may also change the selected tab if it makes sense for this
  * track.
  */
-export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
+export function selectTrack(
+  trackReference: TrackReference,
+  modifier: 'none' | 'ctrl'
+): ThunkAction<void> {
   return (dispatch, getState) => {
     const currentlySelectedTab = getSelectedTab(getState());
-    const currentlySelectedThreadIndex = getSelectedThreadIndexes(getState());
     // These get assigned based on the track type.
     let selectedThreadIndex = null;
     let selectedTab = currentlySelectedTab;
@@ -368,16 +370,32 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
       selectedTab = 'calltree';
     }
 
-    if (
-      currentlySelectedTab === selectedTab &&
-      currentlySelectedThreadIndex === selectedThreadIndex
-    ) {
-      return;
+    let selectedThreadIndexes = new Set(getSelectedThreadIndexes(getState()));
+    switch (modifier) {
+      case 'none':
+        // Only select the single thread.
+        selectedThreadIndexes = new Set([selectedThreadIndex]);
+        break;
+      case 'ctrl':
+        // Toggle the selection.
+        if (selectedThreadIndexes.has(selectedThreadIndex)) {
+          selectedThreadIndexes.delete(selectedThreadIndex);
+          if (selectedThreadIndexes.size === 0) {
+            // Always keep at least one thread selected.
+            return;
+          }
+        } else {
+          selectedThreadIndexes.add(selectedThreadIndex);
+        }
+        break;
+      default:
+        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
+        break;
     }
 
     dispatch({
       type: 'SELECT_TRACK',
-      selectedThreadIndexes: new Set([selectedThreadIndex]),
+      selectedThreadIndexes,
       selectedTab,
     });
   };

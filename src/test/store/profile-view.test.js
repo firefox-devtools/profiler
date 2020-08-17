@@ -373,7 +373,7 @@ describe('actions/ProfileView', function() {
 
       it('can switch to another global track', function() {
         const { getState, dispatch, parentTrack } = setup();
-        dispatch(ProfileView.selectTrack(parentTrackReference));
+        dispatch(ProfileView.selectTrack(parentTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([parentTrack.mainThreadIndex])
         );
@@ -381,7 +381,7 @@ describe('actions/ProfileView', function() {
 
       it('can switch to a local track', function() {
         const { getState, dispatch, workerTrack } = setup();
-        dispatch(ProfileView.selectTrack(workerTrackReference));
+        dispatch(ProfileView.selectTrack(workerTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([workerTrack.threadIndex])
         );
@@ -412,7 +412,7 @@ describe('actions/ProfileView', function() {
       it('can switch to the network track, which selects the network chart tab', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
-        dispatch(ProfileView.selectTrack(networkTrack));
+        dispatch(ProfileView.selectTrack(networkTrack, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
@@ -430,14 +430,14 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'flame-graph'
         );
-        dispatch(ProfileView.selectTrack(networkTrack));
+        dispatch(ProfileView.selectTrack(networkTrack, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'network-chart'
         );
-        dispatch(ProfileView.selectTrack(threadTrack));
+        dispatch(ProfileView.selectTrack(threadTrack, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
@@ -490,7 +490,7 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([1])
         );
-        dispatch(ProfileView.selectTrack(memoryTrackReference));
+        dispatch(ProfileView.selectTrack(memoryTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([0])
         );
@@ -501,7 +501,7 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
-        dispatch(ProfileView.selectTrack(memoryTrackReference));
+        dispatch(ProfileView.selectTrack(memoryTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
@@ -529,7 +529,7 @@ describe('actions/ProfileView', function() {
           'flame-graph'
         );
 
-        dispatch(ProfileView.selectTrack(diffingTrackReference));
+        dispatch(ProfileView.selectTrack(diffingTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([2])
         );
@@ -583,7 +583,7 @@ describe('actions/ProfileView', function() {
         const { dispatch, getState } = storeWithProfile(profile);
 
         // Setup the test to view native allocations.
-        dispatch(ProfileView.selectTrack(nativeAllocationsThread));
+        dispatch(ProfileView.selectTrack(nativeAllocationsThread, 'none'));
         dispatch(
           ProfileView.changeCallTreeSummaryStrategy('native-allocations')
         );
@@ -592,7 +592,7 @@ describe('actions/ProfileView', function() {
         ).toEqual('native-allocations');
 
         // Switch to a thread without native allocations.
-        dispatch(ProfileView.selectTrack(timingOnlyThread));
+        dispatch(ProfileView.selectTrack(timingOnlyThread, 'none'));
 
         // Expect that it switches the summary strategy to one it supports.
         expect(
@@ -605,14 +605,14 @@ describe('actions/ProfileView', function() {
         const { dispatch, getState } = storeWithProfile(profile);
 
         // Setup the test to view js allocations.
-        dispatch(ProfileView.selectTrack(jsAllocationsThread));
+        dispatch(ProfileView.selectTrack(jsAllocationsThread, 'none'));
         dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
         expect(
           selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
         ).toEqual('js-allocations');
 
         // Switch to a thread without js allocations.
-        dispatch(ProfileView.selectTrack(timingOnlyThread));
+        dispatch(ProfileView.selectTrack(timingOnlyThread, 'none'));
 
         // Expect that it switches the summary strategy to one it supports.
         expect(
@@ -627,7 +627,7 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'marker-chart'
         );
-        dispatch(ProfileView.selectTrack(parentTrackReference));
+        dispatch(ProfileView.selectTrack(parentTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([parentTrack.mainThreadIndex])
         );
@@ -641,7 +641,7 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'network-chart'
         );
-        dispatch(ProfileView.selectTrack(parentTrackReference));
+        dispatch(ProfileView.selectTrack(parentTrackReference, 'none'));
         expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
           new Set([parentTrack.mainThreadIndex])
         );
