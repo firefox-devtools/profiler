@@ -2,9 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { mergeProfilesForDiffing } from '../../profile-logic/comparison';
+import {
+  mergeProfilesForDiffing,
+  mergeThreads,
+} from '../../profile-logic/comparison';
 import { stateFromLocation } from '../../app-logic/url-handling';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
+
+import type { MarkerPhase } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function() {
   it('merges the various tables properly in the diffing profile', function() {
@@ -157,5 +165,208 @@ describe('mergeProfilesForDiffing function', function() {
         unknownSymbolicatedProfile
       )
     ).toBe(false);
+  });
+});
+
+describe('mergeThreads function', function() {
+  it('merges the various tables for 2 threads properly', function() {
+    const { profile } = getProfileFromTextSamples(
+      'A[lib:libA]  B[lib:libA]',
+      'A[lib:libA]  A[lib:libB]  C[lib:libC]'
+    );
+
+    const mergedThread = mergeThreads(profile.threads);
+
+    const mergedLibs = mergedThread.libs;
+    const mergedResources = mergedThread.resourceTable;
+    const mergedFunctions = mergedThread.funcTable;
+    const stringTable = mergedThread.stringTable;
+
+    expect(mergedLibs).toHaveLength(3);
+    expect(mergedResources).toHaveLength(3);
+    expect(mergedFunctions).toHaveLength(4);
+
+    // Now check that all functions are linked to the right resources.
+    // We should have 2 A functions, linked to 2 different resources.
+    // And we should have 1 B function, and 1 C function.
+    const libsForA = [];
+    const resourcesForA = [];
+    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
+      const funcName = stringTable.getString(mergedFunctions.name[funcIndex]);
+      const resourceIndex = mergedFunctions.resource[funcIndex];
+
+      let resourceName = '';
+      let libName = '';
+      if (resourceIndex >= 0) {
+        const nameIndex = mergedResources.name[resourceIndex];
+        if (nameIndex >= 0) {
+          resourceName = stringTable.getString(nameIndex);
+        }
+
+        const libIndex = mergedResources.lib[resourceIndex];
+        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
+          libName = mergedLibs[libIndex].name;
+        }
+      }
+
+      switch (funcName) {
+        case 'A':
+          libsForA.push(libName);
+          resourcesForA.push(resourceName);
+          break;
+        case 'B':
+          expect(libName).toBe('libA');
+          expect(resourceName).toBe('libA');
+          break;
+        case 'C':
+          expect(libName).toBe('libC');
+          expect(resourceName).toBe('libC');
+          break;
+        default:
+      }
+    }
+
+    expect(libsForA).toEqual(['libA', 'libB']);
+    expect(resourcesForA).toEqual(['libA', 'libB']);
+  });
+
+  it('merges the various tables for more than 2 threads properly', function() {
+    const { profile } = getProfileFromTextSamples(
+      'A[lib:libA]  B[lib:libA]',
+      'A[lib:libA]  A[lib:libB]  C[lib:libC]',
+      'A[lib:libA]  A[lib:libB]  D[lib:libD]'
+    );
+
+    const mergedThread = mergeThreads(profile.threads);
+
+    const mergedLibs = mergedThread.libs;
+    const mergedResources = mergedThread.resourceTable;
+    const mergedFunctions = mergedThread.funcTable;
+    const stringTable = mergedThread.stringTable;
+
+    expect(mergedLibs).toHaveLength(4);
+    expect(mergedResources).toHaveLength(4);
+    expect(mergedFunctions).toHaveLength(5);
+
+    // Now check that all functions are linked to the right resources.
+    // We should have 2 A functions, linked to 2 different resources.
+    // And we should have 1 B function, 1 C function and 1 D function.
+    const libsForA = [];
+    const resourcesForA = [];
+    const otherFunctions = [];
+    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
+      const funcName = stringTable.getString(mergedFunctions.name[funcIndex]);
+      const resourceIndex = mergedFunctions.resource[funcIndex];
+
+      let resourceName = '';
+      let libName = '';
+      if (resourceIndex >= 0) {
+        const nameIndex = mergedResources.name[resourceIndex];
+        if (nameIndex >= 0) {
+          resourceName = stringTable.getString(nameIndex);
+        }
+
+        const libIndex = mergedResources.lib[resourceIndex];
+        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
+          libName = mergedLibs[libIndex].name;
+        }
+      }
+
+      switch (funcName) {
+        case 'A':
+          libsForA.push(libName);
+          resourcesForA.push(resourceName);
+          break;
+        case 'B':
+          otherFunctions.push(funcName);
+          expect(libName).toBe('libA');
+          expect(resourceName).toBe('libA');
+          break;
+        case 'C':
+          otherFunctions.push(funcName);
+          expect(libName).toBe('libC');
+          expect(resourceName).toBe('libC');
+          break;
+        case 'D':
+          otherFunctions.push(funcName);
+          expect(libName).toBe('libD');
+          expect(resourceName).toBe('libD');
+          break;
+        default:
+      }
+    }
+
+    expect(libsForA).toEqual(['libA', 'libB']);
+    expect(resourcesForA).toEqual(['libA', 'libB']);
+    expect(otherFunctions).toEqual(['B', 'C', 'D']);
+  });
+
+  it('merges the marker tables properly', function() {
+    const profile = getProfileWithMarkers(
+      [
+        ['Thread1 Marker1', 2],
+        ['Thread1 Marker2', 3, 5],
+        [
+          'Thread1 Marker3',
+          6,
+          7,
+          { type: 'Log', name: 'test name 1', module: 'test module 1' },
+        ],
+      ],
+      [
+        ['Thread2 Marker1', 1],
+        ['Thread2 Marker2', 3, 4],
+        [
+          'Thread2 Marker3',
+          8,
+          9,
+          { type: 'Log', name: 'test name 2', module: 'test module 2' },
+        ],
+      ]
+    );
+
+    const mergedThread = mergeThreads(profile.threads);
+
+    const mergedMarkers = mergedThread.markers;
+    const mergedStringTable = mergedThread.stringTable;
+    expect(mergedMarkers).toHaveLength(6);
+    expect(mergedStringTable.serializeToArray()).toHaveLength(6);
+
+    const markerNames = [];
+    const markerStartTimes = [];
+    const markerEndTimes = [];
+    const markerPhases: MarkerPhase[] = [0, 1, 2, 3];
+    for (
+      let markerIndex = 0;
+      markerIndex < mergedMarkers.length;
+      markerIndex++
+    ) {
+      const markerNameIdx = mergedMarkers.name[markerIndex];
+
+      const markerStarTime = mergedMarkers.startTime[markerIndex];
+      const markerEndTime = mergedMarkers.endTime[markerIndex];
+      const markerName = mergedStringTable.getString(markerNameIdx);
+      markerNames.push(markerName);
+      markerStartTimes.push(markerStarTime);
+      markerEndTimes.push(markerEndTime);
+
+      // Check the rest here
+      expect(markerPhases).toContain(mergedMarkers.phase[markerIndex]);
+      expect(typeof mergedMarkers.category[markerIndex]).toBe('number');
+    }
+
+    expect(markerNames).toEqual([
+      'Thread1 Marker1',
+      'Thread1 Marker2',
+      'Thread1 Marker3',
+      'Thread2 Marker1',
+      'Thread2 Marker2',
+      'Thread2 Marker3',
+    ]);
+
+    // New marker table doesn't have to be sorted. Because we sort it while we
+    // are getting it from selector anyway.
+    expect(markerStartTimes).toEqual([2, 3, 6, 1, 3, 8]);
+    expect(markerEndTimes).toEqual([null, 5, 7, null, 4, 9]);
   });
 });
