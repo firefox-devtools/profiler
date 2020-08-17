@@ -7,7 +7,6 @@
    * We have to use `0px` instead of `0` because we are using this variable in
    * `calc` functions and they expect a pixel unit instead of an integer.
    */
-  /* stylelint-disable-next-line length-zero-no-unit */
   --thread-label-column-width: 0px;
 }
 

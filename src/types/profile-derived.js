@@ -213,7 +213,8 @@ export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
-  | {| +type: 'ipc', +threadIndex: ThreadIndex |};
+  | {| +type: 'ipc', +threadIndex: ThreadIndex |}
+  | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
@@ -380,4 +381,18 @@ export type ProfileFilterPageData = {|
 export type TracedTiming = {|
   +self: Float32Array,
   +running: Float32Array,
+|};
+
+/*
+ * Event delay table that holds the pre-processed event delay values and other
+ * statistics about it.
+ * Gecko sends the non processed event delay values to the front-end and we have
+ * to make a calculation to find out their real values. Also see:
+ * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
+ */
+export type EventDelayInfo = {|
+  +eventDelays: Milliseconds[],
+  +minDelay: Milliseconds,
+  +maxDelay: Milliseconds,
+  +delayRange: Milliseconds,
 |};

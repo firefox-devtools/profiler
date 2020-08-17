@@ -683,7 +683,9 @@ export type ProfileMeta = {|
     | 'X11'
     | string,
   // The widget toolkit used for GUI rendering.
-  toolkit?: 'gtk' | 'windows' | 'cocoa' | 'android' | string,
+  // Older versions of Firefox for Linux had the 2 flavors gtk2/gtk3, and so
+  // we could find the value "gtk3".
+  toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string,
 
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
   // in Firefox 62, and are optional because older processed profile

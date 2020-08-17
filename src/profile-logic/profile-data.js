@@ -48,9 +48,10 @@ import type {
   StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
+  EventDelayInfo,
 } from 'firefox-profiler/types';
 
-import { assertExhaustiveCheck } from '../utils/flow';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
@@ -1409,6 +1410,170 @@ export function accumulateCounterSamples(
   });
 
   return accumulatedSamples;
+}
+
+/**
+ * Pre-processing of raw eventDelay values.
+ *
+ * We don't do 16ms event injection for responsiveness values anymore. Instead,
+ * profiler records the time since running event blocked the input events. But
+ * this value is not enough to calculate event delays by itself. We need to process
+ * these values and turn them into event delays, which we can use for determining
+ * responsiveness later.
+ *
+ * For every event that gets enqueued, the delay time will go up by the event's
+ * running time at the time at which the event is enqueued. The delay function
+ * will be a sawtooth of the following shape:
+ *
+ *              |\           |...
+ *              | \          |
+ *         |\   |  \         |
+ *         | \  |   \        |
+ *      |\ |  \ |    \       |
+ *   |\ | \|   \|     \      |
+ *   | \|              \     |
+ *  _|                  \____|
+ *
+ * Calculate the delay of a new event added at time t: (run every sample)
+ *
+ *  TimeSinceRunningEventBlockedInputEvents = RunningEventDelay + (now - RunningEventStart);
+ *  effective_submission = now - TimeSinceRunningEventBlockedInputEvents;
+ *  delta = (now - last_sample_time);
+ *  last_sample_time = now;
+ *  for (t=effective_submission to now) {
+ *     delay[t] += delta;
+ *  }
+ *
+ * Note that TimeSinceRunningEventBlockedInputEvents is our eventDelay values in
+ * the profile. So we don't have to calculate this. It's calculated in the gecko side already.
+ *
+ * This first algorithm is not efficient because we are running this loop for each sample.
+ * Instead it can be reduced in overhead by:
+ *
+ *  TimeSinceRunningEventBlockedInputEvents = RunningEventDelay + (now - RunningEventStart);
+ *  effective_submission = now - TimeSinceRunningEventBlockedInputEvents;
+ *  if (effective_submission != last_submission) {
+ *    delta = (now - last_submission);
+ *    // this loop should be made to match each sample point in the range
+ *    // intead of assuming 1ms sampling as this pseudocode does
+ *    for (t=last_submission to effective_submission-1) {
+ *       delay[t] += delta;
+ *       delta -= 1; // assumes 1ms; adjust as needed to match for()
+ *    }
+ *    last_submission = effective_submission;
+ *  }
+ *
+ * In this algorithm, we are running this only if effective submission is changed.
+ * This reduces the calculation overhead a lot.
+ * So we used the second algorithm in this function to make it faster.
+ *
+ * For instance the processed eventDelay values will be something like this:
+ *
+ *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
+ *         |___|              |___|              |___|
+ *     A new event is    New event is enqueued   New event is enqueued
+ *     enqueued
+ *
+ * A more realistic and minimal example:
+ *  Unprocessed values
+ *
+ *   [0, 0, 1, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]
+ *          ^last submission           ^ effective submission
+ *
+ *  Will be converted to:
+ *
+ *   [0, 0, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+ *
+ * If you want to learn more about this eventDelay value on gecko side, see:
+ * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
+ */
+export function processEventDelays(
+  samples: SamplesTable,
+  interval: Milliseconds
+): EventDelayInfo {
+  if (!samples.eventDelay) {
+    throw new Error(
+      'processEventDelays step should not be called for older profiles'
+    );
+  }
+
+  const eventDelays: number[] = new Array(samples.length).fill(0);
+  const rawEventDelays = ensureExists(
+    samples.eventDelay,
+    'eventDelays field is not present in this profile'
+  );
+  let lastSubmission = samples.time[0];
+  let lastSubmissionIdx = 0;
+
+  // Skipping the first element because we don't have any sample of its past.
+  for (let i = 1; i < samples.length; i++) {
+    const currentEventDelay = rawEventDelays[i];
+    const nextEventDelay = rawEventDelays[i + 1] || 0; // it can be null or undefined (for the last element)
+    const now = samples.time[i];
+    if (currentEventDelay === null || currentEventDelay === undefined) {
+      // Ignore anything that's not numeric. This can happen if there is no responsiveness
+      // information, or if the sampler failed to collect a responsiveness value. This
+      // can happen intermittently.
+      //
+      // See Bug 1506226.
+      continue;
+    }
+
+    if (currentEventDelay < nextEventDelay) {
+      // The submission is still ongoing, we should get the next event delay
+      // value until the submission ends.
+      continue;
+    }
+
+    // This is a new submission
+    const sampleSinceBlockedEvents = Math.trunc(currentEventDelay / interval);
+    const effectiveSubmission = now - currentEventDelay;
+    const effectiveSubmissionIdx = i - sampleSinceBlockedEvents;
+
+    if (effectiveSubmissionIdx < 0) {
+      // Unfortunately submissions that were started before the profiler start
+      // time are not reliable because we don't have any sample data for earlier.
+      // Skipping it.
+      lastSubmission = now;
+      lastSubmissionIdx = i;
+      continue;
+    }
+
+    if (lastSubmissionIdx === effectiveSubmissionIdx) {
+      // Bail out early since there is nothing to do.
+      lastSubmission = effectiveSubmission;
+      lastSubmissionIdx = effectiveSubmissionIdx;
+      continue;
+    }
+
+    let delta = now - lastSubmission;
+    for (let j = lastSubmissionIdx + 1; j <= effectiveSubmissionIdx; j++) {
+      eventDelays[j] += delta;
+      delta -= samples.time[j + 1] - samples.time[j];
+    }
+
+    lastSubmission = effectiveSubmission;
+    lastSubmissionIdx = effectiveSubmissionIdx;
+  }
+
+  // We are done with processing the delays.
+  // Calculate min/max delay and delay range
+  let minDelay = Number.MAX_SAFE_INTEGER;
+  let maxDelay = 0;
+  for (const delay of eventDelays) {
+    if (delay) {
+      minDelay = Math.min(delay, minDelay);
+      maxDelay = Math.max(delay, maxDelay);
+    }
+  }
+  const delayRange = maxDelay - minDelay;
+
+  return {
+    eventDelays,
+    minDelay,
+    maxDelay,
+    delayRange,
+  };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

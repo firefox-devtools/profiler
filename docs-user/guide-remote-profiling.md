@@ -8,15 +8,15 @@ In order to do so, you need both your phone with the mobile Gecko-based browser,
 
 (The following is true as of February 2020.)
 
-You probably want to profile [Firefox Preview Nightly](https://play.google.com/store/apps/details?id=org.mozilla.fenix.nightly) from the Google Play Store. Read on for more details, or skip to the next section if you already know exactly which browser you want to profile.
+You probably want to profile [Firefox Preview Nightly](https://play.google.com/store/apps/details?id=org.mozilla.fenix) from the Google Play Store. Read on for more details, or skip to the next section if you already know exactly which browser you want to profile.
 
-Mozilla's current development efforts on mobile are focused on GeckoView and Firefox Preview (["Fenix"](https://github.com/mozilla-mobile/fenix)). You can [install a Nightly version of Fenix from the Google Play Store](https://play.google.com/store/apps/details?id=org.mozilla.fenix.nightly), or you can download the APK ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.mobile.fenix.v2.nightly.latest/artifacts/public/build/armeabi-v7a/geckoNightly/target.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.mobile.fenix.v2.nightly.latest/artifacts/public/build/arm64-v8a/geckoNightly/target.apk)). Firefox Preview Nightly is the preferred profiling target for the following reasons:
+Mozilla's current development efforts on mobile are focused on GeckoView and Firefox Preview (["Fenix"](https://github.com/mozilla-mobile/fenix)). You can [install a Nightly version of Fenix from the Google Play Store](https://play.google.com/store/apps/details?id=org.mozilla.fenix), or you can download the APK ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/mobile.v2.fenix.nightly.latest.armeabi-v7a/artifacts/public/build/armeabi-v7a/target.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/mobile.v2.fenix.nightly.latest.arm64-v8a/artifacts/public/build/arm64-v8a/target.apk)). Firefox Preview Nightly is the preferred profiling target for the following reasons:
 
  - It's the product we want to ship and are actively working on.
  - It uses a [recent](https://github.com/mozilla-mobile/android-components/blob/master/buildSrc/src/main/java/Gecko.kt#L9) version of Gecko and updates frequently and automatically.
  - It's a very usable browser.
 
-The other reasonable profiling target is something called ["GeckoView-example"](https://searchfox.org/mozilla-central/source/mobile/android/geckoview_example). This is a small Android app that is basically just a demo of GeckoView and doesn't have much UI. You can download the most recent GeckoView-example.apk ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-aarch64-opt/artifacts/public/build/geckoview_example.apk)) from TaskCluster, or you can compile Gecko yourself and [push Geckoview-example to the phone using `mach run`](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/for-gecko-engineers.html#geckoview-example-app) or [using Android Studio](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/geckoview-quick-start.html#build-using-android-studio). In fact, if you're working on Gecko, this is the most low-friction workflow if you want to quickly verify the performance impact of your changes on Android.
+The other reasonable profiling target is something called ["GeckoView-example"](https://searchfox.org/mozilla-central/source/mobile/android/geckoview_example). This is a small Android app that is basically just a demo of GeckoView and doesn't have much UI. You can download the most recent GeckoView-example.apk ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.shippable.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.shippable.latest.mobile.android-aarch64-opt/artifacts/public/build/geckoview_example.apk)) from TaskCluster, or you can compile Gecko yourself and [push Geckoview-example to the phone using `mach run`](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/for-gecko-engineers.html#geckoview-example-app) or [using Android Studio](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/geckoview-quick-start.html#build-using-android-studio). In fact, if you're working on Gecko, this is the most low-friction workflow if you want to quickly verify the performance impact of your changes on Android.
 
 In general, profiling Fenix is preferable over profiling GeckoView-example because you'll be able to see impact from Fenix-specific performance issues. If you're compiling and modifying Gecko locally, you can create a version of Fenix that uses your custom Gecko [by making a small tweak to a `local.properties` file](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/contributor/geckoview-quick-start.html#dependency-substiting-your-local-geckoview-into-a-mozilla-project) in your local clone of [the Fenix repository](https://github.com/mozilla-mobile/fenix).
 
@@ -102,9 +102,9 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 ### Startup profiling Fenix
 
-Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file. The filename depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix.nightly`.
+Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file. The filename depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix`.
 
- 1. Create a file with the name `org.mozilla.fenix.nightly-geckoview-config.yaml` on your desktop machine and content of the following form:
+ 1. Create a file with the name `org.mozilla.fenix-geckoview-config.yaml` on your desktop machine and content of the following form:
 
     ```
     env:
@@ -113,12 +113,12 @@ Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/andro
       MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
       MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
     ```
- 2. Push this file to the device with `adb push org.mozilla.fenix.nightly-geckoview-config.yaml /data/local/tmp/`.
- 3. Run `adb shell am set-debug-app --persistent org.mozilla.fenix.nightly` to make sure the file is respected.
+ 2. Push this file to the device with `adb push org.mozilla.fenix-geckoview-config.yaml /data/local/tmp/`.
+ 3. Run `adb shell am set-debug-app --persistent org.mozilla.fenix` to make sure the file is respected.
 
 From now on, whenever you open the Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
 
-You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.nightly-geckoview-config.yaml`.
+You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix-geckoview-config.yaml`.
 
 [Here's an example profile captured using this method](https://perfht.ml/3bKTFCG).
 
