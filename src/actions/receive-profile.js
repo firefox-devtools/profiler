@@ -185,8 +185,11 @@ export function finalizeProfileView(
         break;
       case 'active-tab':
         if (selectedThreadIndex === null) {
-          // Switch back over to the full view.
-          timelineTrackOrganization = { type: 'full' };
+          // Switch back over to the full view if selectedThreadIndex is not present.
+          // We check this here because if selectedThreadIndex is null, that means
+          // it's a new profile from Firefox directly and has no profile information
+          // encoded in the URL. But we only allow conversions from full view currently.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
         } else {
           // The url state says this is an active tab view. We should compute and
           // initialize the state relevant to that state.
