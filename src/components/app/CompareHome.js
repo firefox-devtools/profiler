@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 
+import { AppHeader } from './AppHeader';
 import { changeProfilesToCompare } from '../../actions/app';
 import explicitConnect from '../../utils/connect';
 import type { ConnectedProps } from '../../utils/connect';
@@ -43,10 +44,11 @@ class CompareHome extends PureComponent<Props, State> {
 
     return (
       <main className="compareHome">
-        <h1 className="compareHomeTitle">
+        <AppHeader />
+        <h2 className="photon-title-20">
           Enter the profile URLs that you’d like to compare
-        </h1>
-        <p>
+        </h2>
+        <p className="photon-body-20">
           The tool will extract the data from the selected track and range for
           each profile, and put them both on the same view to make them easy to
           compare.
