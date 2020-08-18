@@ -234,6 +234,7 @@ class TimelineTrackThread extends PureComponent<Props> {
         ) : (
           <ThreadStackGraph
             className="threadStackGraph"
+            trackName={trackName}
             interval={interval}
             thread={filteredThread}
             tabFilteredThread={tabFilteredThread}
