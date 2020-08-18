@@ -24,6 +24,7 @@ afterEach(() => {
   //
   // See https://github.com/facebook/jest/issues/7654
   jest.resetAllMocks();
+  jest.restoreAllMocks();
   jest.clearAllTimers();
   jest.useRealTimers();
 });
