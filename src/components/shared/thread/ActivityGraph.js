@@ -29,6 +29,7 @@ import type {
 
 export type Props = {|
   +className: string,
+  +trackName: string,
   +fullThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -264,7 +265,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
 
   render() {
     this._renderCanvas();
-    const { fullThread, categories } = this.props;
+    const { fullThread, categories, trackName } = this.props;
     const { hoveredSample, mouseX, mouseY } = this.state;
     return (
       <div
@@ -280,7 +281,10 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
           )}
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
-        />
+        >
+          <h2>Activity Graph for {trackName}</h2>
+          <p>This graph shows a visual chart of thread activity.</p>
+        </canvas>
         {hoveredSample === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents

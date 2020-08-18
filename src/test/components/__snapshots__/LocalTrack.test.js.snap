@@ -160,7 +160,15 @@ process: \\"tab\\" (222)"
             class="threadActivityGraphCanvas threadActivityGraphCanvas"
             height="400"
             width="400"
-          />
+          >
+            <h2>
+              Activity Graph for 
+              DOM Worker
+            </h2>
+            <p>
+              This graph shows a visual chart of thread activity.
+            </p>
+          </canvas>
         </div>
         <div
           class="timelineEmptyThreadIndicator"
