@@ -45,32 +45,6 @@
   box-shadow: 0.1em 0.1em 0 #bbb;
 }
 
-.homeTitle {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
-
-  /* Negative margin is here to compensate for the children's margins */
-  margin: 0 -0.2em 0.5em;
-}
-
-.homeTitleSlogan {
-  margin: 0 0.2em;
-}
-
-.homeTitleSubtext {
-  font-weight: normal;
-}
-
-.homeTitleGithubIcon {
-  margin: 0 0.2em;
-}
-
-.homeTitleGithubIcon svg {
-  vertical-align: middle;
-}
-
 .homeSectionItems {
   margin: 1em 0;
 }

@@ -1,0 +1,40 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.appHeader {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #ddd;
+
+  /* Negative margin is here to compensate for the children's margins */
+  margin: 0 -0.2em 0.5em;
+  font-size: 1.5em;
+}
+
+.appHeaderLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Note that :focus styles are defined in focus.css */
+.appHeaderLink:hover {
+  text-decoration: underline;
+}
+
+.appHeaderSlogan {
+  margin: 0 0.2em;
+}
+
+.appHeaderSubtext {
+  font-weight: normal;
+}
+
+.appHeaderGithubIcon {
+  margin: 0 0.2em;
+}
+
+.appHeaderGithubIcon svg {
+  vertical-align: middle;
+}
