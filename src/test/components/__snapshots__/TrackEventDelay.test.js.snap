@@ -3,7 +3,7 @@
 exports[`TrackEventDelay draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackEventDelayGraphDot"
-  style="left: 15.466666666666667px; top: 39.327586206896555px;"
+  style="left: 14.933333333333334px; top: 39.327586206896555px;"
 />
 `;
 
@@ -17,7 +17,7 @@ exports[`TrackEventDelay has a tooltip that matches the snapshot 1`] = `
     <span
       class="timelineTrackEventDelayTooltipNumber"
     >
-      36ms
+      37ms
     </span>
      event delay
   </div>
