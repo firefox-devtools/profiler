@@ -18,6 +18,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
+import { fireFullClick } from '../fixtures/utils';
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
 // We mock profile-store but we want the real error, so that we can simulate it.
@@ -141,7 +142,7 @@ describe('app/MenuButtons', function() {
       queryByText('Include preference values');
     const getPanel = () => getByTestId('MenuButtonsPublish-container');
     const clickAndRunTimers = where => {
-      fireEvent.click(where);
+      fireFullClick(where);
       jest.runAllTimers();
     };
 
@@ -322,7 +323,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
     const { container, getByText } = setup(profile);
     const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
-    fireEvent.click(metaInfoButton);
+    fireFullClick(metaInfoButton);
     jest.runAllTimers();
 
     expect(container.firstChild).toMatchSnapshot();
@@ -342,7 +343,7 @@ describe('<MenuButtonsMetaInfo>', function() {
     const { getByText, container } = setup(profile);
 
     const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
-    fireEvent.click(metaInfoButton);
+    fireFullClick(metaInfoButton);
     jest.runAllTimers();
 
     expect(container.firstChild).toMatchSnapshot();
@@ -362,7 +363,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
       // Open up the arrow panel for the test.
       const { getByText } = setupResult;
-      fireEvent.click(getByText('Firefox'));
+      fireFullClick(getByText('Firefox'));
       jest.runAllTimers();
 
       return setupResult;
@@ -375,7 +376,7 @@ describe('<MenuButtonsMetaInfo>', function() {
       });
 
       expect(getByText('Profile is symbolicated')).toBeTruthy();
-      getByText('Re-symbolicate profile').click();
+      fireFullClick(getByText('Re-symbolicate profile'));
       expect(resymbolicateProfile).toHaveBeenCalled();
     });
 
@@ -386,7 +387,7 @@ describe('<MenuButtonsMetaInfo>', function() {
       });
 
       expect(getByText('Profile is not symbolicated')).toBeTruthy();
-      getByText('Symbolicate profile').click();
+      fireFullClick(getByText('Symbolicate profile'));
       expect(resymbolicateProfile).toHaveBeenCalled();
     });
 

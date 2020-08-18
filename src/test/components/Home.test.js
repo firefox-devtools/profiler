@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
+import { fireFullClick } from '../fixtures/utils';
 
 // Provide a mechanism to overwrite the navigator.userAgent, which can't be set.
 const FIREFOX =
@@ -118,7 +119,7 @@ describe('app/Home', function() {
     });
     await findByTestId('home-enable-popup-instructions');
 
-    getByText('Enable Profiler Menu Button').click();
+    fireFullClick(getByText('Enable Profiler Menu Button'));
 
     // Respond back from the browser that the menu button was enabled.
     triggerResponse({

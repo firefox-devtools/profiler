@@ -23,6 +23,7 @@ import {
 
 import type { CallNodePath } from 'firefox-profiler/types';
 import { ensureExists } from '../../utils/flow';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('CallTreeSidebar', function() {
   function getProfileWithCategories() {
@@ -180,7 +181,7 @@ describe('CallTreeSidebar', function() {
     expect(queryByText('FakeSubCategoryC')).toBe(null);
 
     const layoutCategory = getByText('Layout');
-    layoutCategory.click();
+    fireFullClick(layoutCategory);
 
     getByText('FakeSubCategoryC');
 

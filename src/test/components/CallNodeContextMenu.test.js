@@ -7,7 +7,7 @@ import * as React from 'react';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
@@ -17,6 +17,7 @@ import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import copy from 'copy-to-clipboard';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('calltree/CallNodeContextMenu', function() {
   // Provide a store with a useful profile to assert context menu operations off of.
@@ -89,7 +90,7 @@ describe('calltree/CallNodeContextMenu', function() {
     fixtures.forEach(({ matcher, type }) => {
       it(`adds a transform for "${type}"`, function() {
         const { getState, getByText } = setup();
-        fireEvent.click(getByText(matcher));
+        fireFullClick(getByText(matcher));
         expect(
           selectedThreadSelectors.getTransformStack(getState())[0].type
         ).toBe(type);
@@ -104,7 +105,7 @@ describe('calltree/CallNodeContextMenu', function() {
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
       ).toHaveLength(1);
 
-      fireEvent.click(getByText('Expand all'));
+      fireFullClick(getByText('Expand all'));
 
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
@@ -115,7 +116,7 @@ describe('calltree/CallNodeContextMenu', function() {
     it('can look up functions on SearchFox', function() {
       const { getByText } = setup();
       jest.spyOn(window, 'open').mockImplementation(() => {});
-      fireEvent.click(getByText(/Searchfox/));
+      fireFullClick(getByText(/Searchfox/));
       expect(window.open).toBeCalledWith(
         'https://searchfox.org/mozilla-central/search?q=B',
         '_blank'
@@ -125,7 +126,7 @@ describe('calltree/CallNodeContextMenu', function() {
     it('can copy a function name', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
-      fireEvent.click(getByText('Copy function name'));
+      fireFullClick(getByText('Copy function name'));
       expect(copy).toBeCalledWith('B');
     });
 
@@ -148,14 +149,14 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup(store);
 
       // Copy is a mocked module, clear it both before and after.
-      fireEvent.click(getByText('Copy script URL'));
+      fireFullClick(getByText('Copy script URL'));
       expect(copy).toBeCalledWith('https://example.com/script.js');
     });
 
     it('can copy a stack', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
-      fireEvent.click(getByText('Copy stack'));
+      fireFullClick(getByText('Copy stack'));
       expect(copy).toBeCalledWith(`B\nA\n`);
     });
   });

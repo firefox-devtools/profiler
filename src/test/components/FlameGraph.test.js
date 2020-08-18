@@ -20,6 +20,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
@@ -64,7 +66,7 @@ describe('FlameGraph', function() {
     const { getByText, dispatch, getState } = setupFlameGraph();
     dispatch(changeInvertCallstack(true));
     expect(getInvertCallstack(getState())).toBe(true);
-    fireEvent.click(getByText(/Switch to the normal call stack/));
+    fireFullClick(getByText(/Switch to the normal call stack/));
     expect(getInvertCallstack(getState())).toBe(false);
   });
 
@@ -234,30 +236,22 @@ function setupFlameGraph() {
     return positioningOptions;
   }
 
+  const canvas = ensureExists(
+    container.querySelector('canvas'),
+    'The container should contain a canvas element.'
+  );
+
   function fireMouseEvent(eventName, options) {
-    fireEvent(
-      ensureExists(
-        container.querySelector('canvas'),
-        'The container should contain a canvas element.'
-      ),
-      getMouseEvent(eventName, options)
-    );
+    fireEvent(canvas, getMouseEvent(eventName, options));
   }
 
   // Note to a future developer: the x/y values can be derived from the
   // array returned by flushDrawLog().
   function rightClick(x: CssPixels, y: CssPixels) {
     const positioningOptions = getPositioningOptions(x, y);
-    const clickOptions = {
-      ...positioningOptions,
-      button: 2,
-      buttons: 2,
-    };
 
     fireMouseEvent('mousemove', positioningOptions);
-    fireMouseEvent('mousedown', clickOptions);
-    fireMouseEvent('mouseup', clickOptions);
-    fireMouseEvent('contextmenu', clickOptions);
+    fireFullContextMenu(canvas, positioningOptions);
     flushRafCalls();
   }
 
@@ -290,7 +284,7 @@ function setupFlameGraph() {
     );
 
   function clickMenuItem(strOrRegexp) {
-    fireEvent.click(getByText(strOrRegexp));
+    fireFullClick(getByText(strOrRegexp));
   }
 
   return {
