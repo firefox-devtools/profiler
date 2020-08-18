@@ -28,7 +28,10 @@ import {
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
 import { extractProfileTokenFromJwt } from '../utils/jwt';
-import { setHistoryReplaceState } from '../app-logic/url-handling';
+import {
+  setHistoryReplaceState,
+  withHistoryReplaceState,
+} from '../app-logic/url-handling';
 import { storeProfileData } from '../app-logic/published-profiles-store';
 
 import type {
@@ -212,6 +215,8 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       });
       // Grab the original pre-published state, so that we can revert back to it if needed.
       const prePublishedState = getState();
+      const isPreviouslyUnsaved =
+        getDataSource(prePublishedState) === 'from-addon';
 
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
@@ -283,6 +288,13 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
+        if (isPreviouslyUnsaved) {
+          // If we're going from the from-addon datasource, we'll replace the
+          // url state instead of pushing it, so that the back button can't go
+          // back to the "from-addon" state.
+          setHistoryReplaceState(true);
+        }
+
         // Update the UrlState so that we are sanitized.
         dispatch(
           profileSanitized(
@@ -302,17 +314,23 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         dispatch(viewProfile(profile));
         setHistoryReplaceState(false);
       } else {
-        dispatch(
-          profilePublished(
-            hash,
-            // Only include the pre-published state if we want to be able to revert
-            // the profile. If we are viewing from-addon, then it's only a single
-            // profile.
-            getDataSource(prePublishedState) === 'from-addon'
-              ? null
-              : prePublishedState
-          )
-        );
+        // If we're going from the from-addon datasource, we want to replace the
+        // url state instead of pushing it, so that the back button can't go
+        // back to the "from-addon" state.
+        // If we're publishing an already published profile, the profile token
+        // will change, and we'll display a revert button to go back, using the
+        // prepublishedState data. Because that data isn't 
+        withHistoryReplaceState(() => {
+          dispatch(
+            profilePublished(
+              hash,
+              // Only include the pre-published state if we want to be able to revert
+              // the profile. If we are viewing from-addon, then it's only a single
+              // profile.
+              isPreviouslyUnsaved ? null : prePublishedState
+            )
+          );
+        });
       }
 
       sendAnalytics({
