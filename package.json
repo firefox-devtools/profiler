@@ -86,7 +86,7 @@
     "@babel/preset-env": "^7.8.6",
     "@babel/preset-flow": "^7.8.3",
     "@babel/preset-react": "^7.8.3",
-    "@testing-library/react": "^10.4.7",
+    "@testing-library/react": "^10.4.8",
     "alex": "^7.1.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^26.3.0",
