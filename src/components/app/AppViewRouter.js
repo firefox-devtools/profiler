@@ -58,7 +58,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
           return <CompareHome />;
         }
         break;
-      case 'my-profiles':
+      case 'uploaded-recordings':
         return <ListOfPublishedProfiles />;
       case 'from-addon':
       case 'from-file':

@@ -1215,30 +1215,30 @@ describe('compare', function() {
   });
 });
 
-describe('my-profiles', function() {
-  it('unserializes my-profiles URLs', () => {
+describe('uploaded-recordings', function() {
+  it('unserializes uploaded-recordings URLs', () => {
     const store = _getStoreWithURL(
-      { pathname: '/my-profiles' },
+      { pathname: '/uploaded-recordings' },
       /* no profile */ null
     );
 
     expect(urlStateReducers.getDataSource(store.getState())).toEqual(
-      'my-profiles'
+      'uploaded-recordings'
     );
   });
 
-  it('serializes my-profiles URLs', () => {
+  it('serializes uploaded-recordings URLs', () => {
     const store = _getStoreWithURL({ pathname: '/' }, /* no profile */ null);
     const initialUrl = urlFromState(
       urlStateReducers.getUrlState(store.getState())
     );
     expect(initialUrl).toEqual('/');
 
-    store.dispatch(setDataSource('my-profiles'));
+    store.dispatch(setDataSource('uploaded-recordings'));
     const resultingUrl = urlFromState(
       urlStateReducers.getUrlState(store.getState())
     );
-    expect(resultingUrl).toEqual('/my-profiles/');
+    expect(resultingUrl).toEqual('/uploaded-recordings/');
   });
 });
 

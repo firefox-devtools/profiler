@@ -157,7 +157,7 @@ describe('app/AppViewRouter', function() {
     expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
   });
 
-  it('renders a my-profiles page when navigating to /my-profiles', () => {
+  it('renders a uploaded-recordings page when navigating to /uploaded-recordings', () => {
     const { container, navigateToMyProfiles } = setup();
     navigateToMyProfiles();
     expect(container.querySelector('list-of-published-profiles')).toBeTruthy();
@@ -220,7 +220,7 @@ function setup() {
 
   function navigateToMyProfiles() {
     const newUrlState = stateFromLocation({
-      pathname: '/my-profiles/',
+      pathname: '/uploaded-recordings/',
       hash: '',
       search: '',
     });

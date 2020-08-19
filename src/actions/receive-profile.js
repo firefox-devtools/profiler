@@ -1427,7 +1427,7 @@ export function getProfilesFromRawUrl(
         }
         break;
       }
-      case 'my-profiles':
+      case 'uploaded-recordings':
       case 'none':
       case 'from-file':
       case 'local':

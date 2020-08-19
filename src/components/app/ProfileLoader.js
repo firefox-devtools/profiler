@@ -72,7 +72,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
           retrieveProfilesToCompare(profilesToCompare);
         }
         break;
-      case 'my-profiles':
+      case 'uploaded-recordings':
       case 'none':
         // nothing to do
         break;

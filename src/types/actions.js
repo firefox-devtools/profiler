@@ -38,7 +38,7 @@ export type DataSource =
   | 'public'
   | 'from-url'
   | 'compare'
-  | 'my-profiles';
+  | 'uploaded-recordings';
 
 export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
