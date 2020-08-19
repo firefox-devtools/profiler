@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -31,7 +31,7 @@ describe('UrlManager', function() {
       },
       json: () =>
         Promise.resolve(
-          JSON.parse(serializeProfile(getProfileFromTextSamples('A').profile))
+          makeProfileSerializable(getProfileFromTextSamples('A').profile)
         ),
     }: any): Response);
     return fetch200Response;
@@ -82,6 +82,8 @@ describe('UrlManager', function() {
 
   it('sets up the URL', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     expect(getUrlSetupPhase(getState())).toBe('initial-load');
     createUrlManager();
 
@@ -90,13 +92,16 @@ describe('UrlManager', function() {
     await waitUntilUrlSetupPhase('done');
     expect(getUrlSetupPhase(getState())).toBe('done');
     expect(getDataSource(getState())).toMatch('none');
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('has no data source by default', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('sets the data source to from-addon', async function() {
@@ -114,11 +119,13 @@ describe('UrlManager', function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
       '/from-file/'
     );
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
+    expect(console.error).toHaveBeenCalled();
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function() {

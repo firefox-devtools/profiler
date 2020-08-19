@@ -1139,7 +1139,7 @@ async function _extractJsonFromResponse(
   }
 }
 
-function getProfileUrlForHash(hash: string): string {
+export function getProfileUrlForHash(hash: string): string {
   // See https://cloud.google.com/storage/docs/access-public-data
   // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
   // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
