@@ -9,7 +9,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import JsTracer from '../../components/js-tracer';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -18,6 +18,7 @@ import {
   getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
@@ -142,7 +143,7 @@ describe('StackChart', function() {
       events: simpleTracerEvents,
     });
     expect(getShowJsTracerSummary(getState())).toEqual(false);
-    fireEvent.click(getChangeJsTracerSummaryCheckbox());
+    fireFullClick(getChangeJsTracerSummaryCheckbox());
     expect(getShowJsTracerSummary(getState())).toEqual(true);
   });
 
@@ -151,7 +152,7 @@ describe('StackChart', function() {
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    fireEvent.click(getChangeJsTracerSummaryCheckbox());
+    fireFullClick(getChangeJsTracerSummaryCheckbox());
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 });

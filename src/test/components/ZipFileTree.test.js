@@ -6,14 +6,18 @@
 import * as React from 'react';
 import ZipFileViewer from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getBoundingBox, waitUntilState } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  waitUntilState,
+  fireFullClick,
+} from '../fixtures/utils';
 
 describe('calltree/ZipFileTree', function() {
   async function setup() {
@@ -106,7 +110,7 @@ describe('calltree/ZipFileTree', function() {
         waitUntilDoneProcessingZip,
         profileViewer,
       } = await setupClickingTest();
-      fireEvent.click(profile1OpenLink);
+      fireFullClick(profile1OpenLink);
       expect(UrlStateSelectors.getPathInZipFileFromUrl(getState())).toBe(
         'foo/bar/profile1.json'
       );
@@ -135,7 +139,7 @@ describe('calltree/ZipFileTree', function() {
         waitUntilDoneProcessingZip,
       } = await setupClickingTest();
 
-      fireEvent.click(profile1OpenLink);
+      fireFullClick(profile1OpenLink);
       await waitUntilDoneProcessingZip();
       expect(profileViewer()).toBeTruthy();
     });

@@ -8,7 +8,7 @@ import type { Profile, FileIoPayload } from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { oneLine } from 'common-tags';
 
 import {
@@ -26,9 +26,9 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
-  getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 
 import {
@@ -184,28 +184,16 @@ describe('timeline/TrackThread', function() {
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
     expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 1))
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 1));
     expect(getCallNodePath()).toEqual(['d', 'e', 'f']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
     expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', getFillRectCenterByIndex(log, 3))
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 3));
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
 
@@ -239,32 +227,20 @@ describe('timeline/TrackThread', function() {
     {
       const log = changeInvertCallstackAndGetDrawLog(true);
 
-      fireEvent(
-        stackGraphCanvas(),
-        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
-      );
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
       expect(getCallNodePath()).toEqual(['c']);
 
-      fireEvent(
-        stackGraphCanvas(),
-        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
-      );
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
       expect(getCallNodePath()).toEqual(['i']);
     }
     {
       // Switch back to "uninverted" mode
       const log = changeInvertCallstackAndGetDrawLog(false);
 
-      fireEvent(
-        stackGraphCanvas(),
-        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 0))
-      );
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
       expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-      fireEvent(
-        stackGraphCanvas(),
-        getMouseEvent('mouseup', getFillRectCenterByIndex(log, 2))
-      );
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
       expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
     }
   });
@@ -280,8 +256,7 @@ describe('timeline/TrackThread', function() {
     const log = ctx.__flushDrawLog();
 
     function clickAndGetMarkerName(event) {
-      fireEvent(markerCanvas(), getMouseEvent('mousedown', event));
-      fireEvent(markerCanvas(), getMouseEvent('mouseup', event));
+      fireFullClick(markerCanvas(), event);
       return getPreviewSelection(getState());
     }
 

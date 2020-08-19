@@ -11,6 +11,7 @@ import CompareHome from '../../components/app/CompareHome';
 import { getProfilesToCompare } from '../../selectors/url-state';
 
 import { blankStore } from '../fixtures/stores';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('app/CompareHome', () => {
   afterEach(cleanup);
@@ -41,7 +42,7 @@ describe('app/CompareHome', () => {
       target: { value: 'http://www.url12.com' },
     });
     const retrieveButton = getByText(/Retrieve/);
-    fireEvent.click(retrieveButton);
+    fireFullClick(retrieveButton);
 
     expect(getProfilesToCompare(getState())).toEqual([
       'http://www.url11.com',
