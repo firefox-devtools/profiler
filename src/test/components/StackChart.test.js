@@ -434,11 +434,7 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     const positioningOptions = getPositioningOptions(where);
 
     fireMouseEvent('mousemove', positioningOptions);
-    fireFullClick(stackChartCanvas, {
-      ...positioningOptions,
-      button: 0,
-      buttons: 0,
-    });
+    fireFullClick(stackChartCanvas, positioningOptions);
     flushRafCalls();
   }
 
