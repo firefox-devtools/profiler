@@ -5,7 +5,8 @@
 // @flow
 
 /**
- * jsdom doesn't really know about this API.
+ * jsdom's implementation of this API doesn't allow for assigning to the location, which
+ * we need to be able to do for certain tests.
  */
 export function mockWindowLocation(location: string = 'http://localhost') {
   // This is the internal state.
@@ -16,23 +17,73 @@ export function mockWindowLocation(location: string = 'http://localhost') {
   }
 
   const nativeLocation = Object.getOwnPropertyDescriptor(window, 'location');
+  function accessError() {
+    throw new Error(
+      'Setting properties for the window.location object is not supported with this mock.'
+    );
+  }
 
   // It seems node v8 doesn't let us change the value unless we delete it before.
   delete window.location;
-  // $FlowExpectError because the value we pass isn't a proper Location object.
-  Object.defineProperty(window, 'location', {
-    get() {
+
+  const property = {
+    get(): $Shape<Location> {
       return {
         ancestorOrigins: [],
-        href: location,
-        origin: url.origin,
-        protocol: url.protocol,
-        host: url.host,
-        hostname: url.hostname,
-        port: url.port,
-        pathname: url.pathname,
-        search: url.search,
-        hash: url.hash,
+        get href() {
+          return location;
+        },
+        get origin() {
+          return url.origin;
+        },
+        get protocol() {
+          return url.protocol;
+        },
+        get host() {
+          return url.host;
+        },
+        get hostname() {
+          return url.hostname;
+        },
+        get port() {
+          return url.port;
+        },
+        get pathname() {
+          return url.pathname;
+        },
+        get search() {
+          return url.search;
+        },
+        get hash() {
+          return url.hash;
+        },
+        set href(v) {
+          accessError();
+        },
+        set origin(v) {
+          accessError();
+        },
+        set protocol(v) {
+          accessError();
+        },
+        set host(v) {
+          accessError();
+        },
+        set hostname(v) {
+          accessError();
+        },
+        set port(v) {
+          accessError();
+        },
+        set pathname(v) {
+          accessError();
+        },
+        set search(v) {
+          accessError();
+        },
+        set hash(v) {
+          accessError();
+        },
         assign: setLocation,
         reload: jest.fn(),
         replace: jest.fn(setLocation),
@@ -41,7 +92,10 @@ export function mockWindowLocation(location: string = 'http://localhost') {
     },
     configurable: true,
     set: setLocation,
-  });
+  };
+
+  // $FlowExpectError because the value we pass isn't a proper Location object.
+  Object.defineProperty(window, 'location', property);
 
   // Return a function that resets the mock.
   return () => {
