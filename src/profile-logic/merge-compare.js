@@ -918,23 +918,33 @@ export function mergeThreads(threads: Thread[]): Thread {
 
   const { markerTable: newMarkers } = mergeMarkers(threads, newStringTable);
 
-  const processStartupTime = Math.min(
-    ...threads.map(thread => thread.processStartupTime)
-  );
-  const processShutdownTime = Math.max(
-    ...threads.map(thread => thread.processShutdownTime || Infinity)
-  );
-  const registerTime = Math.min(...threads.map(thread => thread.registerTime));
-  const unregisterTime = Math.max(
-    ...threads.map(thread => thread.unregisterTime || Infinity)
-  );
+  let processStartupTime = Infinity;
+  let processShutdownTime = -Infinity;
+  let registerTime = Infinity;
+  let unregisterTime = -Infinity;
+  for (const thread of threads) {
+    processStartupTime = Math.min(
+      thread.processStartupTime,
+      processStartupTime
+    );
+    processShutdownTime = Math.max(
+      thread.processShutdownTime || Infinity,
+      processShutdownTime
+    );
+    registerTime = Math.min(thread.registerTime, registerTime);
+    unregisterTime = Math.max(
+      thread.unregisterTime || Infinity,
+      unregisterTime
+    );
+  }
 
   const mergedThread = {
     processType: 'merged',
     processStartupTime,
-    processShutdownTime: processShutdownTime === 0 ? null : processShutdownTime,
+    processShutdownTime:
+      processShutdownTime === Infinity ? null : processShutdownTime,
     registerTime,
-    unregisterTime: unregisterTime === 0 ? null : unregisterTime,
+    unregisterTime: unregisterTime === Infinity ? null : unregisterTime,
     pausedRanges: [],
     name: 'Merged thread',
     pid: 'Merged thread',
