@@ -10,7 +10,7 @@ import {
   formatPlatform,
 } from '../../profile-logic/profile-metainfo';
 
-import './ProfileMetainfoSummary.css';
+import './ProfileMetaInfoSummary.css';
 
 type Props = {|
   +meta: {
@@ -23,18 +23,18 @@ type Props = {|
   },
 |};
 
-export function ProfileMetainfoSummary({ meta }: Props) {
+export function ProfileMetaInfoSummary({ meta }: Props) {
   const productAndVersion = formatProductAndVersion(meta);
   const platform = formatPlatform(meta);
   return (
-    <div className="profileMetainfoSummary">
+    <div className="profileMetaInfoSummary">
       <div
-        className="profileMetainfoSummaryProductAndVersion"
+        className="profileMetaInfoSummaryProductAndVersion"
         data-product={meta.product}
       >
         {productAndVersion}
       </div>
-      <div className="profileMetainfoSummaryPlatform" data-toolkit={platform}>
+      <div className="profileMetaInfoSummaryPlatform" data-toolkit={platform}>
         {platform}
       </div>
     </div>

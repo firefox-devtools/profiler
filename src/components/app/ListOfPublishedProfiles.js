@@ -13,7 +13,7 @@ import {
   type ProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
-import { ProfileMetainfoSummary } from 'firefox-profiler/components/shared/ProfileMetainfoSummary';
+import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/ProfileMetaInfoSummary';
 
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
 
@@ -97,7 +97,7 @@ function PublishedProfile({
           </strong>{' '}
           ({_formatRange(profileData.publishedRange)})
         </div>
-        <ProfileMetainfoSummary meta={profileData.meta} />
+        <ProfileMetaInfoSummary meta={profileData.meta} />
       </a>
     </li>
   );

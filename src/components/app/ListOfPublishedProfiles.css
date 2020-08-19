@@ -35,7 +35,7 @@
 }
 
 .publishedProfilesName,
-.publishedProfilesList .profileMetainfoSummary {
+.publishedProfilesList .profileMetaInfoSummary {
   padding-left: 10em;
 }
 
@@ -71,12 +71,12 @@
 }
 
 @media (min-width: 29rem) {
-  .publishedProfiles .profileMetainfoSummaryProductAndVersion,
-  .publishedProfiles .profileMetainfoSummaryPlatform {
+  .publishedProfiles .profileMetaInfoSummaryProductAndVersion,
+  .publishedProfiles .profileMetaInfoSummaryPlatform {
     flex: none;
   }
 
-  .publishedProfiles .profileMetainfoSummaryProductAndVersion {
+  .publishedProfiles .profileMetaInfoSummaryProductAndVersion {
     min-width: 8.5em; /* This tries to align the second element, but we allow it to grow if necessary */
   }
 }
