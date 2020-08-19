@@ -64,6 +64,10 @@ export const DATABASE_VERSION = 2;
 async function reallyOpen(): Promise<Database> {
   const db = await openDB(DATABASE_NAME, DATABASE_VERSION, {
     upgrade(db, oldVersion, newVersion, transaction) {
+      // In the following switch block, we don't "break" for each case block
+      // because we want to run all migration steps in sequence, starting with
+      // the right step.
+      /* eslint-disable no-fallthrough */
       switch (oldVersion) {
         case 0: {
           // Version 1: this is the first version of the DB.
@@ -72,17 +76,16 @@ async function reallyOpen(): Promise<Database> {
           });
           store.createIndex('originHostname', 'originHostname');
         }
-        /* fallthrough */
         case 1: {
           // Version 2: we create a new index to allow retrieving the values
           // ordered by date.
           const store = ensureExists(transaction.store);
           store.createIndex('publishedDate', 'publishedDate');
         }
-        /* fallthrough */
         default:
         // Nothing more here.
       }
+      /* eslint-enable */
     },
   });
 
