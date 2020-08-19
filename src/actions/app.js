@@ -23,7 +23,7 @@ import {
 import { sendAnalytics } from '../utils/analytics';
 import {
   stateFromLocation,
-  withHistoryReplaceState,
+  withHistoryReplaceStateSync,
 } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 import { fatalError } from './errors';
@@ -150,7 +150,7 @@ export function setupInitialUrlState(
     // setup is done, and lastly finalizes the profile view since everything is set up now.
     // All of this is done while the history is replaced, as this is part of the initial
     // load process.
-    withHistoryReplaceState(() => {
+    withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
       dispatch(urlSetupDone());
       dispatch(finalizeProfileView());
