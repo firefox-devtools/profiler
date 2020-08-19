@@ -13,6 +13,9 @@ import {
 import './ProfileMetaInfoSummary.css';
 
 type Props = {|
+  // We don't use ProfileMeta directly, because this is used also by the stored
+  // data in the local IndexedDB, which doesn't use ProfileMeta. Therefore we
+  // specify only the properties we use here.
   +meta: {
     +product: string,
     +misc?: string,
