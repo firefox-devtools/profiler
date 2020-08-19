@@ -38,6 +38,7 @@ type Props = {|
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
+  +trackName: string,
 |};
 
 class StackGraph extends PureComponent<Props> {
@@ -236,8 +237,9 @@ class StackGraph extends PureComponent<Props> {
 
   render() {
     this._renderCanvas();
+    const { className, trackName } = this.props;
     return (
-      <div className={this.props.className}>
+      <div className={className}>
         <canvas
           className={classNames(
             `${this.props.className}Canvas`,
@@ -245,7 +247,10 @@ class StackGraph extends PureComponent<Props> {
           )}
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
-        />
+        >
+          <h2>Stack Graph for {trackName}</h2>
+          <p>This graph charts the stack height of each sample.</p>
+        </canvas>
       </div>
     );
   }

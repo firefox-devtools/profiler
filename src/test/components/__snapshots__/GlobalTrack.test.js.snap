@@ -74,7 +74,15 @@ process: \\"tab\\" (222)"
             class="threadActivityGraphCanvas threadActivityGraphCanvas"
             height="400"
             width="400"
-          />
+          >
+            <h2>
+              Activity Graph for 
+              Content Process
+            </h2>
+            <p>
+              This graph shows a visual chart of thread activity.
+            </p>
+          </canvas>
         </div>
         <div
           class="timelineEmptyThreadIndicator"
@@ -128,7 +136,15 @@ process: \\"tab\\" (222)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  DOM Worker
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"
@@ -180,7 +196,15 @@ process: \\"tab\\" (222)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  Style
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"
@@ -265,7 +289,15 @@ process: \\"default\\" (5555)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  NoMain
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"

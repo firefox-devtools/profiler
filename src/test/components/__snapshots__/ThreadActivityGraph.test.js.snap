@@ -2547,7 +2547,15 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
       class="threadActivityGraphCanvas threadActivityGraphCanvas"
       height="10"
       width="80"
-    />
+    >
+      <h2>
+        Activity Graph for 
+        Test Track
+      </h2>
+      <p>
+        This graph shows a visual chart of thread activity.
+      </p>
+    </canvas>
   </div>
   <div
     class="timelineEmptyThreadIndicator"

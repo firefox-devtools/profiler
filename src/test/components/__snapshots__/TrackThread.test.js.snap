@@ -87,7 +87,15 @@ exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
       class="threadStackGraphCanvas threadStackGraphCanvas"
       height="50"
       width="400"
-    />
+    >
+      <h2>
+        Stack Graph for 
+        Test Track
+      </h2>
+      <p>
+        This graph charts the stack height of each sample.
+      </p>
+    </canvas>
   </div>
   <div
     class="timelineEmptyThreadIndicator"

@@ -106,6 +106,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       globalTrack,
       processesWithMemoryTrack,
       progressGraphData,
+      trackName,
     } = this.props;
     switch (globalTrack.type) {
       case 'process': {
@@ -125,6 +126,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
             threadIndex={mainThreadIndex}
             showMemoryMarkers={!processesWithMemoryTrack.has(globalTrack.pid)}
             trackType="expanded"
+            trackName={trackName}
           />
         );
       }
