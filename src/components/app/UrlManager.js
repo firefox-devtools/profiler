@@ -124,7 +124,7 @@ class UrlManager extends React.PureComponent<Props> {
     }
   }
 
-  _updateState() {
+  _updateState = () => {
     const { updateUrlState, show404, urlState: previousUrlState } = this.props;
     let newUrlState;
     if (window.history.state) {
@@ -161,11 +161,15 @@ class UrlManager extends React.PureComponent<Props> {
 
     // Update the Redux store.
     updateUrlState(newUrlState);
-  }
+  };
 
   componentDidMount() {
     this._processInitialUrls();
-    window.addEventListener('popstate', () => this._updateState());
+    window.addEventListener('popstate', this._updateState);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('popstate', () => this._updateState);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {

@@ -7,9 +7,7 @@ import { coerceMatchingShape } from '../../../utils/flow';
 
 /**
  * jsdom leaves the history in place after every test, so the history will be dirty.
- * Plus when we stop using a component it could still be subscribed to events, which
- * does not really reflect real-world use cases. This mock creates a history API
- * that can be thrown away after every use.
+ * This mock creates a history API that can be thrown away after every use.
  */
 export function mockWindowHistory() {
   const originalHistory = Object.getOwnPropertyDescriptor(window, 'history');
