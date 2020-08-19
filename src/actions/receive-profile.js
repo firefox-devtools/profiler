@@ -189,7 +189,7 @@ export function finalizeProfileView(
           // We check this here because if selectedThreadIndex is null, that means
           // it's a new profile from Firefox directly and has no profile information
           // encoded in the URL. But we only allow conversions from full view currently.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+          dispatch(finalizeFullProfileView(profile, null));
         } else {
           // The url state says this is an active tab view. We should compute and
           // initialize the state relevant to that state.
