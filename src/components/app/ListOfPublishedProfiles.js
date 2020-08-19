@@ -24,6 +24,12 @@ import './ListOfPublishedProfiles.css';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ONE_YEAR_IN_MS = 365 * ONE_DAY_IN_MS;
+
+// All formats are lazy-initialized at the first use by using the `memoize`
+// tool, because the DateTimeFormat constructor is slow.
+// Because there's no parameter to these functions there will only ever be
+// memoized once and should be fairly efficient. We can replace with a dedicated
+// "lazy" function in the future if performance ever becomes a problem.
 const dateFormats = {
   thisDay: memoize(
     () =>
