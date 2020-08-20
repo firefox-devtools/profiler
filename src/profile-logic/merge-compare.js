@@ -911,7 +911,7 @@ export function mergeThreads(threads: Thread[]): Thread {
   } = combineStackTables(null, translationMapsForFrames, threads);
 
   // Combine the samples for merging.
-  const { samples: newSamples } = combineSamplesForMerging(
+  const newSamples = combineSamplesForMerging(
     translationMapsForStacks,
     threads
   );
@@ -974,8 +974,7 @@ export function mergeThreads(threads: Thread[]): Thread {
 function combineSamplesForMerging(
   translationMapsForStacks: TranslationMapForStacks[],
   threads: Thread[]
-): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
-  const translationMaps = [new Map(), new Map()];
+): SamplesTable {
   const sampleTables = threads.map(thread => thread.samples);
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
@@ -1035,19 +1034,11 @@ function combineSamplesForMerging(
     ensureExists(newSamples.eventDelay).push(null);
     newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
 
-    translationMaps[selectedSamplesTableIndex].set(
-      oldSampleIndex,
-      newSamples.length
-    );
     newSamples.length++;
-
     sampleIndexes[selectedSamplesTableIndex]++;
   }
 
-  return {
-    samples: newSamples,
-    translationMaps,
-  };
+  return newSamples;
 }
 
 type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
