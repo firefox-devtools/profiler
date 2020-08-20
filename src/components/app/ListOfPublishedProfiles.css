@@ -58,11 +58,10 @@
  * for the first element.
  * We also add some more padding and change how the width is computed.
  *
- * 47em is 752px (there's a 16 multiplicator), 29em is 464px, which were the
- * right values when testing on Linux. Fonts are usually larger on Linux for
- * the profiler, so in other OSes we could decide that the value is too large,
- * but this is fine. */
-@media (min-width: 47rem) {
+ * 750px and 465px, seemed like the right values when testing on Linux. Fonts
+ * are usually larger on Linux for the profiler, so in other OSes we could
+ * decide that the value is too large, but this is fine. */
+@media (min-width: 750px) {
   .publishedProfiles {
     width: 75%;
     max-width: 1200px;
@@ -70,7 +69,7 @@
   }
 }
 
-@media (min-width: 29rem) {
+@media (min-width: 465px) {
   .publishedProfiles .profileMetaInfoSummaryProductAndVersion,
   .publishedProfiles .profileMetaInfoSummaryPlatform {
     flex: none;
