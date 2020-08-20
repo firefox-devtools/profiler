@@ -118,7 +118,8 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
     // It isn't ideal to use a setState here, but this is the only way.
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState({
-      profileDataList,
+      // We want to display the list with the most recent uploaded profile first.
+      profileDataList: profileDataList.reverse(),
     });
   }
 
