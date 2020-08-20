@@ -37,7 +37,9 @@ export type DataSource =
   | 'local'
   | 'public'
   | 'from-url'
-  | 'compare';
+  | 'compare'
+  | 'uploaded-recordings';
+
 export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}

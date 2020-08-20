@@ -46,6 +46,8 @@ export function formatProductAndVersion(meta: {
 // very inconsistent depending on the OS so we have very different code for each
 // of them. We may need to tweak this further when we'll deal with importers
 // too.
+// If you change something, please make sure that the CSS in
+// components/shared/ProfileMetaInfoSummary.css still works.
 export function formatPlatform(meta: {
   +platform?: string,
   +oscpu?: string,

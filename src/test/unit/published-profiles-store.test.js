@@ -1,0 +1,70 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// @flow
+
+// Main use cases of storing profiles are tested in the publish flow
+// (test/store/publish.test.js). In this file we'll test more specific cases.
+
+import 'fake-indexeddb/auto';
+import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+
+import {
+  storeProfileData,
+  listAllProfileData,
+  type ProfileData,
+} from 'firefox-profiler/app-logic/published-profiles-store';
+
+function resetIndexedDb() {
+  // This is the recommended way to reset the IDB state between test runs, but
+  // neither flow nor eslint like that we assign to indexedDB directly, for
+  // different reasons.
+  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
+  indexedDB = new FDBFactory();
+}
+beforeEach(resetIndexedDb);
+afterEach(resetIndexedDb);
+
+describe('published-profiles-store', function() {
+  async function storeGenericProfileData(overrides: $Shape<ProfileData>) {
+    const basicProfileData = {
+      profileToken: 'PROFILE-1',
+      jwtToken: null,
+      publishedDate: new Date(),
+      name: '',
+      preset: null,
+      originHostname: null,
+      meta: {
+        product: 'Firefox',
+      },
+      urlPath: '/',
+      publishedRange: { start: 1000, end: 3000 },
+    };
+
+    await storeProfileData({ ...basicProfileData, ...overrides });
+  }
+
+  it('retrieves a sorted list', async () => {
+    // 1. Store some profile data in an unsorted order.
+    await storeGenericProfileData({
+      profileToken: 'PROFILE-1',
+      publishedDate: new Date('2020-07-01'),
+    });
+    await storeGenericProfileData({
+      profileToken: 'PROFILE-2',
+      publishedDate: new Date('2018-07-01'),
+    });
+    await storeGenericProfileData({
+      profileToken: 'PROFILE-3',
+      publishedDate: new Date('2019-07-01'),
+    });
+    // 2. Retrieve the list and expect it's in the expected sorted order.
+    const listOfProfileData = await listAllProfileData();
+    expect(listOfProfileData).toEqual([
+      expect.objectContaining({ profileToken: 'PROFILE-2' }),
+      expect.objectContaining({ profileToken: 'PROFILE-3' }),
+      expect.objectContaining({ profileToken: 'PROFILE-1' }),
+    ]);
+  });
+});

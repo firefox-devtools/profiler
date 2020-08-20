@@ -80,6 +80,8 @@ function getPathParts(urlState: UrlState): string[] {
       return [];
     case 'compare':
       return ['compare'];
+    case 'uploaded-recordings':
+      return ['uploaded-recordings'];
     case 'from-addon':
       return ['from-addon', urlState.selectedTab];
     case 'from-file':
@@ -213,6 +215,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const { dataSource } = urlState;
   switch (dataSource) {
     case 'none':
+    case 'uploaded-recordings':
       return '';
     case 'compare':
       // Special handling for CompareHome: we shouldn't append the default
@@ -439,6 +442,7 @@ export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'uploaded-recordings':
       return str;
     default:
       throw new Error(`Unexpected data source ${str}`);
