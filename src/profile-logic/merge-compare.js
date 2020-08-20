@@ -910,7 +910,7 @@ export function mergeThreads(threads: Thread[]): Thread {
     translationMaps: translationMapsForStacks,
   } = combineStackTables(null, translationMapsForFrames, threads);
 
-  // Combine the samples for merging. This
+  // Combine the samples for merging.
   const { samples: newSamples } = combineSamplesForMerging(
     translationMapsForStacks,
     threads
@@ -976,58 +976,72 @@ function combineSamplesForMerging(
   threads: Thread[]
 ): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
-  const samples = threads.map(thread => thread.samples);
-  const sampleIndexes = Array(samples.length).fill(0);
-
+  const sampleTables = threads.map(thread => thread.samples);
+  // This is the array that holds the latest processed sample index for each
+  // thread's samplesTable.
+  const sampleIndexes = Array(sampleTables.length).fill(0);
+  // Creating a new empty samples table to fill.
   const newSamples = getEmptySamplesTableWithEventDelay();
 
   while (true) {
-    let selectedSamplesIndex: number | null = null;
+    let selectedSamplesTableIndex: number | null = null;
     let time = Infinity;
     // 1. Find out which sample to consume.
-    for (let samplesIndex = 0; samplesIndex < samples.length; samplesIndex++) {
-      const currentSamples = samples[samplesIndex];
-      const currentSamplesIndex = sampleIndexes[samplesIndex];
-      const currentSampleTime = currentSamples.time[currentSamplesIndex];
+    // Iterate over all the sample tables and pick the one with earliest sample.
+    // TODO: We have this for loop inside the while loop which makes this
+    // function's complexity O(n*m), where n is total sample count and m is the
+    // thread count to merge. Possibly we can try to make this faster by reducing
+    // the complexity.
+    for (
+      let sampleTablesIndex = 0;
+      sampleTablesIndex < sampleTables.length;
+      sampleTablesIndex++
+    ) {
+      const currentSamplesTable = sampleTables[sampleTablesIndex];
+      const currentSamplesIndex = sampleIndexes[sampleTablesIndex];
+      const currentSampleTime = currentSamplesTable.time[currentSamplesIndex];
       if (
-        currentSamplesIndex < currentSamples.length &&
+        currentSamplesIndex < currentSamplesTable.length &&
         currentSampleTime < time
       ) {
-        selectedSamplesIndex = samplesIndex;
+        selectedSamplesTableIndex = sampleTablesIndex;
         time = currentSampleTime;
       }
     }
 
-    if (selectedSamplesIndex === null) {
+    if (selectedSamplesTableIndex === null) {
       // All samples from every thread have been consumed.
       break;
     }
 
-    // 2. Add the earliest sampel to the new sample table.
-    const currentSamples = samples[selectedSamplesIndex];
-    const index: number = sampleIndexes[selectedSamplesIndex];
+    // 2. Add the earliest sample to the new sample table.
+    const currentSamplesTable = sampleTables[selectedSamplesTableIndex];
+    const oldSampleIndex: number = sampleIndexes[selectedSamplesTableIndex];
 
-    const stackIndex: number | null = currentSamples.stack[index];
+    const stackIndex: number | null = currentSamplesTable.stack[oldSampleIndex];
     const newStackIndex =
       stackIndex === null
         ? null
-        : translationMapsForStacks[selectedSamplesIndex].get(stackIndex);
+        : translationMapsForStacks[selectedSamplesTableIndex].get(stackIndex);
     if (newStackIndex === undefined) {
       throw new Error(stripIndent`
-          We couldn't find the stack of sample ${index} in the translation map.
+          We couldn't find the stack of sample ${oldSampleIndex} in the translation map.
           This is a programming error.
         `);
     }
     newSamples.stack.push(newStackIndex);
-    // It doesn't make sense to combine event delay values. We need to use junk markers
+    // It doesn't make sense to combine event delay values. We need to use jank markers
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
-    newSamples.time.push(currentSamples.time[index]);
+    newSamples.time.push(currentSamplesTable.time[oldSampleIndex]);
 
-    translationMaps[0].set(index, newSamples.length);
+    translationMaps[selectedSamplesTableIndex].set(
+      oldSampleIndex,
+      newSamples.length
+    );
     newSamples.length++;
 
-    sampleIndexes[selectedSamplesIndex]++;
+    sampleIndexes[selectedSamplesTableIndex]++;
   }
 
   return {
@@ -1039,7 +1053,7 @@ function combineSamplesForMerging(
 type TranslationMapForMarkers = Map<MarkerIndex, MarkerIndex>;
 
 /**
- * Merge markers from diffent threads. And update the new string table while doing it.
+ * Merge markers from different threads. And update the new string table while doing it.
  */
 function mergeMarkers(
   threads: Thread[],
