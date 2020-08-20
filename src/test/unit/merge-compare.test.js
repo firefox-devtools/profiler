@@ -12,7 +12,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
-import type { MarkerPhase } from 'firefox-profiler/types';
+import type { Thread } from 'firefox-profiler/types';
 
 describe('mergeProfilesForDiffing function', function() {
   it('merges the various tables properly in the diffing profile', function() {
@@ -169,6 +169,31 @@ describe('mergeProfilesForDiffing function', function() {
 });
 
 describe('mergeThreads function', function() {
+  function getFriendlyFuncLibResources(thread: Thread): string[] {
+    const { funcTable, resourceTable, stringTable, libs } = thread;
+    const strings = [];
+    for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+      const funcName = stringTable.getString(funcTable.name[funcIndex]);
+      const resourceIndex = funcTable.resource[funcIndex];
+
+      let resourceName = '';
+      let libName = '';
+      if (resourceIndex >= 0) {
+        const nameIndex = resourceTable.name[resourceIndex];
+        if (nameIndex >= 0) {
+          resourceName = stringTable.getString(nameIndex);
+        }
+
+        const libIndex = resourceTable.lib[resourceIndex];
+        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
+          libName = libs[libIndex].name;
+        }
+      }
+      strings.push(`${funcName} [${resourceName}:${libName}]`);
+    }
+    return strings;
+  }
+
   it('merges the various tables for 2 threads properly', function() {
     const { profile } = getProfileFromTextSamples(
       'A[lib:libA]  B[lib:libA]',
@@ -180,7 +205,6 @@ describe('mergeThreads function', function() {
     const mergedLibs = mergedThread.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
-    const stringTable = mergedThread.stringTable;
 
     expect(mergedLibs).toHaveLength(3);
     expect(mergedResources).toHaveLength(3);
@@ -189,45 +213,12 @@ describe('mergeThreads function', function() {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    const libsForA = [];
-    const resourcesForA = [];
-    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
-      const funcName = stringTable.getString(mergedFunctions.name[funcIndex]);
-      const resourceIndex = mergedFunctions.resource[funcIndex];
-
-      let resourceName = '';
-      let libName = '';
-      if (resourceIndex >= 0) {
-        const nameIndex = mergedResources.name[resourceIndex];
-        if (nameIndex >= 0) {
-          resourceName = stringTable.getString(nameIndex);
-        }
-
-        const libIndex = mergedResources.lib[resourceIndex];
-        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-          libName = mergedLibs[libIndex].name;
-        }
-      }
-
-      switch (funcName) {
-        case 'A':
-          libsForA.push(libName);
-          resourcesForA.push(resourceName);
-          break;
-        case 'B':
-          expect(libName).toBe('libA');
-          expect(resourceName).toBe('libA');
-          break;
-        case 'C':
-          expect(libName).toBe('libC');
-          expect(resourceName).toBe('libC');
-          break;
-        default:
-      }
-    }
-
-    expect(libsForA).toEqual(['libA', 'libB']);
-    expect(resourcesForA).toEqual(['libA', 'libB']);
+    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
+      'A [libA:libA]',
+      'B [libA:libA]',
+      'A [libB:libB]',
+      'C [libC:libC]',
+    ]);
   });
 
   it('merges the various tables for more than 2 threads properly', function() {
@@ -242,7 +233,6 @@ describe('mergeThreads function', function() {
     const mergedLibs = mergedThread.libs;
     const mergedResources = mergedThread.resourceTable;
     const mergedFunctions = mergedThread.funcTable;
-    const stringTable = mergedThread.stringTable;
 
     expect(mergedLibs).toHaveLength(4);
     expect(mergedResources).toHaveLength(4);
@@ -251,54 +241,13 @@ describe('mergeThreads function', function() {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, 1 C function and 1 D function.
-    const libsForA = [];
-    const resourcesForA = [];
-    const otherFunctions = [];
-    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
-      const funcName = stringTable.getString(mergedFunctions.name[funcIndex]);
-      const resourceIndex = mergedFunctions.resource[funcIndex];
-
-      let resourceName = '';
-      let libName = '';
-      if (resourceIndex >= 0) {
-        const nameIndex = mergedResources.name[resourceIndex];
-        if (nameIndex >= 0) {
-          resourceName = stringTable.getString(nameIndex);
-        }
-
-        const libIndex = mergedResources.lib[resourceIndex];
-        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-          libName = mergedLibs[libIndex].name;
-        }
-      }
-
-      switch (funcName) {
-        case 'A':
-          libsForA.push(libName);
-          resourcesForA.push(resourceName);
-          break;
-        case 'B':
-          otherFunctions.push(funcName);
-          expect(libName).toBe('libA');
-          expect(resourceName).toBe('libA');
-          break;
-        case 'C':
-          otherFunctions.push(funcName);
-          expect(libName).toBe('libC');
-          expect(resourceName).toBe('libC');
-          break;
-        case 'D':
-          otherFunctions.push(funcName);
-          expect(libName).toBe('libD');
-          expect(resourceName).toBe('libD');
-          break;
-        default:
-      }
-    }
-
-    expect(libsForA).toEqual(['libA', 'libB']);
-    expect(resourcesForA).toEqual(['libA', 'libB']);
-    expect(otherFunctions).toEqual(['B', 'C', 'D']);
+    expect(getFriendlyFuncLibResources(mergedThread)).toEqual([
+      'A [libA:libA]',
+      'B [libA:libA]',
+      'A [libB:libB]',
+      'C [libC:libC]',
+      'D [libD:libD]',
+    ]);
   });
 
   it('merges the marker tables properly', function() {
@@ -335,7 +284,6 @@ describe('mergeThreads function', function() {
     const markerNames = [];
     const markerStartTimes = [];
     const markerEndTimes = [];
-    const markerPhases: MarkerPhase[] = [0, 1, 2, 3];
     for (
       let markerIndex = 0;
       markerIndex < mergedMarkers.length;
@@ -349,10 +297,6 @@ describe('mergeThreads function', function() {
       markerNames.push(markerName);
       markerStartTimes.push(markerStarTime);
       markerEndTimes.push(markerEndTime);
-
-      // Check the rest here
-      expect(markerPhases).toContain(mergedMarkers.phase[markerIndex]);
-      expect(typeof mergedMarkers.category[markerIndex]).toBe('number');
     }
 
     expect(markerNames).toEqual([
