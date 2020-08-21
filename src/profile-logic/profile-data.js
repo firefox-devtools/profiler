@@ -1250,6 +1250,72 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  const {
+    threadCPUCycles,
+    threadKernelTime,
+    threadUserTime,
+    processCPUCycles,
+    processKernelTime,
+    processUserTime,
+    systemIdleCPUCycles,
+    systemIdleTime,
+    systemKernelTime,
+    systemUserTime,
+  } = samples;
+  if (
+    threadCPUCycles &&
+    threadKernelTime &&
+    threadUserTime &&
+    processCPUCycles &&
+    processKernelTime &&
+    processUserTime &&
+    systemIdleCPUCycles &&
+    systemIdleTime &&
+    systemKernelTime &&
+    systemUserTime
+  ) {
+    newSamples.threadCPUCycles = threadCPUCycles.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.threadKernelTime = threadKernelTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.threadUserTime = threadUserTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.processCPUCycles = processCPUCycles.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.processKernelTime = processKernelTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.processUserTime = processUserTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.systemIdleCPUCycles = systemIdleCPUCycles.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.systemIdleTime = systemIdleTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.systemKernelTime = systemKernelTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+    newSamples.systemUserTime = systemUserTime.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   const newThread: Thread = {
     ...thread,
     samples: newSamples,

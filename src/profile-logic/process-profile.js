@@ -828,6 +828,17 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
     time: geckoSamples.time,
     weightType: 'samples',
     weight: null,
+    // CPU usage related stuff
+    threadCPUCycles: geckoSamples.threadCPUCycles,
+    threadKernelTime: geckoSamples.threadKernelTime,
+    threadUserTime: geckoSamples.threadUserTime,
+    processCPUCycles: geckoSamples.processCPUCycles,
+    processKernelTime: geckoSamples.processKernelTime,
+    processUserTime: geckoSamples.processUserTime,
+    systemIdleCPUCycles: geckoSamples.systemIdleCPUCycles,
+    systemIdleTime: geckoSamples.systemIdleTime,
+    systemKernelTime: geckoSamples.systemKernelTime,
+    systemUserTime: geckoSamples.systemUserTime,
     length: geckoSamples.length,
   };
 

@@ -165,6 +165,17 @@ export type SamplesTable = {|
   // See the WeightType type for more information.
   weight: null | number[],
   weightType: WeightType,
+  // New values related to cpu usage.
+  threadCPUCycles?: Array<Milliseconds>,
+  threadKernelTime?: Array<Milliseconds>,
+  threadUserTime?: Array<Milliseconds>,
+  processCPUCycles?: Array<Milliseconds>,
+  processKernelTime?: Array<Milliseconds>,
+  processUserTime?: Array<Milliseconds>,
+  systemIdleCPUCycles?: Array<Milliseconds>,
+  systemIdleTime?: Array<Milliseconds>,
+  systemKernelTime?: Array<Milliseconds>,
+  systemUserTime?: Array<Milliseconds>,
   length: number,
 |};
 
