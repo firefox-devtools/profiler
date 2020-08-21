@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { Fragment, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
 import ProfileViewer from './ProfileViewer';
@@ -15,7 +15,6 @@ import { ProfileRootMessage } from './ProfileRootMessage';
 import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
-import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 import { assertExhaustiveCheck } from '../../utils/flow';
@@ -43,7 +42,7 @@ type AppViewRouterStateProps = {|
 type AppViewRouterProps = ConnectedProps<{||}, AppViewRouterStateProps, {||}>;
 
 class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
-  renderCurrentRoute() {
+  render() {
     const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
 
@@ -110,15 +109,6 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
           <Home specialMessage="The URL you came in on was not recognized." />
         );
     }
-  }
-
-  render() {
-    return (
-      <Fragment>
-        <ServiceWorkerManager />
-        {this.renderCurrentRoute()}
-      </Fragment>
-    );
   }
 }
 
