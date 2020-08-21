@@ -60,22 +60,22 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
     >
       <a
         class="publishedProfilesLink"
-        href="http://localhost//public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
+        href="http://localhost//public/MACOSX/marker-chart/"
       >
         <div
           class="publishedProfilesDate"
         >
-          May 20, 2018
+          Jul 5, 2020
         </div>
         <div
           class="publishedProfilesName"
         >
           <strong>
-            Profile #123abc
+            MacOS X profile
           </strong>
            
           (
-          0.0s
+          38.0s
           )
         </div>
         <div
@@ -83,15 +83,15 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
         >
           <div
             class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox Preview"
+            data-product="Firefox"
           >
-            Firefox Preview 80
+            Firefox 62
           </div>
           <div
             class="profileMetaInfoSummaryPlatform"
-            data-toolkit="Android 7"
+            data-toolkit="macOS 10.12"
           >
-            Android 7
+            macOS 10.12
           </div>
         </div>
       </a>
@@ -106,17 +106,17 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
         <div
           class="publishedProfilesDate"
         >
-          Jul 3, 8:00 AM
+          2:00 PM
         </div>
         <div
           class="publishedProfilesName"
         >
           <strong>
-            Layout profile
+            Profile #012345
           </strong>
            
           (
-          0.0s
+          2.0s
           )
         </div>
         <div
@@ -124,16 +124,14 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
         >
           <div
             class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox"
+            data-product="Fennec"
           >
-            Firefox 68
+            Fennec
           </div>
           <div
             class="profileMetaInfoSummaryPlatform"
-            data-toolkit="Linux"
-          >
-            Linux
-          </div>
+            data-toolkit=""
+          />
         </div>
       </a>
     </li>
@@ -188,56 +186,17 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
         <div
           class="publishedProfilesDate"
         >
-          2:00 PM
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesName"
         >
           <strong>
-            Profile #012345
+            Layout profile
           </strong>
            
           (
-          2.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
-        >
-          <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Fennec"
-          >
-            Fennec
-          </div>
-          <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit=""
-          />
-        </div>
-      </a>
-    </li>
-    <li
-      class="publishedProfilesListItem"
-    >
-      <a
-        class="publishedProfilesLink"
-        href="http://localhost//public/MACOSX/marker-chart/"
-      >
-        <div
-          class="publishedProfilesDate"
-        >
-          Jul 5, 2020
-        </div>
-        <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            MacOS X profile
-          </strong>
-           
-          (
-          38.0s
+          0.0s
           )
         </div>
         <div
@@ -247,13 +206,54 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
             class="profileMetaInfoSummaryProductAndVersion"
             data-product="Firefox"
           >
-            Firefox 62
+            Firefox 68
           </div>
           <div
             class="profileMetaInfoSummaryPlatform"
-            data-toolkit="macOS 10.12"
+            data-toolkit="Linux"
           >
-            macOS 10.12
+            Linux
+          </div>
+        </div>
+      </a>
+    </li>
+    <li
+      class="publishedProfilesListItem"
+    >
+      <a
+        class="publishedProfilesLink"
+        href="http://localhost//public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
+      >
+        <div
+          class="publishedProfilesDate"
+        >
+          May 20, 2018
+        </div>
+        <div
+          class="publishedProfilesName"
+        >
+          <strong>
+            Profile #123abc
+          </strong>
+           
+          (
+          0.0s
+          )
+        </div>
+        <div
+          class="profileMetaInfoSummary"
+        >
+          <div
+            class="profileMetaInfoSummaryProductAndVersion"
+            data-product="Firefox Preview"
+          >
+            Firefox Preview 80
+          </div>
+          <div
+            class="profileMetaInfoSummaryPlatform"
+            data-toolkit="Android 7"
+          >
+            Android 7
           </div>
         </div>
       </a>
