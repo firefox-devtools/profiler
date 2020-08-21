@@ -74,33 +74,35 @@ type PublishedProfileProps = {|
   +nowTimestamp: Milliseconds,
 |};
 
-function PublishedProfile({
-  profileData,
-  nowTimestamp,
-}: PublishedProfileProps) {
-  let { urlPath } = profileData;
-  if (!urlPath.startsWith('/')) {
-    urlPath = '/' + urlPath;
+class PublishedProfile extends React.PureComponent<PublishedProfileProps> {
+  render() {
+    const { profileData, nowTimestamp } = this.props;
+    let { urlPath } = profileData;
+    if (!urlPath.startsWith('/')) {
+      urlPath = '/' + urlPath;
+    }
+    const location = `${window.location.origin}/${urlPath}`;
+    return (
+      <li className="publishedProfilesListItem">
+        <a className="publishedProfilesLink" href={location}>
+          <div className="publishedProfilesDate">
+            {_formatDate(profileData.publishedDate, nowTimestamp)}
+          </div>
+          <div className="publishedProfilesInfo">
+            <div className="publishedProfilesName">
+              <strong>
+                {profileData.name
+                  ? profileData.name
+                  : `Profile #${profileData.profileToken.slice(0, 6)}`}
+              </strong>{' '}
+              ({_formatRange(profileData.publishedRange)})
+            </div>
+            <ProfileMetaInfoSummary meta={profileData.meta} />
+          </div>
+        </a>
+      </li>
+    );
   }
-  const location = `${window.location.origin}/${urlPath}`;
-  return (
-    <li className="publishedProfilesListItem">
-      <a className="publishedProfilesLink" href={location}>
-        <div className="publishedProfilesDate">
-          {_formatDate(profileData.publishedDate, nowTimestamp)}
-        </div>
-        <div className="publishedProfilesName">
-          <strong>
-            {profileData.name
-              ? profileData.name
-              : `Profile #${profileData.profileToken.slice(0, 6)}`}
-          </strong>{' '}
-          ({_formatRange(profileData.publishedRange)})
-        </div>
-        <ProfileMetaInfoSummary meta={profileData.meta} />
-      </a>
-    </li>
-  );
 }
 
 type Props = {|

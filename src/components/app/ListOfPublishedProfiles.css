@@ -8,32 +8,33 @@
   list-style: none;
 }
 
-.publishedProfilesDate {
-  position: absolute;
-}
-
-.publishedProfilesName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.publishedProfilesName,
-.publishedProfilesList .profileMetaInfoSummary {
-  padding-left: 10em;
-}
-
 .publishedProfilesListItem {
   padding: 0;
 }
 
 .publishedProfilesLink {
-  display: block;
-  padding: 5px;
+  display: flex;
+  padding: 4px 8px; /* 4px as vertical padding so that it's 8 when added up, and 8px for the left and right padddings */
   color: inherit;
   text-decoration: none;
 }
 
 .publishedProfilesLink:hover {
   background: var(--grey-90-a05);
+}
+
+.publishedProfilesDate {
+  width: 10em; /* The default flex properties make that it can shrink, so this is really the initial size. */
+  padding-right: 4px;
+  white-space: nowrap;
+}
+
+.publishedProfilesInfo {
+  min-width: 0;
+}
+
+.publishedProfilesName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
