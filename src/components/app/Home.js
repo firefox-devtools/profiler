@@ -339,16 +339,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-enable-popup-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <button
               type="button"
               className="homeSectionButton"
@@ -369,6 +368,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -381,16 +381,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-install-addon-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <InstallButton
               name="Gecko Profiler"
               className="homeSectionButton"
@@ -411,6 +410,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -423,16 +423,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-record-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <p>
-              <img
-                className="homeSectionScreenshot"
-                src={screenshotSrc}
-                alt="Screenshot of the profiler settings from the Firefox menu."
-              />
-            </p>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={screenshotSrc}
+            alt="Screenshot of the profiler settings from the Firefox menu."
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
             <p>
               To start profiling, click on the profiling button, or use the
@@ -448,6 +447,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -460,16 +460,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-other-browser-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
             <h2>How to view and record profiles</h2>
             <p>
@@ -483,6 +482,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );

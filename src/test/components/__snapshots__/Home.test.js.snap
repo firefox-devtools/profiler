@@ -5,22 +5,12 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
   class="homeInstructions"
   data-testid="home-enable-popup-instructions"
 >
-  <div
-    class="homeInstructionsLeft"
-  >
-    <div
-      style="text-align: center;"
-    >
-      <img
-        alt="screenshot of profiler.firefox.com"
-        class="homeSectionScreenshot"
-        src="test-file-stub"
-      />
-    </div>
-  </div>
-  <div
-    class="homeInstructionsRight"
-  >
+  <img
+    alt="screenshot of profiler.firefox.com"
+    class="homeSectionScreenshot"
+    src="test-file-stub"
+  />
+  <div>
     <button
       class="homeSectionButton"
       type="button"
@@ -140,22 +130,12 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         class="homeInstructions"
         data-testid="home-other-browser-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <div
-            style="text-align: center;"
-          >
-            <img
-              alt="screenshot of profiler.firefox.com"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </div>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="screenshot of profiler.firefox.com"
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="/docs/"
@@ -286,22 +266,12 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         class="homeInstructions"
         data-testid="home-install-addon-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <div
-            style="text-align: center;"
-          >
-            <img
-              alt="screenshot of profiler.firefox.com"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </div>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="screenshot of profiler.firefox.com"
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
@@ -433,20 +403,12 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         class="homeInstructions"
         data-testid="home-record-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <p>
-            <img
-              alt="Screenshot of the profiler settings from the Firefox menu."
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </p>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="Screenshot of the profiler settings from the Firefox menu."
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="/docs/"
@@ -541,20 +503,12 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
   class="homeInstructions homeTransition-enter homeTransition-enter-active"
   data-testid="home-record-instructions"
 >
-  <div
-    class="homeInstructionsLeft"
-  >
-    <p>
-      <img
-        alt="Screenshot of the profiler settings from the Firefox menu."
-        class="homeSectionScreenshot"
-        src="test-file-stub"
-      />
-    </p>
-  </div>
-  <div
-    class="homeInstructionsRight"
-  >
+  <img
+    alt="Screenshot of the profiler settings from the Firefox menu."
+    class="homeSectionScreenshot"
+    src="test-file-stub"
+  />
+  <div>
     <a
       class="homeSectionButton"
       href="/docs/"

@@ -56,6 +56,7 @@
   border: 1px solid #d1d1d1;
   border-radius: 0.4em;
   box-shadow: 0 2px 4px #ddd;
+  place-self: center;
 }
 
 .homeSectionButton {
@@ -136,26 +137,11 @@
   filter: grayscale(1) brightness(3);
 }
 
-.homeSectionPerfScreenshot {
-  width: 1346px;
-  max-width: 90%;
-  height: auto;
-  margin-top: 15px;
-  margin-bottom: -40px;
-}
-
 .homeInstructions {
-  display: flex;
+  display: grid;
   margin-top: 30px;
-}
-
-.homeInstructionsLeft,
-.homeInstructionsRight {
-  width: 50%;
-}
-
-.homeInstructionsRight {
-  padding-left: 30px;
+  gap: 30px;
+  grid-template-columns: 1fr 1fr;
 }
 
 .homeInstructionsTransitionGroup {
@@ -212,17 +198,7 @@ label.homeSectionButton:focus-within {
     padding: 3em;
   }
   .homeInstructions {
-    display: block;
-  }
-  .homeInstructionsLeft,
-  .homeInstructionsRight {
-    width: 100%;
-  }
-  .homeInstructionsLeft {
-    text-align: center;
-  }
-  .homeInstructionsRight {
-    padding-left: 0;
+    grid: none;
   }
 }
 
