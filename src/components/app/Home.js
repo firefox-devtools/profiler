@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import { AppHeader } from './AppHeader';
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
@@ -135,9 +136,7 @@ class ActionButtons extends React.PureComponent<
         </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
-        ) : (
-          <p>You can also drag and drop a profile file here to load it.</p>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -362,11 +361,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profile in Firefox, then analyze it and share it with
               profiler.firefox.com.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
           {/* end of grid container */}
         </div>
@@ -404,11 +398,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profile in Firefox, then analyze it and share it with
               profiler.firefox.com.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
           {/* end of grid container */}
         </div>
@@ -441,11 +430,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
           {/* end of grid container */}
         </div>
@@ -476,11 +460,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
               However, existing profiles can be viewed in any modern browser.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
           {/* end of grid container */}
         </div>
@@ -518,6 +497,32 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
+          <section className="homeAdditionalContent">
+            {/* Grid container: homeAdditionalContent */}
+            <h2 className="homeAdditionalContentTitle photon-title-30">
+              {/* Title: full width */}
+              Load existing profiles
+            </h2>
+            <section className="homeActions">
+              {/* Actions: left column */}
+              <p>
+                You can <strong>drag and drop</strong> a profile file here to
+                load it, or:
+              </p>
+              <ActionButtons
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+              />
+              <p>
+                You can also compare recordings.{' '}
+                <InnerNavigationLink dataSource="compare">
+                  Open the comparing interface.
+                </InnerNavigationLink>
+              </p>
+            </section>
+            {/* End of grid container */}
+          </section>
           <DragAndDropOverlay />
         </main>
       </div>

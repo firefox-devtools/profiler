@@ -59,6 +59,12 @@
   place-self: center;
 }
 
+.homeAdditionalContentTitle {
+  margin-top: 0;
+  margin-bottom: 10px;
+  grid-column: 1 / -1; /* from start to end */
+}
+
 .homeSectionButton {
   display: block;
   width: 100%;
@@ -137,10 +143,11 @@
   filter: grayscale(1) brightness(3);
 }
 
-.homeInstructions {
+.homeInstructions,
+.homeAdditionalContent {
   display: grid;
   margin-top: 30px;
-  gap: 30px;
+  column-gap: 30px;
   grid-template-columns: 1fr 1fr;
 }
 
@@ -197,6 +204,8 @@ label.homeSectionButton:focus-within {
     max-width: 80%;
     padding: 3em;
   }
+
+  .homeAdditionalContent,
   .homeInstructions {
     grid: none;
   }
