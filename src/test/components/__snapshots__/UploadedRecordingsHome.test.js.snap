@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ListOfPublishedProfiles matches a snapshot when rendering published profiles 1`] = `
+exports[`UploadedRecordingsHome matches a snapshot when rendering published profiles 1`] = `
 <main
-  class="publishedProfiles"
+  class="uploadedRecordingsHome"
 >
   <header>
     <h1
@@ -262,9 +262,9 @@ exports[`ListOfPublishedProfiles matches a snapshot when rendering published pro
 </main>
 `;
 
-exports[`ListOfPublishedProfiles matches a snapshot when there is no published profiles 1`] = `
+exports[`UploadedRecordingsHome matches a snapshot when there is no published profiles 1`] = `
 <main
-  class="publishedProfiles"
+  class="uploadedRecordingsHome"
 >
   <header>
     <h1

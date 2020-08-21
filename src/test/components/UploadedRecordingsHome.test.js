@@ -34,14 +34,11 @@ describe('UploadedRecordingsHome', () => {
         <UploadedRecordingsHome />
       </Provider>
     );
-    const { findByText } = renderResult;
-
-    const waitForFirstRender = () => findByText('Uploaded Recordings');
-    return { ...renderResult, waitForFirstRender };
+    return renderResult;
   }
   it('matches a snapshot when there is no published profiles', async () => {
-    const { container, waitForFirstRender } = setup();
-    await waitForFirstRender();
+    const { container, findByText } = setup();
+    await findByText(/No profile has been published/);
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -143,8 +140,8 @@ describe('UploadedRecordingsHome', () => {
     });
 
     // 2. Render the component and test.
-    const { container, waitForFirstRender } = setup();
-    await waitForFirstRender();
+    const { container, findByText } = setup();
+    await findByText(/macOS/);
 
     expect(container.firstChild).toMatchSnapshot();
   });
