@@ -8,6 +8,7 @@ import * as React from 'react';
 
 import { AppHeader } from './AppHeader';
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
+import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
@@ -520,6 +521,13 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
                   Open the comparing interface.
                 </InnerNavigationLink>
               </p>
+            </section>
+            <section>
+              {/* Recent recordings: right column */}
+              <h2 className="homeRecentUploadedRecordingsTitle photon-title-20">
+                Recent uploaded recordings
+              </h2>
+              <ListOfPublishedProfiles limit={3} />
             </section>
             {/* End of grid container */}
           </section>
