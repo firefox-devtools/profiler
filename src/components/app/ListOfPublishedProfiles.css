@@ -2,6 +2,32 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*
+ * This implements the layout of the list of recorded profiles. This is used in
+ * 2 locations: in the full uploaded recordings page, or as a small widget in
+ * the home page.
+ *
+ * This is a list, where each list item's layout is:
+ *
+ * /-----------------------------------------------------------------------------------------------------\
+ * | li.publishedProfilesListItem - This is one line in the list.                                        |
+ * | /-------------------------------------------------------------\ /---------------------------------\ |
+ * | | a.publishedProfilesLink                                     | | .publishedProfilesActionButtons | |
+ * | | /------------------------\ /------------------------------\ | |                                 | |
+ * | | | .publishedProfilesDate | | .publishedProfilesInfo       | | |                                 | |
+ * | | |                        | | /--------------------------\ | | |                                 | |
+ * | | |                        | | | .publishedProfilesName   | | | |  /---------------\              | |
+ * | | |                        | | \--------------------------/ | | |  | delete button |              | |
+ * | | |                        | | /--------------------------\ | | |  \---------------/              | |
+ * | | |                        | | | profile metainfo summary | | | |                                 | |
+ * | | |                        | | \--------------------------/ | | | Eventually we'll have more      | |
+ * | | \------------------------/ \------------------------------/ | | buttons here.                   | |
+ * | \-------------------------------------------------------------/ \---------------------------------/ |
+ * \-----------------------------------------------------------------------------------------------------/
+ *
+ * We use nested Flex boxes to achieve this layout.
+ */
+
 .publishedProfilesList {
   padding: 0;
   margin: 0;
@@ -9,18 +35,24 @@
 }
 
 .publishedProfilesListItem {
+  display: flex;
+  justify-content: space-between;
   padding: 0;
 }
 
 .publishedProfilesLink {
   display: flex;
+  min-width: 0;
+  flex: auto;
   padding: 4px 8px; /* 4px as vertical padding so that it's 8 when added up, and 8px for the left and right padddings */
   color: inherit;
   text-decoration: none;
 }
 
-.publishedProfilesLink:hover {
-  background: var(--grey-90-a05);
+.publishedProfilesListItem_ConfirmDialogIsOpen .publishedProfilesLink,
+.publishedProfilesListItem:hover .publishedProfilesLink,
+.publishedProfilesListItem:focus-within .publishedProfilesLink {
+  background: var(--grey-90-a10);
 }
 
 .publishedProfilesDate {
@@ -37,4 +69,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.publishedProfilesActionButtons {
+  display: flex;
+  align-self: center;
+  padding-left: 8px;
+
+  /* We use opacity so that it's still reachable with the keyboard, both
+   * backwards and forwards. Also with this technique this always stays in the
+   * accessibility tree. */
+  opacity: 0;
+}
+
+.publishedProfilesListItem_ConfirmDialogIsOpen .publishedProfilesActionButtons,
+.publishedProfilesListItem:hover .publishedProfilesActionButtons,
+.publishedProfilesListItem:focus-within .publishedProfilesActionButtons {
+  opacity: 1;
+}
+
+.publishedProfilesDeleteButton {
+  margin-left: 8px;
 }

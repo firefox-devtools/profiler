@@ -5,6 +5,7 @@
 .uploadedRecordingsHome {
   /* Box */
   width: 95%;
+  max-width: 900px;
   box-sizing: border-box;
   padding: 3em 1em;
   border: 1px solid #ccc;
@@ -22,18 +23,11 @@
  * for the first element.
  * We also add some more padding and change how the width is computed.
  *
- * 750px and 465px, seemed like the right values when testing on Linux. Fonts
+ * These values seemed like the right values when testing on Linux. Fonts
  * are usually larger on Linux for the profiler, so in other OSes we could
  * decide that the value is too large, but this is fine. */
-@media (min-width: 750px) {
-  .uploadedRecordingsHome {
-    width: 75%;
-    max-width: 1200px;
-    padding: 6em;
-  }
-}
 
-@media (min-width: 465px) {
+@media (min-width: 600px) {
   .uploadedRecordingsHome .profileMetaInfoSummaryProductAndVersion,
   .uploadedRecordingsHome .profileMetaInfoSummaryPlatform {
     flex: none;
@@ -41,5 +35,19 @@
 
   .uploadedRecordingsHome .profileMetaInfoSummaryProductAndVersion {
     min-width: 8.5em; /* This tries to align the second element, but we allow it to grow if necessary */
+  }
+}
+
+@media (min-width: 750px) {
+  .uploadedRecordingsHome {
+    width: 90%;
+    padding: 6%;
+  }
+}
+
+@media (min-width: 1000px) {
+  .uploadedRecordingsHome {
+    width: 75%;
+    padding: 6em;
   }
 }
