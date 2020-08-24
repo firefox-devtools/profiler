@@ -246,6 +246,12 @@ export function computeLocalTracksByPid(
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
     }
+
+    // TODO: Remove this code part of the code if you want to land this.
+    // This is for testing purpose.
+    if (thread.samples.threadCPUCycles) {
+      tracks.push({ type: 'cpu', threadIndex });
+    }
   }
 
   const { counters } = profile;
