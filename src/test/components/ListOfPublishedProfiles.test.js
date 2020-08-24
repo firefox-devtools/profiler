@@ -46,13 +46,16 @@ describe('ListOfPublishedProfiles', () => {
   });
 
   it('matches a snapshot when rendering published profiles', async () => {
-    mockDate('2020-07-04T15:00'); // Now is 4th of July, at 3pm UTC.
+    // Because the rendering is dependent on the timezone, all dates in this
+    // test are using a timezone-dependent format so that the rendering is the
+    // same in all timezones.
+    mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
 
     // 1. Add some profiles to the local indexeddb.
     await storeProfileData({
       profileToken: '0123456789',
       jwtToken: null,
-      publishedDate: new Date('2020-07-04T14:00'), // "today" earlier
+      publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
       name: '',
       preset: null,
       originHostname: null,
@@ -68,7 +71,7 @@ describe('ListOfPublishedProfiles', () => {
     await storeProfileData({
       profileToken: 'ABCDEFGHI',
       jwtToken: null,
-      publishedDate: new Date('2020-07-03T08:00'), // yesterday
+      publishedDate: new Date('3 Jul 2020 08:00'), // yesterday
       name: 'Layout profile',
       preset: 'web',
       originHostname: null,
@@ -86,7 +89,7 @@ describe('ListOfPublishedProfiles', () => {
     await storeProfileData({
       profileToken: '123abc456',
       jwtToken: null,
-      publishedDate: new Date('2018-05-20'), // ancient date
+      publishedDate: new Date('20 May 2018'), // ancient date
       name: '',
       preset: null,
       originHostname: 'https://www.cnn.com',
@@ -106,7 +109,7 @@ describe('ListOfPublishedProfiles', () => {
     await storeProfileData({
       profileToken: 'WINDOWS',
       jwtToken: null,
-      publishedDate: new Date('2020-07-04T13:00'),
+      publishedDate: new Date('4 Jul 2020 13:00'),
       name: 'Another good profile',
       preset: null,
       originHostname: 'https://profiler.firefox.com',
@@ -124,7 +127,7 @@ describe('ListOfPublishedProfiles', () => {
     await storeProfileData({
       profileToken: 'MACOSX',
       jwtToken: null,
-      publishedDate: new Date('2020-07-05T11:00'), // This is the future!
+      publishedDate: new Date('5 Jul 2020 11:00'), // This is the future!
       name: 'MacOS X profile',
       preset: null,
       originHostname: 'https://mozilla.org',
