@@ -29,49 +29,59 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 type State = {|
   isFocused: boolean,
+  // Every time the input is focused, it's recreated to consistently set the initial
+  // value.
+  focusGeneration: number,
 |};
 
 /**
  * Allow the user to rename profiles. These get persisted to the URL, and the document
  * title is updated with the new name. This component uses a button as a focus
- * target, but then switches to a text input when it is used.
+ * target, but then switches to a text input when it is used. This is done because
+ * the button can be dynamically sized according to its content (the default inactive
+ * state), and then when active, it switches to an input, which is only fixed in size.
  */
 class ProfileNameImpl extends React.PureComponent<Props, State> {
   state = {
     isFocused: false,
+    focusGeneration: 0,
   };
 
   inputRef = React.createRef();
 
-  onInputChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    const { changeProfileName } = this.props;
-    changeProfileName(e.currentTarget.value);
-  };
-
-  handleFinalChange() {
-    // Don't allow whitespace at the ends. This can be really weird if you leave a
-    // final space at the end.
-    const { changeProfileName, profileName } = this.props;
-    changeProfileName(profileName.trim());
-    this.setState({ isFocused: false });
+  blurInput() {
+    this.setState(state => ({
+      isFocused: false,
+      focusGeneration: state.focusGeneration++,
+    }));
   }
 
-  onInputBlur = () => {
-    this.handleFinalChange();
+  changeProfileNameIfChanged = (event: SyntheticEvent<HTMLInputElement>) => {
+    const { changeProfileName, profileName } = this.props;
+    const newProfileName = event.currentTarget.value.trim();
+
+    if (newProfileName !== profileName) {
+      changeProfileName(newProfileName);
+    }
   };
 
   blurOnEscapeOrEnter = (event: SyntheticKeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Escape' || event.key === 'Enter') {
-      this.handleFinalChange();
+    switch (event.key) {
+      case 'Escape': {
+        this.blurInput();
+        break;
+      }
+      case 'Enter': {
+        this.changeProfileNameIfChanged(event);
+        this.blurInput();
+        break;
+      }
+      default:
+      // Do nothing.
     }
   };
 
   handleButtonFocus = () => {
-    const { changeProfileName, profileName } = this.props;
-
-    // Initially ensure that the profile name is not null when first selecting.
-    changeProfileName(profileName);
-
     this.setState({ isFocused: true });
 
     const input = this.inputRef.current;
@@ -85,8 +95,8 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { isFocused } = this.state;
-    const { profileName, profileNameOrNull } = this.props;
+    const { isFocused, focusGeneration } = this.state;
+    const { profileName } = this.props;
     const title = 'Edit the profile name';
 
     return (
@@ -104,15 +114,15 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
           {profileName}
         </button>
         <input
+          key={focusGeneration}
           className="profileNameInput"
           style={{
             display: isFocused ? 'block' : 'none',
           }}
-          value={profileNameOrNull || ''}
+          defaultValue={profileName}
           aria-label="Profile name"
           title={title}
-          onBlur={this.onInputBlur}
-          onChange={this.onInputChange}
+          onBlur={this.changeProfileNameIfChanged}
           ref={this.inputRef}
           // Keypress won't
           onKeyDown={this.blurOnEscapeOrEnter}
@@ -125,7 +135,6 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 export const ProfileName = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profileName: getProfileName(state),
-    profileNameOrNull: getProfileNameOrNull(state),
   }),
   mapDispatchToProps: {
     changeProfileName,
