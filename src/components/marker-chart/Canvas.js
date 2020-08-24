@@ -118,7 +118,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           ? undefined
           : markerIndexToTimingRow.get(hoveredItem);
 
-      if (newRow !== undefined && rightClickedRow !== newRow) { 
+      if (newRow !== undefined && newRow !== rightClickedRow) { 
         /** 
          * To avoid multiple renders on the same row rectangle in canvas, first the row
          * is cleared and then redrawn on using the drawMarkers()         
