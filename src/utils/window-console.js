@@ -60,8 +60,17 @@ export function addDataToWindowObject(
   });
 
   target.experimental = {
-    async enableEventDelayTracks() {
-      await dispatch(actions.enableEventDelayTracks());
+    enableEventDelayTracks() {
+      const areEventDelayTracksEnabled = dispatch(
+        actions.enableEventDelayTracks()
+      );
+      if (areEventDelayTracksEnabled) {
+        console.log(stripIndent`
+          ✅ The event delay tracks are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
     },
   };
 
