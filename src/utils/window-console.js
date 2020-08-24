@@ -72,6 +72,16 @@ export function addDataToWindowObject(
         `);
       }
     },
+    enableCPUTracks() {
+      const areCPUTracksEnabled = dispatch(actions.enableCPUTracks());
+      if (areCPUTracksEnabled) {
+        console.log(stripIndent`
+          ✅ The CPU tracks are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
+    },
   };
 
   target.getState = getState;

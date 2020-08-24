@@ -245,6 +245,22 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/*
+ * This reducer hold the state for whether the event delay tracks are enabled.
+ * This way we can hide the event delay tracks by default and display if we
+ * change the state.
+ * TODO: change
+ * TODO: change the default value form true to false later since it should be disabled at first.
+ */
+const cpuTracks: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_CPU_TRACKS': {
+      return true;
+    }
+    default:
+      return state;
+  }
+};
 /**
  * Experimental features that are mostly disabled by default. You need to enable
  * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
@@ -254,6 +270,7 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
  */
 const experimental: Reducer<ExperimentalFlags> = combineReducers({
   eventDelayTracks,
+  cpuTracks,
 });
 
 const appStateReducer: Reducer<AppState> = combineReducers({

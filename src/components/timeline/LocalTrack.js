@@ -29,6 +29,7 @@ import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { TrackCPU } from './TrackCPU';
 import type {
   TrackReference,
   Pid,
@@ -140,6 +141,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackIPC threadIndex={localTrack.threadIndex} />;
       case 'event-delay':
         return <TrackEventDelay threadIndex={localTrack.threadIndex} />;
+      case 'cpu':
+        return <TrackCPU threadIndex={localTrack.threadIndex} />;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -214,7 +217,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         isSelected =
           selectedThreadIndexes.has(threadIndex) &&
           selectedTab !== 'network-chart' &&
-          selectedTab !== 'event-delay';
+          selectedTab !== 'event-delay' &&
+          selectedTab !== 'cpu';
         titleText = selectors.getThreadProcessDetails(state);
         break;
       }
@@ -250,6 +254,17 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
           selectedTab !== 'event-delay';
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
+        break;
+      }
+      case 'cpu': {
+        // Look up the thread information for the process if it exists.
+        const threadIndex = localTrack.threadIndex;
+        const selectedTab = getSelectedTab(state);
+        const selectors = getThreadSelectors(threadIndex);
+        isSelected =
+          threadIndex === selectedThreadIndexes.has(threadIndex) &&
+          selectedTab !== 'cpu';
+        titleText = 'CPU Usage of ' + selectors.getThreadProcessDetails(state);
         break;
       }
       default:

@@ -72,7 +72,8 @@ export const getExperimental: Selector<ExperimentalFlags> = state =>
   getApp(state).experimental;
 export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
   getExperimental(state).eventDelayTracks;
-
+export const getIsCPUTracksEnabled: Selector<boolean> = state =>
+  getExperimental(state).cpuTracks;
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;
 export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
@@ -274,6 +275,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   break;
                 case 'ipc':
                   height += TRACK_IPC_HEIGHT + border;
+                  break;
+                case 'cpu':
+                  height += TRACK_MEMORY_HEIGHT + border;
                   break;
                 default:
                   throw assertExhaustiveCheck(localTrack);

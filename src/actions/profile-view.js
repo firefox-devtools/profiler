@@ -350,6 +350,10 @@ export function selectTrack(
             selectedThreadIndex = localTrack.threadIndex;
             break;
           }
+          case 'cpu': {
+            selectedThreadIndex = localTrack.threadIndex;
+            break;
+          }
           default:
             throw assertExhaustiveCheck(
               localTrack,

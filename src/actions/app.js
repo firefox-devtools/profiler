@@ -14,6 +14,7 @@ import {
 import {
   getTrackThreadHeights,
   getIsEventDelayTracksEnabled,
+  getIsCPUTracksEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
   getActiveTabMainTrack,
@@ -30,6 +31,7 @@ import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
+  addCPUTracksForThreads,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
@@ -288,6 +290,54 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
     );
     dispatch({
       type: 'ENABLE_EVENT_DELAY_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
+    });
+
+    return true;
+  };
+}
+
+/*
+ * This action enables the CPU tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for average users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableCPUTracks()`
+ */
+export function enableCPUTracks(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsCPUTracksEnabled(getState())) {
+      console.error(
+        'Tried to enable the CPU tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    if (
+      selectedThreadSelectors.getSamplesTable(getState()).threadCPUCycles ===
+      undefined
+    ) {
+      // Return early if the profile doesn't have CPU values.
+      console.error(oneLine`
+        Tried to enable the CPU tracks, but this profile does
+        not have CPU sample values. It is likely an older profile.
+      `);
+      return false;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addCPUTracksForThreads(
+      getThreads(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+    dispatch({
+      type: 'ENABLE_CPU_TRACKS',
       localTracksByPid,
       localTrackOrderByPid,
     });

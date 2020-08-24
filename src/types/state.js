@@ -164,6 +164,7 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
  */
 export type ExperimentalFlags = {|
   +eventDelayTracks: boolean,
+  +cpuTracks: boolean,
 |};
 
 export type AppState = {|

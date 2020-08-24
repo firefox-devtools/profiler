@@ -11,6 +11,8 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
+import { ORANGE_50, BLUE_50, MAGENTA_50 } from 'photon-colors';
+import { formatMilliseconds } from '../utils/format-numbers';
 
 import type {
   Profile,
@@ -50,6 +52,7 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
+  CPUSamples,
 } from 'firefox-profiler/types';
 
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
@@ -1636,6 +1639,72 @@ export function processEventDelays(
     maxDelay,
     delayRange,
   };
+}
+
+/**
+ * TODO: write something
+ */
+export function getCPUSamples(samplesTable: SamplesTable): CPUSamples {
+  const cpuSamples = {
+    threadCPUCycles: {
+      min: 0,
+      max: 0,
+      range: 0,
+      samples: ensureExists(samplesTable.threadCPUCycles),
+      strokeStyle: ORANGE_50,
+      formatter: (val: number) => val,
+    },
+    threadKernelTime: {
+      min: 0,
+      max: 0,
+      range: 0,
+      samples: ensureExists(samplesTable.threadKernelTime),
+      strokeStyle: BLUE_50,
+      formatter: formatMilliseconds,
+    },
+    threadUserTime: {
+      min: 0,
+      max: 0,
+      range: 0,
+      samples: ensureExists(samplesTable.threadUserTime),
+      strokeStyle: MAGENTA_50,
+      formatter: formatMilliseconds,
+    },
+  };
+
+  for (let i = 0; i < samplesTable.length; i++) {
+    cpuSamples.threadCPUCycles.min = Math.min(
+      cpuSamples.threadCPUCycles.samples[i],
+      cpuSamples.threadCPUCycles.min
+    );
+    cpuSamples.threadCPUCycles.max = Math.max(
+      cpuSamples.threadCPUCycles.samples[i],
+      cpuSamples.threadCPUCycles.max
+    );
+    //////
+    cpuSamples.threadKernelTime.min = Math.min(
+      cpuSamples.threadKernelTime.samples[i],
+      cpuSamples.threadKernelTime.min
+    );
+    cpuSamples.threadKernelTime.max = Math.max(
+      cpuSamples.threadKernelTime.samples[i],
+      cpuSamples.threadKernelTime.max
+    );
+    //////
+    cpuSamples.threadUserTime.min = Math.min(
+      cpuSamples.threadUserTime.samples[i],
+      cpuSamples.threadUserTime.min
+    );
+    cpuSamples.threadUserTime.max = Math.max(
+      cpuSamples.threadUserTime.samples[i],
+      cpuSamples.threadUserTime.max
+    );
+  }
+
+  cpuSamples.threadCPUCycles.range =
+    cpuSamples.threadCPUCycles.max - cpuSamples.threadCPUCycles.min;
+
+  return cpuSamples;
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

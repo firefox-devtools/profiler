@@ -38,6 +38,7 @@ const LOCAL_TRACK_INDEX_ORDER = {
   memory: 2,
   ipc: 3,
   'event-delay': 4,
+  cpu: 5,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
@@ -45,6 +46,7 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
   thread: 2,
   ipc: 3,
   'event-delay': 4,
+  cpu: 5,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -299,6 +301,42 @@ export function addEventDelayTracksForThreads(
     }
 
     tracks.push({ type: 'event-delay', threadIndex });
+    newLocalTracksByPid.set(pid, tracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
+ * Take threads and add event delay tracks for them. Return the new
+ * localTracksByPid map.
+ * TODO: Update
+ */
+export function addCPUTracksForThreads(
+  threads: Thread[],
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  const newLocalTracksByPid = new Map();
+
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const thread = threads[threadIndex];
+    const { pid, samples } = thread;
+    if (!samples.threadCPUCycles) {
+      // It doesn't have a CPU info, can be a baseprofiler thread.
+      continue;
+    }
+    // Get or create the tracks and trackOrder.
+    let tracks = newLocalTracksByPid.get(pid);
+    if (tracks === undefined) {
+      tracks = localTracksByPid.get(pid);
+      if (tracks === undefined) {
+        tracks = [];
+      }
+      // copy it so we don't mutate the state
+      tracks = [...tracks];
+    }
+
+    tracks.push({ type: 'cpu', threadIndex });
     newLocalTracksByPid.set(pid, tracks);
   }
 
@@ -652,6 +690,11 @@ export function getLocalTrackName(
       return (
         getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
         ' Event Delay'
+      );
+    case 'cpu':
+      return (
+        getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
+        ' CPU Usage'
       );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');

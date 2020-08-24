@@ -200,6 +200,21 @@ export type AccumulatedCounterSamples = {|
   +accumulatedCounts: number[],
 |};
 
+type CPUSamplesSingle = {
+  +min: number,
+  +max: number,
+  +range: number,
+  +samples: number[],
+  +strokeStyle: string,
+  +formatter: (val: number) => number | string,
+};
+
+export type CPUSamples = {|
+  +threadCPUCycles: CPUSamplesSingle,
+  +threadKernelTime: CPUSamplesSingle,
+  +threadUserTime: CPUSamplesSingle,
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -214,7 +229,8 @@ export type LocalTrack =
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
   | {| +type: 'ipc', +threadIndex: ThreadIndex |}
-  | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
+  | {| +type: 'event-delay', +threadIndex: ThreadIndex |}
+  | {| +type: 'cpu', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;

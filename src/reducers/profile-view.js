@@ -94,6 +94,7 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
     case 'ENABLE_EVENT_DELAY_TRACKS':
+    case 'ENABLE_CPU_TRACKS':
       return action.localTracksByPid;
     default:
       return state;
