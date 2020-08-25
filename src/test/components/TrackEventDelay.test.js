@@ -32,10 +32,11 @@ const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable,
+  samplePosition
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
-  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
+  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
 }
 
 /**
@@ -80,10 +81,12 @@ describe('TrackEventDelay', function() {
       document.querySelector('.timelineTrackEventDelayTooltip');
     const getEventDelayDot = () =>
       container.querySelector('.timelineTrackEventDelayGraphDot');
-    const moveMouseAtEventDelay = index =>
+    const moveMouseAtEventDelay = (index, pos) =>
       fireEvent(
         canvas,
-        getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(index, pos),
+        })
       );
 
     return {
@@ -118,7 +121,7 @@ describe('TrackEventDelay', function() {
   it('can create a tooltip', function() {
     const { moveMouseAtEventDelay, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
-    moveMouseAtEventDelay(1);
+    moveMouseAtEventDelay(1, 0.5);
     expect(getTooltipContents()).toBeTruthy();
     fireEvent.mouseLeave(canvas);
     expect(getTooltipContents()).toBeFalsy();
@@ -126,20 +129,29 @@ describe('TrackEventDelay', function() {
 
   it('has a tooltip that matches the snapshot', function() {
     const { moveMouseAtEventDelay, getTooltipContents } = setup();
-    moveMouseAtEventDelay(5);
+    moveMouseAtEventDelay(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
   it('draws a dot on the graph', function() {
     const { moveMouseAtEventDelay, getEventDelayDot } = setup();
     expect(getEventDelayDot()).toBeFalsy();
-    moveMouseAtEventDelay(1);
+    moveMouseAtEventDelay(1, 0.5);
+    expect(getEventDelayDot()).toBeTruthy();
+  });
+
+  it('can draw a dot on both extremes of the graph', function() {
+    const { moveMouseAtEventDelay, getEventDelayDot } = setup();
+    expect(getEventDelayDot()).toBeFalsy();
+    moveMouseAtEventDelay(0, 0.25);
+    expect(getEventDelayDot()).toBeTruthy();
+    moveMouseAtEventDelay(8, 0);
     expect(getEventDelayDot()).toBeTruthy();
   });
 
   it('draws a dot that matches the snapshot', function() {
     const { moveMouseAtEventDelay, getEventDelayDot } = setup();
-    moveMouseAtEventDelay(1);
+    moveMouseAtEventDelay(1, 0.5);
     expect(getEventDelayDot()).toMatchSnapshot();
   });
 });

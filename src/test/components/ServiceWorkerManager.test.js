@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
 import ServiceWorkerManager from '../../components/app/ServiceWorkerManager';
@@ -22,6 +22,7 @@ import { ensureExists } from '../../utils/flow';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { fireFullClick } from '../fixtures/utils';
 
 // Mock the offline plugin library.
 jest.mock('offline-plugin/runtime', () => ({
@@ -128,7 +129,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container.firstChild).toMatchSnapshot();
 
       // Let's hide the notice.
-      fireEvent.click(getCloseButton());
+      fireFullClick(getCloseButton());
       expect(container.firstChild).toBe(null);
 
       // But getting a new update should display the notice again.
@@ -140,7 +141,7 @@ describe('app/ServiceWorkerManager', () => {
 
       // But let's do it now.
       const reloadButton = getReloadButton();
-      fireEvent.click(reloadButton);
+      fireFullClick(reloadButton);
 
       expect(serviceWorkerRuntime.applyUpdate).toHaveBeenCalled();
       expect(reloadButton.textContent).toBe('Installing…');

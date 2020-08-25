@@ -12,7 +12,7 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
@@ -20,7 +20,7 @@ import TrackThread from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
+import { getBoundingBox, fireFullClick } from '../fixtures/utils';
 
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
@@ -66,7 +66,11 @@ describe('ThreadActivityGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread threadIndex={0} trackType="expanded" />
+        <TrackThread
+          threadIndex={0}
+          trackType="expanded"
+          trackName="Test Track"
+        />
       </Provider>
     );
     const { container } = renderResult;
@@ -85,13 +89,10 @@ describe('ThreadActivityGraph', function() {
       index: IndexIntoSamplesTable,
       graphHeightPercentage: number
     ) {
-      fireEvent(
-        activityGraphCanvas,
-        getMouseEvent('mouseup', {
-          pageX: getSamplesPixelPosition(index),
-          pageY: GRAPH_HEIGHT * graphHeightPercentage,
-        })
-      );
+      fireFullClick(activityGraphCanvas, {
+        pageX: getSamplesPixelPosition(index),
+        pageY: GRAPH_HEIGHT * graphHeightPercentage,
+      });
     }
 
     // This function gets the selected call node path as a list of function names.

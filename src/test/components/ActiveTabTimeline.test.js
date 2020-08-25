@@ -10,12 +10,12 @@ import Timeline from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import { getBoundingBox, fireFullClick } from '../fixtures/utils';
 import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import {
@@ -150,7 +150,7 @@ describe('ActiveTabTimeline', function() {
     it('can select a thread by clicking the row', () => {
       const { getState, getGlobalTrackRow, threadIndex } = setup();
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireEvent.click(getGlobalTrackRow());
+      fireFullClick(getGlobalTrackRow());
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 
@@ -217,7 +217,7 @@ describe('ActiveTabTimeline', function() {
 
     it('matches the snapshot of a resources panel when opened', () => {
       const { container, getResourcesPanelHeader } = setup();
-      fireEvent.click(getResourcesPanelHeader());
+      fireFullClick(getResourcesPanelHeader());
       expect(container.firstChild).toMatchSnapshot();
     });
 
@@ -231,7 +231,7 @@ describe('ActiveTabTimeline', function() {
       const resourcesPanelHeader = getResourcesPanelHeader();
       expect(getResourceFrameTrack()).toBeFalsy();
 
-      fireEvent.click(resourcesPanelHeader);
+      fireFullClick(resourcesPanelHeader);
       expect(getResourceFrameTrack()).toBeTruthy();
     });
 
@@ -247,14 +247,14 @@ describe('ActiveTabTimeline', function() {
       expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
 
       // 1. Open the panel.
-      fireEvent.click(getResourcesPanelHeader());
+      fireFullClick(getResourcesPanelHeader());
       // 2. Select the reource track.
-      fireEvent.mouseUp(ensureExists(getResourceFrameTrack()));
+      fireFullClick(ensureExists(getResourceFrameTrack()));
       // Selected thread should be the resource now.
       expect(getSelectedThreadIndex(getState())).toBe(resourceThreadIndex);
 
       // 3. Close the panel.
-      fireEvent.click(getResourcesPanelHeader());
+      fireFullClick(getResourcesPanelHeader());
       // Now the main thread should be selected again.
       expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
     });
@@ -339,14 +339,14 @@ describe('ActiveTabTimeline', function() {
       it('can select a thread by clicking the label', () => {
         const { getState, getResourceFrameTrackLabel, threadIndex } = setup();
         expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-        fireEvent.mouseUp(getResourceFrameTrackLabel());
+        fireFullClick(getResourceFrameTrackLabel());
         expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
       });
 
       it('can select a thread by clicking the row', () => {
         const { getState, getResourceTrackRow, threadIndex } = setup();
         expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-        fireEvent.mouseUp(getResourceTrackRow());
+        fireFullClick(getResourceTrackRow());
         expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
       });
     });

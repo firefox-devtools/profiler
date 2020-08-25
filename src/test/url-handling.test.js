@@ -12,6 +12,7 @@ import {
   changeNetworkSearchString,
   changeProfileName,
   commitRange,
+  setDataSource,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -1211,6 +1212,33 @@ describe('compare', function() {
     );
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
+  });
+});
+
+describe('uploaded-recordings', function() {
+  it('unserializes uploaded-recordings URLs', () => {
+    const store = _getStoreWithURL(
+      { pathname: '/uploaded-recordings' },
+      /* no profile */ null
+    );
+
+    expect(urlStateReducers.getDataSource(store.getState())).toEqual(
+      'uploaded-recordings'
+    );
+  });
+
+  it('serializes uploaded-recordings URLs', () => {
+    const store = _getStoreWithURL({ pathname: '/' }, /* no profile */ null);
+    const initialUrl = urlFromState(
+      urlStateReducers.getUrlState(store.getState())
+    );
+    expect(initialUrl).toEqual('/');
+
+    store.dispatch(setDataSource('uploaded-recordings'));
+    const resultingUrl = urlFromState(
+      urlStateReducers.getUrlState(store.getState())
+    );
+    expect(resultingUrl).toEqual('/uploaded-recordings/');
   });
 });
 

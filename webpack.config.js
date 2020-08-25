@@ -79,14 +79,16 @@ const config = {
       template: 'res/index.html',
       favicon: 'res/img/favicon.png',
     }),
-    new CopyWebpackPlugin([
-      { from: 'res/_headers' },
-      { from: 'res/_redirects' },
-      { from: 'docs-user', to: 'docs' },
-      { from: 'res/zee-worker.js' },
-      { from: 'res/before-load.js' },
-      { from: 'res/contribute.json' },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'res/_headers' },
+        { from: 'res/_redirects' },
+        { from: 'docs-user', to: 'docs' },
+        { from: 'res/zee-worker.js' },
+        { from: 'res/before-load.js' },
+        { from: 'res/contribute.json' },
+      ],
+    }),
   ],
   entry: ['./src/index'],
   output: {

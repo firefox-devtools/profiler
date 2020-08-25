@@ -8,6 +8,7 @@ import { render } from '@testing-library/react';
 
 import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('app/ErrorBoundary', function() {
   const childComponentText = 'This is a child component';
@@ -56,7 +57,7 @@ describe('app/ErrorBoundary', function() {
     ).toBe(true);
 
     // Click the button to expand the details.
-    getByText('View full error details').click();
+    fireFullClick(getByText('View full error details'));
 
     // The technical error now exists.
     expect(

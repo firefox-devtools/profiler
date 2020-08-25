@@ -61,6 +61,7 @@ type OwnProps = {|
   +threadIndex: ThreadIndex,
   +trackType: 'expanded' | 'condensed',
   +showMemoryMarkers?: boolean,
+  +trackName: string,
 |};
 
 type StateProps = {|
@@ -166,6 +167,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       treeOrderSampleComparator,
       trackType,
       timelineTrackOrganization,
+      trackName,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -219,6 +221,7 @@ class TimelineTrackThread extends PureComponent<Props> {
         {timelineType === 'category' && !filteredThread.isJsTracer ? (
           <ThreadActivityGraph
             className="threadActivityGraph"
+            trackName={trackName}
             interval={interval}
             fullThread={fullThread}
             rangeStart={rangeStart}
@@ -231,6 +234,7 @@ class TimelineTrackThread extends PureComponent<Props> {
         ) : (
           <ThreadStackGraph
             className="threadStackGraph"
+            trackName={trackName}
             interval={interval}
             thread={filteredThread}
             tabFilteredThread={tabFilteredThread}

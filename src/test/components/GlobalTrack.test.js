@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import {
   changeSelectedThread,
@@ -20,10 +20,11 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
-
-const LEFT_CLICK = 0;
-const RIGHT_CLICK = 2;
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 
 describe('timeline/GlobalTrack', function() {
   /**
@@ -147,7 +148,7 @@ describe('timeline/GlobalTrack', function() {
       threadIndex,
     } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    fireEvent.mouseDown(getGlobalTrackLabel(), { button: LEFT_CLICK });
+    fireFullClick(getGlobalTrackLabel());
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
     expect(getGlobalTrackRow().classList.contains('selected')).toBe(true);
   });
@@ -160,7 +161,7 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
     } = setup();
 
-    fireEvent.mouseDown(getGlobalTrackLabel(), { button: RIGHT_CLICK });
+    fireFullContextMenu(getGlobalTrackLabel());
     expect(getRightClickedTrack(getState())).toEqual(trackReference);
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
@@ -168,7 +169,7 @@ describe('timeline/GlobalTrack', function() {
   it('can select a thread by clicking the row', () => {
     const { getState, getGlobalTrackRow, threadIndex } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    fireEvent.click(getGlobalTrackRow());
+    fireFullClick(getGlobalTrackRow());
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
   });
 

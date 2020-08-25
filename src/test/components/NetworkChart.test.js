@@ -36,6 +36,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -116,17 +118,6 @@ function setupWithProfile(profile) {
       `Couldn't find the context menu.`
     );
 
-  function rightClick(where) {
-    const clickOptions = {
-      button: 2,
-      buttons: 2,
-    };
-
-    fireEvent.mouseDown(where, clickOptions);
-    fireEvent.mouseUp(where, clickOptions);
-    fireEvent.contextMenu(where, clickOptions);
-  }
-
   return {
     ...renderResult,
     ...store,
@@ -139,7 +130,6 @@ function setupWithProfile(profile) {
     getPhaseElementStyles,
     rowItem,
     getContextMenu,
-    rightClick,
   };
 }
 
@@ -176,12 +166,12 @@ describe('NetworkChart', function() {
         endTime: 70,
       }),
     ];
-    const { getByText, getContextMenu, rightClick } = setupWithPayload(markers);
-    rightClick(getByText('/1'));
+    const { getByText, getContextMenu } = setupWithPayload(markers);
+    fireFullContextMenu(getByText('/1'));
 
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-    fireEvent.click(getByText('Copy URL'));
+    fireFullClick(getByText('Copy URL'));
     expect(copy).toHaveBeenLastCalledWith('https://mozilla.org/1');
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
@@ -676,12 +666,11 @@ describe('Network Chart/tooltip behavior', () => {
     const {
       rowItem,
       queryByTestId,
-      rightClick,
       getByText,
       getContextMenu,
     } = setupWithPayload(getNetworkMarkers());
 
-    rightClick(getByText('mozilla.org'));
+    fireFullContextMenu(getByText('mozilla.org'));
 
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 

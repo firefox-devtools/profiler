@@ -32,6 +32,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   findFillTextPositionFromDrawLog,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -338,18 +340,14 @@ describe('MarkerChart', function() {
 
       function rightClick(where: { x: CssPixels, y: CssPixels }) {
         const positioningOptions = getPositioningOptions(where);
-        const clickOptions = {
-          ...positioningOptions,
-          button: 2,
-          buttons: 2,
-        };
-
+        const canvas = ensureExists(
+          container.querySelector('canvas'),
+          `Couldn't find the canvas element`
+        );
         // Because different components listen to different events, we trigger
         // all the right events, to be as close as possible to the real stuff.
         fireMouseEvent('mousemove', positioningOptions);
-        fireMouseEvent('mousedown', clickOptions);
-        fireMouseEvent('mouseup', clickOptions);
-        fireMouseEvent('contextmenu', clickOptions);
+        fireFullContextMenu(canvas, positioningOptions);
         flushRafCalls();
       }
 
@@ -360,7 +358,7 @@ describe('MarkerChart', function() {
       }
 
       function clickOnMenuItem(stringOrRegexp) {
-        fireEvent.click(getByText(stringOrRegexp));
+        fireFullClick(getByText(stringOrRegexp));
       }
 
       function findFillTextPosition(

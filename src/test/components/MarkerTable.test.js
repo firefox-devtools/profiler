@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -22,7 +22,11 @@ import {
   getProfileWithMarkers,
   getMarkerTableProfile,
 } from '../fixtures/profiles/processed-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 
 describe('MarkerTable', function() {
   function setup(markers) {
@@ -62,20 +66,6 @@ describe('MarkerTable', function() {
         `Couldn't find the context menu.`
       );
 
-    // Because different components listen to different events, we trigger all
-    // the right events as part of click and rightClick actions.
-    const click = (element: HTMLElement) => {
-      fireEvent.mouseDown(element);
-      fireEvent.mouseUp(element);
-      fireEvent.click(element);
-    };
-
-    const rightClick = (element: HTMLElement) => {
-      fireEvent.mouseDown(element, { button: 2, buttons: 2 });
-      fireEvent.mouseUp(element, { button: 2, buttons: 2 });
-      fireEvent.contextMenu(element);
-    };
-
     return {
       ...renderResult,
       ...store,
@@ -83,8 +73,6 @@ describe('MarkerTable', function() {
       scrolledRows,
       getRowElement,
       getContextMenu,
-      click,
-      rightClick,
     };
   }
 
@@ -110,12 +98,12 @@ describe('MarkerTable', function() {
   });
 
   it('selects a row when left clicking', () => {
-    const { getByText, getRowElement, click } = setup();
+    const { getByText, getRowElement } = setup();
 
-    click(getByText(/setTimeout/));
+    fireFullClick(getByText(/setTimeout/));
     expect(getRowElement(/setTimeout/)).toHaveClass('isSelected');
 
-    click(getByText('foobar'));
+    fireFullClick(getByText('foobar'));
     expect(getRowElement(/setTimeout/)).not.toHaveClass('isSelected');
     expect(getRowElement('foobar')).toHaveClass('isSelected');
   });
@@ -123,17 +111,17 @@ describe('MarkerTable', function() {
   it('displays a context menu when right clicking', () => {
     jest.useFakeTimers();
 
-    const { getContextMenu, getRowElement, rightClick, getByText } = setup();
+    const { getContextMenu, getRowElement, getByText } = setup();
 
     function checkMenuIsDisplayedForNode(str) {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
-      fireEvent.click(getByText('Copy'));
+      fireFullClick(getByText('Copy'));
       expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(str));
     }
 
-    rightClick(getByText(/setTimeout/));
+    fireFullContextMenu(getByText(/setTimeout/));
     checkMenuIsDisplayedForNode(/setTimeout/);
     expect(getRowElement(/setTimeout/)).toHaveClass('isRightClicked');
 
@@ -141,8 +129,8 @@ describe('MarkerTable', function() {
     jest.runAllTimers();
 
     // Now try it again by right clicking 2 nodes in sequence.
-    rightClick(getByText(/setTimeout/));
-    rightClick(getByText('foobar'));
+    fireFullContextMenu(getByText(/setTimeout/));
+    fireFullContextMenu(getByText('foobar'));
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement(/setTimeout/)).not.toHaveClass('isRightClicked');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
@@ -152,8 +140,8 @@ describe('MarkerTable', function() {
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
-    rightClick(getByText('NotifyDidPaint'));
-    rightClick(getByText('foobar'));
+    fireFullContextMenu(getByText('NotifyDidPaint'));
+    fireFullContextMenu(getByText('foobar'));
     jest.runAllTimers();
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');

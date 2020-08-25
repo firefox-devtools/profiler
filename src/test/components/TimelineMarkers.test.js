@@ -24,6 +24,8 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { ensureExists } from '../../utils/flow';
@@ -81,7 +83,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   }
 
   function clickOnMenuItem(stringOrRegexp) {
-    fireEvent.click(renderResult.getByText(stringOrRegexp));
+    fireFullClick(renderResult.getByText(stringOrRegexp));
   }
 
   function fireMouseEvent(eventName, options) {
@@ -119,18 +121,15 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   // array returned by ctx.__flushDrawLog().
   function rightClick(where: { x: CssPixels, y: CssPixels }) {
     const positioningOptions = getPositioningOptions(where);
-    const clickOptions = {
-      ...positioningOptions,
-      button: 2,
-      buttons: 2,
-    };
+    const canvas = ensureExists(
+      renderResult.container.querySelector('canvas'),
+      `Couldn't find the canvas element`
+    );
 
     // Because different components listen to different events, we trigger
     // all the right events, to be as close as possible to the real stuff.
     fireMouseEvent('mousemove', positioningOptions);
-    fireMouseEvent('mousedown', clickOptions);
-    fireMouseEvent('mouseup', clickOptions);
-    fireMouseEvent('contextmenu', clickOptions);
+    fireFullContextMenu(canvas, positioningOptions);
 
     flushRafTwice();
   }

@@ -13,7 +13,7 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import {
   changeSelectedThread,
@@ -37,14 +37,16 @@ import {
   getStoreWithMemoryTrack,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
 // local tracks.
 const PID = 222;
-const LEFT_CLICK = 0;
-const RIGHT_CLICK = 2;
 
 describe('timeline/LocalTrack', function() {
   describe('with a thread track', function() {
@@ -79,7 +81,7 @@ describe('timeline/LocalTrack', function() {
         getLocalTrackRow,
       } = setupThreadTrack();
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireEvent.mouseDown(getLocalTrackLabel(), { button: LEFT_CLICK });
+      fireFullClick(getLocalTrackLabel());
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
       expect(getLocalTrackRow().classList.contains('selected')).toBe(true);
     });
@@ -92,7 +94,7 @@ describe('timeline/LocalTrack', function() {
         trackReference,
       } = setupThreadTrack();
 
-      fireEvent.mouseDown(getLocalTrackLabel(), { button: RIGHT_CLICK });
+      fireFullContextMenu(getLocalTrackLabel());
       expect(getRightClickedTrack(getState())).toEqual(trackReference);
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
@@ -100,7 +102,7 @@ describe('timeline/LocalTrack', function() {
     it('can select a thread by clicking the row', () => {
       const { getState, getLocalTrackRow, threadIndex } = setupThreadTrack();
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireEvent.click(getLocalTrackRow());
+      fireFullClick(getLocalTrackRow());
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 

@@ -282,3 +282,46 @@ export function findFillTextPositionFromDrawLog(
 
   return positions[0];
 }
+
+/**
+ * React Testing Library only sends one event at a time, but a lot of component logic
+ * assumes that events come in a natural cascade. This utility ensures that cascasde
+ * gets fired correctly. This also includes the fix to make properties like pageX work.
+ */
+export function fireFullClick(
+  element: HTMLElement,
+  options?: FakeMouseEventInit
+) {
+  fireEvent(element, getMouseEvent('mousedown', options));
+  fireEvent(element, getMouseEvent('click', options));
+  fireEvent(element, getMouseEvent('mouseup', options));
+}
+
+/**
+ * This utility will fire a full context menu event as a user would. The options
+ * paramter is optional. It will always add the `button` and `buttons` value to
+ * ensure that it is correct, unless the ctrlKey is specified, as that is a valid
+ * option in macOS to open a context menu.
+ */
+export function fireFullContextMenu(
+  element: HTMLElement,
+  options: FakeMouseEventInit = {}
+) {
+  const isMacContextMenu =
+    options.ctrlKey && !options.metaKey && !options.shiftKey && !options.altKey;
+
+  if (!isMacContextMenu) {
+    // Ensure that the `options` properties "button" and "buttons" have the correct
+    // values of 2, so that tests don't have to specify this. The only time this value
+    // would not be 2 is on a Mac context menu event.
+    options = {
+      ...options,
+      button: 2,
+      buttons: 2,
+    };
+  }
+
+  fireEvent(element, getMouseEvent('mousedown', options));
+  fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('contextmenu', options));
+}

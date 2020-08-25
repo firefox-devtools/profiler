@@ -82,13 +82,14 @@ class LocalTrackComponent extends PureComponent<Props> {
   };
 
   renderTrack() {
-    const { localTrack } = this.props;
+    const { localTrack, trackName } = this.props;
     switch (localTrack.type) {
       case 'thread':
         return (
           <TrackThread
             threadIndex={localTrack.threadIndex}
             trackType="expanded"
+            trackName={trackName}
           />
         );
       case 'network':

@@ -226,7 +226,22 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredDelay: null });
     } else {
-      let hoveredDelay = bisection.right(samples.time, timeAtMouse);
+      // When the mouse pointer hovers between two points, select the point that's closer.
+      let hoveredDelay;
+      const bisectionDelay = bisection.right(samples.time, timeAtMouse);
+      if (bisectionDelay > 0 && bisectionDelay < samples.time.length) {
+        const leftDistance = timeAtMouse - samples.time[bisectionDelay - 1];
+        const rightDistance = samples.time[bisectionDelay] - timeAtMouse;
+        if (leftDistance < rightDistance) {
+          // Left point is closer
+          hoveredDelay = bisectionDelay - 1;
+        } else {
+          // Right point is closer
+          hoveredDelay = bisectionDelay;
+        }
+      } else {
+        hoveredDelay = bisectionDelay;
+      }
       if (hoveredDelay === samples.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the

@@ -78,6 +78,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
             threadIndex={mainThreadIndex}
             showMemoryMarkers={false}
             trackType="expanded"
+            trackName="Active Tab"
           />
         );
       }

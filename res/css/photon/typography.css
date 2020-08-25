@@ -1,0 +1,64 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Specification at https://design.firefox.com/photon/visuals/typography.html */
+
+/* The idea is to use the same numbers for the same context (eg title 20 with
+ * body 20 and caption 20), and of course use the hierarchy of titles when
+ * needed.
+ *
+ * When using these styles one has to take care to colors and margins as well.
+ * Margins are well described in
+ * https://design.firefox.com/photon/visuals/grid.html.
+ *
+ * In the future we may want to make this more generic by applying these styles
+ * by default to h1, h2, h3, etc.
+ */
+
+.photon-display-20 {
+  font-size: 36px;
+  font-weight: 200;
+}
+
+.photon-title-40 {
+  font-size: 28px;
+  font-weight: 300;
+}
+
+.photon-title-30 {
+  font-size: 22px;
+  font-weight: 300;
+}
+
+.photon-title-20 {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.photon-title-10 {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.photon-body-30 {
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.photon-body-20,
+.photon-caption-30 {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.photon-body-10,
+.photon-caption-20 {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.photon-caption-10 {
+  font-size: 11px;
+  font-weight: 400;
+}

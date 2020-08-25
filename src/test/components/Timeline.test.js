@@ -5,13 +5,17 @@
 // @flow
 import * as React from 'react';
 import Timeline from '../../components/timeline';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import { getTimelineTrackOrganization } from '../../selectors/url-state';
 import { getRightClickedTrack } from '../../selectors/profile';
@@ -157,13 +161,13 @@ describe('Timeline', function() {
         type: 'full',
       });
 
-      fireEvent.click(getByText('Show active tab only'));
+      fireFullClick(getByText('Show active tab only'));
       expect(getTimelineTrackOrganization(store.getState())).toEqual({
         type: 'active-tab',
         browsingContextID: 123,
       });
 
-      fireEvent.click(getByText('Show active tab only'));
+      fireFullClick(getByText('Show active tab only'));
       expect(getTimelineTrackOrganization(store.getState())).toEqual({
         type: 'full',
       });
@@ -187,15 +191,13 @@ describe('Timeline', function() {
 
       expect(getRightClickedTrack(store.getState())).toEqual(null);
 
-      fireEvent.mouseDown(getByRole('button', { name: 'Process 0' }), {
-        button: 2,
-      });
+      fireFullContextMenu(getByRole('button', { name: 'Process 0' }));
       expect(getRightClickedTrack(store.getState())).toEqual({
         trackIndex: 0,
         type: 'global',
       });
 
-      fireEvent.click(getByText('/ tracks visible'));
+      fireFullClick(getByText('/ tracks visible'));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
     });
   });

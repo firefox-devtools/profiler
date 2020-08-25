@@ -39,6 +39,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   findFillTextPositionFromDrawLog,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
@@ -219,7 +221,7 @@ describe('MarkerChart', function() {
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
     expect(getCheckedState(checkbox)).toBe(false);
 
-    checkbox.click();
+    fireFullClick(checkbox);
 
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
     expect(getCheckedState(checkbox)).toBe(true);
@@ -284,7 +286,7 @@ function getUserTiming(name: string, startTime: number, duration: number) {
 function showUserTimings({ ctx, getByLabelText, flushRafCalls }) {
   ctx.__flushDrawLog();
   const checkbox = getByLabelText('Show user timing');
-  checkbox.click();
+  fireFullClick(checkbox);
   flushRafCalls();
 }
 
@@ -430,31 +432,17 @@ function setup(profile: Profile, funcNames: string[] = []): * {
   // Use findFillTextPosition to determin the position.
   function leftClick(where: Position) {
     const positioningOptions = getPositioningOptions(where);
-    const clickOptions = {
-      ...positioningOptions,
-      button: 0,
-      buttons: 0,
-    };
 
     fireMouseEvent('mousemove', positioningOptions);
-    fireMouseEvent('mousedown', clickOptions);
-    fireMouseEvent('mouseup', clickOptions);
-    fireMouseEvent('click', clickOptions);
+    fireFullClick(stackChartCanvas, positioningOptions);
     flushRafCalls();
   }
 
   function rightClick(where: Position) {
     const positioningOptions = getPositioningOptions(where);
-    const clickOptions = {
-      ...positioningOptions,
-      button: 2,
-      buttons: 2,
-    };
 
     fireMouseEvent('mousemove', positioningOptions);
-    fireMouseEvent('mousedown', clickOptions);
-    fireMouseEvent('mouseup', clickOptions);
-    fireMouseEvent('contextmenu', clickOptions);
+    fireFullContextMenu(stackChartCanvas, positioningOptions);
     flushRafCalls();
   }
 
@@ -470,7 +458,7 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     );
 
   function clickMenuItem(strOrRegexp) {
-    fireEvent.click(getByText(strOrRegexp));
+    fireFullClick(getByText(strOrRegexp));
   }
 
   function findFillTextPosition(fillText: string): Position {

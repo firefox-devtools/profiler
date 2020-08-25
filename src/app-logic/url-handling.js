@@ -42,13 +42,47 @@ export const CURRENT_URL_VERSION = 5;
  * to manage this bit of state.
  */
 let _isReplaceState: boolean = false;
+let _replaceHistoryCallCount: number = 0;
+
+function _enableHistoryReplaceState(): void {
+  _replaceHistoryCallCount++;
+  _isReplaceState = true;
+}
 
 /**
- * This function can be called from thunk actions or other components to change the
- * history API's behavior.
+ * Only disable the replace state if the call count is 0.
  */
-export function setHistoryReplaceState(value: boolean): void {
-  _isReplaceState = value;
+function _maybeDisableHistoryReplaceState(): void {
+  _replaceHistoryCallCount--;
+  if (_replaceHistoryCallCount < 0) {
+    throw new Error(
+      '_maybeDisableHistoryReplaceState was called more than _enableHistoryReplaceState which should never happen.'
+    );
+  }
+  if (_replaceHistoryCallCount === 0) {
+    _isReplaceState = false;
+  }
+}
+
+/**
+ * This function changes the behavior of the history API to replace the current state,
+ * rather than pushState. It applies the function synchronously.
+ */
+export function withHistoryReplaceStateSync(fn: () => void): void {
+  _enableHistoryReplaceState();
+  fn();
+  _maybeDisableHistoryReplaceState();
+}
+
+/**
+ * The asynchronous variant of `withHistoryReplaceStateSync`.
+ */
+export async function withHistoryReplaceStateAsync(
+  fn: () => Promise<void>
+): Promise<void> {
+  _enableHistoryReplaceState();
+  await fn();
+  _maybeDisableHistoryReplaceState();
 }
 
 /**
@@ -66,6 +100,8 @@ function getPathParts(urlState: UrlState): string[] {
       return [];
     case 'compare':
       return ['compare'];
+    case 'uploaded-recordings':
+      return ['uploaded-recordings'];
     case 'from-addon':
       return ['from-addon', urlState.selectedTab];
     case 'from-file':
@@ -199,6 +235,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   const { dataSource } = urlState;
   switch (dataSource) {
     case 'none':
+    case 'uploaded-recordings':
       return '';
     case 'compare':
       // Special handling for CompareHome: we shouldn't append the default
@@ -425,6 +462,7 @@ export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'uploaded-recordings':
       return str;
     default:
       throw new Error(`Unexpected data source ${str}`);

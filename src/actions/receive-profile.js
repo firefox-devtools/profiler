@@ -15,7 +15,7 @@ import {
   applySymbolicationStep,
 } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { mergeProfiles } from '../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../profile-logic/merge-compare';
 import { decompress } from '../utils/gz';
 import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
@@ -185,8 +185,11 @@ export function finalizeProfileView(
         break;
       case 'active-tab':
         if (selectedThreadIndex === null) {
-          // Switch back over to the full view.
-          timelineTrackOrganization = { type: 'full' };
+          // Switch back over to the full view if selectedThreadIndex is not present.
+          // We check this here because if selectedThreadIndex is null, that means
+          // it's a new profile from Firefox directly and has no profile information
+          // encoded in the URL. But we only allow conversions from full view currently.
+          dispatch(finalizeFullProfileView(profile, null));
         } else {
           // The url state says this is an active tab view. We should compute and
           // initialize the state relevant to that state.
@@ -1136,7 +1139,7 @@ async function _extractJsonFromResponse(
   }
 }
 
-function getProfileUrlForHash(hash: string): string {
+export function getProfileUrlForHash(hash: string): string {
   // See https://cloud.google.com/storage/docs/access-public-data
   // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
   // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
@@ -1353,7 +1356,7 @@ export function retrieveProfilesToCompare(
         profile: resultProfile,
         implementationFilters,
         transformStacks,
-      } = mergeProfiles(profiles, profileStates);
+      } = mergeProfilesForDiffing(profiles, profileStates);
 
       // We define an implementationFilter if both profiles agree with the value.
       let implementationFilter;
@@ -1424,6 +1427,7 @@ export function getProfilesFromRawUrl(
         }
         break;
       }
+      case 'uploaded-recordings':
       case 'none':
       case 'from-file':
       case 'local':

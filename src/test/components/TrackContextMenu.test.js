@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { ensureExists } from '../../utils/flow';
 
 import {
@@ -29,6 +29,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 
 import { storeWithProfile } from '../fixtures/stores';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('timeline/TrackContextMenu', function() {
   /**
@@ -118,7 +119,7 @@ describe('timeline/TrackContextMenu', function() {
 
     it('can isolate the process', function() {
       const { isolateProcessItem, getState } = setupGlobalTrack();
-      fireEvent.click(isolateProcessItem());
+      fireFullClick(isolateProcessItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
@@ -129,7 +130,7 @@ describe('timeline/TrackContextMenu', function() {
 
     it("can isolate the process's main thread", function() {
       const { isolateProcessMainThreadItem, getState } = setupGlobalTrack();
-      fireEvent.click(isolateProcessMainThreadItem());
+      fireFullClick(isolateProcessMainThreadItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
@@ -156,7 +157,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
 
       expect(isolateProcessMainThreadItem).toThrow();
-      fireEvent.click(isolateProcessItem());
+      fireFullClick(isolateProcessItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [process]',
@@ -169,7 +170,7 @@ describe('timeline/TrackContextMenu', function() {
       const { isolateScreenshotTrack, getState } = setupGlobalTrack(
         getScreenshotTrackProfile()
       );
-      fireEvent.click(isolateScreenshotTrack());
+      fireFullClick(isolateScreenshotTrack());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [screenshots]',
         'hide [screenshots]',
@@ -181,9 +182,9 @@ describe('timeline/TrackContextMenu', function() {
     it('can toggle a global track by clicking it', function() {
       const { trackItem, trackIndex, getState } = setupGlobalTrack();
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
-      fireEvent.click(trackItem());
+      fireFullClick(trackItem());
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(true);
-      fireEvent.click(trackItem());
+      fireFullClick(trackItem());
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
     });
 
@@ -257,7 +258,7 @@ describe('timeline/TrackContextMenu', function() {
 
     it('can isolate the local track', function() {
       const { isolateLocalTrackItem, getState } = setupLocalTrack();
-      fireEvent.click(isolateLocalTrackItem());
+      fireFullClick(isolateLocalTrackItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
@@ -269,9 +270,9 @@ describe('timeline/TrackContextMenu', function() {
     it('can toggle a local track by clicking it', function() {
       const { trackItem, pid, trackIndex, getState } = setupLocalTrack();
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
-      fireEvent.click(trackItem());
+      fireFullClick(trackItem());
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(true);
-      fireEvent.click(trackItem());
+      fireFullClick(trackItem());
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
     });
 
@@ -316,7 +317,7 @@ describe('timeline/TrackContextMenu', function() {
     it('will unhide the global track when unhiding one of its local tracks', function() {
       const { getState, globalTrackItem, localTrackItem } = setupTracks();
       // Hide the global track.
-      fireEvent.click(globalTrackItem());
+      fireFullClick(globalTrackItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         // The "GeckoMain tab" process is now hidden.
@@ -328,7 +329,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
 
       // Unhide "DOM Worker" local track.
-      fireEvent.click(localTrackItem());
+      fireFullClick(localTrackItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         // The "GeckoMain tab" process is visible again.

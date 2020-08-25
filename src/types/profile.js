@@ -742,3 +742,17 @@ export type Profile = {|
   profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
 |};
+
+type SerializableThread = {|
+  ...$Diff<Thread, { stringTable: UniqueStringArray }>,
+  stringArray: string[],
+|};
+
+/**
+ * The UniqueStringArray is a class, and is not serializable to JSON. This profile
+ * variant is able to be based into JSON.stringify.
+ */
+export type SerializableProfile = {|
+  ...Profile,
+  threads: SerializableThread[],
+|};

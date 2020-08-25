@@ -92,6 +92,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
           <TrackThread
             threadIndex={resourceTrack.threadIndex}
             trackType={isOpen ? 'expanded' : 'condensed'}
+            trackName={resourceTrack.name}
           />
         );
       default:

@@ -24,6 +24,12 @@ jest.mock('../../components/app/ProfileViewer', () => 'profile-viewer');
 // overly tested in another test file.
 jest.mock('../../components/app/Home', () => 'home');
 jest.mock('../../components/app/CompareHome', () => 'compare-home');
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
@@ -150,6 +156,12 @@ describe('app/AppViewRouter', function() {
     expect(container.querySelector('.loading')).toBeTruthy();
     expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
   });
+
+  it('renders a uploaded-recordings page when navigating to /uploaded-recordings', () => {
+    const { container, navigateToMyProfiles } = setup();
+    navigateToMyProfiles();
+    expect(container.querySelector('list-of-published-profiles')).toBeTruthy();
+  });
 });
 
 function setup() {
@@ -206,6 +218,15 @@ function setup() {
     store.dispatch(updateUrlState(newUrlState));
   }
 
+  function navigateToMyProfiles() {
+    const newUrlState = stateFromLocation({
+      pathname: '/uploaded-recordings/',
+      hash: '',
+      search: '',
+    });
+    store.dispatch(updateUrlState(newUrlState));
+  }
+
   return {
     ...renderResult,
     dispatch: store.dispatch,
@@ -213,5 +234,6 @@ function setup() {
     navigateToAddonLoadingPage,
     navigateBackToHome,
     navigateToCompareHome,
+    navigateToMyProfiles,
   };
 }

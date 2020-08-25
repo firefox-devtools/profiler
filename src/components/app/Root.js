@@ -10,6 +10,7 @@ import FooterLinks from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
+import ServiceWorkerManager from './ServiceWorkerManager';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -27,6 +28,7 @@ export default class Root extends PureComponent<RootProps> {
         <Provider store={store}>
           <DragAndDrop>
             <UrlManager>
+              <ServiceWorkerManager />
               <ProfileLoader />
               <AppViewRouter />
               <FooterLinks />

@@ -5,11 +5,12 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('<Permalink>', function() {
   function setup(search = '', injectedUrlShortener) {
@@ -43,7 +44,7 @@ describe('<Permalink>', function() {
     const getPermalinkButton = () => getByText('Permalink');
     const queryInput = () => queryByTestId('MenuButtonsPermalink-input');
     const clickAndRunTimers = where => {
-      fireEvent.click(where);
+      fireFullClick(where);
       jest.runAllTimers();
     };
 

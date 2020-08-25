@@ -20,7 +20,15 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             class="threadActivityGraphCanvas threadActivityGraphCanvas"
             height="300"
             width="200"
-          />
+          >
+            <h2>
+              Activity Graph for 
+              Active Tab
+            </h2>
+            <p>
+              This graph shows a visual chart of thread activity.
+            </p>
+          </canvas>
         </div>
         <div
           class="timelineTrackThreadMarkers"
@@ -88,7 +96,15 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
             class="threadActivityGraphCanvas threadActivityGraphCanvas"
             height="300"
             width="200"
-          />
+          >
+            <h2>
+              Activity Graph for 
+              Page #3
+            </h2>
+            <p>
+              This graph shows a visual chart of thread activity.
+            </p>
+          </canvas>
         </div>
         <div
           class="timelineTrackThreadMarkers"
@@ -173,7 +189,15 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="300"
                 width="200"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  Page #2
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineTrackThreadMarkers"
@@ -257,7 +281,15 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       class="threadActivityGraphCanvas threadActivityGraphCanvas"
                       height="300"
                       width="200"
-                    />
+                    >
+                      <h2>
+                        Activity Graph for 
+                        Active Tab
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
                   </div>
                   <div
                     class="timelineTrackThreadMarkers"
