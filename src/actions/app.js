@@ -23,7 +23,7 @@ import {
 import { sendAnalytics } from '../utils/analytics';
 import {
   stateFromLocation,
-  withHistoryReplaceState,
+  withHistoryReplaceStateSync,
 } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 import { fatalError } from './errors';
@@ -150,7 +150,7 @@ export function setupInitialUrlState(
     // setup is done, and lastly finalizes the profile view since everything is set up now.
     // All of this is done while the history is replaced, as this is part of the initial
     // load process.
-    withHistoryReplaceState(() => {
+    withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
       dispatch(urlSetupDone());
       dispatch(finalizeProfileView());
@@ -252,13 +252,13 @@ export function toggleResourcesPanel(): ThunkAction<void> {
  * users have to enable this from the developer console by writing this line:
  * `experimental.enableEventDelayTracks()`
  */
-export function enableEventDelayTracks(): ThunkAction<void> {
+export function enableEventDelayTracks(): ThunkAction<boolean> {
   return (dispatch, getState) => {
     if (getIsEventDelayTracksEnabled(getState())) {
       console.error(
         'Tried to enable the event delay tracks, but they are already enabled.'
       );
-      return;
+      return false;
     }
 
     if (
@@ -270,7 +270,7 @@ export function enableEventDelayTracks(): ThunkAction<void> {
         Tried to enable the event delay tracks, but this profile does
         not have eventDelay values. It is likely an older profile.
       `);
-      return;
+      return false;
     }
 
     const oldLocalTracks = getLocalTracksByPid(getState());
@@ -288,5 +288,7 @@ export function enableEventDelayTracks(): ThunkAction<void> {
       localTracksByPid,
       localTrackOrderByPid,
     });
+
+    return true;
   };
 }

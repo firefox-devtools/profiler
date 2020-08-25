@@ -42,27 +42,47 @@ export const CURRENT_URL_VERSION = 5;
  * to manage this bit of state.
  */
 let _isReplaceState: boolean = false;
+let _replaceHistoryCallCount: number = 0;
 
-/**
- * This function can be called from thunk actions or other components to change the
- * history API's behavior.
- */
-export function setHistoryReplaceState(value: boolean): void {
-  if (_isReplaceState === value) {
-    throw new Error(
-      `Trying to toggle the history replace state to: ${value.toString()} but it was already ${_isReplaceState.toString()}.`
-    );
-  }
-  _isReplaceState = value;
+function _enableHistoryReplaceState(): void {
+  _replaceHistoryCallCount++;
+  _isReplaceState = true;
 }
 
 /**
- * This function only handles sync callbacks, but async could be handled if needed.
+ * Only disable the replace state if the call count is 0.
  */
-export function withHistoryReplaceState(fn: () => void): void {
-  setHistoryReplaceState(true);
+function _maybeDisableHistoryReplaceState(): void {
+  _replaceHistoryCallCount--;
+  if (_replaceHistoryCallCount < 0) {
+    throw new Error(
+      '_maybeDisableHistoryReplaceState was called more than _enableHistoryReplaceState which should never happen.'
+    );
+  }
+  if (_replaceHistoryCallCount === 0) {
+    _isReplaceState = false;
+  }
+}
+
+/**
+ * This function changes the behavior of the history API to replace the current state,
+ * rather than pushState. It applies the function synchronously.
+ */
+export function withHistoryReplaceStateSync(fn: () => void): void {
+  _enableHistoryReplaceState();
   fn();
-  setHistoryReplaceState(false);
+  _maybeDisableHistoryReplaceState();
+}
+
+/**
+ * The asynchronous variant of `withHistoryReplaceStateSync`.
+ */
+export async function withHistoryReplaceStateAsync(
+  fn: () => Promise<void>
+): Promise<void> {
+  _enableHistoryReplaceState();
+  await fn();
+  _maybeDisableHistoryReplaceState();
 }
 
 /**
