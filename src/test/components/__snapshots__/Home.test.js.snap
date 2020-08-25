@@ -34,33 +34,6 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
     <p>
       Enable the profiler menu button to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
     </p>
-    <div
-      class="homeSectionLoadProfile"
-    >
-      <div
-        class="homeSectionActionButtons"
-      >
-        <label
-          class="homeSectionButton"
-        >
-          <input
-            class="homeSectionUploadFromFileInput"
-            type="file"
-          />
-          Load a profile from file
-        </label>
-        <button
-          aria-expanded="false"
-          class="homeSectionButton"
-          type="button"
-        >
-          Load a profile from a URL
-        </button>
-      </div>
-      <p>
-        You can also drag and drop a profile file here to load it.
-      </p>
-    </div>
   </div>
 </div>
 `;
@@ -158,36 +131,72 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             </a>
             . However, existing profiles can be viewed in any modern browser.
           </p>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
-          </div>
         </div>
       </div>
     </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle photon-title-30"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <label
+              class="homeSectionButton"
+            >
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          You can also compare recordings.
+           
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle photon-title-20"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+        />
+      </section>
+    </section>
     <div
       class="dragAndDropOverlayWrapper"
     >
@@ -295,36 +304,72 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           <p>
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
           </p>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
-          </div>
         </div>
       </div>
     </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle photon-title-30"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <label
+              class="homeSectionButton"
+            >
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          You can also compare recordings.
+           
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle photon-title-20"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+        />
+      </section>
+    </section>
     <div
       class="dragAndDropOverlayWrapper"
     >
@@ -455,36 +500,72 @@ exports[`app/Home renders the usage instructions for pages with the extension in
                Capture and load profile
             </p>
           </div>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
-          </div>
         </div>
       </div>
     </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle photon-title-30"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <label
+              class="homeSectionButton"
+            >
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          You can also compare recordings.
+           
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle photon-title-20"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+        />
+      </section>
+    </section>
     <div
       class="dragAndDropOverlayWrapper"
     >
@@ -553,33 +634,6 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
           2
         </kbd>
          Capture and load profile
-      </p>
-    </div>
-    <div
-      class="homeSectionLoadProfile"
-    >
-      <div
-        class="homeSectionActionButtons"
-      >
-        <label
-          class="homeSectionButton"
-        >
-          <input
-            class="homeSectionUploadFromFileInput"
-            type="file"
-          />
-          Load a profile from file
-        </label>
-        <button
-          aria-expanded="false"
-          class="homeSectionButton"
-          type="button"
-        >
-          Load a profile from a URL
-        </button>
-      </div>
-      <p>
-        You can also drag and drop a profile file here to load it.
       </p>
     </div>
   </div>

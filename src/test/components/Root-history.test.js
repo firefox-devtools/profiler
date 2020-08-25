@@ -19,6 +19,13 @@ import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
+
 describe('Root with history', function() {
   // Cleanup the tests through a side-effect.
   let _cleanup;
