@@ -8,7 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
+import { UploadedRecordingsHome } from 'firefox-profiler/components/app/UploadedRecordingsHome';
 import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
 import { blankStore } from '../fixtures/stores';
 import { mockDate } from '../fixtures/mocks/date';
@@ -26,22 +26,19 @@ function resetIndexedDb() {
 beforeEach(resetIndexedDb);
 afterEach(resetIndexedDb);
 
-describe('ListOfPublishedProfiles', () => {
+describe('UploadedRecordingsHome', () => {
   function setup() {
     const store = blankStore();
     const renderResult = render(
       <Provider store={store}>
-        <ListOfPublishedProfiles />
+        <UploadedRecordingsHome />
       </Provider>
     );
-    const { findByText } = renderResult;
-
-    const waitForFirstRender = () => findByText('Uploaded Recordings');
-    return { ...renderResult, waitForFirstRender };
+    return renderResult;
   }
   it('matches a snapshot when there is no published profiles', async () => {
-    const { container, waitForFirstRender } = setup();
-    await waitForFirstRender();
+    const { container, findByText } = setup();
+    await findByText(/No profile has been published/);
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -143,8 +140,8 @@ describe('ListOfPublishedProfiles', () => {
     });
 
     // 2. Render the component and test.
-    const { container, waitForFirstRender } = setup();
-    await waitForFirstRender();
+    const { container, findByText } = setup();
+    await findByText(/macOS/);
 
     expect(container.firstChild).toMatchSnapshot();
   });

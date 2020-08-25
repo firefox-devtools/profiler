@@ -16,7 +16,7 @@ import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
-import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
+import { UploadedRecordingsHome } from './UploadedRecordingsHome';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
@@ -58,7 +58,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         }
         break;
       case 'uploaded-recordings':
-        return <ListOfPublishedProfiles />;
+        return <UploadedRecordingsHome />;
       case 'from-addon':
       case 'from-file':
       case 'local':
