@@ -14,6 +14,7 @@ import type {
   Reducer,
   UrlSetupPhase,
   ThreadIndex,
+  ExperimentalFlags,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -233,7 +234,7 @@ const isDragAndDropOverlayRegistered: Reducer<boolean> = (
  * This way we can hide the event delay tracks by default and display if we
  * change the state.
  */
-const isEventDelayTracksEnabled: Reducer<boolean> = (state = false, action) => {
+const eventDelayTacks: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'ENABLE_EVENT_DELAY_TRACKS': {
       return true;
@@ -242,6 +243,17 @@ const isEventDelayTracksEnabled: Reducer<boolean> = (state = false, action) => {
       return state;
   }
 };
+
+/**
+ * Experimental features that are mostly disabled by default. You need to enable
+ * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
+ * e.g. `experimental.enableEventDelayTracks()`.
+ * If you want to add a new experimental flag here, don't forget to add it to
+ * window.experimental object in window-console.js.
+ */
+const experimental: Reducer<ExperimentalFlags> = combineReducers({
+  eventDelayTacks,
+});
 
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
@@ -254,7 +266,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isNewlyPublished,
   isDragAndDropDragging,
   isDragAndDropOverlayRegistered,
-  isEventDelayTracksEnabled,
+  experimental,
 });
 
 export default appStateReducer;
