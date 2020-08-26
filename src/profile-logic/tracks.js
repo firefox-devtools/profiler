@@ -377,9 +377,9 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
       for (const id of ids) {
         globalTracks.push({ type: 'screenshots', id, threadIndex });
         if (profile.meta && profile.meta.visualMetrics) {
-          globalTracks.push({ type: 'visual-progress', id });
-          globalTracks.push({ type: 'perceptual-visual-progress', id });
-          globalTracks.push({ type: 'contentful-visual-progress', id });
+          globalTracks.push({ type: 'visual-progress' });
+          globalTracks.push({ type: 'perceptual-visual-progress' });
+          globalTracks.push({ type: 'contentful-visual-progress' });
         }
       }
     }
