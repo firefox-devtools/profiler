@@ -69,7 +69,7 @@ export const getIsNewlyPublished: Selector<boolean> = state =>
 export const getExperimental: Selector<ExperimentalFlags> = state =>
   getApp(state).experimental;
 export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
-  getExperimental(state).eventDelayTacks;
+  getExperimental(state).eventDelayTracks;
 
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;

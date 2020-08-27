@@ -234,7 +234,7 @@ const isDragAndDropOverlayRegistered: Reducer<boolean> = (
  * This way we can hide the event delay tracks by default and display if we
  * change the state.
  */
-const eventDelayTacks: Reducer<boolean> = (state = false, action) => {
+const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'ENABLE_EVENT_DELAY_TRACKS': {
       return true;
@@ -252,7 +252,7 @@ const eventDelayTacks: Reducer<boolean> = (state = false, action) => {
  * window.experimental object in window-console.js.
  */
 const experimental: Reducer<ExperimentalFlags> = combineReducers({
-  eventDelayTacks,
+  eventDelayTracks,
 });
 
 const appStateReducer: Reducer<AppState> = combineReducers({

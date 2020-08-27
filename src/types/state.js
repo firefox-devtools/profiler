@@ -158,7 +158,7 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
  * e.g. `experimental.enableEventDelayTracks()`.
  */
 export type ExperimentalFlags = {|
-  +eventDelayTacks: boolean,
+  +eventDelayTracks: boolean,
 |};
 
 export type AppState = {|
