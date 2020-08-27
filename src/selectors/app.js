@@ -42,6 +42,7 @@ import type {
   Selector,
   CssPixels,
   ThreadIndex,
+  ExperimentalFlags,
 } from 'firefox-profiler/types';
 
 /**
@@ -65,8 +66,10 @@ export const getTrackThreadHeights: Selector<
 > = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
+export const getExperimental: Selector<ExperimentalFlags> = state =>
+  getApp(state).experimental;
 export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
-  getApp(state).isEventDelayTracksEnabled;
+  getExperimental(state).eventDelayTracks;
 
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;
