@@ -1395,53 +1395,6 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: ConstructRootFrame-112.5 1`] = `
-<div
-  class="tooltipMarker propClass"
->
-  <div
-    class="tooltipHeader"
-  >
-    <div
-      class="tooltipOneLine"
-    >
-      <div
-        class="tooltipTiming"
-      >
-        800μs
-      </div>
-      <div
-        class="tooltipTitle"
-      >
-        ConstructRootFrame
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Thread
-        :
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Category
-      :
-    </div>
-    Frame Construction
-  </div>
-</div>
-`;
-
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -2642,6 +2595,42 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
     <div
       class="tooltipOneLine"
     >
+      <div
+        class="tooltipTitle"
+      >
+        NotifyDidPaint
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Main Thread
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.5 1`] = `
+<div
+  class="tooltipMarker propClass"
+>
+  <div
+    class=""
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        800μs
+      </div>
       <div
         class="tooltipTitle"
       >

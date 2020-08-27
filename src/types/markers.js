@@ -550,15 +550,6 @@ export type LongTaskMarkerPayload = {|
   category: 'LongTask',
 |};
 
-/*
- * The payload for Frame Construction.
- */
-export type FrameConstructionMarkerPayload = {|
-  type: 'tracing',
-  category: 'Frame Construction',
-  interval: 'start' | 'end',
-|};
-
 export type DummyForTestsMarkerPayload = {|
   type: 'DummyForTests',
 |};
@@ -644,7 +635,6 @@ export type MarkerPayload =
   | LongTaskMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
-  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
   | PrefMarkerPayload
@@ -665,7 +655,6 @@ export type MarkerPayload_Gecko =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
-  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload

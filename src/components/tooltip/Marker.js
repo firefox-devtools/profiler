@@ -629,13 +629,6 @@ function getMarkerDetails(
             );
             break;
           }
-          case 'Frame Construction':
-            tooltipDetails = (
-              <TooltipDetails>
-                <TooltipDetail label="Category">{data.category}</TooltipDetail>
-              </TooltipDetails>
-            );
-            break;
           default:
             break;
         }
