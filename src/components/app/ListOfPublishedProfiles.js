@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
-import { AppHeader } from './AppHeader';
 
 import {
   listAllProfileData,
@@ -132,31 +131,22 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
 
     if (!profileDataList.length) {
       return (
-        <main className="publishedProfiles">
-          <AppHeader />
-          <h2 className="photon-title-30">Uploaded Recordings</h2>
-          <p className="photon-body-30">No profile has been published yet!</p>
-        </main>
+        <p className="photon-body-30">No profile has been published yet!</p>
       );
     }
 
     const nowTimestamp = Date.now();
 
     return (
-      <main className="publishedProfiles">
-        <AppHeader />
-        <h2 className="photon-title-30">Uploaded Recordings</h2>
-        {/* TODO Maybe we should use a grid layout later */}
-        <ul className="publishedProfilesList">
-          {profileDataList.map(profileData => (
-            <PublishedProfile
-              key={profileData.profileToken}
-              profileData={profileData}
-              nowTimestamp={nowTimestamp}
-            />
-          ))}
-        </ul>
-      </main>
+      <ul className="publishedProfilesList">
+        {profileDataList.map(profileData => (
+          <PublishedProfile
+            key={profileData.profileToken}
+            profileData={profileData}
+            nowTimestamp={nowTimestamp}
+          />
+        ))}
+      </ul>
     );
   }
 }

@@ -152,6 +152,15 @@ export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
 
 export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 
+/*
+ * Experimental features that are mostly disabled by default. You need to enable
+ * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
+ * e.g. `experimental.enableEventDelayTracks()`.
+ */
+export type ExperimentalFlags = {|
+  +eventDelayTracks: boolean,
+|};
+
 export type AppState = {|
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
@@ -163,7 +172,7 @@ export type AppState = {|
   +isNewlyPublished: boolean,
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
-  +isEventDelayTracksEnabled: boolean,
+  +experimental: ExperimentalFlags,
 |};
 
 export type UploadPhase =
