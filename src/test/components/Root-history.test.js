@@ -12,8 +12,10 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { mockWindowLocation } from '../fixtures/mocks/window-location';
-import { mockWindowHistory } from '../fixtures/mocks/window-history';
+import {
+  mockWindowLocation,
+  mockWindowHistory,
+} from '../fixtures/mocks/window-navigation';
 import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
