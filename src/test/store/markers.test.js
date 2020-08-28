@@ -256,7 +256,7 @@ describe('memory markers', function() {
   it('can get memory markers using getMemoryMarkers', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getMemoryMarkerIndexes(
+    const markerIndexes = selectedThreadSelectors.getTimelineMemoryMarkerIndexes(
       getState()
     );
     expect(
@@ -264,10 +264,10 @@ describe('memory markers', function() {
     ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
   });
 
-  it('ignores memory markers in getCommittedRangeAndTabFilteredMarkerIndexesForHeader', function() {
+  it('ignores memory markers in getTimelineOverviewMarkerIndexes', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
+    const markerIndexes = selectedThreadSelectors.getTimelineOverviewMarkerIndexes(
       getState()
     );
     expect(

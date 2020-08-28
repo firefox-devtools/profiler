@@ -105,7 +105,7 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'Styles',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
       {
         key: 'elementsTraversed',
@@ -167,7 +167,7 @@ export const markerSchema: MarkerSchema[] = [
   {
     name: 'DOMEvent',
     tooltipLabel: '{eventType}',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
       { key: 'category', label: 'Marker', format: 'string' },
       // eventType is only in the tooltipLabel
@@ -177,26 +177,26 @@ export const markerSchema: MarkerSchema[] = [
     // TODO - Note that this marker is a "tracing" marker currently.
     // See issue #2749
     name: 'Paint',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     // TODO - Note that this marker is a "tracing" marker currently.
     // See issue #2749
     name: 'Navigation',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     // TODO - Note that this marker is a "tracing" marker currently.
     // See issue #2749
     name: 'Layout',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [{ key: 'category', label: 'Type', format: 'string' }],
   },
   {
     name: 'IPC',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-ipc'],
     data: [
       { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
@@ -204,7 +204,7 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'RefreshDriverTick',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
   },
 ];
