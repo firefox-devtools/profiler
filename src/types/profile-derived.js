@@ -205,9 +205,9 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 export type GlobalTrack =
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
-  | {| +type: 'visual-progress', +id: string |}
-  | {| +type: 'perceptual-visual-progress', +id: string |}
-  | {| +type: 'contentful-visual-progress', +id: string |};
+  | {| +type: 'visual-progress' |}
+  | {| +type: 'perceptual-visual-progress' |}
+  | {| +type: 'contentful-visual-progress' |};
 
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}

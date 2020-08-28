@@ -72,7 +72,6 @@ describe('TrackVisualProgress', function() {
         <TrackVisualProgress
           progressGraphData={VisualProgress}
           graphDotTooltipText=" visual completeness at this time"
-          windowId="0"
         />
       </Provider>
     );
