@@ -74,10 +74,20 @@ describe('Root with history', function() {
       _cleanup = null;
     };
 
-    const { findByRole } = renderResult;
+    const { findByText } = renderResult;
 
-    async function waitForTab(details: *): Promise<HTMLElement> {
-      return findByRole('tab', details);
+    async function waitForTab({
+      name,
+      selected,
+    }: {|
+      +name: string,
+      +selected: boolean,
+    |}): Promise<HTMLElement> {
+      // This uses `findByText` instead of `findbyRole` because this is a lot
+      // faster in our use case where there's a lot of DOM nodes.
+      return findByText(name, {
+        selector: `button[role~=tab][aria-selected=${String(selected)}]`,
+      });
     }
 
     return {
