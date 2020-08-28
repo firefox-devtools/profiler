@@ -48,11 +48,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {||};
 
 export class TrackMemoryImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) => {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,

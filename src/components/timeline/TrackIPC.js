@@ -38,11 +38,7 @@ type State = {||};
  * A component for showing IPC messages for a particular thread.
  */
 export class TrackIPCImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) => {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
