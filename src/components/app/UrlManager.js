@@ -169,7 +169,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('popstate', () => this._updateState);
+    window.removeEventListener('popstate', this._updateState);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
