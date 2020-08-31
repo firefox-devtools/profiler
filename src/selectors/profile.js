@@ -6,6 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
+import * as MarkerData from '../profile-logic/marker-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
@@ -62,6 +63,7 @@ import type {
   ActiveTabTimeline,
   ActiveTabMainTrack,
   $ReturnType,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -169,6 +171,43 @@ export const getContentfulSpeedIndexProgress: Selector<
 > = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
+
+/**
+ * TODO - These will eventually be stored in the profile, but for now
+ * define them here.
+ */
+export const getMarkerSchema: Selector<MarkerSchema[]> = () => [
+  {
+    name: 'GCSlice',
+    label: 'GCSlice',
+    display: ['marker-chart', 'marker-table', 'timeline-memory'],
+    data: [],
+  },
+  {
+    name: 'GCMajor',
+    label: 'GCMajor',
+    display: ['marker-chart', 'marker-table', 'timeline-memory'],
+    data: [],
+  },
+  {
+    name: 'GCMinor',
+    label: 'GCMinor',
+    display: ['marker-chart', 'marker-table', 'timeline-memory'],
+    data: [],
+  },
+  {
+    name: 'CC',
+    label: 'Cycle Collect',
+    display: ['marker-chart', 'marker-table', 'timeline-memory'],
+    data: [],
+  },
+];
+
+export const getTimelineMemoryMarkerTypes: Selector<
+  Set<string>
+> = createSelector(getMarkerSchema, markerSchema =>
+  MarkerData.getMarkerTypesForDisplay(markerSchema, 'timeline-memory')
+);
 
 export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
   const configuration = getProfilerConfiguration(state);
