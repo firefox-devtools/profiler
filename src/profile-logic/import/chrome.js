@@ -28,7 +28,7 @@ import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
-type TracingEventUnion =
+export type TracingEventUnion =
   | ProfileEvent
   | ProfileChunkEvent
   | CpuProfileEvent
@@ -95,31 +95,34 @@ type ProfileChunkEvent = TracingEvent<{|
 //  - The parent <-> child relationship between nodes is indicated in the
 //    opposite direction: ProfileChunkEvent has a "parent" field on each nodes,
 //    CpuProfileEvent has a "children" field on each node.
-type CpuProfileEvent = TracingEvent<{|
+export type CpuProfileEvent = TracingEvent<{|
   name: 'CpuProfile',
   args: {
     data: {
-      cpuProfile: {
-        nodes?: Array<{
-          callFrame: {
-            functionName: string,
-            scriptId: number,
-            lineNumber?: number,
-            columnNumber?: number,
-            url?: string,
-          },
-          id: number,
-          children?: number[],
-        }>,
-        samples: number[], // Index into cpuProfile nodes
-        timeDeltas: number[],
-        startTime: number,
-        endTime: number,
-      },
+      cpuProfile: CpuProfileData,
     },
   },
   ph: 'I',
 |}>;
+
+// A node performance profile only outputs this.
+type CpuProfileData = {
+  nodes?: Array<{
+    callFrame: {
+      functionName: string,
+      scriptId: number,
+      lineNumber?: number,
+      columnNumber?: number,
+      url?: string,
+    },
+    id: number,
+    children?: number[],
+  }>,
+  samples: number[], // Index into cpuProfile nodes
+  timeDeltas: number[],
+  startTime: number,
+  endTime: number,
+};
 
 type ThreadNameEvent = TracingEvent<{|
   name: 'thread_name',
@@ -158,27 +161,58 @@ type ScreenshotEvent = TracingEvent<{|
 |}>;
 
 export function isChromeProfile(profile: mixed): boolean {
-  if (!Array.isArray(profile)) {
+  if (!profile || typeof profile !== 'object') {
     return false;
   }
-  const event = profile[0];
-  // Lightly check that some properties exist that are in the TracingEvent.
+
+  if (Array.isArray(profile)) {
+    // Chrome profiles come as a list of events.
+    const event = profile[0];
+    // Lightly check that some properties exist that are in the TracingEvent.
+    return (
+      typeof event === 'object' &&
+      event !== null &&
+      'ph' in event &&
+      'cat' in event &&
+      'args' in event
+    );
+  }
+
+  // A node.js profile is a single CpuProfileData, as opposed to a list of events.
   return (
-    typeof event === 'object' &&
-    event !== null &&
-    'ph' in event &&
-    'cat' in event &&
-    'args' in event
+    'samples' in profile &&
+    'timeDeltas' in profile &&
+    'startTime' in profile &&
+    'endTime' in profile
   );
 }
 
-export function convertChromeProfile(profile: mixed): Promise<Profile> {
+function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
+  return {
+    name: 'CpuProfile',
+    args: {
+      data: { cpuProfile },
+    },
+    // This data shouldn't really matter:
+    cat: 'other',
+    pid: 0,
+    tid: 0,
+    ts: 0,
+    ph: 'I',
+  };
+}
+
+export function convertChromeProfile(
+  profile: CpuProfileData | TracingEventUnion[]
+): Promise<Profile> {
   if (!Array.isArray(profile)) {
-    throw new Error(
-      'Expected an array when attempting to convert a Chrome profile.'
-    );
+    // Assume that this is CpuProfileData from a node profile. Wrap it
+    // in a list of TracingEvents so that the logic below can be re-used.
+    profile = [wrapCpuProfileInEvent(profile)];
   }
+
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
+
   for (const tracingEvent of profile) {
     if (
       typeof tracingEvent !== 'object' ||
@@ -197,6 +231,7 @@ export function convertChromeProfile(profile: mixed): Promise<Profile> {
     }
     list.push((tracingEvent: any));
   }
+
   return processTracingEvents(eventsByName);
 }
 
