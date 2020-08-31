@@ -1302,7 +1302,7 @@ export function changeTimelineType(timelineType: TimelineType): Action {
   };
 }
 
-export function changeProfileName(profileName: string): Action {
+export function changeProfileName(profileName: string | null): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,

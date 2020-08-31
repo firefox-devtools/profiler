@@ -28,7 +28,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
+      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
     );
   });
 
@@ -48,7 +48,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
+      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
     );
   });
 
@@ -68,13 +68,9 @@ describe('WindowTitle', () => {
       </Provider>
     );
 
-    expect(document.title).toBe(
-      'good profile – Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
-    );
+    expect(document.title).toBe('good profile – Firefox Profiler');
 
     store.dispatch(changeProfileName('awesome profile'));
-    expect(document.title).toBe(
-      'awesome profile – Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox profiler'
-    );
+    expect(document.title).toBe('awesome profile – Firefox Profiler');
   });
 });

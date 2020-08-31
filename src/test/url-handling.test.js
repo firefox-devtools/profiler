@@ -386,13 +386,15 @@ describe('profileName', function() {
       search: '?profileName=XXX',
     });
     expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
-    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
+    expect(urlStateReducers.getProfileNameWithDefault(getState())).toBe('XXX');
   });
 
-  it('returns empty string when profileName is not specified', function() {
+  it('provides default values for when no profile name is given', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
-    expect(urlStateReducers.getProfileName(getState())).toBe('');
+    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe(null);
+    expect(urlStateReducers.getProfileNameWithDefault(getState())).toBe(
+      'Firefox'
+    );
   });
 });
 

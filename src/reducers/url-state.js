@@ -403,7 +403,7 @@ const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   }
 };
 
-const profileName: Reducer<string> = (state = '', action) => {
+const profileName: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_PROFILE_NAME':
       return action.profileName;

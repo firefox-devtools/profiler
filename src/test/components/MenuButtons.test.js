@@ -322,7 +322,7 @@ describe('<MenuButtonsMetaInfo>', function() {
     };
 
     const { container, getByText } = setup(profile);
-    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
+    const metaInfoButton = getByText('Profile Info');
     fireFullClick(metaInfoButton);
     jest.runAllTimers();
 
@@ -342,7 +342,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
     const { getByText, container } = setup(profile);
 
-    const metaInfoButton = getByText('Firefox 48 – macOS 10.11');
+    const metaInfoButton = getByText('Profile Info');
     fireFullClick(metaInfoButton);
     jest.runAllTimers();
 
@@ -363,7 +363,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
       // Open up the arrow panel for the test.
       const { getByText } = setupResult;
-      fireFullClick(getByText('Firefox'));
+      fireEvent.click(getByText('Profile Info'));
       jest.runAllTimers();
 
       return setupResult;

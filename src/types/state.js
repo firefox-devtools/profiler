@@ -263,7 +263,7 @@ export type UrlState = {|
   +profilesToCompare: string[] | null,
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
-  +profileName: string,
+  +profileName: string | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +profileSpecific: ProfileSpecificUrlState,
 |};
