@@ -9,7 +9,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { getProfileNameOrNull } from 'firefox-profiler/selectors';
+import { getProfileNameFromUrl } from 'firefox-profiler/selectors';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 
 describe('ProfileName', function() {
@@ -51,7 +51,7 @@ describe('ProfileName', function() {
 
     // Test the default state.
     expect(getByText(defaultName)).toBeTruthy();
-    expect(getProfileNameOrNull(getState())).toBe(null);
+    expect(getProfileNameFromUrl(getState())).toBe(null);
 
     // Click the button to activate it.
     button.click();
@@ -64,7 +64,7 @@ describe('ProfileName', function() {
     fireEvent.blur(input);
 
     expect(queryByText('Custom name')).toBeTruthy();
-    expect(getProfileNameOrNull(getState())).toBe('Custom name');
+    expect(getProfileNameFromUrl(getState())).toBe('Custom name');
   });
 
   it('will use a url-provided profile name', function() {

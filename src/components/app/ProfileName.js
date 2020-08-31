@@ -6,10 +6,7 @@
 import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
-import {
-  getProfileName,
-  getProfileNameOrNull,
-} from 'firefox-profiler/selectors';
+import { getProfileNameWithDefault } from 'firefox-profiler/selectors';
 import { changeProfileName } from '../../actions/profile-view';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -17,8 +14,7 @@ import type { ConnectedProps } from '../../utils/connect';
 import './ProfileName.css';
 
 type StateProps = {|
-  +profileName: string,
-  +profileNameOrNull: string | null,
+  +profileNameWithDefault: string,
 |};
 
 type DispatchProps = {|
@@ -28,7 +24,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 type State = {|
-  isFocused: boolean,
+  focusedWithKey: null | string,
   // Every time the input is focused, it's recreated to consistently set the initial
   // value.
   focusGeneration: number,
@@ -43,7 +39,7 @@ type State = {|
  */
 class ProfileNameImpl extends React.PureComponent<Props, State> {
   state = {
-    isFocused: false,
+    focusedWithKey: null,
     focusGeneration: 0,
   };
 
@@ -51,17 +47,28 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 
   blurInput() {
     this.setState(state => ({
-      isFocused: false,
-      focusGeneration: state.focusGeneration++,
+      focusedWithKey: null,
+      focusGeneration: state.focusGeneration + 1,
     }));
   }
 
-  changeProfileNameIfChanged = (event: SyntheticEvent<HTMLInputElement>) => {
-    const { changeProfileName, profileName } = this.props;
-    const newProfileName = event.currentTarget.value.trim();
+  // This key determines if focusing and the current input are still valid. When
+  // either the profile name or the focus generation changes, the input and
+  // its focus state is invalidated.
+  getKey(): string {
+    return `${this.props.profileNameWithDefault}-${this.state.focusGeneration}`;
+  }
 
-    if (newProfileName !== profileName) {
-      changeProfileName(newProfileName);
+  changeProfileNameIfChanged = (event: SyntheticEvent<HTMLInputElement>) => {
+    const { changeProfileName, profileNameWithDefault } = this.props;
+    const newProfileName = event.currentTarget.value.trim();
+    this.blurInput();
+
+    if (
+      // Make sure the profile name has changed.
+      newProfileName !== profileNameWithDefault
+    ) {
+      changeProfileName(newProfileName ? newProfileName : null);
     }
   };
 
@@ -73,7 +80,6 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
       }
       case 'Enter': {
         this.changeProfileNameIfChanged(event);
-        this.blurInput();
         break;
       }
       default:
@@ -82,7 +88,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
   };
 
   handleButtonFocus = () => {
-    this.setState({ isFocused: true });
+    this.setState({ focusedWithKey: this.getKey() });
 
     const input = this.inputRef.current;
     if (input) {
@@ -95,10 +101,22 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { isFocused, focusGeneration } = this.state;
-    const { profileName } = this.props;
+    const { focusedWithKey } = this.state;
+    // The profileNameWithDefault is either set by the user, or a default is chosen.
+    const { profileNameWithDefault } = this.props;
     const title = 'Edit the profile name';
+    const key = this.getKey();
 
+    // Only stay focused with the current focus key. This will be invalidated when
+    // the input is unfocused, or when the URL state changes the current profile
+    // name.
+    const isFocused = focusedWithKey === key;
+
+    // Use both a button and input at the same time. Buttons can be sized according
+    // to their content, and text inputs cannot. Once the button is focused, it
+    // activates the input. The input ref needs to be available to focus, so it
+    // is unconditionally attached the DOM, and both element's visibility is
+    // controlled by CSS.
     return (
       <>
         <button
@@ -111,15 +129,17 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >
-          {profileName}
+          {profileNameWithDefault}
         </button>
         <input
-          key={focusGeneration}
+          // Make sure and use the profile name and focus generation to support the
+          // back button invalidating the state
+          key={key}
           className="profileNameInput"
           style={{
             display: isFocused ? 'block' : 'none',
           }}
-          defaultValue={profileName}
+          defaultValue={profileNameWithDefault}
           aria-label="Profile name"
           title={title}
           onBlur={this.changeProfileNameIfChanged}
@@ -134,7 +154,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 
 export const ProfileName = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    profileName: getProfileName(state),
+    profileNameWithDefault: getProfileNameWithDefault(state),
   }),
   mapDispatchToProps: {
     changeProfileName,

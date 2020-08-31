@@ -15,7 +15,7 @@ exports[`ProfileName matches the snapshot 1`] = `
     class="profileNameInput"
     style="display: none;"
     title="Edit the profile name"
-    value=""
+    value="Firefox – macOS 10.14"
   />
 </div>
 `;
