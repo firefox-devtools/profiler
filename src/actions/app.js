@@ -35,7 +35,7 @@ import { selectedThreadSelectors } from '../selectors/per-thread';
 
 import type {
   Profile,
-  ThreadIndex,
+  ThreadsKey,
   CssPixels,
   Action,
   ThunkAction,
@@ -168,18 +168,18 @@ export function updateUrlState(newUrlState: UrlState | null): Action {
 }
 
 export function reportTrackThreadHeight(
-  threadIndex: ThreadIndex,
+  threadsKey: ThreadsKey,
   height: CssPixels
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const trackThreadHeights = getTrackThreadHeights(getState());
-    const previousHeight = trackThreadHeights[threadIndex];
+    const previousHeight = trackThreadHeights[threadsKey];
     if (previousHeight !== height) {
       // Guard against unnecessary dispatches. This could happen frequently.
       dispatch({
         type: 'UPDATE_TRACK_THREAD_HEIGHT',
         height,
-        threadIndex,
+        threadsKey,
       });
     }
   };

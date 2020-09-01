@@ -16,7 +16,7 @@ import type {
   CheckedSharingOptions,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange } from './units';
+import type { StartEndRange, CssPixels } from './units';
 import type { Profile, ThreadIndex, Pid, BrowsingContextID } from './profile';
 
 import type {
@@ -171,7 +171,9 @@ export type AppState = {|
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
-  +trackThreadHeights: Array<ThreadIndex | void>,
+  +trackThreadHeights: {
+    [key: ThreadsKey]: CssPixels,
+  },
   +isNewlyPublished: boolean,
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,

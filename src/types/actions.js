@@ -139,7 +139,7 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_TRACK_THREAD_HEIGHT',
       +height: CssPixels,
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',

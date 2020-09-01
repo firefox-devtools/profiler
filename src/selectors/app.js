@@ -41,7 +41,7 @@ import type {
   UrlSetupPhase,
   Selector,
   CssPixels,
-  ThreadIndex,
+  ThreadsKey,
   ExperimentalFlags,
 } from 'firefox-profiler/types';
 
@@ -61,9 +61,9 @@ export const getPanelLayoutGeneration: Selector<number> = state =>
   getApp(state).panelLayoutGeneration;
 export const getLastVisibleThreadTabSlug: Selector<TabSlug> = state =>
   getApp(state).lastVisibleThreadTabSlug;
-export const getTrackThreadHeights: Selector<
-  Array<ThreadIndex | void>
-> = state => getApp(state).trackThreadHeights;
+export const getTrackThreadHeights: Selector<{
+  [key: ThreadsKey]: CssPixels,
+}> = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
 export const getExperimental: Selector<ExperimentalFlags> = state =>
