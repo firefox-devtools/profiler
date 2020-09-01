@@ -500,7 +500,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           </TransitionGroup>
           <section className="homeAdditionalContent">
             {/* Grid container: homeAdditionalContent */}
-            <h2 className="homeAdditionalContentTitle photon-title-30">
+            <h2 className="homeAdditionalContentTitle protocol-display-xs">
               {/* Title: full width */}
               Load existing profiles
             </h2>
@@ -524,7 +524,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </section>
             <section>
               {/* Recent recordings: right column */}
-              <h2 className="homeRecentUploadedRecordingsTitle photon-title-20">
+              <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
                 Recent uploaded recordings
               </h2>
               <ListOfPublishedProfiles limit={3} />
