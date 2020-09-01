@@ -92,7 +92,6 @@ describe('UrlManager', function() {
 
   it('sets up the URL', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(getUrlSetupPhase(getState())).toBe('initial-load');
     createUrlManager();
@@ -102,16 +101,13 @@ describe('UrlManager', function() {
     await waitUntilUrlSetupPhase('done');
     expect(getUrlSetupPhase(getState())).toBe('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it('has no data source by default', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it('sets the data source to from-addon', async function() {
@@ -129,13 +125,11 @@ describe('UrlManager', function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
       '/from-file/'
     );
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function() {
