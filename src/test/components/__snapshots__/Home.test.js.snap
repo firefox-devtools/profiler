@@ -138,7 +138,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       class="homeAdditionalContent"
     >
       <h2
-        class="homeAdditionalContentTitle photon-title-30"
+        class="homeAdditionalContentTitle protocol-display-xs"
       >
         Load existing profiles
       </h2>
@@ -188,7 +188,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </section>
       <section>
         <h2
-          class="homeRecentUploadedRecordingsTitle photon-title-20"
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
         >
           Recent uploaded recordings
         </h2>
@@ -311,7 +311,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       class="homeAdditionalContent"
     >
       <h2
-        class="homeAdditionalContentTitle photon-title-30"
+        class="homeAdditionalContentTitle protocol-display-xs"
       >
         Load existing profiles
       </h2>
@@ -361,7 +361,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </section>
       <section>
         <h2
-          class="homeRecentUploadedRecordingsTitle photon-title-20"
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
         >
           Recent uploaded recordings
         </h2>
@@ -507,7 +507,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       class="homeAdditionalContent"
     >
       <h2
-        class="homeAdditionalContentTitle photon-title-30"
+        class="homeAdditionalContentTitle protocol-display-xs"
       >
         Load existing profiles
       </h2>
@@ -557,7 +557,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </section>
       <section>
         <h2
-          class="homeRecentUploadedRecordingsTitle photon-title-20"
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
         >
           Recent uploaded recordings
         </h2>
