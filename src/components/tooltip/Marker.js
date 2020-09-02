@@ -73,6 +73,10 @@ type OwnProps = {|
   +marker: Marker,
   +threadIndex: ThreadIndex,
   +className?: string,
+  // In tooltips it can be awkward for really long and tall things to force
+  // the layout to be huge. This option when set to true will restrict the
+  // height of things like stacks, and the width of long things like URLs.
+  +restrictHeightWidth: boolean,
 |};
 
 type StateProps = {|
@@ -312,25 +316,33 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _maybeRenderBacktrace() {
-    const { marker, thread, implementationFilter } = this.props;
+    const {
+      marker,
+      thread,
+      implementationFilter,
+      restrictHeightWidth,
+    } = this.props;
     const { data, start } = marker;
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
       const causeAge = start - cause.time;
       return (
-        <div className="tooltipDetailsBackTrace" key="backtrace">
-          {data.type === 'Styles' || marker.name === 'Reflow' ? (
-            <h2 className="tooltipBackTraceTitle">
-              First invalidated {formatNumber(causeAge)}ms before the flush, at:
-            </h2>
-          ) : null}
-          <Backtrace
-            maxHeight="30em"
-            stackIndex={cause.stack}
-            thread={thread}
-            implementationFilter={implementationFilter}
-          />
-        </div>
+        <TooltipDetail label="Stack" key="backtrace">
+          <div className="tooltipDetailsBackTrace">
+            {data.type === 'Styles' || marker.name === 'Reflow' ? (
+              <h2 className="tooltipBackTraceTitle">
+                First invalidated {formatNumber(causeAge)}ms before the flush,
+                at:
+              </h2>
+            ) : null}
+            <Backtrace
+              maxStacks={restrictHeightWidth ? 20 : Infinity}
+              stackIndex={cause.stack}
+              thread={thread}
+              implementationFilter={implementationFilter}
+            />
+          </div>
+        </TooltipDetail>
       );
     }
     return null;
@@ -385,8 +397,14 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   render() {
+    const { className, restrictHeightWidth } = this.props;
     return (
-      <div className={classNames('tooltipMarker', this.props.className)}>
+      <div
+        className={classNames('tooltipMarker', className)}
+        style={{
+          '--tooltip-detail-max-width': restrictHeightWidth ? '600px' : '100%',
+        }}
+      >
         <div className="tooltipHeader">
           <div className="tooltipOneLine">
             {this._maybeRenderMarkerDuration()}
@@ -397,8 +415,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           {this._renderMarkerDetails()}
           {this._renderThreadDetails()}
           {this._maybeRenderPageUrl()}
+          {this._maybeRenderBacktrace()}
         </TooltipDetails>
-        {this._maybeRenderBacktrace()}
         {this._maybeRenderNetworkPhases()}
       </div>
     );

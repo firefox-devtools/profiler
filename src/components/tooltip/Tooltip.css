@@ -101,3 +101,23 @@
   color: var(--grey-50);
   white-space: nowrap;
 }
+
+/**
+ * Overwrite styles for the sidebar.
+ */
+.sidebar .tooltipDetails {
+  /* Force the details to the max-width, even if they have long pieces of text. */
+  overflow: hidden;
+  grid-gap: 2px 0;
+
+  /* Don't let the width overflow for long pieces of text */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+.sidebar .tooltipLabel {
+  margin-top: 8px;
+  color: var(--grey-60);
+  font-weight: bold;
+  text-align: left;
+}

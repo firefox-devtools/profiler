@@ -3,6 +3,7 @@
 exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -60,55 +61,60 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       :
     </div>
     Renderer (TID: 123456)
-  </div>
-  <div
-    class="tooltipDetailsBackTrace"
-  >
-    <ol
-      class="backtrace"
-      style="--max-height: 30em;"
+    <div
+      class="tooltipLabel"
     >
-      <li
-        class="backtraceStackFrame"
+      Stack
+      :
+    </div>
+    <div
+      class="tooltipDetailsBackTrace"
+    >
+      <ul
+        class="backtrace"
       >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        _main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ol>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          XREMain::XRE_main
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          XRE_main
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          _main
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 `;
@@ -116,6 +122,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
 exports[`TooltipMarker renders properly network markers where content type is blank 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -287,6 +294,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
 exports[`TooltipMarker renders properly network markers where content type is missing 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -483,6 +491,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 1
 exports[`TooltipMarker renders properly network markers with a preconnect part 2`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -743,6 +752,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
 exports[`TooltipMarker renders properly network markers with a preconnect part containing only the domain lookup 2`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -929,6 +939,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
 exports[`TooltipMarker renders properly normal network markers 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1183,6 +1194,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
 exports[`TooltipMarker renders properly redirect network markers 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1289,6 +1301,7 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1366,6 +1379,7 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1430,6 +1444,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
 exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profiled thread)-114.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1487,207 +1502,181 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       :
     </div>
     123
-  </div>
-  <div
-    class="tooltipDetailsBackTrace"
-  >
-    <ol
-      class="backtrace"
-      style="--max-height: 30em;"
+    <div
+      class="tooltipLabel"
     >
-      <li
-        class="backtraceStackFrame"
+      Stack
+      :
+    </div>
+    <div
+      class="tooltipDetailsBackTrace"
+    >
+      <ul
+        class="backtrace"
       >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        _main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ol>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        …
+      </ul>
+    </div>
   </div>
 </div>
 `;
@@ -1695,6 +1684,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
 exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1745,207 +1735,181 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       :
     </div>
     Main Thread
-  </div>
-  <div
-    class="tooltipDetailsBackTrace"
-  >
-    <ol
-      class="backtrace"
-      style="--max-height: 30em;"
+    <div
+      class="tooltipLabel"
     >
-      <li
-        class="backtraceStackFrame"
+      Stack
+      :
+    </div>
+    <div
+      class="tooltipDetailsBackTrace"
+    >
+      <ul
+        class="backtrace"
       >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        _main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ol>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        …
+      </ul>
+    </div>
   </div>
 </div>
 `;
@@ -1953,6 +1917,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2103,6 +2068,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2218,6 +2184,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2284,6 +2251,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2362,6 +2330,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2440,6 +2409,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2485,6 +2455,7 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
 exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2530,6 +2501,7 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2568,6 +2540,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
 exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2611,6 +2584,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
 exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2656,6 +2630,7 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
 exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.9 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2715,6 +2690,7 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
 exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2751,207 +2727,181 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
       :
     </div>
     Main Thread
-  </div>
-  <div
-    class="tooltipDetailsBackTrace"
-  >
-    <ol
-      class="backtrace"
-      style="--max-height: 30em;"
+    <div
+      class="tooltipLabel"
     >
-      <li
-        class="backtraceStackFrame"
+      Stack
+      :
+    </div>
+    <div
+      class="tooltipDetailsBackTrace"
+    >
+      <ul
+        class="backtrace"
       >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        _main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ol>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        …
+      </ul>
+    </div>
   </div>
 </div>
 `;
@@ -2959,6 +2909,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3023,214 +2974,188 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       :
     </div>
     Main Thread
-  </div>
-  <div
-    class="tooltipDetailsBackTrace"
-  >
-    <h2
-      class="tooltipBackTraceTitle"
+    <div
+      class="tooltipLabel"
     >
-      First invalidated 
-      0.50
-      ms before the flush, at:
-    </h2>
-    <ol
-      class="backtrace"
-      style="--max-height: 30em;"
+      Stack
+      :
+    </div>
+    <div
+      class="tooltipDetailsBackTrace"
     >
-      <li
-        class="backtraceStackFrame"
+      <h2
+        class="tooltipBackTraceTitle"
       >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
+        First invalidated 
+        0.50
+        ms before the flush, at:
+      </h2>
+      <ul
+        class="backtrace"
       >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame"
-      >
-        _main
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ol>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        <li
+          class="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            class="backtraceStackFrameOrigin"
+          />
+        </li>
+        …
+      </ul>
+    </div>
   </div>
 </div>
 `;
@@ -3238,6 +3163,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3269,6 +3195,7 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`] = `
 <div
   class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"

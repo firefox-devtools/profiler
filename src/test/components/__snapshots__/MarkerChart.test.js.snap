@@ -136,6 +136,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 >
   <div
     class="tooltipMarker"
+    style="--tooltip-detail-max-width: 600px;"
   >
     <div
       class="tooltipHeader"

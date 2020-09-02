@@ -497,6 +497,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
               className="tooltipNetwork"
               marker={marker}
               threadIndex={this.props.threadIndex}
+              restrictHeightWidth={true}
             />
           </Tooltip>
         ) : null}
