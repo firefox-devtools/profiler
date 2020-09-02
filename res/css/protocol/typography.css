@@ -1,0 +1,91 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Specification at https://protocol.mozilla.org/fundamentals/typography.html
+ * This is the protocol styling guide, which is different than the photon design
+ * guide. We can use it for content pages (as opposed to the app).
+ *
+ * In the future we may want to make this more generic by applying these styles
+ * by default to h1, h2, h3, etc, in content pages.
+ */
+
+.protocol-display-xxl {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 64px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-xl {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 56px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-lg {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 48px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-md {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-sm {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-xs {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-display-xxs {
+  margin: 0;
+  font-family: Metropolis, Inter, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.protocol-body-lg {
+  font-family: Inter, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.protocol-body-md {
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.protocol-body-sm {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.protocol-body-xs {
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
