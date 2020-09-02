@@ -142,6 +142,46 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
     Resources (
     1
     )
+    <div
+      class="timelineTrackThread condensed"
+    >
+      <div
+        class="threadActivityGraph"
+      >
+        <canvas
+          class="threadActivityGraphCanvas threadActivityGraphCanvas"
+          height="300"
+          width="200"
+        >
+          <h2>
+            Activity Graph for 
+            Merged resource tracks
+          </h2>
+          <p>
+            This graph shows a visual chart of thread activity.
+          </p>
+        </canvas>
+      </div>
+      <div
+        class="timelineTrackThreadMarkers"
+      >
+        <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="timelineEmptyThreadIndicator"
+      />
+    </div>
   </div>
 </div>
 `;
@@ -157,6 +197,46 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
     Resources (
     1
     )
+    <div
+      class="timelineTrackThread condensed"
+    >
+      <div
+        class="threadActivityGraph"
+      >
+        <canvas
+          class="threadActivityGraphCanvas threadActivityGraphCanvas"
+          height="300"
+          width="200"
+        >
+          <h2>
+            Activity Graph for 
+            Merged resource tracks
+          </h2>
+          <p>
+            This graph shows a visual chart of thread activity.
+          </p>
+        </canvas>
+      </div>
+      <div
+        class="timelineTrackThreadMarkers"
+      >
+        <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="timelineEmptyThreadIndicator"
+      />
+    </div>
   </div>
   <ol
     class="timelineResourceTracks"
