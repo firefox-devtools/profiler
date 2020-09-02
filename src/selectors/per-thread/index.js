@@ -49,6 +49,19 @@ const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
 let _mergedThreadSelectorCacheKey: ?ThreadsKey;
 let _mergedThreadSelectorCache: ?ThreadSelectors;
 
+const getSingleThreadSelectors = (
+  threadIndex: ThreadIndex
+): ThreadSelectors => {
+  if (threadIndex in _threadSelectorsCache) {
+    return _threadSelectorsCache[threadIndex];
+  }
+
+  const threadIndexes = new Set([threadIndex]);
+  const selectors = _buildThreadSelectors(threadIndexes);
+  _threadSelectorsCache[threadIndex] = selectors;
+  return selectors;
+};
+
 /**
  * This function does the work of building out the selectors for a given thread index.
  * See the respective definitions in the functions getXXXXXSelectorsPerThread for
@@ -64,10 +77,6 @@ export const getThreadSelectors = (
     threadIndex = oneOrManyThreadIndexes;
   } else {
     threadIndexes = oneOrManyThreadIndexes;
-    if (threadIndexes.size === 1) {
-      // We know this value exists because of the size check, even if Flow doesn't.
-      threadIndex = (threadIndexes.values().next().value: any);
-    }
   }
 
   // The thread selectors have two different caching strategies. For a single thread
@@ -77,13 +86,7 @@ export const getThreadSelectors = (
   // intensive to retain this set of selectors forever, as it can change frequently
   // and with various different values.
   if (threadIndex !== null) {
-    if (threadIndex in _threadSelectorsCache) {
-      return _threadSelectorsCache[threadIndex];
-    }
-    const threadIndexes = new Set([threadIndex]);
-    const selectors = _buildThreadSelectors(threadIndexes);
-    _threadSelectorsCache[threadIndex] = selectors;
-    return selectors;
+    return getSingleThreadSelectors(threadIndex);
   }
 
   // This must be true with the logic above.
@@ -108,6 +111,12 @@ export const getThreadSelectorsFromThreadsKey = (
     ('' + threadsKey).split(',').map(n => +n)
   )
 ): ThreadSelectors => {
+  if (threadIndexes.size === 1) {
+    // We should get the single thread and use its caching mechanism.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return getSingleThreadSelectors((threadIndexes.values().next().value: any));
+  }
+
   if (
     _mergedThreadSelectorCache &&
     threadsKey === _mergedThreadSelectorCacheKey
