@@ -128,7 +128,7 @@ export function computeActiveTabTracks(
     // FIXME: We should revert back to full view if we failed to find a track
     // index for the main track.
     mainThreadIndex: mainTrackIndexes[0] || 0,
-    threadIndexes: mainTrackIndexes,
+    threadIndexes: new Set(mainTrackIndexes),
   };
   return { mainTrack, screenshots, resources };
 }

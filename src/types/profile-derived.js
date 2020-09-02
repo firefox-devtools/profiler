@@ -279,7 +279,7 @@ export type OriginsTimeline = Array<
 export type ActiveTabMainTrack = {|
   type: 'tab',
   mainThreadIndex: ThreadIndex,
-  threadIndexes: Array<ThreadIndex>,
+  threadIndexes: Set<ThreadIndex>,
 |};
 
 export type ActiveTabScreenshotTrack = {|
