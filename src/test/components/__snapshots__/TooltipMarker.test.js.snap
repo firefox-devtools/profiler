@@ -2312,6 +2312,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       Sync
       :
     </div>
+    false
     <div
       class="tooltipLabel"
     >
@@ -2389,6 +2390,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       Sync
       :
     </div>
+    false
     <div
       class="tooltipLabel"
     >

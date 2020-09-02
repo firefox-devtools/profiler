@@ -251,12 +251,14 @@ export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any
-): string | null {
+): string {
   switch (format) {
     case 'url':
     case 'file-path':
     case 'string':
-      return value;
+      // Make sure a truthy string is returned here. Otherwise it can break
+      // grid layouts.
+      return String(value) || '(empty)';
     case 'duration':
     case 'time':
       return formatTimestamp(value);

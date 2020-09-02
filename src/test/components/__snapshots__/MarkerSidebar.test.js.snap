@@ -51,6 +51,7 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           Sync
           :
         </div>
+        false
         <div
           class="tooltipLabel"
         >
