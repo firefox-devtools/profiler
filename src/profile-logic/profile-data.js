@@ -2675,5 +2675,11 @@ export function getOrCreateURIResource(
  * See the ThreadsKey type for an explanation.
  */
 export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
+  if (threadIndexes.size === 1) {
+    // Return the ThreadIndex directly if there is only one thread.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return (threadIndexes.values().next().value: any);
+  }
+
   return [...threadIndexes].sort((a, b) => b - a).join(',');
 }
