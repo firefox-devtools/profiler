@@ -2,16 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.home {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  align-items: center;
-  align-self: flex-start;
-  justify-content: center;
-  line-height: 1.5;
-}
-
 .homeSpecialMessage {
   padding: 8px 16px;
   border: 1px solid #000;
@@ -21,21 +11,13 @@
   color: #fff;
 }
 
-.homeSection {
-  position: relative;
-  overflow: hidden;
-  width: 75%;
+.home {
   max-width: 1200px;
-  box-sizing: border-box;
   padding: 4em 8em;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  border-radius: 3px;
-  box-shadow: 0 5px 25px #0b1f50;
-  font-size: 130%;
+  margin: 0 auto;
 }
 
-.homeSection kbd {
+.home kbd {
   display: inline-block;
   padding: 0 0.5em;
   border: 1px solid #ccc;
@@ -60,13 +42,11 @@
 }
 
 .homeAdditionalContentTitle {
-  margin-top: 0;
   margin-bottom: 10px;
   grid-column: 1 / -1; /* from start to end */
 }
 
-.homeActions > p:first-child,
-.homeRecentUploadedRecordingsTitle {
+.homeActions > p:first-child {
   margin-top: 0;
 }
 
@@ -200,13 +180,12 @@ label.homeSectionButton:focus-within {
 
 @media (max-width: 1300px) {
   .homeSection {
-    padding: 5em;
+    padding: 4em;
   }
 }
 
 @media (max-width: 1100px) {
   .homeSection {
-    max-width: 80%;
     padding: 3em;
   }
 
@@ -218,8 +197,6 @@ label.homeSectionButton:focus-within {
 
 @media (max-width: 767px) {
   .homeSection {
-    width: 90%;
-    max-width: 90%;
     padding-right: 2em;
     padding-left: 2em;
   }
@@ -227,8 +204,6 @@ label.homeSectionButton:focus-within {
 
 @media (max-width: 499px) {
   .homeSection {
-    width: 95%;
-    max-width: 95%;
     padding-right: 1em;
     padding-left: 1em;
   }

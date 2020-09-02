@@ -486,15 +486,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
 
     return (
       <div className="home">
-        <main className="homeSection">
+        <main className="homeSection protocol-body-md">
           <AppHeader />
           {specialMessage ? (
             <div className="homeSpecialMessage">{specialMessage}</div>
           ) : null}
-          <p>
-            Capture a performance profile. Analyze it. Share it. Make the web
-            faster.
-          </p>
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>

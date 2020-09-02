@@ -10,7 +10,6 @@
 
   /* Negative margin is here to compensate for the children's margins */
   margin: 0 -0.2em 0.5em;
-  font-size: 1.5em;
 }
 
 .appHeaderLink {
@@ -23,11 +22,8 @@
   text-decoration: underline;
 }
 
-.appHeaderSlogan {
-  margin: 0 0.2em;
-}
-
 .appHeaderSubtext {
+  font-size: 24px;
   font-weight: normal;
 }
 
