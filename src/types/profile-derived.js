@@ -312,6 +312,7 @@ export type ActiveTabTimeline = {
   mainTrack: ActiveTabMainTrack,
   screenshots: Array<ActiveTabScreenshotTrack>,
   resources: Array<ActiveTabResourceTrack>,
+  resourcesThreadsKey: ThreadsKey,
 };
 
 export type ActiveTabGlobalTrack =

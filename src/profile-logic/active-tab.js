@@ -133,7 +133,11 @@ export function computeActiveTabTracks(
     threadIndexes: mainTrackIndexesSet,
     threadsKey: getThreadsKey(mainTrackIndexesSet),
   };
-  return { mainTrack, screenshots, resources };
+  const resourcesThreadsKey = getThreadsKey(
+    new Set(resources.map(resource => resource.threadIndex))
+  );
+
+  return { mainTrack, screenshots, resources, resourcesThreadsKey };
 }
 
 /**

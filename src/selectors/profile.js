@@ -66,6 +66,7 @@ import type {
   OriginsViewState,
   ActiveTabTimeline,
   ActiveTabMainTrack,
+  ThreadsKey,
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
@@ -482,6 +483,9 @@ export const getActiveTabGlobalTracks: Selector<
 export const getActiveTabResourceTracks: Selector<
   ActiveTabResourceTrack[]
 > = state => getActiveTabTimeline(state).resources;
+
+export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = state =>
+  getActiveTabTimeline(state).resourcesThreadsKey;
 
 /**
  * This returns all TrackReferences for global tracks.
