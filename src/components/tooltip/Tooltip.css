@@ -2,12 +2,19 @@
   position: fixed;
   display: inline-block;
   overflow: hidden;
-  max-width: 100%;
+
+  /**
+   * The margin size is defined in Tooltip.js, as 8px.
+   * The border is 1px.
+   * Take both of these sizes into account: 8px + 8px + 1px + 1px = 18px
+   */
+  max-width: calc(100% - 18px);
   box-sizing: border-box;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid #ccc;
   background-color: var(--grey-10);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  line-height: 1.4;
   pointer-events: none;
   text-align: left;
   text-overflow: ellipsis;
@@ -54,8 +61,9 @@
 }
 
 .tooltipHeader {
-  padding-bottom: 5px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--grey-40);
+  font-size: 12px;
 }
 
 .tooltipDetails {

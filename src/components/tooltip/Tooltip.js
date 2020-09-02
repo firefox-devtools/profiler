@@ -11,6 +11,8 @@ import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
 export const MOUSE_OFFSET = 11;
+// If changing this value, make sure and adjust the max-width in the .tooltip class.
+export const MARGIN: CssPixels = 8;
 
 type Props = {
   mouseX: CssPixels,
@@ -100,7 +102,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
           top = mouseY - interiorElement.offsetHeight - MOUSE_OFFSET;
         } else {
           // Otherwise we align the tooltip with the window's top edge.
-          top = 0;
+          top = MARGIN;
         }
       }
 
@@ -119,7 +121,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
           left = mouseX - interiorElement.offsetWidth - MOUSE_OFFSET;
         } else {
           // Otherwise, align the tooltip with the window's left edge.
-          left = 0;
+          left = MARGIN;
         }
       }
     }
