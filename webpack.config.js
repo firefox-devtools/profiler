@@ -57,6 +57,11 @@ const config = {
         test: /\.svg$/,
         loader: 'file-loader',
       },
+      {
+        /* fonts */
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        loader: 'file-loader',
+      },
     ],
   },
   node: {

@@ -1,0 +1,66 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* This was copied from the protocol design system.
+ * https://protocol.mozilla.org/.
+ * Assets were copied directly from https://github.com/mozilla/protocol-assets.
+ *
+ * We use the protocol design system in our content pages.
+ * Inter should be used for body text, while Metropolis should be used for the
+ * titles.
+ */
+
+@font-face {
+  font-display: swap;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/Inter-Regular.woff2') format('woff2'),
+    url('./assets/fonts/Inter-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: bold;
+  src: url('./assets/fonts/Inter-Bold.woff2') format('woff2'),
+    url('./assets/fonts/Inter-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Inter;
+  font-style: italic;
+  font-weight: normal;
+  src: url('./assets/fonts/Inter-Italic.woff2') format('woff2'),
+    url('./assets/fonts/Inter-Italic.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Inter;
+  font-style: italic;
+  font-weight: bold;
+  src: url('./assets/fonts/Inter-BoldItalic.woff2') format('woff2'),
+    url('./assets/fonts/Inter-BoldItalic.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Metropolis;
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/Metropolis-Medium.woff2') format('woff2'),
+    url('./assets/fonts/Metropolis-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: Metropolis;
+  font-style: normal;
+  font-weight: bold;
+  src: url('./assets/fonts/Metropolis-Bold.woff2') format('woff2'),
+    url('./assets/fonts/Metropolis-Bold.woff') format('woff');
+}

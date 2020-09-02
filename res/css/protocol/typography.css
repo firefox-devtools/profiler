@@ -11,63 +11,74 @@
  */
 
 .protocol-display-xxl {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 64px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-xl {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 56px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-lg {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 48px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-md {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 40px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-sm {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 32px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-xs {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 24px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-display-xxs {
+  font-family: Metropolis, Inter, sans-serif;
   font-size: 16px;
   font-weight: bold;
   line-height: 1.1;
 }
 
 .protocol-body-lg {
+  font-family: Inter, sans-serif;
   font-size: 18px;
   line-height: 1.5;
 }
 
 .protocol-body-md {
+  font-family: Inter, sans-serif;
   font-size: 16px;
   line-height: 1.5;
 }
 
 .protocol-body-sm {
+  font-family: Inter, sans-serif;
   font-size: 14px;
   line-height: 1.5;
 }
 
 .protocol-body-xs {
+  font-family: Inter, sans-serif;
   font-size: 12px;
   line-height: 1.5;
 }
