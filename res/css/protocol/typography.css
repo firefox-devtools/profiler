@@ -11,6 +11,7 @@
  */
 
 .protocol-display-xxl {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 64px;
   font-weight: bold;
@@ -18,6 +19,7 @@
 }
 
 .protocol-display-xl {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 56px;
   font-weight: bold;
@@ -25,6 +27,7 @@
 }
 
 .protocol-display-lg {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 48px;
   font-weight: bold;
@@ -32,6 +35,7 @@
 }
 
 .protocol-display-md {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 40px;
   font-weight: bold;
@@ -39,6 +43,7 @@
 }
 
 .protocol-display-sm {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 32px;
   font-weight: bold;
@@ -46,6 +51,7 @@
 }
 
 .protocol-display-xs {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 24px;
   font-weight: bold;
@@ -53,6 +59,7 @@
 }
 
 .protocol-display-xxs {
+  margin: 0;
   font-family: Metropolis, Inter, sans-serif;
   font-size: 16px;
   font-weight: bold;
