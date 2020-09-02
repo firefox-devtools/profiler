@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { createSelector } from 'reselect';
+import memoize from 'memoize-immutable';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import {
@@ -46,8 +47,11 @@ export type ThreadSelectors = {|
  * This is the static object store that holds the selector functions.
  */
 const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
-let _mergedThreadSelectorCacheKey: ?ThreadsKey;
-let _mergedThreadSelectorCache: ?ThreadSelectors;
+const _mergedThreadSelectorsMemoized = memoize(
+  (threadIndexes: Set<ThreadIndex>, threadsKey: ThreadsKey) =>
+    _buildThreadSelectors(threadIndexes, threadsKey),
+  { limit: 5 }
+);
 
 const getSingleThreadSelectors = (
   threadIndex: ThreadIndex
@@ -117,17 +121,7 @@ export const getThreadSelectorsFromThreadsKey = (
     return getSingleThreadSelectors((threadIndexes.values().next().value: any));
   }
 
-  if (
-    _mergedThreadSelectorCache &&
-    threadsKey === _mergedThreadSelectorCacheKey
-  ) {
-    return _mergedThreadSelectorCache;
-  }
-
-  const selectors = _buildThreadSelectors(threadIndexes, threadsKey);
-  _mergedThreadSelectorCache = selectors;
-  _mergedThreadSelectorCacheKey = threadsKey;
-  return selectors;
+  return _mergedThreadSelectorsMemoized(threadIndexes, threadsKey);
 };
 
 function _buildThreadSelectors(
