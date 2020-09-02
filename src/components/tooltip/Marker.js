@@ -104,7 +104,22 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const page = pages.find(page => page.innerWindowID === innerWindowID);
 
     if (page) {
-      return <TooltipDetail label="URL">{page.url}</TooltipDetail>;
+      try {
+        const { host } = new URL(page.url);
+        const [protocol, ...rest] = page.url.split(host);
+        return (
+          <TooltipDetail label="URL">
+            <div className="tooltipDetailsUrl">
+              <span className="tooltipDetailsDim">{protocol}</span>
+              {host}
+              <span className="tooltipDetailsDim">{rest}</span>
+            </div>
+          </TooltipDetail>
+        );
+      } catch (error) {
+        // Could not parse the URL. Just display the entire thing
+        return <TooltipDetail label="URL">{page.url}</TooltipDetail>;
+      }
     }
     return null;
   };

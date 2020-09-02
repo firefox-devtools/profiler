@@ -1401,7 +1401,21 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       URL
       :
     </div>
-    https://developer.mozilla.org/en-US/
+    <div
+      class="tooltipDetailsUrl"
+    >
+      <span
+        class="tooltipDetailsDim"
+      >
+        https://
+      </span>
+      developer.mozilla.org
+      <span
+        class="tooltipDetailsDim"
+      >
+        /en-US/
+      </span>
+    </div>
     <div
       class="tooltipLabel"
     >
