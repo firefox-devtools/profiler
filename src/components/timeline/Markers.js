@@ -13,10 +13,11 @@ import { TooltipMarker } from '../tooltip/Marker';
 import { timeCode } from '../../utils/time-code';
 import explicitConnect from '../../utils/connect';
 import { getPreviewSelection } from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
 import { getSelectedThreadIndexes } from '../../selectors/url-state';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { hasThreadKeys } from '../../profile-logic/profile-data';
 import './Markers.css';
 
 import type {
@@ -24,7 +25,7 @@ import type {
   CssPixels,
   Marker,
   MarkerIndex,
-  ThreadIndex,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -260,7 +261,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
 export type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +onSelect: (Milliseconds, Milliseconds) => mixed,
 |};
 
@@ -371,13 +372,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 
   _onMouseDown = e => {
     const markerIndex = this._hitTest(e);
-    const { changeRightClickedMarker, threadIndex, getMarker } = this.props;
+    const { changeRightClickedMarker, threadsKey, getMarker } = this.props;
 
     if (e.button === 2) {
       // The right button is a contextual action. It is important that we call
       // the right click callback at mousedown so that the state is updated and
       // the context menus are rendered before the mouseup/contextmenu events.
-      changeRightClickedMarker(threadIndex, markerIndex);
+      changeRightClickedMarker(threadsKey, markerIndex);
     } else {
       const mouseDownItem =
         markerIndex !== null ? getMarker(markerIndex) : null;
@@ -458,7 +459,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       additionalClassName,
       isSelected,
       isModifyingSelection,
-      threadIndex,
+      threadsKey,
       testId,
       rightClickedMarker,
     } = this.props;
@@ -498,7 +499,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <TooltipMarker
               marker={hoveredItem}
-              threadsKey={threadIndex}
+              threadsKey={threadsKey}
               restrictHeightWidth={true}
             />
           </Tooltip>
@@ -523,15 +524,15 @@ export const TimelineMarkersJank = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = props;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       // These don't use marker schema as they are derived.
       markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
-      isSelected: selectedThreads.has(threadIndex),
+      isSelected: hasThreadKeys(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -550,8 +551,8 @@ export const TimelineMarkersOverview = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = props;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
@@ -561,7 +562,7 @@ export const TimelineMarkersOverview = explicitConnect<
           : null,
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
-      isSelected: selectedThreads.has(threadIndex),
+      isSelected: hasThreadKeys(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -580,14 +581,14 @@ export const TimelineMarkersFileIo = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = props;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
-      isSelected: selectedThreads.has(threadIndex),
+      isSelected: hasThreadKeys(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -606,14 +607,14 @@ export const TimelineMarkersMemory = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = props;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
-      isSelected: selectedThreads.has(threadIndex),
+      isSelected: hasThreadKeys(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',
       testId: 'TimelineMarkersMemory',
@@ -633,14 +634,14 @@ export const TimelineMarkersIPC = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = props;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
-      isSelected: selectedThreads.has(threadIndex),
+      isSelected: hasThreadKeys(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersIPC',
       testId: 'TimelineMarkersIPC',

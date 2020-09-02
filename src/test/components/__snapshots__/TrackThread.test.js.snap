@@ -64,7 +64,7 @@ Array [
 
 exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
 <div
-  class="timelineTrackThread"
+  class="timelineTrackThread expanded"
 >
   <div
     class="timelineMarkers selected"

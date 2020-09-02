@@ -65,7 +65,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
         <TimelineMarkersOverview
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          threadIndex={0}
+          threadsKey={0}
           onSelect={() => {}}
         />
         <MarkerContextMenu />

@@ -72,7 +72,7 @@ export class TrackMemoryImpl extends React.PureComponent<Props, State> {
         <TimelineMarkersMemory
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           onSelect={this._onMarkerSelect}
         />
         <TrackMemoryGraph

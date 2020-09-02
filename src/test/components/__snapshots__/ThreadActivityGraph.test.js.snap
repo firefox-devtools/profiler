@@ -2526,7 +2526,7 @@ Array [
 
 exports[`ThreadActivityGraph matches the component snapshot 1`] = `
 <div
-  class="timelineTrackThread"
+  class="timelineTrackThread expanded"
 >
   <div
     class="timelineMarkers selected"

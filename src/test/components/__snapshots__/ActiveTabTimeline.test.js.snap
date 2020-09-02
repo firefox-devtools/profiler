@@ -11,7 +11,7 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread"
+        class="timelineTrackThread expanded"
       >
         <div
           class="threadActivityGraph"
@@ -87,7 +87,7 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread"
+        class="timelineTrackThread condensed"
       >
         <div
           class="threadActivityGraph"
@@ -180,7 +180,7 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread"
+            class="timelineTrackThread condensed"
           >
             <div
               class="threadActivityGraph"
@@ -272,7 +272,7 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                 class="timelineTrackTrack"
               >
                 <div
-                  class="timelineTrackThread"
+                  class="timelineTrackThread expanded"
                 >
                   <div
                     class="threadActivityGraph"

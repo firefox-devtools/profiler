@@ -2683,3 +2683,14 @@ export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
 
   return [...threadIndexes].sort((a, b) => b - a).join(',');
 }
+
+/**
+ * Checks if threadIndexesSet contains all the threads in the threadsKey.
+ */
+export function hasThreadKeys(
+  threadIndexesSet: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+): boolean {
+  const threadIndexes = ('' + threadsKey).split(',').map(n => +n);
+  return threadIndexes.every(threadIndex => threadIndexesSet.has(threadIndex));
+}

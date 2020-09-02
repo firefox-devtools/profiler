@@ -75,7 +75,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
         const { mainThreadIndex } = globalTrack;
         return (
           <TimelineTrackThread
-            threadIndex={mainThreadIndex}
+            threadsKey={mainThreadIndex}
             showMemoryMarkers={false}
             trackType="expanded"
             trackName="Active Tab"
