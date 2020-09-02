@@ -1,0 +1,105 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* This was copied from the protocol design system.
+ * https://protocol.mozilla.org/
+ *
+ * We use the protocol design system in our content pages.
+ *
+ * Assets have been copied from https://github.com/mozilla/protocol-assets and
+ * the CSS code has been copied from the built version of https://github.com/mozilla/protocol
+ * and then adapted.
+ *
+ * See https://protocol.mozilla.org/demos/zap.html to see all zaps.
+ *
+ * Here is how to use it:
+ * 
+ * <h2 class='protocol-has-zap-1'>bla bla <strong>emphasized word</strong> bla</h2>
+ */
+
+[class*='protocol-has-zap'] strong {
+  position: relative;
+  font-weight: inherit;
+}
+
+[class*='protocol-has-zap'] strong::after {
+  position: absolute;
+  top: calc(100% - 0.15em);
+  left: -0.2em;
+  display: block;
+  width: calc(100% + 0.4em);
+  height: 0.3em;
+  background-image: url('./assets/zaps/zap-01.svg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  content: '';
+}
+
+.protocol-has-zap-2 strong::after {
+  background-image: url('./assets/zaps/zap-02.svg');
+}
+
+.protocol-has-zap-3 strong::after {
+  background-image: url('./assets/zaps/zap-03.svg');
+}
+
+.protocol-has-zap-4 strong::after {
+  background-image: url('./assets/zaps/zap-04.svg');
+}
+
+.protocol-has-zap-5 strong::after {
+  background-image: url('./assets/zaps/zap-05.svg');
+}
+
+.protocol-has-zap-6 strong::after {
+  background-image: url('./assets/zaps/zap-06.svg');
+}
+
+.protocol-has-zap-7 strong::after {
+  background-image: url('./assets/zaps/zap-07.svg');
+}
+
+.protocol-has-zap-8 strong::after {
+  background-image: url('./assets/zaps/zap-08.svg');
+}
+
+.protocol-has-zap-9 strong::after {
+  background-image: url('./assets/zaps/zap-09.svg');
+}
+
+.protocol-has-zap-10 strong::after {
+  background-image: url('./assets/zaps/zap-10.svg');
+}
+
+.protocol-has-zap-11 strong::after {
+  background-image: url('./assets/zaps/zap-11.svg');
+}
+
+.protocol-has-zap-12 strong::after {
+  background-image: url('./assets/zaps/zap-12.svg');
+}
+
+.protocol-has-zap-13 strong::after {
+  background-image: url('./assets/zaps/zap-13.svg');
+}
+
+.protocol-has-zap-14 strong::after {
+  background-image: url('./assets/zaps/zap-14.svg');
+}
+
+.protocol-has-zap-15 strong::after {
+  background-image: url('./assets/zaps/zap-15.svg');
+}
+
+.protocol-has-zap-16 strong::after {
+  background-image: url('./assets/zaps/zap-16.svg');
+}
+
+.protocol-has-zap-17 strong::after {
+  background-image: url('./assets/zaps/zap-17.svg');
+}
+
+.protocol-has-zap-18 strong::after {
+  background-image: url('./assets/zaps/zap-18.svg');
+}
