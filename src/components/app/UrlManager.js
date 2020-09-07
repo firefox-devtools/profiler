@@ -169,15 +169,18 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('popstate', () => this._updateState);
+    window.removeEventListener('popstate', this._updateState);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.urlSetupPhase !== 'done') {
+  componentDidUpdate() {
+    const { urlSetupPhase, phase, urlState } = this.props;
+    if (urlSetupPhase !== 'done') {
+      // Do not change the history before the url setup is done, because the URL
+      // state isn't in a consistent state yet.
       return;
     }
 
-    if (nextProps.phase === 'FATAL_ERROR') {
+    if (phase === 'FATAL_ERROR') {
       // Even if the url setup phase is done, we must not change the URL if
       // we're in a FATAL_ERROR state. Likely the profile update failed, and so
       // the url state wasn't initialized properly. Therefore trying to
@@ -186,16 +189,16 @@ class UrlManager extends React.PureComponent<Props> {
       return;
     }
 
-    const newUrl = urlFromState(nextProps.urlState);
+    const newUrl = urlFromState(urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
       if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
-        window.history.pushState(nextProps.urlState, document.title, newUrl);
+        window.history.pushState(urlState, document.title, newUrl);
       } else {
         // Replace the URL state before the URL setup is done, and if we've specifically
         // flagged to replace the URL state.
-        window.history.replaceState(nextProps.urlState, document.title, newUrl);
+        window.history.replaceState(urlState, document.title, newUrl);
       }
     }
   }

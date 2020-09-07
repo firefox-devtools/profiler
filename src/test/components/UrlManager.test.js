@@ -11,15 +11,24 @@ import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
-import { getDataSource } from '../../selectors/url-state';
+import {
+  getDataSource,
+  getHash,
+  getCurrentSearchString,
+} from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { CURRENT_URL_VERSION } from '../../app-logic/url-handling';
+import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
+import { profilePublished } from 'firefox-profiler/actions/publish';
+import { changeCallTreeSearchString } from 'firefox-profiler/actions/profile-view';
 
 jest.mock('../../profile-logic/symbol-store');
 
 describe('UrlManager', function() {
+  autoMockFullNavigation();
+
   // This is a quite complicated function, that does something very simple:
   // it returns a response with a good profile suitable to mock a fetch result.
   function getSuccessfulFetchResponse() {
@@ -39,9 +48,7 @@ describe('UrlManager', function() {
 
   function setup(urlPath: ?string) {
     if (typeof urlPath === 'string') {
-      // jsdom doesn't allow us to rewrite window.location. Instead, use the
-      // History API to properly set the current location.
-      window.history.pushState(undefined, 'Firefox Profiler', urlPath);
+      window.location.replace(urlPath);
     }
     const store = blankStore();
     const { dispatch, getState } = store;
@@ -186,5 +193,93 @@ describe('UrlManager', function() {
     expect(getView(getState()).phase).toBe('DATA_LOADED');
     expect(window.location.pathname).toBe(expectedResultingPath);
     expect(window.location.search).toContain(searchString);
+  });
+
+  it('allows navigating back and forward when changing view options', async () => {
+    window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
+
+    const urlPath = '/public/FAKE_HASH/calltree/';
+    const searchString = 'v=' + CURRENT_URL_VERSION;
+
+    const {
+      getState,
+      createUrlManager,
+      waitUntilUrlSetupPhase,
+      dispatch,
+    } = setup(urlPath + '?' + searchString);
+
+    expect(getDataSource(getState())).toMatch('none');
+    createUrlManager();
+
+    await waitUntilUrlSetupPhase('done');
+
+    expect(window.history.length).toBe(1);
+
+    // The user changes is looking for some specific call node.
+    dispatch(changeCallTreeSearchString('B'));
+    expect(getCurrentSearchString(getState())).toBe('B');
+    expect(window.history.length).toBe(2);
+
+    // The user can't find anything, he goes back in history.
+    window.history.back();
+    expect(getCurrentSearchString(getState())).toBe('');
+    expect(window.history.length).toBe(2);
+
+    // Look again at this search.
+    window.history.forward();
+    expect(getCurrentSearchString(getState())).toBe('B');
+  });
+
+  it('prevents navigating back after publishing', async () => {
+    // This loads a profile using the add-on.
+    const {
+      getState,
+      dispatch,
+      createUrlManager,
+      waitUntilUrlSetupPhase,
+    } = setup('/from-addon/');
+    createUrlManager();
+    await waitUntilUrlSetupPhase('done');
+
+    // FIXME: for from-addon the history gets rewritten several times at load
+    // time: once without anything in the state, and once once the state is
+    // ready. The reason is that we don't wait for the result of the "view
+    // profile" action before setting url setup to "done". There are some
+    // reasons to this but we'll likely want to change it and fix the "reason"
+    // differently.
+    expect(window.history.length).toBe(2);
+
+    // Now the user publishes.
+    dispatch(profilePublished('SOME_HASH', null));
+    expect(getDataSource(getState())).toMatch('public');
+    expect(getHash(getState())).toMatch('SOME_HASH');
+    expect(window.history.length).toBe(3);
+
+    // Then wants to go back in history. This shouldn't work!
+    let previousLocation = window.location.href;
+    window.history.back();
+    expect(getDataSource(getState())).toMatch('public');
+    expect(getHash(getState())).toMatch('SOME_HASH');
+    expect(previousLocation).toEqual(window.location.href);
+
+    // We went back, the entry number 2 has been replaced, but there are still 3
+    // entries in the history.
+    expect(window.history.length).toBe(3);
+
+    // Now let's publish again
+    dispatch(profilePublished('SOME_OTHER_HASH', null));
+    expect(getDataSource(getState())).toMatch('public');
+    expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
+
+    // It's still 3 because the 3rd entry has been removed and replaced by this
+    // new state (remember we were at entry number 2).
+    expect(window.history.length).toBe(3);
+
+    // The user wants to go back, but this won't work!
+    previousLocation = window.location.href;
+    window.history.back();
+    expect(getDataSource(getState())).toMatch('public');
+    expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
+    expect(previousLocation).toEqual(window.location.href);
   });
 });

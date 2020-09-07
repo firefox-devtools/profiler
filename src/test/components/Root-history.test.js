@@ -12,37 +12,27 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { mockWindowLocation } from '../fixtures/mocks/window-location';
-import { mockWindowHistory } from '../fixtures/mocks/window-history';
+import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
 describe('Root with history', function() {
-  // Cleanup the tests through a side-effect.
-  let _cleanup;
-  afterEach(() => {
-    if (!_cleanup) {
-      throw new Error('Expected the setup function to create a cleanup step.');
-    }
-    _cleanup();
-  });
-
   type TestConfig = {|
     profileHash?: string,
   |};
 
+  autoMockFullNavigation();
+
   function setup(config: TestConfig) {
     const { profileHash } = config;
 
-    let resetWindowLocation;
-    const resetWindowHistory = mockWindowHistory();
-
     // This test is driven primarily by the URL. Decide how to load things.
     if (profileHash) {
-      // Load by URL, with a profile hash.
-      resetWindowLocation = mockWindowLocation(
+      // Load by URL, with a profile hash. This replaces the initial URL as
+      // configured by the navigation automocking.
+      window.location.replace(
         `https://profiler.firefox.com/public/${profileHash}`
       );
 
@@ -66,14 +56,6 @@ describe('Root with history', function() {
     const store = blankStore();
     const renderResult = render(<Root store={store} />);
 
-    _cleanup = () => {
-      // Cleanup the mocks.
-      resetWindowLocation();
-      resetWindowHistory();
-      delete window.fetch;
-      _cleanup = null;
-    };
-
     const { findByText } = renderResult;
 
     async function waitForTab({
@@ -96,6 +78,10 @@ describe('Root with history', function() {
       waitForTab,
     };
   }
+
+  afterEach(() => {
+    delete window.fetch;
+  });
 
   it('can view a file from the profile store, use history with it', async function() {
     const { getByText, queryByText, waitForTab } = setup({
