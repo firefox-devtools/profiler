@@ -41,9 +41,11 @@ const config = {
           { loader: 'css-loader', options: { importLoaders: 1 } },
           'postcss-loader',
         ],
-        include: includes.concat(
-          path.join(__dirname, 'node_modules', 'photon-colors')
-        ),
+        include: [
+          ...includes,
+          path.join(__dirname, 'node_modules', 'photon-colors'),
+          path.join(__dirname, 'node_modules', 'react-splitter-layout'),
+        ],
       },
       {
         test: /\.jpg$/,
