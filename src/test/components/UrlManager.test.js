@@ -22,7 +22,10 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { CURRENT_URL_VERSION } from '../../app-logic/url-handling';
 import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { profilePublished } from 'firefox-profiler/actions/publish';
-import { changeCallTreeSearchString } from 'firefox-profiler/actions/profile-view';
+import {
+  changeCallTreeSearchString,
+  setDataSource,
+} from 'firefox-profiler/actions/profile-view';
 
 jest.mock('../../profile-logic/symbol-store');
 
@@ -89,7 +92,6 @@ describe('UrlManager', function() {
 
   it('sets up the URL', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(getUrlSetupPhase(getState())).toBe('initial-load');
     createUrlManager();
@@ -99,16 +101,13 @@ describe('UrlManager', function() {
     await waitUntilUrlSetupPhase('done');
     expect(getUrlSetupPhase(getState())).toBe('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it('has no data source by default', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it('sets the data source to from-addon', async function() {
@@ -126,13 +125,11 @@ describe('UrlManager', function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
       '/from-file/'
     );
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
-    expect(console.error).toHaveBeenCalled();
   });
 
   it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function() {
@@ -228,6 +225,47 @@ describe('UrlManager', function() {
     // Look again at this search.
     window.history.forward();
     expect(getCurrentSearchString(getState())).toBe('B');
+  });
+
+  it('allows navigating back and forward when moving between content pages', async () => {
+    // The test will start at the home.
+    const urlPath = '/ ';
+    const {
+      getState,
+      createUrlManager,
+      waitUntilUrlSetupPhase,
+      dispatch,
+    } = setup(urlPath);
+    createUrlManager();
+
+    await waitUntilUrlSetupPhase('done');
+    expect(getDataSource(getState())).toBe('none');
+    expect(window.history.length).toBe(1);
+
+    // Now the user clicks on the "all recordings" link. This will change the
+    // datasource, we're simulating that.
+    dispatch(setDataSource('uploaded-recordings'));
+    expect(getDataSource(getState())).toBe('uploaded-recordings');
+    expect(window.history.length).toBe(2);
+
+    // The user goes back to the home by pressing the browser's back button.
+    window.history.back();
+    expect(getDataSource(getState())).toBe('none');
+
+    // Now the user goes to the compare form clicking a link on the homepage,
+    // we're simulating that by changing the data source.
+    dispatch(setDataSource('compare'));
+    expect(getDataSource(getState())).toBe('compare');
+    // Click on the header
+    dispatch(setDataSource('none'));
+    expect(window.history.length).toBe(3);
+
+    // The user goes back to the compare form using the browser's back button.
+    window.history.back();
+    expect(getDataSource(getState())).toBe('compare');
+    // The user goes back to the home using the browser's back button.
+    window.history.back();
+    expect(getDataSource(getState())).toBe('none');
   });
 
   it('prevents navigating back after publishing', async () => {

@@ -1431,7 +1431,8 @@ export function getProfilesFromRawUrl(
       case 'none':
       case 'from-file':
       case 'local':
-        throw new Error(`There is no profile to download`);
+        // There is no profile to download for these datasources.
+        break;
       default:
         throw assertExhaustiveCheck(
           dataSource,
