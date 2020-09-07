@@ -1,5 +1,5 @@
-// flow-typed signature: c1b1289b492ef8e892f40a744b17a9dd
-// flow-typed version: 98d9b6a103/react-splitter-layout_v3.x.x/flow_>=v0.53.x
+// flow-typed signature: c5aa20941637db181565c6b31deee152
+// flow-typed version: c6154227d1/react-splitter-layout_v3.x.x/flow_>=v0.53.x <=v0.103.x
 
 declare type $$reactsplitterlayout$$Props = {|
   +customClassName?: string,
