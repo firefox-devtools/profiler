@@ -1,3 +1,4 @@
+// @flow
 module.exports = {
   env: {
     browser: true,
@@ -12,7 +13,6 @@ module.exports = {
     'prettier',
     'prettier/flowtype',
     'prettier/react',
-    'plugin:jest/recommended'
   ],
   parserOptions: {
     ecmaVersion: '2017',
@@ -41,14 +41,21 @@ module.exports = {
     // Flow provides enough coverage over the prop types, and there can be errors
     // with some of the more complicated Flow types.
     'react/prop-types': 'off',
-    "react/jsx-curly-brace-presence": ['error', { "props": 'never', "children": 'never' }],
+    'react/jsx-curly-brace-presence': [
+      'error',
+      { props: 'never', children: 'never' },
+    ],
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
     // 'react/no-unused-prop-types': 'error',
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
-    'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
+    'flowtype/require-valid-file-annotation': [
+      'error',
+      'always',
+      { annotationStyle: 'line' },
+    ],
     // no-dupe-keys crashes with recent eslint. See
     // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
     // https://github.com/gajus/eslint-plugin-flowtype/pull/302
@@ -106,11 +113,9 @@ module.exports = {
     },
     'import/resolver': {
       alias: {
-        map: [
-          ['firefox-profiler', './src'],
-        ],
-        extensions: ['.js']
-      }
-    }
+        map: [['firefox-profiler', './src']],
+        extensions: ['.js'],
+      },
+    },
   },
 };
