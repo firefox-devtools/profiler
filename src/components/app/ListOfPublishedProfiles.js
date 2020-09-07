@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 import {
   listAllProfileData,
   type ProfileData,
@@ -102,11 +103,15 @@ function PublishedProfile({
   );
 }
 
+type Props = {|
+  limit?: number,
+|};
+
 type State = {|
   profileDataList: null | ProfileData[],
 |};
 
-export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
+export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   state = {
     profileDataList: null,
   };
@@ -123,6 +128,7 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
   }
 
   render() {
+    const { limit } = this.props;
     const { profileDataList } = this.state;
 
     if (!profileDataList) {
@@ -135,18 +141,34 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
       );
     }
 
+    const reducedProfileDataList = limit
+      ? profileDataList.slice(0, limit)
+      : profileDataList;
+
+    const profilesRestCount =
+      profileDataList.length - reducedProfileDataList.length;
+
     const nowTimestamp = Date.now();
 
     return (
-      <ul className="publishedProfilesList">
-        {profileDataList.map(profileData => (
-          <PublishedProfile
-            key={profileData.profileToken}
-            profileData={profileData}
-            nowTimestamp={nowTimestamp}
-          />
-        ))}
-      </ul>
+      <>
+        <ul className="publishedProfilesList">
+          {reducedProfileDataList.map(profileData => (
+            <PublishedProfile
+              key={profileData.profileToken}
+              profileData={profileData}
+              nowTimestamp={nowTimestamp}
+            />
+          ))}
+        </ul>
+        {profilesRestCount > 0 ? (
+          <p>
+            <InnerNavigationLink dataSource="uploaded-recordings">
+              See all your recordings ({profilesRestCount} more)
+            </InnerNavigationLink>
+          </p>
+        ) : null}
+      </>
     );
   }
 }

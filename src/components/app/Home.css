@@ -27,7 +27,7 @@
   width: 75%;
   max-width: 1200px;
   box-sizing: border-box;
-  padding: 8em;
+  padding: 4em 8em;
   border: 1px solid #ccc;
   background-color: #fff;
   border-radius: 3px;
@@ -56,6 +56,18 @@
   border: 1px solid #d1d1d1;
   border-radius: 0.4em;
   box-shadow: 0 2px 4px #ddd;
+  place-self: center;
+}
+
+.homeAdditionalContentTitle {
+  margin-top: 0;
+  margin-bottom: 10px;
+  grid-column: 1 / -1; /* from start to end */
+}
+
+.homeActions > p:first-child,
+.homeRecentUploadedRecordingsTitle {
+  margin-top: 0;
 }
 
 .homeSectionButton {
@@ -136,26 +148,12 @@
   filter: grayscale(1) brightness(3);
 }
 
-.homeSectionPerfScreenshot {
-  width: 1346px;
-  max-width: 90%;
-  height: auto;
-  margin-top: 15px;
-  margin-bottom: -40px;
-}
-
-.homeInstructions {
-  display: flex;
+.homeInstructions,
+.homeAdditionalContent {
+  display: grid;
   margin-top: 30px;
-}
-
-.homeInstructionsLeft,
-.homeInstructionsRight {
-  width: 50%;
-}
-
-.homeInstructionsRight {
-  padding-left: 30px;
+  column-gap: 30px;
+  grid-template-columns: 1fr 1fr;
 }
 
 .homeInstructionsTransitionGroup {
@@ -211,18 +209,10 @@ label.homeSectionButton:focus-within {
     max-width: 80%;
     padding: 3em;
   }
+
+  .homeAdditionalContent,
   .homeInstructions {
-    display: block;
-  }
-  .homeInstructionsLeft,
-  .homeInstructionsRight {
-    width: 100%;
-  }
-  .homeInstructionsLeft {
-    text-align: center;
-  }
-  .homeInstructionsRight {
-    padding-left: 0;
+    grid: none;
   }
 }
 
