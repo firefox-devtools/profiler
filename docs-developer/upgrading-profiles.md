@@ -13,7 +13,7 @@ Changes to the profile format need to happen in this order:
 
 Firefox generates profiles in a function called `StreamJSON` in [tools/profiler/core/platform.cpp](http://searchfox.org/mozilla-central/rev/7cb75d87753de9103253e34bc85592e26378f506/tools/profiler/core/platform.cpp#1259). This code is the authorative "description" of the current profile format.
 
-Sometimes the profile format changes. Maybe we want to add new information that wasn't there before, or maybe we just found a better way to represent existing information.
+Sometimes the profile format changes. Maybe we want to add new information that wasn't there before, or maybe we found a better way to represent existing information.
 
 When this happens, [profiler.firefox.com] needs to be updated to handle the new format. However, we want [profiler.firefox.com] to be compatible with any Firefox version, for example the latest version of [profiler.firefox.com] should still work in Firefox Release while the profile format change slowly propagates from Nightly up the channels.
 
@@ -21,7 +21,7 @@ Rather than enforcing profile format changes to be purely additive, or carefully
 
 **Every change to the profile format needs to come with a change to the profile version number, and is treated as a "breaking" change.**
 
-The profile version number is stored in `profile.meta.version`, and is just an integer.
+The profile version number is stored in `profile.meta.version`, and is an integer.
 
 When [profiler.firefox.com] receives a profile, as a first step it will run it through an upgrade process: If the profile is in a format version that's older than the most recent version known to it, a number of "upgrader" functions get applied to it, and at the end of that process the result can be treated as a profile of the most recent version. This way, most of the client's code can pretend that it only receives up-to-date profiles, and the compatibility concerns are constrained to a dedicated file.
 
@@ -29,7 +29,7 @@ This dedicated file is [gecko-profile-versioning.js](../src/profile-logic/gecko-
 
 ### No forwards compatibility
 
-The setup described above only solves one direction of compatibility: You can run current versions of [profiler.firefox.com] in old versions of Firefox. It does not address the other direction, running old versions of [profiler.firefox.com] on newer versions of Firefox. For now, if the app encounters profiles that are newer than what it understands, it will just reject the profile and show an error message, asking the user to refresh the page in order to load a newer version which will hopefully know how to deal with the profile.
+The setup described above only solves one direction of compatibility: You can run current versions of [profiler.firefox.com] in old versions of Firefox. It does not address the other direction, running old versions of [profiler.firefox.com] on newer versions of Firefox. For now, if the app encounters profiles that are newer than what it understands, it will blindly reject the profile and show an error message, asking the user to refresh the page in order to load a newer version which will hopefully know how to deal with the profile. If a new version is detected it will try to reload automatically.
 
 That means that profile format changes need to be made in this order:
 
@@ -37,7 +37,7 @@ That means that profile format changes need to be made in this order:
  2. [profiler.firefox.com] needs to be updated to be able to deal with that new format, and an upgrader from the current format to the new format needs to be added to it.
  3. *After* the [profiler.firefox.com] update is rolled out, the actual Firefox change can land.
 
-We'll see how this works out. It might be annoying for users who have updated their Firefox Nightly but not opened up [profiler.firefox.com] between (2) and (3), and then try to load a new profile into an old version of [profiler.firefox.com] from their service worker cache. They're just one page refresh away from success, though.
+We'll see how this works out. It might be annoying for users who have updated their Firefox Nightly but not opened up [profiler.firefox.com] between (2) and (3), and then try to load a new profile into an old version of [profiler.firefox.com] from their service worker cache. They're only one page refresh away from success, though.
 
 If this turns out to be too hard to deal with, we might need to go with a semver approach and hope that most profile changes are non-breaking. Time will tell.
 
@@ -53,7 +53,7 @@ Consequently, the same versioning concerns as for the Gecko profile format also 
 
 The processed profile version is stored in the field `profile.meta.preprocessedProfileVersion`, and the upgraders for processed profiles live in the file [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
-`processProfile` should output the latest version of the processed profile format at all times. Combined with the fact that it can treat its input as being a Gecko profile of the latest Gecko profile format version, this makes `processProfile` as simple as possible.
+`processProfile` should output the latest version of the processed profile format at all times. Combined with the fact that it can treat its input as being a Gecko profile of the latest Gecko profile format version, this keeps `processProfile` uncomplicated.
 
 ### The old cleopatra format
 

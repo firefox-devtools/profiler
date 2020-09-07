@@ -76,7 +76,7 @@ so we'll have a different leaf stack object whose prefix is a stack object with 
 
 ### CallNodes
 
-If we just used stacks to create the call tree, with one tree node per stack, the tree would look like this:
+If we only used stacks to create the call tree, with one tree node per stack, the tree would look like this:
 
 ```
   - main@0x02
@@ -103,7 +103,7 @@ We call the node of such a combined tree a `CallNode` - it's like a `stack`, but
 
 ## FAQ
 
-### Why keep around stacks at all, instead of just destructively combining them into CallNodes?
+### Why keep around stacks at all, instead of only destructively combining them into CallNodes?
 
 We want to keep around enough information to be able to show per-line profiling information for a given CallNode. For example, for the CallNode for `main`, we want to be able to highlight the expensive lines / inside `main()`. So we need to know how many samples were executing a given line of code. With the information we have, we can do that by finding all samples whose stacks are in the selected CallNode, and then look at the leaf frames of those stacks.
 

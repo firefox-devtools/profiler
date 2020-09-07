@@ -37,7 +37,7 @@ In this case the profiler took 3 samples, each 1 millisecond apart. Visualizing 
       E       G
 ```
 
-This structure makes it much easier to tell where time is being spent in different parts of the application. Here the call tree shows that function `A` is the root of our samples, and all samples were called from there. According to this call tree `B` calls out to two different functions, `C` and `H`. However with just this tree we do not yet know how long each function took. This is where self time and running time come into play.
+This structure makes it much easier to tell where time is being spent in different parts of the application. Here the call tree shows that function `A` is the root of our samples, and all samples were called from there. According to this call tree `B` calls out to two different functions, `C` and `H`. However with only this tree we do not yet know how long each function took. This is where self time and running time come into play.
 
 # Self and running time
 
@@ -61,7 +61,7 @@ With the above graph, we know that the functions at the leaf of the graph were t
 
 # Functions are important not stacks and frames
 
-One key point of the aggregation done in the call tree is that it's focused on what *functions* are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using just the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and CallNodes in C++](call-nodes-in-cpp.md).
+One key point of the aggregation done in the call tree is that it's focused on what *functions* are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using only the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and CallNodes in C++](call-nodes-in-cpp.md).
 
 ## Frames and stacks in JavaScript
 

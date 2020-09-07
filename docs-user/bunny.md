@@ -89,7 +89,7 @@ The thread list also nicely shows the message passing between the content proces
 
 The Flame Graph provides a nice view into a summary of where time is spent. The X axis represents the percentage of time spent with that function in that stack for all visible stacks. In a previous step, the idle time was already hidden from the analysis.
 
-The stacks are rather deep here, so a nice first step is to focus on just the subtree that is interesting. Visually, `nsThread::ProcessNextEvent` is the last function most common to the tree. Right click and focus on that subtree.
+The stacks are rather deep here, so a nice first step is to focus on only the subtree that is interesting. Visually, `nsThread::ProcessNextEvent` is the last function most common to the tree. Right click and focus on that subtree.
 
 ![A screenshot of the context menu on the flame graph for focus subtree.](./images/bunny-analysis/focus-subtree.png)
 
@@ -121,7 +121,7 @@ The repeated calls to `set fillStyle` are unnecessary for the bunny, as there ar
 
 ### The code change for `set fillStyle`
 
-The fix for this would be rather simple, of only setting the color when it's been changed.
+The fix for this would be straightforward, of only setting the color when it's been changed.
 
 ```js
 worker.addEventListener('message', message => {
@@ -242,7 +242,7 @@ self.postMessage({
   length: colorArray.length,
 })
 ```
-
+<!--alex ignore simple-->
 This makes the code much more complex and hard to maintain, but it could be the key to better performance. This is a common trade-off with fast code and simple code. It's important that any additional complexities are backed by an analysis that it actually affects user-perceived performance.
 
 ### The resulting structured clone profile:
@@ -265,7 +265,7 @@ The structured cloning is also gone from the worker process. Now it is mostly th
 
 ## Conclusion
 
-Profiling the code revealed a simple fix to setting `fillStyle`. These code changes didn't really increase complexity of the codebase but had a sizable user impact. This was a case were caching saved the cost of re-computing a value.
+Profiling the code revealed a quick fix to setting `fillStyle`. These code changes didn't really increase complexity of the codebase but had a sizable user impact. This was a case were caching saved the cost of re-computing a value.
 
 The structured cloning code was a more complicated problem to solve. The solution ended up increasing the complexity of the code, but is justified by the fairly dramatic end-user benefit. The solution was figured out through thinking about the algorithmic complexity of the structured cloning algorithm, and figuring out a way to fit the constraints of the project's data into a faster data structure.
 
