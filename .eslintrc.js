@@ -105,6 +105,12 @@ module.exports = {
     'prefer-spread': 'error',
     'no-else-return': 'error',
   },
+  // This property is specified both here in addition to the command line in
+  // package.json.
+  // The reason is that the property only warns but the command line option
+  // outputs errors, but the property is useful so that we have the information
+  // directly in editors.
+  reportUnusedDisableDirectives: true,
   settings: {
     react: {
       pragma: 'React',

@@ -8,7 +8,7 @@
     "build-prod": "yarn build-prod:quiet --progress",
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "lint": "run-p lint-js lint-css",
-    "lint-js": "eslint *.js bin src",
+    "lint-js": "eslint *.js bin src --report-unused-disable-directives",
     "lint-fix-js": "yarn lint-js --fix",
     "lint-css": "stylelint \"src/**/*.css\" \"res/**/*.css\"",
     "lint-fix-css": "yarn lint-css --fix",
