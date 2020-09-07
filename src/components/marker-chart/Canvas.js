@@ -84,6 +84,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       rowHeight,
       markerTimingAndBuckets,
+      rightClickedMarkerIndex,
       viewport: {
         viewportTop,
         viewportBottom,
@@ -97,33 +98,55 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       Math.ceil(viewportBottom / rowHeight),
       markerTimingAndBuckets.length
     );
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rightClickedRow: number | void =
+      rightClickedMarkerIndex === null
+        ? undefined
+        : markerIndexToTimingRow.get(rightClickedMarkerIndex);
+    const newRow: number | void =
+      hoveredItem === null
+        ? undefined
+        : markerIndexToTimingRow.get(hoveredItem);
 
     if (isHoveredOnlyDifferent) {
       // Only re-draw the rows that have been updated if only the hovering information
       // is different.
+<<<<<<< HEAD
       const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
         markerTimingAndBuckets
       );
+=======
+
+>>>>>>> issue2610
       const oldRow: number | void =
         prevHoveredItem === null
           ? undefined
           : markerIndexToTimingRow.get(prevHoveredItem);
-      const newRow: number | void =
-        hoveredItem === null
-          ? undefined
-          : markerIndexToTimingRow.get(hoveredItem);
 
       if (newRow !== undefined) {
         this.clearRow(ctx, newRow);
+        this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredItem, newRow, newRow + 1);
       }
       if (oldRow !== undefined && oldRow !== newRow) {
-        this.clearRow(ctx, oldRow);
+        if (oldRow !== rightClickedRow) {
+          this.clearRow(ctx, oldRow);
+        }
         this.drawMarkers(ctx, hoveredItem, oldRow, oldRow + 1);
       }
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, containerWidth, containerHeight);
+<<<<<<< HEAD
+=======
+      if (rightClickedRow !== undefined) {
+        this.highlightRow(ctx, rightClickedRow);
+      } else if (newRow !== undefined) {
+        this.highlightRow(ctx, newRow);
+      }
+>>>>>>> issue2610
       this.drawMarkers(ctx, hoveredItem, startRow, endRow);
       this.drawSeparatorsAndLabels(ctx, startRow, endRow);
     }
@@ -177,6 +200,21 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       );
       this.drawMarkers(ctx, hoveredItem, rightClickedRow, rightClickedRow + 1);
     }
+  };
+
+  highlightRow = (ctx, row) => {
+    const {
+      rowHeight,
+      viewport: { viewportTop, containerWidth },
+    } = this.props;
+
+    ctx.fillStyle = 'rgba(40, 122, 169, 0.2)';
+    ctx.fillRect(
+      0, // To include the labels also
+      row * rowHeight - viewportTop,
+      containerWidth,
+      rowHeight - 1 // Subtract 1 for borders.
+    );
   };
 
   /**
@@ -396,7 +434,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       containerWidth,
       rowHeight - 1 // Subtract 1 for borders.
     );
+<<<<<<< HEAD
     this.drawSeparatorsAndLabels(ctx, rowIndex, rowIndex + 1); // To redraw the Sperator and Labels after clearing them
+=======
+    this.drawSeparatorsAndLabels(ctx, rowIndex, rowIndex + 1); // To redraw the Separators and Labels after clearing them
+>>>>>>> issue2610
   }
 
   /**
