@@ -33,6 +33,7 @@
 }
 
 .photon-button-primary,
+.photon-button-destructive,
 .photon-button-default {
   min-width: 132px;
   height: 32px;
@@ -51,6 +52,20 @@
 
 .photon-button-primary:hover:active {
   background-color: var(--blue-80);
+}
+
+/* Use this class for destructive actions only. */
+.photon-button-destructive {
+  background-color: var(--red-60);
+  color: #fff;
+}
+
+.photon-button-destructive:hover {
+  background-color: var(--red-70);
+}
+
+.photon-button-destructive:hover:active {
+  background-color: var(--red-80);
 }
 
 .photon-button-ghost {
