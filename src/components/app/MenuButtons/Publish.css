@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsShareButton,
-.menuButtonsPermalinkButton,
-.menuButtonsRevertButton,
-.menuButtonsAbortUploadButton {
-  height: 24px;
-  border-left: 1px solid var(--grey-30);
-  margin-bottom: -24px;
-}
-
 .menuButtonsAbortUploadButton {
   background-color: var(--green-70);
   color: #fff;

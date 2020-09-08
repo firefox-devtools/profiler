@@ -8,7 +8,6 @@
 
   /* Shrink down twice as fast as the range selection labels. */
   flex-shrink: 2;
-  border-left: 1px solid var(--grey-30);
 }
 
 .menuButtonsMetaInfoButtonButton {

@@ -88,7 +88,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
-        buttonClassName="menuButtonsMetaInfoButtonButton"
+        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
         label="Profile Info"
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
