@@ -7,48 +7,61 @@
 import { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import { getProfileName, getDataSource } from '../../selectors/url-state';
-import { getProfile } from '../../selectors/profile';
 import {
-  formatProductAndVersion,
-  formatPlatform,
-} from '../../profile-logic/profile-metainfo';
+  getProfileNameFromUrl,
+  getDataSource,
+  getFileNameInZipFilePath,
+  getProfile,
+  getFormattedMetaInfoString,
+} from 'firefox-profiler/selectors';
 
 import type { Profile } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +profile: Profile,
-  +profileName: string,
+  +profileNameFromUrl: string | null,
+  +fileNameInZipFilePath: string | null,
+  +formattedMetaInfoString: string,
   +dataSource: string,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 const SEPARATOR = ' – ';
+const PRODUCT = 'Firefox Profiler';
 
 class WindowTitle extends PureComponent<Props> {
   // This component updates window title in the form of:
-  // profile name - version - platform - date time - data source - 'Firefox profiler'
+  // profile name - version - platform - date time - data source - 'Firefox Profiler'
   _updateTitle() {
-    const { profile, profileName, dataSource } = this.props;
+    const {
+      profile,
+      profileNameFromUrl,
+      formattedMetaInfoString,
+      fileNameInZipFilePath,
+      dataSource,
+    } = this.props;
     const { meta } = profile;
-    let title = '';
 
-    if (profileName) {
-      title += profileName + SEPARATOR;
+    if (profileNameFromUrl) {
+      document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
+    } else {
+      let title =
+        formattedMetaInfoString + SEPARATOR + _formatDateTime(meta.startTime);
+      if (dataSource === 'public') {
+        title += ` (${dataSource})`;
+      }
+
+      title += SEPARATOR + PRODUCT;
+
+      // Prepend the name of the file if from a zip file.
+      if (fileNameInZipFilePath) {
+        title = fileNameInZipFilePath + SEPARATOR + title;
+      }
+
+      document.title = title;
     }
-    title += formatProductAndVersion(meta) + SEPARATOR;
-    const os = formatPlatform(meta);
-    if (os) {
-      title += os + SEPARATOR;
-    }
-    title += _formatDateTime(meta.startTime);
-    if (dataSource === 'public') {
-      title += ` (${dataSource})`;
-    }
-    title += SEPARATOR + 'Firefox profiler';
-    document.title = title;
   }
 
   componentDidMount() {
@@ -75,7 +88,9 @@ function _formatDateTime(timestamp: number): string {
 
 export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
-    profileName: getProfileName(state),
+    profileNameFromUrl: getProfileNameFromUrl(state),
+    fileNameInZipFilePath: getFileNameInZipFilePath(state),
+    formattedMetaInfoString: getFormattedMetaInfoString(state),
     profile: getProfile(state),
     dataSource: getDataSource(state),
   }),

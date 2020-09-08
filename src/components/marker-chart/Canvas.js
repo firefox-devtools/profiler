@@ -84,7 +84,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       rowHeight,
       markerTimingAndBuckets,
-      rightClickedMarkerIndex, 
+      rightClickedMarkerIndex,
       viewport: {
         viewportTop,
         viewportBottom,
@@ -97,82 +97,65 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const endRow = Math.min(
       Math.ceil(viewportBottom / rowHeight),
       markerTimingAndBuckets.length
-    );  
-      const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
-        markerTimingAndBuckets
-      );
-    const rightClickedRow: number | void = 
+    );
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rightClickedRow: number | void =
       rightClickedMarkerIndex === null
         ? undefined
         : markerIndexToTimingRow.get(rightClickedMarkerIndex);
+    const newRow: number | void =
+      hoveredItem === null
+        ? undefined
+        : markerIndexToTimingRow.get(hoveredItem);
 
     if (isHoveredOnlyDifferent) {
       // Only re-draw the rows that have been updated if only the hovering information
       // is different.
+
       const oldRow: number | void =
         prevHoveredItem === null
           ? undefined
           : markerIndexToTimingRow.get(prevHoveredItem);
-      const newRow: number | void =
-        hoveredItem === null
-          ? undefined
-          : markerIndexToTimingRow.get(hoveredItem);
 
-      if (newRow !== undefined && rightClickedRow !== newRow) { 
-        /** 
-         * To avoid multiple renders on the same row rectangle in canvas, first the row
-         * is cleared and then redrawn on using the drawMarkers()         
-        **/
-        ctx.clearRect(
-          0, // To include the labels also 
-          newRow * rowHeight - viewportTop, 
-          containerWidth,
-          rowHeight - 1 // Subtract 1 for borders.
-        )
+      if (newRow !== undefined) {
         this.clearRow(ctx, newRow);
+        this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredItem, newRow, newRow + 1);
-        // To highlight the row when mouse hovered over
-        ctx.fillStyle = 'rgba(40, 122, 169, 0.2)'
-        ctx.fillRect(
-          0, // To include the labels also 
-          newRow * rowHeight - viewportTop, 
-          containerWidth,
-          rowHeight - 1 // Subtract 1 for borders.
-        );
-        
       }
       if (oldRow !== undefined && oldRow !== newRow) {
-        this.clearRow(ctx, oldRow);
+        if (oldRow !== rightClickedRow) {
+          this.clearRow(ctx, oldRow);
+        }
         this.drawMarkers(ctx, hoveredItem, oldRow, oldRow + 1);
       }
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, containerWidth, containerHeight);
-
+      if (rightClickedRow !== undefined) {
+        this.highlightRow(ctx, rightClickedRow);
+      } else if (newRow !== undefined) {
+        this.highlightRow(ctx, newRow);
+      }
       this.drawMarkers(ctx, hoveredItem, startRow, endRow);
       this.drawSeparatorsAndLabels(ctx, startRow, endRow);
     }
+  };
 
-    // For Highlighting the rightClickedRow
-    if(rightClickedRow !== undefined) {
-      // Clear the Row first
-      ctx.clearRect(
-        0, // To include the labels also 
-        rightClickedRow * rowHeight - viewportTop, 
-        containerWidth,
-        rowHeight - 1 // Subtract 1 for borders.
-      )
-      this.clearRow(ctx, rightClickedRow);
-      this.drawMarkers(ctx, hoveredItem, rightClickedRow, rightClickedRow + 1);
-      // To highlight the row when right clicked
-      ctx.fillStyle = 'rgba(40, 122, 169, 0.3)'
-      ctx.fillRect(
-        0, // To include the labels also 
-        rightClickedRow * rowHeight - viewportTop, 
-        containerWidth,
-        rowHeight - 1 // Subtract 1 for borders.
-      );
-    }
+  highlightRow = (ctx, row) => {
+    const {
+      rowHeight,
+      viewport: { viewportTop, containerWidth },
+    } = this.props;
+
+    ctx.fillStyle = 'rgba(40, 122, 169, 0.2)';
+    ctx.fillRect(
+      0, // To include the labels also
+      row * rowHeight - viewportTop,
+      containerWidth,
+      rowHeight - 1 // Subtract 1 for borders.
+    );
   };
 
   /**
@@ -388,11 +371,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillStyle = '#fff';
     ctx.fillRect(
       0,
-      rowIndex * rowHeight - viewportTop, 
+      rowIndex * rowHeight - viewportTop,
       containerWidth,
       rowHeight - 1 // Subtract 1 for borders.
     );
-    this.drawSeparatorsAndLabels(ctx, rowIndex, rowIndex+1); // To redraw the Sperator Labels after clearing them 
+    this.drawSeparatorsAndLabels(ctx, rowIndex, rowIndex + 1); // To redraw the Separators and Labels after clearing them
   }
 
   /**

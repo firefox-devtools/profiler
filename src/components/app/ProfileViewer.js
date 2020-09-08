@@ -1,18 +1,20 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* this source code form is subject to the terms of the mozilla public
+ * license, v. 2.0. if a copy of the mpl was not distributed with this
+ * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
 // @flow
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
+
 import DetailsContainer from './DetailsContainer';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import MenuButtons from './MenuButtons';
 import WindowTitle from '../shared/WindowTitle';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
+import { ProfileName } from './ProfileName';
+
 import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { getProfileName } from '../../selectors/url-state';
 import Timeline from '../timeline';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
@@ -34,7 +36,6 @@ import type { ConnectedProps } from '../../utils/connect';
 require('./ProfileViewer.css');
 
 type StateProps = {|
-  +profileName: string | null,
   +hasZipFile: boolean,
   +timelineHeight: CssPixels | null,
   +uploadProgress: number,
@@ -55,7 +56,6 @@ class ProfileViewer extends PureComponent<Props> {
   render() {
     const {
       hasZipFile,
-      profileName,
       returnToZipFileList,
       invalidatePanelLayout,
       timelineHeight,
@@ -104,9 +104,7 @@ class ProfileViewer extends PureComponent<Props> {
                 onClick={returnToZipFileList}
               />
             ) : null}
-            {profileName ? (
-              <div className="profileViewerName">{profileName}</div>
-            ) : null}
+            <ProfileName />
             <ProfileFilterNavigator />
             {
               // Define a spacer in the middle that will shrink based on the availability
@@ -145,7 +143,6 @@ class ProfileViewer extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    profileName: getProfileName(state),
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
     uploadProgress: getUploadProgress(state),

@@ -69,7 +69,9 @@ describe('reducer zipFileState', function() {
       const { getState } = await setup();
 
       const expectedName = 'bar/profile1.json';
-      expect(UrlStateSelectors.getProfileName(getState())).toBe(expectedName);
+      expect(UrlStateSelectors.getProfileNameWithDefault(getState())).toBe(
+        expectedName
+      );
     });
 
     it('computes a profile when no folder present', async function() {
@@ -85,7 +87,9 @@ describe('reducer zipFileState', function() {
       );
 
       const expectedName = 'profile4.json';
-      expect(UrlStateSelectors.getProfileName(getState())).toBe(expectedName);
+      expect(UrlStateSelectors.getProfileNameWithDefault(getState())).toBe(
+        expectedName
+      );
     });
 
     it('prefers ProfileName if it is given in the URL', async function() {
@@ -93,7 +97,7 @@ describe('reducer zipFileState', function() {
       const profileNameFromURL = 'good profile';
 
       dispatch(ProfileViewActions.changeProfileName(profileNameFromURL));
-      expect(UrlStateSelectors.getProfileName(getState())).toBe(
+      expect(UrlStateSelectors.getProfileNameWithDefault(getState())).toBe(
         profileNameFromURL
       );
     });

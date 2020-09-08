@@ -376,13 +376,15 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
       }
       for (const id of ids) {
         globalTracks.push({ type: 'screenshots', id, threadIndex });
-        if (profile.meta && profile.meta.visualMetrics) {
-          globalTracks.push({ type: 'visual-progress', id });
-          globalTracks.push({ type: 'perceptual-visual-progress', id });
-          globalTracks.push({ type: 'contentful-visual-progress', id });
-        }
       }
     }
+  }
+
+  // Add the visual progress tracks if we have visualMetrics data.
+  if (profile.meta && profile.meta.visualMetrics) {
+    globalTracks.push({ type: 'visual-progress' });
+    globalTracks.push({ type: 'perceptual-visual-progress' });
+    globalTracks.push({ type: 'contentful-visual-progress' });
   }
 
   // When adding a new track type, this sort ensures that the newer tracks are added

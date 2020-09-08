@@ -1821,17 +1821,21 @@ describe('actions/receive-profile', function() {
       return expect(waitUntilSymbolication()).resolves.toBe(undefined);
     });
 
-    it('does not retrieve profile from other data sources', async function() {
-      ['/none/', '/from-file/', 'local'].forEach(async sourcePath => {
-        await expect(
-          setup({
+    ['none', 'from-file', 'local', 'uploaded-recordings', 'compare'].forEach(
+      dataSource => {
+        it(`does not retrieve a profile for the datasource ${dataSource}`, async function() {
+          const sourcePath = `/${dataSource}/`;
+          const { getState } = await setup({
             pathname: sourcePath,
             search: '',
             hash: '',
-          })
-        ).rejects.toThrow();
-      });
-    });
+          });
+          expect(ProfileViewSelectors.getProfileOrNull(getState())).toEqual(
+            null
+          );
+        });
+      }
+    );
   });
 });
 

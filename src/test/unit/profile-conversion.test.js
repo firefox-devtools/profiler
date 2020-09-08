@@ -5,6 +5,10 @@
 
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
+import type {
+  TracingEventUnion,
+  CpuProfileEvent,
+} from '../../profile-logic/import/chrome';
 
 describe('converting Linux perf profile', function() {
   it('should import a perf profile', async function() {
@@ -96,6 +100,41 @@ describe('converting Google Chrome profile', function() {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a single CpuProfile, e.g. from node', async function() {
+    const fs = require('fs');
+    let cpuProfile: CpuProfileEvent | void;
+    {
+      // Load the existing saved profile, but then find a single CpuProfile entry in it.
+
+      const buffer = fs.readFileSync(
+        'src/test/fixtures/upgrades/test.chrome-unchunked.json'
+      );
+      const events: TracingEventUnion[] = JSON.parse(buffer.toString('utf8'));
+
+      // Use a for loop to look this up, as Flow is happier than a .find().
+      for (const event of events) {
+        if (event.name === 'CpuProfile') {
+          cpuProfile = event;
+          break;
+        }
+      }
+
+      if (!cpuProfile) {
+        throw new Error('Could not find a CPU profile');
+      }
+    }
+
+    // Now use the single CpuProfile to test that we can convert a node-like export
+    // format.
+    const text = JSON.stringify(cpuProfile.args.data.cpuProfile);
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+
     expect(profile).toMatchSnapshot();
   });
 });

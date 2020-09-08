@@ -7,6 +7,50 @@ import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
+// Provide different formatting options for strings.
+export type MarkerFormatType =
+  | 'string' // "Label: Some String"
+  | 'bytes' // "Label: 5mb"
+  | 'seconds' // "Label: 5s"
+  | 'milliseconds' // "Label: 5ms"
+  | 'microseconds' // "Label: 5μs"
+  | 'nanoseconds' // "Label: 5ns"
+  | 'integer' // "Label: 5323"
+  | 'number' // "Label: 52.23"
+  | 'percentage' // "Label: 50%"
+  | 'stack' // Prints a full stack trace using the value.
+  | 'url'; // Show the URL, and handle sanitization
+
+// A list of all the valid locations to surface this marker.
+// We can be free to add more UI areas.
+export type MarkerDisplayLocation =
+  | 'marker-chart'
+  | 'marker-table'
+  | 'timeline'
+  // In the timeline, this is a section that breaks out markers that are related
+  // to memory.
+  | 'timeline-memory'
+  | 'stack-chart';
+
+export type MarkerSchema = {
+  // The unique identifier for this marker.
+  name: string, // e.g. "GCMajor-complete"
+
+  // The label of how this marker should be displayed in the UI.
+  // TODO - It would be nice to support printf-like features here
+  label: string, // e.g. "GCMajor"
+
+  // The locations to display
+  display: MarkerDisplayLocation[],
+
+  data: Array<{
+    key: string,
+    label: string,
+    format: MarkerFormatType,
+    searchable?: boolean,
+  }>,
+};
+
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
  * the time the stack was taken. Sometimes this cause can be async, and triggered before

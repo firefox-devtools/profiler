@@ -83,6 +83,15 @@ describe('app/ServiceWorkerManager', () => {
       store.dispatch(updateUrlState(newUrlState));
     }
 
+    function navigateToFileLoadingPage() {
+      const newUrlState = stateFromLocation({
+        pathname: '/from-file/',
+        search: '',
+        hash: '',
+      });
+      store.dispatch(updateUrlState(newUrlState));
+    }
+
     const store = blankStore();
 
     const renderResult = render(
@@ -99,6 +108,7 @@ describe('app/ServiceWorkerManager', () => {
       getCloseButton: () => getByLabelText(/hide/i),
       navigateToStoreLoadingPage,
       navigateToAddonLoadingPage,
+      navigateToFileLoadingPage,
       dispatch: store.dispatch,
     };
   }
@@ -318,6 +328,22 @@ describe('app/ServiceWorkerManager', () => {
       expect(window.location.reload).not.toHaveBeenCalled();
       dispatch(fatalError(new Error('Error while loading profile')));
       expect(window.location.reload).toHaveBeenCalled();
+    });
+
+    it('does not reload if the dataSource is from-file', () => {
+      process.env.NODE_ENV = 'production';
+
+      const { navigateToFileLoadingPage, dispatch } = setup();
+      navigateToFileLoadingPage();
+
+      const installOptions = serviceWorkerRuntime.install.mock.calls[0][0];
+
+      dispatch(fatalError(new Error('Error while loading profile')));
+      expect(window.location.reload).not.toHaveBeenCalled();
+      expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
+      installOptions.onUpdateReady();
+      expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
+      expect(window.location.reload).not.toHaveBeenCalled();
     });
   });
 });

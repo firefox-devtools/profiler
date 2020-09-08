@@ -245,6 +245,7 @@ export function toggleResourcesPanel(): ThunkAction<void> {
     });
   };
 }
+
 /*
  * This action enables the event delay tracks. They are hidden by default because
  * they are usually for power users and not so meaningful for average users.

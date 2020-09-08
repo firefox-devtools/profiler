@@ -29,6 +29,7 @@ import type {
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import urlStateReducer from '../reducers/url-state';
+import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
 
 /**
  * Various simple selectors into the UrlState.
@@ -49,7 +50,7 @@ export const getProfileUrl: Selector<string> = state =>
   getUrlState(state).profileUrl;
 export const getProfilesToCompare: Selector<string[] | null> = state =>
   getUrlState(state).profilesToCompare;
-export const getProfileNameFromUrl: Selector<string> = state =>
+export const getProfileNameFromUrl: Selector<string | null> = state =>
   getUrlState(state).profileName;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
@@ -241,21 +242,75 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
   getUrlState(state).pathInZipFile;
 
 /**
- * For now only provide a name for a profile if it came from a zip file.
+ * Get a short formatted string that represents the meta info of the current profile.
  */
-export const getProfileName: Selector<string> = createSelector(
-  getProfileNameFromUrl,
+export const getFormattedMetaInfoString: Selector<string> = state => {
+  // Avoid circular dependencies by selected the profile meta manually.
+  const { meta } = ensureExists(
+    state.profileView.profile,
+    'Expected the profile to exist.'
+  );
+  return formatMetaInfoString(meta);
+};
+
+/**
+ * Get just the file name from the zip file path, if it exists.
+ */
+export const getFileNameInZipFilePath: Selector<string | null> = createSelector(
   getPathInZipFileFromUrl,
-  (profileName, pathInZipFile) => {
-    if (profileName) {
-      return profileName;
-    }
+  pathInZipFile => {
     if (pathInZipFile) {
       const matchResult = pathInZipFile.match(/(?:[^/]+\/)?[^/]+$/);
       if (matchResult !== null) {
         return matchResult[0];
       }
     }
+    return null;
+  }
+);
+
+/**
+ * Get a profile name that can be used as a short identifier for the profile. This
+ * will be displayed in the UI, and will be used as a default for a profile name
+ * if none is currently set. If none is set, then a series of strategies will be
+ * used to select a default one.
+ */
+export const getProfileNameWithDefault: Selector<string> = createSelector(
+  getProfileNameFromUrl,
+  getFileNameInZipFilePath,
+  getFormattedMetaInfoString,
+  (profileNameFromUrl, fileNameInZipFilePath, formattedMetaInfoString) => {
+    // Always prefer a manually set name.
+    if (profileNameFromUrl) {
+      return profileNameFromUrl;
+    }
+    // Next, try and use a path from the zip file.
+    if (fileNameInZipFilePath) {
+      return fileNameInZipFilePath;
+    }
+
+    // Finally return a generic string describing the type of profile.
+    return formattedMetaInfoString;
+  }
+);
+
+/**
+ * Determines the profile name used to store in the IndexedDB by default.
+ */
+export const getProfileNameForStorage: Selector<string> = createSelector(
+  getProfileNameFromUrl,
+  getFileNameInZipFilePath,
+  (profileNameFromUrl, fileNameInZipFilePath) => {
+    // Always prefer a manually set name.
+    if (profileNameFromUrl) {
+      return profileNameFromUrl;
+    }
+    // Next, try and use a path from the zip file.
+    if (fileNameInZipFilePath) {
+      return fileNameInZipFilePath;
+    }
+
+    // Finally, return a blank string.
     return '';
   }
 );

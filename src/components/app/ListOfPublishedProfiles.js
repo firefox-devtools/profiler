@@ -6,8 +6,8 @@
 
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
-import { AppHeader } from './AppHeader';
 
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 import {
   listAllProfileData,
   type ProfileData,
@@ -103,11 +103,15 @@ function PublishedProfile({
   );
 }
 
+type Props = {|
+  limit?: number,
+|};
+
 type State = {|
   profileDataList: null | ProfileData[],
 |};
 
-export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
+export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   state = {
     profileDataList: null,
   };
@@ -124,6 +128,7 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
   }
 
   render() {
+    const { limit } = this.props;
     const { profileDataList } = this.state;
 
     if (!profileDataList) {
@@ -132,23 +137,23 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
 
     if (!profileDataList.length) {
       return (
-        <main className="publishedProfiles">
-          <AppHeader />
-          <h2 className="photon-title-30">Uploaded Recordings</h2>
-          <p className="photon-body-30">No profile has been published yet!</p>
-        </main>
+        <p className="photon-body-30">No profile has been published yet!</p>
       );
     }
+
+    const reducedProfileDataList = limit
+      ? profileDataList.slice(0, limit)
+      : profileDataList;
+
+    const profilesRestCount =
+      profileDataList.length - reducedProfileDataList.length;
 
     const nowTimestamp = Date.now();
 
     return (
-      <main className="publishedProfiles">
-        <AppHeader />
-        <h2 className="photon-title-30">Uploaded Recordings</h2>
-        {/* TODO Maybe we should use a grid layout later */}
+      <>
         <ul className="publishedProfilesList">
-          {profileDataList.map(profileData => (
+          {reducedProfileDataList.map(profileData => (
             <PublishedProfile
               key={profileData.profileToken}
               profileData={profileData}
@@ -156,7 +161,14 @@ export class ListOfPublishedProfiles extends PureComponent<{||}, State> {
             />
           ))}
         </ul>
-      </main>
+        {profilesRestCount > 0 ? (
+          <p>
+            <InnerNavigationLink dataSource="uploaded-recordings">
+              See all your recordings ({profilesRestCount} more)
+            </InnerNavigationLink>
+          </p>
+        ) : null}
+      </>
     );
   }
 }

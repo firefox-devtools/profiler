@@ -16,7 +16,7 @@ import {
 } from '../selectors/publish';
 import {
   getDataSource,
-  getProfileName,
+  getProfileNameForStorage,
   getUrlPredictor,
 } from '../selectors/url-state';
 import {
@@ -141,7 +141,7 @@ async function storeJustPublishedProfileData(
       profileToken,
       jwtToken,
       publishedDate: new Date(),
-      name: getProfileName(prepublishedState),
+      name: getProfileNameForStorage(prepublishedState),
       originHostname: profileFilterPageData
         ? profileFilterPageData.hostname
         : null,

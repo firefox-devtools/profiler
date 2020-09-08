@@ -7,6 +7,8 @@
 import * as React from 'react';
 
 import { AppHeader } from './AppHeader';
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
+import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
@@ -135,9 +137,7 @@ class ActionButtons extends React.PureComponent<
         </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
-        ) : (
-          <p>You can also drag and drop a profile file here to load it.</p>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -339,16 +339,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-enable-popup-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <button
               type="button"
               className="homeSectionButton"
@@ -363,12 +362,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profile in Firefox, then analyze it and share it with
               profiler.firefox.com.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -381,16 +376,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-install-addon-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <InstallButton
               name="Gecko Profiler"
               className="homeSectionButton"
@@ -405,12 +399,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profile in Firefox, then analyze it and share it with
               profiler.firefox.com.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -423,16 +413,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-record-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <p>
-              <img
-                className="homeSectionScreenshot"
-                src={screenshotSrc}
-                alt="Screenshot of the profiler settings from the Firefox menu."
-              />
-            </p>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={screenshotSrc}
+            alt="Screenshot of the profiler settings from the Firefox menu."
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
             <p>
               To start profiling, click on the profiling button, or use the
@@ -442,12 +431,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -460,16 +445,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           className="homeInstructions"
           data-testid="home-other-browser-instructions"
         >
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
             <h2>How to view and record profiles</h2>
             <p>
@@ -477,12 +461,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
               However, existing profiles can be viewed in any modern browser.
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -518,6 +498,39 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
+          <section className="homeAdditionalContent">
+            {/* Grid container: homeAdditionalContent */}
+            <h2 className="homeAdditionalContentTitle protocol-display-xs">
+              {/* Title: full width */}
+              Load existing profiles
+            </h2>
+            <section className="homeActions">
+              {/* Actions: left column */}
+              <p>
+                You can <strong>drag and drop</strong> a profile file here to
+                load it, or:
+              </p>
+              <ActionButtons
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+              />
+              <p>
+                You can also compare recordings.{' '}
+                <InnerNavigationLink dataSource="compare">
+                  Open the comparing interface.
+                </InnerNavigationLink>
+              </p>
+            </section>
+            <section>
+              {/* Recent recordings: right column */}
+              <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
+                Recent uploaded recordings
+              </h2>
+              <ListOfPublishedProfiles limit={3} />
+            </section>
+            {/* End of grid container */}
+          </section>
           <DragAndDropOverlay />
         </main>
       </div>

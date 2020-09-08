@@ -10,39 +10,19 @@
 
 import * as React from 'react';
 
-import { setDataSource } from 'firefox-profiler/actions/profile-view';
-import explicitConnect, {
-  type ConnectedProps,
-} from 'firefox-profiler/utils/connect';
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 
 import './AppHeader.css';
 
-type DispatchProps = {|
-  +setDataSource: typeof setDataSource,
-|};
-type Props = ConnectedProps<{||}, {||}, DispatchProps>;
-
-class AppHeaderImpl extends React.PureComponent<Props> {
-  onClick = (e: SyntheticMouseEvent<>) => {
-    const { setDataSource } = this.props;
-    if (e.ctrlKey || e.metaKey) {
-      // The user clearly wanted to open this link in a new tab.
-      return;
-    }
-
-    e.preventDefault();
-
-    setDataSource('none');
-  };
-
+export class AppHeader extends React.PureComponent<{||}> {
   render() {
     return (
       <header>
         <h1 className="appHeader">
           <span className="appHeaderSlogan">
-            <a className="appHeaderLink" href="/" onClick={this.onClick}>
+            <InnerNavigationLink dataSource="none" className="appHeaderLink">
               Firefox Profiler
-            </a>
+            </InnerNavigationLink>
             <span className="appHeaderSubtext">
               {' '}
               &mdash; Web app for Firefox performance analysis
@@ -74,8 +54,3 @@ class AppHeaderImpl extends React.PureComponent<Props> {
     );
   }
 }
-
-export const AppHeader = explicitConnect<{||}, {||}, DispatchProps>({
-  mapDispatchToProps: { setDataSource },
-  component: AppHeaderImpl,
-});
