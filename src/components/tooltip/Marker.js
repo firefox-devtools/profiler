@@ -19,6 +19,7 @@ import {
   getPageList,
   getZeroAt,
   getThreadIdToNameMap,
+  getMarkerLabelMakerByName,
 } from 'firefox-profiler/selectors';
 
 import {
@@ -33,7 +34,12 @@ import {
 import Backtrace from '../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
-import { formatFromMarkerSchema } from '../../profile-logic/marker-schema';
+import {
+  formatFromMarkerSchema,
+  getMarkerLabelMaker,
+  getMarkerSchema,
+  getMarkerSchemaName,
+} from '../../profile-logic/marker-schema';
 
 import type {
   Milliseconds,
@@ -43,6 +49,7 @@ import type {
   ThreadIndex,
   PageList,
   MarkerSchemaByName,
+  MarkerLabelMakerByName,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -76,6 +83,7 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
+  +markerLabelMakerByName: MarkerLabelMakerByName,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -153,13 +161,34 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const schema = markerSchemaByName[data.type];
+      const schema = getMarkerSchema(markerSchemaByName, marker);
       if (schema) {
-        for (const { key, label, format } of schema.data) {
-          if (key in data) {
+        for (const schemaData of schema.data) {
+          // Check for a schema that is looking up and formatting a value from
+          // the payload.
+          if (schemaData.value === undefined) {
+            const { key, label, format } = schemaData;
+            if (key in data) {
+              details.push(
+                <TooltipDetail
+                  key={schema.name + '-' + key}
+                  label={label || key}
+                >
+                  {formatFromMarkerSchema(schema.name, format, data[key])}
+                </TooltipDetail>
+              );
+            }
+          }
+
+          // Do a check to see if there is no key. This means this is a simple
+          // label that is applied to every marker of this type, with no data
+          // lookup. For some reason Flow as not able to refine this.
+          if (schemaData.key === undefined) {
+            const { label, value } = schemaData;
+            const key = label + '-' + value;
             details.push(
-              <TooltipDetail key={data.type + '-' + key} label={label || key}>
-                {formatFromMarkerSchema(data.type, format, data[key])}
+              <TooltipDetail key={key} label={label}>
+                {value}
               </TooltipDetail>
             );
           }
@@ -303,6 +332,21 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     return null;
   }
 
+  _renderTitle(): string {
+    const { marker, markerLabelMakerByName } = this.props;
+    const { data } = marker;
+    if (data) {
+      // Add the details for the markers based on their Marker schema.
+      const applyLabel = markerLabelMakerByName[getMarkerSchemaName(marker)];
+      if (applyLabel) {
+        return applyLabel(data);
+      }
+    }
+
+    // Fallback to the title or the marker name.
+    return marker.title || marker.name;
+  }
+
   /**
    * Often-times component logic is split out into several different components. This
    * is really helpful for interactive components, as each list of Props serves as
@@ -326,14 +370,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   render() {
-    const { marker, className } = this.props;
-
     return (
-      <div className={classNames('tooltipMarker', className)}>
+      <div className={classNames('tooltipMarker', this.props.className)}>
         <div className="tooltipHeader">
           <div className="tooltipOneLine">
             {this._maybeRenderMarkerDuration()}
-            <div className="tooltipTitle">{marker.title || marker.name}</div>
+            <div className="tooltipTitle">{this._renderTitle()}</div>
           </div>
         </div>
         <TooltipDetails>
@@ -359,6 +401,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       zeroAt: getZeroAt(state),
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
+      markerLabelMakerByName: getMarkerLabelMakerByName(state),
     };
   },
   component: MarkerTooltipContents,

@@ -878,7 +878,7 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
         <div
           class="tooltipTitle"
         >
-          UserTiming
+          componentB
         </div>
       </div>
     </div>
@@ -895,10 +895,24 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
-        Name
+        Marker
         :
       </div>
-      componentB
+      UserTiming
+      <div
+        class="tooltipLabel"
+      >
+        Entry Type
+        :
+      </div>
+      measure
+      <div
+        class="tooltipLabel"
+      >
+        Description
+        :
+      </div>
+      UserTiming is created using the DOM APIs performance.mark() and performance.measure().
     </div>
   </div>
 </div>

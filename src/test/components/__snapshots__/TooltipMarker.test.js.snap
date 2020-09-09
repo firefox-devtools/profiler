@@ -1381,7 +1381,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTitle"
       >
-        DOMEvent
+        commandupdate
       </div>
     </div>
   </div>
@@ -1405,7 +1405,7 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
     <div
       class="tooltipLabel"
     >
-      Category
+      Marker
       :
     </div>
     DOMEvent
@@ -2541,7 +2541,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
     <div
       class="tooltipLabel"
     >
-      Category
+      Type
       :
     </div>
     Paint
@@ -2584,7 +2584,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
     <div
       class="tooltipLabel"
     >
-      Category
+      Type
       :
     </div>
     Paint
@@ -2731,7 +2731,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
     <div
       class="tooltipLabel"
     >
-      Category
+      Type
       :
     </div>
     Paint
@@ -3246,13 +3246,6 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
       :
     </div>
     Main Thread
-    <div
-      class="tooltipLabel"
-    >
-      Details
-      :
-    </div>
-    TTFI after 100.01ms (longTask was 100.001ms)
   </div>
 </div>
 `;
@@ -3275,7 +3268,7 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       <div
         class="tooltipTitle"
       >
-        UserTiming
+        foobar
       </div>
     </div>
   </div>
@@ -3292,10 +3285,24 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
     <div
       class="tooltipLabel"
     >
-      Name
+      Marker
       :
     </div>
-    foobar
+    UserTiming
+    <div
+      class="tooltipLabel"
+    >
+      Entry Type
+      :
+    </div>
+    mark
+    <div
+      class="tooltipLabel"
+    >
+      Description
+      :
+    </div>
+    UserTiming is created using the DOM APIs performance.mark() and performance.measure().
   </div>
 </div>
 `;

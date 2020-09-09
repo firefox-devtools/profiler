@@ -13,6 +13,7 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
+import { getMarkerSchemaName } from './marker-schema';
 
 import type {
   Thread,
@@ -36,6 +37,7 @@ import type {
   IndexedArray,
   DerivedMarkerInfo,
   MarkerSchema,
+  MarkerDisplayLocation,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';

@@ -67,27 +67,44 @@ export type MarkerDisplayLocation =
   // TODO - This is not supported yet.
   | 'stack-chart';
 
-export type MarkerSchema = {
+export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
 
   // The label of how this marker should be displayed in the UI.
   // If none is provided, then the name is used.
-  label?: string, // e.g. "Cycle Collect"
+  tooltipLabel?: string, // e.g. "Cycle Collect"
 
   // The locations to display
   display: MarkerDisplayLocation[],
 
-  data: Array<{
-    key: string,
-    // If no label is provided, the key is displayed.
-    label?: string,
-    format: MarkerFormatType,
-    searchable?: boolean,
-  }>,
-};
+  data: Array<
+    | {|
+        key: string,
+        // If no label is provided, the key is displayed.
+        label?: string,
+        format: MarkerFormatType,
+        searchable?: boolean,
+      |}
+    | {|
+        // This type is a static bit of text that will be displayed
+        label: string,
+        value: string,
+      |}
+  >,
+|};
 
 export type MarkerSchemaByName = { [name: string]: MarkerSchema };
+
+// This type is a more dynamic version of the Payload type.
+type DynamicMarkerPayload = { [key: string]: any };
+// Marker schema can create a dynamic tooltip label. For instance a schema with
+// a `tooltipLabel` field of "Event at {url}" would create a label based off of the
+// "url" property in the payload.
+export type MarkerLabelMaker = DynamicMarkerPayload => string;
+export type MarkerLabelMakerByName = {
+  [name: string]: MarkerLabelMaker | void,
+};
 
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
