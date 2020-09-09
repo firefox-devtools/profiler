@@ -27,21 +27,17 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
             IPC — sent to 2222
           </div>
         </div>
-        <div
-          class="tooltipDetails"
-        >
-          <div
-            class="tooltipLabel"
-          >
-            Thread
-            :
-          </div>
-          Empty
-        </div>
       </div>
       <div
         class="tooltipDetails"
       >
+        <div
+          class="tooltipLabel"
+        >
+          Thread
+          :
+        </div>
+        Empty
         <div
           class="tooltipLabel"
         >
@@ -55,7 +51,6 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           Sync
           :
         </div>
-        false
         <div
           class="tooltipLabel"
         >

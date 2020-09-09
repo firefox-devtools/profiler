@@ -18,6 +18,8 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 
+import { markerSchema } from '../profile-logic/marker-schema';
+
 import type {
   Profile,
   CategoryList,
@@ -64,6 +66,7 @@ import type {
   ActiveTabMainTrack,
   $ReturnType,
   MarkerSchema,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -172,36 +175,18 @@ export const getContentfulSpeedIndexProgress: Selector<
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
 
-/**
- * TODO - These will eventually be stored in the profile, but for now
- * define them here.
- */
-export const getMarkerSchema: Selector<MarkerSchema[]> = () => [
-  {
-    name: 'GCSlice',
-    label: 'GCSlice',
-    display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
-  },
-  {
-    name: 'GCMajor',
-    label: 'GCMajor',
-    display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
-  },
-  {
-    name: 'GCMinor',
-    label: 'GCMinor',
-    display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
-  },
-  {
-    name: 'CC',
-    label: 'Cycle Collect',
-    display: ['marker-chart', 'marker-table', 'timeline-memory'],
-    data: [],
-  },
-];
+export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
+
+export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
+  getMarkerSchema,
+  schemaList => {
+    const result = {};
+    for (const schema of schemaList) {
+      result[schema.name] = schema;
+    }
+    return result;
+  }
+);
 
 export const getTimelineMemoryMarkerTypes: Selector<
   Set<string>

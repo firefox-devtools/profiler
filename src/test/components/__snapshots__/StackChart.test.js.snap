@@ -881,21 +881,17 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
           UserTiming
         </div>
       </div>
-      <div
-        class="tooltipDetails"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Thread
-          :
-        </div>
-        Empty
-      </div>
     </div>
     <div
       class="tooltipDetails"
     >
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
       <div
         class="tooltipLabel"
       >
