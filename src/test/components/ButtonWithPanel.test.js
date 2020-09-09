@@ -84,6 +84,7 @@ describe('shared/ButtonWithPanel', () => {
             <ArrowPanel
               className="panel"
               okButtonText="Confirm"
+              okButtonType="destructive"
               cancelButtonText="Cancel"
             >
               <div>Panel content</div>

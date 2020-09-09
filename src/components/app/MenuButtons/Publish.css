@@ -41,13 +41,6 @@
   --width: 500px;
 }
 
-.menuButtonsPermalinkTextField {
-  width: 16em;
-  height: 19px;
-  padding: 0 4px;
-  margin: 5px -5px;
-}
-
 .menuButtonsPublishContent {
   position: relative;
   padding: 0 0 10px 70px;

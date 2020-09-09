@@ -18,6 +18,7 @@ type Props = {|
   children: React.Node,
   title?: string,
   okButtonText?: string,
+  okButtonType?: 'default' | 'primary' | 'destructive',
   cancelButtonText?: string,
 |};
 
@@ -104,6 +105,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
       children,
       title,
       okButtonText,
+      okButtonType,
       cancelButtonText,
     } = this.props;
     const hasTitle = title !== undefined;
@@ -128,13 +130,14 @@ class ArrowPanel extends React.PureComponent<Props, State> {
             <div className="arrowPanelButtons">
               <input
                 type="button"
-                className="arrowPanelCancelButton"
+                className="photon-button photon-button-default"
                 value={cancelButtonText}
                 onClick={this._onCancelButtonClick}
               />
               <input
                 type="button"
-                className="arrowPanelOkButton"
+                className={`photon-button photon-button-${okButtonType ||
+                  'primary'}`}
                 value={okButtonText}
                 onClick={this._onOkButtonClick}
               />

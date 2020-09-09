@@ -235,12 +235,12 @@ exports[`shared/ButtonWithPanel various panel contents renders panels with defau
         class="arrowPanelButtons"
       >
         <input
-          class="arrowPanelCancelButton"
+          class="photon-button photon-button-default"
           type="button"
           value="Cancel"
         />
         <input
-          class="arrowPanelOkButton"
+          class="photon-button photon-button-primary"
           type="button"
           value="Confirm"
         />
@@ -283,12 +283,12 @@ exports[`shared/ButtonWithPanel various panel contents renders panels with speci
         class="arrowPanelButtons"
       >
         <input
-          class="arrowPanelCancelButton"
+          class="photon-button photon-button-default"
           type="button"
           value="Cancel"
         />
         <input
-          class="arrowPanelOkButton"
+          class="photon-button photon-button-destructive"
           type="button"
           value="Confirm"
         />

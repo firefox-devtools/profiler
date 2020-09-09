@@ -14,8 +14,6 @@
   --internal-offset-from-top: 15px;
   --internal-width: var(--width, initial);
   --internal-button-height: 30px;
-  --internal-ok-button-background: var(--ok-button-background, #7990c8);
-  --internal-ok-button-color: var(--ok-button-color, white);
 
   position: absolute;
   top: var(--internal-offset-from-top);
@@ -31,6 +29,16 @@
   text-align: left;
   transform-origin: calc(100% - var(--internal-offset-from-right))
     calc(var(--internal-offset-from-top) * -1);
+}
+
+/* The paddings are on the inner elements (arrowPanelContent, arrowPanelTitle,
+ * arrowPanelButtons), instead of the arrowPanel, because they have the
+ * scrollbar, so this is more elegant.
+ * Horizontal paddings are added here for all elements, vertical padding will be
+ * added where needed. */
+.arrowPanel > * {
+  padding-right: 16px;
+  padding-left: 16px;
 }
 
 .arrowPanel:not(.open) {
@@ -92,13 +100,19 @@
 
 .arrowPanelTitle,
 .arrowPanelSubTitle {
-  padding: 10px;
   margin: 0;
   font-size: 1.2em;
 }
 
+.arrowPanelTitle {
+  padding-top: 16px;
+
+  /* No padding-bottom because the arrowPanelContent has a padding-top. */
+}
+
 .arrowPanelSubTitle {
-  padding: 5px 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-weight: 700;
 }
@@ -109,18 +123,11 @@
     100vh - var(--internal-approx-distance-from-top) -
       var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
   );
-  padding: 0 10px;
+  padding-top: 16px;
+  padding-bottom: 16px;
 
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
-}
-
-.arrowPanel.hasTitle > .arrowPanelContent {
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.arrowPanel.hasButtons > .arrowPanelContent {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .arrowPanel ul {
@@ -129,46 +136,25 @@
 
 .arrowPanelButtons {
   display: flex;
-  height: 35px;
   flex-flow: row nowrap;
-  align-items: stretch;
-  line-height: 35px;
+
+  /* No padding-top because arrowPanelContent has a padding-bottom. */
+  padding-bottom: 16px;
+  gap: 8px;
 }
 
-.arrowPanelOkButton,
-.arrowPanelCancelButton {
-  flex: 1;
-  padding: 0;
-  border: 0;
-  margin: 0;
-  background: none;
-  font-size: 1.2em;
-  text-align: center;
+.menuButtonsPermalinkPanel .arrowPanelContent {
+  /* Override the default padding for ArrowPanel */
+  padding: 4px;
 }
 
-.arrowPanelOkButton {
-  background: var(--internal-ok-button-background);
-  border-bottom-right-radius: 5px;
-  color: var(--internal-ok-button-color);
-}
-
-.arrowPanelCancelButton {
-  border-bottom-left-radius: 5px;
-}
-
-.arrowPanelOkButton:hover,
-.arrowPanelCancelButton:hover {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
-}
-
-.arrowPanelOkButton:hover:active,
-.arrowPanelCancelButton:hover:active {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+.menuButtonsPermalinkTextField {
+  width: 16em;
+  height: 19px;
 }
 
 .arrowPanelOpenMetaInfo {
   width: 350px;
-  padding-top: 5px;
   font-size: 12px;
   line-height: 20px;
 }
