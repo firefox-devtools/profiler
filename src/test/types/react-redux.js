@@ -18,7 +18,7 @@ import type {
   Dispatch,
   GetState,
 } from 'firefox-profiler/types';
-/* eslint-disable no-unused-vars, react/prefer-stateless-function, flowtype/no-unused-expressions */
+/* eslint-disable no-unused-vars */
 
 // Use this any value to create fake variables as a type. Consider using
 // `declare var myVariables: MyType;` instead. However, it can sometimes be clearer to

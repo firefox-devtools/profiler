@@ -66,6 +66,7 @@ describe('mergeProfilesForDiffing function', function() {
         }
       }
 
+      /* eslint-disable jest/no-conditional-expect */
       switch (funcName) {
         case 'A':
           libsForA.push(libName);
@@ -81,6 +82,7 @@ describe('mergeProfilesForDiffing function', function() {
           break;
         default:
       }
+      /* eslint-enable */
     }
     expect(libsForA).toEqual(['libA', 'libB']);
     expect(resourcesForA).toEqual(['libA', 'libB']);

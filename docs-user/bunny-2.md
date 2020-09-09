@@ -26,7 +26,7 @@ worker.addEventListener('message', message => {
 });
 ```
 
-In this example, the iframe draws to the canvas, and once it's done, it posts a message to the worker asking it to generate a new list of the draw calls. While this works, it's not harnessing the fact that the worker can run code in parallel. The fix luckily is simple. Swap the order of the `drawRect` and `worker.postMessage` calls.
+In this example, the iframe draws to the canvas, and once it's done, it posts a message to the worker asking it to generate a new list of the draw calls. While this works, it's not harnessing the fact that the worker can run code in parallel. The fix luckily is straightforward. Swap the order of the `drawRect` and `worker.postMessage` calls.
 
 ```js
 worker.addEventListener('message', message => {

@@ -4,7 +4,7 @@
 // @flow
 
 // $FlowExpectError Flow doesn't know about this util
-import { Worker } from 'worker_threads'; // eslint-disable-line import/no-unresolved
+import { Worker } from 'worker_threads';
 
 class NodeWorker {
   _instance: Worker;

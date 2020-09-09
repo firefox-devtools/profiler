@@ -159,7 +159,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can reorder global tracks ', function() {
+    it('can reorder global tracks', function() {
       const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain tab]',
@@ -195,7 +195,7 @@ describe('url handling tracks', function() {
   });
 
   describe('local tracks', function() {
-    it('can reorder local tracks ', function() {
+    it('can reorder local tracks', function() {
       const { getState } = initWithSearchParams(
         '?localTrackOrderByPid=222-1-0'
       );
@@ -207,7 +207,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can hide local tracks ', function() {
+    it('can hide local tracks', function() {
       const { getState } = initWithSearchParams(
         '?hiddenLocalTracksByPid=222-1'
       );
@@ -369,7 +369,7 @@ describe('search strings', function() {
 });
 
 describe('profileName', function() {
-  it('serializes the profileName in the URL ', function() {
+  it('serializes the profileName in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const profileName = 'Good Profile';
 
@@ -399,7 +399,7 @@ describe('profileName', function() {
 });
 
 describe('showTabOnly', function() {
-  it('serializes the showTabOnly in the URL ', function() {
+  it('serializes the showTabOnly in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const browsingContextID = 123;
 
