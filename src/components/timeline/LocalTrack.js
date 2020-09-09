@@ -13,7 +13,7 @@ import {
 import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getSelectedTab,
   getHiddenLocalTracks,
 } from '../../selectors/url-state';
@@ -158,16 +158,17 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     let titleText = null;
     let isSelected = false;
 
+    const selectedThreadIndexes = getSelectedThreadIndexes(state);
+
     // Run different selectors based on the track type.
     switch (localTrack.type) {
       case 'thread': {
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
-          threadIndex === selectedThreadIndex &&
+          selectedThreadIndexes.has(threadIndex) &&
           selectedTab !== 'network-chart' &&
           selectedTab !== 'event-delay';
         titleText = selectors.getThreadProcessDetails(state);
@@ -175,10 +176,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       }
       case 'network': {
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         isSelected =
-          threadIndex === selectedThreadIndex &&
+          selectedThreadIndexes.has(threadIndex) &&
           selectedTab === 'network-chart';
         break;
       }
@@ -190,20 +190,20 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       }
       case 'ipc': {
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         isSelected =
-          threadIndex === selectedThreadIndex && selectedTab === 'marker-chart';
+          selectedThreadIndexes.has(threadIndex) &&
+          selectedTab === 'marker-chart';
         break;
       }
       case 'event-delay': {
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
-          threadIndex === selectedThreadIndex && selectedTab !== 'event-delay';
+          threadIndex === selectedThreadIndexes.has(threadIndex) &&
+          selectedTab !== 'event-delay';
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;

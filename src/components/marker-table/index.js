@@ -15,7 +15,7 @@ import {
   getScrollToSelectionGeneration,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,
@@ -30,7 +30,7 @@ import {
 import './index.css';
 
 import type {
-  ThreadIndex,
+  ThreadsKey,
   Marker,
   MarkerIndex,
   Milliseconds,
@@ -122,7 +122,7 @@ function _formatStart(start: number, zeroAt) {
 }
 
 type StateProps = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +getMarker: MarkerIndex => Marker,
   +markerIndexes: MarkerIndex[],
   +selectedMarker: MarkerIndex | null,
@@ -175,13 +175,13 @@ class MarkerTable extends PureComponent<Props> {
   }
 
   _onSelectionChange = (selectedMarker: MarkerIndex) => {
-    const { threadIndex, changeSelectedMarker } = this.props;
-    changeSelectedMarker(threadIndex, selectedMarker);
+    const { threadsKey, changeSelectedMarker } = this.props;
+    changeSelectedMarker(threadsKey, selectedMarker);
   };
 
   _onRightClickSelection = (selectedMarker: MarkerIndex) => {
-    const { threadIndex, changeRightClickedMarker } = this.props;
-    changeRightClickedMarker(threadIndex, selectedMarker);
+    const { threadsKey, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadsKey, selectedMarker);
   };
 
   render() {
@@ -228,7 +228,7 @@ class MarkerTable extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     getMarker: selectedThreadSelectors.getMarkerGetter(state),
     markerIndexes: selectedThreadSelectors.getPreviewFilteredMarkerIndexes(

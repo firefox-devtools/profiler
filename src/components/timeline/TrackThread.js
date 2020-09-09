@@ -17,7 +17,7 @@ import {
 import { getThreadSelectors } from '../../selectors/per-thread';
 
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getTimelineType,
   getInvertCallstack,
   getTimelineTrackOrganization,
@@ -294,12 +294,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex =
-      threadIndex === selectedThread
-        ? selectors.getSelectedCallNodeIndex(state)
-        : null;
+    const selectedCallNodeIndex = selectedThreads.has(threadIndex)
+      ? selectors.getSelectedCallNodeIndex(state)
+      : null;
     return {
       invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),

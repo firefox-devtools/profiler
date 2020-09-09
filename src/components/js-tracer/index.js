@@ -13,14 +13,14 @@ import { getProfile } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowJsTracerSummary,
-  getSelectedThreadIndex,
+  getSelectedThreadsKey,
 } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
   Profile,
   JsTracerTable,
-  ThreadIndex,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -32,7 +32,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +profile: Profile,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +jsTracerTable: JsTracerTable | null,
   +showJsTracerSummary: boolean,
 |};
@@ -47,7 +47,7 @@ class JsTracer extends React.PureComponent<Props> {
       profile,
       jsTracerTable,
       showJsTracerSummary,
-      threadIndex,
+      threadsKey,
     } = this.props;
     return (
       <div className="jsTracer">
@@ -60,7 +60,7 @@ class JsTracer extends React.PureComponent<Props> {
               profile={profile}
               jsTracerTable={jsTracerTable}
               showJsTracerSummary={showJsTracerSummary}
-              threadIndex={threadIndex}
+              threadsKey={threadsKey}
             />
           </>
         )}
@@ -73,7 +73,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       profile: getProfile(state),
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
       jsTracerTable: selectedThreadSelectors.getJsTracerTable(state),
       showJsTracerSummary: getShowJsTracerSummary(state),
     };

@@ -36,7 +36,7 @@ import {
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
 import { getMarkerFullDescription } from '../../profile-logic/marker-data';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
 
 type StateProps = {|
   +previewSelection: PreviewSelection,
@@ -294,7 +294,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     let thread = null;
 
     if (rightClickedMarkerInfo !== null) {
-      const selectors = getThreadSelectors(rightClickedMarkerInfo.threadIndex);
+      const selectors = getThreadSelectorsFromThreadsKey(
+        rightClickedMarkerInfo.threadsKey
+      );
 
       rightClickedMarker = selectors.getRightClickedMarker(state);
       thread = selectors.getThread(state);

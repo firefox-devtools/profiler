@@ -14,7 +14,7 @@ import { timeCode } from '../../utils/time-code';
 import explicitConnect from '../../utils/connect';
 import { getPreviewSelection } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadIndexes } from '../../selectors/url-state';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import './Markers.css';
@@ -525,13 +525,13 @@ export const TimelineMarkersJank = explicitConnect<
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       // These don't use marker schema as they are derived.
       markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
-      isSelected: threadIndex === selectedThread,
+      isSelected: selectedThreads.has(threadIndex),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -552,7 +552,7 @@ export const TimelineMarkersOverview = explicitConnect<
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       additionalClassName:
@@ -561,7 +561,7 @@ export const TimelineMarkersOverview = explicitConnect<
           : null,
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
-      isSelected: threadIndex === selectedThread,
+      isSelected: selectedThreads.has(threadIndex),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -582,12 +582,12 @@ export const TimelineMarkersFileIo = explicitConnect<
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
-      isSelected: threadIndex === selectedThread,
+      isSelected: selectedThreads.has(threadIndex),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -608,12 +608,12 @@ export const TimelineMarkersMemory = explicitConnect<
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
-      isSelected: threadIndex === selectedThread,
+      isSelected: selectedThreads.has(threadIndex),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',
       testId: 'TimelineMarkersMemory',
@@ -635,12 +635,12 @@ export const TimelineMarkersIPC = explicitConnect<
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreads = getSelectedThreadIndexes(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
-      isSelected: threadIndex === selectedThread,
+      isSelected: selectedThreads.has(threadIndex),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersIPC',
       testId: 'TimelineMarkersIPC',
