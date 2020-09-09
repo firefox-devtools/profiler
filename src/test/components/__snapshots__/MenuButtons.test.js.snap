@@ -88,7 +88,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoLabel"
               >
-                Features:
+                Features
+                :
               </span>
               <ul
                 class="metaInfoList"
@@ -111,7 +112,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoLabel"
               >
-                Threads Filter:
+                Threads Filter
+                :
               </span>
               <ul
                 class="metaInfoList"
@@ -207,7 +209,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             <span
               class="metaInfoLabel"
             >
-              Extensions:
+              Extensions
+              :
             </span>
             <ul
               class="metaInfoList"
@@ -529,7 +532,8 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             <span
               class="metaInfoLabel"
             >
-              Extensions:
+              Extensions
+              :
             </span>
             <ul
               class="metaInfoList"
