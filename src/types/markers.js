@@ -12,8 +12,10 @@ export type MarkerFormatType =
   // ----------------------------------------------------
   // String types.
 
-  // Show the URL, and handle PII sanitization.
+  // Show the URL, and handle PII sanitization
+  // TODO Handle PII sanitization. Issue #2757
   | 'url'
+  // TODO Handle PII sanitization. Issue #2757
   // Show the file path, and handle PII sanitization.
   | 'file-path'
   // Important, do not put URL or file path information here, as it will not be
@@ -23,6 +25,8 @@ export type MarkerFormatType =
 
   // ----------------------------------------------------
   // Numeric types
+
+  // Note: All time and durations are stored as milliseconds.
 
   // For time data that represents a duration of time.
   // e.g. "Label: 5s, 5ms, 5μs"
@@ -48,13 +52,7 @@ export type MarkerFormatType =
   // The decimal should be used for generic representations of numbers. Do not
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
-  | 'decimal'
-
-  // ----------------------------------------------------
-  // Complex types
-
-  // Prints a full stack trace using the value.
-  | 'stack';
+  | 'decimal';
 
 // A list of all the valid locations to surface this marker.
 // We can be free to add more UI areas.

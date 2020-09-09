@@ -1340,14 +1340,14 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
       Function Line
       :
     </div>
-    3662
+    3,662
     <div
       class="tooltipLabel"
     >
       Bailout Line
       :
     </div>
-    3666
+    3,666
     <div
       class="tooltipLabel"
     >
@@ -1973,6 +1973,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
+      Reason
+      :
+    </div>
+    ALLOC_TRIGGER
+    <div
+      class="tooltipLabel"
+    >
       Total slice times
       :
     </div>
@@ -2106,6 +2113,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       :
     </div>
     Main Thread
+    <div
+      class="tooltipLabel"
+    >
+      Reason
+      :
+    </div>
+    FULL_CELL_PTR_BUFFER
     <div
       class="tooltipLabel"
     >
@@ -3235,7 +3249,7 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
     <div
       class="tooltipLabel"
     >
-      Name
+      Details
       :
     </div>
     TTFI after 100.01ms (longTask was 100.001ms)

@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import type { MarkerFormatType } from 'firefox-profiler/types';
 import {
   formatNumber,
   formatPercent,
@@ -13,6 +12,7 @@ import {
   formatMicroseconds,
   formatNanoseconds,
 } from '../utils/format-numbers';
+import type { MarkerFormatType } from 'firefox-profiler/types';
 
 /**
  * TODO - These will eventually be stored in the profile, but for now
@@ -138,7 +138,7 @@ export const markerSchema = [
   {
     name: 'Text',
     display: ['marker-chart', 'marker-table'],
-    data: [{ key: 'name', label: 'Name', format: 'string' }],
+    data: [{ key: 'name', label: 'Details', format: 'string' }],
   },
   {
     name: 'Log',
@@ -146,17 +146,6 @@ export const markerSchema = [
     data: [
       { key: 'module', label: 'Module', format: 'string' },
       { key: 'name', label: 'Name', format: 'string' },
-    ],
-  },
-  {
-    name: 'Bailout',
-    display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'bailoutType', label: 'Type', format: 'string' },
-      { key: 'where', label: 'Where', format: 'string' },
-      { key: 'script', label: 'Script', format: 'string' },
-      { key: 'functionLine', label: 'Function Line', format: 'string' },
-      { key: 'bailoutLine', label: 'Bailout Line', format: 'string' },
     ],
   },
   {
@@ -177,6 +166,10 @@ export const markerSchema = [
   },
 ];
 
+/**
+ * This function takes the intended marker schema for a marker field, and applies
+ * the appropriate formatting function.
+ */
 export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
@@ -206,8 +199,6 @@ export function formatFromMarkerSchema(
       return formatNumber(value);
     case 'percentage':
       return formatPercent(value);
-    case 'stack':
-      return null;
     default:
       console.error(
         `A marker schema of type "${markerType}" had an unknown format "${(format: empty)}"`

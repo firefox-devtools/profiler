@@ -51,6 +51,9 @@ export function getGCMinorDetails(
             ])
           : undefined;
         details.push(
+          <TooltipDetail label="Reason" key="GCMinor-Reason">
+            {nursery.reason}
+          </TooltipDetail>,
           <TooltipDetail label="Bytes evicted" key="GCMinor-Bytes evicted">
             {formatValueTotal(
               nursery.bytes_tenured,
@@ -249,6 +252,9 @@ export function getGCMajorDetails(
       }
       details.push(
         nonIncrementalReason,
+        <TooltipDetail label="Reason" key="GCMajor-reason">
+          {timings.reason}
+        </TooltipDetail>,
         <TooltipDetail label="Total slice times" key="GMajor-Total slice times">
           {formatMilliseconds(
             timings.total_time,
