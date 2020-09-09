@@ -16,7 +16,7 @@ import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
 import {
-  changeSelectedThread,
+  changeSelectedThreads,
   hideLocalTrack,
 } from '../../actions/profile-view';
 import TimelineLocalTrack from '../../components/timeline/LocalTrack';
@@ -26,7 +26,7 @@ import {
   getProfile,
 } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import {
   getNetworkTrackProfile,
@@ -69,7 +69,7 @@ describe('timeline/LocalTrack', function() {
         getLocalTrackRow,
       } = setupThreadTrack();
       expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       expect(getLocalTrackRow().classList.contains('selected')).toBe(false);
     });
 
@@ -80,9 +80,9 @@ describe('timeline/LocalTrack', function() {
         threadIndex,
         getLocalTrackRow,
       } = setupThreadTrack();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireFullClick(getLocalTrackLabel());
-      expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
       expect(getLocalTrackRow().classList.contains('selected')).toBe(true);
     });
 
@@ -96,14 +96,14 @@ describe('timeline/LocalTrack', function() {
 
       fireFullContextMenu(getLocalTrackLabel());
       expect(getRightClickedTrack(getState())).toEqual(trackReference);
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
 
     it('can select a thread by clicking the row', () => {
       const { getState, getLocalTrackRow, threadIndex } = setupThreadTrack();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireFullClick(getLocalTrackRow());
-      expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 
     it('will render a stub div if the track is hidden', () => {
@@ -160,7 +160,7 @@ function setup(
   const { getState, dispatch } = store;
   const setIsInitialSelectedPane = () => {};
   // The assertions are simpler if this thread is not already selected.
-  dispatch(changeSelectedThread(threadIndex + 1));
+  dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
   // Some child components render to canvas.
   jest
