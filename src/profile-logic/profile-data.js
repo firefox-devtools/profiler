@@ -49,6 +49,7 @@ import type {
   ImplementationFilter,
   CallTreeSummaryStrategy,
   EventDelayInfo,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
@@ -2668,4 +2669,11 @@ export function getOrCreateURIResource(
     resourceTable.type[resourceIndex] = resourceTypes.url;
   }
   return resourceIndex;
+}
+
+/**
+ * See the ThreadsKey type for an explanation.
+ */
+export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
+  return [...threadIndexes].sort((a, b) => b - a).join(',');
 }

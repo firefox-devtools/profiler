@@ -288,7 +288,7 @@ type ReceiveProfileAction =
     |}
   | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
       +browsingContextID: BrowsingContextID | null,
     |}

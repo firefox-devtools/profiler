@@ -24,6 +24,7 @@ import type {
   IndexIntoRawMarkerTable,
   Selector,
   $ReturnType,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 /**
@@ -40,7 +41,8 @@ export type MarkerSelectorsPerThread = $ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: *,
-  threadIndex: ThreadIndex
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = state =>
     threadSelectors.getThread(state).markers;
@@ -491,7 +493,7 @@ export function getMarkerSelectorsPerThread(
     rightClickedMarkerInfo => {
       if (
         rightClickedMarkerInfo !== null &&
-        rightClickedMarkerInfo.threadIndex === threadIndex
+        rightClickedMarkerInfo.threadsKey === threadsKey
       ) {
         return rightClickedMarkerInfo.markerIndex;
       }

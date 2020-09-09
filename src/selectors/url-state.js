@@ -8,6 +8,7 @@ import { createSelector } from 'reselect';
 import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
+import { getThreadsKey } from '../profile-logic/profile-data';
 
 import type {
   ThreadIndex,
@@ -24,6 +25,7 @@ import type {
   DangerousSelectorWithArguments,
   StartEndRange,
   TrackIndex,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -85,12 +87,25 @@ export const getNetworkSearchString: Selector<string> = state =>
 
 export const getSelectedTab: Selector<TabSlug> = state =>
   getUrlState(state).selectedTab;
-export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>
-  getProfileSpecificState(state).selectedThread;
-export const getSelectedThreadIndex: Selector<ThreadIndex> = state =>
+export const getSelectedThreadIndexesOrNull: Selector<Set<ThreadIndex> | null> = state =>
+  getProfileSpecificState(state).selectedThreads;
+export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = state =>
   ensureExists(
-    getSelectedThreadIndexOrNull(state),
+    getSelectedThreadIndexesOrNull(state),
     'Attempted to get a thread index before a profile was loaded.'
+  );
+export const getSelectedThreadsKey: Selector<ThreadsKey> = state =>
+  getThreadsKey(getSelectedThreadIndexes(state));
+
+/**
+ * This selector is temporary for a migration to multiple selected thread indexes.
+ */
+export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
+  ensureExists(
+    getSelectedThreadIndexes(state)
+      .values()
+      .next().value,
+    'Expected to find at least one thread index in the selected thread indexes'
   );
 export const getTimelineType: Selector<TimelineType> = state =>
   getFullProfileSpecificState(state).timelineType;
@@ -210,10 +225,10 @@ const EMPTY_TRANSFORM_STACK = [];
 
 export const getTransformStack: DangerousSelectorWithArguments<
   TransformStack,
-  ThreadIndex
-> = (state, threadIndex) => {
+  ThreadsKey
+> = (state, threadsKey) => {
   return (
-    getProfileSpecificState(state).transforms[threadIndex] ||
+    getProfileSpecificState(state).transforms[threadsKey] ||
     EMPTY_TRANSFORM_STACK
   );
 };

@@ -498,7 +498,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <TooltipMarker
               marker={hoveredItem}
-              threadIndex={threadIndex}
+              threadsKey={threadIndex}
               restrictHeightWidth={true}
             />
           </Tooltip>

@@ -21,7 +21,7 @@ import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
-  getSelectedThreadIndexOrNull,
+  getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
@@ -169,7 +169,7 @@ export function finalizeProfileView(
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
-    const selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
     const pages = profile.pages;
     if (!timelineTrackOrganization) {
       // Most likely we'll need to load the timeline track organization, as requested
@@ -181,33 +181,33 @@ export function finalizeProfileView(
       case 'full':
         // The url state says this is a full view. We should compute and initialize
         // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         break;
       case 'active-tab':
         if (pages) {
           dispatch(
             finalizeActiveTabProfileView(
               profile,
-              selectedThreadIndex,
+              selectedThreadIndexes,
               timelineTrackOrganization.browsingContextID
             )
           );
         } else {
           // Don't fully trust the URL, this view doesn't support the active tab based
           // view. Switch to fulll view.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         }
 
         break;
       case 'origins': {
         if (pages) {
           dispatch(
-            finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+            finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
           );
         } else {
           // Don't fully trust the URL, this view doesn't support the origins based
           // view. Switch to fulll view.
-          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         }
         break;
       }
@@ -239,10 +239,10 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex | null
+  selectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndex !== null;
+    const hasUrlInfo = selectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -291,8 +291,8 @@ export function finalizeFullProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    selectedThreadIndex = initializeSelectedThreadIndex(
-      selectedThreadIndex,
+    selectedThreadIndexes = initializeSelectedThreadIndex(
+      selectedThreadIndexes,
       visibleThreadIndexes,
       profile
     );
@@ -321,7 +321,7 @@ export function finalizeFullProfileView(
 
     dispatch({
       type: 'VIEW_FULL_PROFILE',
-      selectedThreadIndex,
+      selectedThreadIndexes,
       globalTracks,
       globalTrackOrder,
       hiddenGlobalTracks,
@@ -362,7 +362,7 @@ function getOrigin(urlString: string): string {
 export function finalizeOriginProfileView(
   profile: Profile,
   pages: Page[],
-  selectedThreadIndex: ThreadIndex | null
+  selectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
   return dispatch => {
     const idToPage: Map<InnerWindowID, Page> = new Map();
@@ -506,8 +506,8 @@ export function finalizeOriginProfileView(
     dispatch({
       type: 'VIEW_ORIGINS_PROFILE',
       // TODO - We should pick the best selected thread.
-      selectedThreadIndex:
-        selectedThreadIndex === null ? 0 : selectedThreadIndex,
+      selectedThreadIndexes:
+        selectedThreadIndexes === null ? new Set([0]) : selectedThreadIndexes,
       originsTimeline: [...originsTimelineNoOrigin, ...originsTimelineRoots],
     });
   };
@@ -521,7 +521,7 @@ export function finalizeOriginProfileView(
  */
 export function finalizeActiveTabProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex | null,
+  selectedThreadIndexes: Set<ThreadIndex> | null,
   browsingContextID: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -532,15 +532,17 @@ export function finalizeActiveTabProfileView(
       getState()
     );
 
-    if (selectedThreadIndex === null) {
+    if (selectedThreadIndexes === null) {
       // Select the main track if there is no selected thread.
-      selectedThreadIndex = activeTabTimeline.mainTrack.mainThreadIndex;
+      selectedThreadIndexes = new Set([
+        activeTabTimeline.mainTrack.mainThreadIndex,
+      ]);
     }
 
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
       activeTabTimeline,
-      selectedThreadIndex,
+      selectedThreadIndexes,
       browsingContextID,
     });
   };
@@ -557,7 +559,7 @@ export function changeTimelineTrackOrganization(
     const profile = getProfile(getState());
     // We are resetting the selected thread index, because we are not sure if
     // the selected thread will be availabe in the next view.
-    const selectedThreadIndex = 0;
+    const selectedThreadIndexes = new Set([0]);
     dispatch({
       type: 'DATA_RELOAD',
     });
@@ -566,7 +568,7 @@ export function changeTimelineTrackOrganization(
       case 'full':
         // The url state says this is a full view. We should compute and initialize
         // the state relevant to that state.
-        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         break;
       case 'active-tab':
         // The url state says this is an active tab view. We should compute and
@@ -574,7 +576,7 @@ export function changeTimelineTrackOrganization(
         dispatch(
           finalizeActiveTabProfileView(
             profile,
-            selectedThreadIndex,
+            selectedThreadIndexes,
             timelineTrackOrganization.browsingContextID
           )
         );
@@ -585,7 +587,7 @@ export function changeTimelineTrackOrganization(
           'There was no page information in the profile.'
         );
         dispatch(
-          finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+          finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
         );
         break;
       }
