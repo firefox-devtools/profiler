@@ -138,6 +138,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
+  ctxId: BrowsingContextID,
 |};
 
 // Base query that only applies to origins profile view.
@@ -153,7 +154,6 @@ type BaseQuery = {|
   transforms: string,
   profiles: string[],
   profileName: string,
-  ctxId: BrowsingContextID,
   view: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
@@ -256,9 +256,29 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
 
   const { selectedThread } = urlState.profileSpecific;
 
+  let ctxId;
+  let view;
+  const { timelineTrackOrganization } = urlState;
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      // Dont URL-encode anything.
+      break;
+    case 'active-tab':
+      view = timelineTrackOrganization.type;
+      ctxId = timelineTrackOrganization.browsingContextID;
+      break;
+    case 'origins':
+      view = timelineTrackOrganization.type;
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        'Unhandled TimelineTrackOrganization case'
+      );
+  }
+
   // Start with the query parameters that are shown regardless of the active panel.
   let baseQuery;
-  const { timelineTrackOrganization } = urlState;
   switch (timelineTrackOrganization.type) {
     case 'full': {
       // Add the full profile specific state query here.
@@ -310,6 +330,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         .isResourcesPanelOpen
         ? null
         : undefined;
+      baseQuery.ctxId = ctxId;
       break;
     }
     case 'origins':
@@ -322,26 +343,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       );
   }
 
-  let ctxId;
-  let view;
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      // Dont URL-encode anything.
-      break;
-    case 'active-tab':
-      view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.browsingContextID;
-      break;
-    case 'origins':
-      view = timelineTrackOrganization.type;
-      break;
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        'Unhandled TimelineTrackOrganization case'
-      );
-  }
-
   baseQuery = ({
     ...baseQuery,
     range:
@@ -350,7 +351,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     thread: selectedThread === null ? undefined : selectedThread.toString(),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
-    ctxId,
     view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
