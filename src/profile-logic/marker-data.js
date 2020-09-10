@@ -35,6 +35,7 @@ import type {
   StartEndRange,
   IndexedArray,
   DerivedMarkerInfo,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -1355,4 +1356,45 @@ export function getMarkerCategory(marker: Marker) {
     }
   }
   return category;
+}
+
+/**
+ * Markers can be filtered by display area using the marker schema. Get a list of
+ * marker "types" (the type field in the Payload) for a specific location.
+ */
+export function getMarkerTypesForDisplay(
+  markerSchema: MarkerSchema[],
+  displayArea: string
+): Set<string> {
+  const types = new Set();
+  for (const { display, name } of markerSchema) {
+    if (display.includes(displayArea)) {
+      types.add(name);
+    }
+  }
+  return types;
+}
+
+/**
+ * Filter markers to a smaller set based on what "type" they are. This is used to
+ * to filter markers based on the schema.
+ */
+export function filterMarkerByTypes(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[],
+  markerTypes: Set<string>
+): MarkerIndex[] {
+  return filterMarkerIndexes(getMarker, markerIndexes, marker => {
+    const { data } = marker;
+    if (!data) {
+      return false;
+    }
+    if (data.type === 'tracing') {
+      // This is a bit gross, but tracing markers are all of type "tracing", but
+      // differentiate on their categories. This should probably be fixed, but
+      // for now just do another check here.
+      return markerTypes.has(data.category);
+    }
+    return markerTypes.has(data.type);
+  });
 }

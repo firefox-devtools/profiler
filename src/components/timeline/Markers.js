@@ -261,7 +261,7 @@ export type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +threadIndex: ThreadIndex,
-  +onSelect: (ThreadIndex, Milliseconds, Milliseconds) => mixed,
+  +onSelect: (Milliseconds, Milliseconds) => mixed,
 |};
 
 export type StateProps = {|
@@ -408,13 +408,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           null /* extra null check because flow doesn't realize it's unnecessary */
       ) {
         e.stopPropagation();
-        const { onSelect, threadIndex, rangeStart, rangeEnd } = this.props;
+        const { onSelect, rangeStart, rangeEnd } = this.props;
         const { start, end } = getStartEndRangeForMarker(
           rangeStart,
           rangeEnd,
           mouseUpItem
         );
-        onSelect(threadIndex, start, end);
+        onSelect(start, end);
       }
       this.setState({
         hoveredItem: mouseUpItem,

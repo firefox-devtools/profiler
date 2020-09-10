@@ -4,7 +4,7 @@
 
 ## Gecko Profiler (aka SPS, nsIProfiler)
 
-The profiler collects two types of information, samples and markers. The profiler is an internal component inside of Gecko. It stores all of profile information in a circular buffer, that when it gets full, the buffer starts to overwrite the old data with new data. This is a nice feature because it means the profiler can be left on indefinitely, allowing for the easy capture of a profile once some kind of interesting behavior happens. Once the user is done profiling then the data can be retrieved as a JSON blob. The profiler can be configuring to collect data from different specific threads, and it stores this information on a per-thread basis.
+The profiler collects two types of information, samples and markers. The profiler is an internal component inside of Gecko. It stores all of profile information in a circular buffer, that when it gets full, the buffer starts to overwrite the old data with new data. This is a nice feature because it means the profiler can be left on indefinitely, allowing for the capture of a profile once some kind of interesting behavior happens. Once the user is done profiling then the data can be retrieved as a JSON blob. The profiler can be configuring to collect data from different specific threads, and it stores this information on a per-thread basis.
 
 ### Samples in the profiler
 

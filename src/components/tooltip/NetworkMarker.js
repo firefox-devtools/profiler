@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import { TooltipDetails, TooltipDetail } from './TooltipDetails';
+import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 import {
   getColorClassNameForMimeType,
   guessMimeTypeFromNetworkMarker,
@@ -62,17 +62,6 @@ function _getHumanReadableDataStatus(str: string): string {
     default:
       return 'other';
   }
-}
-
-function _markerDetailBytesNullable(label: string, value: ?number): * {
-  if (typeof value !== 'number') {
-    return null;
-  }
-  return (
-    <TooltipDetail key={label} label={label}>
-      {formatBytes(value)}
-    </TooltipDetail>
-  );
 }
 
 /* The preconnect phase may only contain these properties. */
@@ -182,7 +171,7 @@ type Props = {|
   +zeroAt: Milliseconds,
 |};
 
-export class TooltipNetworkMarker extends React.PureComponent<Props> {
+export class TooltipNetworkMarkerPhases extends React.PureComponent<Props> {
   _getPhasesForProperties(
     properties: string[],
     sectionDuration: Milliseconds,
@@ -290,8 +279,11 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
     );
   }
 
-  _renderPhases(markerColorClass: string): React.Node {
+  render() {
     const { payload } = this.props;
+    const mimeType =
+      payload.contentType || guessMimeTypeFromNetworkMarker(payload);
+    const markerColorClass = getColorClassNameForMimeType(mimeType);
 
     if (payload.status === 'STATUS_START') {
       return null;
@@ -347,50 +339,71 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
       </div>
     );
   }
+}
 
-  render() {
-    const { payload } = this.props;
-    let mimeType = payload.contentType;
-    let mimeTypeLabel = 'MIME type';
-    if (mimeType === undefined || mimeType === null) {
-      mimeType = guessMimeTypeFromNetworkMarker(payload);
-      mimeTypeLabel = 'Guessed MIME type';
-    }
+/**
+ * This function bypasses the Marker schema, and uses its own formatting to display
+ * the Network details.
+ */
+export function getNetworkMarkerDetails(
+  payload: NetworkPayload
+): TooltipDetailComponent[] {
+  let mimeType = payload.contentType;
+  let mimeTypeLabel = 'MIME type';
+  if (mimeType === undefined || mimeType === null) {
+    mimeType = guessMimeTypeFromNetworkMarker(payload);
+    mimeTypeLabel = 'Guessed MIME type';
+  }
+  const markerColorClass = getColorClassNameForMimeType(mimeType);
+  const details = [];
 
-    const markerColorClass = getColorClassNameForMimeType(mimeType);
-    return (
-      <>
-        <TooltipDetails>
-          <TooltipDetail label="Status">
-            {_getHumanReadableDataStatus(payload.status)}
-          </TooltipDetail>
-          <TooltipDetail label="Cache">{payload.cache}</TooltipDetail>
-          <TooltipDetail label="URL">
-            <span className="tooltipNetworkUrl">{payload.URI}</span>
-          </TooltipDetail>
-          {payload.RedirectURI ? (
-            <TooltipDetail label="Redirect URL">
-              <span className="tooltipNetworkUrl">{payload.RedirectURI}</span>
-            </TooltipDetail>
-          ) : null}
-          <TooltipDetail label="Priority">
-            {_getHumanReadablePriority(payload.pri)}
-          </TooltipDetail>
-          {mimeType ? (
-            <TooltipDetail label={mimeTypeLabel}>
-              <div className="tooltipNetworkMimeType">
-                <span
-                  className={`tooltipNetworkMimeTypeSwatch colored-square ${markerColorClass}`}
-                  title={mimeType}
-                />
-                {mimeType}
-              </div>
-            </TooltipDetail>
-          ) : null}
-          {_markerDetailBytesNullable('Requested bytes', payload.count)}
-        </TooltipDetails>
-        {this._renderPhases(markerColorClass)}
-      </>
+  details.push(
+    <TooltipDetail label="Status" key="Network-Status">
+      {_getHumanReadableDataStatus(payload.status)}
+    </TooltipDetail>,
+    <TooltipDetail label="Cache" key="Network-Cache">
+      {payload.cache}
+    </TooltipDetail>,
+    <TooltipDetail label="URL" key="Network-URL">
+      <span className="tooltipNetworkUrl">{payload.URI}</span>
+    </TooltipDetail>
+  );
+
+  if (payload.RedirectURI) {
+    details.push(
+      <TooltipDetail label="Redirect URL" key="Network-Redirect URL">
+        <span className="tooltipNetworkUrl">{payload.RedirectURI}</span>
+      </TooltipDetail>
     );
   }
+
+  details.push(
+    <TooltipDetail label="Priority" key="Network-Priority">
+      {_getHumanReadablePriority(payload.pri)}
+    </TooltipDetail>
+  );
+
+  if (mimeType) {
+    details.push(
+      <TooltipDetail label={mimeTypeLabel} key={'Network-' + mimeTypeLabel}>
+        <div className="tooltipNetworkMimeType">
+          <span
+            className={`tooltipNetworkMimeTypeSwatch colored-square ${markerColorClass}`}
+            title={mimeType}
+          />
+          {mimeType}
+        </div>
+      </TooltipDetail>
+    );
+  }
+
+  if (typeof payload.count === 'number') {
+    details.push(
+      <TooltipDetail label="Requested bytes" key="Network-Requested Bytes">
+        {formatBytes(payload.count)}
+      </TooltipDetail>
+    );
+  }
+
+  return details;
 }

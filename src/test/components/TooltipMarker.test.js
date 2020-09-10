@@ -302,12 +302,12 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'ConstructRootFrame',
+        'NotifyDidPaint',
         112.5,
         113.3,
         {
           type: 'tracing',
-          category: 'Frame Construction',
+          category: 'Paint',
           interval: 'start',
         },
       ],

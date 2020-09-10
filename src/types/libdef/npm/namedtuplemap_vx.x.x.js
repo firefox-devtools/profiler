@@ -1,4 +1,4 @@
-// flow-typed signature: 901e6451994b4fb547e800e32460197d
+// flow-typed signature: 06b456186acd950235c631c20c230d8d
 // flow-typed version: <<STUB>>/namedtuplemap_v^1.0.0/flow_v0.96.0
 
 /**
@@ -26,7 +26,7 @@ declare module 'namedtuplemap/__tests__/index.test' {
   declare module.exports: any;
 }
 
-declare module 'namedtuplemap/dist/index' {
+declare module 'namedtuplemap/dist' {
   declare module.exports: any;
 }
 
@@ -34,8 +34,11 @@ declare module 'namedtuplemap/dist/index' {
 declare module 'namedtuplemap/__tests__/index.test.js' {
   declare module.exports: $Exports<'namedtuplemap/__tests__/index.test'>;
 }
+declare module 'namedtuplemap/dist/index' {
+  declare module.exports: $Exports<'namedtuplemap/dist'>;
+}
 declare module 'namedtuplemap/dist/index.js' {
-  declare module.exports: $Exports<'namedtuplemap/dist/index'>;
+  declare module.exports: $Exports<'namedtuplemap/dist'>;
 }
 declare module 'namedtuplemap/index' {
   declare module.exports: $Exports<'namedtuplemap'>;

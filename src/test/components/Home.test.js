@@ -11,6 +11,13 @@ import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 import { fireFullClick } from '../fixtures/utils';
 
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
+
 // Provide a mechanism to overwrite the navigator.userAgent, which can't be set.
 const FIREFOX =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0';

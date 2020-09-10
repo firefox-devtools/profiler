@@ -13,11 +13,7 @@ import {
   formatPlatform,
 } from '../../../profile-logic/profile-metainfo';
 
-import type {
-  Profile,
-  ProfileMeta,
-  SymbolicationStatus,
-} from 'firefox-profiler/types';
+import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
 import { typeof resymbolicateProfile } from '../../../actions/receive-profile';
 import { assertExhaustiveCheck } from '../../../utils/flow';
@@ -93,7 +89,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
         buttonClassName="menuButtonsMetaInfoButtonButton"
-        label={_formatMetaInfoString(meta) || 'Profile information'}
+        label="Profile Info"
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
             <h2 className="arrowPanelSubTitle">Profile Information</h2>
@@ -262,10 +258,4 @@ function _formatDate(timestamp: number): string {
     minute: 'numeric',
   });
   return timestampDate;
-}
-
-function _formatMetaInfoString(meta: ProfileMeta) {
-  const productAndVersion = formatProductAndVersion(meta);
-  const os = formatPlatform(meta);
-  return productAndVersion + (os ? ` – ${os}` : '');
 }

@@ -7,6 +7,88 @@ import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
+// Provide different formatting options for strings.
+export type MarkerFormatType =
+  // ----------------------------------------------------
+  // String types.
+
+  // Show the URL, and handle PII sanitization
+  // TODO Handle PII sanitization. Issue #2757
+  | 'url'
+  // TODO Handle PII sanitization. Issue #2757
+  // Show the file path, and handle PII sanitization.
+  | 'file-path'
+  // Important, do not put URL or file path information here, as it will not be
+  // sanitized. Please be careful with including other types of PII here as well.
+  // e.g. "Label: Some String"
+  | 'string'
+
+  // ----------------------------------------------------
+  // Numeric types
+
+  // Note: All time and durations are stored as milliseconds.
+
+  // For time data that represents a duration of time.
+  // e.g. "Label: 5s, 5ms, 5μs"
+  | 'duration'
+  // Data that happened at a specific time, relative to the start of
+  // the profile. e.g. "Label: 15.5s, 20.5ms, 30.5μs"
+  | 'time'
+  // The following are alternatives to display a time only in a specific
+  // unit of time.
+  | 'seconds' // "Label: 5s"
+  | 'milliseconds' // "Label: 5ms"
+  | 'microseconds' // "Label: 5μs"
+  | 'nanoseconds' // "Label: 5ns"
+  // e.g. "Label: 5.55mb, 5 bytes, 312.5kb"
+  | 'bytes'
+  // This should be a value between 0 and 1.
+  // "Label: 50%"
+  | 'percentage'
+  // The integer should be used for generic representations of numbers. Do not
+  // use it for time information.
+  // "Label: 52, 5,323, 1,234,567"
+  | 'integer'
+  // The decimal should be used for generic representations of numbers. Do not
+  // use it for time information.
+  // "Label: 52.23, 0.0054, 123,456.78"
+  | 'decimal';
+
+// A list of all the valid locations to surface this marker.
+// We can be free to add more UI areas.
+export type MarkerDisplayLocation =
+  | 'marker-chart'
+  | 'marker-table'
+  | 'timeline'
+  // In the timeline, this is a section that breaks out markers that are related
+  // to memory. When memory counters are enabled, this is its own track, otherwise
+  // it is displayed with the main thread.
+  | 'timeline-memory'
+  // TODO - This is not supported yet.
+  | 'stack-chart';
+
+export type MarkerSchema = {
+  // The unique identifier for this marker.
+  name: string, // e.g. "CC"
+
+  // The label of how this marker should be displayed in the UI.
+  // If none is provided, then the name is used.
+  label?: string, // e.g. "Cycle Collect"
+
+  // The locations to display
+  display: MarkerDisplayLocation[],
+
+  data: Array<{
+    key: string,
+    // If no label is provided, the key is displayed.
+    label?: string,
+    format: MarkerFormatType,
+    searchable?: boolean,
+  }>,
+};
+
+export type MarkerSchemaByName = { [name: string]: MarkerSchema };
+
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
  * the time the stack was taken. Sometimes this cause can be async, and triggered before
@@ -506,15 +588,6 @@ export type LongTaskMarkerPayload = {|
   category: 'LongTask',
 |};
 
-/*
- * The payload for Frame Construction.
- */
-export type FrameConstructionMarkerPayload = {|
-  type: 'tracing',
-  category: 'Frame Construction',
-  interval: 'start' | 'end',
-|};
-
 export type DummyForTestsMarkerPayload = {|
   type: 'DummyForTests',
 |};
@@ -600,7 +673,6 @@ export type MarkerPayload =
   | LongTaskMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
-  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
   | PrefMarkerPayload
@@ -621,7 +693,6 @@ export type MarkerPayload_Gecko =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
-  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload

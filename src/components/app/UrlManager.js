@@ -144,13 +144,31 @@ class UrlManager extends React.PureComponent<Props> {
       }
     }
 
-    if (
-      previousUrlState.dataSource !== newUrlState.dataSource ||
-      previousUrlState.hash !== newUrlState.hash
-    ) {
-      // Profile sanitization and publishing can do weird things for the history API.
-      // Rather than write lots of complicated interactions, just prevent the back button
-      // from working when going between a published profile, and one that is not.
+    // Profile sanitization and publishing can do weird things for the history API
+    // and we could end up having unconsistent state.
+    // That's why we prevent going back in history in these cases:
+    // 1 - between "from-addon" and "public" (in any direction)
+    // 2 - with the "public" datasource when the hash changes (this means the
+    //     user once published again an already public profile, and then wants to go
+    //     back).
+    // But we want to accept the other interactions.
+
+    // 1. Do we move between "from-addon" and "public"?
+    const movesBetweenFromAddonAndPublic =
+      // from-addon -> public
+      (previousUrlState.dataSource === 'from-addon' &&
+        newUrlState.dataSource === 'public') ||
+      // or public -> from-addon
+      (previousUrlState.dataSource === 'public' &&
+        newUrlState.dataSource === 'from-addon');
+
+    // 2. Do we move between 2 different hashes for a public profile
+    const movesBetweenHashValues =
+      previousUrlState.dataSource === 'public' &&
+      newUrlState.dataSource === 'public' &&
+      previousUrlState.hash !== newUrlState.hash;
+
+    if (movesBetweenFromAddonAndPublic || movesBetweenHashValues) {
       window.history.replaceState(
         previousUrlState,
         document.title,
@@ -169,15 +187,18 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('popstate', () => this._updateState);
+    window.removeEventListener('popstate', this._updateState);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.urlSetupPhase !== 'done') {
+  componentDidUpdate() {
+    const { urlSetupPhase, phase, urlState } = this.props;
+    if (urlSetupPhase !== 'done') {
+      // Do not change the history before the url setup is done, because the URL
+      // state isn't in a consistent state yet.
       return;
     }
 
-    if (nextProps.phase === 'FATAL_ERROR') {
+    if (phase === 'FATAL_ERROR') {
       // Even if the url setup phase is done, we must not change the URL if
       // we're in a FATAL_ERROR state. Likely the profile update failed, and so
       // the url state wasn't initialized properly. Therefore trying to
@@ -186,16 +207,16 @@ class UrlManager extends React.PureComponent<Props> {
       return;
     }
 
-    const newUrl = urlFromState(nextProps.urlState);
+    const newUrl = urlFromState(urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
       if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
-        window.history.pushState(nextProps.urlState, document.title, newUrl);
+        window.history.pushState(urlState, document.title, newUrl);
       } else {
         // Replace the URL state before the URL setup is done, and if we've specifically
         // flagged to replace the URL state.
-        window.history.replaceState(nextProps.urlState, document.title, newUrl);
+        window.history.replaceState(urlState, document.title, newUrl);
       }
     }
   }

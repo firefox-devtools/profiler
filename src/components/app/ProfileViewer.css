@@ -56,15 +56,6 @@
   animation-name: profileViewerFadeInSanitized;
 }
 
-.profileViewerName {
-  height: 24px;
-  padding: 0 6px;
-  border-right: 1px solid var(--grey-30);
-  color: var(--grey-60);
-  font-weight: bold;
-  line-height: 24px;
-}
-
 .profileViewerZipButton {
   /* Position */
   width: 18px;

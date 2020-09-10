@@ -23,7 +23,6 @@ import './TrackVisualProgress.css';
 type OwnProps = {|
   +progressGraphData: ProgressGraphData[],
   +graphDotTooltipText: string,
-  +windowId: string,
 |};
 
 type StateProps = {|

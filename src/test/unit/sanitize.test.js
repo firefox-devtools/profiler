@@ -218,10 +218,12 @@ describe('sanitizePII', function() {
           currentMarker.type &&
           currentMarker.type === 'Network'
         ) {
+          /* eslint-disable jest/no-conditional-expect */
           expect(currentMarker.URI).toBeFalsy();
           expect(currentMarker.RedirectURI).toBeFalsy();
           const stringIndex = thread.markers.name[i];
           expect(stringArray[stringIndex].includes('http')).toBe(false);
+          /* eslint-enable */
         }
       }
     }

@@ -1,3 +1,6 @@
+// flow-typed signature: c53d84e49992194ab4f7963940776415
+// flow-typed version: 8c09c1003c/idb_v5.x.x/flow_>=v0.83.x
+
 // Derived from TS typings at https://github.com/jakearchibald/idb/blob/c8bab898f01bacab96097f87c1e42a0c19e01425/lib/idb.d.ts
 // Updated for changes between v2 and v5.
 

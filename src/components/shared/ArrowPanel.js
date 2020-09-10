@@ -32,8 +32,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
   state = {
     open: false,
     isClosing: false,
-    // The open generation is mistakenly being tagged here as being unused.
-    // eslint-disable-next-line react/no-unused-state
     openGeneration: 0,
   };
 

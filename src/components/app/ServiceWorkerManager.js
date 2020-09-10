@@ -215,10 +215,14 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   }
 
   componentDidUpdate() {
-    const { phase } = this.props;
+    const { phase, dataSource } = this.props;
     const { installStatus } = this.state;
 
-    if (installStatus !== 'idle' && phase === 'FATAL_ERROR') {
+    if (
+      installStatus !== 'idle' &&
+      phase === 'FATAL_ERROR' &&
+      dataSource !== 'from-file' // we can't reload and keep the context for this dataSource.
+    ) {
       // If we got a fatal error and a new version of the application is
       // available, let's try to reload automatically, as this might fix the
       // fatal error.
@@ -295,7 +299,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     if (updatedWhileNotReady) {
       // The user updated the service worker from another tab, before this tab
       // was fully loaded. There may be problems if we need to load some
-      // resources, for example the demandling wasm module.
+      // resources, for example the demangling wasm module.
       return (
         <div className="serviceworker-ready-notice-wrapper">
           {/* We use the wrapper to horizontally center the notice */}

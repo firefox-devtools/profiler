@@ -12,37 +12,34 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { mockWindowLocation } from '../fixtures/mocks/window-location';
-import { mockWindowHistory } from '../fixtures/mocks/window-history';
+import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
-describe('Root with history', function() {
-  // Cleanup the tests through a side-effect.
-  let _cleanup;
-  afterEach(() => {
-    if (!_cleanup) {
-      throw new Error('Expected the setup function to create a cleanup step.');
-    }
-    _cleanup();
-  });
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
 
+describe('Root with history', function() {
   type TestConfig = {|
     profileHash?: string,
   |};
 
+  autoMockFullNavigation();
+
   function setup(config: TestConfig) {
     const { profileHash } = config;
 
-    let resetWindowLocation;
-    const resetWindowHistory = mockWindowHistory();
-
     // This test is driven primarily by the URL. Decide how to load things.
     if (profileHash) {
-      // Load by URL, with a profile hash.
-      resetWindowLocation = mockWindowLocation(
+      // Load by URL, with a profile hash. This replaces the initial URL as
+      // configured by the navigation automocking.
+      window.location.replace(
         `https://profiler.firefox.com/public/${profileHash}`
       );
 
@@ -66,18 +63,20 @@ describe('Root with history', function() {
     const store = blankStore();
     const renderResult = render(<Root store={store} />);
 
-    _cleanup = () => {
-      // Cleanup the mocks.
-      resetWindowLocation();
-      resetWindowHistory();
-      delete window.fetch;
-      _cleanup = null;
-    };
+    const { findByText } = renderResult;
 
-    const { findByRole } = renderResult;
-
-    async function waitForTab(details: *): Promise<HTMLElement> {
-      return findByRole('tab', details);
+    async function waitForTab({
+      name,
+      selected,
+    }: {|
+      +name: string,
+      +selected: boolean,
+    |}): Promise<HTMLElement> {
+      // This uses `findByText` instead of `findbyRole` because this is a lot
+      // faster in our use case where there's a lot of DOM nodes.
+      return findByText(name, {
+        selector: `button[role~=tab][aria-selected=${String(selected)}]`,
+      });
     }
 
     return {
@@ -86,6 +85,10 @@ describe('Root with history', function() {
       waitForTab,
     };
   }
+
+  afterEach(() => {
+    delete window.fetch;
+  });
 
   it('can view a file from the profile store, use history with it', async function() {
     const { getByText, queryByText, waitForTab } = setup({

@@ -30,7 +30,7 @@ import {
   getAllCommittedRanges,
   getSelectedTab,
   getDataSource,
-  getProfileName,
+  getProfileNameWithDefault,
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
@@ -538,7 +538,7 @@ describe('attemptToPublish', function() {
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
-      expect(getProfileName(getState())).toEqual('profile1.json');
+      expect(getProfileNameWithDefault(getState())).toEqual('profile1.json');
 
       // Revert the profile.
       await dispatch(revertToPrePublishedState());
@@ -561,7 +561,7 @@ describe('attemptToPublish', function() {
       // single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
-      expect(getProfileName(getState())).toEqual('profile2.json');
+      expect(getProfileNameWithDefault(getState())).toEqual('profile2.json');
     });
   });
 

@@ -6,6 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
+import * as MarkerData from '../profile-logic/marker-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
@@ -16,6 +17,8 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
+
+import { markerSchema } from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -62,6 +65,8 @@ import type {
   ActiveTabTimeline,
   ActiveTabMainTrack,
   $ReturnType,
+  MarkerSchema,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -169,6 +174,25 @@ export const getContentfulSpeedIndexProgress: Selector<
 > = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
+
+export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
+
+export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
+  getMarkerSchema,
+  schemaList => {
+    const result = {};
+    for (const schema of schemaList) {
+      result[schema.name] = schema;
+    }
+    return result;
+  }
+);
+
+export const getTimelineMemoryMarkerTypes: Selector<
+  Set<string>
+> = createSelector(getMarkerSchema, markerSchema =>
+  MarkerData.getMarkerTypesForDisplay(markerSchema, 'timeline-memory')
+);
 
 export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
   const configuration = getProfilerConfiguration(state);
