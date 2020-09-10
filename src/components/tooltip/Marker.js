@@ -36,7 +36,6 @@ import Backtrace from '../shared/Backtrace';
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import {
   formatFromMarkerSchema,
-  getMarkerLabelMaker,
   getMarkerSchema,
   getMarkerSchemaName,
 } from '../../profile-logic/marker-schema';
