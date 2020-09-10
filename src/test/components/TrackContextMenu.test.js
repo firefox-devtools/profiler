@@ -193,7 +193,7 @@ describe('timeline/TrackContextMenu', function() {
       // TODO - We should wait until we have some real tracks without a thread index.
     });
 
-    it('network track will be displayed when a number is not set for showTabOnly', () => {
+    it('network track will be displayed when a number is not set for ctxId', () => {
       const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
       // We can't use getHumanReadableTracks here because that function doesn't
       // use the functions used by context menu directly and gives us wrong results.

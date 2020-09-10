@@ -176,7 +176,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 </nav>
 `;
 
-exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for showTabOnly 1`] = `
+exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for ctxId 1`] = `
 <nav
   class="react-contextmenu timeline-context-menu"
   role="menu"

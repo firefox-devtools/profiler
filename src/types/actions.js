@@ -280,7 +280,6 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +showTabOnly?: BrowsingContextID | null,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',

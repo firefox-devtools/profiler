@@ -398,8 +398,8 @@ describe('profileName', function() {
   });
 });
 
-describe('showTabOnly', function() {
-  it('serializes the showTabOnly in the URL', function() {
+describe('ctxId', function() {
+  it('serializes the ctxId in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const browsingContextID = 123;
 
@@ -421,7 +421,7 @@ describe('showTabOnly', function() {
     });
   });
 
-  it('returns the full view when showTabOnly is not specified', function() {
+  it('returns the full view when ctxId is not specified', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
       type: 'full',

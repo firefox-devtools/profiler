@@ -720,8 +720,8 @@ export const getRelevantInnerWindowIDsForActiveTab: Selector<
 
 /**
  * A simple wrapper for getRelevantInnerWindowIDsForActiveTab.
- * It returns an empty Set if showTabOnly is null, and returns the real Set if
- * showTabOnly is assigned already. We should usually use this instead of the
+ * It returns an empty Set if ctxId is null, and returns the real Set if
+ * ctxId is assigned already. We should usually use this instead of the
  * wrapped function. But the wrapped function is helpful to calculate the hidden
  * tracks by active tab view during the first page load(inside viewProfile function).
  */
