@@ -45,6 +45,7 @@ import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
 } from '../selectors/profile';
+import { getView } from '../selectors/app';
 
 function _getStoreWithURL(
   settings: {
@@ -476,6 +477,18 @@ describe('ctxId', function() {
     expect(newUrl.search).toEqual(
       `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
     );
+  });
+
+  it('if not present in the URL, still manages to load the active tab view', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?view=active-tab',
+    });
+
+    expect(getView(getState()).phase).toEqual('DATA_LOADED');
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      browsingContextID: null,
+    });
   });
 });
 
