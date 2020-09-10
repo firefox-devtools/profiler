@@ -44,7 +44,7 @@ chmod a+x install.sh
 To get started clone the repo and get the web application started.
 
  1. Run `git clone git@github.com:firefox-devtools/profiler.git`
- 2. Run `cd firefox-profiler`
+ 2. Run `cd profiler`
  3. Run `yarn install`, this will install all of the dependencies.
  4. Run `yarn start`, this will start up the webpack server.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
