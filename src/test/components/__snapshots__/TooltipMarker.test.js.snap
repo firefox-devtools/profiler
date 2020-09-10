@@ -28,20 +28,6 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
     <div
       class="tooltipLabel"
     >
-      Recording Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
-      Occurring Thread
-      :
-    </div>
-    Renderer (TID: 123456)
-    <div
-      class="tooltipLabel"
-    >
       Operation
       :
     </div>
@@ -60,6 +46,20 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       :
     </div>
     /foo/bar
+    <div
+      class="tooltipLabel"
+    >
+      Recording Thread
+      :
+    </div>
+    Empty
+    <div
+      class="tooltipLabel"
+    >
+      Occurring Thread
+      :
+    </div>
+    Renderer (TID: 123456)
   </div>
   <div
     class="tooltipDetailsBackTrace"
@@ -141,13 +141,6 @@ exports[`TooltipMarker renders properly network markers where content type is bl
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -184,6 +177,13 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       :
     </div>
     45.9KB
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-img"
@@ -312,13 +312,6 @@ exports[`TooltipMarker renders properly network markers where content type is mi
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -370,6 +363,13 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       :
     </div>
     45.9KB
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-img"
@@ -508,13 +508,6 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -566,6 +559,13 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       :
     </div>
     45.9KB
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-img"
@@ -768,13 +768,6 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -826,6 +819,13 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       :
     </div>
     45.9KB
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-img"
@@ -954,13 +954,6 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -1012,6 +1005,13 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       :
     </div>
     45.9KB
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-img"
@@ -1208,13 +1208,6 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Empty
-    <div
-      class="tooltipLabel"
-    >
       Status
       :
     </div>
@@ -1262,6 +1255,13 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
       :
     </div>
     0.000B
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
   <div
     class="tooltipNetworkPhases network-color-other"
@@ -1309,13 +1309,6 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
@@ -1359,6 +1352,13 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
     >
       A shape guard based on TI information failed. (We saw an object whose shape does not match that / any of those observed by the baseline IC.)
     </div>
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -1391,6 +1391,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
     <div
       class="tooltipLabel"
     >
+      Marker
+      :
+    </div>
+    DOMEvent
+    <div
+      class="tooltipLabel"
+    >
       Thread
       :
     </div>
@@ -1416,13 +1423,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
         /en-US/
       </span>
     </div>
-    <div
-      class="tooltipLabel"
-    >
-      Marker
-      :
-    </div>
-    DOMEvent
   </div>
 </div>
 `;
@@ -1455,20 +1455,6 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
     <div
       class="tooltipLabel"
     >
-      Recording Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
-      Occurring Thread ID
-      :
-    </div>
-    123
-    <div
-      class="tooltipLabel"
-    >
       Operation
       :
     </div>
@@ -1487,6 +1473,20 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       :
     </div>
     /foo/bar
+    <div
+      class="tooltipLabel"
+    >
+      Recording Thread
+      :
+    </div>
+    Main Thread
+    <div
+      class="tooltipLabel"
+    >
+      Occurring Thread ID
+      :
+    </div>
+    123
   </div>
   <div
     class="tooltipDetailsBackTrace"
@@ -1720,13 +1720,6 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Operation
       :
     </div>
@@ -1745,6 +1738,13 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       :
     </div>
     /foo/bar
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
   <div
     class="tooltipDetailsBackTrace"
@@ -1973,13 +1973,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Non-incremental reason
       :
     </div>
@@ -2096,6 +2089,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       :
     </div>
     14ms
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2120,13 +2120,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Thread
-      :
-    </div>
-    Main Thread
     <div
       class="tooltipLabel"
     >
@@ -2211,6 +2204,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
       :
     </div>
     1.5ms
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2235,13 +2235,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Thread
-      :
-    </div>
-    Main Thread
     <div
       class="tooltipLabel"
     >
@@ -2277,6 +2270,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       :
     </div>
     1
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2309,13 +2309,6 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
@@ -2355,6 +2348,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       :
     </div>
     unknown
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2387,13 +2387,6 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
@@ -2433,6 +2426,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       :
     </div>
     unknown
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2460,13 +2460,6 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       URL
       :
     </div>
@@ -2478,6 +2471,13 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
       :
     </div>
     1,234
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2505,13 +2505,6 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Module
       :
     </div>
@@ -2523,6 +2516,13 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
       :
     </div>
     Random log message
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2550,17 +2550,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
     Paint
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2593,17 +2593,17 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
     Paint
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2631,13 +2631,6 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Sample start time
       :
     </div>
@@ -2649,6 +2642,13 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
       :
     </div>
     3,632,674,500μs
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2673,13 +2673,6 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Thread
-      :
-    </div>
-    Main Thread
     <div
       class="tooltipLabel"
     >
@@ -2708,6 +2701,13 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
       :
     </div>
     -1
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;
@@ -2740,17 +2740,17 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Type
       :
     </div>
     Paint
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
   <div
     class="tooltipDetailsBackTrace"
@@ -2984,13 +2984,6 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Elements traversed
       :
     </div>
@@ -3023,6 +3016,13 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       :
     </div>
     20
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
   <div
     class="tooltipDetailsBackTrace"
@@ -3294,13 +3294,6 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
     <div
       class="tooltipLabel"
     >
-      Thread
-      :
-    </div>
-    Main Thread
-    <div
-      class="tooltipLabel"
-    >
       Marker
       :
     </div>
@@ -3319,6 +3312,13 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       :
     </div>
     UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
   </div>
 </div>
 `;

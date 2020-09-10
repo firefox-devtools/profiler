@@ -34,13 +34,6 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
         <div
           class="tooltipLabel"
         >
-          Thread
-          :
-        </div>
-        Empty
-        <div
-          class="tooltipLabel"
-        >
           Type
           :
         </div>
@@ -80,6 +73,13 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           :
         </div>
         unknown
+        <div
+          class="tooltipLabel"
+        >
+          Thread
+          :
+        </div>
+        Empty
       </div>
     </div>
   </div>

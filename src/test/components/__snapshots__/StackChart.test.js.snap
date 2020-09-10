@@ -888,13 +888,6 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
-        Thread
-        :
-      </div>
-      Empty
-      <div
-        class="tooltipLabel"
-      >
         Marker
         :
       </div>
@@ -913,6 +906,13 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
         :
       </div>
       UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
     </div>
   </div>
 </div>

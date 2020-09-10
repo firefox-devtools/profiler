@@ -394,9 +394,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           </div>
         </div>
         <TooltipDetails>
+          {this._renderMarkerDetails()}
           {this._renderThreadDetails()}
           {this._maybeRenderPageUrl()}
-          {this._renderMarkerDetails()}
         </TooltipDetails>
         {this._maybeRenderBacktrace()}
         {this._maybeRenderNetworkPhases()}
