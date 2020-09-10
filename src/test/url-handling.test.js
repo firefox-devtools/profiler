@@ -45,6 +45,7 @@ import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
 } from '../selectors/profile';
+import { getView } from '../selectors/app';
 
 function _getStoreWithURL(
   settings: {
@@ -398,8 +399,8 @@ describe('profileName', function() {
   });
 });
 
-describe('showTabOnly', function() {
-  it('serializes the showTabOnly in the URL', function() {
+describe('ctxId', function() {
+  it('serializes the ctxId in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const browsingContextID = 123;
 
@@ -421,7 +422,7 @@ describe('showTabOnly', function() {
     });
   });
 
-  it('returns the full view when showTabOnly is not specified', function() {
+  it('returns the full view when ctxId is not specified', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
       type: 'full',
@@ -476,6 +477,18 @@ describe('showTabOnly', function() {
     expect(newUrl.search).toEqual(
       `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
     );
+  });
+
+  it('if not present in the URL, still manages to load the active tab view', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?view=active-tab',
+    });
+
+    expect(getView(getState()).phase).toEqual('DATA_LOADED');
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      browsingContextID: null,
+    });
   });
 });
 

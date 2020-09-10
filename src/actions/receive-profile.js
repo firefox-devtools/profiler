@@ -525,7 +525,7 @@ export function finalizeOriginProfileView(
 export function finalizeActiveTabProfileView(
   profile: Profile,
   selectedThreadIndex: ThreadIndex,
-  browsingContextID: BrowsingContextID
+  browsingContextID: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());

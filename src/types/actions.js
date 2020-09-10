@@ -280,7 +280,6 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +showTabOnly?: BrowsingContextID | null,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',
@@ -291,7 +290,7 @@ type ReceiveProfileAction =
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +activeTabTimeline: ActiveTabTimeline,
-      +browsingContextID: BrowsingContextID,
+      +browsingContextID: BrowsingContextID | null,
     |}
   | {|
       +type: 'DATA_RELOAD',

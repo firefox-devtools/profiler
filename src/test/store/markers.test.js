@@ -323,7 +323,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
   const browsingContextID = 123123;
   const innerWindowID = 2;
 
-  function setup(showTabOnly, markers: ?Array<any>) {
+  function setup(ctxId, markers: ?Array<any>) {
     const profile = getProfileWithMarkers(
       markers || [
         [
@@ -379,7 +379,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
-    if (showTabOnly) {
+    if (ctxId) {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
