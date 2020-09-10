@@ -42,10 +42,49 @@ Array [
   ],
   Array [
     "fillRect",
-    150,
-    129,
-    215,
-    14,
+    0,
+    128,
+    365,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    149,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    0,
+    143,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "UserTiming",
+    5,
+    139,
+  ],
+  Array [
+    "set fillStyle",
+    "rgba(40, 122, 169, 0.2)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    128,
+    365,
+    15,
   ],
   Array [
     "set lineWidth",
