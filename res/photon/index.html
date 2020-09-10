@@ -9,41 +9,67 @@
     <p>This page has examples for the profiler’s implementation of the <a href="https://design.firefox.com/photon/">Photon design spec</a>.</p>
 
     <h2 class='photon-title-30'>Photon Buttons</h2>
+    <p>All buttons have both enabled and disable states. When a button is
+    disabled, please consider adding a title explaining why it's disabled.</p>
     <div class="row">
       <h3 class='photon-title-20'>Photon Button</h3>
-      <pre>&lt;button type="button" class="photon-button"&gt;Photon Button&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button"&gt;Photon Button&lt;/button&gt;
+&lt;button type="button" class="photon-button" disabled title="This function is disabled because..."&gt;Disabled Photon Button&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button">Photon Button</button>
+      <button type="button" class="photon-button" disabled title="This function is disabled because...">Disabled Photon Button</button>
     </div>
 
     <div class="row">
       <h3 class='photon-title-20'>Photon Button Default</h3>
-      <pre>&lt;button type="button" class="photon-button photon-button-default"&gt;Default&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button photon-button-default"&gt;Default&lt;/button&gt;
+&lt;button type="button" class="photon-button photon-button-default" disabled title="This function is disabled because..."&gt;Disabled Default&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button photon-button-default">Default</button>
+      <button type="button" class="photon-button photon-button-default" disabled title="This function is disabled because...">Disabled Default</button>
     </div>
 
     <div class="row">
       <h3 class='photon-title-20'>Photon Button Primary</h3>
-      <pre>&lt;button type="button" class="photon-button photon-button-primary"&gt;Primary&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button photon-button-primary"&gt;Primary&lt;/button&gt;
+&lt;button type="button" class="photon-button photon-button-primary" disabled title="This function is disabled because..."&gt;Disabled Primary&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button photon-button-primary">Primary</button>
+      <button type="button" class="photon-button photon-button-primary" disabled title="This function is disabled because...">Disabled Primary</button>
     </div>
 
     <div class="row">
       <h3 class='photon-title-20'>Photon Button Destructive</h3>
       <p>Use this class for destructive actions only.</p>
-      <pre>&lt;button type="button" class="photon-button photon-button-destructive"&gt;Delete&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button photon-button-destructive"&gt;Delete&lt;/button&gt;
+&lt;button type="button" class="photon-button photon-button-destructive" disabled title="This function is disabled because..."&gt;Disabled Delete&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button photon-button-destructive">Delete</button>
+      <button type="button" class="photon-button photon-button-destructive" disabled title="This function is disabled because...">Disabled Delete</button>
     </div>
 
     <div class="row">
       <h3 class='photon-title-20'>Photon Button Micro</h3>
-      <pre>&lt;button type="button" class="photon-button photon-button-micro"&gt;Photon Micro Button&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button photon-button-micro"&gt;Photon Micro Button&lt;/button&gt;
+&lt;button type="button" class="photon-button photon-button-micro" disabled title="This function is disabled because..."&gt;Disabled Photon Micro Button&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button photon-button-micro">Photon Micro Button</button>
+      <button type="button" class="photon-button photon-button-micro" disabled title="This function is disabled because...">Disabled Photon Micro Button</button>
     </div>
 
     <div class="row">
       <h3 class='photon-title-20'>Photon Button Ghost</h3>
-      <pre>&lt;button type="button" class="photon-button photon-button-ghost photon-button-test-image"&gt;&lt;/button&gt;</pre>
+      <pre>
+&lt;button type="button" class="photon-button photon-button-ghost photon-button-test-image"&gt;&lt;/button&gt;
+&lt;button type="button" class="photon-button photon-button-ghost photon-button-test-image" disabled title="This function is disabled because..."&gt;&lt;/button&gt;
+      </pre>
       <button type="button" class="photon-button photon-button-ghost photon-button-test-image"></button>
+      <button type="button" class="photon-button photon-button-ghost photon-button-test-image" disabled title="This function is disabled because..."></button>
     </div>
 
     <h2 class='photon-title-30'>Photon inputs</h2>

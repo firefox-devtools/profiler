@@ -24,11 +24,15 @@
   border: none;
 }
 
-.photon-button:hover {
+.photon-button:disabled {
+  opacity: 0.4;
+}
+
+.photon-button:hover:enabled {
   background-color: var(--grey-90-a20);
 }
 
-.photon-button:hover:active {
+.photon-button:hover:active:enabled {
   background-color: var(--grey-90-a30);
 }
 
@@ -46,11 +50,11 @@
   color: #fff;
 }
 
-.photon-button-primary:hover {
+.photon-button-primary:hover:enabled {
   background-color: var(--blue-70);
 }
 
-.photon-button-primary:hover:active {
+.photon-button-primary:hover:active:enabled {
   background-color: var(--blue-80);
 }
 
@@ -60,11 +64,11 @@
   color: #fff;
 }
 
-.photon-button-destructive:hover {
+.photon-button-destructive:hover:enabled {
   background-color: var(--red-70);
 }
 
-.photon-button-destructive:hover:active {
+.photon-button-destructive:hover:active:enabled {
   background-color: var(--red-80);
 }
 
@@ -74,11 +78,11 @@
   background-color: transparent;
 }
 
-.photon-button-ghost:hover {
+.photon-button-ghost:hover:enabled {
   background-color: var(--grey-90-a10);
 }
 
-.photon-button-ghost:hover:active {
+.photon-button-ghost:hover:active:enabled {
   background-color: var(--grey-90-a20);
 }
 
