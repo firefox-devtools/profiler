@@ -98,7 +98,7 @@ describe('PathSet', function() {
 
     const context = {};
     set.forEach(function() {
-      expect(this).toBe(context); // eslint-disable-line babel/no-invalid-this
+      expect(this).toBe(context);
     }, context);
   });
 

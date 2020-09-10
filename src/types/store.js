@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Store as ReduxStore } from 'redux'; // eslint-disable-line import/named
+import type { Store as ReduxStore } from 'redux';
 import type { Action as ActionsRef } from './actions';
 import type { State as StateRef } from './state';
 

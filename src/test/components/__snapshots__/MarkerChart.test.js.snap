@@ -154,21 +154,17 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
           UserTiming
         </div>
       </div>
-      <div
-        class="tooltipDetails"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Thread
-          :
-        </div>
-        Empty
-      </div>
     </div>
     <div
       class="tooltipDetails"
     >
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
       <div
         class="tooltipLabel"
       >

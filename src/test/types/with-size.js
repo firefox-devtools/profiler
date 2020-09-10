@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { withSize, type SizeProps } from '../../components/shared/WithSize';
-/* eslint-disable no-unused-vars, flowtype/no-unused-expressions */
+/* eslint-disable no-unused-vars */
 
 /**
  * This file tests the WithSize higher order component, and makes sure that it correctly

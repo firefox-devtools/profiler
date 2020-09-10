@@ -395,7 +395,7 @@ describe('actions/ProfileView', function() {
         trackIndex: 1,
         pid: 0,
       };
-      it('it starts out with the thread track and call tree selected', function() {
+      it('starts out with the thread track and call tree selected', function() {
         const profile = getNetworkTrackProfile();
         const { getState } = storeWithProfile(profile);
         expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
@@ -403,7 +403,7 @@ describe('actions/ProfileView', function() {
           'calltree'
         );
       });
-      it('it can switch to the network track, which selects the network chart tab', function() {
+      it('can switch to the network track, which selects the network chart tab', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
         dispatch(ProfileView.selectTrack(networkTrack));
@@ -412,7 +412,7 @@ describe('actions/ProfileView', function() {
           'network-chart'
         );
       });
-      it('it can switch back to the thread, which remembers the last viewed panel', function() {
+      it('can switch back to the thread, which remembers the last viewed panel', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
         dispatch(App.changeSelectedTab('flame-graph'));

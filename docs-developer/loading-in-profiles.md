@@ -23,7 +23,7 @@ uploadprofile /path/to/profile.js
 
 Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from The Firefox Profiler's interface. The profile needs to be served from https, and have the appropriate `Access-Control-Allow-Origin` header set to either `*` or `https://profiler.firefox.com`.
 
-See the function below for an easy utility for converting to the proper URL format. Here is a simple utility function to turn a profile URL into a [profiler.firefox.com](https://profiler.firefox.com) URL to view it:
+Here is a small utility function to turn a profile URL into a [profiler.firefox.com](https://profiler.firefox.com) URL to view it:
 
 ```js
 function getProfilerUrl (profileUrl) {

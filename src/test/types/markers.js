@@ -3,7 +3,7 @@
  * file, You can obtain one at <http://mozilla.org/MPL/2.0/>. */
 // @flow
 
-/* eslint-disable no-unused-vars, flowtype/no-unused-expressions */
+/* eslint-disable no-unused-vars */
 
 import type {
   $ReplaceCauseWithStack,

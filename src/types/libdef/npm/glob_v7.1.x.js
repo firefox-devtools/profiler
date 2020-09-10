@@ -1,5 +1,5 @@
-// flow-typed signature: 7c09aef8ac07163d6ef9e3f50c6bc35c
-// flow-typed version: a12a42a747/glob_v7.1.x/flow_>=v0.42.x
+// flow-typed signature: 257135a98dbce29a68026e7b9b7f381d
+// flow-typed version: c6154227d1/glob_v7.1.x/flow_>=v0.42.x <=v0.103.x
 
 declare module "glob" {
   declare type MinimatchOptions = {|
