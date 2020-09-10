@@ -138,7 +138,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
-  ctxId: BrowsingContextID,
+  ctxId: BrowsingContextID | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -330,7 +330,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         .isResourcesPanelOpen
         ? null
         : undefined;
-      baseQuery.ctxId = ctxId;
+      baseQuery.ctxId = ctxId || undefined;
       break;
     }
     case 'origins':
@@ -936,11 +936,7 @@ function validateTimelineTrackOrganization(
     case 'full':
       return { type: 'full' };
     case 'active-tab':
-      if (browsingContextID) {
-        return { type: 'active-tab', browsingContextID };
-      }
-      return { type: 'full' };
-
+      return { type: 'active-tab', browsingContextID };
     case 'origins':
       return { type: 'origins' };
     default:

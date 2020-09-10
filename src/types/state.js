@@ -250,7 +250,7 @@ export type ProfileSpecificUrlState = {|
  */
 export type TimelineTrackOrganization =
   | {| +type: 'full' |}
-  | {| +type: 'active-tab', +browsingContextID: BrowsingContextID |}
+  | {| +type: 'active-tab', +browsingContextID: BrowsingContextID | null |}
   | {| +type: 'origins' |};
 
 export type UrlState = {|
