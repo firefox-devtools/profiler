@@ -237,9 +237,9 @@ describe('memory markers', function() {
 
     return storeWithProfile(
       getProfileWithMarkers([
-        ['A', 0, null],
-        ['B', 1, null],
-        ['C', 2, null],
+        ['DOMEvent', 0, null],
+        ['Navigation', 1, null],
+        ['Paint', 2, null],
         [
           'IdleForgetSkippable',
           3,
@@ -272,7 +272,7 @@ describe('memory markers', function() {
     );
     expect(
       markerIndexes.map(markerIndex => getMarker(markerIndex).name)
-    ).toEqual(['A', 'B', 'C']);
+    ).toEqual(['DOMEvent', 'Navigation', 'Paint']);
   });
 });
 
