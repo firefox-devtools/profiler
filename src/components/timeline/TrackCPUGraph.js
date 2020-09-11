@@ -102,10 +102,22 @@ class TrackCPUCanvas extends React.PureComponent<CanvasProps> {
       throw new Error('No sample found for CPU usage');
     }
 
-    // const { min, range, samples: threadCPUCyclesSamples } = threadCPUCycles;
     for (const cpuProp in cpuSamples) {
       const cpuSampleItem = cpuSamples[cpuProp];
-      const { min, range, samples: samplesItem, strokeStyle } = cpuSampleItem;
+      if (typeof cpuSampleItem !== 'object') {
+        // todo: explain
+        continue;
+      }
+
+      const {
+        samples: samplesItem,
+        strokeStyle,
+        fillStyle,
+        stack,
+        min,
+        range,
+      } = cpuSampleItem;
+
       // Draw the chart.
       //
       //                 ...--`
@@ -118,7 +130,7 @@ class TrackCPUCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = strokeStyle;
-      ctx.fillStyle = 'rgba(0,0,0,0)'; // transparent
+      ctx.fillStyle = fillStyle;
       ctx.beginPath();
 
       // The x and y are used after the loop.
@@ -131,7 +143,11 @@ class TrackCPUCanvas extends React.PureComponent<CanvasProps> {
         x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        const unitGraphCount = (samplesItem[i] - min) / range;
+        const samplesItemCount =
+          stack !== undefined
+            ? samplesItem[i] + cpuSamples[stack].samples[i]
+            : samplesItem[i];
+        const unitGraphCount = (samplesItemCount - min) / range;
         y =
           innerDeviceHeight -
           innerDeviceHeight * unitGraphCount +
@@ -304,6 +320,10 @@ class TrackCPUGraphImpl extends React.PureComponent<Props, State> {
 
     for (const cpuProp in cpuSamples) {
       const cpuSampleItem = cpuSamples[cpuProp];
+      if (typeof cpuSampleItem !== 'object') {
+        // todo: explain
+        continue;
+      }
       const { samples: samplesItem, strokeStyle } = cpuSampleItem;
 
       const sample = samplesItem[sampleIndex];
@@ -351,14 +371,28 @@ class TrackCPUGraphImpl extends React.PureComponent<Props, State> {
 
     for (const cpuProp in cpuSamples) {
       const cpuSampleItem = cpuSamples[cpuProp];
-      const { min, range, samples: samplesItem, strokeStyle } = cpuSampleItem;
+      if (typeof cpuSampleItem !== 'object') {
+        // todo: explain
+        continue;
+      }
 
+      const {
+        samples: samplesItem,
+        strokeStyle,
+        stack,
+        min,
+        range,
+      } = cpuSampleItem;
       const { samples } = filteredThread;
       const rangeLength = rangeEnd - rangeStart;
       const left =
         (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
-      const unitSampleCount = (samplesItem[counterIndex] - min) / range;
+      const samplesItemCount =
+        stack !== undefined
+          ? samplesItem[counterIndex] + cpuSamples[stack].samples[counterIndex]
+          : samplesItem[counterIndex];
+      const unitSampleCount = (samplesItemCount - min) / range;
       const innerTrackHeight = graphHeight - lineWidth / 2;
       const top =
         innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
@@ -376,7 +410,7 @@ class TrackCPUGraphImpl extends React.PureComponent<Props, State> {
 
       dots.push(
         <div
-          style={{ left, top, 'background-color': strokeStyle }}
+          style={{ left, top, backgroundColor: strokeStyle }}
           className="timelineTrackMemoryGraphDot"
         />
       );
@@ -444,7 +478,7 @@ export const TrackCPUGraph = explicitConnect<
     const { threadIndex } = ownProps;
     const { start, end } = getCommittedRange(state);
     const selectors = getThreadSelectors(threadIndex);
-    const filteredThread = selectors.getRangeFilteredThread(state);
+    const filteredThread = selectors.getTabFilteredThread(state);
     console.log('thread index: ', threadIndex);
     return {
       rangeStart: start,

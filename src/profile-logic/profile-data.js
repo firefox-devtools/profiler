@@ -1646,32 +1646,84 @@ export function processEventDelays(
  */
 export function getCPUSamples(samplesTable: SamplesTable): CPUSamples {
   const cpuSamples = {
+    threadUserTime: {
+      min: 0,
+      max: 0,
+      range: 0,
+      samples: new Array(ensureExists(samplesTable.threadUserTime).length).fill(
+        0
+      ),
+      strokeStyle: MAGENTA_50,
+      fillStyle: '#ff7ae9',
+      stack: 'threadKernelTime',
+      formatter: formatMilliseconds,
+    },
+    threadKernelTime: {
+      min: 0,
+      max: 0,
+      range: 0,
+      samples: new Array(
+        ensureExists(samplesTable.threadKernelTime).length
+      ).fill(0),
+      strokeStyle: BLUE_50,
+      fillStyle: '#6eaae8',
+      formatter: formatMilliseconds,
+    },
     threadCPUCycles: {
       min: 0,
       max: 0,
       range: 0,
       samples: ensureExists(samplesTable.threadCPUCycles),
       strokeStyle: ORANGE_50,
+      fillStyle: 'rgba(0,0,0,0)',
       formatter: (val: number) => val,
-    },
-    threadKernelTime: {
-      min: 0,
-      max: 0,
-      range: 0,
-      samples: ensureExists(samplesTable.threadKernelTime),
-      strokeStyle: BLUE_50,
-      formatter: formatMilliseconds,
-    },
-    threadUserTime: {
-      min: 0,
-      max: 0,
-      range: 0,
-      samples: ensureExists(samplesTable.threadUserTime),
-      strokeStyle: MAGENTA_50,
-      formatter: formatMilliseconds,
     },
   };
 
+  const threadUserTime = ensureExists(samplesTable.threadUserTime);
+  const threadKernelTime = ensureExists(samplesTable.threadKernelTime);
+  const threadCPUCycles = ensureExists(samplesTable.threadCPUCycles);
+  let previousUserTimeChangeIdx = 0;
+  let previousKernelTimeChangeIdx = 0;
+  for (let i = 0; i < samplesTable.length; i++) {
+    // threadUserTime
+    if (
+      threadUserTime[i] !== threadUserTime[previousUserTimeChangeIdx] &&
+      i - previousUserTimeChangeIdx > 1 // todo: is that correct?
+    ) {
+      for (let j = previousUserTimeChangeIdx + 1; j < i; j++) {
+        //  u[j] = u[pci] + (u[i] - u[pci]) * (c[j] - c[pci]) / (c[i] - c[pci])
+        cpuSamples.threadUserTime.samples[j] =
+          threadUserTime[previousUserTimeChangeIdx] +
+          ((threadUserTime[i] - threadUserTime[previousUserTimeChangeIdx]) *
+            (threadCPUCycles[j] - threadCPUCycles[previousUserTimeChangeIdx])) /
+            (threadCPUCycles[i] - threadCPUCycles[previousUserTimeChangeIdx]);
+      }
+      previousUserTimeChangeIdx = i;
+    }
+    cpuSamples.threadUserTime.samples[i] = threadUserTime[i];
+
+    // threadKernelTime
+    if (
+      threadKernelTime[i] !== threadKernelTime[previousKernelTimeChangeIdx] &&
+      i - previousKernelTimeChangeIdx > 1 // todo: is that correct?
+    ) {
+      for (let j = previousKernelTimeChangeIdx + 1; j < i; j++) {
+        //  u[j] = u[pci] + (u[i] - u[pci]) * (c[j] - c[pci]) / (c[i] - c[pci])
+        cpuSamples.threadKernelTime.samples[j] =
+          threadKernelTime[previousKernelTimeChangeIdx] +
+          ((threadKernelTime[i] -
+            threadKernelTime[previousKernelTimeChangeIdx]) *
+            (threadCPUCycles[j] -
+              threadCPUCycles[previousKernelTimeChangeIdx])) /
+            (threadCPUCycles[i] - threadCPUCycles[previousKernelTimeChangeIdx]);
+      }
+      previousKernelTimeChangeIdx = i;
+    }
+    cpuSamples.threadKernelTime.samples[i] = threadKernelTime[i];
+  }
+
+  // Min max and stuff
   for (let i = 0; i < samplesTable.length; i++) {
     cpuSamples.threadCPUCycles.min = Math.min(
       cpuSamples.threadCPUCycles.samples[i],
@@ -1703,6 +1755,23 @@ export function getCPUSamples(samplesTable: SamplesTable): CPUSamples {
 
   cpuSamples.threadCPUCycles.range =
     cpuSamples.threadCPUCycles.max - cpuSamples.threadCPUCycles.min;
+
+  // max/min/range of user timings because we need to combine two timings together.
+  // TODO: We can make this nicer!
+  const combinedMin =
+    cpuSamples.threadUserTime.min + cpuSamples.threadKernelTime.min;
+  const combinedMax =
+    cpuSamples.threadUserTime.max + cpuSamples.threadKernelTime.max;
+  const combinedRange = combinedMax - combinedMin;
+
+  cpuSamples.threadUserTime.min = combinedMin;
+  cpuSamples.threadKernelTime.min = combinedMin;
+
+  cpuSamples.threadUserTime.max = combinedMax;
+  cpuSamples.threadKernelTime.max = combinedMax;
+
+  cpuSamples.threadUserTime.range = combinedRange;
+  cpuSamples.threadKernelTime.range = combinedRange;
 
   return cpuSamples;
 }
