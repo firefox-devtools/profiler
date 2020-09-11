@@ -1724,7 +1724,33 @@ export function getCPUSamples(samplesTable: SamplesTable): CPUSamples {
   }
 
   // Min max and stuff
+  const userTime = cpuSamples.threadUserTime.samples;
+  const kernelTime = cpuSamples.threadKernelTime.samples;
+  const cpuCycles = cpuSamples.threadCPUCycles.samples;
+  cpuSamples.threadUserTime.samples = new Array(
+    cpuSamples.threadUserTime.samples.length
+  ).fill(0);
+  cpuSamples.threadKernelTime.samples = new Array(
+    cpuSamples.threadKernelTime.samples.length
+  ).fill(0);
+  cpuSamples.threadCPUCycles.samples = new Array(
+    cpuSamples.threadCPUCycles.samples.length
+  ).fill(0);
+
   for (let i = 0; i < samplesTable.length; i++) {
+    // Get the first derivative of the numbers.
+    if (i !== 0) {
+      const timeDiff = samplesTable.time[i] - samplesTable.time[i - 1];
+      cpuSamples.threadUserTime.samples[i] =
+        (userTime[i] - userTime[i - 1]) / timeDiff;
+
+      cpuSamples.threadKernelTime.samples[i] =
+        (kernelTime[i] - kernelTime[i - 1]) / timeDiff;
+
+      cpuSamples.threadCPUCycles.samples[i] =
+        (cpuCycles[i] - cpuCycles[i - 1]) / timeDiff;
+    }
+
     cpuSamples.threadCPUCycles.min = Math.min(
       cpuSamples.threadCPUCycles.samples[i],
       cpuSamples.threadCPUCycles.min

@@ -83,6 +83,7 @@ class TrackCPUCanvas extends React.PureComponent<CanvasProps> {
     canvas.width = Math.round(deviceWidth);
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
+    ctx.lineJoin = 'round';
 
     if (samples.length === 0) {
       // There's no reason to draw the samples, there are none.
@@ -131,6 +132,7 @@ class TrackCPUCanvas extends React.PureComponent<CanvasProps> {
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = strokeStyle;
       ctx.fillStyle = fillStyle;
+
       ctx.beginPath();
 
       // The x and y are used after the loop.
