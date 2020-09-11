@@ -488,7 +488,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   render() {
     const { globalTrackOrder, globalTracks } = this.props;
-
+    const rightClickedTrack = this.props.rightClickedTrack;
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
@@ -501,6 +501,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         <div className="react-contextmenu-separator" />
       ) : null;
 
+  
     return (
       <ContextMenu
         id="TimelineTrackContextMenu"
@@ -515,21 +516,54 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateLocalTrack}
         {isolateScreenshot}
         {separator}
-        {globalTrackOrder.map(globalTrackIndex => {
-          const globalTrack = globalTracks[globalTrackIndex];
-          return (
-            <div key={globalTrackIndex}>
-              {this.renderGlobalTrack(globalTrackIndex)}
-              {globalTrack.type === 'process'
-                ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                : null}
-            </div>
-          );
-        })}
+        { 
+              globalTrackOrder.map(globalTrackIndex => {
+              const globalTrack = globalTracks[globalTrackIndex];
+              if(rightClickedTrack===null)
+              {
+                return (
+                  <div key={globalTrackIndex}>
+                    {this.renderGlobalTrack(globalTrackIndex)}
+                    {globalTrack.type === 'process'
+                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                      : null}
+                  </div>
+                );
+              }
+              else if(rightClickedTrack.type==='global' && rightClickedTrack.trackIndex===globalTrackIndex) 
+              {
+                return (
+                  <div key={globalTrackIndex}>
+                    {this.renderGlobalTrack(globalTrackIndex)}
+                    {globalTrack.type === 'process'
+                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                      : null}
+                  </div>
+                );
+              }
+              else if(rightClickedTrack.type==='local' && rightClickedTrack.pid===globalTrack.pid)
+              {
+                return (
+                  <div key={globalTrackIndex}>
+                    {this.renderGlobalTrack(globalTrackIndex)}
+                    {globalTrack.type === 'process'
+                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                      : null}
+                  </div>
+                );
+              }
+              else
+              {
+                return null;
+              }
+            })
+        }
+      
       </ContextMenu>
     );
-  }
+ }
 }
+
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
