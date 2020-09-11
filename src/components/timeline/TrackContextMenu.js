@@ -501,7 +501,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         <div className="react-contextmenu-separator" />
       ) : null;
 
-  
     return (
       <ContextMenu
         id="TimelineTrackContextMenu"
@@ -516,52 +515,53 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateLocalTrack}
         {isolateScreenshot}
         {separator}
-        { 
-              globalTrackOrder.map(globalTrackIndex => {
-              const globalTrack = globalTracks[globalTrackIndex];
-              if(rightClickedTrack===null)
-              {
-                return (
-                  <div key={globalTrackIndex}>
-                    {this.renderGlobalTrack(globalTrackIndex)}
-                    {globalTrack.type === 'process'
-                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                      : null}
-                  </div>
-                );
-              }
-              else if(rightClickedTrack.type==='global' && rightClickedTrack.trackIndex===globalTrackIndex) 
-              {
-                return (
-                  <div key={globalTrackIndex}>
-                    {this.renderGlobalTrack(globalTrackIndex)}
-                    {globalTrack.type === 'process'
-                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                      : null}
-                  </div>
-                );
-              }
-              else if(rightClickedTrack.type==='local' && rightClickedTrack.pid===globalTrack.pid)
-              {
-                return (
-                  <div key={globalTrackIndex}>
-                    {this.renderGlobalTrack(globalTrackIndex)}
-                    {globalTrack.type === 'process'
-                      ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
-                      : null}
-                  </div>
-                );
-              }
-              else
-              {
-                return null;
-              }
-            })
-        }
-      
+        {globalTrackOrder.map(globalTrackIndex => {
+          const globalTrack = globalTracks[globalTrackIndex];
+          if (rightClickedTrack === null)
+          {
+            return (
+              <div key={globalTrackIndex}>
+                {this.renderGlobalTrack(globalTrackIndex)}
+                {globalTrack.type === 'process'
+                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                  : null}
+              </div>
+            );
+          } else if(rightClickedTrack.type==='global' && rightClickedTrack.trackIndex===globalTrackIndex) 
+          {
+            return (
+              <div key={globalTrackIndex}>
+                {this.renderGlobalTrack(globalTrackIndex)}
+                {globalTrack.type === 'process'
+                  ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                  : null}
+              </div>
+            );
+          }
+          else if(rightClickedTrack.type==='local' && globalTrack.type==='process')
+          {
+            if(rightClickedTrack.pid===globalTrack.pid){
+              return (
+                <div key={globalTrackIndex}>
+                  {this.renderGlobalTrack(globalTrackIndex)}
+                  {globalTrack.type === 'process'
+                    ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
+                    : null}
+                </div>
+              );}
+            else{
+              return null;
+            }
+          }
+          else
+          {
+            return null;
+          }
+        })
+      }
+    
       </ContextMenu>
-    );
- }
+    );}    
 }
 
 
