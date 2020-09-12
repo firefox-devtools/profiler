@@ -517,8 +517,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
-          if (rightClickedTrack === null)
-          {
+          if (rightClickedTrack === null) {
             return (
               <div key={globalTrackIndex}>
                 {this.renderGlobalTrack(globalTrackIndex)}
@@ -527,8 +526,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
                   : null}
               </div>
             );
-          } else if(rightClickedTrack.type==='global' && rightClickedTrack.trackIndex===globalTrackIndex) 
-          {
+          } else if (
+            rightClickedTrack.type === 'global' &&
+            rightClickedTrack.trackIndex === globalTrackIndex
+          ) {
             return (
               <div key={globalTrackIndex}>
                 {this.renderGlobalTrack(globalTrackIndex)}
@@ -537,10 +538,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
                   : null}
               </div>
             );
-          }
-          else if(rightClickedTrack.type==='local' && globalTrack.type==='process')
-          {
-            if(rightClickedTrack.pid===globalTrack.pid){
+          } else if (
+            rightClickedTrack.type === 'local' &&
+            globalTrack.type === 'process'
+          ) {
+            if (rightClickedTrack.pid === globalTrack.pid) {
               return (
                 <div key={globalTrackIndex}>
                   {this.renderGlobalTrack(globalTrackIndex)}
@@ -548,22 +550,15 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
                     ? this.renderLocalTracks(globalTrackIndex, globalTrack.pid)
                     : null}
                 </div>
-              );}
-            else{
-              return null;
+              );
             }
           }
-          else
-          {
-            return null;
-          }
-        })
-      }
-    
+          return null;
+        })}
       </ContextMenu>
-    );}    
+    );
+  }
 }
-
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
