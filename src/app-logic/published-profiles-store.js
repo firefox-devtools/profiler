@@ -143,7 +143,12 @@ export async function listAllProfileData(): Promise<ProfileData[]> {
 
 export async function retrieveProfileData(
   profileToken: string
-): Promise<ProfileData> {
+): Promise<ProfileData | void> {
   const db = await open();
   return db.get(OBJECTSTORE_NAME, profileToken);
+}
+
+export async function deleteProfileData(profileToken: string): Promise<void> {
+  const db = await open();
+  return db.delete(OBJECTSTORE_NAME, profileToken);
 }

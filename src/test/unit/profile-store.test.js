@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
+import {
+  uploadBinaryProfileData,
+  deleteProfileOnServer,
+} from 'firefox-profiler/profile-logic/profile-store';
+import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 describe('profile upload', () => {
   function setup() {
@@ -159,5 +163,73 @@ describe('profile upload', () => {
     startUpload(new Uint8Array(10));
     abortUpload();
     expect(getLastXhr().abort).toHaveBeenCalled();
+  });
+});
+
+describe('profile deletion', () => {
+  beforeEach(() => {
+    window.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    delete window.fetch;
+  });
+
+  function mockFetchForDeleteProfile({
+    endpointUrl,
+    jwtToken,
+  }: {
+    endpointUrl: string,
+    jwtToken: string,
+  }) {
+    window.fetch.mockImplementation(async (urlString, options) => {
+      if (urlString !== endpointUrl) {
+        return new Response(null, { status: 404, statusText: 'Not found' });
+      }
+
+      const { method, headers } = options;
+
+      if (method !== 'DELETE') {
+        return new Response(null, {
+          status: 405,
+          statusText: 'Method not allowed',
+        });
+      }
+
+      if (
+        headers['Content-Type'] !== 'application/json' ||
+        headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+      ) {
+        return new Response(null, {
+          status: 406,
+          statusText: 'Not acceptable',
+        });
+      }
+
+      if (headers.Authorization !== `Bearer ${jwtToken}`) {
+        return new Response(null, {
+          status: 401,
+          statusText: 'Forbidden',
+        });
+      }
+
+      return new Response('Profile successfully deleted.', { status: 200 });
+    });
+  }
+
+  it('can delete a profile', async () => {
+    const PROFILE_TOKEN = 'FAKE_PROFILE_TOKEN';
+    const JWT_TOKEN = 'FAKE_JWT_TOKEN';
+
+    const endpointUrl = `https://api.profiler.firefox.com/profile/${PROFILE_TOKEN}`;
+    mockFetchForDeleteProfile({
+      endpointUrl,
+      jwtToken: JWT_TOKEN,
+    });
+    await deleteProfileOnServer({
+      profileToken: PROFILE_TOKEN,
+      jwtToken: JWT_TOKEN,
+    });
+    expect(window.fetch).toHaveBeenCalledWith(endpointUrl, expect.anything());
   });
 });
