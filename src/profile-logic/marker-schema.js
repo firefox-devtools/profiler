@@ -65,7 +65,7 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'FileIO',
-    display: [],
+    display: ['marker-chart', 'marker-table'],
     data: [
       {
         key: 'operation',

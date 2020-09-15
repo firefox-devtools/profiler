@@ -1388,7 +1388,3 @@ export function filterMarkerByDisplayLocation(
     return markerTypes.has(getMarkerSchemaName(marker));
   });
 }
-
-export function filterOverviewMarkers(_marker: Marker): boolean | void {
-  return undefined;
-}

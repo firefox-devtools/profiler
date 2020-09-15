@@ -233,8 +233,6 @@ export function getMarkerSelectorsPerThread(
     getCommittedRangeAndTabFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
     () => 'timeline-overview',
-    // Custom filtering in addition to the schema logic:
-    () => MarkerData.filterOverviewMarkers,
     MarkerData.filterMarkerByDisplayLocation
   );
 
