@@ -48,8 +48,13 @@ export type ThreadSelectors = {|
  */
 const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
 const _mergedThreadSelectorsMemoized = memoize(
-  (threadIndexes: Set<ThreadIndex>, threadsKey: ThreadsKey) =>
-    _buildThreadSelectors(threadIndexes, threadsKey),
+  (threadsKey: ThreadsKey) => {
+    // We don't pass this set inside this memoization function since we create
+    // an intermediate Set whenever we need to access the cache. Memoize should
+    // only use threadsKey as the key.
+    const threadIndexes = new Set(('' + threadsKey).split(',').map(n => +n));
+    return _buildThreadSelectors(threadIndexes, threadsKey);
+  },
   { limit: 5 }
 );
 
@@ -121,7 +126,7 @@ export const getThreadSelectorsFromThreadsKey = (
     return getSingleThreadSelectors((threadIndexes.values().next().value: any));
   }
 
-  return _mergedThreadSelectorsMemoized(threadIndexes, threadsKey);
+  return _mergedThreadSelectorsMemoized(threadsKey);
 };
 
 function _buildThreadSelectors(
