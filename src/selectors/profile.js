@@ -18,7 +18,10 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 
-import { markerSchema } from '../profile-logic/marker-schema';
+import {
+  markerSchema,
+  getMarkerLabelMaker,
+} from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -67,6 +70,7 @@ import type {
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
+  MarkerLabelMakerByName,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -180,11 +184,24 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,
   schemaList => {
-    const result = {};
+    const result = Object.create(null);
     for (const schema of schemaList) {
       result[schema.name] = schema;
     }
     return result;
+  }
+);
+
+export const getMarkerLabelMakerByName: Selector<MarkerLabelMakerByName> = createSelector(
+  getMarkerSchema,
+  markerSchemaList => {
+    const results: MarkerLabelMakerByName = Object.create(null);
+    for (const schema of markerSchemaList) {
+      if (schema.tooltipLabel) {
+        results[schema.name] = getMarkerLabelMaker(schema.tooltipLabel);
+      }
+    }
+    return results;
   }
 );
 
