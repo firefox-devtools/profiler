@@ -3199,6 +3199,13 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
     <div
       class="tooltipLabel"
     >
+      Details
+      :
+    </div>
+    TTFI after 100.01ms (longTask was 100.001ms)
+    <div
+      class="tooltipLabel"
+    >
       Thread
       :
     </div>

@@ -368,11 +368,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _renderTitle(): string {
-    const { marker, markerLabelMakerByName } = this.props;
+    const { marker, markerSchemaByName, markerLabelMakerByName } = this.props;
     const { data } = marker;
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const applyLabel = markerLabelMakerByName[getMarkerSchemaName(marker)];
+      const applyLabel =
+        markerLabelMakerByName[getMarkerSchemaName(markerSchemaByName, marker)];
       if (applyLabel) {
         return applyLabel(data);
       }

@@ -232,6 +232,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
     () => 'timeline-overview',
     MarkerData.filterMarkerByDisplayLocation
   );
@@ -400,6 +401,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
     () => 'timeline-fileio',
     // Custom filtering in addition to the schema logic:
     () => MarkerData.isOnThreadFileIoMarker,
@@ -415,6 +417,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
     () => 'timeline-memory',
     MarkerData.filterMarkerByDisplayLocation
   );
@@ -426,6 +429,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
     () => 'timeline-ipc',
     MarkerData.filterMarkerByDisplayLocation
   );
