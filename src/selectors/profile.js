@@ -6,7 +6,6 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import * as MarkerData from '../profile-logic/marker-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
@@ -203,12 +202,6 @@ export const getMarkerLabelMakerByName: Selector<MarkerLabelMakerByName> = creat
     }
     return results;
   }
-);
-
-export const getTimelineMemoryMarkerTypes: Selector<
-  Set<string>
-> = createSelector(getMarkerSchema, markerSchema =>
-  MarkerData.getMarkerTypesForDisplay(markerSchema, 'timeline-memory')
 );
 
 export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
