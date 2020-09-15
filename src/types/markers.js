@@ -6,6 +6,7 @@
 import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
+import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
 export type MarkerFormatType =
@@ -94,7 +95,7 @@ export type MarkerSchema = {|
   >,
 |};
 
-export type MarkerSchemaByName = { [name: string]: MarkerSchema };
+export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
 
 // This type is a more dynamic version of the Payload type.
 type DynamicMarkerPayload = { [key: string]: any };
@@ -102,9 +103,7 @@ type DynamicMarkerPayload = { [key: string]: any };
 // a `tooltipLabel` field of "Event at {url}" would create a label based off of the
 // "url" property in the payload.
 export type MarkerLabelMaker = DynamicMarkerPayload => string;
-export type MarkerLabelMakerByName = {
-  [name: string]: MarkerLabelMaker | void,
-};
+export type MarkerLabelMakerByName = ObjectMap<MarkerLabelMaker>;
 
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes

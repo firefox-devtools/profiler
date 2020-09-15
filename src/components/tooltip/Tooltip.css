@@ -4,11 +4,10 @@
   overflow: hidden;
 
   /**
-   * The margin size is defined in Tooltip.js, as 8px.
-   * The border is 1px.
-   * Take both of these sizes into account: 8px + 8px + 1px + 1px = 18px
+   * The VISUAL_MARGIN = 8 for the Tooltip is defined in src/components/tooltip/Tooltip.js.
+   * Both added together equals: 8px + 8px = 16px
    */
-  max-width: calc(100% - 18px);
+  max-width: calc(100% - 16px);
   box-sizing: border-box;
   padding: 8px;
   border: 1px solid #ccc;
@@ -73,12 +72,18 @@
   grid-template-columns: min-content auto;
 }
 
+.tooltipDetailSeparator {
+  border-top: 1px solid var(--grey-40);
+  margin: 4px 0;
+  grid-column: 1 / 3;
+}
+
 .tooltipDetailsUrl {
   /* URLs can be really long, and it's disruptive when widths change rapidly
    * this components. Define an arbitrary max-width in px to restrict this change.
    * Set the variable to 100% to allow the full-width, e.g. in the sidebar. */
   max-width: var(--tooltip-detail-max-width);
-  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 .tooltipDetailsDim {
@@ -120,7 +125,6 @@
 
   /* Don't let the width overflow for long pieces of text */
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto;
 }
 
 .sidebar .tooltipLabel {
@@ -128,4 +132,8 @@
   color: var(--grey-60);
   font-weight: bold;
   text-align: left;
+}
+
+.sidebar .tooltipDetailSeparator {
+  display: none;
 }

@@ -62,6 +62,9 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
     </div>
     Renderer (TID: 123456)
     <div
+      class="tooltipDetailSeparator"
+    />
+    <div
       class="tooltipLabel"
     >
       Stack
@@ -1503,6 +1506,9 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
     </div>
     123
     <div
+      class="tooltipDetailSeparator"
+    />
+    <div
       class="tooltipLabel"
     >
       Stack
@@ -1735,6 +1741,9 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       :
     </div>
     Main Thread
+    <div
+      class="tooltipDetailSeparator"
+    />
     <div
       class="tooltipLabel"
     >
@@ -2728,6 +2737,9 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
     </div>
     Main Thread
     <div
+      class="tooltipDetailSeparator"
+    />
+    <div
       class="tooltipLabel"
     >
       Stack
@@ -2974,6 +2986,9 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       :
     </div>
     Main Thread
+    <div
+      class="tooltipDetailSeparator"
+    />
     <div
       class="tooltipLabel"
     >

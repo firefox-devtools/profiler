@@ -184,7 +184,7 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,
   schemaList => {
-    const result = {};
+    const result = Object.create(null);
     for (const schema of schemaList) {
       result[schema.name] = schema;
     }
@@ -195,7 +195,7 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelecto
 export const getMarkerLabelMakerByName: Selector<MarkerLabelMakerByName> = createSelector(
   getMarkerSchema,
   markerSchemaList => {
-    const results = {};
+    const results: MarkerLabelMakerByName = Object.create(null);
     for (const schema of markerSchemaList) {
       if (schema.tooltipLabel) {
         results[schema.name] = getMarkerLabelMaker(schema.tooltipLabel);

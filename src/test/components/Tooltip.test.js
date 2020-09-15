@@ -16,7 +16,7 @@ import { ensureExists } from '../../utils/flow';
 
 import Tooltip, {
   MOUSE_OFFSET,
-  MARGIN,
+  VISUAL_MARGIN,
 } from '../../components/tooltip/Tooltip';
 
 describe('shared/Tooltip', () => {
@@ -78,8 +78,8 @@ describe('shared/Tooltip', () => {
         mouse: { x: 500, y: 300 },
       });
 
-      const expectedLeft = MARGIN;
-      const expectedTop = MARGIN;
+      const expectedLeft = VISUAL_MARGIN;
+      const expectedTop = VISUAL_MARGIN;
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,

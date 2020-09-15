@@ -228,7 +228,7 @@ export function getMarkerSchemaName(marker: Marker): string {
     if (type === 'Text') {
       // Text markers are a cheap and easy way to create markers with
       // a category,
-      return marker.name;
+      return name;
     }
     return data.type;
   }
@@ -293,17 +293,17 @@ export function formatFromMarkerSchema(
  */
 export function getMarkerLabelMaker(label: string): MarkerLabelMaker {
   // Split the label on the "{key}" capture groups.
-  // Each (zero-indexed) even entry will be a string label.
+  // Each (zero-indexed) even entry will be a raw string label.
   // Each (zero-indexed) odd entry will be a key to the payload.
   //
   // e.g.
   // "asdf {foo} jkl {bar}" -> ["asdf ", "foo", " jkl ", "bar"]
   // "{foo} jkl {bar}"      -> ["", "foo", " jkl ", "bar"];
   // "{foo}"                -> ["", "foo", ""];
-  const splits = label.split(/{(.+?)}/);
-  //                          {     } Split anytime text is in brackets.
-  //                           (   )  Capture the text inside the brackets.
-  //                            .+?   Match any character, non-greedily.
+  const splits = label.split(/{([^}]+)}/);
+  //                          {       } Split anytime text is in brackets.
+  //                           (     )  Capture the text inside the brackets.
+  //                            [^}]+   Match any character that is not a }.
 
   if (splits.length === 1) {
     // Just return the label.

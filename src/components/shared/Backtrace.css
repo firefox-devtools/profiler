@@ -15,7 +15,7 @@
   /* Box */
   padding: 0;
   margin: 0;
-  list-style-position: inside;
+  list-style: none;
 
   /* Other */
   text-overflow: ellipsis;

@@ -30,6 +30,7 @@ import {
   TooltipDetails,
   TooltipDetail,
   type TooltipDetailComponent,
+  TooltipDetailSeparator,
 } from './TooltipDetails';
 import Backtrace from '../shared/Backtrace';
 
@@ -109,7 +110,14 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     if (page) {
       try {
         const { host } = new URL(page.url);
-        const [protocol, ...rest] = page.url.split(host);
+        const hostIndex = page.url.indexOf(host);
+        if (hostIndex === -1) {
+          throw new Error(
+            'Unable to find the host in the URL. This is a programming error.'
+          );
+        }
+        const protocol = page.url.slice(0, hostIndex);
+        const rest = page.url.slice(hostIndex + host.length);
         return (
           <TooltipDetail label="URL">
             <div className="tooltipDetailsUrl">
@@ -325,7 +333,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
       const causeAge = start - cause.time;
-      return (
+      return [
+        <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">
           <div className="tooltipDetailsBackTrace">
             {data.type === 'Styles' || marker.name === 'Reflow' ? (
@@ -341,8 +350,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               implementationFilter={implementationFilter}
             />
           </div>
-        </TooltipDetail>
-      );
+        </TooltipDetail>,
+      ];
     }
     return null;
   }
