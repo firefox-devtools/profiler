@@ -177,7 +177,14 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         // the threadKey with multiple threads into a number will result in a NaN.
         // This should be fine here, as the oldFuncToNewFuncMaps only supports
         // single thread indexes.
-        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(+threadsKey);
+        const threadIndex = +threadsKey;
+        if (Number.isNaN(threadIndex)) {
+          throw new Error(
+            'Bulk symbolication only supports a single thread, and a ThreadsKey with ' +
+              'multiple threads was used.'
+          );
+        }
+        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(threadIndex);
         if (oldFuncToNewFuncMap === undefined) {
           return threadViewOptions;
         }

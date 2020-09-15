@@ -95,6 +95,13 @@ export const getThreadSelectors = (
   );
 };
 
+/**
+ * This function returns the selectors for a group of threads, based on the ThreadsKey.
+ * It only memoizes off of a single ThreadsKey. If that key changes, the caching will
+ * be invalidated, and a new set of selectors will be generated. This is because
+ * thread selections are fairly dynamic, and we don't want to retain too many
+ * extraneous results.
+ */
 export const getThreadSelectorsFromThreadsKey = (
   threadsKey: ThreadsKey,
   threadIndexes: Set<ThreadIndex> = new Set(

@@ -667,7 +667,7 @@ export function isolateProcess(
       ) {
         newSelectedThreadIndexes.add(globalTrack.mainThreadIndex);
       }
-      // No look at all of the local tracks
+      // Now look at all of the local tracks
       for (const localTrack of localTracks) {
         if (
           localTrack.threadIndex !== undefined &&
