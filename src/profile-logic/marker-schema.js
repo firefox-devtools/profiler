@@ -12,13 +12,19 @@ import {
   formatMicroseconds,
   formatNanoseconds,
 } from '../utils/format-numbers';
-import type { MarkerFormatType } from 'firefox-profiler/types';
+import type {
+  MarkerFormatType,
+  MarkerSchema,
+  MarkerSchemaByName,
+  Marker,
+  MarkerLabelMaker,
+} from 'firefox-profiler/types';
 
 /**
  * TODO - These will eventually be stored in the profile, but for now
  * define them here.
  */
-export const markerSchema = [
+export const markerSchema: MarkerSchema[] = [
   {
     name: 'Bailout',
     display: ['marker-chart', 'marker-table'],
@@ -53,13 +59,13 @@ export const markerSchema = [
   },
   {
     name: 'CC',
-    label: 'Cycle Collect',
+    tooltipLabel: 'Cycle Collect',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
     data: [],
   },
   {
     name: 'FileIO',
-    display: [],
+    display: ['marker-chart', 'marker-table'],
     data: [
       {
         key: 'operation',
@@ -99,7 +105,7 @@ export const markerSchema = [
   },
   {
     name: 'Styles',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
       {
         key: 'elementsTraversed',
@@ -132,8 +138,18 @@ export const markerSchema = [
   },
   {
     name: 'UserTiming',
+    tooltipLabel: '{name}',
     display: ['marker-chart', 'marker-table'],
-    data: [{ key: 'name', label: 'Name', format: 'string' }],
+    data: [
+      // name
+      { label: 'Marker', value: 'UserTiming' },
+      { key: 'entryType', label: 'Entry Type', format: 'string' },
+      {
+        label: 'Description',
+        value:
+          'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
+      },
+    ],
   },
   {
     name: 'Text',
@@ -149,37 +165,100 @@ export const markerSchema = [
     ],
   },
   {
-    name: 'tracing',
-    display: ['marker-chart', 'marker-table'],
+    name: 'DOMEvent',
+    tooltipLabel: '{eventType}',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
-      // This is really the "type" of the marker.
-      { key: 'category', label: 'Category', format: 'string' },
+      { key: 'category', label: 'Marker', format: 'string' },
+      // eventType is only in the tooltipLabel
     ],
   },
   {
+    // TODO - Note that this marker is a "tracing" marker currently.
+    // See issue #2749
+    name: 'Paint',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [{ key: 'category', label: 'Type', format: 'string' }],
+  },
+  {
+    // TODO - Note that this marker is a "tracing" marker currently.
+    // See issue #2749
+    name: 'Navigation',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [{ key: 'category', label: 'Type', format: 'string' }],
+  },
+  {
+    // TODO - Note that this marker is a "tracing" marker currently.
+    // See issue #2749
+    name: 'Layout',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [{ key: 'category', label: 'Type', format: 'string' }],
+  },
+  {
     name: 'IPC',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-ipc'],
     data: [
       { key: 'messageType', label: 'Type', format: 'string' },
       { key: 'sync', label: 'Sync', format: 'string' },
     ],
   },
+  {
+    name: 'RefreshDriverTick',
+    display: ['marker-chart', 'marker-table', 'timeline-overview'],
+    data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
+  },
 ];
+
+/**
+ * For the most part, schema is matched up by the Payload's "type" field,
+ * but for practical purposes, there are a few other options, see the
+ * implementation of this function for details.
+ */
+export function getMarkerSchemaName(marker: Marker): string {
+  const { data, name } = marker;
+  // Fall back to using the name if no payload exists.
+
+  if (data) {
+    const { type } = data;
+    if (type === 'tracing' && data.category) {
+      // TODO - Tracing markers have a duplicate "category" field.
+      // See issue #2749
+      return data.category;
+    }
+    if (type === 'Text') {
+      // Text markers are a cheap and easy way to create markers with
+      // a category,
+      return name;
+    }
+    return data.type;
+  }
+
+  return name;
+}
 
 /**
  * This function takes the intended marker schema for a marker field, and applies
  * the appropriate formatting function.
  */
+export function getMarkerSchema(
+  markerSchemaByName: MarkerSchemaByName,
+  marker: Marker
+): MarkerSchema | null {
+  return markerSchemaByName[getMarkerSchemaName(marker)] || null;
+}
+
 export function formatFromMarkerSchema(
   markerType: string,
   format: MarkerFormatType,
   value: any
-): string | null {
+): string {
   switch (format) {
     case 'url':
     case 'file-path':
     case 'string':
-      return value;
+      // Make sure a truthy string is returned here. Otherwise it can break
+      // grid layouts.
+      return String(value) || '(empty)';
     case 'duration':
     case 'time':
       return formatTimestamp(value);
@@ -205,4 +284,43 @@ export function formatFromMarkerSchema(
       );
       return value;
   }
+}
+
+/**
+ * Marker schema can create a dynamic tooltip label. For instance a schema with
+ * a `tooltipLabel` field of "Event at {url}" would create a label based off of the
+ * "url" property in the payload.
+ */
+export function getMarkerLabelMaker(label: string): MarkerLabelMaker {
+  // Split the label on the "{key}" capture groups.
+  // Each (zero-indexed) even entry will be a raw string label.
+  // Each (zero-indexed) odd entry will be a key to the payload.
+  //
+  // e.g.
+  // "asdf {foo} jkl {bar}" -> ["asdf ", "foo", " jkl ", "bar"]
+  // "{foo} jkl {bar}"      -> ["", "foo", " jkl ", "bar"];
+  // "{foo}"                -> ["", "foo", ""];
+  const splits = label.split(/{([^}]+)}/);
+  //                          {       } Split anytime text is in brackets.
+  //                           (     )  Capture the text inside the brackets.
+  //                            [^}]+   Match any character that is not a }.
+
+  if (splits.length === 1) {
+    // Just return the label.
+    return () => label;
+  }
+
+  return data => {
+    let result: string = '';
+    for (let i = 0; i < splits.length; i++) {
+      const part = splits[i];
+      // Flip-flop between inserting a label, and looking up a value.
+      if (i % 2 === 0) {
+        result += part;
+      } else {
+        result += String(data[part]);
+      }
+    }
+    return result;
+  };
 }

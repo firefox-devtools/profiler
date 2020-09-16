@@ -136,6 +136,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 >
   <div
     class="tooltipMarker"
+    style="--tooltip-detail-max-width: 600px;"
   >
     <div
       class="tooltipHeader"
@@ -151,7 +152,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
         <div
           class="tooltipTitle"
         >
-          UserTiming
+          Marker B
         </div>
       </div>
     </div>
@@ -161,17 +162,31 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
       <div
         class="tooltipLabel"
       >
+        Marker
+        :
+      </div>
+      UserTiming
+      <div
+        class="tooltipLabel"
+      >
+        Entry Type
+        :
+      </div>
+      measure
+      <div
+        class="tooltipLabel"
+      >
+        Description
+        :
+      </div>
+      UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      <div
+        class="tooltipLabel"
+      >
         Thread
         :
       </div>
       Empty
-      <div
-        class="tooltipLabel"
-      >
-        Name
-        :
-      </div>
-      Marker B
     </div>
   </div>
 </div>

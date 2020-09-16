@@ -496,7 +496,11 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         </ContextMenuTrigger>
         {shouldShowTooltip && hoveredItem ? (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
-            <TooltipMarker marker={hoveredItem} threadIndex={threadIndex} />
+            <TooltipMarker
+              marker={hoveredItem}
+              threadIndex={threadIndex}
+              restrictHeightWidth={true}
+            />
           </Tooltip>
         ) : null}
       </div>
@@ -525,6 +529,7 @@ export const TimelineMarkersJank = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      // These don't use marker schema as they are derived.
       markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
@@ -548,9 +553,6 @@ export const TimelineMarkersOverview = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerIndexes = selectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
-      state
-    );
 
     return {
       additionalClassName:
@@ -558,7 +560,7 @@ export const TimelineMarkersOverview = explicitConnect<
           ? 'timelineMarkersGeckoMain'
           : null,
       getMarker: selectors.getMarkerGetter(state),
-      markerIndexes,
+      markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
@@ -584,7 +586,7 @@ export const TimelineMarkersFileIo = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
-      markerIndexes: selectors.getFileIoMarkerIndexesForHeader(state),
+      markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
@@ -610,7 +612,7 @@ export const TimelineMarkersMemory = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
-      markerIndexes: selectors.getMemoryMarkerIndexes(state),
+      markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',
@@ -637,7 +639,7 @@ export const TimelineMarkersIPC = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
-      markerIndexes: selectors.getIPCMarkerIndexes(state),
+      markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersIPC',

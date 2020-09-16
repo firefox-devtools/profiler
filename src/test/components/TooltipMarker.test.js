@@ -416,6 +416,7 @@ describe('TooltipMarker', function() {
             marker={marker}
             threadIndex={threadIndex}
             className="propClass"
+            restrictHeightWidth={true}
           />
         </Provider>
       );
@@ -449,7 +450,12 @@ describe('TooltipMarker', function() {
 
     return render(
       <Provider store={store}>
-        <TooltipMarker marker={marker} threadIndex={0} className="propClass" />
+        <TooltipMarker
+          marker={marker}
+          threadIndex={0}
+          className="propClass"
+          restrictHeightWidth={true}
+        />
       </Provider>
     );
   }
@@ -676,6 +682,7 @@ describe('TooltipMarker', function() {
           marker={marker}
           threadIndex={threadIndex}
           className="propClass"
+          restrictHeightWidth={true}
         />
       </Provider>
     );

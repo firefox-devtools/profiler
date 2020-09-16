@@ -314,7 +314,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       categories: getCategories(state),
       timelineType: getTimelineType(state),
       hasFileIoMarkers:
-        selectors.getFileIoMarkerIndexesForHeader(state).length !== 0,
+        selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
         state
       ),

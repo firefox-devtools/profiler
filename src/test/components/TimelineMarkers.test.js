@@ -158,22 +158,12 @@ describe('TimelineMarkers', function() {
     const { container, flushDrawLog } = setupWithMarkers(
       { rangeStart: 0, rangeEnd: 15 },
       [
-        ['Marker A', 0, 10],
-        ['Marker B', 0, 10],
-        ['Marker C', 5, 15],
-        ['BHR-detected hang', 2, 13, { type: 'BHR-detected hang' }],
-        [
-          'LongTask',
-          2,
-          6,
-          { type: 'MainThreadLongTask', category: 'LongTask' },
-        ],
-        [
-          'LongIdleTask',
-          6,
-          8,
-          { type: 'MainThreadLongTask', category: 'LongTask' },
-        ],
+        ['DOMEvent', 0, 10],
+        ['DOMEvent', 0, 10],
+        ['DOMEvent', 5, 15],
+        ['Paint', 2, 13],
+        ['Navigation', 2, 6],
+        ['Layout', 6, 8],
       ]
     );
 
@@ -192,10 +182,10 @@ describe('TimelineMarkers', function() {
       { rangeStart: 0, rangeEnd: 15000 },
       [
         // 2 very close dot markers. They shouldn't be drawn both together.
-        ['Marker A', 5000],
-        ['Marker B', 5001],
+        ['DOMEvent', 5000],
+        ['DOMEvent', 5001],
         // This is a longer marker starting at the same place, it should always be drawn
-        ['Marker C', 5001, 7000],
+        ['DOMEvent', 5001, 7000],
       ]
     );
 
@@ -231,10 +221,10 @@ describe('TimelineMarkers', function() {
     it('when right clicking on a marker', () => {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
-        [['Marker A', 0, 10]]
+        [['DOMEvent', 0, 10]]
       );
 
-      // The "Marker A" marker is drawn from 0,0 to 5,200.
+      // The "DOMEvent" marker is drawn from 0,0 to 5,200.
       rightClick({ x: 50, y: 2 });
 
       jest.runAllTimers();
@@ -243,7 +233,7 @@ describe('TimelineMarkers', function() {
 
       clickOnMenuItem('Copy');
 
-      expect(copy).toHaveBeenLastCalledWith('Marker A');
+      expect(copy).toHaveBeenLastCalledWith('DOMEvent');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();
@@ -255,23 +245,23 @@ describe('TimelineMarkers', function() {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
         [
-          ['Marker A', 0, 3],
-          ['Marker B', 6, 10],
+          ['DOMEvent', 0, 3],
+          ['Navigation', 6, 10],
         ]
       );
 
-      // The "Marker A" marker is drawn from 0,0 to 5,60.
+      // The "DOMEvent" marker is drawn from 0,0 to 5,60.
       rightClick({ x: 30, y: 2 });
       jest.runAllTimers();
 
-      // The "Marker B" marker is drawn from 0,120 to 5,200.
+      // The "Navigation" marker is drawn from 0,120 to 5,200.
       rightClick({ x: 160, y: 2 });
       jest.runAllTimers();
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy');
-      expect(copy).toHaveBeenLastCalledWith('Marker B');
+      expect(copy).toHaveBeenLastCalledWith('Navigation');
 
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
@@ -286,11 +276,11 @@ describe('TimelineMarkers', function() {
         flushDrawLog,
         getContextMenu,
       } = setupWithMarkers({ rangeStart: 0, rangeEnd: 10 }, [
-        ['Marker A', 0, 3],
-        ['Marker B', 6, 10],
+        ['DOMEvent', 0, 3],
+        ['DOMEvent', 6, 10],
       ]);
 
-      // The "Marker A" marker is drawn from 0,0 to 5,60.
+      // The "DOMEvent" marker is drawn from 0,0 to 5,60.
       rightClick({ x: 30, y: 2 });
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
