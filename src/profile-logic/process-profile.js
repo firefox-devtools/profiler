@@ -80,6 +80,7 @@ import type {
   GCMajorAborted,
   PhaseTimes,
   SerializableProfile,
+  MarkerSchema,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1212,6 +1213,30 @@ export function adjustMarkerTimestamps(
 }
 
 /**
+ * Marker schemas are only emitted for markers that are used. Each subprocess
+ * can have a different list, as the processes are not coordinating with each
+ * other in Gecko. These per-process lists need to be consolidated into a
+ * primary list that is stored on the processed profile's meta object.
+ */
+function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
+  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema;
+  const names: Set<string> = new Set(
+    geckoProfile.meta.markerSchema.map(({ name }) => name)
+  );
+
+  for (const subprocess of geckoProfile.processes) {
+    for (const markerSchema of subprocess.meta.markerSchema) {
+      if (!names.has(markerSchema.name)) {
+        names.add(markerSchema.name);
+        combinedSchemas.push(markerSchema);
+      }
+    }
+  }
+
+  return combinedSchemas;
+}
+
+/**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
@@ -1333,6 +1358,7 @@ export function processProfile(
     // already symbolicated, otherwise we indicate it needs to be symbolicated.
     symbolicated: !!geckoProfile.meta.presymbolicated,
     updateChannel: geckoProfile.meta.updateChannel,
+    markerSchema: processMarkerSchema(geckoProfile),
   };
 
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(

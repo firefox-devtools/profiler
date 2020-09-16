@@ -13,6 +13,7 @@
 
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
+import { markerSchemaGecko } from './marker-schema';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -1089,6 +1090,26 @@ const _upgraders = {
       }
     }
     convertToVersion21Recursive(profile);
+  },
+  [22]: untypedProfile => {
+    // The marker schema, which details how to display markers was added. Back-fill
+    // any old profiles with a default schema.
+    type GeckoProfileVersion20To21 = {
+      meta: { markerSchema: mixed, ... },
+      processes: GeckoProfileVersion20To21[],
+      ...
+    };
+    const geckoProfile: GeckoProfileVersion20To21 = untypedProfile;
+
+    // Reviewer: Don't approve this PR until the marker schema is inlined:
+    // Provide the primary marker schema list in the parent process.
+    geckoProfile.meta.markerSchema = markerSchemaGecko;
+
+    for (const processes of geckoProfile.processes) {
+      // We only need the marker schema in the parent process, as the front-end
+      // de-duplicates each process' schema.
+      processes.meta.markerSchema = [];
+    }
   },
 };
 /* eslint-enable no-useless-computed-key */

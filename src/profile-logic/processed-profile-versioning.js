@@ -17,6 +17,7 @@ import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { markerSchemaGecko } from './marker-schema';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -1474,6 +1475,13 @@ const _upgraders = {
         }
       }
     }
+  },
+  [33]: profile => {
+    // The marker schema, which details how to display markers was added. Back-fill
+    // any old profiles with a default schema.
+
+    // Reviewer: Don't approve this PR until the marker schema is inlined:
+    profile.meta.markerSchema = markerSchemaGecko;
   },
 };
 /* eslint-enable no-useless-computed-key */
