@@ -13,7 +13,6 @@
     // default in babel v6.
     ["@babel/plugin-proposal-class-properties", { loose: true }],
     ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
-    "syntax-dynamic-import",
     ["module-resolver", {
       "alias": {
         "firefox-profiler": "./src",
@@ -30,7 +29,6 @@
       plugins: [
         ["@babel/plugin-proposal-class-properties", { loose: true }],
         ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
-        "dynamic-import-node"
       ],
     }
   }
