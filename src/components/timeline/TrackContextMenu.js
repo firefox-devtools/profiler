@@ -487,8 +487,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 
   render() {
-    const { globalTrackOrder, globalTracks } = this.props;
-    const rightClickedTrack = this.props.rightClickedTrack;
+    const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
