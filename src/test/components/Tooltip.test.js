@@ -14,7 +14,10 @@ import {
 
 import { ensureExists } from '../../utils/flow';
 
-import Tooltip, { MOUSE_OFFSET } from '../../components/tooltip/Tooltip';
+import Tooltip, {
+  MOUSE_OFFSET,
+  VISUAL_MARGIN,
+} from '../../components/tooltip/Tooltip';
 
 describe('shared/Tooltip', () => {
   beforeEach(addRootOverlayElement);
@@ -75,8 +78,8 @@ describe('shared/Tooltip', () => {
         mouse: { x: 500, y: 300 },
       });
 
-      const expectedLeft = 0;
-      const expectedTop = 0;
+      const expectedLeft = VISUAL_MARGIN;
+      const expectedTop = VISUAL_MARGIN;
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,

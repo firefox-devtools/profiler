@@ -9,6 +9,7 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
   >
     <div
       class="tooltipMarker"
+      style="--tooltip-detail-max-width: 100%;"
     >
       <div
         class="tooltipHeader"
@@ -34,13 +35,6 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
         <div
           class="tooltipLabel"
         >
-          Thread
-          :
-        </div>
-        Empty
-        <div
-          class="tooltipLabel"
-        >
           Type
           :
         </div>
@@ -51,6 +45,7 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           Sync
           :
         </div>
+        false
         <div
           class="tooltipLabel"
         >
@@ -79,6 +74,13 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
           :
         </div>
         unknown
+        <div
+          class="tooltipLabel"
+        >
+          Thread
+          :
+        </div>
+        Empty
       </div>
     </div>
   </div>

@@ -6,6 +6,7 @@
 import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
+import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
 export type MarkerFormatType =
@@ -59,35 +60,55 @@ export type MarkerFormatType =
 export type MarkerDisplayLocation =
   | 'marker-chart'
   | 'marker-table'
-  | 'timeline'
+  // This adds markers to the main marker timeline in the header.
+  | 'timeline-overview'
   // In the timeline, this is a section that breaks out markers that are related
   // to memory. When memory counters are enabled, this is its own track, otherwise
   // it is displayed with the main thread.
   | 'timeline-memory'
+  // This adds markers to the IPC timeline area in the header.
+  | 'timeline-ipc'
+  // This adds markers to the FileIO timeline area in the header.
+  | 'timeline-fileio'
   // TODO - This is not supported yet.
   | 'stack-chart';
 
-export type MarkerSchema = {
+export type MarkerSchema = {|
   // The unique identifier for this marker.
   name: string, // e.g. "CC"
 
   // The label of how this marker should be displayed in the UI.
   // If none is provided, then the name is used.
-  label?: string, // e.g. "Cycle Collect"
+  tooltipLabel?: string, // e.g. "Cycle Collect"
 
   // The locations to display
   display: MarkerDisplayLocation[],
 
-  data: Array<{
-    key: string,
-    // If no label is provided, the key is displayed.
-    label?: string,
-    format: MarkerFormatType,
-    searchable?: boolean,
-  }>,
-};
+  data: Array<
+    | {|
+        key: string,
+        // If no label is provided, the key is displayed.
+        label?: string,
+        format: MarkerFormatType,
+        searchable?: boolean,
+      |}
+    | {|
+        // This type is a static bit of text that will be displayed
+        label: string,
+        value: string,
+      |}
+  >,
+|};
 
-export type MarkerSchemaByName = { [name: string]: MarkerSchema };
+export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
+
+// This type is a more dynamic version of the Payload type.
+type DynamicMarkerPayload = { [key: string]: any };
+// Marker schema can create a dynamic tooltip label. For instance a schema with
+// a `tooltipLabel` field of "Event at {url}" would create a label based off of the
+// "url" property in the payload.
+export type MarkerLabelMaker = DynamicMarkerPayload => string;
+export type MarkerLabelMakerByName = ObjectMap<MarkerLabelMaker>;
 
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes

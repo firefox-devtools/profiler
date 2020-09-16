@@ -92,7 +92,7 @@
     "babel-jest": "^26.3.0",
     "babel-loader": "^8.0.5",
     "babel-plugin-module-resolver": "^4.0.0",
-    "browserslist": "^4.14.1",
+    "browserslist": "^4.14.2",
     "caniuse-lite": "^1.0.30001125",
     "circular-dependency-plugin": "^5.0.2",
     "copy-webpack-plugin": "^6.1.0",

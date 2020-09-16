@@ -21,13 +21,15 @@ require('./Backtrace.css');
 
 type Props = {|
   +thread: Thread,
-  +maxHeight: string | number,
+  // Tooltips will want to only show a certain number of stacks, while the sidebars
+  // can show all of the stacks.
+  +maxStacks: number,
   +stackIndex: IndexIntoStackTable,
   +implementationFilter: ImplementationFilter,
 |};
 
 function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxHeight } = props;
+  const { stackIndex, thread, implementationFilter, maxStacks } = props;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
     implementationFilter,
@@ -40,14 +42,18 @@ function Backtrace(props: Props) {
 
   if (funcNamesAndOrigins.length) {
     return (
-      <ol className="backtrace" style={{ '--max-height': maxHeight }}>
-        {funcNamesAndOrigins.map(({ funcName, origin }, i) => (
-          <li key={i} className="backtraceStackFrame">
-            {funcName}
-            <em className="backtraceStackFrameOrigin">{origin}</em>
-          </li>
-        ))}
-      </ol>
+      <ul className="backtrace">
+        {funcNamesAndOrigins
+          // Truncate the stacks
+          .slice(0, maxStacks)
+          .map(({ funcName, origin }, i) => (
+            <li key={i} className="backtraceStackFrame">
+              {funcName}
+              <em className="backtraceStackFrameOrigin">{origin}</em>
+            </li>
+          ))}
+        {funcNamesAndOrigins.length > maxStacks ? '…' : null}
+      </ul>
     );
   }
   return (

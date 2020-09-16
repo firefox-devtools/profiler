@@ -13,6 +13,8 @@ import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 import {
   storeProfileData,
   listAllProfileData,
+  retrieveProfileData,
+  deleteProfileData,
   type ProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 
@@ -45,8 +47,7 @@ describe('published-profiles-store', function() {
     await storeProfileData({ ...basicProfileData, ...overrides });
   }
 
-  it('retrieves a sorted list', async () => {
-    // 1. Store some profile data in an unsorted order.
+  async function setup() {
     await storeGenericProfileData({
       profileToken: 'PROFILE-1',
       publishedDate: new Date('2020-07-01'),
@@ -59,10 +60,35 @@ describe('published-profiles-store', function() {
       profileToken: 'PROFILE-3',
       publishedDate: new Date('2019-07-01'),
     });
+  }
+
+  it('retrieves individual profile information', async () => {
+    await setup();
+
+    expect(await retrieveProfileData('PROFILE-1')).toMatchObject({
+      profileToken: 'PROFILE-1',
+    });
+  });
+
+  it('retrieves a sorted list', async () => {
+    // 1. Store some profile data in an unsorted order.
+    await setup();
+
     // 2. Retrieve the list and expect it's in the expected sorted order.
     const listOfProfileData = await listAllProfileData();
     expect(listOfProfileData).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-2' }),
+      expect.objectContaining({ profileToken: 'PROFILE-3' }),
+      expect.objectContaining({ profileToken: 'PROFILE-1' }),
+    ]);
+  });
+
+  it('can delete profile information', async () => {
+    await setup();
+
+    await deleteProfileData('PROFILE-2');
+    expect(await retrieveProfileData('PROFILE-2')).toBe(undefined);
+    expect(await listAllProfileData()).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-3' }),
       expect.objectContaining({ profileToken: 'PROFILE-1' }),
     ]);

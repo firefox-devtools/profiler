@@ -36,7 +36,11 @@ class MarkerSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-marker-table">
         <div className="sidebar-contents-wrapper">
-          <TooltipMarker marker={marker} threadIndex={selectedThreadIndex} />
+          <TooltipMarker
+            marker={marker}
+            threadIndex={selectedThreadIndex}
+            restrictHeightWidth={false}
+          />
         </div>
       </aside>
     );
