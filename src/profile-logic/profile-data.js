@@ -2692,5 +2692,10 @@ export function hasThreadKeys(
   threadsKey: ThreadsKey
 ): boolean {
   const threadIndexes = ('' + threadsKey).split(',').map(n => +n);
-  return threadIndexes.every(threadIndex => threadIndexesSet.has(threadIndex));
+  for (const threadIndex of threadIndexes) {
+    if (!threadIndexesSet.has(threadIndex)) {
+      return false;
+    }
+  }
+  return true;
 }
