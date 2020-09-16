@@ -37,6 +37,7 @@ import type {
   IndexedArray,
   DerivedMarkerInfo,
   MarkerSchema,
+  MarkerSchemaByName,
   MarkerDisplayLocation,
 } from 'firefox-profiler/types';
 
@@ -1368,6 +1369,7 @@ export function filterMarkerByDisplayLocation(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
   markerSchema: MarkerSchema[],
+  markerSchemaByName: MarkerSchemaByName,
   displayLocation: MarkerDisplayLocation,
   // This argument allows a filtering function to customize the result, without having
   // to loop through all of the markers again. Return a boolean if making a decision,
@@ -1385,6 +1387,6 @@ export function filterMarkerByDisplayLocation(
       return additionalResult;
     }
 
-    return markerTypes.has(getMarkerSchemaName(marker));
+    return markerTypes.has(getMarkerSchemaName(markerSchemaByName, marker));
   });
 }
