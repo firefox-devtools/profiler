@@ -214,7 +214,10 @@ export const markerSchema: MarkerSchema[] = [
  * but for practical purposes, there are a few other options, see the
  * implementation of this function for details.
  */
-export function getMarkerSchemaName(marker: Marker): string {
+export function getMarkerSchemaName(
+  markerSchemaByName: MarkerSchemaByName,
+  marker: Marker
+): string {
   const { data, name } = marker;
   // Fall back to using the name if no payload exists.
 
@@ -227,8 +230,9 @@ export function getMarkerSchemaName(marker: Marker): string {
     }
     if (type === 'Text') {
       // Text markers are a cheap and easy way to create markers with
-      // a category,
-      return name;
+      // a category. Check for schema if it exists, if not, fallback to
+      // a Text type marker.
+      return markerSchemaByName[name] === undefined ? 'Text' : name;
     }
     return data.type;
   }
@@ -244,7 +248,9 @@ export function getMarkerSchema(
   markerSchemaByName: MarkerSchemaByName,
   marker: Marker
 ): MarkerSchema | null {
-  return markerSchemaByName[getMarkerSchemaName(marker)] || null;
+  return (
+    markerSchemaByName[getMarkerSchemaName(markerSchemaByName, marker)] || null
+  );
 }
 
 export function formatFromMarkerSchema(
