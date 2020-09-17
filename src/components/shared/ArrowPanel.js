@@ -28,15 +28,10 @@ type State = {|
 |};
 
 class ArrowPanel extends React.PureComponent<Props, State> {
-  _panelElement: HTMLElement | null = null;
   state = {
     open: false,
     isClosing: false,
     openGeneration: 0,
-  };
-
-  _takePanelElementRef = (elem: HTMLElement | null) => {
-    this._panelElement = elem;
   };
 
   open() {
@@ -123,7 +118,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
             className
           )}
           onClick={this._onArrowPanelClick}
-          ref={this._takePanelElementRef}
         >
           <div className="arrowPanelArrow" />
           {hasTitle ? <h1 className="arrowPanelTitle">{title}</h1> : null}
