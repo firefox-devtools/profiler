@@ -99,7 +99,7 @@ describe('ActiveTab', function() {
 });
 
 describe('finalizeProfileView', function() {
-  function setup(search: string) {
+  function setup(search: string, withPages: boolean = true) {
     const { profile } = getProfileFromTextSamples('A');
     const newUrlState = stateFromLocation({
       pathname: '/public/FAKEHASH/calltree/',
@@ -107,12 +107,18 @@ describe('finalizeProfileView', function() {
       hash: '',
     });
 
+    if (!withPages) {
+      delete profile.pages;
+    }
+
+    // Create the store and dispatch the url state.
     const store = blankStore();
     store.dispatch({
       type: 'UPDATE_URL_STATE',
       newUrlState,
     });
 
+    // Lastly, load the profile to test finalizeProfileView.
     store.dispatch(viewProfile(profile));
     return store;
   }
@@ -125,6 +131,16 @@ describe('finalizeProfileView', function() {
     expect(getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
       browsingContextID: null,
+    });
+  });
+
+  it('switches back to full view if there is no `pages` array', async function() {
+    const { getState } = setup('?view=active-tab&v=5', false);
+
+    // Check if we can successfully finalized the profile view for full view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
     });
   });
 });

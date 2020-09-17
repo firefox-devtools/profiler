@@ -184,13 +184,19 @@ export function finalizeProfileView(
         dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
         break;
       case 'active-tab':
-        dispatch(
-          finalizeActiveTabProfileView(
-            profile,
-            selectedThreadIndex,
-            timelineTrackOrganization.browsingContextID
-          )
-        );
+        if (pages) {
+          dispatch(
+            finalizeActiveTabProfileView(
+              profile,
+              selectedThreadIndex,
+              timelineTrackOrganization.browsingContextID
+            )
+          );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the active tab based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        }
 
         break;
       case 'origins': {
