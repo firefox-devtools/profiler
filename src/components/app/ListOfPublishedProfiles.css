@@ -14,7 +14,7 @@
  * | /-------------------------------------------------------------\ /---------------------------------\ |
  * | | a.publishedProfilesLink                                     | | .publishedProfilesActionButtons | |
  * | | /------------------------\ /------------------------------\ | |                                 | |
- * | | | .publishedProfilesDate | | .publishedProfilesInfo       | | |                                 | |
+ * | | | .publishedProfilesDate | | .publishedProfilesInfo       | | | (This element is optional.)     | |
  * | | |                        | | /--------------------------\ | | |                                 | |
  * | | |                        | | | .publishedProfilesName   | | | |  /---------------\              | |
  * | | |                        | | \--------------------------/ | | |  | delete button |              | |

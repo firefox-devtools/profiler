@@ -80,6 +80,7 @@ function _formatRange(range: StartEndRange): string {
 type PublishedProfileProps = {|
   +profileData: ProfileData,
   +nowTimestamp: Milliseconds,
+  +withActionButtons: boolean,
 |};
 
 type PublishedProfileState = {|
@@ -114,7 +115,7 @@ class PublishedProfile extends React.PureComponent<
   };
 
   render() {
-    const { profileData, nowTimestamp } = this.props;
+    const { profileData, nowTimestamp, withActionButtons } = this.props;
     const { hasBeenDeleted, confirmDialogIsOpen } = this.state;
 
     if (hasBeenDeleted) {
@@ -148,43 +149,46 @@ class PublishedProfile extends React.PureComponent<
             <ProfileMetaInfoSummary meta={profileData.meta} />
           </div>
         </a>
-        <div className="publishedProfilesActionButtons">
-          {profileData.jwtToken ? (
-            <ButtonWithPanel
-              buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
-              label="Delete"
-              onPanelOpen={this.onOpenConfirmDialog}
-              onPanelClose={this.onCloseConfirmDialog}
-              panelContent={
-                <ConfirmDialog
-                  title={`Delete ${profileName}`}
-                  confirmButtonText="Delete"
-                  confirmButtonType="destructive"
-                  cancelButtonText="Cancel"
-                  onConfirmButtonClick={this.onConfirmDeletion}
-                >
-                  Are you sure you want to delete uploaded data for this
-                  profile? Links for shared copies will no longer work.
-                </ConfirmDialog>
-              }
-            />
-          ) : (
-            <button
-              className="publishedProfilesDeleteButton photon-button photon-button-default"
-              type="button"
-              title="This profile cannot be deleted because we lack the authorization information."
-              disabled
-            >
-              Delete
-            </button>
-          )}
-        </div>
+        {withActionButtons ? (
+          <div className="publishedProfilesActionButtons">
+            {profileData.jwtToken ? (
+              <ButtonWithPanel
+                buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
+                label="Delete"
+                onPanelOpen={this.onOpenConfirmDialog}
+                onPanelClose={this.onCloseConfirmDialog}
+                panelContent={
+                  <ConfirmDialog
+                    title={`Delete ${profileName}`}
+                    confirmButtonText="Delete"
+                    confirmButtonType="destructive"
+                    cancelButtonText="Cancel"
+                    onConfirmButtonClick={this.onConfirmDeletion}
+                  >
+                    Are you sure you want to delete uploaded data for this
+                    profile? Links for shared copies will no longer work.
+                  </ConfirmDialog>
+                }
+              />
+            ) : (
+              <button
+                className="publishedProfilesDeleteButton photon-button photon-button-default"
+                type="button"
+                title="This profile cannot be deleted because we lack the authorization information."
+                disabled
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        ) : null}
       </li>
     );
   }
 }
 
 type Props = {|
+  withActionButtons: boolean,
   limit?: number,
 |};
 
@@ -209,7 +213,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   }
 
   render() {
-    const { limit } = this.props;
+    const { limit, withActionButtons } = this.props;
     const { profileDataList } = this.state;
 
     if (!profileDataList) {
@@ -239,13 +243,14 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
               key={profileData.profileToken}
               profileData={profileData}
               nowTimestamp={nowTimestamp}
+              withActionButtons={withActionButtons}
             />
           ))}
         </ul>
         {profilesRestCount > 0 ? (
           <p>
             <InnerNavigationLink dataSource="uploaded-recordings">
-              See all your recordings ({profilesRestCount} more)
+              See and manage all your recordings ({profilesRestCount} more)
             </InnerNavigationLink>
           </p>
         ) : null}

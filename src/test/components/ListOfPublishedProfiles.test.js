@@ -130,14 +130,14 @@ describe('ListOfPublishedProfiles', () => {
     const store = blankStore();
     const renderResult = render(
       <Provider store={store}>
-        <ListOfPublishedProfiles {...props} />
+        <ListOfPublishedProfiles withActionButtons={false} {...props} />
       </Provider>
     );
 
     const { getByText } = renderResult;
 
     function getAllRecordingsLink() {
-      return getByText(/See all your recordings/);
+      return getByText(/all your recordings/);
     }
 
     return {
