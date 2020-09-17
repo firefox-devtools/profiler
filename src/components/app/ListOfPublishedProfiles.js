@@ -93,6 +93,8 @@ class PublishedProfile extends React.PureComponent<
   PublishedProfileState
 > {
   state = { confirmDialogIsOpen: false, hasBeenDeleted: false };
+  _deleteButtonRef = React.createRef();
+  _actionButtonsRef = React.createRef();
 
   onConfirmDeletion = async () => {
     const { profileToken, jwtToken } = this.props.profileData;
@@ -108,6 +110,18 @@ class PublishedProfile extends React.PureComponent<
 
   onCloseConfirmDialog = () => {
     this.setState({ confirmDialogIsOpen: false });
+
+    // Let's focus the delete button after dismissing the dialog, but _only_ if
+    // the focus was part of the dialog before.
+    // Note: we might need to get a more precise ref to the right
+    // buttonWithPanel wrapper when we'll have more buttons.
+    if (this._deleteButtonRef.current && this._actionButtonsRef.current) {
+      const deleteButton = this._deleteButtonRef.current;
+      const actionButtons = this._actionButtonsRef.current;
+      if (actionButtons.matches(':focus-within')) {
+        deleteButton.focus();
+      }
+    }
   };
 
   onOpenConfirmDialog = () => {
@@ -150,9 +164,13 @@ class PublishedProfile extends React.PureComponent<
           </div>
         </a>
         {withActionButtons ? (
-          <div className="publishedProfilesActionButtons">
+          <div
+            className="publishedProfilesActionButtons"
+            ref={this._actionButtonsRef}
+          >
             {profileData.jwtToken ? (
               <ButtonWithPanel
+                buttonRef={this._deleteButtonRef}
                 buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
                 label="Delete"
                 onPanelOpen={this.onOpenConfirmDialog}
