@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import ThreadStackGraph from '../shared/thread/StackGraph';
@@ -320,13 +321,21 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
+/**
+ * Memoize the hasThreadKeys to not compute it all the time.
+ */
+const _getTimelineIsSelected = memoize(
+  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
+  { limit: 1 }
+);
+
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadsKey } = ownProps;
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex = hasThreadKeys(
+    const selectedCallNodeIndex = _getTimelineIsSelected(
       selectedThreadIndexes,
       threadsKey
     )

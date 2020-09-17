@@ -5,6 +5,7 @@
 // @flow
 import * as React from 'react';
 import classNames from 'classnames';
+import memoize from 'memoize-immutable';
 
 import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import { withSize } from '../shared/WithSize';
@@ -516,6 +517,14 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 export const TimelineMarkers = withSize<Props>(TimelineMarkersImplementation);
 
 /**
+ * Memoize the isSelected result of the markers since this is user multiple times.
+ */
+const _getTimelineMarkersIsSelected = memoize(
+  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
+  { limit: 1 }
+);
+
+/**
  * Create a special connected component for Jank instances.
  */
 export const TimelineMarkersJank = explicitConnect<
@@ -532,7 +541,7 @@ export const TimelineMarkersJank = explicitConnect<
       getMarker: selectors.getMarkerGetter(state),
       // These don't use marker schema as they are derived.
       markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
-      isSelected: hasThreadKeys(selectedThreads, threadsKey),
+      isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -562,7 +571,7 @@ export const TimelineMarkersOverview = explicitConnect<
           : null,
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
-      isSelected: hasThreadKeys(selectedThreads, threadsKey),
+      isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -588,7 +597,7 @@ export const TimelineMarkersFileIo = explicitConnect<
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
-      isSelected: hasThreadKeys(selectedThreads, threadsKey),
+      isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
       rightClickedMarker: selectors.getRightClickedMarker(state),
@@ -614,7 +623,7 @@ export const TimelineMarkersMemory = explicitConnect<
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
-      isSelected: hasThreadKeys(selectedThreads, threadsKey),
+      isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',
       testId: 'TimelineMarkersMemory',
@@ -641,7 +650,7 @@ export const TimelineMarkersIPC = explicitConnect<
     return {
       getMarker: selectors.getMarkerGetter(state),
       markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
-      isSelected: hasThreadKeys(selectedThreads, threadsKey),
+      isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersIPC',
       testId: 'TimelineMarkersIPC',
