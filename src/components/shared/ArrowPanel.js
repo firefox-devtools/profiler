@@ -12,8 +12,11 @@ require('./ArrowPanel.css');
 type Props = {|
   +onOpen?: () => mixed,
   +onClose?: () => mixed,
-  +onOkButtonClick?: () => mixed,
-  +onCancelButtonClick?: () => mixed,
+  // If these callbacks return promises, they will be waited for before the
+  // panel is closed. To make this explicit we added Promise<mixed> even if that
+  // isn't necessary to pass Flow checks.
+  +onOkButtonClick?: () => mixed | Promise<mixed>,
+  +onCancelButtonClick?: () => mixed | Promise<mixed>,
   +className: string,
   +children: React.Node,
   +title?: string,
@@ -85,18 +88,18 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     }
   };
 
-  _onOkButtonClick = () => {
-    this.close();
+  _onOkButtonClick = async () => {
     if (this.props.onOkButtonClick) {
-      this.props.onOkButtonClick();
+      await this.props.onOkButtonClick();
     }
+    this.close();
   };
 
-  _onCancelButtonClick = () => {
-    this.close();
+  _onCancelButtonClick = async () => {
     if (this.props.onCancelButtonClick) {
-      this.props.onCancelButtonClick();
+      await this.props.onCancelButtonClick();
     }
+    this.close();
   };
 
   render() {

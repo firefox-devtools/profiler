@@ -52,47 +52,158 @@ describe('shared/ButtonWithPanel', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('various panel contents', () => {
-    it('renders panels with default buttons and titles', () => {
-      const { container } = render(
+  describe('with ok and cancel buttons', () => {
+    function setupWithTitleAndButtons(
+      overrides: $Shape<{|
+        +buttonProps: $Shape<React.ElementConfig<typeof ButtonWithPanel>>,
+        +arrowPanelProps: $Shape<React.ElementConfig<typeof ArrowPanel>>,
+      |}> = {}
+    ) {
+      const { buttonProps, arrowPanelProps } = overrides;
+      const renderResult = render(
         <ButtonWithPanel
           className="button"
           label="My Button"
-          initialOpen={true}
+          {...buttonProps}
           panel={
             <ArrowPanel
               className="panel"
               title="Wonderful content"
               okButtonText="Confirm"
               cancelButtonText="Cancel"
+              {...arrowPanelProps}
             >
               <div>Panel content</div>
             </ArrowPanel>
           }
         />
       );
+
+      const { container, getByText, queryByText } = renderResult;
+
+      function clickOpenButtonAndWait() {
+        fireFullClick(getByText('My Button'));
+        assertPanelIsOpen();
+      }
+
+      function clickOkButton() {
+        fireFullClick(getByText('Confirm'));
+      }
+
+      function clickCancelButton() {
+        fireFullClick(getByText('Cancel'));
+      }
+
+      function assertPanelIsClosed() {
+        // Closing the panel involves timeouts.
+        jest.runAllTimers();
+        expect(queryByText('Panel content')).toBe(null);
+        expect(container.querySelector('.arrowPanel.open')).toBe(null);
+      }
+
+      function assertPanelIsOpen() {
+        // Opening the panel involves timeouts.
+        jest.runAllTimers();
+        expect(getByText('Panel content')).toBeTruthy();
+        expect(container.querySelector('.arrowPanel.open')).toBeTruthy();
+      }
+
+      return {
+        ...renderResult,
+        clickOpenButtonAndWait,
+        clickOkButton,
+        clickCancelButton,
+        assertPanelIsClosed,
+        assertPanelIsOpen,
+      };
+    }
+
+    it('renders panels with default buttons and titles', () => {
+      const { container } = setupWithTitleAndButtons({
+        buttonProps: { initialOpen: true },
+      });
       expect(container.firstChild).toMatchSnapshot();
     });
 
     it('renders panels with specified buttons', () => {
-      const { container } = render(
-        <ButtonWithPanel
-          className="button"
-          label="My Button"
-          initialOpen={true}
-          panel={
-            <ArrowPanel
-              className="panel"
-              okButtonText="Confirm"
-              okButtonType="destructive"
-              cancelButtonText="Cancel"
-            >
-              <div>Panel content</div>
-            </ArrowPanel>
-          }
-        />
-      );
+      const { container } = setupWithTitleAndButtons({
+        buttonProps: { initialOpen: true },
+        arrowPanelProps: { okButtonType: 'destructive' },
+      });
       expect(container.firstChild).toMatchSnapshot();
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('opens and closes the panel when clicking on cancel button', () => {
+      const {
+        clickOpenButtonAndWait,
+        clickCancelButton,
+        assertPanelIsClosed,
+      } = setupWithTitleAndButtons();
+      clickOpenButtonAndWait();
+
+      clickCancelButton();
+      assertPanelIsClosed();
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('opens and closes the panel when clicking on confirm button', () => {
+      const {
+        clickOpenButtonAndWait,
+        clickOkButton,
+        assertPanelIsClosed,
+      } = setupWithTitleAndButtons();
+      clickOpenButtonAndWait();
+
+      clickOkButton();
+      assertPanelIsClosed();
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('waits for the end of callbacks', async () => {
+      // We initialize to empty functions just so that Flow doesn't error later.
+      let resolveOkPromise = () => {};
+      const okPromise = new Promise(resolve => {
+        resolveOkPromise = resolve;
+      });
+
+      let resolveCancelPromise = () => {};
+      const cancelPromise = new Promise(resolve => {
+        resolveCancelPromise = resolve;
+      });
+
+      const {
+        clickOpenButtonAndWait,
+        clickOkButton,
+        clickCancelButton,
+        assertPanelIsOpen,
+        assertPanelIsClosed,
+      } = setupWithTitleAndButtons({
+        arrowPanelProps: {
+          onOkButtonClick: () => okPromise,
+          onCancelButtonClick: () => cancelPromise,
+        },
+      });
+      clickOpenButtonAndWait();
+
+      clickOkButton();
+      // It's still not closed because the promise isn't resolved.
+      assertPanelIsOpen();
+
+      // Let's resolve the OK promise and wait for timers again.
+      resolveOkPromise();
+      await okPromise;
+
+      // This time, the panel should be closed.
+      assertPanelIsClosed();
+
+      // Do it again for the cancel button now.
+      clickOpenButtonAndWait();
+      clickCancelButton();
+      assertPanelIsOpen();
+      resolveCancelPromise();
+      await cancelPromise;
+      assertPanelIsClosed();
     });
   });
 
