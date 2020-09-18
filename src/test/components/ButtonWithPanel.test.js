@@ -41,7 +41,7 @@ describe('shared/ButtonWithPanel', () => {
       <ButtonWithPanel
         className="button"
         label="My Button"
-        defaultOpen={true}
+        initialOpen={true}
         panel={
           <ArrowPanel className="panel">
             <div>Panel content</div>
@@ -58,7 +58,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          defaultOpen={true}
+          initialOpen={true}
           panel={
             <ArrowPanel
               className="panel"
@@ -79,7 +79,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          defaultOpen={true}
+          initialOpen={true}
           panel={
             <ArrowPanel
               className="panel"
@@ -121,7 +121,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          defaultOpen={true}
+          initialOpen={true}
           panel={
             <ArrowPanel className="panel">
               <div data-testid="panel-content">Panel content</div>

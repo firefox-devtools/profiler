@@ -31,7 +31,7 @@ type Props = {|
   >,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
-  +defaultOpen?: boolean,
+  +initialOpen?: boolean,
   // The class name of the button input element.
   +buttonClassName?: string,
 |};
@@ -45,7 +45,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { open: !!props.defaultOpen };
+    this.state = { open: !!props.initialOpen };
   }
 
   componentDidMount() {
