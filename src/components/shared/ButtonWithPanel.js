@@ -10,8 +10,8 @@ import classNames from 'classnames';
 import './ButtonWithPanel.css';
 
 type PanelProps = {
-  onOpen?: () => mixed,
-  onClose?: () => mixed,
+  +onOpen?: () => mixed,
+  +onClose?: () => mixed,
 };
 
 interface Panel {

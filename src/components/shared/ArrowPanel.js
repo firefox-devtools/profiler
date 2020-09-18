@@ -10,22 +10,22 @@ import classNames from 'classnames';
 require('./ArrowPanel.css');
 
 type Props = {|
-  onOpen?: () => mixed,
-  onClose?: () => mixed,
-  onOkButtonClick?: () => mixed,
-  onCancelButtonClick?: () => mixed,
-  className: string,
-  children: React.Node,
-  title?: string,
-  okButtonText?: string,
-  okButtonType?: 'default' | 'primary' | 'destructive',
-  cancelButtonText?: string,
+  +onOpen?: () => mixed,
+  +onClose?: () => mixed,
+  +onOkButtonClick?: () => mixed,
+  +onCancelButtonClick?: () => mixed,
+  +className: string,
+  +children: React.Node,
+  +title?: string,
+  +okButtonText?: string,
+  +okButtonType?: 'default' | 'primary' | 'destructive',
+  +cancelButtonText?: string,
 |};
 
 type State = {|
-  open: boolean,
-  isClosing: boolean,
-  openGeneration: number,
+  +open: boolean,
+  +isClosing: boolean,
+  +openGeneration: number,
 |};
 
 class ArrowPanel extends React.PureComponent<Props, State> {
