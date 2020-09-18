@@ -29,7 +29,6 @@ type Props = {|
   +panel: React.Element<
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
   >,
-  +open?: boolean,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
   +defaultOpen?: boolean,
@@ -46,7 +45,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = { open: !!props.open };
+    this.state = { open: !!props.defaultOpen };
   }
 
   componentDidMount() {
@@ -54,7 +53,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     window.addEventListener('click', this._onWindowClick);
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
-    if (this.props.open || this.props.defaultOpen) {
+    if (this.state.open) {
       this.openPanel();
     }
   }
@@ -62,12 +61,6 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   componentWillUnmount() {
     window.removeEventListener('keydown', this._onKeyDown);
     window.removeEventListener('click', this._onWindowClick);
-  }
-
-  UNSAFE_componentWillReceiveProps(props: Props) {
-    if (props.open !== this.props.open) {
-      this.setState({ open: !!props.open });
-    }
   }
 
   _onPanelOpen = () => {
