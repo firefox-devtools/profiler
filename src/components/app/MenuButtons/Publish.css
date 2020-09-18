@@ -2,15 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsShareButton,
-.menuButtonsPermalinkButton,
-.menuButtonsRevertButton,
-.menuButtonsAbortUploadButton {
-  height: 24px;
-  border-left: 1px solid var(--grey-30);
-  margin-bottom: -24px;
-}
-
 .menuButtonsAbortUploadButton {
   background-color: var(--green-70);
   color: #fff;
@@ -38,19 +29,18 @@
 }
 
 .menuButtonsPublishPanel {
-  --width: 500px;
-}
-
-.menuButtonsPermalinkTextField {
-  width: 16em;
-  height: 19px;
-  padding: 0 4px;
-  margin: 5px -5px;
+  --width: 510px;
 }
 
 .menuButtonsPublishContent {
   position: relative;
-  padding: 0 0 10px 70px;
+
+  /* This aligns all content, except the big icon. */
+  padding-left: 70px;
+
+  /* This is the same value as the "top" property for menuButtonsPublishIcon,
+   * so that the visible space at the top is the same as at the bottom. */
+  margin-top: 6px;
 }
 
 .menuButtonsPublishIcon {
@@ -63,8 +53,7 @@
 }
 
 .menuButtonsPublishTitle {
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin: 0;
 }
 
 .menuButtonsPublishInfoDescription {

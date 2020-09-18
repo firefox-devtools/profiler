@@ -4,15 +4,11 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
 <div
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-      type="button"
-      value="Profile Info"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
+    type="button"
+    value="Profile Info"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -92,7 +88,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoLabel"
               >
-                Features:
+                Features
+                :
               </span>
               <ul
                 class="metaInfoList"
@@ -115,7 +112,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoLabel"
               >
-                Threads Filter:
+                Threads Filter
+                :
               </span>
               <ul
                 class="metaInfoList"
@@ -211,7 +209,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             <span
               class="metaInfoLabel"
             >
-              Extensions:
+              Extensions
+              :
             </span>
             <ul
               class="metaInfoList"
@@ -400,15 +399,11 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
 <div
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-      type="button"
-      value="Profile Info"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
+    type="button"
+    value="Profile Info"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -537,7 +532,8 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             <span
               class="metaInfoLabel"
             >
-              Extensions:
+              Extensions
+              :
             </span>
             <ul
               class="metaInfoList"
@@ -624,15 +620,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
   <div
     class="buttonWithPanel menuButtonsMetaInfoButton"
   >
-    <div
-      class="buttonWithPanelButtonWrapper"
-    >
-      <input
-        class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-        type="button"
-        value="Profile Info"
-      />
-    </div>
+    <input
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
+      type="button"
+      value="Profile Info"
+    />
     <div
       class="arrowPanelAnchor"
     >
@@ -651,15 +643,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     <div
       class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
     >
-      <div
-        class="buttonWithPanelButtonWrapper"
-      >
-        <input
-          class="buttonWithPanelButton"
-          type="button"
-          value="Publish…"
-        />
-      </div>
+      <input
+        class="buttonWithPanelButton menuButtonsButton"
+        type="button"
+        value="Publish…"
+      />
       <div
         class="arrowPanelAnchor"
       >

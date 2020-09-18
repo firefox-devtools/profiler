@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-require('./ButtonWithPanel.css');
+import './ButtonWithPanel.css';
 
 type PanelProps = {
   onOpen?: () => mixed,
@@ -23,19 +23,19 @@ interface Panel {
  * Note about the `panel` prop: we accept any React element whose Component
  * class implements the `Panel` interface above, and has at least the props from
  * `PanelProps` above, and any State type. */
-type Props = {
-  className: string,
-  label: string,
-  panel: React.Element<
+type Props = {|
+  +className: string,
+  +label: string,
+  +panel: React.Element<
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
   >,
-  open?: boolean,
+  +open?: boolean,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
-  defaultOpen?: boolean,
+  +defaultOpen?: boolean,
   // The class name of the button input element.
-  buttonClassName?: string,
-};
+  +buttonClassName?: string,
+|};
 
 type State = {|
   open: boolean,
@@ -123,14 +123,12 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
-        <div className="buttonWithPanelButtonWrapper">
-          <input
-            type="button"
-            className={classNames('buttonWithPanelButton', buttonClassName)}
-            value={label}
-            onClick={this._onButtonClick}
-          />
-        </div>
+        <input
+          type="button"
+          className={classNames('buttonWithPanelButton', buttonClassName)}
+          value={label}
+          onClick={this._onButtonClick}
+        />
         {React.cloneElement(panel, {
           ref: this._takePanelRef,
           onOpen: this._onPanelOpen,
