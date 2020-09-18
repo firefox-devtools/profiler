@@ -4,8 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import ArrowPanel from '../../shared/ArrowPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 import {
@@ -90,10 +89,11 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
         className="menuButtonsMetaInfoButton"
         buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
         label="Profile Info"
-        panel={
-          <ArrowPanel className="arrowPanelOpenMetaInfo">
-            <h2 className="arrowPanelSubTitle">Profile Information</h2>
-            <div className="arrowPanelSection">
+        panelClassName="metaInfoPanel"
+        panelContent={
+          <>
+            <h2 className="metaInfoSubTitle">Profile Information</h2>
+            <div className="metaInfoSection">
               {meta.startTime ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Recording started:</span>
@@ -124,7 +124,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                       ? `${configuration.duration} seconds`
                       : 'Unlimited'}
                   </div>
-                  <div className="arrowPanelSection">
+                  <div className="metaInfoSection">
                     {_renderRowOfList('Features', configuration.features)}
                     {_renderRowOfList('Threads Filter', configuration.threads)}
                   </div>
@@ -132,8 +132,8 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
               ) : null}
               {this.renderSymbolication()}
             </div>
-            <h2 className="arrowPanelSubTitle">Application</h2>
-            <div className="arrowPanelSection">
+            <h2 className="metaInfoSubTitle">Application</h2>
+            <div className="metaInfoSection">
               {meta.product ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Name and version:</span>
@@ -173,8 +173,8 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 ? _renderRowOfList('Extensions', meta.extensions.name)
                 : null}
             </div>
-            <h2 className="arrowPanelSubTitle">Platform</h2>
-            <div className="arrowPanelSection">
+            <h2 className="metaInfoSubTitle">Platform</h2>
+            <div className="metaInfoSection">
               {platformInformation ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">OS:</span>
@@ -190,8 +190,8 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             </div>
             {meta.visualMetrics ? (
               <>
-                <h2 className="arrowPanelSubTitle">Visual Metrics</h2>
-                <div className="arrowPanelSection">
+                <h2 className="metaInfoSubTitle">Visual Metrics</h2>
+                <div className="metaInfoSection">
                   <div className="metaInfoRow">
                     <span className="visualMetricsLabel">Speed Index:</span>
                     {meta.visualMetrics.SpeedIndex}
@@ -218,7 +218,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             {profilerOverhead ? (
               <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
             ) : null}
-          </ArrowPanel>
+          </>
         }
       />
     );

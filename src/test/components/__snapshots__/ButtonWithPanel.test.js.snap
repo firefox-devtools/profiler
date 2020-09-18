@@ -159,21 +159,10 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
     type="button"
     value="My Button"
   />
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-    </div>
-  </div>
 </div>
 `;
 
-exports[`shared/ButtonWithPanel various panel contents renders panels with default buttons and titles 1`] = `
+exports[`shared/ButtonWithPanel with ok and cancel buttons renders panels with default buttons and titles 1`] = `
 <div
   class="buttonWithPanel button open"
 >
@@ -186,43 +175,51 @@ exports[`shared/ButtonWithPanel various panel contents renders panels with defau
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open hasTitle hasButtons panel"
+      class="arrowPanel open"
     >
       <div
         class="arrowPanelArrow"
       />
-      <h1
-        class="arrowPanelTitle"
-      >
-        Wonderful content
-      </h1>
       <div
         class="arrowPanelContent"
       >
-        <div>
-          Panel content
+        <div
+          class="confirmDialog"
+        >
+          <h2
+            class="confirmDialogTitle"
+          >
+            Wonderful content
+          </h2>
+          <div
+            class="confirmDialogContent"
+          >
+            <div>
+              Panel content
+            </div>
+          </div>
+          <div
+            class="confirmDialogButtons"
+          >
+            <input
+              class="photon-button photon-button-default"
+              type="button"
+              value="Cancel"
+            />
+            <input
+              class="photon-button photon-button-primary"
+              type="button"
+              value="Confirm"
+            />
+          </div>
         </div>
-      </div>
-      <div
-        class="arrowPanelButtons"
-      >
-        <input
-          class="photon-button photon-button-default"
-          type="button"
-          value="Cancel"
-        />
-        <input
-          class="photon-button photon-button-primary"
-          type="button"
-          value="Confirm"
-        />
       </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`shared/ButtonWithPanel various panel contents renders panels with specified buttons 1`] = `
+exports[`shared/ButtonWithPanel with ok and cancel buttons renders panels with specified buttons 1`] = `
 <div
   class="buttonWithPanel button open"
 >
@@ -235,7 +232,7 @@ exports[`shared/ButtonWithPanel various panel contents renders panels with speci
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open hasButtons panel"
+      class="arrowPanel open"
     >
       <div
         class="arrowPanelArrow"
@@ -243,23 +240,36 @@ exports[`shared/ButtonWithPanel various panel contents renders panels with speci
       <div
         class="arrowPanelContent"
       >
-        <div>
-          Panel content
+        <div
+          class="confirmDialog my-dialog"
+        >
+          <h2
+            class="confirmDialogTitle"
+          >
+            Do you confirm this destructive action?
+          </h2>
+          <div
+            class="confirmDialogContent"
+          >
+            <div>
+              Panel content
+            </div>
+          </div>
+          <div
+            class="confirmDialogButtons"
+          >
+            <input
+              class="photon-button photon-button-default"
+              type="button"
+              value="Stop"
+            />
+            <input
+              class="photon-button photon-button-destructive"
+              type="button"
+              value="Delete"
+            />
+          </div>
         </div>
-      </div>
-      <div
-        class="arrowPanelButtons"
-      >
-        <input
-          class="photon-button photon-button-default"
-          type="button"
-          value="Cancel"
-        />
-        <input
-          class="photon-button photon-button-destructive"
-          type="button"
-          value="Confirm"
-        />
       </div>
     </div>
   </div>
