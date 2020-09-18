@@ -61,6 +61,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/MACOSX/marker-chart/"
+        title="Click here to load profile MacOS X profile"
       >
         <div
           class="publishedProfilesDate"
@@ -117,6 +118,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//"
+        title="Click here to load profile #012345"
       >
         <div
           class="publishedProfilesDate"
@@ -171,6 +173,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/WINDOWS/marker-chart/"
+        title="Click here to load profile Another good profile"
       >
         <div
           class="publishedProfilesDate"
@@ -227,6 +230,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//"
+        title="Click here to load profile Layout profile"
       >
         <div
           class="publishedProfilesDate"
@@ -283,6 +287,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
+        title="Click here to load profile #123abc"
       >
         <div
           class="publishedProfilesDate"

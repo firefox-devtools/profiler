@@ -141,9 +141,13 @@ class PublishedProfile extends React.PureComponent<
       urlPath = '/' + urlPath;
     }
     const location = `${window.location.origin}/${urlPath}`;
+    const slicedProfileToken = profileData.profileToken.slice(0, 6);
     const profileName = profileData.name
       ? profileData.name
-      : `Profile #${profileData.profileToken.slice(0, 6)}`;
+      : `Profile #${slicedProfileToken}`;
+    const smallProfileName = profileData.name
+      ? profileData.name
+      : '#' + slicedProfileToken;
 
     return (
       <li
@@ -151,7 +155,11 @@ class PublishedProfile extends React.PureComponent<
           publishedProfilesListItem_ConfirmDialogIsOpen: confirmDialogIsOpen,
         })}
       >
-        <a className="publishedProfilesLink" href={location}>
+        <a
+          className="publishedProfilesLink"
+          href={location}
+          title={`Click here to load profile ${smallProfileName}`}
+        >
           <div className="publishedProfilesDate">
             {_formatDate(profileData.publishedDate, nowTimestamp)}
           </div>
@@ -173,6 +181,7 @@ class PublishedProfile extends React.PureComponent<
                 buttonRef={this._deleteButtonRef}
                 buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
                 label="Delete"
+                title={`Click here to delete the profile ${smallProfileName}`}
                 onPanelOpen={this.onOpenConfirmDialog}
                 onPanelClose={this.onCloseConfirmDialog}
                 panelContent={

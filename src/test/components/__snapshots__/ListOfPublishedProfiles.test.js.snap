@@ -10,6 +10,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//public/MACOSX/marker-chart/"
+      title="Click here to load profile MacOS X profile"
     >
       <div
         class="publishedProfilesDate"
@@ -54,6 +55,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//"
+      title="Click here to load profile #012345"
     >
       <div
         class="publishedProfilesDate"
@@ -96,6 +98,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//public/WINDOWS/marker-chart/"
+      title="Click here to load profile Another good profile"
     >
       <div
         class="publishedProfilesDate"
