@@ -99,7 +99,7 @@ describe('ActiveTab', function() {
 });
 
 describe('finalizeProfileView', function() {
-  function setup(search: string, withPages: boolean = true) {
+  function setup({ search, noPages }: { search: string, noPages?: boolean }) {
     const { profile } = getProfileFromTextSamples('A');
     const newUrlState = stateFromLocation({
       pathname: '/public/FAKEHASH/calltree/',
@@ -107,7 +107,7 @@ describe('finalizeProfileView', function() {
       hash: '',
     });
 
-    if (!withPages) {
+    if (noPages) {
       delete profile.pages;
     }
 
@@ -124,7 +124,7 @@ describe('finalizeProfileView', function() {
   }
 
   it('loads the profile with only `view=active-tab` in active tab view', async function() {
-    const { getState } = setup('?view=active-tab&v=5');
+    const { getState } = setup({ search: '?view=active-tab&v=5' });
 
     // Check if we can successfully finalized the profile view for active tab.
     expect(getView(getState()).phase).toBe('DATA_LOADED');
@@ -135,7 +135,10 @@ describe('finalizeProfileView', function() {
   });
 
   it('switches back to full view if there is no `pages` array', async function() {
-    const { getState } = setup('?view=active-tab&v=5', false);
+    const { getState } = setup({
+      search: '?view=active-tab&v=5',
+      noPages: true,
+    });
 
     // Check if we can successfully finalized the profile view for full view.
     expect(getView(getState()).phase).toBe('DATA_LOADED');
