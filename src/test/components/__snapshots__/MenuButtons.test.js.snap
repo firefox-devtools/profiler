@@ -625,17 +625,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       type="button"
       value="Profile Info"
     />
-    <div
-      class="arrowPanelAnchor"
-    >
-      <div
-        class="arrowPanel metaInfoPanel"
-      >
-        <div
-          class="arrowPanelArrow"
-        />
-      </div>
-    </div>
   </div>
   <div
     class="menuButtons"
@@ -648,17 +637,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
         type="button"
         value="Publish…"
       />
-      <div
-        class="arrowPanelAnchor"
-      >
-        <div
-          class="arrowPanel menuButtonsPublishPanel"
-        >
-          <div
-            class="arrowPanelArrow"
-          />
-        </div>
-      </div>
     </div>
     <a
       class="menuButtonsLink"

@@ -12,14 +12,8 @@ require('./ArrowPanel.css');
 type Props = {|
   +onOpen?: () => mixed,
   +onClose?: () => mixed,
-  +onOkButtonClick?: () => mixed,
-  +onCancelButtonClick?: () => mixed,
   +className: string,
   +children: React.Node,
-  +title?: string,
-  +okButtonText?: string,
-  +okButtonType?: 'default' | 'primary' | 'destructive',
-  +cancelButtonText?: string,
 |};
 
 type State = {|
@@ -85,64 +79,21 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     }
   };
 
-  _onOkButtonClick = () => {
-    this.close();
-    if (this.props.onOkButtonClick) {
-      this.props.onOkButtonClick();
-    }
-  };
-
-  _onCancelButtonClick = () => {
-    this.close();
-    if (this.props.onCancelButtonClick) {
-      this.props.onCancelButtonClick();
-    }
-  };
-
   render() {
-    const {
-      className,
-      children,
-      title,
-      okButtonText,
-      okButtonType,
-      cancelButtonText,
-    } = this.props;
-    const hasTitle = title !== undefined;
-    const hasButtons = okButtonText || cancelButtonText;
+    const { className, children } = this.props;
     const { open, isClosing } = this.state;
+    if (!open && !isClosing) {
+      return null;
+    }
+
     return (
       <div className="arrowPanelAnchor">
         <div
-          className={classNames(
-            'arrowPanel',
-            { open, hasTitle, hasButtons },
-            className
-          )}
+          className={classNames('arrowPanel', { open }, className)}
           onClick={this._onArrowPanelClick}
         >
           <div className="arrowPanelArrow" />
-          {hasTitle ? <h1 className="arrowPanelTitle">{title}</h1> : null}
-          {open || isClosing ? (
-            <div className="arrowPanelContent">{children}</div>
-          ) : null}
-          {hasButtons ? (
-            <div className="arrowPanelButtons">
-              <input
-                type="button"
-                className="photon-button photon-button-default"
-                value={cancelButtonText}
-                onClick={this._onCancelButtonClick}
-              />
-              <input
-                type="button"
-                className={`photon-button photon-button-${okButtonType ||
-                  'primary'}`}
-                value={okButtonText}
-                onClick={this._onOkButtonClick}
-              />
-            </div>
-          ) : null}
+          <div className="arrowPanelContent">{children}</div>
         </div>
       </div>
     );

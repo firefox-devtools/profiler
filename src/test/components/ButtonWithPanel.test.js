@@ -52,50 +52,6 @@ describe('shared/ButtonWithPanel', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('various panel contents', () => {
-    it('renders panels with default buttons and titles', () => {
-      const { container } = render(
-        <ButtonWithPanel
-          className="button"
-          label="My Button"
-          initialOpen={true}
-          panel={
-            <ArrowPanel
-              className="panel"
-              title="Wonderful content"
-              okButtonText="Confirm"
-              cancelButtonText="Cancel"
-            >
-              <div>Panel content</div>
-            </ArrowPanel>
-          }
-        />
-      );
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it('renders panels with specified buttons', () => {
-      const { container } = render(
-        <ButtonWithPanel
-          className="button"
-          label="My Button"
-          initialOpen={true}
-          panel={
-            <ArrowPanel
-              className="panel"
-              okButtonText="Confirm"
-              okButtonType="destructive"
-              cancelButtonText="Cancel"
-            >
-              <div>Panel content</div>
-            </ArrowPanel>
-          }
-        />
-      );
-      expect(container.firstChild).toMatchSnapshot();
-    });
-  });
-
   describe('protecting against mounting expensive panels', function() {
     it('does not render the contents when closed', function() {
       const { queryByTestId } = render(

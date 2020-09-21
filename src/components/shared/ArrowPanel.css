@@ -31,16 +31,6 @@
     calc(var(--internal-offset-from-top) * -1);
 }
 
-/* The paddings are on the inner elements (arrowPanelContent, arrowPanelTitle,
- * arrowPanelButtons), instead of the arrowPanel, because they have the
- * scrollbar, so this is more elegant.
- * Horizontal paddings are added here for all elements, vertical padding will be
- * added where needed. */
-.arrowPanel > * {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
 .arrowPanel:not(.open) {
   opacity: 0;
   pointer-events: none;
@@ -98,34 +88,16 @@
   transform-origin: top left;
 }
 
-.arrowPanelTitle {
-  padding-top: 16px;
-  margin: 0;
-  font-size: 1.2em;
-
-  /* No padding-bottom because the arrowPanelContent has a padding-top. */
-}
-
 .arrowPanelContent {
   overflow: auto;
   max-height: calc(
     100vh - var(--internal-approx-distance-from-top) -
       var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
   );
-  padding-top: 16px;
-  padding-bottom: 16px;
+  padding: 16px;
 
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
-}
-
-.arrowPanelButtons {
-  display: flex;
-  flex-flow: row nowrap;
-
-  /* No padding-top because arrowPanelContent has a padding-bottom. */
-  padding-bottom: 16px;
-  gap: 8px;
 }
 
 .menuButtonsPermalinkPanel .arrowPanelContent {
