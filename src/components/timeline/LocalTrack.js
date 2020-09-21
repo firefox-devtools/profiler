@@ -94,7 +94,7 @@ class LocalTrackComponent extends PureComponent<Props> {
       case 'thread':
         return (
           <TrackThread
-            threadIndex={localTrack.threadIndex}
+            threadsKey={localTrack.threadIndex}
             trackType="expanded"
             trackName={trackName}
           />

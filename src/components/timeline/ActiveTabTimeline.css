@@ -58,6 +58,14 @@
   transition: height 0.2s;
 }
 
+.timelineResourcesHeader .timelineMarkers {
+  /*
+   * TODO: Currently we don't show any markers for merged resource track but we
+   * should add jank markers.
+   */
+  height: 0;
+}
+
 /* Set the marker height of the closed resources to 3px */
 .timelineTrackResourceRow:not(.opened) .timelineMarkers {
   height: 3px;
@@ -79,6 +87,10 @@
  */
 .timelineTrackResourceRow .timelineMarkersGeckoMain {
   height: 9px;
+}
+
+.timelineResourcesHeader .threadActivityGraph {
+  height: 20px;
 }
 
 .timelineTrackResourceRow:not(.opened) .threadActivityGraph {
@@ -126,4 +138,12 @@
 
 .timelineTrackResourceLabel span {
   font-weight: bold;
+}
+
+.timelineResourcesHeader .timelineTrackThread.condensed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--resources-header-height);
 }

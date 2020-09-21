@@ -230,7 +230,7 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
     switch (globalTrack.type) {
       case 'tab': {
         // Only print the main track if we actually managed to find it.
-        if (globalTrack.threadIndexes.length > 0) {
+        if (globalTrack.threadIndexes.size > 0) {
           const selected = selectedThreadIndexes.has(
             globalTrack.mainThreadIndex
           )

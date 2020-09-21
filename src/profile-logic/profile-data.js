@@ -2675,5 +2675,27 @@ export function getOrCreateURIResource(
  * See the ThreadsKey type for an explanation.
  */
 export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
+  if (threadIndexes.size === 1) {
+    // Return the ThreadIndex directly if there is only one thread.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return (threadIndexes.values().next().value: any);
+  }
+
   return [...threadIndexes].sort((a, b) => b - a).join(',');
+}
+
+/**
+ * Checks if threadIndexesSet contains all the threads in the threadsKey.
+ */
+export function hasThreadKeys(
+  threadIndexesSet: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+): boolean {
+  const threadIndexes = ('' + threadsKey).split(',').map(n => +n);
+  for (const threadIndex of threadIndexes) {
+    if (!threadIndexesSet.has(threadIndex)) {
+      return false;
+    }
+  }
+  return true;
 }

@@ -13,8 +13,9 @@ import type {
   IsSidebarOpenPerPanelState,
   Reducer,
   UrlSetupPhase,
-  ThreadIndex,
+  ThreadsKey,
   ExperimentalFlags,
+  CssPixels,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -163,14 +164,14 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
   }
 };
 
-const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
-  state = [],
+const trackThreadHeights: Reducer<{ [key: ThreadsKey]: CssPixels }> = (
+  state = {},
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_TRACK_THREAD_HEIGHT': {
-      const newState = state.slice();
-      newState[action.threadIndex] = action.height;
+      const newState = { ...state };
+      newState[action.threadsKey] = action.height;
       return newState;
     }
     default:

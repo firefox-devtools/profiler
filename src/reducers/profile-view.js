@@ -263,7 +263,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     case 'CHANGE_INVERT_CALLSTACK': {
       const { callTree, callNodeTable, selectedThreadIndexes } = action;
       return objectMap(state, (viewOptions, threadsKey) => {
-        if (threadsKey === ProfileData.getThreadsKey(selectedThreadIndexes)) {
+        if (
+          // `Object.entries` converts number threadsKeys into strings, so
+          // converting right hand side to string as well.
+          threadsKey ===
+          ProfileData.getThreadsKey(selectedThreadIndexes).toString()
+        ) {
           // Only attempt this on the current thread, as we need the transformed thread
           // There is no guarantee that this has been calculated on all the other threads,
           // and we shouldn't attempt to expect it, as that could be quite a perf cost.

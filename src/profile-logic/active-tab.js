@@ -5,6 +5,7 @@
 
 import { getThreadSelectors } from '../selectors/per-thread';
 import { isMainThread } from './tracks';
+import { getThreadsKey } from './profile-data';
 import { ensureExists } from '../utils/flow';
 
 import type {
@@ -123,14 +124,20 @@ export function computeActiveTabTracks(
     }
   }
 
+  const mainTrackIndexesSet = new Set(mainTrackIndexes);
   const mainTrack: ActiveTabMainTrack = {
     type: 'tab',
     // FIXME: We should revert back to full view if we failed to find a track
     // index for the main track.
     mainThreadIndex: mainTrackIndexes[0] || 0,
-    threadIndexes: mainTrackIndexes,
+    threadIndexes: mainTrackIndexesSet,
+    threadsKey: getThreadsKey(mainTrackIndexesSet),
   };
-  return { mainTrack, screenshots, resources };
+  const resourcesThreadsKey = getThreadsKey(
+    new Set(resources.map(resource => resource.threadIndex))
+  );
+
+  return { mainTrack, screenshots, resources, resourcesThreadsKey };
 }
 
 /**

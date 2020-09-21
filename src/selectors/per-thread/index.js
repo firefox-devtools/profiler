@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { createSelector } from 'reselect';
+import memoize from 'memoize-immutable';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import {
@@ -46,8 +47,29 @@ export type ThreadSelectors = {|
  * This is the static object store that holds the selector functions.
  */
 const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
-let _mergedThreadSelectorCacheKey: ?ThreadsKey;
-let _mergedThreadSelectorCache: ?ThreadSelectors;
+const _mergedThreadSelectorsMemoized = memoize(
+  (threadsKey: ThreadsKey) => {
+    // We don't pass this set inside this memoization function since we create
+    // an intermediate Set whenever we need to access the cache. Memoize should
+    // only use threadsKey as the key.
+    const threadIndexes = new Set(('' + threadsKey).split(',').map(n => +n));
+    return _buildThreadSelectors(threadIndexes, threadsKey);
+  },
+  { limit: 5 }
+);
+
+const getSingleThreadSelectors = (
+  threadIndex: ThreadIndex
+): ThreadSelectors => {
+  if (threadIndex in _threadSelectorsCache) {
+    return _threadSelectorsCache[threadIndex];
+  }
+
+  const threadIndexes = new Set([threadIndex]);
+  const selectors = _buildThreadSelectors(threadIndexes);
+  _threadSelectorsCache[threadIndex] = selectors;
+  return selectors;
+};
 
 /**
  * This function does the work of building out the selectors for a given thread index.
@@ -64,10 +86,6 @@ export const getThreadSelectors = (
     threadIndex = oneOrManyThreadIndexes;
   } else {
     threadIndexes = oneOrManyThreadIndexes;
-    if (threadIndexes.size === 1) {
-      // We know this value exists because of the size check, even if Flow doesn't.
-      threadIndex = (threadIndexes.values().next().value: any);
-    }
   }
 
   // The thread selectors have two different caching strategies. For a single thread
@@ -77,13 +95,7 @@ export const getThreadSelectors = (
   // intensive to retain this set of selectors forever, as it can change frequently
   // and with various different values.
   if (threadIndex !== null) {
-    if (threadIndex in _threadSelectorsCache) {
-      return _threadSelectorsCache[threadIndex];
-    }
-    const threadIndexes = new Set([threadIndex]);
-    const selectors = _buildThreadSelectors(threadIndexes);
-    _threadSelectorsCache[threadIndex] = selectors;
-    return selectors;
+    return getSingleThreadSelectors(threadIndex);
   }
 
   // This must be true with the logic above.
@@ -108,17 +120,13 @@ export const getThreadSelectorsFromThreadsKey = (
     ('' + threadsKey).split(',').map(n => +n)
   )
 ): ThreadSelectors => {
-  if (
-    _mergedThreadSelectorCache &&
-    threadsKey === _mergedThreadSelectorCacheKey
-  ) {
-    return _mergedThreadSelectorCache;
+  if (threadIndexes.size === 1) {
+    // We should get the single thread and use its caching mechanism.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return getSingleThreadSelectors((threadIndexes.values().next().value: any));
   }
 
-  const selectors = _buildThreadSelectors(threadIndexes, threadsKey);
-  _mergedThreadSelectorCache = selectors;
-  _mergedThreadSelectorCacheKey = threadsKey;
-  return selectors;
+  return _mergedThreadSelectorsMemoized(threadsKey);
 };
 
 function _buildThreadSelectors(

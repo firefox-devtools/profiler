@@ -5,6 +5,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import classNames from 'classnames';
+import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import ThreadStackGraph from '../shared/thread/StackGraph';
@@ -17,7 +19,7 @@ import {
   getTimelineType,
   getInvertCallstack,
   getTimelineTrackOrganization,
-  getThreadSelectors,
+  getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -34,6 +36,7 @@ import {
   selectRootCallNode,
 } from '../../actions/profile-view';
 import { reportTrackThreadHeight } from '../../actions/app';
+import { hasThreadKeys } from '../../profile-logic/profile-data';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import { getTrackSelectionModifier } from '../../utils';
 import { assertExhaustiveCheck } from '../../utils/flow';
@@ -52,12 +55,13 @@ import type {
   SelectedState,
   State,
   TimelineTrackOrganization,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +trackType: 'expanded' | 'condensed',
   +showMemoryMarkers?: boolean,
   +trackName: string,
@@ -114,7 +118,7 @@ class TimelineTrackThread extends PureComponent<Props> {
     switch (modifier) {
       case 'none': {
         const {
-          threadIndex,
+          threadsKey,
           selectLeafCallNode,
           selectRootCallNode,
           focusCallTree,
@@ -127,13 +131,16 @@ class TimelineTrackThread extends PureComponent<Props> {
           if (invertCallstack) {
             // When we're displaying the inverted call stack, the "leaf" call node we're
             // interested in is actually displayed as the "root" of the tree.
-            selectRootCallNode(threadIndex, sampleIndex);
+            selectRootCallNode(threadsKey, sampleIndex);
           } else {
-            selectLeafCallNode(threadIndex, sampleIndex);
+            selectLeafCallNode(threadsKey, sampleIndex);
           }
           focusCallTree();
         }
-        if (selectedThreadIndexes.has(threadIndex)) {
+        if (
+          typeof threadsKey === 'number' &&
+          selectedThreadIndexes.has(threadsKey)
+        ) {
           // We could have multiple threads selected here, and we wouldn't want
           // to de-select one when interacting with it.
           event.stopPropagation();
@@ -160,10 +167,10 @@ class TimelineTrackThread extends PureComponent<Props> {
   };
 
   componentDidUpdate() {
-    const { threadIndex, height, reportTrackThreadHeight } = this.props;
+    const { threadsKey, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
-    reportTrackThreadHeight(threadIndex, height);
+    reportTrackThreadHeight(threadsKey, height);
   }
 
   render() {
@@ -171,7 +178,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       filteredThread,
       fullThread,
       tabFilteredThread,
-      threadIndex,
+      threadsKey,
       interval,
       rangeStart,
       rangeEnd,
@@ -196,18 +203,19 @@ class TimelineTrackThread extends PureComponent<Props> {
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer' ||
         filteredThread.name === 'Java Main Thread' ||
+        filteredThread.name === 'Merged thread' ||
         filteredThread.name.startsWith('MediaDecoderStateMachine')) &&
       processType !== 'plugin';
 
     return (
-      <div className="timelineTrackThread">
+      <div className={classNames('timelineTrackThread', trackType)}>
         {timelineTrackOrganization.type !== 'active-tab' ? (
           <>
             {showMemoryMarkers ? (
               <TimelineMarkersMemory
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -215,7 +223,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersFileIo
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -223,7 +231,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersJank
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -231,7 +239,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersOverview
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -271,7 +279,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersMemory
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -279,7 +287,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersFileIo
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -287,7 +295,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersJank
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -295,7 +303,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               <TimelineMarkersOverview
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
+                threadsKey={threadsKey}
                 onSelect={this._onMarkerSelect}
               />
             ) : null}
@@ -313,13 +321,24 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
+/**
+ * Memoize the hasThreadKeys to not compute it all the time.
+ */
+const _getTimelineIsSelected = memoize(
+  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
+  { limit: 1 }
+);
+
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
-    const { threadIndex } = ownProps;
-    const selectors = getThreadSelectors(threadIndex);
+    const { threadsKey } = ownProps;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex = selectedThreadIndexes.has(threadIndex)
+    const selectedCallNodeIndex = _getTimelineIsSelected(
+      selectedThreadIndexes,
+      threadsKey
+    )
       ? selectors.getSelectedCallNodeIndex(state)
       : null;
     return {

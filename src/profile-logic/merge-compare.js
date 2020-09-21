@@ -885,6 +885,7 @@ function getComparisonThread(
  * Merge threads inside a profile.
  * The threads should belong to the same profile because unlike mergeProfilesForDiffing,
  * this does not merge the profile level information like metadata, categories etc.
+ * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: Thread[]): Thread {
   const newStringTable = new UniqueStringArray();

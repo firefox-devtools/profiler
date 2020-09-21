@@ -60,7 +60,7 @@ export class TrackIPCImpl extends React.PureComponent<Props, State> {
         <TimelineMarkersIPC
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           onSelect={this._onMarkerSelect}
         />
       </div>
