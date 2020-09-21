@@ -5,7 +5,6 @@
 // @flow
 import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import ArrowPanel from '../../shared/ArrowPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 import {
@@ -90,8 +89,9 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
         className="menuButtonsMetaInfoButton"
         buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
         label="Profile Info"
-        panel={
-          <ArrowPanel className="metaInfoPanel">
+        panelClassName="metaInfoPanel"
+        panelContent={
+          <>
             <h2 className="metaInfoSubTitle">Profile Information</h2>
             <div className="metaInfoSection">
               {meta.startTime ? (
@@ -218,7 +218,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             {profilerOverhead ? (
               <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
             ) : null}
-          </ArrowPanel>
+          </>
         }
       />
     );

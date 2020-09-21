@@ -4,15 +4,20 @@
 
 // @flow
 
+// This implements a panel with a "arrow" triangle graphic that points to the
+// button that triggers it.
+// Please do not use this component directly. This is used by ButtonWithPanel
+// to wrap the panel content.
+
 import * as React from 'react';
 import classNames from 'classnames';
 
 require('./ArrowPanel.css');
 
 type Props = {|
-  +onOpen?: () => mixed,
-  +onClose?: () => mixed,
-  +className: string,
+  +onOpen: () => mixed,
+  +onClose: () => mixed,
+  +className?: string,
   +children: React.Node,
 |};
 
@@ -35,9 +40,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     }
 
     this.setState({ open: true });
-    if (this.props.onOpen) {
-      this.props.onOpen();
-    }
+    this.props.onOpen();
   }
 
   close() {
@@ -49,9 +52,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
 
       setTimeout(this._onCloseAnimationFinish(openGeneration), 400);
 
-      if (this.props.onClose) {
-        this.props.onClose();
-      }
+      this.props.onClose();
 
       return { open: false, isClosing: true, openGeneration };
     });

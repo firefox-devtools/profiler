@@ -6,7 +6,6 @@
 import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
-import ArrowPanel from '../../components/shared/ArrowPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -22,11 +21,8 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         buttonClassName="buttonButton"
         label="My Button"
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
   }
@@ -42,11 +38,8 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         label="My Button"
         initialOpen={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
     expect(container.firstChild).toMatchSnapshot();
@@ -58,11 +51,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeFalsy();
@@ -78,11 +67,7 @@ describe('shared/ButtonWithPanel', () => {
           className="button"
           label="My Button"
           initialOpen={true}
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeTruthy();

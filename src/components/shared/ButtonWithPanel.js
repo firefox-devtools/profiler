@@ -4,44 +4,37 @@
 
 // @flow
 
+// This implements a Button that trrigers a panel. The panel will have a small
+// arrow pointing towards the button, which is implemented in ArrowPanel that
+// shouldn't be used directly.
+
 import * as React from 'react';
 import classNames from 'classnames';
 
+import ArrowPanel from './ArrowPanel';
+
 import './ButtonWithPanel.css';
 
-type PanelProps = {
-  +onOpen?: () => mixed,
-  +onClose?: () => mixed,
-};
-
-interface Panel {
-  open(): mixed;
-  close(): mixed;
-}
-
-/**
- * Note about the `panel` prop: we accept any React element whose Component
- * class implements the `Panel` interface above, and has at least the props from
- * `PanelProps` above, and any State type. */
 type Props = {|
   +className?: string,
   +label: string,
-  +panel: React.Element<
-    Class<Panel & React.Component<$Subtype<PanelProps>, any>>
-  >,
+  +panelContent: React.Node,
+  +panelClassName?: string,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
   +initialOpen?: boolean,
   // The class name of the button input element.
   +buttonClassName?: string,
+  +onPanelOpen?: () => mixed,
+  +onPanelClose?: () => mixed,
 |};
 
 type State = {|
-  open: boolean,
+  +open: boolean,
 |};
 
 class ButtonWithPanel extends React.PureComponent<Props, State> {
-  _panel: Panel | null = null;
+  _panel: ArrowPanel | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -65,19 +58,19 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   _onPanelOpen = () => {
     this.setState({ open: true });
-    if (this.props.panel.props.onOpen) {
-      this.props.panel.props.onOpen();
+    if (this.props.onPanelOpen) {
+      this.props.onPanelOpen();
     }
   };
 
   _onPanelClose = () => {
     this.setState({ open: false });
-    if (this.props.panel.props.onClose) {
-      this.props.panel.props.onClose();
+    if (this.props.onPanelClose) {
+      this.props.onPanelClose();
     }
   };
 
-  _takePanelRef = (panel: Panel | null) => {
+  _takePanelRef = (panel: ArrowPanel | null) => {
     this._panel = panel;
   };
 
@@ -112,7 +105,13 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { className, label, panel, buttonClassName } = this.props;
+    const {
+      className,
+      label,
+      panelContent,
+      panelClassName,
+      buttonClassName,
+    } = this.props;
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
@@ -122,11 +121,14 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
           value={label}
           onClick={this._onButtonClick}
         />
-        {React.cloneElement(panel, {
-          ref: this._takePanelRef,
-          onOpen: this._onPanelOpen,
-          onClose: this._onPanelClose,
-        })}
+        <ArrowPanel
+          className={panelClassName}
+          onOpen={this._onPanelOpen}
+          onClose={this._onPanelClose}
+          ref={this._takePanelRef}
+        >
+          {panelContent}
+        </ArrowPanel>
       </div>
     );
   }

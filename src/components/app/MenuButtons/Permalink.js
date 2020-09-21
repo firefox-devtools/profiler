@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import * as UrlUtils from '../../../utils/shorten-url';
 
@@ -26,10 +25,10 @@ type State = {|
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
   _permalinkButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
-  _takePermalinkButtonRef = (elem: any) => {
+  _takePermalinkButtonRef = (elem: ButtonWithPanel | null) => {
     this._permalinkButton = elem;
   };
-  _takePermalinkTextFieldRef = (elem: any) => {
+  _takePermalinkTextFieldRef = (elem: HTMLInputElement | null) => {
     this._permalinkTextField = elem;
   };
 
@@ -75,21 +74,18 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
         ref={this._takePermalinkButtonRef}
         label="Permalink"
         initialOpen={this.props.isNewlyPublished}
-        panel={
-          <ArrowPanel
-            className="menuButtonsPermalinkPanel"
-            onOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
-            onClose={this._onPermalinkPanelClose}
-          >
-            <input
-              data-testid="MenuButtonsPermalink-input"
-              type="text"
-              className="menuButtonsPermalinkTextField photon-input"
-              value={this.state.shortUrl}
-              readOnly="readOnly"
-              ref={this._takePermalinkTextFieldRef}
-            />
-          </ArrowPanel>
+        onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
+        onPanelClose={this._onPermalinkPanelClose}
+        panelClassName="menuButtonsPermalinkPanel"
+        panelContent={
+          <input
+            data-testid="MenuButtonsPermalink-input"
+            type="text"
+            className="menuButtonsPermalinkTextField photon-input"
+            value={this.state.shortUrl}
+            readOnly="readOnly"
+            ref={this._takePermalinkTextFieldRef}
+          />
         }
       />
     );
