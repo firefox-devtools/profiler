@@ -24,7 +24,7 @@ interface Panel {
  * class implements the `Panel` interface above, and has at least the props from
  * `PanelProps` above, and any State type. */
 type Props = {|
-  +className: string,
+  +className?: string,
   +label: string,
   +panel: React.Element<
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
