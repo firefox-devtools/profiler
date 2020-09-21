@@ -89,6 +89,7 @@ declare class Window {
   WheelEvent: WheelEvent;
   navigator: {
     userAgent: string,
+    platform: string,
   };
 }
 

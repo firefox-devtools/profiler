@@ -12,7 +12,7 @@ import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
   changeInvertCallstack,
-  changeSelectedThread,
+  changeSelectedThreads,
 } from '../../actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
@@ -160,7 +160,7 @@ describe('CallTreeSidebar', function() {
       )
     );
 
-    dispatch(changeSelectedThread(2));
+    dispatch(changeSelectedThreads(new Set([2])));
     dispatch(changeSelectedCallNode(2, [A]));
 
     expect(queryByText(/Implementation/)).toBe(null);

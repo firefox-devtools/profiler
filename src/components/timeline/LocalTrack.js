@@ -13,7 +13,7 @@ import {
 import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getSelectedTab,
   getHiddenLocalTracks,
 } from '../../selectors/url-state';
@@ -28,6 +28,7 @@ import { TrackEventDelay } from './TrackEventDelay';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
+import { getTrackSelectionModifier } from '../../utils';
 import type {
   TrackReference,
   Pid,
@@ -61,25 +62,31 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class LocalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
-    if (event.button === 0) {
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-      this._onLineClick();
-    } else if (event.button === 2) {
-      // This is needed to allow the context menu to know what was right clicked without
-      // actually changing the current selection.
+    if (event.button === 2) {
+      // Notify the redux store that this was right clicked.
       this.props.changeRightClickedTrack(this._getTrackReference());
     }
+  };
+
+  _selectCurrentTrack = (event: MouseEvent) => {
+    if (
+      event.button === 2 ||
+      // Macs can right click with the ctrl key.
+      (window.navigator.platform === 'MacIntel' && event.ctrlKey)
+    ) {
+      // This is a right click, do nothing.
+      return;
+    }
+    this.props.selectTrack(
+      this._getTrackReference(),
+      getTrackSelectionModifier(event)
+    );
   };
 
   _getTrackReference(): TrackReference {
     const { pid, trackIndex } = this.props;
     return { type: 'local', pid, trackIndex };
   }
-
-  _onLineClick = () => {
-    this.props.selectTrack(this._getTrackReference());
-  };
 
   renderTrack() {
     const { localTrack, trackName } = this.props;
@@ -129,7 +136,7 @@ class LocalTrackComponent extends PureComponent<Props> {
           className={classNames('timelineTrackRow timelineTrackLocalRow', {
             selected: isSelected,
           })}
-          onClick={this._onLineClick}
+          onMouseUp={this._selectCurrentTrack}
         >
           <ContextMenuTrigger
             id="TimelineTrackContextMenu"
@@ -158,16 +165,17 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     let titleText = null;
     let isSelected = false;
 
+    const selectedThreadIndexes = getSelectedThreadIndexes(state);
+
     // Run different selectors based on the track type.
     switch (localTrack.type) {
       case 'thread': {
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
-          threadIndex === selectedThreadIndex &&
+          selectedThreadIndexes.has(threadIndex) &&
           selectedTab !== 'network-chart' &&
           selectedTab !== 'event-delay';
         titleText = selectors.getThreadProcessDetails(state);
@@ -175,10 +183,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       }
       case 'network': {
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         isSelected =
-          threadIndex === selectedThreadIndex &&
+          selectedThreadIndexes.has(threadIndex) &&
           selectedTab === 'network-chart';
         break;
       }
@@ -190,20 +197,20 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       }
       case 'ipc': {
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         isSelected =
-          threadIndex === selectedThreadIndex && selectedTab === 'marker-chart';
+          selectedThreadIndexes.has(threadIndex) &&
+          selectedTab === 'marker-chart';
         break;
       }
       case 'event-delay': {
         // Look up the thread information for the process if it exists.
         const threadIndex = localTrack.threadIndex;
-        const selectedThreadIndex = getSelectedThreadIndex(state);
         const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
-          threadIndex === selectedThreadIndex && selectedTab !== 'event-delay';
+          threadIndex === selectedThreadIndexes.has(threadIndex) &&
+          selectedTab !== 'event-delay';
         titleText =
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;

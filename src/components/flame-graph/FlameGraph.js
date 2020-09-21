@@ -16,7 +16,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
@@ -39,6 +39,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
   TracedTiming,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
@@ -70,7 +71,7 @@ type StateProps = {|
   +flameGraphTiming: FlameGraphTiming,
   +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
@@ -94,9 +95,9 @@ class FlameGraph extends React.PureComponent<Props> {
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
@@ -104,13 +105,9 @@ class FlameGraph extends React.PureComponent<Props> {
   _onRightClickedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const {
-      callNodeInfo,
-      threadIndex,
-      changeRightClickedCallNode,
-    } = this.props;
+    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
@@ -185,7 +182,7 @@ class FlameGraph extends React.PureComponent<Props> {
 
   _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
     const {
-      threadIndex,
+      threadsKey,
       callTree,
       callNodeInfo: { callNodeTable },
       selectedCallNodeIndex,
@@ -198,7 +195,7 @@ class FlameGraph extends React.PureComponent<Props> {
       ) {
         // Just select the "root" node if we've got no prior selection.
         changeSelectedCallNode(
-          threadIndex,
+          threadsKey,
           getCallNodePathFromIndex(0, callNodeTable)
         );
       }
@@ -210,7 +207,7 @@ class FlameGraph extends React.PureComponent<Props> {
         const prefix = callNodeTable.prefix[selectedCallNodeIndex];
         if (prefix !== -1) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(prefix, callNodeTable)
           );
         }
@@ -225,7 +222,7 @@ class FlameGraph extends React.PureComponent<Props> {
 
         if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(callNodeIndex, callNodeTable)
           );
         }
@@ -240,7 +237,7 @@ class FlameGraph extends React.PureComponent<Props> {
 
         if (callNodeIndex !== undefined) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(callNodeIndex, callNodeTable)
           );
         }
@@ -257,7 +254,7 @@ class FlameGraph extends React.PureComponent<Props> {
       thread,
       unfilteredThread,
       sampleIndexOffset,
-      threadIndex,
+      threadsKey,
       maxStackDepth,
       flameGraphTiming,
       callTree,
@@ -288,7 +285,7 @@ class FlameGraph extends React.PureComponent<Props> {
           }}
         >
           <FlameGraphCanvas
-            key={threadIndex}
+            key={threadsKey}
             // ChartViewport props
             viewportProps={{
               timeRange,
@@ -359,7 +356,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     previewSelection: getPreviewSelection(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     categories: getCategories(state),
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),

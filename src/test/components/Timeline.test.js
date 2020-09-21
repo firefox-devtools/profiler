@@ -17,10 +17,230 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
-import { getTimelineTrackOrganization } from '../../selectors/url-state';
-import { getRightClickedTrack } from '../../selectors/profile';
+import {
+  getTimelineTrackOrganization,
+  selectedThreadSelectors,
+  getRightClickedTrack,
+} from 'firefox-profiler/selectors';
+import {
+  getProfileWithNiceTracks,
+  getHumanReadableTracks,
+} from '../fixtures/profiles/tracks';
+import { ensureExists } from '../../utils/flow';
 
 import type { Profile } from 'firefox-profiler/types';
+
+describe('Timeline multiple thread selection', function() {
+  const originalDOMRect = global.DOMRect;
+  beforeEach(() => {
+    global.DOMRect = class DOMRect {};
+  });
+  afterEach(() => {
+    if (originalDOMRect) {
+      global.DOMRect = originalDOMRect;
+    } else {
+      delete global.DOMRect;
+    }
+  });
+
+  function setup() {
+    const profile = getProfileWithNiceTracks();
+    const store = storeWithProfile(profile);
+
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
+
+    const renderResult = render(
+      <Provider store={store}>
+        <Timeline />
+      </Provider>
+    );
+
+    return { ...renderResult, ...store };
+  }
+
+  it('can toggle select multiple threads', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    fireFullClick(domWorker, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    const contentProcess = getByRole('button', {
+      name: 'Content Process PID: 222',
+    });
+
+    fireFullClick(contentProcess, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will not de-select the last thread', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    const contentProcess = getByRole('button', {
+      name: 'Content Process PID: 222',
+    });
+
+    fireFullClick(contentProcess, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('can select one thread from many', function() {
+    const { getState, getByRole } = setup();
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    fireFullClick(domWorker, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullClick(domWorker);
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will not de-select threads when clicking on a sample', function() {
+    const { getState, getByRole, getByText } = setup();
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    fireFullClick(domWorker, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    const activityGraph: HTMLElement = (ensureExists(
+      getByText('Activity Graph for DOM Worker').closest('canvas'),
+      'Could not find the canvas.'
+    ): any);
+
+    expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
+      null
+    );
+
+    fireFullClick(activityGraph, { pageX: 50, pageY: 50 });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will still work on the activity graph when holding ctrl', function() {
+    const { getState, getByRole, getByText } = setup();
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    fireFullClick(domWorker, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    const activityGraphForStyle: HTMLElement = (ensureExists(
+      getByText('Activity Graph for Style').closest('canvas'),
+      'Could not find the canvas.'
+    ): any);
+
+    expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
+      null
+    );
+
+    fireFullClick(activityGraphForStyle, {
+      pageX: 50,
+      pageY: 50,
+      ctrlKey: true,
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style] SELECTED',
+    ]);
+  });
+
+  it('maintains multi-selections when using the context menu', function() {
+    const { getState, getByRole } = setup();
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    fireFullClick(domWorker, { metaKey: true });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullContextMenu(domWorker);
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+  });
+});
 
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(

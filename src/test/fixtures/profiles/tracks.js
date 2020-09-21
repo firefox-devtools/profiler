@@ -49,7 +49,9 @@ export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
-  const selectedThreadIndex = urlStateSelectors.getSelectedThreadIndex(state);
+  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
+    state
+  );
   const timelineTrackOrganization = urlStateSelectors.getTimelineTrackOrganization(
     state
   );
@@ -68,9 +70,11 @@ export function getHumanReadableTracks(state: State): string[] {
       globalTrack.type === 'process' &&
       globalTrack.mainThreadIndex !== null
     ) {
-      const selected =
-        globalTrack.mainThreadIndex === selectedThreadIndex ? ' SELECTED' : '';
-      const thread = threads[globalTrack.mainThreadIndex];
+      const { mainThreadIndex } = globalTrack;
+      const selected = selectedThreadIndexes.has(mainThreadIndex)
+        ? ' SELECTED'
+        : '';
+      const thread = threads[mainThreadIndex];
       text.push(
         // This is broken up into multiple lines to make it easier to read, but it is
         // in fact one line.
@@ -111,7 +115,10 @@ export function getHumanReadableTracks(state: State): string[] {
 
         const hiddenText = hiddenTracks.has(trackIndex) ? 'hide' : 'show';
         const selected =
-          track.threadIndex === selectedThreadIndex ? ' SELECTED' : '';
+          track.threadIndex !== undefined &&
+          selectedThreadIndexes.has(track.threadIndex)
+            ? ' SELECTED'
+            : '';
 
         text.push(`  - ${hiddenText} [${track.type} ${trackName}]${selected}`);
       }
@@ -214,7 +221,9 @@ export function getStoreWithMemoryTrack(pid: number = 222): * {
  */
 export function getHumanReadableActiveTabTracks(state: State): string[] {
   const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
-  const selectedThreadIndex = urlStateSelectors.getSelectedThreadIndex(state);
+  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
+    state
+  );
   const text: string[] = [];
 
   for (const globalTrack of globalTracks) {
@@ -222,10 +231,11 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
       case 'tab': {
         // Only print the main track if we actually managed to find it.
         if (globalTrack.threadIndexes.length > 0) {
-          const selected =
-            globalTrack.mainThreadIndex === selectedThreadIndex
-              ? ' SELECTED'
-              : '';
+          const selected = selectedThreadIndexes.has(
+            globalTrack.mainThreadIndex
+          )
+            ? ' SELECTED'
+            : '';
           text.push(`main track [tab]${selected}`);
           // TODO: Add resource tracks
         }

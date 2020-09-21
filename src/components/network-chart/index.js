@@ -20,7 +20,7 @@ import {
   getPreviewSelectionRange,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -29,6 +29,7 @@ import type {
   Marker,
   MarkerIndex,
   StartEndRange,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -48,7 +49,7 @@ type StateProps = {|
   +rightClickedMarkerIndex: MarkerIndex | null,
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
 |};
 
 type OwnProps = {| ...SizeProps |};
@@ -80,15 +81,15 @@ class NetworkChart extends React.PureComponent<Props> {
   };
 
   _onRightClick = (markerIndex: MarkerIndex) => {
-    const { threadIndex, changeRightClickedMarker } = this.props;
-    changeRightClickedMarker(threadIndex, markerIndex);
+    const { threadsKey, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadsKey, markerIndex);
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
     const {
-      threadIndex,
+      threadsKey,
       getMarker,
       rightClickedMarkerIndex,
       timeRange,
@@ -114,7 +115,7 @@ class NetworkChart extends React.PureComponent<Props> {
         marker={marker}
         markerIndex={markerIndex}
         networkPayload={networkPayload}
-        threadIndex={threadIndex}
+        threadsKey={threadsKey}
         timeRange={timeRange}
         width={width}
         shouldDisplayTooltips={this._shouldDisplayTooltips}
@@ -186,7 +187,7 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
       ),
       timeRange: getPreviewSelectionRange(state),
       disableOverscan: getPreviewSelection(state).isModifying,
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
     }),
     mapDispatchToProps: { changeRightClickedMarker },
     component: NetworkChart,

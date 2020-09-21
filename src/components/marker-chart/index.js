@@ -18,7 +18,7 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -32,6 +32,7 @@ import type {
   UnitIntervalOfProfileRange,
   StartEndRange,
   PreviewSelection,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -50,7 +51,7 @@ type StateProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: StartEndRange,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
 |};
@@ -95,7 +96,7 @@ class MarkerChart extends React.PureComponent<Props> {
     const {
       maxMarkerRows,
       timeRange,
-      threadIndex,
+      threadsKey,
       markerTimingAndBuckets,
       getMarker,
       previewSelection,
@@ -126,7 +127,7 @@ class MarkerChart extends React.PureComponent<Props> {
             }}
           >
             <MarkerChartCanvas
-              key={threadIndex}
+              key={threadsKey}
               viewportProps={{
                 timeRange,
                 previewSelection,
@@ -146,7 +147,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
-                threadIndex,
+                threadsKey,
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 rightClickedMarkerIndex,
@@ -178,7 +179,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
       previewSelection: getPreviewSelection(state),
       rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
         state

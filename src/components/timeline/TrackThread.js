@@ -13,15 +13,12 @@ import {
   getProfileInterval,
   getCommittedRange,
   getCategories,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
-
-import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getTimelineType,
   getInvertCallstack,
   getTimelineTrackOrganization,
-} from '../../selectors/url-state';
+  getThreadSelectors,
+} from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
   TimelineMarkersFileIo,
@@ -38,6 +35,8 @@ import {
 } from '../../actions/profile-view';
 import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
+import { getTrackSelectionModifier } from '../../utils';
+import { assertExhaustiveCheck } from '../../utils/flow';
 import './TrackThread.css';
 
 import type {
@@ -84,6 +83,7 @@ type StateProps = {|
     IndexIntoSamplesTable
   ) => number,
   +timelineTrackOrganization: TimelineTrackOrganization,
+  +selectedThreadIndexes: Set<ThreadIndex>,
 |};
 
 type DispatchProps = {|
@@ -106,24 +106,47 @@ class TimelineTrackThread extends PureComponent<Props> {
    * Handle when a sample is clicked in the ThreadStackGraph and in the ThreadActivityGraph.
    * This will select the leaf-most stack frame or call node.
    */
-  _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
-    const {
-      threadIndex,
-      selectLeafCallNode,
-      selectRootCallNode,
-      focusCallTree,
-      invertCallstack,
-    } = this.props;
-    /**
-     * When we're displaying the inverted call stack, the "leaf" call node we're
-     * interested in is actually displayed as the "root" of the tree.
-     */
-    if (invertCallstack) {
-      selectRootCallNode(threadIndex, sampleIndex);
-    } else {
-      selectLeafCallNode(threadIndex, sampleIndex);
+  _onSampleClick = (
+    event: SyntheticMouseEvent<>,
+    sampleIndex: IndexIntoSamplesTable
+  ) => {
+    const modifier = getTrackSelectionModifier(event);
+    switch (modifier) {
+      case 'none': {
+        const {
+          threadIndex,
+          selectLeafCallNode,
+          selectRootCallNode,
+          focusCallTree,
+          invertCallstack,
+          selectedThreadIndexes,
+        } = this.props;
+
+        // Sample clicking only works for one thread. See issue #2709
+        if (selectedThreadIndexes.size === 1) {
+          if (invertCallstack) {
+            // When we're displaying the inverted call stack, the "leaf" call node we're
+            // interested in is actually displayed as the "root" of the tree.
+            selectRootCallNode(threadIndex, sampleIndex);
+          } else {
+            selectLeafCallNode(threadIndex, sampleIndex);
+          }
+          focusCallTree();
+        }
+        if (selectedThreadIndexes.has(threadIndex)) {
+          // We could have multiple threads selected here, and we wouldn't want
+          // to de-select one when interacting with it.
+          event.stopPropagation();
+        }
+        break;
+      }
+      case 'ctrl':
+        // Do nothing, the track selection logic will kick in.
+        break;
+      default:
+        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
+        break;
     }
-    focusCallTree();
   };
 
   _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
@@ -294,12 +317,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex =
-      threadIndex === selectedThread
-        ? selectors.getSelectedCallNodeIndex(state)
-        : null;
+    const selectedCallNodeIndex = selectedThreadIndexes.has(threadIndex)
+      ? selectors.getSelectedCallNodeIndex(state)
+      : null;
     return {
       invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
@@ -322,6 +344,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         state
       ),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
+      selectedThreadIndexes,
     };
   },
   mapDispatchToProps: {

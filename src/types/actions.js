@@ -21,6 +21,7 @@ import type {
   MarkerIndex,
   OriginsTimeline,
   ActiveTabTimeline,
+  ThreadsKey,
 } from './profile-derived';
 import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -131,7 +132,7 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
@@ -142,7 +143,7 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +callNodePath: CallNodePath | null,
     |}
   | {|
@@ -150,17 +151,17 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +selectedMarker: MarkerIndex | null,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +markerIndex: MarkerIndex | null,
     |}
   | {|
@@ -182,7 +183,7 @@ type ProfileAction =
   | {|
       +type: 'HIDE_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'SHOW_GLOBAL_TRACK',
@@ -193,7 +194,7 @@ type ProfileAction =
       +type: 'ISOLATE_PROCESS',
       +hiddenGlobalTracks: Set<TrackIndex>,
       +isolatedTrackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       // Isolate the process track, and hide the local tracks.
@@ -201,7 +202,7 @@ type ProfileAction =
       pid: Pid,
       hiddenGlobalTracks: Set<TrackIndex>,
       isolatedTrackIndex: TrackIndex,
-      selectedThreadIndex: ThreadIndex,
+      selectedThreadIndexes: Set<ThreadIndex>,
       hiddenLocalTracks: Set<TrackIndex>,
     |}
   | {|
@@ -218,7 +219,7 @@ type ProfileAction =
       +type: 'HIDE_LOCAL_TRACK',
       +pid: Pid,
       +trackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'SHOW_LOCAL_TRACK',
@@ -230,7 +231,7 @@ type ProfileAction =
       +pid: Pid,
       +hiddenGlobalTracks: Set<TrackIndex>,
       +hiddenLocalTracks: Set<TrackIndex>,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
@@ -273,7 +274,7 @@ type ReceiveProfileAction =
     |}
   | {|
       +type: 'VIEW_FULL_PROFILE',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
       +hiddenGlobalTracks: Set<TrackIndex>,
@@ -283,12 +284,12 @@ type ReceiveProfileAction =
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +originsTimeline: OriginsTimeline,
     |}
   | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
       +browsingContextID: BrowsingContextID | null,
     |}
@@ -324,10 +325,13 @@ type UrlStateAction =
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
   | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
-  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThreadIndex: ThreadIndex |}
+  | {|
+      +type: 'CHANGE_SELECTED_THREAD',
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
   | {|
       +type: 'SELECT_TRACK',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +selectedTab: TabSlug,
     |}
   | {|
@@ -337,13 +341,13 @@ type UrlStateAction =
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +firstPoppedFilterIndex: number,
     |}
   | {|
@@ -353,7 +357,7 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_IMPLEMENTATION_FILTER',
       +implementation: ImplementationFilter,
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +transformedThread: Thread,
       +previousImplementation: ImplementationFilter,
       +implementation: ImplementationFilter,
@@ -367,7 +371,7 @@ type UrlStateAction =
       +invertCallstack: boolean,
       +callTree: CallTree,
       +callNodeTable: CallNodeTable,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'CHANGE_SHOW_USER_TIMINGS',
@@ -394,7 +398,7 @@ type UrlStateAction =
     |}
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |};
 
 type IconsAction =

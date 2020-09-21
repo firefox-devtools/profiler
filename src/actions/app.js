@@ -8,7 +8,7 @@ import {
   getSelectedTab,
   getDataSource,
   getIsActiveTabResourcesPanelOpen,
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
 } from '../selectors/url-state';
 import {
@@ -229,19 +229,19 @@ export function unregisterDragAndDropOverlay(): Action {
 export function toggleResourcesPanel(): ThunkAction<void> {
   return (dispatch, getState) => {
     const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
-    let selectedThreadIndex = getSelectedThreadIndex(getState());
+    let selectedThreadIndexes = getSelectedThreadIndexes(getState());
 
     if (isResourcesPanelOpen) {
       // If it was open when we dispatched that action, it means we are closing this panel.
       // We would like to also select the main track when we close this panel.
       const mainTrack = getActiveTabMainTrack(getState());
-      selectedThreadIndex = mainTrack.mainThreadIndex;
+      selectedThreadIndexes = new Set([mainTrack.mainThreadIndex]);
     }
 
     // Toggle the resources panel eventually.
     dispatch({
       type: 'TOGGLE_RESOURCES_PANEL',
-      selectedThreadIndex,
+      selectedThreadIndexes,
     });
   };
 }

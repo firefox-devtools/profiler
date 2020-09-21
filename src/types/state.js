@@ -27,6 +27,7 @@ import type {
   MarkerIndex,
   ActiveTabTimeline,
   OriginsTimeline,
+  ThreadsKey,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -43,13 +44,15 @@ export type ThreadViewOptions = {|
   +selectedMarker: MarkerIndex | null,
 |};
 
+export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
+
 export type RightClickedCallNode = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +callNodePath: CallNodePath,
 |};
 
 export type RightClickedMarker = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +markerIndex: MarkerIndex,
 |};
 
@@ -81,7 +84,7 @@ export type ActiveTabProfileViewState = {|
  */
 export type ProfileViewState = {
   +viewOptions: {|
-    perThread: ThreadViewOptions[],
+    perThread: ThreadViewOptionsPerThreads,
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
     previewSelection: PreviewSelection,
@@ -231,7 +234,7 @@ export type ActiveTabSpecificProfileUrlState = {|
 |};
 
 export type ProfileSpecificUrlState = {|
-  selectedThread: ThreadIndex | null,
+  selectedThreads: Set<ThreadIndex> | null,
   implementation: ImplementationFilter,
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
   invertCallstack: boolean,

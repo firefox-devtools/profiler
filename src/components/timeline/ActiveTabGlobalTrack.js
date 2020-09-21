@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { selectActiveTabTrack } from '../../actions/profile-view';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
@@ -169,7 +169,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         if (globalTrack.mainThreadIndex !== null) {
           const threadIndex = globalTrack.mainThreadIndex;
           isSelected =
-            threadIndex === getSelectedThreadIndex(state) &&
+            getSelectedThreadIndexes(state).has(threadIndex) &&
             selectedTab !== 'network-chart';
         }
         resourceTracks = getActiveTabResourceTracks(state);
