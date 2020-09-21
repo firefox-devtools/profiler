@@ -91,3 +91,14 @@
 .publishedProfilesDeleteButton {
   margin-left: 8px;
 }
+
+.publishedProfilesDeleteError {
+  /* Note: 24px is: 16px (icon width) + 8px (distance from the text) */
+  padding-left: 24px;
+
+  /* The icon is 4px below the top */
+  background: url(../../../res/img/svg/error-red.svg) no-repeat 0 4px / 16px
+    16px;
+  color: var(--red-60);
+  word-break: break-word;
+}

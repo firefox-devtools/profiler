@@ -86,26 +86,44 @@ type PublishedProfileProps = {|
 type PublishedProfileState = {|
   +confirmDialogIsOpen: boolean,
   +hasBeenDeleted: boolean,
+  +status: 'idle' | 'working',
+  +error: Error | null,
 |};
 
 class PublishedProfile extends React.PureComponent<
   PublishedProfileProps,
   PublishedProfileState
 > {
-  state = { confirmDialogIsOpen: false, hasBeenDeleted: false };
+  state = {
+    confirmDialogIsOpen: false,
+    hasBeenDeleted: false,
+    error: null,
+    status: 'idle',
+  };
   _deleteButtonRef = React.createRef();
   _actionButtonsRef = React.createRef();
 
   onConfirmDeletion = async () => {
     const { profileToken, jwtToken } = this.props.profileData;
-    if (!jwtToken) {
-      throw new Error(
-        `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
-      );
+
+    this.setState({ status: 'working' });
+    try {
+      if (!jwtToken) {
+        throw new Error(
+          `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
+        );
+      }
+      await deleteProfileOnServer({ profileToken, jwtToken });
+      await deleteProfileData(profileToken);
+      this.setState({ hasBeenDeleted: true });
+    } catch (e) {
+      this.setState({
+        error: e,
+      });
+      throw e; // By rethrowing, we keep the dialog open to display some diagnostic.
+    } finally {
+      this.setState({ status: 'idle' });
     }
-    await deleteProfileOnServer({ profileToken, jwtToken });
-    await deleteProfileData(profileToken);
-    this.setState({ hasBeenDeleted: true });
   };
 
   onCloseConfirmDialog = () => {
@@ -128,9 +146,25 @@ class PublishedProfile extends React.PureComponent<
     this.setState({ confirmDialogIsOpen: true });
   };
 
+  _renderPossibleErrorMessage() {
+    const { error } = this.state;
+    if (!error) {
+      return null;
+    }
+
+    return (
+      <p className="publishedProfilesDeleteError">
+        An error happened while deleting this profile.{' '}
+        <a href="javascript:void" title={error.message}>
+          Hover to know more.
+        </a>
+      </p>
+    );
+  }
+
   render() {
     const { profileData, nowTimestamp, withActionButtons } = this.props;
-    const { hasBeenDeleted, confirmDialogIsOpen } = this.state;
+    const { hasBeenDeleted, confirmDialogIsOpen, status } = this.state;
 
     if (hasBeenDeleted) {
       return null;
@@ -187,13 +221,16 @@ class PublishedProfile extends React.PureComponent<
                 panelContent={
                   <ConfirmDialog
                     title={`Delete ${profileName}`}
-                    confirmButtonText="Delete"
+                    confirmButtonText={
+                      status === 'working' ? 'Deleting…' : 'Delete'
+                    }
                     confirmButtonType="destructive"
                     cancelButtonText="Cancel"
                     onConfirmButtonClick={this.onConfirmDeletion}
                   >
                     Are you sure you want to delete uploaded data for this
                     profile? Links for shared copies will no longer work.
+                    {this._renderPossibleErrorMessage()}
                   </ConfirmDialog>
                 }
               />
