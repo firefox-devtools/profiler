@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import * as UrlUtils from '../../../utils/shorten-url';
 
 type Props = {|

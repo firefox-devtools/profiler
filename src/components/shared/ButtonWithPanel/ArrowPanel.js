@@ -12,7 +12,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-require('./ArrowPanel.css');
+import './ArrowPanel.css';
 
 type Props = {|
   +onOpen: () => mixed,
@@ -27,7 +27,7 @@ type State = {|
   +openGeneration: number,
 |};
 
-class ArrowPanel extends React.PureComponent<Props, State> {
+export class ArrowPanel extends React.PureComponent<Props, State> {
   state = {
     open: false,
     isClosing: false,
@@ -100,5 +100,3 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default ArrowPanel;

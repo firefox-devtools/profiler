@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 

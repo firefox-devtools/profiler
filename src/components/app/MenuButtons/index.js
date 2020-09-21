@@ -21,7 +21,7 @@ import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { revertToPrePublishedState } from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
 import {

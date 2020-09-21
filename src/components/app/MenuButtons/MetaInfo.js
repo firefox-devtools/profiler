@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 import {

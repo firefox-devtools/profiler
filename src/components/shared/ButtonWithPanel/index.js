@@ -4,14 +4,30 @@
 
 // @flow
 
-// This implements a Button that trrigers a panel. The panel will have a small
-// arrow pointing towards the button, which is implemented in ArrowPanel that
-// shouldn't be used directly.
+// This implements a Button that triggers a panel. The panel will have a small
+// arrow pointing towards the button, which is implemented in ArrowPanel.
+//
+// Here is a simple example:
+//
+// import { ButtonWithPanel } from // 'firefox-profiler/components/ButtonWithPanel';
+// ...
+// <ButtonWithPanel
+//   className="MyButtonWithPanel"
+//   buttonClassName="MyPanelButton"
+//   panelClassName="MyPanel"
+//   label="Click me!"
+//   panelContent={<>
+//     <p>We explain lots of useful things here.</p>
+//     <p>If you want to know more <a href='/'>click here</a>.</p>
+//   </>}
+// />
+//
+// This registers the events on the window object (mouse and keyboard events).
 
 import * as React from 'react';
 import classNames from 'classnames';
 
-import ArrowPanel from './ArrowPanel';
+import { ArrowPanel } from './ArrowPanel';
 
 import './ButtonWithPanel.css';
 
@@ -33,7 +49,7 @@ type State = {|
   +open: boolean,
 |};
 
-class ButtonWithPanel extends React.PureComponent<Props, State> {
+export class ButtonWithPanel extends React.PureComponent<Props, State> {
   _panel: ArrowPanel | null = null;
 
   constructor(props: Props) {
@@ -133,5 +149,3 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default ButtonWithPanel;
