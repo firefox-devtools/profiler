@@ -184,15 +184,7 @@ export function finalizeProfileView(
         dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
         break;
       case 'active-tab':
-        if (selectedThreadIndex === null) {
-          // Switch back over to the full view if selectedThreadIndex is not present.
-          // We check this here because if selectedThreadIndex is null, that means
-          // it's a new profile from Firefox directly and has no profile information
-          // encoded in the URL. But we only allow conversions from full view currently.
-          dispatch(finalizeFullProfileView(profile, null));
-        } else {
-          // The url state says this is an active tab view. We should compute and
-          // initialize the state relevant to that state.
+        if (pages) {
           dispatch(
             finalizeActiveTabProfileView(
               profile,
@@ -200,7 +192,12 @@ export function finalizeProfileView(
               timelineTrackOrganization.browsingContextID
             )
           );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the active tab based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
         }
+
         break;
       case 'origins': {
         if (pages) {
@@ -524,7 +521,7 @@ export function finalizeOriginProfileView(
  */
 export function finalizeActiveTabProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex,
+  selectedThreadIndex: ThreadIndex | null,
   browsingContextID: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -535,7 +532,10 @@ export function finalizeActiveTabProfileView(
       getState()
     );
 
-    // TODO: check the selectedThreadIndex and select the proper one if it's out of bound.
+    if (selectedThreadIndex === null) {
+      // Select the main track if there is no selected thread.
+      selectedThreadIndex = activeTabTimeline.mainTrack.mainThreadIndex;
+    }
 
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
