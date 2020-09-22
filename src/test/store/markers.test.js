@@ -9,6 +9,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
   type TestDefinedMarkers,
+  getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
@@ -418,5 +419,53 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       ['Dummy 2', 20, null],
     ]);
     expect(markers).toEqual(['Jank']);
+  });
+});
+
+describe('Marker schema filtering', function() {
+  function getMarkerNames(selector): string[] {
+    // prettier-ignore
+    const profile = getProfileWithMarkers([
+      ['no payload',        0, null, null],
+      // $FlowExpectError - Invalid payload by our type system.
+      ['payload no schema', 0, null, { type: 'no schema marker' }],
+      ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
+      ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
+      ...getNetworkMarkers(),
+    ]);
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    return selector(getState())
+      .map(getMarker)
+      .map(marker => marker.name);
+  }
+
+  it('filters for getMarkerTableMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerTableMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      'Load 0: https://mozilla.org',
+      'UserTiming',
+    ]);
+  });
+
+  it('filters for getMarkerChartMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerChartMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      'UserTiming',
+    ]);
+  });
+
+  it('filters for getTimelineOverviewMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)
+    ).toEqual(['RefreshDriverTick']);
   });
 });

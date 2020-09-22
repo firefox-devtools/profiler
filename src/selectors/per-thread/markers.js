@@ -360,25 +360,50 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
-   * This filters out network markers from the list of all markers, so that
-   * they'll be displayed in the marker chart.
+   * For performance reasons, the marker chart ignores the preview selection.
+   * It handles its own zooming behavior. It uses the SearchFilteredMarkerIndexes
+   * instead. It shows markers that use the "marker-chart" schema location, plus it
+   * shows markers that have no schema, in order to be as permissive as possible.
    */
   const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeAndTabFilteredMarkerIndexes,
-    MarkerData.filterForMarkerChart
+    getSearchFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-chart',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
   );
 
   /**
-   * This filters the previous result using a search string.
+   * The marker table uses only the preview selection filtered markers. It shows markers
+   * that use the "marker-table" schema location, plus it shows markers that have
+   * no schema, in order to be as permissive as possible.
    */
-  const getSearchFilteredMarkerChartMarkerIndexes: Selector<
-    MarkerIndex[]
-  > = createSelector(
+  const getMarkerTableMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getMarkerChartMarkerIndexes,
-    UrlState.getMarkersSearchStringsAsRegExp,
-    MarkerData.getSearchFilteredMarkerIndexes
+    getPreviewFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-table',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
   );
 
   /**
@@ -387,7 +412,7 @@ export function getMarkerSelectorsPerThread(
    */
   const getMarkerChartTimingAndBuckets: Selector<MarkerTimingAndBuckets> = createSelector(
     getMarkerGetter,
-    getSearchFilteredMarkerChartMarkerIndexes,
+    getMarkerChartMarkerIndexes,
     ProfileSelectors.getCategories,
     MarkerTimingLogic.getMarkerTimingAndBuckets
   );
@@ -519,8 +544,8 @@ export function getMarkerSelectorsPerThread(
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
     getAreMarkerPanelsEmptyInFullRange,
+    getMarkerTableMarkerIndexes,
     getMarkerChartMarkerIndexes,
-    getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
     getCommittedRangeAndTabFilteredMarkerIndexes,
