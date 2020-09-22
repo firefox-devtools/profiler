@@ -37,13 +37,10 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
     data-index="1"
-    title="40ms"
   >
     <span
       class="filterNavigatorBarItemContent"
-    >
-      40ms
-    </span>
+    />
   </li>
 </ol>
 `;
@@ -67,13 +64,10 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
     data-index="1"
-    title="40ms"
   >
     <span
       class="filterNavigatorBarItemContent"
-    >
-      40ms
-    </span>
+    />
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarLeafItem filterNavigatorBarUncommittedItem filterNavigatorBarUncommittedTransition-enter filterNavigatorBarUncommittedTransition-enter-active"
@@ -95,7 +89,7 @@ exports[`app/ProfileFilterNavigator renders the site hostname as its first eleme
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="0"
-    title="[object Object]"
+    title="https://developer.mozilla.org"
   >
     <span
       class="filterNavigatorBarItemContent"
