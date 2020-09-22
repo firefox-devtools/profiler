@@ -45,13 +45,14 @@ class FilterNavigatorBar extends React.PureComponent<Props> {
                 filterNavigatorBarSelectedItem: i === selectedItem,
                 filterNavigatorBarLeafItem: i === items.length - 1,
               })}
+              title={item.title}
               onClick={this._onLiClick}
             >
               {i === items.length - 1 ? (
-                <span className="filterNavigatorBarItemContent">{item}</span>
+                <span className="filterNavigatorBarItemContent">{item.data}</span>
               ) : (
                 <button type="button" className="filterNavigatorBarItemContent">
-                  {item}
+                  {item.data}
                 </button>
               )}
             </li>

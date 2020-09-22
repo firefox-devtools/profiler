@@ -55,13 +55,16 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
 
     let firstItem;
     if (filterPageData) {
-      firstItem = (
-        <>
-          <Icon iconUrl={filterPageData.favicon} />
-          {filterPageData.hostname} (
-          {getFormattedTimeLength(rootRange.end - rootRange.start)})
-        </>
-      );
+      firstItem = {
+        title: filterPageData.origin,
+        data: (
+          <>
+            <Icon iconUrl={filterPageData.favicon} />
+            {filterPageData.hostname} (
+            {getFormattedTimeLength(rootRange.end - rootRange.start)})
+          </>
+        ),
+      };
     } else {
       firstItem = 'Full Range';
     }
