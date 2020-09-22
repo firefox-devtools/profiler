@@ -266,7 +266,7 @@ export function getMarkerSchemaName(
  * This function takes the intended marker schema for a marker field, and applies
  * the appropriate formatting function.
  */
-export function getMarkerSchema(
+export function getSchemaFromMarker(
   markerSchemaByName: MarkerSchemaByName,
   marker: Marker
 ): MarkerSchema | null {
