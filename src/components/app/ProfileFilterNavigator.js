@@ -66,7 +66,7 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
         ),
       };
     } else {
-      firstItem = 'Full Range';
+      firstItem = { title: 'Full Range', data: 'Full Range' };
     }
 
     const itemsWithFirstElement = this._getItemsWithFirstElement(
