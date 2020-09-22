@@ -45,7 +45,6 @@ class FilterNavigatorBar extends React.PureComponent<Props> {
                 filterNavigatorBarSelectedItem: i === selectedItem,
                 filterNavigatorBarLeafItem: i === items.length - 1,
               })}
-              title={item}
               onClick={this._onLiClick}
             >
               {i === items.length - 1 ? (
