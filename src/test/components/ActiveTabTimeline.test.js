@@ -22,8 +22,8 @@ import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
 } from '../../selectors/profile';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { changeSelectedThread } from '../../actions/profile-view';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
+import { changeSelectedThreads } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
 describe('ActiveTabTimeline', function() {
@@ -97,7 +97,7 @@ describe('ActiveTabTimeline', function() {
 
       if (threadIndex !== null) {
         // The assertions are simpler if the GeckoMain tab thread is not already selected.
-        dispatch(changeSelectedThread(threadIndex + 1));
+        dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
       }
 
       const renderResult = render(
@@ -143,15 +143,15 @@ describe('ActiveTabTimeline', function() {
 
     it('starts out not being selected', function() {
       const { getState, getGlobalTrackRow, threadIndex } = setup();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
     });
 
     it('can select a thread by clicking the row', () => {
       const { getState, getGlobalTrackRow, threadIndex } = setup();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireFullClick(getGlobalTrackRow());
-      expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 
     it('does not display the resources panel if there are no resource tracks', () => {
@@ -244,19 +244,19 @@ describe('ActiveTabTimeline', function() {
         resourceThreadIndex,
       } = setup();
       // At first, make sure the main thread is selected.
-      expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(mainThreadIndex);
 
       // 1. Open the panel.
       fireFullClick(getResourcesPanelHeader());
       // 2. Select the reource track.
       fireFullClick(ensureExists(getResourceFrameTrack()));
       // Selected thread should be the resource now.
-      expect(getSelectedThreadIndex(getState())).toBe(resourceThreadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(resourceThreadIndex);
 
       // 3. Close the panel.
       fireFullClick(getResourcesPanelHeader());
       // Now the main thread should be selected again.
-      expect(getSelectedThreadIndex(getState())).toBe(mainThreadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).toBe(mainThreadIndex);
     });
   });
 
@@ -333,21 +333,21 @@ describe('ActiveTabTimeline', function() {
 
       it('starts out not being selected', function() {
         const { getState, threadIndex } = setup();
-        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       });
 
       it('can select a thread by clicking the label', () => {
         const { getState, getResourceFrameTrackLabel, threadIndex } = setup();
-        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
         fireFullClick(getResourceFrameTrackLabel());
-        expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+        expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
       });
 
       it('can select a thread by clicking the row', () => {
         const { getState, getResourceTrackRow, threadIndex } = setup();
-        expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
         fireFullClick(getResourceTrackRow());
-        expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+        expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
       });
     });
   });

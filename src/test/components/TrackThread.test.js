@@ -113,7 +113,7 @@ describe('timeline/TrackThread', function() {
     const renderResult = render(
       <Provider store={store}>
         <TrackThread
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           trackType="expanded"
           trackName="Test Track"
         />

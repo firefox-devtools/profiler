@@ -8,7 +8,7 @@ import {
   getSelectedTab,
   getDataSource,
   getIsActiveTabResourcesPanelOpen,
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
 } from '../selectors/url-state';
 import {
@@ -35,7 +35,7 @@ import { selectedThreadSelectors } from '../selectors/per-thread';
 
 import type {
   Profile,
-  ThreadIndex,
+  ThreadsKey,
   CssPixels,
   Action,
   ThunkAction,
@@ -168,18 +168,18 @@ export function updateUrlState(newUrlState: UrlState | null): Action {
 }
 
 export function reportTrackThreadHeight(
-  threadIndex: ThreadIndex,
+  threadsKey: ThreadsKey,
   height: CssPixels
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const trackThreadHeights = getTrackThreadHeights(getState());
-    const previousHeight = trackThreadHeights[threadIndex];
+    const previousHeight = trackThreadHeights[threadsKey];
     if (previousHeight !== height) {
       // Guard against unnecessary dispatches. This could happen frequently.
       dispatch({
         type: 'UPDATE_TRACK_THREAD_HEIGHT',
         height,
-        threadIndex,
+        threadsKey,
       });
     }
   };
@@ -229,19 +229,19 @@ export function unregisterDragAndDropOverlay(): Action {
 export function toggleResourcesPanel(): ThunkAction<void> {
   return (dispatch, getState) => {
     const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
-    let selectedThreadIndex = getSelectedThreadIndex(getState());
+    let selectedThreadIndexes = getSelectedThreadIndexes(getState());
 
     if (isResourcesPanelOpen) {
       // If it was open when we dispatched that action, it means we are closing this panel.
       // We would like to also select the main track when we close this panel.
       const mainTrack = getActiveTabMainTrack(getState());
-      selectedThreadIndex = mainTrack.mainThreadIndex;
+      selectedThreadIndexes = new Set([mainTrack.mainThreadIndex]);
     }
 
     // Toggle the resources panel eventually.
     dispatch({
       type: 'TOGGLE_RESOURCES_PANEL',
-      selectedThreadIndex,
+      selectedThreadIndexes,
     });
   };
 }

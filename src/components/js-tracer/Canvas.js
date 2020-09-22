@@ -25,7 +25,7 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   DevicePixels,
-  ThreadIndex,
+  ThreadsKey,
   IndexIntoJsTracerEvents,
   JsTracerTable,
   JsTracerTiming,
@@ -40,7 +40,7 @@ type OwnProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
   +jsTracerTable: JsTracerTable,
   +rowHeight: CssPixels,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +doFadeIn: boolean,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
@@ -603,7 +603,7 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
     // return (
     //   <JsTracerTooltipContents
     //     event={hoveredItem}
-    //     threadIndex={this.props.threadIndex}
+    //     threadsKey={this.props.threadsKey}
     //   />
     // );
   };

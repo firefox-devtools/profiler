@@ -109,7 +109,10 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
   }
 };
 
-const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
+const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
+  state = null,
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
@@ -123,22 +126,26 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'ISOLATE_LOCAL_TRACK':
     case 'TOGGLE_RESOURCES_PANEL':
       // Only switch to non-null selected threads.
-      return (action.selectedThreadIndex: ThreadIndex);
+      return (action.selectedThreadIndexes: Set<ThreadIndex>);
     case 'SANITIZED_PROFILE_PUBLISHED': {
       const { oldThreadIndexToNew } = action;
       if (state === null || !oldThreadIndexToNew) {
         // Either there was no selected thread, or the thread indexes were not modified.
         return state;
       }
-      const newThreadIndex = oldThreadIndexToNew.get(state);
-      if (newThreadIndex === undefined) {
-        console.error(oneLine`
-          Unable to map an old thread index to a new thread index for the selected
-          thread when sanitizing a profile
-        `);
-        return null;
+      const newSelectedThreads = new Set();
+      for (const oldThreadIndex of state) {
+        const newThreadIndex = oldThreadIndexToNew.get(oldThreadIndex);
+        if (newThreadIndex === undefined) {
+          console.error(oneLine`
+            Unable to map an old thread index to a new thread index for the selected
+            thread when sanitizing a profile
+          `);
+          return null;
+        }
+        newSelectedThreads.add(newThreadIndex);
       }
-      return newThreadIndex;
+      return newSelectedThreads;
     }
     default:
       return state;
@@ -177,17 +184,17 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
     case 'PROFILE_LOADED':
       return action.transformStacks || state;
     case 'ADD_TRANSFORM_TO_STACK': {
-      const { threadIndex, transform } = action;
-      const transforms = state[threadIndex] || [];
+      const { threadsKey, transform } = action;
+      const transforms = state[threadsKey] || [];
       return Object.assign({}, state, {
-        [threadIndex]: [...transforms, transform],
+        [threadsKey]: [...transforms, transform],
       });
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
-      const { threadIndex, firstPoppedFilterIndex } = action;
-      const transforms = state[threadIndex] || [];
+      const { threadsKey, firstPoppedFilterIndex } = action;
+      const transforms = state[threadsKey] || [];
       return Object.assign({}, state, {
-        [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
+        [threadsKey]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
     case 'SANITIZED_PROFILE_PUBLISHED': {
@@ -198,8 +205,8 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
       }
       // This may no longer be valid because of PII sanitization.
       const newTransforms = {};
-      for (const [threadIndex, transformStack] of objectEntries(state)) {
-        const newThreadIndex = oldThreadIndexToNew.get(Number(threadIndex));
+      for (const [threadsKey, transformStack] of objectEntries(state)) {
+        const newThreadIndex = oldThreadIndexToNew.get(Number(threadsKey));
         if (newThreadIndex !== undefined) {
           newTransforms[newThreadIndex] = transformStack;
         }
@@ -476,7 +483,7 @@ const activeTabProfileSpecific = combineReducers({
  * These values are specific to an individual profile.
  */
 const profileSpecific = combineReducers({
-  selectedThread,
+  selectedThreads,
   implementation,
   lastSelectedCallTreeSummaryStrategy,
   invertCallstack,

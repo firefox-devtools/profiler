@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { selectActiveTabTrack } from '../../actions/profile-view';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
@@ -90,7 +90,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
       case 'thread':
         return (
           <TrackThread
-            threadIndex={resourceTrack.threadIndex}
+            threadsKey={resourceTrack.threadIndex}
             trackType={isOpen ? 'expanded' : 'condensed'}
             trackName={resourceTrack.name}
           />
@@ -186,10 +186,10 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { resourceTrack }) => {
     const threadIndex = resourceTrack.threadIndex;
-    const selectedThreadIndex = getSelectedThreadIndex(state);
+    const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const selectedTab = getSelectedTab(state);
     const isSelected =
-      threadIndex === selectedThreadIndex && selectedTab !== 'network-chart';
+      selectedThreadIndexes.has(threadIndex) && selectedTab !== 'network-chart';
 
     return {
       isSelected,

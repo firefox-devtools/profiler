@@ -20,7 +20,7 @@ import {
   getThreads,
 } from 'firefox-profiler/selectors';
 import { getFriendlyThreadName } from '../../profile-logic/profile-data';
-import { changeSelectedThread } from '../../actions/profile-view';
+import { changeSelectedThreads } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type {
@@ -46,7 +46,7 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +changeSelectedThread: typeof changeSelectedThread,
+  +changeSelectedThreads: typeof changeSelectedThreads,
 |};
 
 type Props = {|
@@ -84,7 +84,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
   clickTrack = memoize((threadIndex: ThreadIndex) => {
     return (event: Event) => {
       event.preventDefault();
-      this.props.changeSelectedThread(threadIndex);
+      this.props.changeSelectedThreads(new Set([threadIndex]));
     };
   });
 
@@ -178,7 +178,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     originsTimeline: getOriginsTimeline(state),
   }),
   mapDispatchToProps: {
-    changeSelectedThread,
+    changeSelectedThreads,
   },
   component: withSize<Props>(OriginsTimelineView),
 });

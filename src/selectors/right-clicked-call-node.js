@@ -8,13 +8,13 @@ import { createSelector } from 'reselect';
 import { getProfileViewOptions } from './profile';
 
 import type {
-  ThreadIndex,
+  ThreadsKey,
   CallNodePath,
   Selector,
 } from 'firefox-profiler/types';
 
 export type RightClickedCallNodeInfo = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +callNodePath: CallNodePath,
 |};
 

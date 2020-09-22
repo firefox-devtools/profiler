@@ -23,7 +23,7 @@ import type {
   Milliseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
-  ThreadIndex,
+  ThreadsKey,
   Marker,
   MarkerTimingAndBuckets,
   MarkerIndex,
@@ -47,7 +47,7 @@ type OwnProps = {|
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: MarkerIndex => Marker,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
@@ -527,8 +527,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   };
 
   onRightClickMarker = (markerIndex: MarkerIndex | null) => {
-    const { changeRightClickedMarker, threadIndex } = this.props;
-    changeRightClickedMarker(threadIndex, markerIndex);
+    const { changeRightClickedMarker, threadsKey } = this.props;
+    changeRightClickedMarker(threadsKey, markerIndex);
   };
 
   drawRoundedRect(
@@ -556,7 +556,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     return (
       <TooltipMarker
         marker={marker}
-        threadIndex={this.props.threadIndex}
+        threadsKey={this.props.threadsKey}
         restrictHeightWidth={true}
       />
     );

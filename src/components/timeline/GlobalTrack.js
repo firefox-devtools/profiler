@@ -13,7 +13,7 @@ import {
 } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenGlobalTracks,
@@ -36,6 +36,7 @@ import TimelineLocalTrack from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import Reorderable from '../shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
+import { getTrackSelectionModifier } from '../../utils';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type {
@@ -82,23 +83,26 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class GlobalTrackComponent extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
-  _onLabelMouseDown = (event: MouseEvent) => {
-    const { changeRightClickedTrack, trackReference } = this.props;
 
-    if (event.button === 0) {
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-      this._selectCurrentTrack();
-    } else if (event.button === 2) {
-      // This is needed to allow the context menu to know what was right clicked without
-      // actually changing the current selection.
+  _onLabelMouseDown = (event: MouseEvent) => {
+    if (event.button === 2) {
+      const { changeRightClickedTrack, trackReference } = this.props;
+      // Notify the redux store that this was right clicked.
       changeRightClickedTrack(trackReference);
     }
   };
 
-  _selectCurrentTrack = () => {
+  _selectCurrentTrack = (event: MouseEvent) => {
+    if (
+      event.button === 2 ||
+      (window.navigator.platform === 'MacIntel' && event.ctrlKey)
+    ) {
+      // This is a right click, do nothing.
+      return;
+    }
+
     const { selectTrack, trackReference } = this.props;
-    selectTrack(trackReference);
+    selectTrack(trackReference, getTrackSelectionModifier(event));
   };
 
   renderTrack() {
@@ -123,7 +127,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         }
         return (
           <TimelineTrackThread
-            threadIndex={mainThreadIndex}
+            threadsKey={mainThreadIndex}
             showMemoryMarkers={!processesWithMemoryTrack.has(globalTrack.pid)}
             trackType="expanded"
             trackName={trackName}
@@ -250,7 +254,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
           className={classNames('timelineTrackRow timelineTrackGlobalRow', {
             selected: isSelected,
           })}
-          onClick={this._selectCurrentTrack}
+          onMouseUp={this._selectCurrentTrack}
         >
           <ContextMenuTrigger
             id="TimelineTrackContextMenu"
@@ -316,7 +320,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
           threadIndex = globalTrack.mainThreadIndex;
           const selectors = getThreadSelectors(threadIndex);
           isSelected =
-            threadIndex === getSelectedThreadIndex(state) &&
+            getSelectedThreadIndexes(state).has(threadIndex) &&
             selectedTab !== 'network-chart';
           titleText = selectors.getThreadProcessDetails(state);
         }

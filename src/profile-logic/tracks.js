@@ -460,17 +460,23 @@ export function initializeGlobalTrackOrder(
 }
 
 export function initializeSelectedThreadIndex(
-  selectedThreadIndex: ThreadIndex | null,
+  selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
-): ThreadIndex {
-  if (
-    selectedThreadIndex !== null &&
-    visibleThreadIndexes.includes(selectedThreadIndex)
-  ) {
-    // This is a valid thread index to select.
-    return selectedThreadIndex;
+): Set<ThreadIndex> {
+  if (selectedThreadIndexes !== null) {
+    // Make sure all of the selected thread indexes are actually visible.
+    const visibleSelectedThreadIndexes = new Set();
+    for (const threadIndex of visibleThreadIndexes) {
+      if (selectedThreadIndexes.has(threadIndex)) {
+        visibleSelectedThreadIndexes.add(threadIndex);
+      }
+    }
+    if (visibleSelectedThreadIndexes.size > 0) {
+      return visibleSelectedThreadIndexes;
+    }
   }
+
   // Select either the GeckoMain [tab] thread, or the first thread in the thread
   // order.
   const threadIndex = profile.threads.indexOf(
@@ -481,7 +487,7 @@ export function initializeSelectedThreadIndex(
   if (threadIndex === -1) {
     throw new Error('Expected to find a thread index to select.');
   }
-  return threadIndex;
+  return new Set([threadIndex]);
 }
 
 export function initializeHiddenGlobalTracks(

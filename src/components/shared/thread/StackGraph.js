@@ -35,7 +35,10 @@ type Props = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
-  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
+  +onSampleClick: (
+    event: SyntheticMouseEvent<>,
+    sampleIndex: IndexIntoSamplesTable
+  ) => void,
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
@@ -208,13 +211,13 @@ class StackGraph extends PureComponent<Props> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  _onMouseUp = (e: SyntheticMouseEvent<>) => {
+  _onMouseUp = (event: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
       const { rangeStart, rangeEnd, thread, interval } = this.props;
       const r = canvas.getBoundingClientRect();
 
-      const x = e.pageX - r.left;
+      const x = event.pageX - r.left;
       const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
       const sampleIndex = getSampleIndexClosestToTime(
@@ -230,8 +233,7 @@ class StackGraph extends PureComponent<Props> {
         return;
       }
 
-      e.stopPropagation();
-      this.props.onSampleClick(sampleIndex);
+      this.props.onSampleClick(event, sampleIndex);
     }
   };
 

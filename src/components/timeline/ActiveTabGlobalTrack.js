@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { selectActiveTabTrack } from '../../actions/profile-view';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
@@ -72,10 +72,10 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     const { globalTrack } = this.props;
     switch (globalTrack.type) {
       case 'tab': {
-        const { mainThreadIndex } = globalTrack;
+        const { threadsKey } = globalTrack;
         return (
           <TimelineTrackThread
-            threadIndex={mainThreadIndex}
+            threadsKey={threadsKey}
             showMemoryMarkers={false}
             trackType="expanded"
             trackName="Active Tab"
@@ -169,7 +169,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         if (globalTrack.mainThreadIndex !== null) {
           const threadIndex = globalTrack.mainThreadIndex;
           isSelected =
-            threadIndex === getSelectedThreadIndex(state) &&
+            getSelectedThreadIndexes(state).has(threadIndex) &&
             selectedTab !== 'network-chart';
         }
         resourceTracks = getActiveTabResourceTracks(state);

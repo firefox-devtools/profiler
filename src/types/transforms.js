@@ -16,12 +16,8 @@
  * This combination of information will provide a stable reference to a call node for a
  * given view into a call tree.
  */
-import type {
-  ThreadIndex,
-  IndexIntoFuncTable,
-  IndexIntoResourceTable,
-} from './profile';
-import type { CallNodePath } from './profile-derived';
+import type { IndexIntoFuncTable, IndexIntoResourceTable } from './profile';
+import type { CallNodePath, ThreadsKey } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
 /*
@@ -293,4 +289,4 @@ type ExtractType = <T: string, S: { +type: T }>(transform: S) => T;
 export type TransformType = $Values<$ObjMap<TransformDefinitions, ExtractType>>;
 
 export type TransformStack = Transform[];
-export type TransformStacksPerThread = { [id: ThreadIndex]: TransformStack };
+export type TransformStacksPerThread = { [key: ThreadsKey]: TransformStack };

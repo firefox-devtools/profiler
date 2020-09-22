@@ -133,14 +133,18 @@ describe('selectedThread', function() {
 
   it('selects the right thread when receiving a profile from web', function() {
     const { getState } = setup(1);
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(1);
+    expect(urlStateReducers.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([1])
+    );
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
     const { getState } = setup(100);
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(2);
+    expect(urlStateReducers.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([2])
+    );
   });
 });
 
@@ -449,7 +453,8 @@ describe('ctxId', function() {
       {
         type: 'tab',
         mainThreadIndex: 0,
-        threadIndexes: [0],
+        threadIndexes: new Set([0]),
+        threadsKey: 0,
       },
     ]);
     // TODO: Resource track type will be changed soon.

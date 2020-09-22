@@ -16,7 +16,7 @@ import type {
   CheckedSharingOptions,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange } from './units';
+import type { StartEndRange, CssPixels } from './units';
 import type { Profile, ThreadIndex, Pid, BrowsingContextID } from './profile';
 
 import type {
@@ -27,6 +27,7 @@ import type {
   MarkerIndex,
   ActiveTabTimeline,
   OriginsTimeline,
+  ThreadsKey,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -43,13 +44,15 @@ export type ThreadViewOptions = {|
   +selectedMarker: MarkerIndex | null,
 |};
 
+export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
+
 export type RightClickedCallNode = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +callNodePath: CallNodePath,
 |};
 
 export type RightClickedMarker = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +markerIndex: MarkerIndex,
 |};
 
@@ -81,7 +84,7 @@ export type ActiveTabProfileViewState = {|
  */
 export type ProfileViewState = {
   +viewOptions: {|
-    perThread: ThreadViewOptions[],
+    perThread: ThreadViewOptionsPerThreads,
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
     previewSelection: PreviewSelection,
@@ -168,7 +171,9 @@ export type AppState = {|
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
-  +trackThreadHeights: Array<ThreadIndex | void>,
+  +trackThreadHeights: {
+    [key: ThreadsKey]: CssPixels,
+  },
   +isNewlyPublished: boolean,
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
@@ -231,7 +236,7 @@ export type ActiveTabSpecificProfileUrlState = {|
 |};
 
 export type ProfileSpecificUrlState = {|
-  selectedThread: ThreadIndex | null,
+  selectedThreads: Set<ThreadIndex> | null,
   implementation: ImplementationFilter,
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
   invertCallstack: boolean,

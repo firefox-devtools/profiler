@@ -13,13 +13,13 @@ import {
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
 import {
-  getThreadSelectors,
   getMarkerSchemaByName,
   getImplementationFilter,
   getPageList,
   getZeroAt,
   getThreadIdToNameMap,
   getMarkerLabelMakerByName,
+  getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
 
 import {
@@ -46,7 +46,7 @@ import type {
   Marker,
   ImplementationFilter,
   Thread,
-  ThreadIndex,
+  ThreadsKey,
   PageList,
   MarkerSchemaByName,
   MarkerLabelMakerByName,
@@ -71,7 +71,7 @@ function _maybeFormatDuration(
 
 type OwnProps = {|
   +marker: Marker,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +className?: string,
   // In tooltips it can be awkward for really long and tall things to force
   // the layout to be huge. This option when set to true will restrict the
@@ -434,7 +434,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
 export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
-    const selectors = getThreadSelectors(props.threadIndex);
+    const selectors = getThreadSelectorsFromThreadsKey(props.threadsKey);
     return {
       threadName: selectors.getFriendlyThreadName(state),
       thread: selectors.getThread(state),

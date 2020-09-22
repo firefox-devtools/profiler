@@ -30,6 +30,7 @@ import type {
   $ReturnType,
   CallTreeSummaryStrategy,
   TracedTiming,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ThreadSelectorsPerThread } from './thread';
@@ -48,7 +49,8 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
  */
 export function getStackAndSampleSelectorsPerThread(
   threadSelectors: ThreadSelectorsPerThread,
-  threadIndex: ThreadIndex
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
 ): * {
   /**
    * The buffers of the samples can be cleared out. This function lets us know the
@@ -289,7 +291,7 @@ export function getStackAndSampleSelectorsPerThread(
     (rightClickedCallNodeInfo, { callNodeTable }) => {
       if (
         rightClickedCallNodeInfo !== null &&
-        rightClickedCallNodeInfo.threadIndex === threadIndex
+        threadsKey === rightClickedCallNodeInfo.threadsKey
       ) {
         return ProfileData.getCallNodeIndexFromPath(
           rightClickedCallNodeInfo.callNodePath,

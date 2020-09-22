@@ -121,9 +121,15 @@ export function mergeProfilesForDiffing(
 
   for (let i = 0; i < profileStates.length; i++) {
     const { profileSpecific } = profileStates[i];
-    const selectedThreadIndex = profileSpecific.selectedThread;
-    if (selectedThreadIndex === null) {
+    const selectedThreadIndexes = profileSpecific.selectedThreads;
+    if (selectedThreadIndexes === null) {
       throw new Error(`No thread has been selected in profile ${i}`);
+    }
+    const selectedThreadIndex = selectedThreadIndexes.values().next().value;
+    if (selectedThreadIndexes.size !== 1 || selectedThreadIndex === undefined) {
+      throw new Error(
+        'Only one thread selection is currently supported for the comparison view.'
+      );
     }
     const profile = profiles[i];
     let thread = profile.threads[selectedThreadIndex];
@@ -879,6 +885,7 @@ function getComparisonThread(
  * Merge threads inside a profile.
  * The threads should belong to the same profile because unlike mergeProfilesForDiffing,
  * this does not merge the profile level information like metadata, categories etc.
+ * TODO: Overlapping threads will not look great due to #2783.
  */
 export function mergeThreads(threads: Thread[]): Thread {
   const newStringTable = new UniqueStringArray();

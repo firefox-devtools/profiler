@@ -1119,15 +1119,31 @@ export function isOnThreadFileIoMarker(marker: Marker): boolean | void {
   return data.threadId === undefined;
 }
 
-export function filterForMarkerChart(
-  getMarker: MarkerIndex => Marker,
-  markerIndexes: MarkerIndex[]
-): MarkerIndex[] {
-  return filterMarkerIndexes(
-    getMarker,
-    markerIndexes,
-    marker => !isNetworkMarker(marker)
-  );
+/**
+ * This function is used by the marker chart and marker table. When filtering by
+ * schema for these areas, we want to be as permissive as possible when no schema
+ * is present.
+ */
+export function getAllowMarkersWithNoSchema(
+  markerSchemaByName: MarkerSchemaByName
+): Marker => boolean | void {
+  return marker => {
+    const { data } = marker;
+
+    if (!data) {
+      // Keep the marker if there is payload.
+      return true;
+    }
+
+    if (!markerSchemaByName[data.type]) {
+      // Keep the marker if there is no schema. Note that this function doesn't use
+      // the getMarkerSchemaName function, as that function attempts to find a
+      // marker schema name in a very permissive manner. In the marker chart
+      // and marker table, most likely we want to show everything.
+      return true;
+    }
+    return undefined;
+  };
 }
 
 // Identifies mime type of a network request.

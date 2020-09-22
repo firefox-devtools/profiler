@@ -15,7 +15,7 @@ import {
   getInvertCallstack,
   getImplementationFilter,
   getSearchStringsAsRegExp,
-  getSelectedThreadIndex,
+  getSelectedThreadsKey,
 } from '../../selectors/url-state';
 import {
   getScrollToSelectionGeneration,
@@ -34,7 +34,7 @@ import { assertExhaustiveCheck } from '../../utils/flow';
 import type {
   State,
   ImplementationFilter,
-  ThreadIndex,
+  ThreadsKey,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
@@ -46,7 +46,7 @@ import type { Column } from '../shared/TreeView';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
   +focusCallTreeGeneration: number,
   +tree: CallTree,
@@ -201,21 +201,17 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 
   _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
 
   _onRightClickSelection = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const {
-      callNodeInfo,
-      threadIndex,
-      changeRightClickedCallNode,
-    } = this.props;
+    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
@@ -223,9 +219,9 @@ class CallTreeComponent extends PureComponent<Props> {
   _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) => {
-    const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
+    const { callNodeInfo, threadsKey, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
-      threadIndex,
+      threadsKey,
       newExpandedCallNodeIndexes.map(callNodeIndex =>
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
@@ -304,7 +300,7 @@ class CallTreeComponent extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),

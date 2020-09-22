@@ -36,7 +36,8 @@ import type {
   ImplementationFilter,
   Transform,
   TransformType,
-  TransformStack,
+  ThreadIndex,
+  TransformStacksPerThread,
 } from 'firefox-profiler/types';
 
 /**
@@ -98,190 +99,222 @@ const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
  */
 
 /**
+ * Every transform stack is per thread, and separated by a ";".
+ * This first list matches the order of selected threads.
  * Every transform is separated by the "~" character.
  * Each transform is made up of a tuple separated by "-"
  * The first value in the tuple is a short key of the transform type.
  *
  * e.g "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
  */
-export function parseTransforms(stringValue: string = ''): TransformStack {
-  // Flow had some trouble with the `Transform | null` type, so use a forEach
-  // rather than a map.
-  const transforms = [];
+export function parseTransforms(
+  threadList: ThreadIndex[],
+  stringValue: string
+): TransformStacksPerThread {
+  if (!stringValue) {
+    return {};
+  }
+  const transformStrings = stringValue.split(';');
+  const transformStacksPerThread = {};
+  for (let i = 0; i < transformStrings.length; i++) {
+    // Flow had some trouble with the `Transform | null` type, so use a forEach
+    // rather than a map.
+    const transforms = [];
+    const transformString = transformStrings[i];
+    const threadIndex = threadList[i];
+    transformStacksPerThread[threadIndex] = transforms;
 
-  stringValue.split('~').forEach(s => {
-    const tuple = s.split('-');
-    const shortKey = tuple[0];
-    const type = convertToTransformType(SHORT_KEY_TO_TRANSFORM[shortKey]);
-    if (type === null) {
-      console.error('Unrecognized transform was passed to the URL.', shortKey);
-      return;
-    }
-    // This switch breaks down each transform into the minimum amount of data needed
-    // to represent it in the URL. Each transform has slightly different requirements
-    // as defined in src/types/transforms.js.
-    switch (type) {
-      case 'collapse-resource': {
-        // e.g. "cr-js-325-8"
-        const [
-          ,
-          implementation,
-          resourceIndexRaw,
-          collapsedFuncIndexRaw,
-        ] = tuple;
-        const resourceIndex = parseInt(resourceIndexRaw, 10);
-        const collapsedFuncIndex = parseInt(collapsedFuncIndexRaw, 10);
-        if (isNaN(resourceIndex) || isNaN(collapsedFuncIndex)) {
+    transformString.split('~').forEach(s => {
+      const tuple = s.split('-');
+      const shortKey = tuple[0];
+      const type = convertToTransformType(SHORT_KEY_TO_TRANSFORM[shortKey]);
+      if (type === null) {
+        console.error(
+          'Unrecognized transform was passed to the URL.',
+          shortKey
+        );
+        return;
+      }
+      // This switch breaks down each transform into the minimum amount of data needed
+      // to represent it in the URL. Each transform has slightly different requirements
+      // as defined in src/types/transforms.js.
+      switch (type) {
+        case 'collapse-resource': {
+          // e.g. "cr-js-325-8"
+          const [
+            ,
+            implementation,
+            resourceIndexRaw,
+            collapsedFuncIndexRaw,
+          ] = tuple;
+          const resourceIndex = parseInt(resourceIndexRaw, 10);
+          const collapsedFuncIndex = parseInt(collapsedFuncIndexRaw, 10);
+          if (isNaN(resourceIndex) || isNaN(collapsedFuncIndex)) {
+            break;
+          }
+          if (resourceIndex >= 0) {
+            transforms.push({
+              type,
+              resourceIndex,
+              collapsedFuncIndex,
+              implementation: toValidImplementationFilter(implementation),
+            });
+          }
+
           break;
         }
-        if (resourceIndex >= 0) {
+        case 'collapse-direct-recursion': {
+          // e.g. "rec-js-325"
+          const [, implementation, funcIndexRaw] = tuple;
+          const funcIndex = parseInt(funcIndexRaw, 10);
+          if (isNaN(funcIndex) || funcIndex < 0) {
+            break;
+          }
           transforms.push({
             type,
-            resourceIndex,
-            collapsedFuncIndex,
+            funcIndex,
             implementation: toValidImplementationFilter(implementation),
           });
-        }
-
-        break;
-      }
-      case 'collapse-direct-recursion': {
-        // e.g. "rec-js-325"
-        const [, implementation, funcIndexRaw] = tuple;
-        const funcIndex = parseInt(funcIndexRaw, 10);
-        if (isNaN(funcIndex) || funcIndex < 0) {
           break;
         }
-        transforms.push({
-          type,
-          funcIndex,
-          implementation: toValidImplementationFilter(implementation),
-        });
-        break;
-      }
-      case 'merge-function':
-      case 'focus-function':
-      case 'drop-function':
-      case 'collapse-function-subtree': {
-        // e.g. "mf-325"
-        const [, funcIndexRaw] = tuple;
-        const funcIndex = parseInt(funcIndexRaw, 10);
-        // Validate that the funcIndex makes sense.
-        if (!isNaN(funcIndex) && funcIndex >= 0) {
+        case 'merge-function':
+        case 'focus-function':
+        case 'drop-function':
+        case 'collapse-function-subtree': {
+          // e.g. "mf-325"
+          const [, funcIndexRaw] = tuple;
+          const funcIndex = parseInt(funcIndexRaw, 10);
+          // Validate that the funcIndex makes sense.
+          if (!isNaN(funcIndex) && funcIndex >= 0) {
+            switch (type) {
+              case 'merge-function':
+                transforms.push({
+                  type: 'merge-function',
+                  funcIndex,
+                });
+                break;
+              case 'focus-function':
+                transforms.push({
+                  type: 'focus-function',
+                  funcIndex,
+                });
+                break;
+              case 'drop-function':
+                transforms.push({
+                  type: 'drop-function',
+                  funcIndex,
+                });
+                break;
+              case 'collapse-function-subtree':
+                transforms.push({
+                  type: 'collapse-function-subtree',
+                  funcIndex,
+                });
+                break;
+              default:
+                throw new Error('Unmatched transform.');
+            }
+          }
+          break;
+        }
+        case 'focus-subtree':
+        case 'merge-call-node': {
+          // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
+          const [
+            ,
+            implementationRaw,
+            serializedCallNodePath,
+            invertedRaw,
+          ] = tuple;
+          const implementation = toValidImplementationFilter(implementationRaw);
+          const callNodePath = stringToUintArray(serializedCallNodePath);
+          const inverted = Boolean(invertedRaw);
+          // Flow requires a switch because it can't deduce the type string correctly.
           switch (type) {
-            case 'merge-function':
+            case 'focus-subtree':
               transforms.push({
-                type: 'merge-function',
-                funcIndex,
+                type: 'focus-subtree',
+                implementation,
+                callNodePath,
+                inverted,
               });
               break;
-            case 'focus-function':
+            case 'merge-call-node':
               transforms.push({
-                type: 'focus-function',
-                funcIndex,
-              });
-              break;
-            case 'drop-function':
-              transforms.push({
-                type: 'drop-function',
-                funcIndex,
-              });
-              break;
-            case 'collapse-function-subtree':
-              transforms.push({
-                type: 'collapse-function-subtree',
-                funcIndex,
+                type: 'merge-call-node',
+                implementation,
+                callNodePath,
               });
               break;
             default:
               throw new Error('Unmatched transform.');
           }
-        }
-        break;
-      }
-      case 'focus-subtree':
-      case 'merge-call-node': {
-        // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
-        const [
-          ,
-          implementationRaw,
-          serializedCallNodePath,
-          invertedRaw,
-        ] = tuple;
-        const implementation = toValidImplementationFilter(implementationRaw);
-        const callNodePath = stringToUintArray(serializedCallNodePath);
-        const inverted = Boolean(invertedRaw);
-        // Flow requires a switch because it can't deduce the type string correctly.
-        switch (type) {
-          case 'focus-subtree':
-            transforms.push({
-              type: 'focus-subtree',
-              implementation,
-              callNodePath,
-              inverted,
-            });
-            break;
-          case 'merge-call-node':
-            transforms.push({
-              type: 'merge-call-node',
-              implementation,
-              callNodePath,
-            });
-            break;
-          default:
-            throw new Error('Unmatched transform.');
-        }
 
-        break;
-      }
-      default:
-        throw assertExhaustiveCheck(type);
-    }
-  });
-
-  return transforms;
-}
-
-export function stringifyTransforms(transforms: TransformStack = []): string {
-  return transforms
-    .map(transform => {
-      const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
-      if (!shortKey) {
-        throw new Error(
-          'Expected to be able to convert a transform into its short key.'
-        );
-      }
-      // This switch breaks down each transform into shared groups of what data
-      // they need, as defined in src/types/transforms.js. For instance some transforms
-      // need only a funcIndex, while some care about the current implemention, or
-      // other pieces of data.
-      switch (transform.type) {
-        case 'merge-function':
-        case 'drop-function':
-        case 'collapse-function-subtree':
-        case 'focus-function':
-          return `${shortKey}-${transform.funcIndex}`;
-        case 'collapse-resource':
-          return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
-        case 'collapse-direct-recursion':
-          return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
-        case 'focus-subtree':
-        case 'merge-call-node': {
-          let string = [
-            shortKey,
-            transform.implementation,
-            uintArrayToString(transform.callNodePath),
-          ].join('-');
-          if (transform.inverted) {
-            string += '-i';
-          }
-          return string;
+          break;
         }
         default:
-          throw assertExhaustiveCheck(transform);
+          throw assertExhaustiveCheck(type);
       }
-    })
-    .join('~');
+    });
+  }
+  return transformStacksPerThread;
+}
+
+/**
+ * Each transform in the stack is separated by a ",".
+ * Each thread is separated by a ";".
+ * The thread order matches the selected thread indexes order.
+ */
+export function stringifyTransforms(
+  selectedThreads: Set<ThreadIndex>,
+  transformStacksPerThread: TransformStacksPerThread
+): string {
+  // The iterator for the Set<ThreadIndex> will give the threads in the same order.
+  // The order itself is arbitrary, but it should be consistent across the stringify
+  // calls.
+  return [...selectedThreads]
+    .map(threadIndex =>
+      (transformStacksPerThread[threadIndex] || [])
+        .map(transform => {
+          const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
+          if (!shortKey) {
+            throw new Error(
+              'Expected to be able to convert a transform into its short key.'
+            );
+          }
+          // This switch breaks down each transform into shared groups of what data
+          // they need, as defined in src/types/transforms.js. For instance some transforms
+          // need only a funcIndex, while some care about the current implemention, or
+          // other pieces of data.
+          switch (transform.type) {
+            case 'merge-function':
+            case 'drop-function':
+            case 'collapse-function-subtree':
+            case 'focus-function':
+              return `${shortKey}-${transform.funcIndex}`;
+            case 'collapse-resource':
+              return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
+            case 'collapse-direct-recursion':
+              return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
+            case 'focus-subtree':
+            case 'merge-call-node': {
+              let string = [
+                shortKey,
+                transform.implementation,
+                uintArrayToString(transform.callNodePath),
+              ].join('-');
+              if (transform.inverted) {
+                string += '-i';
+              }
+              return string;
+            }
+            default:
+              throw assertExhaustiveCheck(transform);
+          }
+        })
+        .join('~')
+    )
+    .join(';');
 }
 
 export function getTransformLabels(
