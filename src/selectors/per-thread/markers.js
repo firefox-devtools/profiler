@@ -360,10 +360,10 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
-   * The marker chart ignores the preview selection, as it handles its own zooming
-   * behavior. It uses the SearchFilteredMarkerIndexes instead. It shows markers
-   * that use the "marker-chart" schema location, plus it shows markers that have
-   * no schema, in order to be as permissive as possible.
+   * For performance reasons, the marker chart ignores the preview selection.
+   * It handles its own zooming behavior. It uses the SearchFilteredMarkerIndexes
+   * instead. It shows markers that use the "marker-chart" schema location, plus it
+   * shows markers that have no schema, in order to be as permissive as possible.
    */
   const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,

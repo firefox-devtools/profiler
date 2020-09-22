@@ -1146,17 +1146,6 @@ export function getAllowMarkersWithNoSchema(
   };
 }
 
-export function filterForMarkerChart(
-  getMarker: MarkerIndex => Marker,
-  markerIndexes: MarkerIndex[]
-): MarkerIndex[] {
-  return filterMarkerIndexes(
-    getMarker,
-    markerIndexes,
-    marker => !isNetworkMarker(marker)
-  );
-}
-
 // Identifies mime type of a network request.
 export function guessMimeTypeFromNetworkMarker(
   payload: NetworkPayload
