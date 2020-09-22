@@ -231,9 +231,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     getMarker: selectedThreadSelectors.getMarkerGetter(state),
-    markerIndexes: selectedThreadSelectors.getPreviewFilteredMarkerIndexes(
-      state
-    ),
+    markerIndexes: selectedThreadSelectors.getMarkerTableMarkerIndexes(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
       state
