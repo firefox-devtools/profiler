@@ -56,7 +56,7 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
     let firstItem;
     if (filterPageData) {
       firstItem = {
-        title: filterPageData.origin,
+        title: filterPageData.origin + '' || '',
         data: (
           <>
             <Icon iconUrl={filterPageData.favicon} />
@@ -66,7 +66,7 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
         ),
       };
     } else {
-      firstItem = { title: 'Full Range', data: 'Full Range' };
+      firstItem = { title: 'Full Range', data: <>Full Range</> };
     }
 
     const itemsWithFirstElement = this._getItemsWithFirstElement(

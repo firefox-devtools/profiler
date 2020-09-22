@@ -334,7 +334,7 @@ export const getProfileNameForStorage: Selector<string> = createSelector(
  * This selector transforms the committed ranges into a list of labels that can
  * be displayed in the UI.
  */
-export const getCommittedRangeLabels: Selector<string[]> = createSelector(
+export const getCommittedRangeLabels: Selector<any[]> = createSelector(
   getAllCommittedRanges,
   CommittedRanges.getCommittedRangeLabels
 );
