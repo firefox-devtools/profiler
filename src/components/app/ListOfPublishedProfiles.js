@@ -6,14 +6,19 @@
 
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
+import classNames from 'classnames';
 
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
+import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/ProfileMetaInfoSummary';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+
 import {
   listAllProfileData,
+  deleteProfileData,
   type ProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
-import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/ProfileMetaInfoSummary';
+import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-store';
 
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
 
@@ -74,32 +79,151 @@ type PublishedProfileProps = {|
   +nowTimestamp: Milliseconds,
 |};
 
-class PublishedProfile extends React.PureComponent<PublishedProfileProps> {
+type PublishedProfileState = {|
+  +confirmDialogIsOpen: boolean,
+  +status: 'idle' | 'working' | 'just-deleted' | 'deleted',
+|};
+
+class PublishedProfile extends React.PureComponent<
+  PublishedProfileProps,
+  PublishedProfileState
+> {
+  state = {
+    confirmDialogIsOpen: false,
+    status: 'idle',
+  };
+  _componentDeleteButtonRef = React.createRef();
+
+  onConfirmDeletion = async () => {
+    const { profileToken, jwtToken } = this.props.profileData;
+
+    this.setState({ status: 'working' });
+    if (!jwtToken) {
+      throw new Error(
+        `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
+      );
+    }
+    await deleteProfileOnServer({ profileToken, jwtToken });
+    await deleteProfileData(profileToken);
+    this.setState({ status: 'just-deleted' });
+  };
+
+  onCancelDeletion = () => {
+    // Close the panel when the user clicks on the Cancel button.
+    if (this._componentDeleteButtonRef.current) {
+      this._componentDeleteButtonRef.current.closePanel();
+    }
+  };
+
+  onCloseConfirmDialog = () => {
+    this.setState({ confirmDialogIsOpen: false });
+
+    // In case we deleted the profile, and the user dismisses the success panel,
+    // let's move directly to the deleted state:
+    if (this.state.status === 'just-deleted') {
+      this.setState({ status: 'deleted' });
+    }
+  };
+
+  onOpenConfirmDialog = () => {
+    this.setState({ confirmDialogIsOpen: true });
+  };
+
   render() {
     const { profileData, nowTimestamp } = this.props;
+    const { confirmDialogIsOpen, status } = this.state;
+
+    if (status === 'deleted') {
+      return null;
+    }
+
     let { urlPath } = profileData;
     if (!urlPath.startsWith('/')) {
       urlPath = '/' + urlPath;
     }
     const location = `${window.location.origin}/${urlPath}`;
+    const slicedProfileToken = profileData.profileToken.slice(0, 6);
+    const profileName = profileData.name
+      ? profileData.name
+      : `Profile #${slicedProfileToken}`;
+    const smallProfileName = profileData.name
+      ? profileData.name
+      : '#' + slicedProfileToken;
+
     return (
-      <li className="publishedProfilesListItem">
-        <a className="publishedProfilesLink" href={location}>
+      <li
+        className={classNames('publishedProfilesListItem', {
+          publishedProfilesListItem_ConfirmDialogIsOpen: confirmDialogIsOpen,
+        })}
+      >
+        <a
+          className="publishedProfilesLink"
+          href={location}
+          title={`Click here to load profile ${smallProfileName}`}
+        >
           <div className="publishedProfilesDate">
             {_formatDate(profileData.publishedDate, nowTimestamp)}
           </div>
           <div className="publishedProfilesInfo">
             <div className="publishedProfilesName">
-              <strong>
-                {profileData.name
-                  ? profileData.name
-                  : `Profile #${profileData.profileToken.slice(0, 6)}`}
-              </strong>{' '}
-              ({_formatRange(profileData.publishedRange)})
+              <strong>{profileName}</strong> (
+              {_formatRange(profileData.publishedRange)})
             </div>
             <ProfileMetaInfoSummary meta={profileData.meta} />
           </div>
         </a>
+        <div className="publishedProfilesActionButtons">
+          {profileData.jwtToken ? (
+            <ButtonWithPanel
+              ref={this._componentDeleteButtonRef}
+              buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
+              label="Delete"
+              title={`Click here to delete the profile ${smallProfileName}`}
+              onPanelOpen={this.onOpenConfirmDialog}
+              onPanelClose={this.onCloseConfirmDialog}
+              panelContent={
+                status === 'just-deleted' ? (
+                  <p className="publishedProfilesDeleteSuccess">
+                    Successfully deleted uploaded data.
+                  </p>
+                ) : (
+                  <div className="confirmDialog">
+                    <h2 className="confirmDialogTitle">Delete {profileName}</h2>
+                    <div className="confirmDialogContent">
+                      Are you sure you want to delete uploaded data for this
+                      profile? Links for shared copies will no longer work.
+                    </div>
+                    <div className="confirmDialogButtons">
+                      <input
+                        type="button"
+                        className="photon-button photon-button-default"
+                        value="Cancel"
+                        disabled={status === 'working'}
+                        onClick={this.onCancelDeletion}
+                      />
+                      <input
+                        type="button"
+                        className="photon-button photon-button-destructive"
+                        value={status === 'working' ? 'Deleting…' : 'Delete'}
+                        disabled={status === 'working'}
+                        onClick={this.onConfirmDeletion}
+                      />
+                    </div>
+                  </div>
+                )
+              }
+            />
+          ) : (
+            <button
+              className="publishedProfilesDeleteButton photon-button photon-button-default"
+              type="button"
+              title="This profile cannot be deleted because we lack the authorization information."
+              disabled
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </li>
     );
   }
@@ -166,7 +290,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         {profilesRestCount > 0 ? (
           <p>
             <InnerNavigationLink dataSource="uploaded-recordings">
-              See all your recordings ({profilesRestCount} more)
+              See and manage all your recordings ({profilesRestCount} more)
             </InnerNavigationLink>
           </p>
         ) : null}

@@ -137,7 +137,7 @@ describe('ListOfPublishedProfiles', () => {
     const { getByText } = renderResult;
 
     function getAllRecordingsLink() {
-      return getByText(/See all your recordings/);
+      return getByText(/all your recordings/);
     }
 
     return {
