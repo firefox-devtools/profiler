@@ -58,11 +58,8 @@ const MARKERS: TestDefinedMarkers = [
     5,
     10,
     {
-      type: 'tracing',
-      category: 'DOMEvent',
+      type: 'DOMEvent',
       eventType: 'click',
-      interval: 'start',
-      phase: 2,
     },
   ],
   [

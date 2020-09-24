@@ -52,12 +52,9 @@ Array [
   Object {
     "category": 0,
     "data": Object {
-      "category": "DOMEvent",
       "eventType": "mouseout",
-      "interval": "start",
-      "phase": 3,
-      "timeStamp": 1,
-      "type": "tracing",
+      "latency": 7,
+      "type": "DOMEvent",
     },
     "end": 10,
     "name": "DOMEvent",

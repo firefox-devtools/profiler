@@ -365,7 +365,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       'VsyncTimestamp:VsyncTimestamp',
       'tracing:Reflow',
       'tracing:Rasterize',
-      'tracing:DOMEvent',
+      'DOMEvent:DOMEvent',
       'GCMinor:MinorGC',
       'UserTiming:UserTiming',
       'tracing:Reflow',

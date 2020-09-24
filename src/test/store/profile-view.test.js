@@ -1092,12 +1092,9 @@ describe('actions/ProfileView', function() {
           0,
           null,
           {
-            type: 'tracing',
-            category: 'DOMEvent',
-            timeStamp: 1001,
-            interval: 'start',
+            type: 'DOMEvent',
+            latency: 1001,
             eventType: 'mousedown',
-            phase: 1,
           },
         ],
         [

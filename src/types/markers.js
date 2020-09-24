@@ -543,12 +543,9 @@ export type LogMarkerPayload = {|
 |};
 
 export type DOMEventMarkerPayload = {|
-  type: 'tracing',
-  category: 'DOMEvent',
-  timeStamp?: Milliseconds,
-  interval: 'start' | 'end',
+  type: 'DOMEvent',
+  latency?: Milliseconds,
   eventType: string,
-  phase: 0 | 1 | 2 | 3,
   innerWindowID?: number,
 |};
 

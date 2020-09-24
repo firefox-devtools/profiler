@@ -74,11 +74,8 @@ describe('TooltipMarker', function() {
         10.5,
         11.3,
         {
-          type: 'tracing',
-          category: 'DOMEvent',
+          type: 'DOMEvent',
           eventType: 'commandupdate',
-          interval: 'start',
-          phase: 2,
           innerWindowID: innerWindowID,
         },
       ],

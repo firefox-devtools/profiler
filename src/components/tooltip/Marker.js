@@ -259,22 +259,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           details.push(...getNetworkMarkerDetails(data));
           break;
         }
-        case 'tracing': {
-          // The DOMEvent markers include a latency that is computed from a timestamp
-          // and the marker start time.
-          if (data.category === 'DOMEvent') {
-            const latency =
-              data.timeStamp === undefined
-                ? null
-                : formatMilliseconds(marker.start - data.timeStamp);
-            details.push(
-              <TooltipDetail label="Latency" key="tracing-Latency">
-                {latency}
-              </TooltipDetail>
-            );
-          }
-          break;
-        }
         case 'IPC': {
           // The logic to subtract times to create durations is not supported by
           // the marker schema. Use custom handling for these in addition to

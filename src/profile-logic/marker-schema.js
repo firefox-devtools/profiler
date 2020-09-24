@@ -174,11 +174,13 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'DOMEvent',
-    tooltipLabel: '{eventType}',
+    tooltipLabel: '{marker.data.eventType} — DOMEvent',
+    tableLabel: '{marker.data.eventType}',
+    chartLabel: '{marker.data.eventType}',
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [
-      { key: 'category', label: 'Marker', format: 'string' },
-      // eventType is only in the tooltipLabel
+      { key: 'latency', label: 'Latency', format: 'duration' },
+      // eventType is in the payload as well.
     ],
   },
   {
