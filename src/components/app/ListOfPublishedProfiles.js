@@ -94,6 +94,8 @@ class PublishedProfile extends React.PureComponent<
     status: 'idle',
   };
   _componentDeleteButtonRef = React.createRef();
+  _domDeleteButtonRef = React.createRef();
+  _actionButtonsRef = React.createRef();
 
   onConfirmDeletion = async () => {
     const { profileToken, jwtToken } = this.props.profileData;
@@ -123,6 +125,20 @@ class PublishedProfile extends React.PureComponent<
     // let's move directly to the deleted state:
     if (this.state.status === 'just-deleted') {
       this.setState({ status: 'deleted' });
+    }
+
+    // Let's focus the delete button after dismissing the dialog, but _only_ if
+    // the focus was part of the dialog before.
+    // Note: we might need to get a more precise ref to the right
+    // buttonWithPanel wrapper when we'll have more buttons.
+    const deleteButton = this._domDeleteButtonRef.current;
+    const actionButtons = this._actionButtonsRef.current;
+    if (
+      deleteButton &&
+      actionButtons &&
+      actionButtons.matches(':focus-within')
+    ) {
+      deleteButton.focus();
     }
   };
 
@@ -174,10 +190,14 @@ class PublishedProfile extends React.PureComponent<
           </div>
         </a>
         {withActionButtons ? (
-          <div className="publishedProfilesActionButtons">
+          <div
+            className="publishedProfilesActionButtons"
+            ref={this._actionButtonsRef}
+          >
             {profileData.jwtToken ? (
               <ButtonWithPanel
                 ref={this._componentDeleteButtonRef}
+                buttonRef={this._domDeleteButtonRef}
                 buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
                 label="Delete"
                 title={`Click here to delete the profile ${smallProfileName}`}

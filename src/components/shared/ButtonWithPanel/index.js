@@ -43,6 +43,7 @@ type Props = {|
   +buttonClassName?: string,
   +onPanelOpen?: () => mixed,
   +onPanelClose?: () => mixed,
+  +buttonRef?: {| -current: null | HTMLInputElement |},
   +title?: string,
 |};
 
@@ -128,6 +129,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
       panelContent,
       panelClassName,
       buttonClassName,
+      buttonRef,
       title,
     } = this.props;
     const { open } = this.state;
@@ -139,6 +141,7 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
           value={label}
           title={title}
           onClick={this._onButtonClick}
+          ref={buttonRef}
         />
         <ArrowPanel
           className={panelClassName}
