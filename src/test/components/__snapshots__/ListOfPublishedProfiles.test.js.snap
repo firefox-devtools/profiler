@@ -48,18 +48,6 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         </div>
       </div>
     </a>
-    <div
-      class="publishedProfilesActionButtons"
-    >
-      <button
-        class="publishedProfilesDeleteButton photon-button photon-button-default"
-        disabled=""
-        title="This profile cannot be deleted because we lack the authorization information."
-        type="button"
-      >
-        Delete
-      </button>
-    </div>
   </li>
   <li
     class="publishedProfilesListItem"
@@ -103,18 +91,6 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         </div>
       </div>
     </a>
-    <div
-      class="publishedProfilesActionButtons"
-    >
-      <button
-        class="publishedProfilesDeleteButton photon-button photon-button-default"
-        disabled=""
-        title="This profile cannot be deleted because we lack the authorization information."
-        type="button"
-      >
-        Delete
-      </button>
-    </div>
   </li>
   <li
     class="publishedProfilesListItem"
@@ -160,18 +136,6 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         </div>
       </div>
     </a>
-    <div
-      class="publishedProfilesActionButtons"
-    >
-      <button
-        class="publishedProfilesDeleteButton photon-button photon-button-default"
-        disabled=""
-        title="This profile cannot be deleted because we lack the authorization information."
-        type="button"
-      >
-        Delete
-      </button>
-    </div>
   </li>
 </ul>
 `;

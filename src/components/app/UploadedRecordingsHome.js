@@ -19,7 +19,7 @@ export class UploadedRecordingsHome extends PureComponent<{||}> {
       <main className="uploadedRecordingsHome">
         <AppHeader />
         <h2 className="photon-title-30">Uploaded Recordings</h2>
-        <ListOfPublishedProfiles />
+        <ListOfPublishedProfiles withActionButtons={true} />
       </main>
     );
   }

@@ -77,6 +77,7 @@ function _formatRange(range: StartEndRange): string {
 type PublishedProfileProps = {|
   +profileData: ProfileData,
   +nowTimestamp: Milliseconds,
+  +withActionButtons: boolean,
 |};
 
 type PublishedProfileState = {|
@@ -130,7 +131,7 @@ class PublishedProfile extends React.PureComponent<
   };
 
   render() {
-    const { profileData, nowTimestamp } = this.props;
+    const { profileData, nowTimestamp, withActionButtons } = this.props;
     const { confirmDialogIsOpen, status } = this.state;
 
     if (status === 'deleted') {
@@ -172,64 +173,69 @@ class PublishedProfile extends React.PureComponent<
             <ProfileMetaInfoSummary meta={profileData.meta} />
           </div>
         </a>
-        <div className="publishedProfilesActionButtons">
-          {profileData.jwtToken ? (
-            <ButtonWithPanel
-              ref={this._componentDeleteButtonRef}
-              buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
-              label="Delete"
-              title={`Click here to delete the profile ${smallProfileName}`}
-              onPanelOpen={this.onOpenConfirmDialog}
-              onPanelClose={this.onCloseConfirmDialog}
-              panelContent={
-                status === 'just-deleted' ? (
-                  <p className="publishedProfilesDeleteSuccess">
-                    Successfully deleted uploaded data.
-                  </p>
-                ) : (
-                  <div className="confirmDialog">
-                    <h2 className="confirmDialogTitle">Delete {profileName}</h2>
-                    <div className="confirmDialogContent">
-                      Are you sure you want to delete uploaded data for this
-                      profile? Links for shared copies will no longer work.
+        {withActionButtons ? (
+          <div className="publishedProfilesActionButtons">
+            {profileData.jwtToken ? (
+              <ButtonWithPanel
+                ref={this._componentDeleteButtonRef}
+                buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
+                label="Delete"
+                title={`Click here to delete the profile ${smallProfileName}`}
+                onPanelOpen={this.onOpenConfirmDialog}
+                onPanelClose={this.onCloseConfirmDialog}
+                panelContent={
+                  status === 'just-deleted' ? (
+                    <p className="publishedProfilesDeleteSuccess">
+                      Successfully deleted uploaded data.
+                    </p>
+                  ) : (
+                    <div className="confirmDialog">
+                      <h2 className="confirmDialogTitle">
+                        Delete {profileName}
+                      </h2>
+                      <div className="confirmDialogContent">
+                        Are you sure you want to delete uploaded data for this
+                        profile? Links for shared copies will no longer work.
+                      </div>
+                      <div className="confirmDialogButtons">
+                        <input
+                          type="button"
+                          className="photon-button photon-button-default"
+                          value="Cancel"
+                          disabled={status === 'working'}
+                          onClick={this.onCancelDeletion}
+                        />
+                        <input
+                          type="button"
+                          className="photon-button photon-button-destructive"
+                          value={status === 'working' ? 'Deleting…' : 'Delete'}
+                          disabled={status === 'working'}
+                          onClick={this.onConfirmDeletion}
+                        />
+                      </div>
                     </div>
-                    <div className="confirmDialogButtons">
-                      <input
-                        type="button"
-                        className="photon-button photon-button-default"
-                        value="Cancel"
-                        disabled={status === 'working'}
-                        onClick={this.onCancelDeletion}
-                      />
-                      <input
-                        type="button"
-                        className="photon-button photon-button-destructive"
-                        value={status === 'working' ? 'Deleting…' : 'Delete'}
-                        disabled={status === 'working'}
-                        onClick={this.onConfirmDeletion}
-                      />
-                    </div>
-                  </div>
-                )
-              }
-            />
-          ) : (
-            <button
-              className="publishedProfilesDeleteButton photon-button photon-button-default"
-              type="button"
-              title="This profile cannot be deleted because we lack the authorization information."
-              disabled
-            >
-              Delete
-            </button>
-          )}
-        </div>
+                  )
+                }
+              />
+            ) : (
+              <button
+                className="publishedProfilesDeleteButton photon-button photon-button-default"
+                type="button"
+                title="This profile cannot be deleted because we lack the authorization information."
+                disabled
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        ) : null}
       </li>
     );
   }
 }
 
 type Props = {|
+  withActionButtons: boolean,
   limit?: number,
 |};
 
@@ -254,7 +260,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   }
 
   render() {
-    const { limit } = this.props;
+    const { limit, withActionButtons } = this.props;
     const { profileDataList } = this.state;
 
     if (!profileDataList) {
@@ -284,6 +290,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
               key={profileData.profileToken}
               profileData={profileData}
               nowTimestamp={nowTimestamp}
+              withActionButtons={withActionButtons}
             />
           ))}
         </ul>

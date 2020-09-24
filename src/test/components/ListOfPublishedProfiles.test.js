@@ -130,7 +130,7 @@ describe('ListOfPublishedProfiles', () => {
     const store = blankStore();
     const renderResult = render(
       <Provider store={store}>
-        <ListOfPublishedProfiles {...props} />
+        <ListOfPublishedProfiles withActionButtons={false} {...props} />
       </Provider>
     );
 
