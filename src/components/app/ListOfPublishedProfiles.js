@@ -83,6 +83,7 @@ type PublishedProfileProps = {|
 type PublishedProfileState = {|
   +confirmDialogIsOpen: boolean,
   +status: 'idle' | 'working' | 'just-deleted' | 'deleted',
+  +error: Error | null,
 |};
 
 class PublishedProfile extends React.PureComponent<
@@ -91,6 +92,7 @@ class PublishedProfile extends React.PureComponent<
 > {
   state = {
     confirmDialogIsOpen: false,
+    error: null,
     status: 'idle',
   };
   _componentDeleteButtonRef = React.createRef();
@@ -101,14 +103,21 @@ class PublishedProfile extends React.PureComponent<
     const { profileToken, jwtToken } = this.props.profileData;
 
     this.setState({ status: 'working' });
-    if (!jwtToken) {
-      throw new Error(
-        `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
-      );
+    try {
+      if (!jwtToken) {
+        throw new Error(
+          `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
+        );
+      }
+      await deleteProfileOnServer({ profileToken, jwtToken });
+      await deleteProfileData(profileToken);
+      this.setState({ status: 'just-deleted' });
+    } catch (e) {
+      this.setState({
+        error: e,
+        status: 'idle',
+      });
     }
-    await deleteProfileOnServer({ profileToken, jwtToken });
-    await deleteProfileData(profileToken);
-    this.setState({ status: 'just-deleted' });
   };
 
   onCancelDeletion = () => {
@@ -145,6 +154,26 @@ class PublishedProfile extends React.PureComponent<
   onOpenConfirmDialog = () => {
     this.setState({ confirmDialogIsOpen: true });
   };
+
+  preventClick(e) {
+    e.preventDefault();
+  }
+
+  _renderPossibleErrorMessage() {
+    const { error } = this.state;
+    if (!error) {
+      return null;
+    }
+
+    return (
+      <p className="publishedProfilesDeleteError">
+        An error happened while deleting this profile.{' '}
+        <a href="#" title={error.message} onClick={this.preventClick}>
+          Hover to know more.
+        </a>
+      </p>
+    );
+  }
 
   render() {
     const { profileData, nowTimestamp, withActionButtons } = this.props;
@@ -216,6 +245,7 @@ class PublishedProfile extends React.PureComponent<
                       <div className="confirmDialogContent">
                         Are you sure you want to delete uploaded data for this
                         profile? Links for shared copies will no longer work.
+                        {this._renderPossibleErrorMessage()}
                       </div>
                       <div className="confirmDialogButtons">
                         <input
