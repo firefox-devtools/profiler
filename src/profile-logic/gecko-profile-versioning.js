@@ -1026,5 +1026,69 @@ const _upgraders = {
     }
     convertToVersion20Recursive(profile);
   },
+  [21]: profile => {
+    // Migrate DOMEvent markers to Markers 2.0
+
+    // This is a fairly permissive type, but helps ensure the logic below is type checked.
+    type DOMEventPayload20_to_21 = {
+      // Tracing -> DOMEvent
+      type: 'tracing' | 'DOMEvent',
+      category: 'DOMEvent',
+      // These are removed:
+      eventType: string,
+      timeStamp: number,
+      // This gets added:
+      latency: number,
+    };
+
+    type UnknownArityTuple = any[];
+
+    type ProfileV20 = {
+      threads: Array<{
+        markers: {|
+          data: UnknownArityTuple[],
+          schema: { name: number, startTime: number, data: number },
+        |},
+        ...
+      }>,
+      processes: ProfileV20[],
+    };
+
+    // DOMEvents are tracing markers with a little bit more information about them,
+    // so it was easier to migrate them with a profile upgrader.
+    function convertToVersion21Recursive(p: ProfileV20) {
+      for (const thread of p.threads) {
+        const { markers } = thread;
+
+        for (
+          let markerIndex = 0;
+          markerIndex < markers.data.length;
+          markerIndex++
+        ) {
+          const markerTuple = markers.data[markerIndex];
+          const payload: DOMEventPayload20_to_21 =
+            markerTuple[markers.schema.data];
+          if (
+            payload &&
+            payload.type === 'tracing' &&
+            payload.category === 'DOMEvent'
+          ) {
+            const startTime: number = markerTuple[markers.schema.startTime];
+
+            // Mutate the payload to limit GC.
+            payload.type = 'DOMEvent';
+            if (payload.timeStamp !== undefined) {
+              payload.latency = startTime - payload.timeStamp;
+            }
+            delete payload.timeStamp;
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion21Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion21Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */
