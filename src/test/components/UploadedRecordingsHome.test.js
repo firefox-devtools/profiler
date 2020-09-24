@@ -51,7 +51,7 @@ describe('UploadedRecordingsHome', () => {
     // 1. Add some profiles to the local indexeddb.
     await storeProfileData({
       profileToken: '0123456789',
-      jwtToken: null,
+      jwtToken: 'FAKE_TOKEN',
       publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
       name: '',
       preset: null,

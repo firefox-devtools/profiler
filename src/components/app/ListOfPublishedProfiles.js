@@ -117,6 +117,11 @@ class PublishedProfile extends React.PureComponent<
         error: e,
         status: 'idle',
       });
+      // Also output the error to the console for easier debugging.
+      console.error(
+        'An error was triggered when we tried to delete a profile.',
+        e
+      );
     }
   };
 
@@ -142,12 +147,17 @@ class PublishedProfile extends React.PureComponent<
     // buttonWithPanel wrapper when we'll have more buttons.
     const deleteButton = this._domDeleteButtonRef.current;
     const actionButtons = this._actionButtonsRef.current;
-    if (
-      deleteButton &&
-      actionButtons &&
-      actionButtons.matches(':focus-within')
-    ) {
-      deleteButton.focus();
+    try {
+      if (
+        deleteButton &&
+        actionButtons &&
+        actionButtons.matches(':focus-within')
+      ) {
+        deleteButton.focus();
+      }
+    } catch (e) {
+      // This browser doesn't support :focus-within (especially JSDOM), let's
+      // degrade gracefully by not refocusing the delete button.
     }
   };
 
