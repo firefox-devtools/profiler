@@ -337,7 +337,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  PContent::Msg_PreferenceUpdate — sent to 2222
+                  IPCOut — PContent::Msg_PreferenceUpdate — sent to 2222
                 </span>
               </div>
               <div

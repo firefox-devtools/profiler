@@ -2276,7 +2276,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       <div
         class="tooltipTitle"
       >
-        IPC — sent to 2222
+        IPC — sent to 2222
       </div>
     </div>
   </div>
@@ -2297,6 +2297,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       :
     </div>
     false
+    <div
+      class="tooltipLabel"
+    >
+      From
+      :
+    </div>
+    Main Thread (Thread ID: 0)
     <div
       class="tooltipLabel"
     >
@@ -2355,7 +2362,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       <div
         class="tooltipTitle"
       >
-        IPC — sent to 2222
+        IPC — sent to 2222
       </div>
     </div>
   </div>
@@ -2376,6 +2383,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       :
     </div>
     false
+    <div
+      class="tooltipLabel"
+    >
+      From
+      :
+    </div>
+    Main Thread (Thread ID: 0)
     <div
       class="tooltipLabel"
     >

@@ -43,13 +43,6 @@ import type {
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
-function _formatIPCMarkerDirection(data) {
-  if (data.direction === 'sending') {
-    return `sent to ${data.recvThreadName || data.otherPid}`;
-  }
-  return `received from ${data.sendThreadName || data.otherPid}`;
-}
-
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
  * feature that can be turned on and off. When on, every sample includes a responsiveness
@@ -722,14 +715,20 @@ export function deriveMarkersFromRawMarkerTable(
             incomplete = false;
           }
 
-          const allData = { ...data, ...sharedData };
+          const allData = {
+            ...data,
+            ...sharedData,
+            niceDirection:
+              data.direction === 'sending'
+                ? `sent to ${sharedData.recvThreadName || data.otherPid}`
+                : `received from ${sharedData.sendThreadName || data.otherPid}`,
+          };
 
           // TODO - How do I get the other rawMarkerIndexes
           addMarker([rawMarkerIndex], {
             start,
             end,
             name,
-            title: `IPC — ${_formatIPCMarkerDirection(allData)}`,
             category,
             data: allData,
             incomplete,

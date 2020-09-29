@@ -962,6 +962,7 @@ describe('actions/ProfileView', function() {
             direction: 'receiving',
             phase: 'endpoint',
             sync: false,
+            niceDirection: 'receiving from Content Process (Thread ID: 1111)',
           },
         ],
         ['c', 2, null],
@@ -983,6 +984,7 @@ describe('actions/ProfileView', function() {
             direction: 'sending',
             phase: 'endpoint',
             sync: false,
+            niceDirection: 'sending to 9999',
           },
         ],
       ]);

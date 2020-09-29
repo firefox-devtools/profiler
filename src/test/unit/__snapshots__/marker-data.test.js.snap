@@ -200,6 +200,7 @@ Array [
       "endTime": 1031,
       "messageSeqno": 1,
       "messageType": "PContent::Msg_PreferenceUpdate",
+      "niceDirection": "sent to Content Process (Thread ID: 1111)",
       "otherPid": 2222,
       "phase": "endpoint",
       "recvEndTime": 1030.3,
@@ -218,7 +219,6 @@ Array [
     "incomplete": false,
     "name": "IPCOut",
     "start": 30,
-    "title": "IPC — sent to Content Process (Thread ID: 1111)",
   },
   Object {
     "category": 0,
@@ -227,6 +227,7 @@ Array [
       "endTime": 1031,
       "messageSeqno": 1,
       "messageType": "PContent::Msg_PreferenceUpdate",
+      "niceDirection": "sent to Content Process (Thread ID: 1111)",
       "otherPid": 2222,
       "phase": "transferStart",
       "recvEndTime": 1030.3,
@@ -245,7 +246,6 @@ Array [
     "incomplete": false,
     "name": "IPCOut",
     "start": 30,
-    "title": "IPC — sent to Content Process (Thread ID: 1111)",
   },
   Object {
     "category": 0,
@@ -254,6 +254,7 @@ Array [
       "endTime": undefined,
       "messageSeqno": 2,
       "messageType": "PContent::Msg_PreferenceUpdate",
+      "niceDirection": "sent to 9999",
       "otherPid": 9999,
       "phase": "endpoint",
       "recvEndTime": undefined,
@@ -272,7 +273,6 @@ Array [
     "incomplete": true,
     "name": "IPCOut",
     "start": 40,
-    "title": "IPC — sent to 9999",
   },
   Object {
     "category": 0,

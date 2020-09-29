@@ -660,6 +660,9 @@ export type IPCMarkerPayload = {|
   recvTid?: number,
   sendThreadName?: string,
   recvThreadName?: string,
+
+  // This field is a nicely formatted field for the direction.
+  niceDirection: string,
 |};
 
 export type MediaSampleMarkerPayload = {|

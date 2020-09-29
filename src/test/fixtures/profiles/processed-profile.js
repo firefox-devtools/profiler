@@ -356,6 +356,7 @@ export function getMarkerTableProfile() {
           direction: 'sending',
           phase: 'endpoint',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -986,6 +987,7 @@ function _getIPCMarkers(
     direction: 'sending',
     phase: 'endpoint',
     sync: false,
+    niceDirection: 'sending to 1234',
     ...options,
   };
 

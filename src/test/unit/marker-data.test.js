@@ -560,6 +560,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         recvThreadName: 'Content Process (Thread ID: 1111)',
         messageSeqno: 1,
         messageType: 'PContent::Msg_PreferenceUpdate',
+        niceDirection: 'sent to Content Process (Thread ID: 1111)',
         side: 'parent',
         direction: 'sending',
         phase: 'endpoint',
@@ -569,7 +570,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       incomplete: false,
       name: 'IPCOut',
       start: 30,
-      title: 'IPC — sent to Content Process (Thread ID: 1111)',
       category: 0,
     });
 
@@ -588,6 +588,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         recvThreadName: 'Content Process (Thread ID: 1111)',
         messageSeqno: 1,
         messageType: 'PContent::Msg_PreferenceUpdate',
+        niceDirection: 'received from Parent Process (Thread ID: 3333)',
         side: 'child',
         direction: 'receiving',
         phase: 'endpoint',
@@ -597,7 +598,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       incomplete: false,
       name: 'IPCIn',
       start: 30,
-      title: 'IPC — received from Parent Process (Thread ID: 3333)',
       category: 0,
     });
     expect(contentMarkers[12]).toEqual({

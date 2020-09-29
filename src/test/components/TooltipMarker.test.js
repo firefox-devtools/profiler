@@ -357,6 +357,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'endpoint',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -374,6 +375,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'transferStart',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
