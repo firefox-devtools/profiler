@@ -24,21 +24,11 @@
   color: black;
   filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
     drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
-  filter: url(../../../res/img/svg/shadowfilter.svg#menushadow);
+  filter: url(../../../../res/img/svg/shadowfilter.svg#menushadow);
   line-height: 1.3;
   text-align: left;
   transform-origin: calc(100% - var(--internal-offset-from-right))
     calc(var(--internal-offset-from-top) * -1);
-}
-
-/* The paddings are on the inner elements (arrowPanelContent, arrowPanelTitle,
- * arrowPanelButtons), instead of the arrowPanel, because they have the
- * scrollbar, so this is more elegant.
- * Horizontal paddings are added here for all elements, vertical padding will be
- * added where needed. */
-.arrowPanel > * {
-  padding-right: 16px;
-  padding-left: 16px;
 }
 
 .arrowPanel:not(.open) {
@@ -98,49 +88,16 @@
   transform-origin: top left;
 }
 
-.arrowPanelTitle,
-.arrowPanelSubTitle {
-  margin: 0;
-  font-size: 1.2em;
-}
-
-.arrowPanelTitle {
-  padding-top: 16px;
-
-  /* No padding-bottom because the arrowPanelContent has a padding-top. */
-}
-
-.arrowPanelSubTitle {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  font-weight: 700;
-}
-
 .arrowPanelContent {
   overflow: auto;
   max-height: calc(
     100vh - var(--internal-approx-distance-from-top) -
       var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
   );
-  padding-top: 16px;
-  padding-bottom: 16px;
+  padding: 16px;
 
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
-}
-
-.arrowPanel ul {
-  padding-left: 2em;
-}
-
-.arrowPanelButtons {
-  display: flex;
-  flex-flow: row nowrap;
-
-  /* No padding-top because arrowPanelContent has a padding-bottom. */
-  padding-bottom: 16px;
-  gap: 8px;
 }
 
 .menuButtonsPermalinkPanel .arrowPanelContent {
@@ -151,46 +108,4 @@
 .menuButtonsPermalinkTextField {
   width: 16em;
   height: 19px;
-}
-
-.arrowPanelOpenMetaInfo {
-  width: 350px;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.arrowPanelOpenMetaInfo,
-.arrowPanelOpenMetaInfo .arrowPanelArrow::before {
-  background-color: white;
-}
-
-.arrowPanelSection {
-  margin-top: 7px;
-  margin-bottom: 12px;
-}
-
-.metaInfoLabel,
-.metaInfoWideLabel {
-  display: inline-block;
-  width: 120px;
-  color: var(--grey-50);
-}
-
-.metaInfoWideLabel {
-  width: 140px;
-}
-
-.visualMetricsLabel {
-  display: inline-block;
-  width: 145px;
-  color: var(--grey-50);
-}
-
-.metaInfoList {
-  margin-top: -19px;
-}
-
-.metaInfoList .metaInfoListItem {
-  margin-left: 110px;
-  list-style: circle;
 }
