@@ -37,7 +37,12 @@
 .publishedProfilesListItem {
   display: flex;
   justify-content: space-between;
-  padding: 0;
+
+  /* The padding compensates for the negative margin. The negative margin is
+   * there so that the left border (implemented as a box-shadow below) go
+   * outside the line. */
+  padding: 2px 0;
+  margin: -2px 0;
 }
 
 .publishedProfilesLink {
@@ -49,10 +54,13 @@
   text-decoration: none;
 }
 
-.publishedProfilesListItem_ConfirmDialogIsOpen .publishedProfilesLink,
-.publishedProfilesListItem:hover .publishedProfilesLink,
-.publishedProfilesListItem:focus-within .publishedProfilesLink {
-  background: var(--grey-90-a10);
+.publishedProfilesLink:hover {
+  background: var(--grey-90-a05);
+}
+
+.publishedProfilesListItem_ConfirmDialogIsOpen,
+.publishedProfilesListItem:focus-within {
+  box-shadow: -3px 0 0 var(--blue-60); /* This is a border that doesn't move the content. */
 }
 
 .publishedProfilesDate {
