@@ -37,6 +37,9 @@ import type {
 import type { ConnectedProps } from '../../utils/connect';
 import { getMarkerSchemaName } from '../../profile-logic/marker-schema';
 
+// Limit how many characters in the description get sent to the DOM.
+const MAX_DESCRIPTION_CHARACTERS = 500;
+
 type MarkerDisplayData = {|
   start: string,
   duration: string | null,
@@ -101,7 +104,13 @@ class MarkerTree {
     if (displayData === undefined) {
       const marker = this._getMarker(markerIndex);
 
-      const name = this._getMarkerLabel(markerIndex);
+      let name = this._getMarkerLabel(markerIndex);
+
+      if (name.length > MAX_DESCRIPTION_CHARACTERS) {
+        // This was adapted from the log marker payloads as a general rule for
+        // the marker table. This way no special handling is needed.
+        name = name.substring(0, MAX_DESCRIPTION_CHARACTERS) + '…';
+      }
 
       let duration = null;
       if (marker.incomplete) {
