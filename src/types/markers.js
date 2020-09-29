@@ -109,14 +109,6 @@ export type MarkerSchema = {|
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
 
-// This type is a more dynamic version of the Payload type.
-type DynamicMarkerPayload = { [key: string]: any };
-// Marker schema can create a dynamic tooltip label. For instance a schema with
-// a `tooltipLabel` field of "Event at {url}" would create a label based off of the
-// "url" property in the payload.
-export type MarkerLabelMaker = DynamicMarkerPayload => string;
-export type MarkerLabelMakerByName = ObjectMap<MarkerLabelMaker>;
-
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
  * the time the stack was taken. Sometimes this cause can be async, and triggered before
