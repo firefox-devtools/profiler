@@ -97,9 +97,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Duration
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn category"
+        class="treeViewHeaderColumn treeViewFixedColumn type"
       >
-        Category
+        Type
       </span>
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -147,7 +147,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   0s
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="UserTiming"
                 >
                   UserTiming
@@ -168,7 +168,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   title=""
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Paint"
                 >
                   Paint
@@ -214,7 +214,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   584.00ns
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Text"
                 >
                   Text
@@ -235,7 +235,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   title=""
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Log"
                 >
                   Log

@@ -41,7 +41,7 @@ type MarkerDisplayData = {|
   start: string,
   duration: string | null,
   name: string,
-  category: string,
+  type: string,
 |};
 
 class MarkerTree {
@@ -114,7 +114,7 @@ class MarkerTree {
         start: _formatStart(marker.start, this._zeroAt),
         duration,
         name,
-        category: getMarkerSchemaName(this._markerSchemaByName, marker),
+        type: getMarkerSchemaName(this._markerSchemaByName, marker),
       };
       this._displayDataByIndex.set(markerIndex, displayData);
     }
@@ -149,7 +149,7 @@ class MarkerTable extends PureComponent<Props> {
   _fixedColumns = [
     { propName: 'start', title: 'Start' },
     { propName: 'duration', title: 'Duration' },
-    { propName: 'category', title: 'Category' },
+    { propName: 'type', title: 'Type' },
   ];
   _mainColumn = { propName: 'name', title: 'Description' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
