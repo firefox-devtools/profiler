@@ -5,8 +5,7 @@
 // @flow
 import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
-import ArrowPanel from '../../components/shared/ArrowPanel';
+import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -22,11 +21,8 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         buttonClassName="buttonButton"
         label="My Button"
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
   }
@@ -41,59 +37,12 @@ describe('shared/ButtonWithPanel', () => {
       <ButtonWithPanel
         className="button"
         label="My Button"
-        open={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        initialOpen={true}
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  describe('various panel contents', () => {
-    it('renders panels with default buttons and titles', () => {
-      const { container } = render(
-        <ButtonWithPanel
-          className="button"
-          label="My Button"
-          open={true}
-          panel={
-            <ArrowPanel
-              className="panel"
-              title="Wonderful content"
-              okButtonText="Confirm"
-              cancelButtonText="Cancel"
-            >
-              <div>Panel content</div>
-            </ArrowPanel>
-          }
-        />
-      );
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it('renders panels with specified buttons', () => {
-      const { container } = render(
-        <ButtonWithPanel
-          className="button"
-          label="My Button"
-          open={true}
-          panel={
-            <ArrowPanel
-              className="panel"
-              okButtonText="Confirm"
-              okButtonType="destructive"
-              cancelButtonText="Cancel"
-            >
-              <div>Panel content</div>
-            </ArrowPanel>
-          }
-        />
-      );
-      expect(container.firstChild).toMatchSnapshot();
-    });
   });
 
   describe('protecting against mounting expensive panels', function() {
@@ -102,11 +51,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeFalsy();
@@ -121,12 +66,8 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          open={true}
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          initialOpen={true}
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeTruthy();
