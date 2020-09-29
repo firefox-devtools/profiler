@@ -182,7 +182,7 @@ describe('getJankMarkersForHeader', function() {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
-      .getJankMarkerIndexesForHeader(getState())
+      .getTimelineJankMarkerIndexes(getState())
       .map(getMarker);
   }
 
@@ -191,7 +191,7 @@ describe('getJankMarkersForHeader', function() {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
-      .getJankMarkerIndexesForHeader(getState())
+      .getTimelineJankMarkerIndexes(getState())
       .map(getMarker);
   }
 
@@ -1738,7 +1738,7 @@ describe('snapshots of selectors/profile', function() {
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     expect(
       selectedThreadSelectors
-        .getJankMarkerIndexesForHeader(getState())
+        .getTimelineJankMarkerIndexes(getState())
         .map(getMarker)
     ).toMatchSnapshot();
   });

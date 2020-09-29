@@ -6,7 +6,10 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
-import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
+import {
+  overlayFills,
+  getMarkerStyle,
+} from '../../profile-logic/marker-styles';
 import { withSize } from '../shared/WithSize';
 import { Tooltip } from '../tooltip/Tooltip';
 import { TooltipMarker } from '../tooltip/Marker';
@@ -141,7 +144,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
     let previousPos = null;
     for (const markerIndex of markerIndexes) {
       const marker = getMarker(markerIndex);
-      const { start, end, name } = marker;
+      const { start, end } = marker;
       const dur = end === null ? 0 : end - start;
       let pos = ((start - rangeStart) / (rangeEnd - rangeStart)) * width;
       pos = Math.round(pos * devicePixelRatio) / devicePixelRatio;
@@ -157,8 +160,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
             MIN_MARKER_WIDTH / devicePixelRatio
           )
         : Number.MAX_SAFE_INTEGER;
-      const markerStyle =
-        name in markerStyles ? markerStyles[name] : markerStyles.default;
+      const markerStyle = getMarkerStyle(marker);
       ctx.fillStyle = markerStyle.background;
       if (markerStyle.squareCorners) {
         ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
@@ -323,14 +325,15 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     for (let i = markerIndexes.length - 1; i >= 0; i--) {
       const markerIndex = markerIndexes[i];
       const marker = getMarker(markerIndex);
-      const { start, end, name } = marker;
+      const { start, end } = marker;
       const dur = end === null ? 0 : end - start;
       const duration = Math.max(dur, onePixelTime);
       if (time < start || time >= start + duration) {
         continue;
       }
-      const markerStyle =
-        name in markerStyles ? markerStyles[name] : markerStyles.default;
+
+      const markerStyle = getMarkerStyle(marker);
+
       if (y >= markerStyle.top && y < markerStyle.top + markerStyle.height) {
         return markerIndex;
       }
@@ -537,7 +540,7 @@ export const TimelineMarkersJank = explicitConnect<
     return {
       getMarker: selectors.getMarkerGetter(state),
       // These don't use marker schema as they are derived.
-      markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
+      markerIndexes: selectors.getTimelineJankMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
