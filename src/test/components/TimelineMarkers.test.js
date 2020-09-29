@@ -221,7 +221,7 @@ describe('TimelineMarkers', function() {
     it('when right clicking on a marker', () => {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
-        [['DOMEvent', 0, 10]]
+        [['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'mousedown' }]]
       );
 
       // The "DOMEvent" marker is drawn from 0,0 to 5,200.
@@ -232,8 +232,7 @@ describe('TimelineMarkers', function() {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy');
-
-      expect(copy).toHaveBeenLastCalledWith('DOMEvent');
+      expect(copy).toHaveBeenLastCalledWith('mousedown — DOMEvent');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();

@@ -20,6 +20,7 @@ import copy from 'copy-to-clipboard';
 
 import type {
   Marker,
+  MarkerIndex,
   StartEndRange,
   PreviewSelection,
   ImplementationFilter,
@@ -36,7 +37,6 @@ import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
-import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
 
 type OwnProps = {|
@@ -45,10 +45,12 @@ type OwnProps = {|
 
 type StateProps = {|
   +marker: Marker,
+  +markerIndex: MarkerIndex,
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
+  +getMarkerLabelToCopy: MarkerIndex => string,
 |};
 
 type DispatchProps = {|
@@ -154,13 +156,8 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   copyMarkerDescription = () => {
-    const { rightClickedMarker } = this.props;
-
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    copy(getMarkerFullDescription(rightClickedMarker));
+    const { markerIndex, getMarkerLabelToCopy } = this.props;
+    copy(getMarkerLabelToCopy(markerIndex));
   };
 
   copyMarkerCause = () => {
@@ -266,11 +263,13 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
     const getMarker = selectors.getMarkerGetter(state);
 
     return {
+      markerIndex,
       marker: getMarker(markerIndex),
       previewSelection: getPreviewSelection(state),
       committedRange: getCommittedRange(state),
       implementationFilter: getImplementationFilter(state),
       thread: selectors.getThread(state),
+      getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },

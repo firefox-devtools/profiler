@@ -451,6 +451,31 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
+   * This selector is used by the generic marker context menu to decide what to copy.
+   */
+  const getMarkerLabelToCopyGetter: Selector<
+    (MarkerIndex) => string
+  > = state => {
+    const tabSlug = UrlState.getSelectedTab(state);
+    switch (tabSlug) {
+      case 'marker-chart':
+        return _getMarkerChartLabelGetter(state);
+      case 'marker-table':
+        return getMarkerTableLabelGetter(state);
+      case 'network-chart':
+      case 'calltree':
+      case 'flame-graph':
+      case 'stack-chart':
+      case 'js-tracer':
+        // Some of these may not actually happen, but all TabSlugs are included
+        // for completeness.
+        return getMarkerTooltipLabelGetter(state);
+      default:
+        throw assertExhaustiveCheck(tabSlug, 'Unhandled TabSlug type');
+    }
+  };
+
+  /**
    * This organizes the result of the previous selector in rows to be nicely
    * displayed in the marker chart.
    */
@@ -595,6 +620,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerChartMarkerIndexes,
     getMarkerTooltipLabelGetter,
     getMarkerTableLabelGetter,
+    getMarkerLabelToCopyGetter,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
     getCommittedRangeAndTabFilteredMarkerIndexes,
