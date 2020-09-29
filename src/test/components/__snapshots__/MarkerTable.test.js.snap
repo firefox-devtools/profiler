@@ -191,10 +191,10 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   unknown
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
-                  title="IPC out"
+                  class="treeViewRowColumn treeViewFixedColumn type"
+                  title="IPC"
                 >
-                  IPC out
+                  IPC
                 </span>
               </div>
               <div
@@ -358,7 +358,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  setTimeout — 5.5
+                  setTimeout — 5.5
                 </span>
               </div>
               <div

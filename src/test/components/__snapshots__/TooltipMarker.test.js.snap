@@ -1398,20 +1398,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTitle"
       >
-        commandupdate
+        commandupdate — DOMEvent
       </div>
     </div>
   </div>
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Marker
-      :
-    </div>
-    DOMEvent
     <div
       class="tooltipLabel"
     >
