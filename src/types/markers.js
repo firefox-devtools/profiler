@@ -81,6 +81,13 @@ export type MarkerSchema = {|
   // If none is provided, then the name is used.
   tooltipLabel?: string, // e.g. "Cycle Collect"
 
+  // This is how the marker shows up in the Marker Table description.
+  tableLabel?: string, // e.g. "{eventType} – DOMEvent"
+
+  // This is how the marker shows up in the Marker Chart, where it is drawn
+  // on the screen as a bar.
+  chartLabel?: string,
+
   // The locations to display
   display: MarkerDisplayLocation[],
 

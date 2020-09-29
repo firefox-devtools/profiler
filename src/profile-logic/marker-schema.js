@@ -138,7 +138,9 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'UserTiming',
-    tooltipLabel: '{name}',
+    tooltipLabel: '{marker.data.name}',
+    chartLabel: '{marker.data.name}',
+    tableLabel: '{marker.data.name}',
     display: ['marker-chart', 'marker-table'],
     data: [
       // name
@@ -153,12 +155,15 @@ export const markerSchema: MarkerSchema[] = [
   },
   {
     name: 'Text',
+    tableLabel: '{marker.name} — {marker.data.name}',
+    chartLabel: '{marker.name} — {marker.data.name}',
     display: ['marker-chart', 'marker-table'],
     data: [{ key: 'name', label: 'Details', format: 'string' }],
   },
   {
     name: 'Log',
     display: ['marker-table'],
+    tableLabel: '({marker.data.module}) {marker.data.name}',
     data: [
       { key: 'module', label: 'Module', format: 'string' },
       { key: 'name', label: 'Name', format: 'string' },
