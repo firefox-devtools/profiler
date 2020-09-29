@@ -257,7 +257,8 @@ class PublishedProfile extends React.PureComponent<
                       </h2>
                       <div className="confirmDialogContent">
                         Are you sure you want to delete uploaded data for this
-                        profile? Links for shared copies will no longer work.
+                        profile? Links that were previously shared will no
+                        longer work.
                         {this._renderPossibleErrorMessage()}
                       </div>
                       <div className="confirmDialogButtons">
