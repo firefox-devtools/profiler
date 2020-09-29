@@ -68,19 +68,19 @@ export function deriveJankMarkers(
   thresholdInMs: number,
   otherCategoryIndex: IndexIntoCategoryList
 ): Marker[] {
+  const data = { type: 'Jank' };
   const addMarker = () =>
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       end: lastTimestamp,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
-      name: 'Jank',
+      name: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       category: otherCategoryIndex,
-      data: null,
+      data,
     });
 
   let lastResponsiveness: number = 0;
   let lastTimestamp: number = 0;
-  const jankInstances = [];
+  const jankInstances: Marker[] = [];
   for (let i = 0; i < samples.length; i++) {
     let currentResponsiveness;
     if (samples.eventDelay) {

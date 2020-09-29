@@ -277,10 +277,12 @@ export function getMarkerSelectorsPerThread(
   /**
    * This selector selects only jank markers.
    */
-  const getJankMarkerIndexesForHeader: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineJankeMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(marker => marker.name === 'Jank')
+    filterMarkerIndexesCreator(marker =>
+      Boolean(marker.data && marker.data.type === 'Jank')
+    )
   );
 
   /**
@@ -608,7 +610,7 @@ export function getMarkerSelectorsPerThread(
 
   return {
     getMarkerGetter,
-    getJankMarkerIndexesForHeader,
+    getJankMarkerIndexesForHeader: getTimelineJankeMarkerIndexes,
     getProcessedRawMarkerTable,
     getDerivedMarkerInfo,
     getMarkerIndexToRawMarkerIndexes,

@@ -2700,11 +2700,12 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Array [
   Object {
     "category": 1,
-    "data": null,
+    "data": Object {
+      "type": "Jank",
+    },
     "end": 55,
-    "name": "Jank",
+    "name": "50.00ms event processing delay",
     "start": 5,
-    "title": "50.00ms event processing delay",
   },
 ]
 `;

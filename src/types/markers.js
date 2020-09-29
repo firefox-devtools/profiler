@@ -672,6 +672,11 @@ export type MediaSampleMarkerPayload = {|
 |};
 
 /**
+ * This type is generated on the Firefox Profiler side, and doesn't come from Gecko.
+ */
+export type JankPayload = {| type: 'Jank' |};
+
+/**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
  * profiler.
@@ -704,6 +709,7 @@ export type MarkerPayload =
   | ChromeDurationTraceEventPayload
   | ChromeInstantTraceEventPayload
   | MediaSampleMarkerPayload
+  | JankPayload
   | null;
 
 export type MarkerPayload_Gecko =
