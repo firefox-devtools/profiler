@@ -285,7 +285,7 @@ type Props = {|
 |};
 
 type State = {
-  hoveredMarker: Marker | null,
+  hoveredMarkerIndex: MarkerIndex | null,
   mouseDownMarker: Marker | null,
   mouseX: CssPixels,
   mouseY: CssPixels,
@@ -294,7 +294,7 @@ type State = {
 class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   _container: HTMLElement | null = null;
   state = {
-    hoveredMarker: null,
+    hoveredMarkerIndex: null,
     mouseDownMarker: null,
     mouseX: 0,
     mouseY: 0,
@@ -338,34 +338,23 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     return null;
   }
 
-  _getHitMarker = (
-    e: SyntheticMouseEvent<HTMLCanvasElement>
-  ): Marker | null => {
-    const markerIndex = this._hitTest(e);
-
-    if (markerIndex !== null) {
-      return this.props.getMarker(markerIndex);
-    }
-
-    return null;
-  };
-
   _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
-    const hoveredMarker = this._getHitMarker(event);
-    if (hoveredMarker !== null) {
+    const hoveredMarkerIndex = this._hitTest(event);
+
+    if (hoveredMarkerIndex !== null) {
       this.setState({
-        hoveredMarker,
+        hoveredMarkerIndex,
         mouseX: event.pageX,
         mouseY: event.pageY,
       });
     } else if (
-      this.state.hoveredMarker !== null &&
+      this.state.hoveredMarkerIndex !== null &&
       // This persistTooltips property is part of the web console API. It helps
       // in being able to inspect and debug tooltips.
       !window.persistTooltips
     ) {
       this.setState({
-        hoveredMarker: null,
+        hoveredMarkerIndex: null,
       });
     }
   };
@@ -399,16 +388,21 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
   };
 
-  _onMouseUp = (e: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onMouseUp = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const { mouseDownMarker } = this.state;
     if (mouseDownMarker !== null) {
-      const mouseUpMarker = this._getHitMarker(e);
+      const mouseUpMarkerIndex = this._hitTest(event);
+      const mouseUpMarker =
+        mouseUpMarkerIndex === null
+          ? null
+          : this.props.getMarker(mouseUpMarkerIndex);
+
       if (
         mouseDownMarker === mouseUpMarker &&
         mouseUpMarker !==
           null /* extra null check because flow doesn't realize it's unnecessary */
       ) {
-        e.stopPropagation();
+        event.stopPropagation();
         const { onSelect, rangeStart, rangeEnd } = this.props;
         const { start, end } = getStartEndRangeForMarker(
           rangeStart,
@@ -418,7 +412,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         onSelect(start, end);
       }
       this.setState({
-        hoveredMarker: mouseUpMarker,
+        hoveredMarkerIndex: mouseUpMarkerIndex,
         mouseDownMarker: null,
       });
     }
@@ -429,7 +423,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     // in being able to inspect and debug tooltips.
     if (!window.persistTooltips) {
       this.setState({
-        hoveredMarker: null,
+        hoveredMarkerIndex: null,
       });
     }
   };
@@ -462,11 +456,14 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       threadsKey,
       testId,
       rightClickedMarker,
+      getMarker,
     } = this.props;
 
-    const { mouseDownMarker, hoveredMarker, mouseX, mouseY } = this.state;
+    const { mouseDownMarker, hoveredMarkerIndex, mouseX, mouseY } = this.state;
     const shouldShowTooltip =
       !isModifyingSelection && !mouseDownMarker && !rightClickedMarker;
+    const hoveredMarker =
+      hoveredMarkerIndex === null ? null : getMarker(hoveredMarkerIndex);
 
     return (
       <div
@@ -495,9 +492,10 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
             onMouseOut={this._onMouseOut}
           />
         </ContextMenuTrigger>
-        {shouldShowTooltip && hoveredMarker ? (
+        {shouldShowTooltip && hoveredMarkerIndex && hoveredMarker ? (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <TooltipMarker
+              markerIndex={hoveredMarkerIndex}
               marker={hoveredMarker}
               threadsKey={threadsKey}
               restrictHeightWidth={true}

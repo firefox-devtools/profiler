@@ -413,6 +413,7 @@ describe('TooltipMarker', function() {
       const { container } = render(
         <Provider store={store}>
           <TooltipMarker
+            markerIndex={markerIndex}
             marker={marker}
             threadsKey={threadIndex}
             className="propClass"
@@ -451,6 +452,7 @@ describe('TooltipMarker', function() {
     return render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={0}
           className="propClass"
@@ -679,6 +681,7 @@ describe('TooltipMarker', function() {
     const { container } = render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={threadIndex}
           className="propClass"

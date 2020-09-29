@@ -555,6 +555,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const marker = this.props.getMarker(markerIndex);
     return (
       <TooltipMarker
+        markerIndex={markerIndex}
         marker={marker}
         threadsKey={this.props.threadsKey}
         restrictHeightWidth={true}
