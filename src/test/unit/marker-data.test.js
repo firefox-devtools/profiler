@@ -72,7 +72,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: null,
         name: 'TestDefinedMarker',
         start: 5,
-        title: null,
       },
     ]);
   });
@@ -93,7 +92,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 6,
         name: 'TestDefinedMarker',
         start: 5,
-        title: null,
       },
     ]);
   });
@@ -119,7 +117,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 6,
         name: 'TestDefinedMarker',
         start: 5,
-        title: null,
       },
     ]);
   });
@@ -140,7 +137,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 6,
         name: 'TestDefinedMarker',
         start: 0,
-        title: null,
         incomplete: true,
       },
     ]);
@@ -164,7 +160,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: profile.threads[0].samples.length,
         name: 'TestDefinedMarker',
         start: 2,
-        title: null,
         incomplete: true,
       },
     ]);
@@ -201,7 +196,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 7,
         name: 'TestDefinedMarker',
         start: 2,
-        title: null,
       },
       {
         category: 0,
@@ -209,7 +203,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 5,
         name: 'TestDefinedMarker',
         start: 3,
-        title: null,
       },
     ]);
   });
@@ -249,7 +242,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 5,
         name: 'Marker A',
         start: 2,
-        title: null,
       },
       {
         category: 0,
@@ -257,7 +249,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: 7,
         name: 'Marker B',
         start: 3,
-        title: null,
       },
     ]);
   });
@@ -305,7 +296,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: startTimeB,
         name: 'CompositorScreenshot',
         start: 2,
-        title: null,
       },
       // The last has a duration until the end of the thread range.
       {
@@ -314,7 +304,6 @@ describe('Derive markers from Gecko phase markers', function() {
         end: threadRange.end,
         name: 'CompositorScreenshot',
         start: startTimeB,
-        title: null,
       },
     ]);
   });
@@ -399,7 +388,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 2,
       end: null,
       name: 'VsyncTimestamp',
-      title: null,
     });
   });
   it('should create a marker', function() {
@@ -408,7 +396,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 3,
       end: 8,
       name: 'Reflow',
-      title: null,
     });
   });
   it('should fold the two reflow markers into one marker', function() {
@@ -418,7 +405,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 3,
       end: 8,
       name: 'Reflow',
-      title: null,
     });
   });
   it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
@@ -427,7 +413,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 4,
       end: 5,
       name: 'Rasterize',
-      title: null,
     });
   });
   it('should correlate the IPC markers together and fold transferStart/transferEnd markers', function() {
@@ -470,7 +455,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 11,
       end: 12,
       name: 'MinorGC',
-      title: null,
     });
   });
   it('should create a marker for the DOMEvent marker', function() {
@@ -479,7 +463,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       end: 10,
       name: 'DOMEvent',
       start: 9,
-      title: null,
     });
   });
   it('should create a marker for the marker UserTiming', function() {
@@ -488,7 +471,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       end: 13,
       name: 'UserTiming',
       start: 12,
-      title: null,
     });
   });
   it('should handle markers without a start', function() {
@@ -497,7 +479,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 0, // Truncated to the time of the first captured sample.
       end: 1,
       name: 'Rasterize',
-      title: null,
     });
   });
   it('should handle markers without an end', function() {
@@ -506,7 +487,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 100,
       end: 100,
       name: 'Rasterize',
-      title: null,
       incomplete: true,
     });
   });
@@ -516,13 +496,11 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 13,
       end: 18,
       name: 'Reflow',
-      title: null,
     });
     expect(markers[8]).toMatchObject({
       start: 14,
       end: 15,
       name: 'Reflow',
-      title: null,
     });
   });
   it('should handle arbitrary tracing markers correctly', function() {
@@ -531,7 +509,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 21,
       end: null,
       name: 'ArbitraryName',
-      title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
     });
   });
@@ -566,7 +543,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       end: 24,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 22,
-      title: null,
       category: 0,
     });
     expect(markers[14]).toEqual({
@@ -648,7 +624,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       end: 1024,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 1022,
-      title: null,
       category: 0,
     });
     expect(contentMarkers[13]).toEqual({
@@ -666,7 +641,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       end: 1024,
       name: 'FileIO',
       start: 1022,
-      title: null,
       category: 0,
     });
   });
@@ -683,7 +657,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'CompositorScreenshot',
       start: 25,
       end: 25,
-      title: null,
     });
   });
 });
