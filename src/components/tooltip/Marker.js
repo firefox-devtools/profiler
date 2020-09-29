@@ -194,14 +194,19 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           if (schemaData.value === undefined) {
             const { key, label, format } = schemaData;
             if (key in data) {
-              details.push(
-                <TooltipDetail
-                  key={schema.name + '-' + key}
-                  label={label || key}
-                >
-                  {formatFromMarkerSchema(schema.name, format, data[key])}
-                </TooltipDetail>
-              );
+              const value = data[key];
+
+              // Don't add undefined values, as values are optional.
+              if (value !== undefined) {
+                details.push(
+                  <TooltipDetail
+                    key={schema.name + '-' + key}
+                    label={label || key}
+                  >
+                    {formatFromMarkerSchema(schema.name, format, value)}
+                  </TooltipDetail>
+                );
+              }
             }
           }
 
