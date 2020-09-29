@@ -510,8 +510,10 @@ export function formatFromMarkerSchema(
     case 'url':
     case 'file-path':
     case 'string':
-      // Make sure a truthy string is returned here. Otherwise it can break
-      // grid layouts.
+      // Make sure a non-empty string is returned here.
+      if (value === undefined || value === null) {
+        return '(empty)';
+      }
       return String(value) || '(empty)';
     case 'duration':
     case 'time':
