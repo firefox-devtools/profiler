@@ -86,6 +86,9 @@ type PublishedProfileState = {|
   +error: Error | null,
 |};
 
+/**
+ * This implements one line in the list of published profiles.
+ */
 class PublishedProfile extends React.PureComponent<
   PublishedProfileProps,
   PublishedProfileState
