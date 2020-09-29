@@ -12,7 +12,7 @@ import {
   TimelineMarkersOverview,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
 import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -68,7 +68,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
           threadsKey={0}
           onSelect={() => {}}
         />
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
       </>
     </Provider>
   );

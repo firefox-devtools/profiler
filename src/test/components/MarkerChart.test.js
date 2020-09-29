@@ -16,7 +16,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import MarkerChart from '../../components/marker-chart';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 
@@ -109,7 +109,7 @@ function setupWithProfile(profile) {
   const renderResult = render(
     <Provider store={store}>
       <>
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
         <MarkerChart />
       </>
     </Provider>

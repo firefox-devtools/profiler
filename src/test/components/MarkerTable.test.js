@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
 import MarkerTable from '../../components/marker-table';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
   updatePreviewSelection,
   changeMarkersSearchString,
@@ -43,7 +43,7 @@ describe('MarkerTable', function() {
     const renderResult = render(
       <Provider store={store}>
         <>
-          <MarkerContextMenu />
+          <MaybeMarkerContextMenu />
           <MarkerTable />
         </>
       </Provider>
