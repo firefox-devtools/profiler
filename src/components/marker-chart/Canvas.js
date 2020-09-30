@@ -123,12 +123,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
         this.clearRow(ctx, newRow);
         this.highlightRow(ctx, newRow);
         this.drawMarkers(ctx, hoveredItem, newRow, newRow + 1);
+        this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1);
       }
       if (oldRow !== undefined && oldRow !== newRow) {
         if (oldRow !== rightClickedRow) {
           this.clearRow(ctx, oldRow);
         }
         this.drawMarkers(ctx, hoveredItem, oldRow, oldRow + 1);
+        this.drawSeparatorsAndLabels(ctx, oldRow, oldRow + 1);
       }
     } else {
       ctx.fillStyle = '#ffffff';
@@ -375,7 +377,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       containerWidth,
       rowHeight - 1 // Subtract 1 for borders.
     );
-    this.drawSeparatorsAndLabels(ctx, rowIndex, rowIndex + 1); // To redraw the Separators and Labels after clearing them
   }
 
   /**
