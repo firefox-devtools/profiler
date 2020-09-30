@@ -84,7 +84,7 @@ describe('timeline/TrackContextMenu', function() {
       const trackItem = () => getByText('Content Process');
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
-      const hideTrack = () => getByText(/Hide "Content Process"/);
+      const hideContentProcess = () => getByText(/Hide "Content Process"/);
 
       return {
         ...results,
@@ -94,7 +94,7 @@ describe('timeline/TrackContextMenu', function() {
         isolateProcessItem,
         isolateProcessMainThreadItem,
         isolateScreenshotTrack,
-        hideTrack,
+        hideContentProcess,
         trackItem,
       };
     }
@@ -182,8 +182,16 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('can hide the process', function() {
-      const { hideTrack, getState } = setupGlobalTrack();
-      fireFullClick(hideTrack());
+      const { hideContentProcess, getState } = setupGlobalTrack();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      fireFullClick(hideContentProcess());
+
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'hide [thread GeckoMain tab]',
@@ -241,7 +249,7 @@ describe('timeline/TrackContextMenu', function() {
       dispatch(changeRightClickedTrack(trackReference));
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
-      const hideTrack = () => getByText('Hide "DOM Worker"');
+      const hideDOMWorker = () => getByText('Hide "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {
@@ -250,7 +258,7 @@ describe('timeline/TrackContextMenu', function() {
         trackIndex,
         threadIndex,
         isolateLocalTrackItem,
-        hideTrack,
+        hideDOMWorker,
         trackItem,
         pid,
       };
@@ -282,9 +290,17 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can hide the process', function() {
-      const { hideTrack, getState } = setupLocalTrack();
-      fireFullClick(hideTrack());
+    it('can hide the DOM worker thread', function() {
+      const { hideDOMWorker, getState } = setupLocalTrack();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - show [thread Style]',
+      ]);
+
+      fireFullClick(hideDOMWorker());
+
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
