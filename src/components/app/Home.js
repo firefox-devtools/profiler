@@ -527,7 +527,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
                 Recent uploaded recordings
               </h2>
-              <ListOfPublishedProfiles limit={3} />
+              <ListOfPublishedProfiles limit={3} withActionButtons={false} />
             </section>
             {/* End of grid container */}
           </section>

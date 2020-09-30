@@ -10,6 +10,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//public/MACOSX/marker-chart/"
+      title="Click here to load profile MacOS X profile"
     >
       <div
         class="publishedProfilesDate"
@@ -17,30 +18,33 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         Jul 5, 2020
       </div>
       <div
-        class="publishedProfilesName"
-      >
-        <strong>
-          MacOS X profile
-        </strong>
-         
-        (
-        38.0s
-        )
-      </div>
-      <div
-        class="profileMetaInfoSummary"
+        class="publishedProfilesInfo"
       >
         <div
-          class="profileMetaInfoSummaryProductAndVersion"
-          data-product="Firefox"
+          class="publishedProfilesName"
         >
-          Firefox 62
+          <strong>
+            MacOS X profile
+          </strong>
+           (
+          38.0s
+          )
         </div>
         <div
-          class="profileMetaInfoSummaryPlatform"
-          data-toolkit="macOS 10.12"
+          class="profileMetaInfoSummary"
         >
-          macOS 10.12
+          <div
+            class="profileMetaInfoSummaryProductAndVersion"
+            data-product="Firefox"
+          >
+            Firefox 62
+          </div>
+          <div
+            class="profileMetaInfoSummaryPlatform"
+            data-toolkit="macOS 10.12"
+          >
+            macOS 10.12
+          </div>
         </div>
       </div>
     </a>
@@ -51,6 +55,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//"
+      title="Click here to load profile #012345"
     >
       <div
         class="publishedProfilesDate"
@@ -58,29 +63,32 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         2:00 PM
       </div>
       <div
-        class="publishedProfilesName"
-      >
-        <strong>
-          Profile #012345
-        </strong>
-         
-        (
-        2.0s
-        )
-      </div>
-      <div
-        class="profileMetaInfoSummary"
+        class="publishedProfilesInfo"
       >
         <div
-          class="profileMetaInfoSummaryProductAndVersion"
-          data-product="Fennec"
+          class="publishedProfilesName"
         >
-          Fennec
+          <strong>
+            Profile #012345
+          </strong>
+           (
+          2.0s
+          )
         </div>
         <div
-          class="profileMetaInfoSummaryPlatform"
-          data-toolkit=""
-        />
+          class="profileMetaInfoSummary"
+        >
+          <div
+            class="profileMetaInfoSummaryProductAndVersion"
+            data-product="Fennec"
+          >
+            Fennec
+          </div>
+          <div
+            class="profileMetaInfoSummaryPlatform"
+            data-toolkit=""
+          />
+        </div>
       </div>
     </a>
   </li>
@@ -90,6 +98,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       class="publishedProfilesLink"
       href="http://localhost//public/WINDOWS/marker-chart/"
+      title="Click here to load profile Another good profile"
     >
       <div
         class="publishedProfilesDate"
@@ -97,33 +106,72 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         1:00 PM
       </div>
       <div
-        class="publishedProfilesName"
-      >
-        <strong>
-          Another good profile
-        </strong>
-         
-        (
-        38.0s
-        )
-      </div>
-      <div
-        class="profileMetaInfoSummary"
+        class="publishedProfilesInfo"
       >
         <div
-          class="profileMetaInfoSummaryProductAndVersion"
-          data-product="Firefox"
+          class="publishedProfilesName"
         >
-          Firefox 77
+          <strong>
+            Another good profile
+          </strong>
+           (
+          38.0s
+          )
         </div>
         <div
-          class="profileMetaInfoSummaryPlatform"
-          data-toolkit="Windows 10"
+          class="profileMetaInfoSummary"
         >
-          Windows 10
+          <div
+            class="profileMetaInfoSummaryProductAndVersion"
+            data-product="Firefox"
+          >
+            Firefox 77
+          </div>
+          <div
+            class="profileMetaInfoSummaryPlatform"
+            data-toolkit="Windows 10"
+          >
+            Windows 10
+          </div>
         </div>
       </div>
     </a>
   </li>
 </ul>
+`;
+
+exports[`ListOfPublishedProfiles profile deletion can delete profiles 1`] = `
+<div
+  class="arrowPanelContent"
+>
+  <div
+    class="confirmDialog"
+  >
+    <h2
+      class="confirmDialogTitle"
+    >
+      Delete 
+      Profile #012345
+    </h2>
+    <div
+      class="confirmDialogContent"
+    >
+      Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+    </div>
+    <div
+      class="confirmDialogButtons"
+    >
+      <input
+        class="photon-button photon-button-default"
+        type="button"
+        value="Cancel"
+      />
+      <input
+        class="photon-button photon-button-destructive"
+        type="button"
+        value="Delete"
+      />
+    </div>
+  </div>
+</div>
 `;

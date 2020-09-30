@@ -21,6 +21,7 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         buttonClassName="buttonButton"
         label="My Button"
+        title="Click here to open the panel"
         panelClassName="panel"
         panelContent={<div>Panel content</div>}
       />
@@ -72,6 +73,15 @@ describe('shared/ButtonWithPanel', () => {
       );
       expect(queryByTestId('panel-content')).toBeTruthy();
     });
+  });
+
+  it('displays a title only when not open', () => {
+    const { getByText } = setup();
+    const button = getByText('My Button');
+    expect(button.title).toBe('Click here to open the panel');
+    fireFullClick(button);
+    jest.runAllTimers();
+    expect(button.title).toBe('');
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {

@@ -36,6 +36,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 >
   <input
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
@@ -96,6 +97,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 >
   <input
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
@@ -156,6 +158,7 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
 >
   <input
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
