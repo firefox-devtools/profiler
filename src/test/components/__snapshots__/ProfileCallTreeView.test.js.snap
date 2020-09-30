@@ -131,10 +131,13 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -790,10 +793,13 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -1201,10 +1207,13 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -1848,10 +1857,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -2495,10 +2507,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -3112,10 +3127,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty Thread\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty Thread"
+      </span>
     </li>
   </ol>
   <div
@@ -3242,10 +3260,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Thread with samples\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Thread with samples"
+      </span>
     </li>
   </ol>
   <div
@@ -3372,10 +3393,13 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Thread with samples\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Thread with samples"
+      </span>
     </li>
   </ol>
   <div
@@ -3402,37 +3426,49 @@ exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple t
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem"
     data-index="0"
+    title="Complete \\"Thread with samples\\""
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
-    />
+    >
+      Complete "Thread with samples"
+    </button>
   </li>
   <li
     class="filterNavigatorBarItem"
     data-index="1"
+    title="Focus Node: A"
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
-    />
+    >
+      Focus Node: A
+    </button>
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarBeforeSelectedItem"
     data-index="2"
+    title="Focus Node: B"
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
-    />
+    >
+      Focus Node: B
+    </button>
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="3"
+    title="Focus Node: C"
   >
     <span
       class="filterNavigatorBarItemContent"
-    />
+    >
+      Focus Node: C
+    </span>
   </li>
 </ol>
 `;
@@ -3545,10 +3581,13 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -4160,10 +4199,13 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -4775,10 +4817,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -5390,10 +5435,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -5960,10 +6008,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -6530,10 +6581,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -6981,10 +7035,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -7432,10 +7489,13 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div

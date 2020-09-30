@@ -120,10 +120,13 @@ exports[`CombinedChart renders combined stack chart 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -632,10 +635,13 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div
@@ -1084,10 +1090,13 @@ exports[`StackChart matches the snapshot 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
+      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
-      />
+      >
+        Complete "Empty"
+      </span>
     </li>
   </ol>
   <div

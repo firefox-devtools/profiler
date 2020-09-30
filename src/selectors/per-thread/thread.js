@@ -260,7 +260,7 @@ export function getThreadSelectorsPerThread(
     ProfileData.getThreadProcessDetails
   );
 
-  const getTransformLabels: Selector<any[]> = createSelector(
+  const getTransformLabels: Selector<string[]> = createSelector(
     getRangeAndTransformFilteredThread,
     getFriendlyThreadName,
     getTransformStack,

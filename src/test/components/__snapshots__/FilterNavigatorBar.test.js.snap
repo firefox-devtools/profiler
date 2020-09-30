@@ -7,7 +7,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 1`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="0"
-    title="Full Range"
   >
     <span
       class="filterNavigatorBarItemContent"
@@ -25,7 +24,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
     data-index="0"
-    title="Full Range"
   >
     <button
       class="filterNavigatorBarItemContent"
@@ -37,10 +35,13 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
     data-index="1"
+    title="40ms"
   >
     <span
       class="filterNavigatorBarItemContent"
-    />
+    >
+      40ms
+    </span>
   </li>
 </ol>
 `;
@@ -52,7 +53,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
     data-index="0"
-    title="Full Range"
   >
     <button
       class="filterNavigatorBarItemContent"
@@ -64,10 +64,13 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
     data-index="1"
+    title="40ms"
   >
     <span
       class="filterNavigatorBarItemContent"
-    />
+    >
+      40ms
+    </span>
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarLeafItem filterNavigatorBarUncommittedItem filterNavigatorBarUncommittedTransition-enter filterNavigatorBarUncommittedTransition-enter-active"
