@@ -9,6 +9,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
   type TestDefinedMarkers,
+  getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
@@ -237,9 +238,9 @@ describe('memory markers', function() {
 
     return storeWithProfile(
       getProfileWithMarkers([
-        ['A', 0, null],
-        ['B', 1, null],
-        ['C', 2, null],
+        ['DOMEvent', 0, null],
+        ['Navigation', 1, null],
+        ['Paint', 2, null],
         [
           'IdleForgetSkippable',
           3,
@@ -256,7 +257,7 @@ describe('memory markers', function() {
   it('can get memory markers using getMemoryMarkers', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getMemoryMarkerIndexes(
+    const markerIndexes = selectedThreadSelectors.getTimelineMemoryMarkerIndexes(
       getState()
     );
     expect(
@@ -264,15 +265,15 @@ describe('memory markers', function() {
     ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
   });
 
-  it('ignores memory markers in getCommittedRangeAndTabFilteredMarkerIndexesForHeader', function() {
+  it('ignores memory markers in getTimelineOverviewMarkerIndexes', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
+    const markerIndexes = selectedThreadSelectors.getTimelineOverviewMarkerIndexes(
       getState()
     );
     expect(
       markerIndexes.map(markerIndex => getMarker(markerIndex).name)
-    ).toEqual(['A', 'B', 'C']);
+    ).toEqual(['DOMEvent', 'Navigation', 'Paint']);
   });
 });
 
@@ -323,7 +324,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
   const browsingContextID = 123123;
   const innerWindowID = 2;
 
-  function setup(showTabOnly, markers: ?Array<any>) {
+  function setup(ctxId, markers: ?Array<any>) {
     const profile = getProfileWithMarkers(
       markers || [
         [
@@ -379,7 +380,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
-    if (showTabOnly) {
+    if (ctxId) {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
@@ -418,5 +419,53 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       ['Dummy 2', 20, null],
     ]);
     expect(markers).toEqual(['Jank']);
+  });
+});
+
+describe('Marker schema filtering', function() {
+  function getMarkerNames(selector): string[] {
+    // prettier-ignore
+    const profile = getProfileWithMarkers([
+      ['no payload',        0, null, null],
+      // $FlowExpectError - Invalid payload by our type system.
+      ['payload no schema', 0, null, { type: 'no schema marker' }],
+      ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
+      ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
+      ...getNetworkMarkers(),
+    ]);
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    return selector(getState())
+      .map(getMarker)
+      .map(marker => marker.name);
+  }
+
+  it('filters for getMarkerTableMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerTableMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      'Load 0: https://mozilla.org',
+      'UserTiming',
+    ]);
+  });
+
+  it('filters for getMarkerChartMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerChartMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      'UserTiming',
+    ]);
+  });
+
+  it('filters for getTimelineOverviewMarkerIndexes', function() {
+    expect(
+      getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)
+    ).toEqual(['RefreshDriverTick']);
   });
 });

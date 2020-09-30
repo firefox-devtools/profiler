@@ -4,6 +4,10 @@
 
 // @flow
 
+// It's important to import the base CSS file first, so that CSS in the
+// subcomponents can more easily override the rules.
+import './index.css';
+
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
@@ -17,8 +21,7 @@ import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
-import ArrowPanel from '../../shared/ArrowPanel';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { revertToPrePublishedState } from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
 import {
@@ -38,8 +41,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../../utils/connect';
-
-require('./index.css');
 
 type OwnProps = {|
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
@@ -84,7 +85,7 @@ class MenuButtons extends React.PureComponent<Props> {
       return (
         <button
           type="button"
-          className="buttonWithPanelButton menuButtonsAbortUploadButton"
+          className="menuButtonsButton menuButtonsAbortUploadButton"
           onClick={abortFunction}
         >
           Cancel Upload
@@ -110,12 +111,10 @@ class MenuButtons extends React.PureComponent<Props> {
           menuButtonsShareButtonOriginal: !isRepublish && !isError,
           menuButtonsShareButtonError: isError,
         })}
+        buttonClassName="menuButtonsButton"
+        panelClassName="menuButtonsPublishPanel"
         label={label}
-        panel={
-          <ArrowPanel className="menuButtonsPublishPanel">
-            <MenuButtonsPublish isRepublish={isRepublish} />
-          </ArrowPanel>
-        }
+        panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
       />
     );
   }
@@ -144,7 +143,7 @@ class MenuButtons extends React.PureComponent<Props> {
     return (
       <button
         type="button"
-        className="buttonWithPanelButton menuButtonsRevertButton"
+        className="menuButtonsButton menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
         Revert to Original Profile

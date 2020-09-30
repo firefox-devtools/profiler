@@ -29,3 +29,26 @@
   background-repeat: no-repeat;
   background-size: 11px;
 }
+
+.menuButtonsButton {
+  height: 100%;
+  padding: 0 20px;
+  border: 0;
+  border-left: 1px solid var(--grey-30);
+  margin: 0;
+  background: none;
+
+  /* Inherit the color rather than using the browser's */
+  color: inherit;
+  font-size: 100%;
+  white-space: nowrap;
+}
+
+.menuButtonsButton:hover {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
+}
+
+.buttonWithPanel.open > .menuButtonsButton,
+.menuButtonsButton:hover:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+}

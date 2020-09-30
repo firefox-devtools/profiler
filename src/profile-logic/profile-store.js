@@ -7,8 +7,6 @@ import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
 // This is the server we use to publish new profiles.
 const PUBLISHING_ENDPOINT = `${PROFILER_SERVER_ORIGIN}/compressed-store`;
-// Uncomment the following endpoint instead to use your local server.
-//const PUBLISHING_ENDPOINT = 'http://localhost:5252/compressed-store';
 
 const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
 
@@ -97,4 +95,29 @@ export function uploadBinaryProfileData(): * {
         xhr.send(data);
       }),
   };
+}
+
+export async function deleteProfileOnServer({
+  profileToken,
+  jwtToken,
+}: {
+  profileToken: string,
+  jwtToken: string,
+}): Promise<void> {
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/profile/${profileToken}`;
+
+  const response = await fetch(ENDPOINT, {
+    method: 'DELETE',
+    headers: {
+      Accept: ACCEPT_HEADER_VALUE,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwtToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `An error happened while deleting the profile with the token "${profileToken}": ${response.statusText} (${response.status})`
+    );
+  }
 }

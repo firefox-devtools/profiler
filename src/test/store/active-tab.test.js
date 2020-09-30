@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import {
+  changeTimelineTrackOrganization,
+  viewProfile,
+} from '../../actions/receive-profile';
 import {
   getHumanReadableActiveTabTracks,
   getProfileWithNiceTracks,
@@ -12,8 +15,12 @@ import {
   getScreenshotTrackProfile,
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
+  getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
-import { storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
+import { getView } from '../../selectors/app';
+import { getTimelineTrackOrganization } from '../../selectors/url-state';
+import { stateFromLocation } from '../../app-logic/url-handling';
 
 describe('ActiveTab', function() {
   function setup(p = getProfileWithNiceTracks(), addInnerWindowID = true) {
@@ -87,6 +94,56 @@ describe('ActiveTab', function() {
       const { getState } = setup(profile, false);
 
       expect(getHumanReadableActiveTabTracks(getState()).length).toBe(0);
+    });
+  });
+});
+
+describe('finalizeProfileView', function() {
+  function setup({ search, noPages }: { search: string, noPages?: boolean }) {
+    const { profile } = getProfileFromTextSamples('A');
+    const newUrlState = stateFromLocation({
+      pathname: '/public/FAKEHASH/calltree/',
+      search: '?' + search,
+      hash: '',
+    });
+
+    if (noPages) {
+      delete profile.pages;
+    }
+
+    // Create the store and dispatch the url state.
+    const store = blankStore();
+    store.dispatch({
+      type: 'UPDATE_URL_STATE',
+      newUrlState,
+    });
+
+    // Lastly, load the profile to test finalizeProfileView.
+    store.dispatch(viewProfile(profile));
+    return store;
+  }
+
+  it('loads the profile with only `view=active-tab` in active tab view', async function() {
+    const { getState } = setup({ search: '?view=active-tab&v=5' });
+
+    // Check if we can successfully finalized the profile view for active tab.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      browsingContextID: null,
+    });
+  });
+
+  it('switches back to full view if there is no `pages` array', async function() {
+    const { getState } = setup({
+      search: '?view=active-tab&v=5',
+      noPages: true,
+    });
+
+    // Check if we can successfully finalized the profile view for full view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
     });
   });
 });

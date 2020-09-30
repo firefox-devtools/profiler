@@ -13,12 +13,13 @@ import {
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
 import {
-  getThreadSelectors,
   getMarkerSchemaByName,
   getImplementationFilter,
   getPageList,
   getZeroAt,
   getThreadIdToNameMap,
+  getMarkerLabelMakerByName,
+  getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
 
 import {
@@ -29,20 +30,26 @@ import {
   TooltipDetails,
   TooltipDetail,
   type TooltipDetailComponent,
+  TooltipDetailSeparator,
 } from './TooltipDetails';
 import Backtrace from '../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
-import { formatFromMarkerSchema } from '../../profile-logic/marker-schema';
+import {
+  formatFromMarkerSchema,
+  getMarkerSchema,
+  getMarkerSchemaName,
+} from '../../profile-logic/marker-schema';
 
 import type {
   Milliseconds,
   Marker,
   ImplementationFilter,
   Thread,
-  ThreadIndex,
+  ThreadsKey,
   PageList,
   MarkerSchemaByName,
+  MarkerLabelMakerByName,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -64,8 +71,12 @@ function _maybeFormatDuration(
 
 type OwnProps = {|
   +marker: Marker,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +className?: string,
+  // In tooltips it can be awkward for really long and tall things to force
+  // the layout to be huge. This option when set to true will restrict the
+  // height of things like stacks, and the width of long things like URLs.
+  +restrictHeightWidth: boolean,
 |};
 
 type StateProps = {|
@@ -76,6 +87,7 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
+  +markerLabelMakerByName: MarkerLabelMakerByName,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -96,7 +108,29 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const page = pages.find(page => page.innerWindowID === innerWindowID);
 
     if (page) {
-      return <TooltipDetail label="URL">{page.url}</TooltipDetail>;
+      try {
+        const { host } = new URL(page.url);
+        const hostIndex = page.url.indexOf(host);
+        if (hostIndex === -1) {
+          throw new Error(
+            'Unable to find the host in the URL. This is a programming error.'
+          );
+        }
+        const protocol = page.url.slice(0, hostIndex);
+        const rest = page.url.slice(hostIndex + host.length);
+        return (
+          <TooltipDetail label="URL">
+            <div className="tooltipDetailsUrl">
+              <span className="tooltipDetailsDim">{protocol}</span>
+              {host}
+              <span className="tooltipDetailsDim">{rest}</span>
+            </div>
+          </TooltipDetail>
+        );
+      } catch (error) {
+        // Could not parse the URL. Just display the entire thing
+        return <TooltipDetail label="URL">{page.url}</TooltipDetail>;
+      }
     }
     return null;
   };
@@ -153,13 +187,34 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const schema = markerSchemaByName[data.type];
+      const schema = getMarkerSchema(markerSchemaByName, marker);
       if (schema) {
-        for (const { key, label, format } of schema.data) {
-          if (key in data) {
+        for (const schemaData of schema.data) {
+          // Check for a schema that is looking up and formatting a value from
+          // the payload.
+          if (schemaData.value === undefined) {
+            const { key, label, format } = schemaData;
+            if (key in data) {
+              details.push(
+                <TooltipDetail
+                  key={schema.name + '-' + key}
+                  label={label || key}
+                >
+                  {formatFromMarkerSchema(schema.name, format, data[key])}
+                </TooltipDetail>
+              );
+            }
+          }
+
+          // Do a check to see if there is no key. This means this is a simple
+          // label that is applied to every marker of this type, with no data
+          // lookup. For some reason Flow as not able to refine this.
+          if (schemaData.key === undefined) {
+            const { label, value } = schemaData;
+            const key = label + '-' + value;
             details.push(
-              <TooltipDetail key={data.type + '-' + key} label={label || key}>
-                {formatFromMarkerSchema(data.type, format, data[key])}
+              <TooltipDetail key={key} label={label}>
+                {value}
               </TooltipDetail>
             );
           }
@@ -268,26 +323,35 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _maybeRenderBacktrace() {
-    const { marker, thread, implementationFilter } = this.props;
+    const {
+      marker,
+      thread,
+      implementationFilter,
+      restrictHeightWidth,
+    } = this.props;
     const { data, start } = marker;
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
       const causeAge = start - cause.time;
-      return (
-        <div className="tooltipDetailsBackTrace" key="backtrace">
-          {data.type === 'Styles' || marker.name === 'Reflow' ? (
-            <h2 className="tooltipBackTraceTitle">
-              First invalidated {formatNumber(causeAge)}ms before the flush, at:
-            </h2>
-          ) : null}
-          <Backtrace
-            maxHeight="30em"
-            stackIndex={cause.stack}
-            thread={thread}
-            implementationFilter={implementationFilter}
-          />
-        </div>
-      );
+      return [
+        <TooltipDetailSeparator key="backtrace-separator" />,
+        <TooltipDetail label="Stack" key="backtrace">
+          <div className="tooltipDetailsBackTrace">
+            {data.type === 'Styles' || marker.name === 'Reflow' ? (
+              <h2 className="tooltipBackTraceTitle">
+                First invalidated {formatNumber(causeAge)}ms before the flush,
+                at:
+              </h2>
+            ) : null}
+            <Backtrace
+              maxStacks={restrictHeightWidth ? 20 : Infinity}
+              stackIndex={cause.stack}
+              thread={thread}
+              implementationFilter={implementationFilter}
+            />
+          </div>
+        </TooltipDetail>,
+      ];
     }
     return null;
   }
@@ -301,6 +365,22 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       return <TooltipNetworkMarkerPhases payload={data} zeroAt={zeroAt} />;
     }
     return null;
+  }
+
+  _renderTitle(): string {
+    const { marker, markerSchemaByName, markerLabelMakerByName } = this.props;
+    const { data } = marker;
+    if (data) {
+      // Add the details for the markers based on their Marker schema.
+      const applyLabel =
+        markerLabelMakerByName[getMarkerSchemaName(markerSchemaByName, marker)];
+      if (applyLabel) {
+        return applyLabel(data);
+      }
+    }
+
+    // Fallback to the title or the marker name.
+    return marker.title || marker.name;
   }
 
   /**
@@ -326,22 +406,26 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   render() {
-    const { marker, className } = this.props;
-
+    const { className, restrictHeightWidth } = this.props;
     return (
-      <div className={classNames('tooltipMarker', className)}>
+      <div
+        className={classNames('tooltipMarker', className)}
+        style={{
+          '--tooltip-detail-max-width': restrictHeightWidth ? '600px' : '100%',
+        }}
+      >
         <div className="tooltipHeader">
           <div className="tooltipOneLine">
             {this._maybeRenderMarkerDuration()}
-            <div className="tooltipTitle">{marker.title || marker.name}</div>
+            <div className="tooltipTitle">{this._renderTitle()}</div>
           </div>
         </div>
         <TooltipDetails>
+          {this._renderMarkerDetails()}
           {this._renderThreadDetails()}
           {this._maybeRenderPageUrl()}
-          {this._renderMarkerDetails()}
+          {this._maybeRenderBacktrace()}
         </TooltipDetails>
-        {this._maybeRenderBacktrace()}
         {this._maybeRenderNetworkPhases()}
       </div>
     );
@@ -350,7 +434,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
 export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
-    const selectors = getThreadSelectors(props.threadIndex);
+    const selectors = getThreadSelectorsFromThreadsKey(props.threadsKey);
     return {
       threadName: selectors.getFriendlyThreadName(state),
       thread: selectors.getThread(state),
@@ -359,6 +443,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       zeroAt: getZeroAt(state),
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
+      markerLabelMakerByName: getMarkerLabelMakerByName(state),
     };
   },
   component: MarkerTooltipContents,

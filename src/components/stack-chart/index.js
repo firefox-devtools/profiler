@@ -22,7 +22,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowUserTimings,
-  getSelectedThreadIndex,
+  getSelectedThreadsKey,
 } from '../../selectors/url-state';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
@@ -50,6 +50,7 @@ import type {
   StartEndRange,
   PreviewSelection,
   WeightType,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -67,7 +68,7 @@ type StateProps = {|
   +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -104,22 +105,18 @@ class StackChartGraph extends React.PureComponent<Props> {
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
 
   _onRightClickedCallNodeChange = (callNodeIndex: number | null) => {
-    const {
-      callNodeInfo,
-      threadIndex,
-      changeRightClickedCallNode,
-    } = this.props;
+    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
 
     changeRightClickedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
@@ -143,7 +140,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   render() {
     const {
       thread,
-      threadIndex,
+      threadsKey,
       maxStackDepth,
       combinedTimingRows,
       timeRange,
@@ -197,7 +194,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                   thread,
                   weightType,
                   pages,
-                  threadIndex,
+                  threadsKey,
                   combinedTimingRows,
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
@@ -239,7 +236,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(

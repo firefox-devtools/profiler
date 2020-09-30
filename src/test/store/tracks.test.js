@@ -23,7 +23,7 @@ import {
   isolateProcess,
   changeLocalTrackOrder,
   hideLocalTrack,
-  changeSelectedThread,
+  changeSelectedThreads,
   showLocalTrack,
   isolateLocalTrack,
   isolateProcessMainThread,
@@ -224,7 +224,7 @@ describe('ordering and hiding', function() {
 
     it('keeps the selected local track when isolating a global track', function() {
       const { getState, dispatch, tabTrackIndex, styleThreadIndex } = init();
-      dispatch(changeSelectedThread(styleThreadIndex));
+      dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(isolateProcess(tabTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
@@ -260,12 +260,12 @@ describe('ordering and hiding', function() {
         tabThreadIndex,
         parentThreadIndex,
       } = init();
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
-        tabThreadIndex
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([tabThreadIndex])
       );
       dispatch(hideGlobalTrack(tabTrackIndex));
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
-        parentThreadIndex
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
       );
     });
 
@@ -277,12 +277,12 @@ describe('ordering and hiding', function() {
         parentThreadIndex,
         parentTrackIndex,
       } = init();
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
-        tabThreadIndex
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([tabThreadIndex])
       );
       dispatch(isolateProcess(parentTrackIndex));
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
-        parentThreadIndex
+      expect(UrlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+        new Set([parentThreadIndex])
       );
     });
 
@@ -291,7 +291,7 @@ describe('ordering and hiding', function() {
       const { getState, dispatch, parentTrackIndex, parentThreadIndex } = init(
         profile
       );
-      dispatch(changeSelectedThread(parentThreadIndex));
+      dispatch(changeSelectedThreads(new Set([parentThreadIndex])));
       dispatch(hideGlobalTrack(parentTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
@@ -416,7 +416,7 @@ describe('ordering and hiding', function() {
 
     it("can select a local track's thread", function() {
       const { getState, dispatch, workerThreadIndex } = init();
-      dispatch(changeSelectedThread(workerThreadIndex));
+      dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
@@ -433,7 +433,7 @@ describe('ordering and hiding', function() {
         workerTrackIndex,
         workerThreadIndex,
       } = init();
-      dispatch(changeSelectedThread(workerThreadIndex));
+      dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -451,7 +451,7 @@ describe('ordering and hiding', function() {
         styleTrackIndex,
         styleThreadIndex,
       } = init();
-      dispatch(changeSelectedThread(styleThreadIndex));
+      dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -471,7 +471,7 @@ describe('ordering and hiding', function() {
         workerThreadIndex,
       } = init();
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
-      dispatch(changeSelectedThread(workerThreadIndex));
+      dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -587,7 +587,7 @@ describe('ordering and hiding', function() {
         workerTrackIndex,
         parentThreadIndex,
       } = init();
-      dispatch(changeSelectedThread(parentThreadIndex));
+      dispatch(changeSelectedThreads(new Set([parentThreadIndex])));
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'show [thread GeckoMain tab]',

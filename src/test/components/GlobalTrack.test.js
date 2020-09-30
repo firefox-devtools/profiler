@@ -9,12 +9,12 @@ import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
 import {
-  changeSelectedThread,
+  changeSelectedThreads,
   hideGlobalTrack,
 } from '../../actions/profile-view';
 import GlobalTrack from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -73,7 +73,7 @@ describe('timeline/GlobalTrack', function() {
 
     if (threadIndex !== null) {
       // The assertions are simpler if the GeckoMain tab thread is not already selected.
-      dispatch(changeSelectedThread(threadIndex + 1));
+      dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
     }
 
     const renderResult = render(
@@ -136,7 +136,7 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
     } = setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
   });
 
@@ -147,9 +147,9 @@ describe('timeline/GlobalTrack', function() {
       getGlobalTrackRow,
       threadIndex,
     } = setup();
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     fireFullClick(getGlobalTrackLabel());
-    expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
     expect(getGlobalTrackRow().classList.contains('selected')).toBe(true);
   });
 
@@ -163,14 +163,14 @@ describe('timeline/GlobalTrack', function() {
 
     fireFullContextMenu(getGlobalTrackLabel());
     expect(getRightClickedTrack(getState())).toEqual(trackReference);
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
 
   it('can select a thread by clicking the row', () => {
     const { getState, getGlobalTrackRow, threadIndex } = setup();
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     fireFullClick(getGlobalTrackRow());
-    expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
   });
 
   it('will render a stub div if the track is hidden', () => {

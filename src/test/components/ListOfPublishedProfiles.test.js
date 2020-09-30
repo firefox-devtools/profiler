@@ -6,12 +6,18 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
+import { render, getByText as globalGetByText } from '@testing-library/react';
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
-import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
-import { blankStore } from '../fixtures/stores';
-import { mockDate } from '../fixtures/mocks/date';
+import {
+  storeProfileData,
+  retrieveProfileData,
+} from 'firefox-profiler/app-logic/published-profiles-store';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import { blankStore } from 'firefox-profiler/test/fixtures/stores';
+import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';
+import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
+import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
@@ -29,7 +35,7 @@ afterEach(resetIndexedDb);
 const listOfProfileInformations = [
   {
     profileToken: '0123456789',
-    jwtToken: null,
+    jwtToken: 'FAKE_TOKEN',
     publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
     name: '',
     preset: null,
@@ -130,19 +136,74 @@ describe('ListOfPublishedProfiles', () => {
     const store = blankStore();
     const renderResult = render(
       <Provider store={store}>
-        <ListOfPublishedProfiles {...props} />
+        <ListOfPublishedProfiles withActionButtons={false} {...props} />
       </Provider>
     );
 
-    const { getByText } = renderResult;
+    const { getByText, getByTitle, container } = renderResult;
 
     function getAllRecordingsLink() {
-      return getByText(/See all your recordings/);
+      return getByText(/all your recordings/);
+    }
+
+    function getDeleteButtonForProfile(
+      profileName: string
+    ): HTMLInputElement | HTMLButtonElement {
+      const workingButton = getByTitle(new RegExp(`delete.*${profileName}`));
+      if (
+        !(workingButton instanceof HTMLInputElement) &&
+        !(workingButton instanceof HTMLButtonElement)
+      ) {
+        throw new Error(
+          "Oops, the delete button should be a HTMLInputElement or HTMLButtonElement, but it isn't!"
+        );
+      }
+
+      return workingButton;
+    }
+
+    function getConfirmDeleteButton() {
+      const panelContent = ensureExists(
+        container.querySelector('.arrowPanelContent'),
+        "Expected that an ArrowPanel was rendered, but it's not there."
+      );
+      const confirmButton = globalGetByText(panelContent, 'Delete');
+      if (
+        !(confirmButton instanceof HTMLInputElement) &&
+        !(confirmButton instanceof HTMLButtonElement)
+      ) {
+        throw new Error(
+          "Oops, the confirm button should be a HTMLInputElement or HTMLButtonElement, but it isn't!"
+        );
+      }
+
+      return confirmButton;
+    }
+
+    function getCancelDeleteButton() {
+      const panelContent = ensureExists(
+        container.querySelector('.arrowPanelContent'),
+        "Expected that an ArrowPanel was rendered, but it's not there."
+      );
+      const confirmButton = globalGetByText(panelContent, 'Cancel');
+      if (
+        !(confirmButton instanceof HTMLInputElement) &&
+        !(confirmButton instanceof HTMLButtonElement)
+      ) {
+        throw new Error(
+          "Oops, the confirm button should be a HTMLInputElement or HTMLButtonElement, but it isn't!"
+        );
+      }
+
+      return confirmButton;
     }
 
     return {
       ...renderResult,
       getAllRecordingsLink,
+      getDeleteButtonForProfile,
+      getConfirmDeleteButton,
+      getCancelDeleteButton,
     };
   }
 
@@ -163,5 +224,189 @@ describe('ListOfPublishedProfiles', () => {
     const { findByText, getAllRecordingsLink } = setup({ limit: 3 });
     await findByText(/Layout profile/);
     expect(() => getAllRecordingsLink()).toThrow('Unable to find an element');
+  });
+
+  it('renders action buttons when appropriate', async () => {
+    await storeProfileInformations(listOfProfileInformations);
+    const { findByText, getAllByText, getDeleteButtonForProfile } = setup({
+      withActionButtons: true,
+    });
+
+    // Wait for the full rendering with a find* operation.
+    await findByText(/macOS/);
+
+    // Only this button isn't disabled, because it's the only one with the JWT information.
+    const workingButton = getDeleteButtonForProfile('#012345');
+    expect(workingButton.disabled).toBe(false);
+
+    // All others are disabled.
+    const allButtons = getAllByText('Delete');
+    for (const button of allButtons) {
+      if (button !== workingButton) {
+        // $FlowExpectError findAllByText returns HTMLElement, but we know these are buttons.
+        expect(button.disabled).toBe(true); // eslint-disable-line jest/no-conditional-expect
+      }
+    }
+  });
+
+  describe('profile deletion', () => {
+    beforeEach(() => {
+      window.fetch = jest.fn();
+    });
+
+    afterEach(() => {
+      delete window.fetch;
+    });
+
+    function mockFetchForDeleteProfile({
+      endpointUrl,
+      jwtToken,
+    }: {
+      endpointUrl: string,
+      jwtToken: string,
+    }) {
+      window.fetch.mockImplementation(async (urlString, options) => {
+        if (urlString !== endpointUrl) {
+          return new Response(null, { status: 404, statusText: 'Not found' });
+        }
+
+        const { method, headers } = options;
+
+        if (method !== 'DELETE') {
+          return new Response(null, {
+            status: 405,
+            statusText: 'Method not allowed',
+          });
+        }
+
+        if (
+          headers['Content-Type'] !== 'application/json' ||
+          headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+        ) {
+          return new Response(null, {
+            status: 406,
+            statusText: 'Not acceptable',
+          });
+        }
+
+        if (headers.Authorization !== `Bearer ${jwtToken}`) {
+          return new Response(null, {
+            status: 401,
+            statusText: 'Forbidden',
+          });
+        }
+
+        return new Response('Profile successfully deleted.', { status: 200 });
+      });
+    }
+
+    it('can delete profiles', async () => {
+      const { profileToken, jwtToken } = listOfProfileInformations[0];
+      const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
+      mockFetchForDeleteProfile({ endpointUrl, jwtToken });
+
+      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
+      await storeProfileInformations(listOfProfileInformations);
+      const {
+        container,
+        getDeleteButtonForProfile,
+        findByText,
+        queryByText,
+        getConfirmDeleteButton,
+      } = setup({
+        withActionButtons: true,
+      });
+
+      // Wait for the full rendering with a find* operation.
+      await findByText(/macOS/);
+      const workingButton = getDeleteButtonForProfile('#012345');
+
+      // Click on the delete button
+      fireFullClick(workingButton);
+      jest.runAllTimers(); // Opening the panel involves a timeout.
+      expect(container.querySelector('.arrowPanelContent')).toMatchSnapshot();
+
+      // Click on the confirm button
+      fireFullClick(getConfirmDeleteButton());
+      await findByText(/successfully/i);
+      expect(await retrieveProfileData(profileToken)).toBe(undefined);
+
+      // Clicking elsewhere should make the successful message disappear.
+      fireFullClick((window: any));
+      expect(queryByText(/successfully/i)).toBe(null);
+    });
+
+    it('can cancel the deletion', async () => {
+      const { profileToken } = listOfProfileInformations[0];
+
+      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
+      await storeProfileInformations(listOfProfileInformations);
+      const {
+        getDeleteButtonForProfile,
+        findByText,
+        queryByText,
+        getCancelDeleteButton,
+      } = setup({
+        withActionButtons: true,
+      });
+
+      // Wait for the full rendering with a find* operation.
+      await findByText(/macOS/);
+      const workingButton = getDeleteButtonForProfile('#012345');
+
+      // Click on the delete button
+      fireFullClick(workingButton);
+      jest.runAllTimers(); // Opening the panel involves a timeout.
+
+      // Click on the cancel button
+      fireFullClick(getCancelDeleteButton());
+      jest.runAllTimers(); // Closing the panel involves a timeout too.
+      expect(queryByText(/are you sure/i)).toBe(null);
+      expect(await retrieveProfileData(profileToken)).toEqual(
+        listOfProfileInformations[0]
+      );
+    });
+
+    it('can handle errors', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { profileToken } = listOfProfileInformations[0];
+      const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
+      mockFetchForDeleteProfile({
+        endpointUrl,
+        jwtToken: 'THIS_TOKEN_IS_UNKNOWN',
+      });
+
+      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
+      await storeProfileInformations(listOfProfileInformations);
+      const {
+        getDeleteButtonForProfile,
+        findByText,
+        getByText,
+        getConfirmDeleteButton,
+      } = setup({
+        withActionButtons: true,
+      });
+
+      // Wait for the full rendering with a find* operation.
+      await findByText(/macOS/);
+      const workingButton = getDeleteButtonForProfile('#012345');
+
+      fireFullClick(workingButton);
+      jest.runAllTimers(); // Opening the panel involves a timeout.
+
+      fireFullClick(getConfirmDeleteButton());
+      await findByText(/An error happened/i);
+      const hoverLink = getByText(/Hover to know more/);
+      expect(hoverLink.title).toEqual(
+        'An error happened while deleting the profile with the token "0123456789": Forbidden (401)'
+      );
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringMatching(/when we tried to delete a profile/),
+        expect.any(Error)
+      );
+      expect(await retrieveProfileData(profileToken)).toEqual(
+        listOfProfileInformations[0]
+      );
+    });
   });
 });

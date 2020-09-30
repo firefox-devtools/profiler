@@ -17,14 +17,14 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type {
   JsTracerTable,
-  ThreadIndex,
+  ThreadsKey,
   Profile,
   JsTracerTiming,
   UnitIntervalOfProfileRange,
@@ -53,7 +53,7 @@ type StateProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
   +stringTable: UniqueStringArray,
   +timeRange: StartEndRange,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
 |};
 
@@ -78,7 +78,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
   render() {
     const {
       timeRange,
-      threadIndex,
+      threadsKey,
       jsTracerTable,
       jsTracerTimingRows,
       previewSelection,
@@ -92,7 +92,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
 
     return (
       <JsTracerCanvas
-        key={threadIndex}
+        key={threadsKey}
         viewportProps={{
           timeRange,
           previewSelection,
@@ -110,7 +110,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
           rangeStart: timeRange.start,
           rangeEnd: timeRange.end,
           rowHeight: ROW_HEIGHT,
-          threadIndex,
+          threadsKey,
           doFadeIn,
         }}
       />
@@ -137,7 +137,7 @@ const JsTracerExpensiveChart = explicitConnect<
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
     stringTable: selectedThreadSelectors.getStringTable(state),
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     previewSelection: getPreviewSelection(state),
     jsTracerTimingRows: ensureExists(
       ownProps.showJsTracerSummary
@@ -236,7 +236,7 @@ type ChartProps = {|
   +profile: Profile,
   +jsTracerTable: JsTracerTable,
   +showJsTracerSummary: boolean,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
 |};
 
 /**
@@ -255,9 +255,9 @@ export default class JsTracerChart extends React.PureComponent<ChartProps> {
       profile,
       jsTracerTable,
       showJsTracerSummary,
-      threadIndex,
+      threadsKey,
     } = this.props;
-    const key = `${threadIndex}-${showJsTracerSummary ? 'true' : 'false'}`;
+    const key = `${threadsKey}-${showJsTracerSummary ? 'true' : 'false'}`;
     return (
       <JsTracerChartLoader
         key={key}

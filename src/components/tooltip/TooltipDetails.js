@@ -44,7 +44,13 @@ export function TooltipDetail({ label, children }: DetailProps) {
   );
 }
 
-export type TooltipDetailComponent = React.Element<typeof TooltipDetail> | null;
+export function TooltipDetailSeparator() {
+  return <div className="tooltipDetailSeparator"></div>;
+}
+
+export type TooltipDetailComponent = React.Element<
+  typeof TooltipDetail | typeof TooltipDetailSeparator
+> | null;
 type Props = {|
   // This component accepts only TooltipDetail children.
   +children: React.ChildrenArray<TooltipDetailComponent>,

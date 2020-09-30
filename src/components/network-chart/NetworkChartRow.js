@@ -24,7 +24,7 @@ import type {
   CssPixels,
   Milliseconds,
   StartEndRange,
-  ThreadIndex,
+  ThreadsKey,
   Marker,
   MarkerIndex,
   NetworkPayload,
@@ -319,7 +319,7 @@ type NetworkChartRowProps = {|
   +networkPayload: NetworkPayload,
   +timeRange: StartEndRange,
   +width: CssPixels,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
@@ -496,7 +496,8 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
             <TooltipMarker
               className="tooltipNetwork"
               marker={marker}
-              threadIndex={this.props.threadIndex}
+              threadsKey={this.props.threadsKey}
+              restrictHeightWidth={true}
             />
           </Tooltip>
         ) : null}

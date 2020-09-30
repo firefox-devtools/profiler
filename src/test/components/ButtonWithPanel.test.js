@@ -5,8 +5,7 @@
 // @flow
 import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
-import ArrowPanel from '../../components/shared/ArrowPanel';
+import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -22,11 +21,9 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         buttonClassName="buttonButton"
         label="My Button"
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        title="Click here to open the panel"
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
   }
@@ -41,12 +38,9 @@ describe('shared/ButtonWithPanel', () => {
       <ButtonWithPanel
         className="button"
         label="My Button"
-        open={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        initialOpen={true}
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
     expect(container.firstChild).toMatchSnapshot();
@@ -58,11 +52,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeFalsy();
@@ -77,16 +67,21 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          open={true}
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          initialOpen={true}
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeTruthy();
     });
+  });
+
+  it('displays a title only when not open', () => {
+    const { getByText } = setup();
+    const button = getByText('My Button');
+    expect(button.title).toBe('Click here to open the panel');
+    fireFullClick(button);
+    jest.runAllTimers();
+    expect(button.title).toBe('');
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {

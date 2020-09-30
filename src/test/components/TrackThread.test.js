@@ -113,7 +113,7 @@ describe('timeline/TrackThread', function() {
     const renderResult = render(
       <Provider store={store}>
         <TrackThread
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           trackType="expanded"
           trackName="Test Track"
         />
@@ -248,8 +248,8 @@ describe('timeline/TrackThread', function() {
   it('can click a marker', function() {
     const { getState, markerCanvas, ctx, getFillRectCenterByIndex } = setup(
       getMarkersProfile([
-        ['Marker A', 0, 4],
-        ['Marker B', 4, 8],
+        ['DOMEvent', 0, 4],
+        ['DOMEvent', 4, 8],
       ])
     );
 

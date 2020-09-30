@@ -9,14 +9,17 @@ import classNames from 'classnames';
 import explicitConnect from '../../utils/connect';
 import { withSize } from '../shared/WithSize';
 import { getIsActiveTabResourcesPanelOpen } from '../../selectors/url-state';
+import { getActiveTabResourcesThreadsKey } from '../../selectors/profile';
 import { toggleResourcesPanel } from '../../actions/app';
 import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from '../../app-logic/constants';
 import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
+import TrackThread from './TrackThread';
 
 import type { SizeProps } from '../shared/WithSize';
 import type {
   ActiveTabResourceTrack,
   InitialSelectedTrackReference,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -30,6 +33,7 @@ type OwnProps = {|
 
 type StateProps = {|
   isActiveTabResourcesPanelOpen: boolean,
+  resourcesThreadsKey: ThreadsKey,
 |};
 
 type DispatchProps = {|
@@ -48,6 +52,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
       toggleResourcesPanel,
       isActiveTabResourcesPanelOpen,
       setInitialSelected,
+      resourcesThreadsKey,
     } = this.props;
     return (
       <div
@@ -63,6 +68,11 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
           })}
         >
           Resources ({resourceTracks.length})
+          <TrackThread
+            threadsKey={resourcesThreadsKey}
+            trackType="condensed"
+            trackName="Merged resource tracks"
+          />
         </div>
         {isActiveTabResourcesPanelOpen ? (
           <ol className="timelineResourceTracks">
@@ -84,6 +94,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),
+    resourcesThreadsKey: getActiveTabResourcesThreadsKey(state),
   }),
   mapDispatchToProps: { toggleResourcesPanel },
   component: withSize<Props>(ActiveTabResourcesPanel),

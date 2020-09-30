@@ -21,7 +21,7 @@ import {
   getInvertCallstack,
 } from '../../selectors/url-state';
 import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
 
 import {
   convertToTransformType,
@@ -35,7 +35,7 @@ import type {
   CallNodeInfo,
   CallNodePath,
   Thread,
-  ThreadIndex,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
@@ -43,7 +43,7 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +thread: Thread | null,
-  +threadIndex: ThreadIndex | null,
+  +threadsKey: ThreadsKey | null,
   +callNodeInfo: CallNodeInfo | null,
   +rightClickedCallNodePath: CallNodePath | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -229,12 +229,12 @@ class CallNodeContextMenu extends PureComponent<Props> {
       );
     }
 
-    const { threadIndex, callNodePath, thread } = rightClickedCallNodeInfo;
+    const { threadsKey, callNodePath, thread } = rightClickedCallNodeInfo;
     const selectedFunc = callNodePath[callNodePath.length - 1];
 
     switch (type) {
       case 'focus-subtree':
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'focus-subtree',
           callNodePath: callNodePath,
           implementation,
@@ -242,26 +242,26 @@ class CallNodeContextMenu extends PureComponent<Props> {
         });
         break;
       case 'focus-function':
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'focus-function',
           funcIndex: selectedFunc,
         });
         break;
       case 'merge-call-node':
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'merge-call-node',
           callNodePath: callNodePath,
           implementation,
         });
         break;
       case 'merge-function':
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'merge-function',
           funcIndex: selectedFunc,
         });
         break;
       case 'drop-function':
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'drop-function',
           funcIndex: selectedFunc,
         });
@@ -272,7 +272,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
         // A new collapsed func will be inserted into the table at the end. Deduce
         // the index here.
         const collapsedFuncIndex = funcTable.length;
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'collapse-resource',
           resourceIndex,
           collapsedFuncIndex,
@@ -281,7 +281,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
         break;
       }
       case 'collapse-direct-recursion': {
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'collapse-direct-recursion',
           funcIndex: selectedFunc,
           implementation,
@@ -289,7 +289,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
         break;
       }
       case 'collapse-function-subtree': {
-        addTransformToStack(threadIndex, {
+        addTransformToStack(threadsKey, {
           type: 'collapse-function-subtree',
           funcIndex: selectedFunc,
         });
@@ -311,12 +311,12 @@ class CallNodeContextMenu extends PureComponent<Props> {
     }
 
     const {
-      threadIndex,
+      threadsKey,
       callNodeIndex,
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
-    expandAllCallNodeDescendants(threadIndex, callNodeIndex, callNodeInfo);
+    expandAllCallNodeDescendants(threadsKey, callNodeIndex, callNodeInfo);
   }
 
   getNameForSelectedResource(): string | null {
@@ -388,14 +388,14 @@ class CallNodeContextMenu extends PureComponent<Props> {
 
   getRightClickedCallNodeInfo(): null | {|
     +thread: Thread,
-    +threadIndex: ThreadIndex,
+    +threadsKey: ThreadsKey,
     +callNodeInfo: CallNodeInfo,
     +callNodePath: CallNodePath,
     +callNodeIndex: IndexIntoCallNodeTable,
   |} {
     const {
       thread,
-      threadIndex,
+      threadsKey,
       callNodeInfo,
       rightClickedCallNodePath,
       rightClickedCallNodeIndex,
@@ -403,14 +403,14 @@ class CallNodeContextMenu extends PureComponent<Props> {
 
     if (
       thread &&
-      typeof threadIndex === 'number' &&
+      threadsKey !== null &&
       callNodeInfo &&
       rightClickedCallNodePath &&
       typeof rightClickedCallNodeIndex === 'number'
     ) {
       return {
         thread,
-        threadIndex,
+        threadsKey,
         callNodeInfo,
         callNodePath: rightClickedCallNodePath,
         callNodeIndex: rightClickedCallNodeIndex,
@@ -552,18 +552,18 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
 
     let thread = null;
-    let threadIndex = null;
+    let threadsKey = null;
     let callNodeInfo = null;
     let rightClickedCallNodePath = null;
     let rightClickedCallNodeIndex = null;
 
     if (rightClickedCallNodeInfo !== null) {
-      const selectors = getThreadSelectors(
-        rightClickedCallNodeInfo.threadIndex
+      const selectors = getThreadSelectorsFromThreadsKey(
+        rightClickedCallNodeInfo.threadsKey
       );
 
       thread = selectors.getThread(state);
-      threadIndex = rightClickedCallNodeInfo.threadIndex;
+      threadsKey = rightClickedCallNodeInfo.threadsKey;
       callNodeInfo = selectors.getCallNodeInfo(state);
       rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
       rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
@@ -571,7 +571,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
 
     return {
       thread,
-      threadIndex,
+      threadsKey,
       callNodeInfo,
       rightClickedCallNodePath,
       rightClickedCallNodeIndex,

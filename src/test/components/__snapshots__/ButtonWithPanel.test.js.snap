@@ -4,15 +4,11 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 <div
   class="buttonWithPanel button open"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton buttonButton"
+    type="button"
+    value="My Button"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -38,15 +34,12 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 <div
   class="buttonWithPanel button"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
+    type="button"
+    value="My Button"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -72,15 +65,11 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 <div
   class="buttonWithPanel button open"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton buttonButton"
+    type="button"
+    value="My Button"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -106,15 +95,12 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 <div
   class="buttonWithPanel button"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
+    type="button"
+    value="My Button"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -140,15 +126,11 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
 <div
   class="buttonWithPanel button open"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
+  <input
+    class="buttonWithPanelButton"
+    type="button"
+    value="My Button"
+  />
   <div
     class="arrowPanelAnchor"
   >
@@ -174,25 +156,11 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
 <div
   class="buttonWithPanel button"
 >
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      type="button"
-      value="My Button"
-    />
-  </div>
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-    </div>
-  </div>
+  <input
+    class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
+    type="button"
+    value="My Button"
+  />
 </div>
 `;

@@ -15,7 +15,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 
 describe('TooltipMarker', function() {
@@ -402,7 +402,7 @@ describe('TooltipMarker', function() {
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
-    const threadIndex = getSelectedThreadIndex(state);
+    const threadIndex = getFirstSelectedThreadIndex(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
     const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
       state
@@ -414,8 +414,9 @@ describe('TooltipMarker', function() {
         <Provider store={store}>
           <TooltipMarker
             marker={marker}
-            threadIndex={threadIndex}
+            threadsKey={threadIndex}
             className="propClass"
+            restrictHeightWidth={true}
           />
         </Provider>
       );
@@ -449,7 +450,12 @@ describe('TooltipMarker', function() {
 
     return render(
       <Provider store={store}>
-        <TooltipMarker marker={marker} threadIndex={0} className="propClass" />
+        <TooltipMarker
+          marker={marker}
+          threadsKey={0}
+          className="propClass"
+          restrictHeightWidth={true}
+        />
       </Provider>
     );
   }
@@ -662,7 +668,7 @@ describe('TooltipMarker', function() {
 
     const store = storeWithProfile(profile);
     const state = store.getState();
-    const threadIndex = getSelectedThreadIndex(state);
+    const threadIndex = getFirstSelectedThreadIndex(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
     const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
       state
@@ -674,8 +680,9 @@ describe('TooltipMarker', function() {
       <Provider store={store}>
         <TooltipMarker
           marker={marker}
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           className="propClass"
+          restrictHeightWidth={true}
         />
       </Provider>
     );

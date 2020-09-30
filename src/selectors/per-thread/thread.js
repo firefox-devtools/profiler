@@ -26,9 +26,13 @@ import type {
   StartEndRange,
   WeightType,
   EventDelayInfo,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
+import { ensureExists } from '../../utils/flow';
+import { mergeThreads } from '../../profile-logic/merge-compare';
+import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This
@@ -43,9 +47,27 @@ export type ThreadSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with an entire thread. This includes
  * the general filtering pipeline for threads.
  */
-export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
+export function getThreadSelectorsPerThread(
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+): * {
+  const getMergedThread: Selector<Thread> = createSelector(
+    ProfileSelectors.getProfile,
+    profile =>
+      mergeThreads(
+        [...threadIndexes].map(threadIndex => profile.threads[threadIndex])
+      )
+  );
+  /**
+   * Either return the raw thread from the profile, or merge several raw threads
+   * together.
+   */
   const getThread: Selector<Thread> = state =>
-    ProfileSelectors.getProfile(state).threads[threadIndex];
+    threadIndexes.size === 1
+      ? ProfileSelectors.getProfile(state).threads[
+          ensureExists(threadIndexes.values().next().value)
+        ]
+      : getMergedThread(state);
   const getStringTable: Selector<UniqueStringArray> = state =>
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
@@ -129,7 +151,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   });
 
   const getTransformStack: Selector<TransformStack> = state =>
-    UrlState.getTransformStack(state, threadIndex);
+    UrlState.getTransformStack(state, threadsKey);
 
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
     getRangeFilteredThread,
@@ -246,7 +268,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   );
 
   const getViewOptions: Selector<ThreadViewOptions> = state =>
-    ProfileSelectors.getProfileViewOptions(state).perThread[threadIndex];
+    ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
+    defaultThreadViewOptions;
 
   /**
    * Check to see if there are any JS allocations for this thread. This way we

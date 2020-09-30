@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { STATUS_CODES } from 'http';
 
-import { shortenUrl, expandUrl } from '../../utils/shorten-url';
+import { shortenUrl, expandUrl } from 'firefox-profiler/utils/shorten-url';
+import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 beforeEach(() => {
   window.fetch = jest.fn();
@@ -14,36 +14,6 @@ beforeEach(() => {
 afterEach(() => {
   delete window.fetch;
 });
-
-// This is a partial implementation of the Fetch API's Response object,
-// implementing just what we need for these tests.
-class Response {
-  status: number;
-  statusText: string;
-  ok: boolean;
-  _body: string | null;
-
-  constructor(
-    body: string | null,
-    options: {|
-      status: number,
-      statusText?: string,
-      headers?: {},
-    |}
-  ) {
-    this.status = options.status || 200;
-    this.statusText = options.statusText || STATUS_CODES[this.status];
-    this.ok = this.status >= 200 && this.status < 300;
-    this._body = body;
-  }
-
-  async json() {
-    if (this._body) {
-      return JSON.parse(this._body);
-    }
-    throw new Error('The body is missing.');
-  }
-}
 
 // This implements some base checks and behavior to mock the fetch API when
 // testing functions dealing with this API.

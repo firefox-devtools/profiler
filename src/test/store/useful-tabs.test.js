@@ -66,7 +66,7 @@ describe('getUsefulTabs', function() {
 
     dispatch({
       type: 'SELECT_TRACK',
-      selectedThreadIndex: 2,
+      selectedThreadIndexes: new Set([2]),
       selectedTab: 'calltree',
     });
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([

@@ -4,8 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import ArrowPanel from '../../shared/ArrowPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 import {
@@ -88,12 +87,13 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
-        buttonClassName="menuButtonsMetaInfoButtonButton"
+        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
         label="Profile Info"
-        panel={
-          <ArrowPanel className="arrowPanelOpenMetaInfo">
-            <h2 className="arrowPanelSubTitle">Profile Information</h2>
-            <div className="arrowPanelSection">
+        panelClassName="metaInfoPanel"
+        panelContent={
+          <>
+            <h2 className="metaInfoSubTitle">Profile Information</h2>
+            <div className="metaInfoSection">
               {meta.startTime ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Recording started:</span>
@@ -124,26 +124,16 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                       ? `${configuration.duration} seconds`
                       : 'Unlimited'}
                   </div>
-                  <div className="arrowPanelSection">
-                    <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Features:</span>
-                      <ul className="metaInfoList">
-                        {_mapInfoListItem(configuration.features)}
-                      </ul>
-                    </div>
-                    <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Threads Filter:</span>
-                      <ul className="metaInfoList">
-                        {_mapInfoListItem(configuration.threads)}
-                      </ul>
-                    </div>
+                  <div className="metaInfoSection">
+                    {_renderRowOfList('Features', configuration.features)}
+                    {_renderRowOfList('Threads Filter', configuration.threads)}
                   </div>
                 </>
               ) : null}
               {this.renderSymbolication()}
             </div>
-            <h2 className="arrowPanelSubTitle">Application</h2>
-            <div className="arrowPanelSection">
+            <h2 className="metaInfoSubTitle">Application</h2>
+            <div className="metaInfoSection">
               {meta.product ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Name and version:</span>
@@ -179,17 +169,12 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   {meta.debug ? 'Debug' : 'Opt'}
                 </div>
               ) : null}
-              {meta.extensions ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Extensions:</span>
-                  <ul className="metaInfoList">
-                    {_mapInfoListItem(meta.extensions.name)}
-                  </ul>
-                </div>
-              ) : null}
+              {meta.extensions
+                ? _renderRowOfList('Extensions', meta.extensions.name)
+                : null}
             </div>
-            <h2 className="arrowPanelSubTitle">Platform</h2>
-            <div className="arrowPanelSection">
+            <h2 className="metaInfoSubTitle">Platform</h2>
+            <div className="metaInfoSection">
               {platformInformation ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">OS:</span>
@@ -205,8 +190,8 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             </div>
             {meta.visualMetrics ? (
               <>
-                <h2 className="arrowPanelSubTitle">Visual Metrics</h2>
-                <div className="arrowPanelSection">
+                <h2 className="metaInfoSubTitle">Visual Metrics</h2>
+                <div className="metaInfoSection">
                   <div className="metaInfoRow">
                     <span className="visualMetricsLabel">Speed Index:</span>
                     {meta.visualMetrics.SpeedIndex}
@@ -233,19 +218,29 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
             {profilerOverhead ? (
               <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
             ) : null}
-          </ArrowPanel>
+          </>
         }
       />
     );
   }
 }
 
-function _mapInfoListItem(data: string[]): React.DOM {
-  return data.map(d => (
-    <li className="metaInfoListItem" key={d}>
-      {d}
-    </li>
-  ));
+function _renderRowOfList(label: string, data: string[]): React.Node {
+  if (!data.length) {
+    return null;
+  }
+  return (
+    <div className="metaInfoRow">
+      <span className="metaInfoLabel">{label}:</span>
+      <ul className="metaInfoList">
+        {data.map(d => (
+          <li className="metaInfoListItem" key={d}>
+            {d}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function _formatDate(timestamp: number): string {

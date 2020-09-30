@@ -24,6 +24,7 @@ import type {
   IndexIntoRawMarkerTable,
   Selector,
   $ReturnType,
+  ThreadsKey,
 } from 'firefox-profiler/types';
 
 /**
@@ -40,7 +41,8 @@ export type MarkerSelectorsPerThread = $ReturnType<
  */
 export function getMarkerSelectorsPerThread(
   threadSelectors: *,
-  threadIndex: ThreadIndex
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
 ) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = state =>
     threadSelectors.getThread(state).markers;
@@ -226,23 +228,15 @@ export function getMarkerSelectorsPerThread(
    * in the header, because they would obscure the header, or that are displayed
    * in other tracks already.
    */
-  const getCommittedRangeAndTabFilteredMarkerIndexesForHeader: Selector<
+  const getTimelineOverviewMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(
-      marker =>
-        marker.name !== 'BHR-detected hang' &&
-        marker.name !== 'LongTask' &&
-        marker.name !== 'LongIdleTask' &&
-        marker.name !== 'Jank' &&
-        !MarkerData.isNetworkMarker(marker) &&
-        !MarkerData.isFileIoMarker(marker) &&
-        !MarkerData.isNavigationMarker(marker) &&
-        !MarkerData.isMemoryMarker(marker) &&
-        !MarkerData.isIPCMarker(marker)
-    )
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-overview',
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
@@ -366,25 +360,50 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
-   * This filters out network markers from the list of all markers, so that
-   * they'll be displayed in the marker chart.
+   * For performance reasons, the marker chart ignores the preview selection.
+   * It handles its own zooming behavior. It uses the SearchFilteredMarkerIndexes
+   * instead. It shows markers that use the "marker-chart" schema location, plus it
+   * shows markers that have no schema, in order to be as permissive as possible.
    */
   const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeAndTabFilteredMarkerIndexes,
-    MarkerData.filterForMarkerChart
+    getSearchFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-chart',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
   );
 
   /**
-   * This filters the previous result using a search string.
+   * The marker table uses only the preview selection filtered markers. It shows markers
+   * that use the "marker-table" schema location, plus it shows markers that have
+   * no schema, in order to be as permissive as possible.
    */
-  const getSearchFilteredMarkerChartMarkerIndexes: Selector<
-    MarkerIndex[]
-  > = createSelector(
+  const getMarkerTableMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getMarkerChartMarkerIndexes,
-    UrlState.getMarkersSearchStringsAsRegExp,
-    MarkerData.getSearchFilteredMarkerIndexes
+    getPreviewFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-table',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
   );
 
   /**
@@ -393,47 +412,53 @@ export function getMarkerSelectorsPerThread(
    */
   const getMarkerChartTimingAndBuckets: Selector<MarkerTimingAndBuckets> = createSelector(
     getMarkerGetter,
-    getSearchFilteredMarkerChartMarkerIndexes,
+    getMarkerChartMarkerIndexes,
     ProfileSelectors.getCategories,
     MarkerTimingLogic.getMarkerTimingAndBuckets
   );
 
   /**
-   * This returns only FileIO markers for the header.
-   * Also excludes FileIO markers that belong to other threads.
+   * This returns markers for the FileIO timeline. The Marker Schema is obeyed, but
+   * there is special handling to ensure that the FileIO markers are displayed
+   * only for that thread.
    */
-  const getFileIoMarkerIndexesForHeader: Selector<
+  const getTimelineFileIoMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isOnThreadFileIoMarker)
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-fileio',
+    // Custom filtering in addition to the schema logic:
+    () => MarkerData.isOnThreadFileIoMarker,
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
    * This returns only memory markers.
    */
-  const getMemoryMarkerIndexes: Selector<
+  const getTimelineMemoryMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    ProfileSelectors.getTimelineMemoryMarkerTypes,
-    (getMarker, markerIndexes, timelineMemoryMarkerTypes) =>
-      MarkerData.filterMarkerByTypes(
-        getMarker,
-        markerIndexes,
-        timelineMemoryMarkerTypes
-      )
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-memory',
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
    * This returns only IPC markers.
    */
-  const getIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isIPCMarker)
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-ipc',
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
@@ -493,7 +518,7 @@ export function getMarkerSelectorsPerThread(
     rightClickedMarkerInfo => {
       if (
         rightClickedMarkerInfo !== null &&
-        rightClickedMarkerInfo.threadIndex === threadIndex
+        rightClickedMarkerInfo.threadsKey === threadsKey
       ) {
         return rightClickedMarkerInfo.markerIndex;
       }
@@ -519,17 +544,17 @@ export function getMarkerSelectorsPerThread(
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
     getAreMarkerPanelsEmptyInFullRange,
+    getMarkerTableMarkerIndexes,
     getMarkerChartMarkerIndexes,
-    getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    getCommittedRangeAndTabFilteredMarkerIndexesForHeader,
+    getTimelineOverviewMarkerIndexes,
     getActiveTabFilteredMarkerIndexesWithoutGlobals,
     getTimelineVerticalMarkerIndexes,
-    getFileIoMarkerIndexesForHeader,
-    getMemoryMarkerIndexes,
-    getIPCMarkerIndexes,
+    getTimelineFileIoMarkerIndexes,
+    getTimelineMemoryMarkerIndexes,
+    getTimelineIPCMarkerIndexes,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkerIndexes,

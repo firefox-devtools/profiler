@@ -139,7 +139,7 @@ process: \\"tab\\" (222)"
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread"
+        class="timelineTrackThread expanded"
       >
         <div
           class="timelineMarkers"

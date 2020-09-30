@@ -279,7 +279,8 @@ export type OriginsTimeline = Array<
 export type ActiveTabMainTrack = {|
   type: 'tab',
   mainThreadIndex: ThreadIndex,
-  threadIndexes: Array<ThreadIndex>,
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey,
 |};
 
 export type ActiveTabScreenshotTrack = {|
@@ -311,6 +312,7 @@ export type ActiveTabTimeline = {
   mainTrack: ActiveTabMainTrack,
   screenshots: Array<ActiveTabScreenshotTrack>,
   resources: Array<ActiveTabResourceTrack>,
+  resourcesThreadsKey: ThreadsKey,
 };
 
 export type ActiveTabGlobalTrack =
@@ -396,3 +398,11 @@ export type EventDelayInfo = {|
   +maxDelay: Milliseconds,
   +delayRange: Milliseconds,
 |};
+
+/**
+ * This is a unique key that can be used in an object cache that represents either
+ * a single thread, or a selection of multiple threads. When it's a number, it's
+ * the ThreadIndex. When there are multiple threads, the key is a string of sorted,
+ * comma separated thread indexes, e.g. "5,7,10"
+ */
+export type ThreadsKey = string | number;

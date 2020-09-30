@@ -26,7 +26,7 @@
   position: relative;
   height: var(--resources-header-height);
   padding-left: 20px;
-  cursor: default;
+  cursor: pointer;
   font-size: 12px;
   line-height: var(--resources-header-height);
 }
@@ -58,6 +58,14 @@
   transition: height 0.2s;
 }
 
+.timelineResourcesHeader .timelineMarkers {
+  /*
+   * TODO: Currently we don't show any markers for merged resource track but we
+   * should add jank markers.
+   */
+  height: 0;
+}
+
 /* Set the marker height of the closed resources to 3px */
 .timelineTrackResourceRow:not(.opened) .timelineMarkers {
   height: 3px;
@@ -81,6 +89,10 @@
   height: 9px;
 }
 
+.timelineResourcesHeader .threadActivityGraph {
+  height: 20px;
+}
+
 .timelineTrackResourceRow:not(.opened) .threadActivityGraph {
   height: 6px;
 }
@@ -89,8 +101,8 @@
   overflow: hidden;
   max-width: calc(100% - 55px);
   padding: 0 5px 0 30px;
+  cursor: pointer;
   line-height: var(--resources-header-height);
-  pointer-events: none;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -126,4 +138,12 @@
 
 .timelineTrackResourceLabel span {
   font-weight: bold;
+}
+
+.timelineResourcesHeader .timelineTrackThread.condensed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--resources-header-height);
 }

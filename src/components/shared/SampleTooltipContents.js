@@ -49,7 +49,7 @@ export default class SampleTooltipContents extends React.PureComponent<Props> {
           <div className="tooltipLabel">Stack:</div>
         </div>
         <Backtrace
-          maxHeight="9.2em"
+          maxStacks={20}
           stackIndex={stackIndex}
           thread={fullThread}
           implementationFilter="combined"

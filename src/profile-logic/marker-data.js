@@ -13,6 +13,7 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
+import { getMarkerSchemaName } from './marker-schema';
 
 import type {
   Thread,
@@ -36,6 +37,8 @@ import type {
   IndexedArray,
   DerivedMarkerInfo,
   MarkerSchema,
+  MarkerSchemaByName,
+  MarkerDisplayLocation,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -1094,57 +1097,53 @@ export function isNavigationMarker({ name, data }: Marker) {
   return false;
 }
 
-export function isFileIoMarker(marker: Marker): boolean {
-  return !!(marker.data && marker.data.type === 'FileIO');
-}
-
 /**
- * Returns true if the marker is an on-thread FileIO marker.
+ * Returns true if the marker is an on-thread FileIO marker, false if off-thread,
+ * and undefined if the marker is not FileIO.
+ *
  * The FileIO markers can be either on-thread or off-thread. If the FileIO marker
  * has a threadId, that means the marker does not belong to that thread but rather
  * belongs to the thread with the given threadId, which is off-thread.
+ *
  * We don't want to display the off-thread markers in some parts of the UI because
  * they bring a lot of noise.
  */
-export function isOnThreadFileIoMarker(marker: Marker): boolean {
-  return !!(
-    marker.data &&
-    marker.data.type === 'FileIO' &&
-    // If thread ID isn't there, that means this FileIO marker belongs to that thread.
-    typeof marker.data.threadId === 'undefined'
-  );
-}
-
-export function isMemoryMarker(marker: Marker): boolean {
+export function isOnThreadFileIoMarker(marker: Marker): boolean | void {
   const { data } = marker;
-  if (!data) {
-    return false;
+  if (!data || data.type !== 'FileIO') {
+    // This is not a FileIO marker, do make a decision on filtering.
+    return undefined;
   }
-  return (
-    data.type === 'GCMajor' ||
-    data.type === 'GCMinor' ||
-    data.type === 'GCSlice' ||
-    (data.type === 'tracing' && data.category === 'CC')
-  );
+
+  // If thread ID isn't there, that means this FileIO marker belongs to that thread.
+  return data.threadId === undefined;
 }
 
-export function isIPCMarker(marker: Marker): boolean {
-  return !!(marker.data && marker.data.type === 'IPC');
-}
+/**
+ * This function is used by the marker chart and marker table. When filtering by
+ * schema for these areas, we want to be as permissive as possible when no schema
+ * is present.
+ */
+export function getAllowMarkersWithNoSchema(
+  markerSchemaByName: MarkerSchemaByName
+): Marker => boolean | void {
+  return marker => {
+    const { data } = marker;
 
-export function filterForNetworkChart(markers: Marker[]): Marker[] {
-  return markers.filter(marker => isNetworkMarker(marker));
-}
+    if (!data) {
+      // Keep the marker if there is payload.
+      return true;
+    }
 
-export function filterForMarkerChart(
-  getMarker: MarkerIndex => Marker,
-  markerIndexes: MarkerIndex[]
-): MarkerIndex[] {
-  return filterMarkerIndexes(
-    getMarker,
-    markerIndexes,
-    marker => !isNetworkMarker(marker)
-  );
+    if (!markerSchemaByName[data.type]) {
+      // Keep the marker if there is no schema. Note that this function doesn't use
+      // the getMarkerSchemaName function, as that function attempts to find a
+      // marker schema name in a very permissive manner. In the marker chart
+      // and marker table, most likely we want to show everything.
+      return true;
+    }
+    return undefined;
+  };
 }
 
 // Identifies mime type of a network request.
@@ -1375,26 +1374,35 @@ export function getMarkerTypesForDisplay(
   return types;
 }
 
+function _doNotAutomaticallyAdd(_data: Marker) {
+  return undefined;
+}
+
 /**
- * Filter markers to a smaller set based on what "type" they are. This is used to
- * to filter markers based on the schema.
+ * Filter markers to a smaller set based on the location.
  */
-export function filterMarkerByTypes(
+export function filterMarkerByDisplayLocation(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  markerTypes: Set<string>
+  markerSchema: MarkerSchema[],
+  markerSchemaByName: MarkerSchemaByName,
+  displayLocation: MarkerDisplayLocation,
+  // This argument allows a filtering function to customize the result, without having
+  // to loop through all of the markers again. Return a boolean if making a decision,
+  // or undefined if not.
+  preemptiveFilterFunc?: (
+    data: Marker
+  ) => boolean | void = _doNotAutomaticallyAdd
 ): MarkerIndex[] {
+  const markerTypes = getMarkerTypesForDisplay(markerSchema, displayLocation);
   return filterMarkerIndexes(getMarker, markerIndexes, marker => {
-    const { data } = marker;
-    if (!data) {
-      return false;
+    const additionalResult = preemptiveFilterFunc(marker);
+
+    if (additionalResult !== undefined) {
+      // This is a boolean value, use it rather than the schema.
+      return additionalResult;
     }
-    if (data.type === 'tracing') {
-      // This is a bit gross, but tracing markers are all of type "tracing", but
-      // differentiate on their categories. This should probably be fixed, but
-      // for now just do another check here.
-      return markerTypes.has(data.category);
-    }
-    return markerTypes.has(data.type);
+
+    return markerTypes.has(getMarkerSchemaName(markerSchemaByName, marker));
   });
 }

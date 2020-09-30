@@ -41,7 +41,7 @@ import type {
   UrlSetupPhase,
   Selector,
   CssPixels,
-  ThreadIndex,
+  ThreadsKey,
   ExperimentalFlags,
 } from 'firefox-profiler/types';
 
@@ -61,9 +61,9 @@ export const getPanelLayoutGeneration: Selector<number> = state =>
   getApp(state).panelLayoutGeneration;
 export const getLastVisibleThreadTabSlug: Selector<TabSlug> = state =>
   getApp(state).lastVisibleThreadTabSlug;
-export const getTrackThreadHeights: Selector<
-  Array<ThreadIndex | void>
-> = state => getApp(state).trackThreadHeights;
+export const getTrackThreadHeights: Selector<{
+  [key: ThreadsKey]: CssPixels,
+}> = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
 export const getExperimental: Selector<ExperimentalFlags> = state =>
@@ -144,17 +144,13 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         // Add the height of the main track.
         // The thread tracks have enough complexity that it warrants measuring
         // them rather than statically using a value like the other tracks.
-        const { mainThreadIndex } = activeTabTimeline.mainTrack;
-        if (mainThreadIndex === null) {
-          height += TRACK_PROCESS_BLANK_HEIGHT + border;
-        } else {
-          const trackThreadHeight = trackThreadHeights[mainThreadIndex];
-          if (trackThreadHeight === undefined) {
-            // The height isn't computed yet, return.
-            return null;
-          }
-          height += trackThreadHeight + border;
+        const { threadsKey } = activeTabTimeline.mainTrack;
+        const trackThreadHeight = trackThreadHeights[threadsKey];
+        if (trackThreadHeight === undefined) {
+          // The height isn't computed yet, return.
+          return null;
         }
+        height += trackThreadHeight + border;
 
         // Add the height of screenshot tracks.
         for (let i = 0; i < activeTabTimeline.screenshots.length; i++) {

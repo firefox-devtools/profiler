@@ -12,7 +12,7 @@ import {
   selectedThreadSelectors,
   selectedNodeSelectors,
 } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { getCategories } from '../../selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
 import {
@@ -23,7 +23,7 @@ import CanSelectContent from './CanSelectContent';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type {
-  ThreadIndex,
+  ThreadsKey,
   CategoryList,
   CallNodeTable,
   IndexIntoCallNodeTable,
@@ -271,7 +271,7 @@ class CategoryBreakdown extends React.PureComponent<
 type StateProps = {|
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
   +callNodeTable: CallNodeTable,
-  +selectedThreadIndex: ThreadIndex,
+  +selectedThreadsKey: ThreadsKey,
   +name: string,
   +lib: string,
   +timings: TimingsForPath,
@@ -466,7 +466,7 @@ export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
-    selectedThreadIndex: getSelectedThreadIndex(state),
+    selectedThreadsKey: getSelectedThreadsKey(state),
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),

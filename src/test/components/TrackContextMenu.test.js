@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ensureExists } from '../../utils/flow';
 
 import {
-  changeSelectedThread,
+  changeSelectedThreads,
   changeRightClickedTrack,
 } from '../../actions/profile-view';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
@@ -74,7 +74,7 @@ describe('timeline/TrackContextMenu', function() {
       if (threadIndex !== null) {
         // Explicitly select the global thread. Tests can pass in a custom profile,
         // so don't fail if this doesn't exist.
-        dispatch(changeSelectedThread(threadIndex));
+        dispatch(changeSelectedThreads(new Set([threadIndex])));
       }
       dispatch(changeRightClickedTrack(trackReference));
 
@@ -193,7 +193,7 @@ describe('timeline/TrackContextMenu', function() {
       // TODO - We should wait until we have some real tracks without a thread index.
     });
 
-    it('network track will be displayed when a number is not set for showTabOnly', () => {
+    it('network track will be displayed when a number is not set for ctxId', () => {
       const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
       // We can't use getHumanReadableTracks here because that function doesn't
       // use the functions used by context menu directly and gives us wrong results.
@@ -224,7 +224,7 @@ describe('timeline/TrackContextMenu', function() {
       const threadIndex = localTrack.threadIndex;
 
       // Explicitly select the global thread.
-      dispatch(changeSelectedThread(threadIndex));
+      dispatch(changeSelectedThreads(new Set([threadIndex])));
       dispatch(changeRightClickedTrack(trackReference));
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
@@ -301,7 +301,7 @@ describe('timeline/TrackContextMenu', function() {
         `Couldn't get the mainThreadIndex of global track`
       );
 
-      dispatch(changeSelectedThread(threadIndex));
+      dispatch(changeSelectedThreads(new Set([threadIndex])));
       dispatch(changeRightClickedTrack(trackReference));
 
       const globalTrackItem = () => getByText('Content Process');

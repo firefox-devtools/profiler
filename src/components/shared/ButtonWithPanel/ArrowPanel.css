@@ -14,8 +14,6 @@
   --internal-offset-from-top: 15px;
   --internal-width: var(--width, initial);
   --internal-button-height: 30px;
-  --internal-ok-button-background: var(--ok-button-background, #7990c8);
-  --internal-ok-button-color: var(--ok-button-color, white);
 
   position: absolute;
   top: var(--internal-offset-from-top);
@@ -26,7 +24,7 @@
   color: black;
   filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
     drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
-  filter: url(../../../res/img/svg/shadowfilter.svg#menushadow);
+  filter: url(../../../../res/img/svg/shadowfilter.svg#menushadow);
   line-height: 1.3;
   text-align: left;
   transform-origin: calc(100% - var(--internal-offset-from-right))
@@ -90,121 +88,24 @@
   transform-origin: top left;
 }
 
-.arrowPanelTitle,
-.arrowPanelSubTitle {
-  padding: 10px;
-  margin: 0;
-  font-size: 1.2em;
-}
-
-.arrowPanelSubTitle {
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  font-weight: 700;
-}
-
 .arrowPanelContent {
   overflow: auto;
   max-height: calc(
     100vh - var(--internal-approx-distance-from-top) -
       var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
   );
-  padding: 0 10px;
+  padding: 16px;
 
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
 }
 
-.arrowPanel.hasTitle > .arrowPanelContent {
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+.menuButtonsPermalinkPanel .arrowPanelContent {
+  /* Override the default padding for ArrowPanel */
+  padding: 4px;
 }
 
-.arrowPanel.hasButtons > .arrowPanelContent {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.arrowPanel ul {
-  padding-left: 2em;
-}
-
-.arrowPanelButtons {
-  display: flex;
-  height: 35px;
-  flex-flow: row nowrap;
-  align-items: stretch;
-  line-height: 35px;
-}
-
-.arrowPanelOkButton,
-.arrowPanelCancelButton {
-  flex: 1;
-  padding: 0;
-  border: 0;
-  margin: 0;
-  background: none;
-  font-size: 1.2em;
-  text-align: center;
-}
-
-.arrowPanelOkButton {
-  background: var(--internal-ok-button-background);
-  border-bottom-right-radius: 5px;
-  color: var(--internal-ok-button-color);
-}
-
-.arrowPanelCancelButton {
-  border-bottom-left-radius: 5px;
-}
-
-.arrowPanelOkButton:hover,
-.arrowPanelCancelButton:hover {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
-}
-
-.arrowPanelOkButton:hover:active,
-.arrowPanelCancelButton:hover:active {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
-}
-
-.arrowPanelOpenMetaInfo {
-  width: 350px;
-  padding-top: 5px;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.arrowPanelOpenMetaInfo,
-.arrowPanelOpenMetaInfo .arrowPanelArrow::before {
-  background-color: white;
-}
-
-.arrowPanelSection {
-  margin-top: 7px;
-  margin-bottom: 12px;
-}
-
-.metaInfoLabel,
-.metaInfoWideLabel {
-  display: inline-block;
-  width: 120px;
-  color: var(--grey-50);
-}
-
-.metaInfoWideLabel {
-  width: 140px;
-}
-
-.visualMetricsLabel {
-  display: inline-block;
-  width: 145px;
-  color: var(--grey-50);
-}
-
-.metaInfoList {
-  margin-top: -19px;
-}
-
-.metaInfoList .metaInfoListItem {
-  margin-left: 110px;
-  list-style: circle;
+.menuButtonsPermalinkTextField {
+  width: 16em;
+  height: 19px;
 }

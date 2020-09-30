@@ -194,6 +194,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         </h2>
         <list-of-published-profiles
           limit="3"
+          withactionbuttons="false"
         />
       </section>
     </section>
@@ -367,6 +368,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         </h2>
         <list-of-published-profiles
           limit="3"
+          withactionbuttons="false"
         />
       </section>
     </section>
@@ -563,6 +565,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         </h2>
         <list-of-published-profiles
           limit="3"
+          withactionbuttons="false"
         />
       </section>
     </section>

@@ -6,7 +6,6 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import * as MarkerData from '../profile-logic/marker-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
@@ -18,7 +17,10 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 
-import { markerSchema } from '../profile-logic/marker-schema';
+import {
+  markerSchema,
+  getMarkerLabelMaker,
+} from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -64,9 +66,11 @@ import type {
   OriginsViewState,
   ActiveTabTimeline,
   ActiveTabMainTrack,
+  ThreadsKey,
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
+  MarkerLabelMakerByName,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -180,7 +184,7 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,
   schemaList => {
-    const result = {};
+    const result = Object.create(null);
     for (const schema of schemaList) {
       result[schema.name] = schema;
     }
@@ -188,10 +192,17 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelecto
   }
 );
 
-export const getTimelineMemoryMarkerTypes: Selector<
-  Set<string>
-> = createSelector(getMarkerSchema, markerSchema =>
-  MarkerData.getMarkerTypesForDisplay(markerSchema, 'timeline-memory')
+export const getMarkerLabelMakerByName: Selector<MarkerLabelMakerByName> = createSelector(
+  getMarkerSchema,
+  markerSchemaList => {
+    const results: MarkerLabelMakerByName = Object.create(null);
+    for (const schema of markerSchemaList) {
+      if (schema.tooltipLabel) {
+        results[schema.name] = getMarkerLabelMaker(schema.tooltipLabel);
+      }
+    }
+    return results;
+  }
 );
 
 export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
@@ -473,6 +484,9 @@ export const getActiveTabResourceTracks: Selector<
   ActiveTabResourceTrack[]
 > = state => getActiveTabTimeline(state).resources;
 
+export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = state =>
+  getActiveTabTimeline(state).resourcesThreadsKey;
+
 /**
  * This returns all TrackReferences for global tracks.
  */
@@ -720,8 +734,8 @@ export const getRelevantInnerWindowIDsForActiveTab: Selector<
 
 /**
  * A simple wrapper for getRelevantInnerWindowIDsForActiveTab.
- * It returns an empty Set if showTabOnly is null, and returns the real Set if
- * showTabOnly is assigned already. We should usually use this instead of the
+ * It returns an empty Set if ctxId is null, and returns the real Set if
+ * ctxId is assigned already. We should usually use this instead of the
  * wrapped function. But the wrapped function is helpful to calculate the hidden
  * tracks by active tab view during the first page load(inside viewProfile function).
  */

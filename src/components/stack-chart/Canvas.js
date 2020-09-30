@@ -27,7 +27,7 @@ import type {
   Thread,
   CategoryList,
   PageList,
-  ThreadIndex,
+  ThreadsKey,
   UserTimingMarkerPayload,
   WeightType,
   CallNodeInfo,
@@ -49,7 +49,7 @@ import type { WrapFunctionInDispatch } from '../../utils/connect';
 type OwnProps = {|
   +thread: Thread,
   +pages: PageList | null,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +interval: Milliseconds,
   +weightType: WeightType,
   +rangeStart: Milliseconds,
@@ -409,7 +409,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const {
       thread,
       weightType,
-      threadIndex,
+      threadsKey,
       combinedTimingRows,
       categories,
       callNodeInfo,
@@ -431,7 +431,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
       return (
         <TooltipMarker
           marker={getMarker(markerIndex)}
-          threadIndex={threadIndex}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
         />
       );
     }

@@ -136,6 +136,21 @@ export function objectEntries<Key, Value>(object: {
   return (Object.entries: Function)(object);
 }
 
+/**
+ * This is a type-friendly version of Object.entries that assumes the object has
+ * a Map-like structure.
+ */
+export function objectMap<Return, Key, Value>(
+  object: { [Key]: Value },
+  fn: (Value, Key) => Return
+): { [Key]: Return } {
+  const result: { [Key]: Return } = {};
+  for (const [key, value] of objectEntries(object)) {
+    result[key] = fn(value, key);
+  }
+  return result;
+}
+
 export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
   return Object.values(obj);
 }

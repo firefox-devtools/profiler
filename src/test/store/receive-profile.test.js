@@ -441,7 +441,7 @@ describe('actions/receive-profile', function() {
   describe('changeTimelineTrackOrganization', function() {
     const browsingContextID = 123;
     const innerWindowID = 111111;
-    function setup(initializeShowTabOnly: boolean = false) {
+    function setup(initializeCtxId: boolean = false) {
       const store = blankStore();
       const profile = getEmptyProfile();
 
@@ -465,7 +465,7 @@ describe('actions/receive-profile', function() {
       ];
 
       store.dispatch(viewProfile(profile));
-      if (initializeShowTabOnly) {
+      if (initializeCtxId) {
         store.dispatch(
           changeTimelineTrackOrganization({
             type: 'active-tab',

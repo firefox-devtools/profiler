@@ -31,6 +31,8 @@ import type {
   BrowsingContextID,
   TrackIndex,
   CallNodePath,
+  ThreadIndex,
+  TransformStacksPerThread,
 } from 'firefox-profiler/types';
 
 export const CURRENT_URL_VERSION = 5;
@@ -138,6 +140,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
+  ctxId: BrowsingContextID | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -153,7 +156,6 @@ type BaseQuery = {|
   transforms: string,
   profiles: string[],
   profileName: string,
-  ctxId: BrowsingContextID,
   view: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
@@ -254,11 +256,31 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       throw assertExhaustiveCheck(dataSource);
   }
 
-  const { selectedThread } = urlState.profileSpecific;
+  const { selectedThreads } = urlState.profileSpecific;
+
+  let ctxId;
+  let view;
+  const { timelineTrackOrganization } = urlState;
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      // Dont URL-encode anything.
+      break;
+    case 'active-tab':
+      view = timelineTrackOrganization.type;
+      ctxId = timelineTrackOrganization.browsingContextID;
+      break;
+    case 'origins':
+      view = timelineTrackOrganization.type;
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        'Unhandled TimelineTrackOrganization case'
+      );
+  }
 
   // Start with the query parameters that are shown regardless of the active panel.
   let baseQuery;
-  const { timelineTrackOrganization } = urlState;
   switch (timelineTrackOrganization.type) {
     case 'full': {
       // Add the full profile specific state query here.
@@ -310,6 +332,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         .isResourcesPanelOpen
         ? null
         : undefined;
+      baseQuery.ctxId = ctxId || undefined;
       break;
     }
     case 'origins':
@@ -322,35 +345,15 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       );
   }
 
-  let ctxId;
-  let view;
-  switch (timelineTrackOrganization.type) {
-    case 'full':
-      // Dont URL-encode anything.
-      break;
-    case 'active-tab':
-      view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.browsingContextID;
-      break;
-    case 'origins':
-      view = timelineTrackOrganization.type;
-      break;
-    default:
-      throw assertExhaustiveCheck(
-        timelineTrackOrganization,
-        'Unhandled TimelineTrackOrganization case'
-      );
-  }
-
   baseQuery = ({
     ...baseQuery,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
-    thread: selectedThread === null ? undefined : selectedThread.toString(),
+    thread:
+      selectedThreads === null ? undefined : [...selectedThreads].join(','),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
-    ctxId,
     view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
@@ -382,10 +385,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.implementation === 'combined'
           ? undefined
           : urlState.profileSpecific.implementation;
-      if (selectedThread !== null) {
+      if (selectedThreads !== null) {
         query.transforms =
           stringifyTransforms(
-            urlState.profileSpecific.transforms[selectedThread]
+            selectedThreads,
+            urlState.profileSpecific.transforms
           ) || undefined;
       }
       query.ctSummary =
@@ -496,7 +500,9 @@ export function stateFromLocation(
 
   const pathParts = pathname.split('/').filter(d => d);
   const dataSource = getDataSourceFromPathParts(pathParts);
-  const selectedThread = query.thread !== undefined ? +query.thread : null;
+  const selectedThreadsList: ThreadIndex[] =
+    // Either a single thread index, or a list separated by commas.
+    query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
 
   // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -514,12 +520,7 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
-  const transforms = {};
-  if (selectedThread !== null) {
-    transforms[selectedThread] = query.transforms
-      ? parseTransforms(query.transforms)
-      : [];
-  }
+  const transforms = parseTransforms(selectedThreadsList, query.transforms);
 
   let browsingContextId = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
@@ -546,7 +547,8 @@ export function stateFromLocation(
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
-      selectedThread: selectedThread,
+      selectedThreads:
+        selectedThreadsList.length === 0 ? null : new Set(selectedThreadsList),
       callTreeSearchString: query.search || '',
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
@@ -768,17 +770,23 @@ const _upgraders = {
     // callNodePaths. For example,  in a call stack like this: 'C++->JS->relevantForJS->JS'
     // Previous callNodePath was 'JS,JS'. But now it has to be 'JS,relevantForJS,JS'.
     const query = processedLocation.query;
-    const selectedThread = query.thread !== undefined ? +query.thread : null;
-    const transforms = query.transforms
-      ? parseTransforms(query.transforms)
-      : [];
+    const selectedThread: null | number =
+      query.thread === undefined ? null : +query.thread;
 
-    if (transforms.length === 0) {
-      // We don't have any transforms to upgrade.
+    if (selectedThread === null || profile === undefined) {
       return;
     }
 
-    if (selectedThread === null || profile === undefined) {
+    const transformStacksPerThread: TransformStacksPerThread = query.transforms
+      ? parseTransforms([selectedThread], query.transforms)
+      : {};
+
+    // At the time this upgrader was written, there was only one selected thread.
+    // Only upgrade the single transfrom.
+    const transforms = transformStacksPerThread[selectedThread];
+
+    if (!transforms || transforms.length === 0) {
+      // We don't have any transforms to upgrade.
       return;
     }
 
@@ -803,12 +811,17 @@ const _upgraders = {
         // If we can't find the stack index of given call node path, just abort.
         continue;
       }
-      transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
+      // This property is not writable, make it an "any"
+      (transform: any).callNodePath = getVersion4JSCallNodePathFromStackIndex(
         thread,
         callNodeStackIndex
       );
     }
-    processedLocation.query.transforms = stringifyTransforms(transforms);
+
+    processedLocation.query.transforms = stringifyTransforms(
+      new Set([selectedThread]),
+      transformStacksPerThread
+    );
   },
   [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
     // We changed how the ranges are serialized to the URLs. Before it was the
@@ -936,11 +949,7 @@ function validateTimelineTrackOrganization(
     case 'full':
       return { type: 'full' };
     case 'active-tab':
-      if (browsingContextID) {
-        return { type: 'active-tab', browsingContextID };
-      }
-      return { type: 'full' };
-
+      return { type: 'active-tab', browsingContextID };
     case 'origins':
       return { type: 'origins' };
     default:
