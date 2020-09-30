@@ -358,13 +358,21 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
             />
           ))}
         </ul>
-        {profilesRestCount > 0 ? (
+        {withActionButtons ? null : (
           <p>
             <InnerNavigationLink dataSource="uploaded-recordings">
-              See and manage all your recordings ({profilesRestCount} more)
+              {profilesRestCount > 0 ? (
+                <>
+                  See and manage all your recordings ({profilesRestCount} more)
+                </>
+              ) : profileDataList.length > 1 ? (
+                <>Manage these recordings</>
+              ) : (
+                <>Manage this recording</>
+              )}
             </InnerNavigationLink>
           </p>
-        ) : null}
+        )}
       </>
     );
   }
