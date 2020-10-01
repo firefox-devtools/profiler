@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { DivWithTooltip }from '../tooltip/DivWithTooltip';
+import { DivWithTooltip } from '../tooltip/DivWithTooltip';
 import { withSize } from '../shared/WithSize';
 import { displayNiceUrl } from '../../utils';
 import { formatSeconds } from '../../utils/format-numbers';
