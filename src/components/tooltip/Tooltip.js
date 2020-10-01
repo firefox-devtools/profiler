@@ -25,7 +25,7 @@ type State = {
   isNewContentLaidOut: boolean,
 };
 
-export default class Tooltip extends React.PureComponent<Props, State> {
+export class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean = false;
 
   state = {
