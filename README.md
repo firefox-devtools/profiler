@@ -1,3 +1,4 @@
+# An amazing project
 # Firefox Profiler
 [![Matrix][matrix-badge]][matrix]
 
