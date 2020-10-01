@@ -58,14 +58,17 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     };
   }
 
-  _onMouseUp = fromWhere => (event: MouseEvent) => {
+  _onMouseUp = (
+    clickedArea: 'timelineTrackResourceLabel' | 'timelineTrackRow'
+  ) => (event: MouseEvent) => {
     const { isSelected } = this.props;
     const { isOpen } = this.state;
 
     if (event.button === 0) {
       // Don't allow clicks on the threads list to steal focus from the tree view.
       event.preventDefault();
-      if (fromWhere === 'timelineTrackResourceLabel') {
+      //Only toggle the resource track when the resource label is clicked
+      if (clickedArea === 'timelineTrackResourceLabel') {
         if (isSelected || !isOpen) {
           // We have two different states for selected tracks and open tracks because
           // non selected tracks also can stay opened. We can only close the track if
@@ -74,10 +77,8 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
             return { isOpen: !prevState.isOpen };
           });
         }
-        this.props.selectActiveTabTrack(this._getTrackReference());
-      } else {
-        this.props.selectActiveTabTrack(this._getTrackReference());
       }
+      this.props.selectActiveTabTrack(this._getTrackReference());
     }
   };
 
