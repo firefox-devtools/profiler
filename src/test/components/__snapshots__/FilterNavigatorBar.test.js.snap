@@ -7,7 +7,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 1`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="0"
-    title="Full Range"
   >
     <span
       class="filterNavigatorBarItemContent"
@@ -25,7 +24,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
     data-index="0"
-    title="Full Range"
   >
     <button
       class="filterNavigatorBarItemContent"
@@ -55,7 +53,6 @@ exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] 
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
     data-index="0"
-    title="Full Range"
   >
     <button
       class="filterNavigatorBarItemContent"
@@ -95,7 +92,7 @@ exports[`app/ProfileFilterNavigator renders the site hostname as its first eleme
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="0"
-    title="[object Object]"
+    title="https://developer.mozilla.org"
   >
     <span
       class="filterNavigatorBarItemContent"

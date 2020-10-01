@@ -9,7 +9,7 @@ import memoize from 'memoize-immutable';
 
 import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import { withSize } from '../shared/WithSize';
-import Tooltip from '../tooltip/Tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 import { TooltipMarker } from '../tooltip/Marker';
 import { timeCode } from '../../utils/time-code';
 import explicitConnect from '../../utils/connect';

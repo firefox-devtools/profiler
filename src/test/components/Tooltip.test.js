@@ -14,7 +14,8 @@ import {
 
 import { ensureExists } from '../../utils/flow';
 
-import Tooltip, {
+import {
+  Tooltip,
   MOUSE_OFFSET,
   VISUAL_MARGIN,
 } from '../../components/tooltip/Tooltip';

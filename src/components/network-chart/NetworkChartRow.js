@@ -7,7 +7,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import { TooltipMarker } from '../tooltip/Marker';
-import Tooltip from '../tooltip/Tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 
 import {
   guessMimeTypeFromNetworkMarker,
