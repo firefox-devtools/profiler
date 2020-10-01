@@ -13,7 +13,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="arrowPanel open metaInfoPanel"
     >
       <div
         class="arrowPanelArrow"
@@ -22,12 +22,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
         class="arrowPanelContent"
       >
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Profile Information
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -80,7 +80,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             20 seconds
           </div>
           <div
-            class="arrowPanelSection"
+            class="metaInfoSection"
           >
             <div
               class="metaInfoRow"
@@ -156,12 +156,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Application
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -234,12 +234,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Platform
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -408,7 +408,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="arrowPanel open metaInfoPanel"
     >
       <div
         class="arrowPanelArrow"
@@ -417,12 +417,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
         class="arrowPanelContent"
       >
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Profile Information
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -479,12 +479,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Application
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -557,12 +557,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Platform
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -625,17 +625,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       type="button"
       value="Profile Info"
     />
-    <div
-      class="arrowPanelAnchor"
-    >
-      <div
-        class="arrowPanel arrowPanelOpenMetaInfo"
-      >
-        <div
-          class="arrowPanelArrow"
-        />
-      </div>
-    </div>
   </div>
   <div
     class="menuButtons"
@@ -648,17 +637,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
         type="button"
         value="Publish…"
       />
-      <div
-        class="arrowPanelAnchor"
-      >
-        <div
-          class="arrowPanel menuButtonsPublishPanel"
-        >
-          <div
-            class="arrowPanelArrow"
-          />
-        </div>
-      </div>
     </div>
     <a
       class="menuButtonsLink"

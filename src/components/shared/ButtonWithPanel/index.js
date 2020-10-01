@@ -4,49 +4,59 @@
 
 // @flow
 
+// This implements a Button that triggers a panel. The panel will have a small
+// arrow pointing towards the button, which is implemented in ArrowPanel.
+//
+// Here is a simple example:
+//
+// import { ButtonWithPanel } from // 'firefox-profiler/components/ButtonWithPanel';
+// ...
+// <ButtonWithPanel
+//   className="MyButtonWithPanel"
+//   buttonClassName="MyPanelButton"
+//   panelClassName="MyPanel"
+//   label="Click me!"
+//   panelContent={<>
+//     <p>We explain lots of useful things here.</p>
+//     <p>If you want to know more <a href='/'>click here</a>.</p>
+//   </>}
+// />
+//
+// This registers the events on the window object (mouse and keyboard events).
+
 import * as React from 'react';
 import classNames from 'classnames';
 
+import { ArrowPanel } from './ArrowPanel';
+
 import './ButtonWithPanel.css';
 
-type PanelProps = {
-  onOpen?: () => mixed,
-  onClose?: () => mixed,
-};
-
-interface Panel {
-  open(): mixed;
-  close(): mixed;
-}
-
-/**
- * Note about the `panel` prop: we accept any React element whose Component
- * class implements the `Panel` interface above, and has at least the props from
- * `PanelProps` above, and any State type. */
 type Props = {|
-  +className: string,
+  +className?: string,
   +label: string,
-  +panel: React.Element<
-    Class<Panel & React.Component<$Subtype<PanelProps>, any>>
-  >,
-  +open?: boolean,
+  +panelContent: React.Node,
+  +panelClassName?: string,
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
-  +defaultOpen?: boolean,
+  +initialOpen?: boolean,
   // The class name of the button input element.
   +buttonClassName?: string,
+  +onPanelOpen?: () => mixed,
+  +onPanelClose?: () => mixed,
+  +buttonRef?: {| -current: null | HTMLInputElement |},
+  +title?: string,
 |};
 
 type State = {|
-  open: boolean,
+  +open: boolean,
 |};
 
-class ButtonWithPanel extends React.PureComponent<Props, State> {
-  _panel: Panel | null = null;
+export class ButtonWithPanel extends React.PureComponent<Props, State> {
+  _panel: ArrowPanel | null = null;
 
   constructor(props: Props) {
     super(props);
-    this.state = { open: !!props.open };
+    this.state = { open: !!props.initialOpen };
   }
 
   componentDidMount() {
@@ -54,7 +64,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     window.addEventListener('click', this._onWindowClick);
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
-    if (this.props.open || this.props.defaultOpen) {
+    if (this.state.open) {
       this.openPanel();
     }
   }
@@ -64,27 +74,21 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     window.removeEventListener('click', this._onWindowClick);
   }
 
-  UNSAFE_componentWillReceiveProps(props: Props) {
-    if (props.open !== this.props.open) {
-      this.setState({ open: !!props.open });
-    }
-  }
-
   _onPanelOpen = () => {
     this.setState({ open: true });
-    if (this.props.panel.props.onOpen) {
-      this.props.panel.props.onOpen();
+    if (this.props.onPanelOpen) {
+      this.props.onPanelOpen();
     }
   };
 
   _onPanelClose = () => {
     this.setState({ open: false });
-    if (this.props.panel.props.onClose) {
-      this.props.panel.props.onClose();
+    if (this.props.onPanelClose) {
+      this.props.onPanelClose();
     }
   };
 
-  _takePanelRef = (panel: Panel | null) => {
+  _takePanelRef = (panel: ArrowPanel | null) => {
     this._panel = panel;
   };
 
@@ -119,7 +123,15 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { className, label, panel, buttonClassName } = this.props;
+    const {
+      className,
+      label,
+      panelContent,
+      panelClassName,
+      buttonClassName,
+      buttonRef,
+      title,
+    } = this.props;
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
@@ -127,16 +139,19 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
           type="button"
           className={classNames('buttonWithPanelButton', buttonClassName)}
           value={label}
+          title={open ? null : title}
           onClick={this._onButtonClick}
+          ref={buttonRef}
         />
-        {React.cloneElement(panel, {
-          ref: this._takePanelRef,
-          onOpen: this._onPanelOpen,
-          onClose: this._onPanelClose,
-        })}
+        <ArrowPanel
+          className={panelClassName}
+          onOpen={this._onPanelOpen}
+          onClose={this._onPanelClose}
+          ref={this._takePanelRef}
+        >
+          {panelContent}
+        </ArrowPanel>
       </div>
     );
   }
 }
-
-export default ButtonWithPanel;

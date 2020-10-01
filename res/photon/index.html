@@ -427,7 +427,8 @@
     <h2 class="photon-title-30">Typography</h2>
     Please look only at the font sizes and weights. We don't change colors or
     paddings with these classes..
-    <pre>
+    <div class='row'>
+      <pre>
 &lt;div class="photon-display-20"&gt;Something just happened.&lt;/div&gt;
 &lt;h4 class="photon-title-30"&gt;Title 30 followed with body 30&lt;/h4&gt;
 &lt;div class="photon-body-30"&gt;This is a large body of text.&lt;/div&gt;
@@ -438,18 +439,74 @@
 &lt;h4 class="photon-title-10"&gt;Title 10 followed with body 10&lt;/h4&gt;
 &lt;div class="photon-body-10"&gt;This is a large body of text.&lt;/div&gt;
 &lt;div class="photon-caption-10"&gt;This is a caption. Normally its color is also paler.&lt;/div&gt;
-    </pre>
-    <div class="photon-display-20">
-      Something just happened.
+      </pre>
     </div>
-    <h4 class="photon-title-30">Title 30 followed with body 30</h4>
-    <div class="photon-body-30">This is a large body of text.</div>
-    <div class="photon-caption-30">This is a caption. Normally its color is also paler.</div>
-    <h4 class="photon-title-20">Title 20 followed with body 20</h4>
-    <div class="photon-body-20">This is a large body of text.</div>
-    <div class="photon-caption-20">This is a caption. Normally its color is also paler.</div>
-    <h4 class="photon-title-10">Title 10 followed with body 10</h4>
-    <div class="photon-body-10">This is a large body of text.</div>
-    <div class="photon-caption-10">This is a caption. Normally its color is also paler.</div>
+    <div class='row'>
+      <div class="photon-display-20">
+        Something just happened.
+      </div>
+      <h4 class="photon-title-30">Title 30 followed with body 30</h4>
+      <div class="photon-body-30">This is a large body of text.</div>
+      <div class="photon-caption-30">This is a caption. Normally its color is also paler.</div>
+      <h4 class="photon-title-20">Title 20 followed with body 20</h4>
+      <div class="photon-body-20">This is a large body of text.</div>
+      <div class="photon-caption-20">This is a caption. Normally its color is also paler.</div>
+      <h4 class="photon-title-10">Title 10 followed with body 10</h4>
+      <div class="photon-body-10">This is a large body of text.</div>
+      <div class="photon-caption-10">This is a caption. Normally its color is also paler.</div>
+    </div>
+
+    <h2 class='photon-title-30'>Bigger components</h2>
+    <h3 class='photon-title-20'>Confirm dialog</h3>
+    <p>This is used to display a confirmation dialog. This will be usually used
+    inside another container.</p>
+    <div class='row'>
+      <pre>
+&lt;div className="confirmDialog"&gt;
+  &lt;h3 className="confirmDialogTitle"&gt;
+    Wonderful title
+  &lt;/h3&gt;
+  &lt;div className="confirmDialogContent"&gt;
+    Wonderful content
+  &lt;/div&gt;
+  &lt;div className="confirmDialogButtons"&gt;
+    &lt;input
+      type="button"
+      className="photon-button photon-button-default"
+      value="Cancel"
+      onClick={doSomethingOnCancel}
+    /&gt;
+    &lt;input
+      type="button"
+      className="photon-button photon-button-destructive"
+      value="Confirm"
+      onClick={doSomethingOnConfirm}
+    /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </pre>
+    </div>
+    <div class='row'>
+      <div class="confirmDialog">
+        <h3 class="confirmDialogTitle">
+          Wonderful title
+        </h3>
+        <div class="confirmDialogContent">
+          Wonderful content
+        </div>
+        <div class="confirmDialogButtons">
+          <input
+            type="button"
+            class="photon-button photon-button-default"
+            value="Cancel"
+            />
+          <input
+            type="button"
+            class="photon-button photon-button-destructive"
+            value="Confirm"
+            />
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -61,6 +61,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/MACOSX/marker-chart/"
+        title="Click here to load profile MacOS X profile"
       >
         <div
           class="publishedProfilesDate"
@@ -68,33 +69,48 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
           Jul 5, 2020
         </div>
         <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            MacOS X profile
-          </strong>
-           
-          (
-          38.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
+          class="publishedProfilesInfo"
         >
           <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox"
+            class="publishedProfilesName"
           >
-            Firefox 62
+            <strong>
+              MacOS X profile
+            </strong>
+             (
+            38.0s
+            )
           </div>
           <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit="macOS 10.12"
+            class="profileMetaInfoSummary"
           >
-            macOS 10.12
+            <div
+              class="profileMetaInfoSummaryProductAndVersion"
+              data-product="Firefox"
+            >
+              Firefox 62
+            </div>
+            <div
+              class="profileMetaInfoSummaryPlatform"
+              data-toolkit="macOS 10.12"
+            >
+              macOS 10.12
+            </div>
           </div>
         </div>
       </a>
+      <div
+        class="publishedProfilesActionButtons"
+      >
+        <button
+          class="publishedProfilesDeleteButton photon-button photon-button-default"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
     </li>
     <li
       class="publishedProfilesListItem"
@@ -102,6 +118,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//"
+        title="Click here to load profile #012345"
       >
         <div
           class="publishedProfilesDate"
@@ -109,31 +126,48 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
           2:00 PM
         </div>
         <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            Profile #012345
-          </strong>
-           
-          (
-          2.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
+          class="publishedProfilesInfo"
         >
           <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Fennec"
+            class="publishedProfilesName"
           >
-            Fennec
+            <strong>
+              Profile #012345
+            </strong>
+             (
+            2.0s
+            )
           </div>
           <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit=""
-          />
+            class="profileMetaInfoSummary"
+          >
+            <div
+              class="profileMetaInfoSummaryProductAndVersion"
+              data-product="Fennec"
+            >
+              Fennec
+            </div>
+            <div
+              class="profileMetaInfoSummaryPlatform"
+              data-toolkit=""
+            />
+          </div>
         </div>
       </a>
+      <div
+        class="publishedProfilesActionButtons"
+      >
+        <div
+          class="buttonWithPanel"
+        >
+          <input
+            class="buttonWithPanelButton publishedProfilesDeleteButton photon-button photon-button-default"
+            title="Click here to delete the profile #012345"
+            type="button"
+            value="Delete"
+          />
+        </div>
+      </div>
     </li>
     <li
       class="publishedProfilesListItem"
@@ -141,6 +175,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/WINDOWS/marker-chart/"
+        title="Click here to load profile Another good profile"
       >
         <div
           class="publishedProfilesDate"
@@ -148,33 +183,48 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
           1:00 PM
         </div>
         <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            Another good profile
-          </strong>
-           
-          (
-          38.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
+          class="publishedProfilesInfo"
         >
           <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox"
+            class="publishedProfilesName"
           >
-            Firefox 77
+            <strong>
+              Another good profile
+            </strong>
+             (
+            38.0s
+            )
           </div>
           <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit="Windows 10"
+            class="profileMetaInfoSummary"
           >
-            Windows 10
+            <div
+              class="profileMetaInfoSummaryProductAndVersion"
+              data-product="Firefox"
+            >
+              Firefox 77
+            </div>
+            <div
+              class="profileMetaInfoSummaryPlatform"
+              data-toolkit="Windows 10"
+            >
+              Windows 10
+            </div>
           </div>
         </div>
       </a>
+      <div
+        class="publishedProfilesActionButtons"
+      >
+        <button
+          class="publishedProfilesDeleteButton photon-button photon-button-default"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
     </li>
     <li
       class="publishedProfilesListItem"
@@ -182,6 +232,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//"
+        title="Click here to load profile Layout profile"
       >
         <div
           class="publishedProfilesDate"
@@ -189,33 +240,48 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
           Jul 3, 8:00 AM
         </div>
         <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            Layout profile
-          </strong>
-           
-          (
-          0.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
+          class="publishedProfilesInfo"
         >
           <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox"
+            class="publishedProfilesName"
           >
-            Firefox 68
+            <strong>
+              Layout profile
+            </strong>
+             (
+            0.0s
+            )
           </div>
           <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit="Linux"
+            class="profileMetaInfoSummary"
           >
-            Linux
+            <div
+              class="profileMetaInfoSummaryProductAndVersion"
+              data-product="Firefox"
+            >
+              Firefox 68
+            </div>
+            <div
+              class="profileMetaInfoSummaryPlatform"
+              data-toolkit="Linux"
+            >
+              Linux
+            </div>
           </div>
         </div>
       </a>
+      <div
+        class="publishedProfilesActionButtons"
+      >
+        <button
+          class="publishedProfilesDeleteButton photon-button photon-button-default"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
     </li>
     <li
       class="publishedProfilesListItem"
@@ -223,6 +289,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
       <a
         class="publishedProfilesLink"
         href="http://localhost//public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
+        title="Click here to load profile #123abc"
       >
         <div
           class="publishedProfilesDate"
@@ -230,33 +297,48 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
           May 20, 2018
         </div>
         <div
-          class="publishedProfilesName"
-        >
-          <strong>
-            Profile #123abc
-          </strong>
-           
-          (
-          0.0s
-          )
-        </div>
-        <div
-          class="profileMetaInfoSummary"
+          class="publishedProfilesInfo"
         >
           <div
-            class="profileMetaInfoSummaryProductAndVersion"
-            data-product="Firefox Preview"
+            class="publishedProfilesName"
           >
-            Firefox Preview 80
+            <strong>
+              Profile #123abc
+            </strong>
+             (
+            0.0s
+            )
           </div>
           <div
-            class="profileMetaInfoSummaryPlatform"
-            data-toolkit="Android 7"
+            class="profileMetaInfoSummary"
           >
-            Android 7
+            <div
+              class="profileMetaInfoSummaryProductAndVersion"
+              data-product="Firefox Preview"
+            >
+              Firefox Preview 80
+            </div>
+            <div
+              class="profileMetaInfoSummaryPlatform"
+              data-toolkit="Android 7"
+            >
+              Android 7
+            </div>
           </div>
         </div>
       </a>
+      <div
+        class="publishedProfilesActionButtons"
+      >
+        <button
+          class="publishedProfilesDeleteButton photon-button photon-button-default"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
     </li>
   </ul>
 </main>
