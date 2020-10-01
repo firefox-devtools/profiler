@@ -17,7 +17,7 @@ import MarkerChart from '../marker-chart/';
 import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
 import JsTracer from '../js-tracer/';
-import selectSidebar from '../sidebar';
+import { selectSidebar } from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { getSelectedTab } from '../../selectors/url-state';
