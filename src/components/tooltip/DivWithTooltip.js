@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import Tooltip from './Tooltip';
+import { Tooltip } from './Tooltip';
 import type { CssPixels } from 'firefox-profiler/types';
 
 type Props = {
@@ -22,7 +22,7 @@ type State = {|
  * This component provides a way to automatically insert a tooltip when mousing over
  * a div.
  */
-export default class DivWithTooltip extends React.PureComponent<Props, State> {
+export class DivWithTooltip extends React.PureComponent<Props, State> {
   state = {
     isMouseOver: false,
     mouseX: 0,

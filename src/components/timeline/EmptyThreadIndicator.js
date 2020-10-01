@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { withSize } from '../shared/WithSize';
-import DivWithTooltip from '../tooltip/DivWithTooltip';
+import { DivWithTooltip } from '../tooltip/DivWithTooltip';
 import { oneLine } from 'common-tags';
 
 import type {

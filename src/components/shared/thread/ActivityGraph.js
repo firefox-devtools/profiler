@@ -7,7 +7,7 @@ import * as React from 'react';
 import { computeActivityGraphFills } from './ActivityGraphFills';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
-import Tooltip, { MOUSE_OFFSET } from '../../tooltip/Tooltip';
+import { Tooltip, MOUSE_OFFSET } from '../../tooltip/Tooltip';
 import SampleTooltipContents from '../SampleTooltipContents';
 import { mapCategoryColorNameToStyles } from '../../../utils/colors';
 

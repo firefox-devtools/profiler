@@ -8,7 +8,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import MarkerSidebar from '../../components/sidebar/MarkerSidebar';
+import { MarkerSidebar } from '../../components/sidebar/MarkerSidebar';
 import { changeSelectedMarker } from '../../actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';

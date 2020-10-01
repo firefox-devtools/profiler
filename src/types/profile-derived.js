@@ -370,6 +370,7 @@ export type InitialSelectedTrackReference = HTMLElement;
  * Page data for ProfileFilterNavigator component.
  */
 export type ProfileFilterPageData = {|
+  origin: string,
   hostname: string,
   favicon: string,
 |};
