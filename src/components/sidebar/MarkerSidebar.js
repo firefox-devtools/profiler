@@ -21,7 +21,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class MarkerSidebar extends React.PureComponent<Props> {
+class MarkerSidebarImpl extends React.PureComponent<Props> {
   render() {
     const { marker, selectedThreadsKey } = this.props;
 
@@ -47,10 +47,10 @@ class MarkerSidebar extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const MarkerSidebar = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     marker: selectedThreadSelectors.getSelectedMarker(state),
     selectedThreadsKey: getSelectedThreadsKey(state),
   }),
-  component: MarkerSidebar,
+  component: MarkerSidebarImpl,
 });

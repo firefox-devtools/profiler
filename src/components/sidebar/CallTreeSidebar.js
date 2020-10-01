@@ -19,7 +19,7 @@ import {
   getFriendlyStackTypeName,
   shouldDisplaySubcategoryInfoForCategory,
 } from '../../profile-logic/profile-data';
-import CanSelectContent from './CanSelectContent';
+import { CanSelectContent } from './CanSelectContent';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type {
@@ -301,7 +301,7 @@ function getWeightTypeLabel(weightType: WeightType): string {
   }
 }
 
-class CallTreeSidebar extends React.PureComponent<Props> {
+class CallTreeSidebarImpl extends React.PureComponent<Props> {
   _getWeightTypeDetails = memoize(
     (weightType: WeightType): WeightDetails => {
       switch (weightType) {
@@ -462,7 +462,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
@@ -474,5 +474,5 @@ export default explicitConnect<{||}, StateProps, {||}>({
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
   }),
-  component: CallTreeSidebar,
+  component: CallTreeSidebarImpl,
 });
