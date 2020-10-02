@@ -71,6 +71,7 @@ const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
+const LABEL_PADDING = 5;
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
@@ -432,7 +433,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
         name,
         TIMELINE_MARGIN_LEFT
       );
-      ctx.fillText(fittedText, 5, y + TEXT_OFFSET_TOP);
+      ctx.fillText(fittedText, LABEL_PADDING, y + TEXT_OFFSET_TOP);
     }
 
     // Draw the bucket names.
@@ -455,7 +456,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
 
       // Draw the text.
       ctx.fillStyle = '#000000';
-      ctx.fillText(bucketName, 5 + TIMELINE_MARGIN_LEFT, y + TEXT_OFFSET_TOP);
+      ctx.fillText(
+        bucketName,
+        LABEL_PADDING + TIMELINE_MARGIN_LEFT,
+        y + TEXT_OFFSET_TOP
+      );
     }
   }
 
