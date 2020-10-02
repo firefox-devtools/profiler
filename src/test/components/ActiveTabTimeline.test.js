@@ -305,6 +305,8 @@ describe('ActiveTabTimeline', function() {
           container.querySelector('.timelineTrackResourceRow'),
           `Couldn't find the track resource row with selector .timelineTrackResourceRow`
         );
+      const isResourceTrackOpen = () =>
+        getResourceTrackRow().classList.contains('opened');
 
       return {
         ...renderResult,
@@ -317,6 +319,7 @@ describe('ActiveTabTimeline', function() {
         getResourceFrameTrackLabel,
         getResourceTrackRow,
         resourcePage,
+        isResourceTrackOpen,
       };
     }
 
@@ -354,23 +357,28 @@ describe('ActiveTabTimeline', function() {
         const {
           getState,
           getResourceFrameTrackLabel,
-          getResourceTrackRow,
           threadIndex,
+          isResourceTrackOpen,
         } = setup();
         expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-        expect(getResourceTrackRow().classList.contains('opened')).toBe(false);
+        expect(isResourceTrackOpen()).toBe(false);
         fireFullClick(getResourceFrameTrackLabel());
         expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
-        expect(getResourceTrackRow().classList.contains('opened')).toBe(true);
+        expect(isResourceTrackOpen()).toBe(true);
       });
 
       it('does not toggle a selected track by clicking other part of the track except label', () => {
-        const { getState, getResourceTrackRow, threadIndex } = setup();
+        const {
+          getState,
+          getResourceTrackRow,
+          threadIndex,
+          isResourceTrackOpen,
+        } = setup();
         expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-        expect(getResourceTrackRow().classList.contains('opened')).toBe(false);
+        expect(isResourceTrackOpen()).toBe(false);
         fireFullClick(getResourceTrackRow());
         expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
-        expect(getResourceTrackRow().classList.contains('opened')).toBe(false);
+        expect(isResourceTrackOpen()).toBe(false);
       });
     });
   });
