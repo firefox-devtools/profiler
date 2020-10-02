@@ -88,7 +88,7 @@ const TEXT_OFFSET_START: CssPixels = 3;
 const ROW_LABEL_OFFSET_LEFT: CssPixels = 5;
 const FONT_SIZE: CssPixels = 10;
 
-class JsTracerCanvas extends React.PureComponent<Props, State> {
+class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   state = {
     hasFirstDraw: false,
   };
@@ -630,6 +630,6 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  JsTracerCanvas
+export const JsTracerCanvas = (withChartViewport: WithChartViewport<OwnProps, Props>)(
+  JsTracerCanvasImpl
 );

@@ -10,7 +10,7 @@ import {
   JS_TRACER_MAXIMUM_CHART_ZOOM,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import JsTracerCanvas from './Canvas';
+import { JsTracerCanvas } from './Canvas';
 
 import {
   getCommittedRange,
@@ -249,7 +249,7 @@ type ChartProps = {|
  * For more information on the life cycle of keyed components see:
  * See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
-export default class JsTracerChart extends React.PureComponent<ChartProps> {
+export class JsTracerChart extends React.PureComponent<ChartProps> {
   render() {
     const {
       profile,
