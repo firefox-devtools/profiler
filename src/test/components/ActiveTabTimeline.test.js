@@ -367,8 +367,10 @@ describe('ActiveTabTimeline', function() {
       it('does not toggle a selected track by clicking other part of the track except label', () => {
         const { getState, getResourceTrackRow, threadIndex } = setup();
         expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+        expect(getResourceTrackRow().classList.contains('opened')).toBe(false);
         fireFullClick(getResourceTrackRow());
         expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
+        expect(getResourceTrackRow().classList.contains('opened')).toBe(false);
       });
     });
   });
