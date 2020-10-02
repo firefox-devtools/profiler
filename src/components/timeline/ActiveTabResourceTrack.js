@@ -58,20 +58,25 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     };
   }
 
-  _onMouseUp = (event: MouseEvent) => {
+  _onMouseUp = (
+    clickedArea: 'timelineTrackResourceLabel' | 'timelineTrackRow'
+  ) => (event: MouseEvent) => {
     const { isSelected } = this.props;
     const { isOpen } = this.state;
 
     if (event.button === 0) {
       // Don't allow clicks on the threads list to steal focus from the tree view.
       event.preventDefault();
-      if (isSelected || !isOpen) {
-        // We have two different states for selected tracks and open tracks because
-        // non selected tracks also can stay opened. We can only close the track if
-        // the track is already selected.
-        this.setState(prevState => {
-          return { isOpen: !prevState.isOpen };
-        });
+      //Only toggle the resource track when the resource label is clicked
+      if (clickedArea === 'timelineTrackResourceLabel') {
+        if (isSelected || !isOpen) {
+          // We have two different states for selected tracks and open tracks because
+          // non selected tracks also can stay opened. We can only close the track if
+          // the track is already selected.
+          this.setState(prevState => {
+            return { isOpen: !prevState.isOpen };
+          });
+        }
       }
       this.props.selectActiveTabTrack(this._getTrackReference());
     }
@@ -171,9 +176,12 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
             selected: isSelected,
             opened: isOpen,
           })}
-          onMouseUp={this._onMouseUp}
+          onMouseUp={this._onMouseUp('timelineTrackRow')}
         >
-          <div className="timelineTrackResourceLabel">
+          <div
+            className="timelineTrackResourceLabel"
+            onMouseUp={this._onMouseUp('timelineTrackResourceLabel')}
+          >
             <span>{trackLabel}</span> {resourceTrack.name}
           </div>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
