@@ -288,61 +288,61 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
                 Overhead
               </div>
               <div>
-                227ns
+                227μs
               </div>
               <div>
-                410ns
+                410μs
               </div>
               <div>
-                38.0ns
+                38μs
               </div>
               <div>
                 Cleaning
               </div>
               <div>
-                54.1ns
+                54μs
               </div>
               <div>
-                100ns
+                100μs
               </div>
               <div>
-                7.00ns
+                7.0μs
               </div>
               <div>
                 Counter
               </div>
               <div>
-                59.1ns
+                59μs
               </div>
               <div>
-                105ns
+                105μs
               </div>
               <div>
-                12.0ns
+                12μs
               </div>
               <div>
                 Interval
               </div>
               <div>
-                857ns
+                857μs
               </div>
               <div>
-                1,000ns
+                1,000μs
               </div>
               <div>
-                0.0000ns
+                0.000μs
               </div>
               <div>
                 Lockings
               </div>
               <div>
-                49.1ns
+                49μs
               </div>
               <div>
-                95.0ns
+                95μs
               </div>
               <div>
-                2.00ns
+                2.0μs
               </div>
             </div>
             <div
@@ -356,7 +356,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoValueRight"
               >
-                1,586ns
+                1,586μs
               </span>
             </div>
             <div
@@ -384,7 +384,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoValueRight"
               >
-                6.00ns
+                6.0μs
               </span>
             </div>
           </div>
