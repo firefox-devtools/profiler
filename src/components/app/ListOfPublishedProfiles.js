@@ -344,6 +344,20 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     const profilesRestCount =
       profileDataList.length - reducedProfileDataList.length;
 
+    const profileListLabel =
+      profileDataList.length > 1 ? (
+        <>Manage these recordings</>
+      ) : (
+        <>Manage this recording</>
+      );
+
+    const profileRestLabel =
+      profilesRestCount > 0 ? (
+        <>See and manage all your recordings ({profilesRestCount} more)</>
+      ) : (
+        profileListLabel
+      );
+
     const nowTimestamp = Date.now();
 
     return (
@@ -361,15 +375,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         {withActionButtons ? null : (
           <p>
             <InnerNavigationLink dataSource="uploaded-recordings">
-              {profilesRestCount > 0 ? (
-                <>
-                  See and manage all your recordings ({profilesRestCount} more)
-                </>
-              ) : profileDataList.length > 1 ? (
-                <>Manage these recordings</>
-              ) : (
-                <>Manage this recording</>
-              )}
+              {profileRestLabel}
             </InnerNavigationLink>
           </p>
         )}
