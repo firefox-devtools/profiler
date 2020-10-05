@@ -277,8 +277,8 @@ export function getMarkerSchema(
 
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
- * a `tooltipLabel` field of "Event at {url}" would create a label based off of the
- * "url" property in the payload.
+ * a `tooltipLabel` field of "Event at {marker.data.url}" would create a label based
+ * off of the "url" property in the payload.
  *
  * Note that this is only exported for unit tests.
  */
@@ -456,6 +456,15 @@ const fallbacks: { [LabelKey]: (Marker) => string } = {
   },
 };
 
+/**
+ * Marker labels are computed dynamically. In an effort to keep this process efficient
+ * in a reactive environment, this function creates a memoized function that takes a
+ * MarkerIndex and returns the label for a given area. This label is cached between
+ * calls. The label maker function parses the marker schema to determine how to process
+ * and display the label.
+ *
+ * This function should only be used behind a selector.
+ */
 export function getLabelGetter(
   getMarker: MarkerIndex => Marker,
   markerSchemaList: MarkerSchema[],

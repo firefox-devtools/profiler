@@ -197,7 +197,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               const value = data[key];
 
               // Don't add undefined values, as values are optional.
-              if (value !== undefined) {
+              if (value !== undefined && value !== null) {
                 details.push(
                   <TooltipDetail
                     key={schema.name + '-' + key}

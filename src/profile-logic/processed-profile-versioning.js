@@ -1438,8 +1438,8 @@ const _upgraders = {
       // Tracing -> DOMEvent
       type: 'tracing' | 'DOMEvent',
       category: 'DOMEvent',
-      // These are removed:
       eventType: string,
+      // These are removed:
       timeStamp: number,
       // This gets added:
       latency: number,
