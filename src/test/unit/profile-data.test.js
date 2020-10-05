@@ -204,20 +204,6 @@ describe('process-profile', function() {
       expect(thread2.markers.startTime[6]).toEqual(1009);
       expect(thread2.markers.endTime[7]).toEqual(1010);
 
-      expect(
-        thread2.markers.data[6] &&
-          thread2.markers.data[6].type === 'tracing' &&
-          thread2.markers.data[6].category === 'DOMEvent'
-          ? thread2.markers.data[6].timeStamp
-          : null
-      ).toEqual(1001);
-      expect(
-        thread2.markers.data[7] &&
-          thread2.markers.data[7].type === 'tracing' &&
-          thread2.markers.data[7].category === 'DOMEvent'
-          ? thread2.markers.data[7].timeStamp
-          : null
-      ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function() {

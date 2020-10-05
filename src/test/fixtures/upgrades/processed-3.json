@@ -408,6 +408,7 @@
           {
             "type": "tracing",
             "category": "DOMEvent",
+            "timeStamp": 5,
             "interval": "start",
             "eventType": "mouseout",
             "phase": 3,

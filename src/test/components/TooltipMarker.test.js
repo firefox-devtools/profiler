@@ -74,11 +74,8 @@ describe('TooltipMarker', function() {
         10.5,
         11.3,
         {
-          type: 'tracing',
-          category: 'DOMEvent',
+          type: 'DOMEvent',
           eventType: 'commandupdate',
-          interval: 'start',
-          phase: 2,
           innerWindowID: innerWindowID,
         },
       ],
@@ -357,6 +354,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'endpoint',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -374,6 +372,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'transferStart',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -413,6 +412,7 @@ describe('TooltipMarker', function() {
       const { container } = render(
         <Provider store={store}>
           <TooltipMarker
+            markerIndex={markerIndex}
             marker={marker}
             threadsKey={threadIndex}
             className="propClass"
@@ -451,6 +451,7 @@ describe('TooltipMarker', function() {
     return render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={0}
           className="propClass"
@@ -679,6 +680,7 @@ describe('TooltipMarker', function() {
     const { container } = render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={threadIndex}
           className="propClass"

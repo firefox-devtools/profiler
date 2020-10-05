@@ -1430,5 +1430,50 @@ const _upgraders = {
       }
     }
   },
+  [32]: profile => {
+    // Migrate DOMEvent markers to Markers 2.0
+
+    // This is a fairly permissive type, but helps ensure the logic below is type checked.
+    type DOMEventPayload31_to_32 = {
+      // Tracing -> DOMEvent
+      type: 'tracing' | 'DOMEvent',
+      category: 'DOMEvent',
+      eventType: string,
+      // These are removed:
+      timeStamp: number,
+      // This gets added:
+      latency: number,
+    };
+
+    // This is just the useful parts of the processed profile version 31.
+    type ProfileV31 = {
+      threads: Array<{
+        markers: {
+          data: any[],
+          startTime: Array<number | null>,
+          length: number,
+          ...
+        },
+        ...
+      }>,
+      processes: ProfileV31[],
+    };
+
+    for (const { markers } of (profile: ProfileV31).threads) {
+      for (let i = 0; i < markers.length; i++) {
+        // This isn't particularly type-safe, we need to refine to this type.
+        const data: DOMEventPayload31_to_32 = markers.data[i];
+        if (data && data.type === 'tracing' && data.category === 'DOMEvent') {
+          const startTime = markers.startTime[i];
+          // Mutate the payload to limit GC.
+          data.type = 'DOMEvent';
+          if (data.timeStamp !== undefined && startTime !== null) {
+            data.latency = startTime - data.timeStamp;
+          }
+          delete data.timeStamp;
+        }
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -452,6 +452,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   render() {
     const {
       index,
+      markerIndex,
       marker,
       networkPayload,
       width,
@@ -495,6 +496,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <TooltipMarker
               className="tooltipNetwork"
+              markerIndex={markerIndex}
               marker={marker}
               threadsKey={this.props.threadsKey}
               restrictHeightWidth={true}

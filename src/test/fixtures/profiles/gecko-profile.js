@@ -595,12 +595,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the start marker
-            type: 'tracing',
-            category: 'DOMEvent',
-            timeStamp: 1,
-            interval: 'start',
+            type: 'DOMEvent',
+            latency: 7,
             eventType: 'mouseout',
-            phase: 3,
           },
         ],
         [
@@ -611,12 +608,9 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the end marker
-            type: 'tracing',
-            category: 'DOMEvent',
-            timeStamp: 1,
-            interval: 'end',
+            type: 'DOMEvent',
+            latency: 8,
             eventType: 'mouseout',
-            phase: 3,
           },
         ],
         [
