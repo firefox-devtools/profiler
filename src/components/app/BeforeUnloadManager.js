@@ -27,6 +27,9 @@ class BeforeUnloadManager extends React.PureComponent<Props> {
   }
 
   handleUnload = (event: BeforeUnloadEvent) => {
+    // To be cross-browser and future-proof, we need to use these techniques.
+    // Especially at the time this code is written, Chrome doesn't support using
+    // preventDefault to trigger the unload alert.
     event.preventDefault();
     event.returnValue = 'Are you sure you want to close while uploading?';
   };
