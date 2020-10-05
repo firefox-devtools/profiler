@@ -121,7 +121,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 112px;"
+            style="height: 128px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -264,11 +264,34 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   Log
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn start"
+                  title="0.162s"
+                >
+                  0.162s
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn duration"
+                  title="1ms"
+                >
+                  1ms
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn type"
+                  title="FileIO"
+                >
+                  FileIO
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; width: 3000px;"
+            style="height: 128px; width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -402,6 +425,27 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 >
                   (nsJarProtocol) nsJARChannel::nsJARChannel [this=0x87f1ec80]
 
+                </span>
+              </div>
+              <div
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  (PoisonIOInterposer) create/open — /foo/bar
                 </span>
               </div>
             </div>

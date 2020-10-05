@@ -378,6 +378,17 @@ export function getMarkerTableProfile() {
           name: '5.5',
         },
       ],
+      [
+        'FileIO',
+        174,
+        175,
+        {
+          type: 'FileIO',
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+        },
+      ],
     ].sort((a, b) => a[1] - b[1])
   );
 }

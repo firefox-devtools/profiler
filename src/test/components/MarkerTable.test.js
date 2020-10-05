@@ -79,8 +79,8 @@ describe('MarkerTable', function() {
   it('renders some basic markers and updates when needed', () => {
     const { container, fixedRows, scrolledRows, dispatch } = setup();
 
-    expect(fixedRows()).toHaveLength(6);
-    expect(scrolledRows()).toHaveLength(6);
+    expect(fixedRows()).toHaveLength(7);
+    expect(scrolledRows()).toHaveLength(7);
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */
