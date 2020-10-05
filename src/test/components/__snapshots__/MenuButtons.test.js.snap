@@ -5,6 +5,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
     type="button"
     value="Profile Info"
@@ -400,6 +401,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
     type="button"
     value="Profile Info"
@@ -621,6 +623,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     class="buttonWithPanel menuButtonsMetaInfoButton"
   >
     <input
+      aria-expanded="false"
       class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
       type="button"
       value="Profile Info"
@@ -633,6 +636,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
     >
       <input
+        aria-expanded="false"
         class="buttonWithPanelButton menuButtonsButton"
         type="button"
         value="Publish…"
