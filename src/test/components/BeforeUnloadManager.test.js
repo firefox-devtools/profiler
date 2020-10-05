@@ -44,8 +44,8 @@ describe('app/BeforeUnloadManager', () => {
     // $FlowExpectError
     event.preventDefault = jest.fn();
 
-    const returnValue = fireEvent((window: any), event);
-    expect(returnValue).toBe(true);
+    fireEvent((window: any), event);
+    expect((event: any).returnValue).toBeTruthy();
     expect(event.preventDefault).toHaveBeenCalled();
   });
 });
