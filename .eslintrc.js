@@ -104,6 +104,7 @@ module.exports = {
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
     'no-else-return': 'error',
+    'no-nested-ternary': 'error',
   },
   // This property is specified both here in addition to the command line in
   // package.json.
