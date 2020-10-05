@@ -175,6 +175,8 @@ describe('marker schema formatting', function() {
     const entries = [
       ['url', 'http://example.com'],
       ['file-path', '/Users/me/gecko'],
+      ['file-path', null],
+      ['file-path', undefined],
       ['duration', 0],
       ['duration', 10],
       ['duration', 12.3456789],
@@ -232,6 +234,8 @@ describe('marker schema formatting', function() {
       Array [
         "url - http://example.com",
         "file-path - /Users/me/gecko",
+        "file-path - (empty)",
+        "file-path - (empty)",
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
