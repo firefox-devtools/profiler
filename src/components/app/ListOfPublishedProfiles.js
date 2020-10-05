@@ -344,19 +344,19 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     const profilesRestCount =
       profileDataList.length - reducedProfileDataList.length;
 
-    const profileListLabel =
-      profileDataList.length > 1 ? (
-        <>Manage these recordings</>
-      ) : (
-        <>Manage this recording</>
-      );
-
-    const profileRestLabel =
-      profilesRestCount > 0 ? (
+    let profileRestLabel;
+    if (profilesRestCount > 0) {
+      profileRestLabel = (
         <>See and manage all your recordings ({profilesRestCount} more)</>
-      ) : (
-        profileListLabel
       );
+    } else {
+      profileRestLabel =
+        profileDataList.length > 1 ? (
+          <>Manage these recordings</>
+        ) : (
+          <>Manage this recording</>
+        );
+    }
 
     const nowTimestamp = Date.now();
 
