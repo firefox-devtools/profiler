@@ -341,6 +341,7 @@ type TreeViewProps<DisplayData> = {|
   +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
+  +onKeyDown?: (SyntheticKeyboardEvent<>, null | NodeIndex) => void,
 |};
 
 export class TreeView<DisplayData: Object> extends React.PureComponent<
@@ -561,7 +562,11 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   };
 
-  _onKeyDown = (event: KeyboardEvent) => {
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    if (this.props.onKeyDown) {
+      this.props.onKeyDown(event, this.props.selectedNodeId);
+    }
+
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
