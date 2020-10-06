@@ -2701,10 +2701,11 @@ Array [
   Object {
     "category": 1,
     "data": Object {
+      "delay": 50,
       "type": "Jank",
     },
     "end": 55,
-    "name": "50.00ms event processing delay",
+    "name": "Jank",
     "start": 5,
   },
 ]

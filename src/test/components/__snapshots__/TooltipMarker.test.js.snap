@@ -3306,13 +3306,31 @@ exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
       <div
         class="tooltipTitle"
       >
-        70.00ms event processing delay
+        Jank – event processing delay
       </div>
     </div>
   </div>
   <div
     class="tooltipDetails"
   >
+    <div
+      class="tooltipLabel"
+    >
+      Delay
+      :
+    </div>
+    70ms
+    <div
+      class="tooltipLabel"
+    >
+      Description
+      :
+    </div>
+    <div
+      class="tooltipDetailsDescription"
+    >
+      Jank markers show when the main event loop of a thread has been busy. It is a good indicator that there may be some kind of performance problem that is worth investigating.
+    </div>
     <div
       class="tooltipLabel"
     >

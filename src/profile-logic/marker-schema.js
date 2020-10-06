@@ -229,6 +229,23 @@ export const markerSchema: MarkerSchema[] = [
     display: ['marker-table'],
     data: [],
   },
+  {
+    name: 'Jank',
+    display: ['marker-table', 'marker-chart'],
+    tooltipLabel: 'Jank – event processing delay',
+    tableLabel: 'Event processing delay — {marker.data.delay}',
+    data: [
+      { key: 'delay', label: 'Delay', format: 'duration' },
+      {
+        label: 'Description',
+        value: oneLine`
+          Jank markers show when the main event loop of a thread has been busy. It is
+          a good indicator that there may be some kind of performance problem that
+          is worth investigating.
+        `,
+      },
+    ],
+  },
 ];
 
 /**
