@@ -2605,6 +2605,7 @@ export function extractProfileFilterPageData(
       favicon.protocol = 'https:';
     }
     return {
+      origin: page.origin,
       hostname: page.hostname,
       favicon: favicon.href,
     };

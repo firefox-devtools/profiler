@@ -143,7 +143,8 @@ describe('ListOfPublishedProfiles', () => {
     const { getByText, getByTitle, container } = renderResult;
 
     function getAllRecordingsLink() {
-      return getByText(/all your recordings/);
+      // This regexp should match all possible flavor of this link.
+      return getByText(/manage.*recording/i);
     }
 
     function getDeleteButtonForProfile(
@@ -216,19 +217,48 @@ describe('ListOfPublishedProfiles', () => {
     await findByText(/macOS/);
     expect(container.querySelectorAll('li')).toHaveLength(3);
     getAllRecordingsLink(); // This shouldn't throw.
-    expect(container.firstChild).toMatchSnapshot();
+    // Note: we're testing on `container` instead of `container.firstChild`
+    // because this component renders a fragment with several HTML elements.
+    expect(container).toMatchSnapshot();
   });
 
-  it('does not display the link to all recordings when there is 3 profiles or less', async () => {
+  it('still displays the link to all recordings when there is 3 profiles or less', async () => {
     await storeProfileInformations(listOfProfileInformations.slice(0, 3));
-    const { findByText, getAllRecordingsLink } = setup({ limit: 3 });
+    const { container, findByText, getAllRecordingsLink } = setup({ limit: 3 });
     await findByText(/Layout profile/);
+    getAllRecordingsLink(); // This shouldn't throw.
+    // Note: we're testing on `container` instead of `container.firstChild`
+    // because this component renders a fragment with several HTML elements.
+    expect(container).toMatchSnapshot();
+  });
+
+  it('still displays the link to all recordings when there is only 1 profile', async () => {
+    await storeProfileInformations(listOfProfileInformations.slice(0, 1));
+    const { container, findByText, getAllRecordingsLink } = setup({ limit: 3 });
+    await findByText(/Fennec/);
+    getAllRecordingsLink(); // This shouldn't throw.
+    // Note: we're testing on `container` instead of `container.firstChild`
+    // because this component renders a fragment with several HTML elements.
+    expect(container).toMatchSnapshot();
+  });
+
+  it('renders a generic message when there is no profiles', async () => {
+    const { container, findByText, getAllRecordingsLink } = setup({ limit: 3 });
+    await findByText(/no profile/i);
     expect(() => getAllRecordingsLink()).toThrow('Unable to find an element');
+    // Note: we're testing on `container` instead of `container.firstChild`
+    // because this component renders a fragment with several HTML elements.
+    expect(container).toMatchSnapshot();
   });
 
   it('renders action buttons when appropriate', async () => {
     await storeProfileInformations(listOfProfileInformations);
-    const { findByText, getAllByText, getDeleteButtonForProfile } = setup({
+    const {
+      container,
+      findByText,
+      getAllByText,
+      getDeleteButtonForProfile,
+    } = setup({
       withActionButtons: true,
     });
 
@@ -247,6 +277,10 @@ describe('ListOfPublishedProfiles', () => {
         expect(button.disabled).toBe(true); // eslint-disable-line jest/no-conditional-expect
       }
     }
+
+    // Note: we're testing on `container` instead of `container.firstChild`
+    // because this component renders a fragment with several HTML elements.
+    expect(container).toMatchSnapshot();
   });
 
   describe('profile deletion', () => {

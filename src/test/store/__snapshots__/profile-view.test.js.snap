@@ -81,7 +81,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 31,
+    "preprocessedProfileVersion": 32,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -89,7 +89,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 20,
+    "version": 21,
   },
   "pages": Array [
     Object {
@@ -1449,7 +1449,6 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1457,7 +1456,6 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1465,7 +1463,6 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1484,7 +1481,6 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1503,7 +1499,6 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
-    "title": null,
   },
 ]
 `;
@@ -1516,7 +1511,6 @@ Array [
     "end": null,
     "name": "A",
     "start": 0,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1524,7 +1518,6 @@ Array [
     "end": null,
     "name": "B",
     "start": 1,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1532,7 +1525,6 @@ Array [
     "end": null,
     "name": "C",
     "start": 2,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1540,7 +1532,6 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1548,7 +1539,6 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1556,7 +1546,6 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1575,7 +1564,6 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1594,7 +1582,6 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
-    "title": null,
   },
 ]
 `;
@@ -1776,7 +1763,6 @@ Array [
     "end": null,
     "name": "D",
     "start": 3,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1784,7 +1770,6 @@ Array [
     "end": null,
     "name": "E",
     "start": 4,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1792,7 +1777,6 @@ Array [
     "end": null,
     "name": "F",
     "start": 5,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1811,7 +1795,6 @@ Array [
     "end": 7,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
-    "title": null,
   },
   Object {
     "category": 0,
@@ -1830,7 +1813,6 @@ Array [
     "end": 8,
     "name": "Load 7: https://mozilla.org",
     "start": 7,
-    "title": null,
   },
 ]
 `;
@@ -2718,11 +2700,12 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Array [
   Object {
     "category": 1,
-    "data": null,
+    "data": Object {
+      "type": "Jank",
+    },
     "end": 55,
-    "name": "Jank",
+    "name": "50.00ms event processing delay",
     "start": 5,
-    "title": "50.00ms event processing delay",
   },
 ]
 `;

@@ -13,7 +13,7 @@ type Props = {|
   +className?: string,
 |};
 
-export default class CanSelectContent extends React.PureComponent<Props> {
+export class CanSelectContent extends React.PureComponent<Props> {
   _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
     const input = e.currentTarget;
     input.focus();
