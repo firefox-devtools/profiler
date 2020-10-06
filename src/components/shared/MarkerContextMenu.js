@@ -20,11 +20,13 @@ import copy from 'copy-to-clipboard';
 
 import type {
   Marker,
+  MarkerIndex,
   StartEndRange,
   PreviewSelection,
   ImplementationFilter,
   IndexIntoStackTable,
   Thread,
+  RightClickedMarkerInfo,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -35,15 +37,20 @@ import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
-import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
 
+type OwnProps = {|
+  +rightClickedMarkerInfo: RightClickedMarkerInfo,
+|};
+
 type StateProps = {|
+  +marker: Marker,
+  +markerIndex: MarkerIndex,
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +rightClickedMarker: Marker | null,
   +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
+  +getMarkerLabelToCopy: MarkerIndex => string,
 |};
 
 type DispatchProps = {|
@@ -51,20 +58,16 @@ type DispatchProps = {|
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class MarkerContextMenu extends PureComponent<Props> {
+class MarkerContextMenuImpl extends PureComponent<Props> {
   setStartRange = () => {
     const {
-      rightClickedMarker,
       updatePreviewSelection,
       previewSelection,
       committedRange,
+      marker,
     } = this.props;
-
-    if (rightClickedMarker === null) {
-      return;
-    }
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -73,28 +76,24 @@ class MarkerContextMenu extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: rightClickedMarker.start,
+      selectionStart: marker.start,
       selectionEnd,
     });
   };
 
   setEndRange = () => {
     const {
-      rightClickedMarker,
+      marker,
       updatePreviewSelection,
       committedRange,
       previewSelection,
     } = this.props;
 
-    if (rightClickedMarker === null) {
-      return;
-    }
-
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
       : committedRange.start;
 
-    let selectionEnd = rightClickedMarker.end || rightClickedMarker.start;
+    let selectionEnd = marker.end || marker.start;
 
     if (selectionEnd === selectionStart) {
       // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
@@ -112,21 +111,17 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   setRangeByDuration = () => {
-    const { rightClickedMarker, updatePreviewSelection } = this.props;
+    const { marker, updatePreviewSelection } = this.props;
 
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    if (rightClickedMarker.end === null) {
+    if (marker.end === null) {
       return;
     }
 
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: rightClickedMarker.start,
-      selectionEnd: rightClickedMarker.end,
+      selectionStart: marker.start,
+      selectionEnd: marker.end,
     });
   };
 
@@ -157,36 +152,19 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   copyMarkerJSON = () => {
-    const { rightClickedMarker } = this.props;
-
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    copy(JSON.stringify(rightClickedMarker, null, 2));
+    copy(JSON.stringify(this.props.marker, null, 2));
   };
 
   copyMarkerDescription = () => {
-    const { rightClickedMarker } = this.props;
-
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    copy(getMarkerFullDescription(rightClickedMarker));
+    const { markerIndex, getMarkerLabelToCopy } = this.props;
+    copy(getMarkerLabelToCopy(markerIndex));
   };
 
   copyMarkerCause = () => {
-    const { rightClickedMarker } = this.props;
+    const { marker } = this.props;
 
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    if (rightClickedMarker.data && rightClickedMarker.data.cause) {
-      const stack = this._convertStackToString(
-        rightClickedMarker.data.cause.stack
-      );
+    if (marker.data && marker.data.cause) {
+      const stack = this._convertStackToString(marker.data.cause.stack);
       if (stack) {
         copy(stack);
       } else {
@@ -198,14 +176,10 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   copyUrl = () => {
-    const { rightClickedMarker } = this.props;
+    const { marker } = this.props;
 
-    if (rightClickedMarker === null) {
-      return;
-    }
-
-    if (rightClickedMarker.data && rightClickedMarker.data.type === 'Network') {
-      copy(rightClickedMarker.data.URI);
+    if (marker.data && marker.data.type === 'Network') {
+      copy(marker.data.URI);
     }
   };
 
@@ -248,12 +222,8 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   render() {
-    const { rightClickedMarker } = this.props;
-
-    if (rightClickedMarker === null) {
-      return null;
-    }
-
+    const { marker } = this.props;
+    const { data } = marker;
     return (
       <ContextMenu
         id="MarkerContextMenu"
@@ -268,16 +238,15 @@ class MarkerContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem
           onClick={this.setRangeByDuration}
-          disabled={this._isZeroDurationMarker(rightClickedMarker)}
+          disabled={this._isZeroDurationMarker(marker)}
         >
           Set selection from duration
         </MenuItem>
         <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
-        {rightClickedMarker.data && rightClickedMarker.data.cause ? (
+        {data && data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
-        {rightClickedMarker.data &&
-        rightClickedMarker.data.type === 'Network' ? (
+        {data && data.type === 'Network' ? (
           <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
         ) : null}
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
@@ -286,30 +255,52 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const rightClickedMarkerInfo = getRightClickedMarkerInfo(state);
+const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: (state, ownProps) => {
+    const { threadsKey, markerIndex } = ownProps.rightClickedMarkerInfo;
 
-    let rightClickedMarker = null;
-    let thread = null;
-
-    if (rightClickedMarkerInfo !== null) {
-      const selectors = getThreadSelectorsFromThreadsKey(
-        rightClickedMarkerInfo.threadsKey
-      );
-
-      rightClickedMarker = selectors.getRightClickedMarker(state);
-      thread = selectors.getThread(state);
-    }
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const getMarker = selectors.getMarkerGetter(state);
 
     return {
+      markerIndex,
+      marker: getMarker(markerIndex),
       previewSelection: getPreviewSelection(state),
       committedRange: getCommittedRange(state),
       implementationFilter: getImplementationFilter(state),
-      rightClickedMarker,
-      thread,
+      thread: selectors.getThread(state),
+      getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
-  component: MarkerContextMenu,
+  component: MarkerContextMenuImpl,
+});
+
+type MaybeProps = {|
+  +rightClickedMarkerInfo: RightClickedMarkerInfo | null,
+|};
+
+/**
+ * This component only renders the context menu if there is a right clicked marker.
+ * It is the component that is actually exported here.
+ */
+class MaybeMarkerContextMenuImpl extends PureComponent<MaybeProps> {
+  render() {
+    const { rightClickedMarkerInfo } = this.props;
+
+    if (rightClickedMarkerInfo === null) {
+      return null;
+    }
+
+    return (
+      <MarkerContextMenu rightClickedMarkerInfo={rightClickedMarkerInfo} />
+    );
+  }
+}
+
+export const MaybeMarkerContextMenu = explicitConnect<{||}, MaybeProps, {||}>({
+  mapStateToProps: state => ({
+    rightClickedMarkerInfo: getRightClickedMarkerInfo(state),
+  }),
+  component: MaybeMarkerContextMenuImpl,
 });

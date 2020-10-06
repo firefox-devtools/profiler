@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`marker schema labels parseErrors errors if looking up into a part of the marker that does not exist 1`] = `
+Array [
+  Array [
+    "Error processing the label \\"Parse error: \\"{marker.nothing}\\"\\" because of the marker.nothing. Currently the labels in the marker schema take the form of \\"marker.data.keyName\\" or \\"marker.startTime\\". No other type of access is currently supported.",
+  ],
+]
+`;
+
+exports[`marker schema labels parseErrors errors if not looking up into a marker 1`] = `
+Array [
+  Array [
+    "Error processing the label \\"Parse error: \\"{duration}\\"\\" because of the duration. Currently the labels in the marker schema take the form of \\"marker.data.keyName\\" or \\"marker.startTime\\". No other type of access is currently supported.",
+  ],
+]
+`;
+
+exports[`marker schema labels parseErrors errors when accessing random properties 1`] = `
+Array [
+  Array [
+    "Error processing the label \\"Parse error: \\"{property.value}\\"\\" because of the property.value. Currently the labels in the marker schema take the form of \\"marker.data.keyName\\" or \\"marker.startTime\\". No other type of access is currently supported.",
+  ],
+]
+`;
+
+exports[`marker schema labels parseErrors errors when accessing twice into a payload 1`] = `
+Array [
+  Array [
+    "Error processing the label \\"Parse error: \\"{marker.data.duration.extra}\\"\\" because of the marker.data.duration.extra. Currently the labels in the marker schema take the form of \\"marker.data.keyName\\" or \\"marker.startTime\\". No other type of access is currently supported.",
+  ],
+]
+`;

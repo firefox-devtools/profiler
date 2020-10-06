@@ -217,6 +217,7 @@
                   "type": "tracing",
                   "category": "DOMEvent",
                   "interval": "start",
+                  "timeStamp": 7.55,
                   "eventType": "mouseout",
                   "phase": 3,
                   "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",

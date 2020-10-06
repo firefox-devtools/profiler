@@ -455,6 +455,7 @@ export class NetworkChartRow extends React.PureComponent<
   render() {
     const {
       index,
+      markerIndex,
       marker,
       networkPayload,
       width,
@@ -498,6 +499,7 @@ export class NetworkChartRow extends React.PureComponent<
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <TooltipMarker
               className="tooltipNetwork"
+              markerIndex={markerIndex}
               marker={marker}
               threadsKey={this.props.threadsKey}
               restrictHeightWidth={true}

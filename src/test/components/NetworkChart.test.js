@@ -15,8 +15,10 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
+
 import { NetworkChart } from '../../components/network-chart';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
+
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 import {
@@ -77,7 +79,7 @@ function setupWithProfile(profile) {
   const renderResult = render(
     <Provider store={store}>
       <>
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
         <NetworkChart />
       </>
     </Provider>
