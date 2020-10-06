@@ -109,6 +109,8 @@ body,
 }
 
 .treeViewBodyInner1 {
+  /* This allows the right column to expand more than its content, so that the
+   * background always extends to the right edge. */
   flex-grow: 1;
 }
 
