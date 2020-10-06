@@ -27,7 +27,7 @@ import type {
  * TODO - These will eventually be stored in the profile, but for now
  * define them here.
  */
-export const markerSchema: MarkerSchema[] = [
+export const markerSchemaGecko: MarkerSchema[] = [
   {
     name: 'Bailout',
     display: ['marker-chart', 'marker-table'],
@@ -229,6 +229,9 @@ export const markerSchema: MarkerSchema[] = [
     display: ['marker-table'],
     data: [],
   },
+];
+
+export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   {
     name: 'Jank',
     display: ['marker-table', 'marker-chart'],
