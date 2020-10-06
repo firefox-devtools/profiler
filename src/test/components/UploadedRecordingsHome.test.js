@@ -10,8 +10,11 @@ import { render } from '@testing-library/react';
 
 import { UploadedRecordingsHome } from 'firefox-profiler/components/app/UploadedRecordingsHome';
 import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { changeProfileName } from '../../actions/profile-view';
+import { stateFromLocation } from '../../app-logic/url-handling';
 import { blankStore } from '../fixtures/stores';
 import { mockDate } from '../fixtures/mocks/date';
+import { updateUrlState } from '../../actions/app';
 
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
@@ -144,5 +147,56 @@ describe('UploadedRecordingsHome', () => {
     await findByText(/macOS/);
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('can rename stored profiles', async () => {
+    // Store a single profile that we will rename. The data inside is mostly
+    // arbirtrary except the "name" field.
+    // mockDate('4 Jul 2020 15:00');
+    await storeProfileData({
+      profileToken: 'FAKE_1234',
+      jwtToken: null,
+      publishedDate: new Date('4 Jul 2020 13:00'), // This is the future!
+      name: 'Initial Profile Name',
+      preset: null,
+      originHostname: 'https://mozilla.org',
+      meta: {
+        product: 'Firefox',
+        platform: 'Macintosh',
+        toolkit: 'cocoa',
+        misc: 'rv:62.0',
+        oscpu: 'Intel Mac OS X 10.12',
+      },
+      urlPath: '/public/FAKE_1234/marker-chart/',
+      publishedRange: { start: 2000, end: 40000 },
+    });
+    const store = blankStore();
+    {
+      const { findByText } = render(
+        <Provider store={store}>
+          <UploadedRecordingsHome />
+        </Provider>
+      );
+
+      expect(await findByText(/Initial Profile Name/)).toBeTruthy();
+    }
+
+    const newUrlState = stateFromLocation({
+      pathname: `/public/FAKE_1234/marker-chart/`,
+      search: '',
+      hash: '',
+    });
+    store.dispatch(updateUrlState(newUrlState));
+
+    await store.dispatch(changeProfileName('My Profile Name'));
+    {
+      const { findByText } = render(
+        <Provider store={store}>
+          <UploadedRecordingsHome />
+        </Provider>
+      );
+
+      expect(await findByText(/My Profile Name/)).toBeTruthy();
+    }
   });
 });
