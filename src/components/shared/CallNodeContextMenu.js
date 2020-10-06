@@ -23,6 +23,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
+import { oneLine } from 'common-tags';
 
 import {
   convertToTransformType,
@@ -446,60 +447,127 @@ class CallNodeContextMenuImpl extends PureComponent<Props> {
 
     return (
       <Fragment>
-        {inverted ? null : (
-          <MenuItem
-            onClick={this._handleClick}
-            data={{ type: 'merge-call-node' }}
-          >
-            <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
-            Merge node into calling function
-          </MenuItem>
-        )}
-        <MenuItem onClick={this._handleClick} data={{ type: 'merge-function' }}>
-          <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
-          Merge function into caller across the entire tree
-        </MenuItem>
-        <MenuItem onClick={this._handleClick} data={{ type: 'focus-subtree' }}>
-          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
-          Focus on subtree
-        </MenuItem>
-        <MenuItem onClick={this._handleClick} data={{ type: 'focus-function' }}>
-          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
-          {inverted
-            ? 'Focus on calls made by this function'
-            : 'Focus on function'}
-        </MenuItem>
-        <MenuItem
+        <TransformMenuItem
+          shortcut="m"
+          icon="Merge"
           onClick={this._handleClick}
-          data={{ type: 'collapse-function-subtree' }}
+          transform="merge-function"
+          title={oneLine`
+            Merging a function removes it from the profile, and assigns its time to the
+            function that called it. This happens anywhere the function was called in
+            the tree.
+          `}
         >
-          <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
-          Collapse function’s subtree across the entire tree
-        </MenuItem>
+          Merge function
+        </TransformMenuItem>
+
+        {inverted ? null : (
+          <TransformMenuItem
+            shortcut="M"
+            icon="Merge"
+            onClick={this._handleClick}
+            transform="merge-call-node"
+            title={oneLine`
+              Merging a node removes it from the profile, and assigns its time to the
+              function's node that called it. It only removes the function from that
+              specific part of the tree. Any other places the function was called
+              will remain in the profile.
+            `}
+          >
+            Merge node only
+          </TransformMenuItem>
+        )}
+
+        <TransformMenuItem
+          shortcut="f"
+          icon="Focus"
+          onClick={this._handleClick}
+          transform="focus-function"
+          title={oneLine`
+            Focusing on a function will remove any sample that does not include that
+            function. In addition, it re-roots the call tree so that the function
+            is the only root of the tree. This can combine multiple function call sites
+            across a profile into one call node.
+          `}
+        >
+          {inverted ? 'Focus on function (inverted)' : 'Focus on function'}
+        </TransformMenuItem>
+
+        <TransformMenuItem
+          shortcut="F"
+          icon="Focus"
+          onClick={this._handleClick}
+          transform="focus-subtree"
+          title={oneLine`
+            Focusing on a subtree will remove any sample that does not include that
+            specific part of the call tree. It pulls out a branch of the call tree,
+            however it only does it for that single call node. All other calls
+            of the function are ignored.
+          `}
+        >
+          Focus on subtree only
+        </TransformMenuItem>
+
+        <TransformMenuItem
+          shortcut="c"
+          icon="Collapse"
+          onClick={this._handleClick}
+          transform="collapse-function-subtree"
+          title={oneLine`
+            Collapsing a function will remove everything it called, and assign
+            all of the time to the function. This can help simplify a profile that
+            calls into code that does not need to be analyzed.
+          `}
+        >
+          Collapse function
+        </TransformMenuItem>
+
         {nameForResource ? (
-          <MenuItem
+          <TransformMenuItem
+            shortcut="C"
+            icon="Collapse"
             onClick={this._handleClick}
-            data={{ type: 'collapse-resource' }}
+            transform="collapse-resource"
+            title={oneLine`
+              Collapsing a resource will flatten out of all the calls into that
+              resource into a single collapsed call node.
+            `}
           >
-            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
-            Collapse functions in{' '}
+            Collapse
             <span className="callNodeContextMenuLabel">{nameForResource}</span>
-          </MenuItem>
+          </TransformMenuItem>
         ) : null}
+
         {this.isRecursiveCall() ? (
-          <MenuItem
+          <TransformMenuItem
+            shortcut="r"
+            icon="Collapse"
             onClick={this._handleClick}
-            data={{ type: 'collapse-direct-recursion' }}
+            transform="collapse-direct-recursion"
+            title={oneLine`
+              Collapsing direct recursion removes calls that repeatedly recurse into
+              the same function.
+            `}
           >
-            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse direct recursion
-          </MenuItem>
+          </TransformMenuItem>
         ) : null}
-        <MenuItem onClick={this._handleClick} data={{ type: 'drop-function' }}>
-          <span className="callNodeContextMenuIcon callNodeContextMenuIconDrop" />
+
+        <TransformMenuItem
+          shortcut="d"
+          icon="Drop"
+          onClick={this._handleClick}
+          transform="drop-function"
+          title={oneLine`
+            Dropping samples removes their time from the profile. This is useful to
+            eliminate timing information that is not for the analysis.
+          `}
+        >
           Drop samples with this function
-        </MenuItem>
+        </TransformMenuItem>
+
         <div className="react-contextmenu-separator" />
+
         {showExpandAll ? (
           <Fragment>
             <MenuItem onClick={this._handleClick} data={{ type: 'expand-all' }}>
@@ -592,3 +660,26 @@ export const CallNodeContextMenu = explicitConnect<
   },
   component: CallNodeContextMenuImpl,
 });
+
+function TransformMenuItem(props: {|
+  +children: *,
+  +onClick: *,
+  +transform: string,
+  +shortcut: string,
+  +icon: string,
+  +title: string,
+|}) {
+  return (
+    <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
+      <div className="callNodeContextMenuWithKey" title={props.title}>
+        <div className="callNodeContextMenuWithKeyText">
+          <span
+            className={`callNodeContextMenuIcon callNodeContextMenuIcon${props.icon}`}
+          />
+          {props.children}
+        </div>
+        <kbd>{props.shortcut}</kbd>
+      </div>
+    </MenuItem>
+  );
+}

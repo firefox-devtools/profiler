@@ -28,9 +28,9 @@ describe('calltree/CallNodeContextMenu', function() {
       funcNamesDictPerThread: [{ A, B }],
     } = getProfileFromTextSamples(`
       A               A               A
-      B[lib:library]  B[lib:library]  B[lib:library]
-      B[lib:library]  B[lib:library]  B[lib:library]
-      B[lib:library]  B[lib:library]  B[lib:library]
+      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
+      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
+      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
       C               C               H
       D               F               I
       E               E
@@ -77,13 +77,16 @@ describe('calltree/CallNodeContextMenu', function() {
   describe('clicking on call tree transforms', function() {
     // Iterate through each transform slug, and click things in it.
     const fixtures = [
-      { matcher: /Merge node/, type: 'merge-call-node' },
       { matcher: /Merge function/, type: 'merge-function' },
-      { matcher: /Focus.*subtree/, type: 'focus-subtree' },
-      { matcher: /Focus.*function/, type: 'focus-function' },
-      { matcher: /Collapse.*subtree/, type: 'collapse-function-subtree' },
-      { matcher: /Collapse functions/, type: 'collapse-resource' },
-      { matcher: /Collapse.*recursion/, type: 'collapse-direct-recursion' },
+      { matcher: /Merge node only/, type: 'merge-call-node' },
+      { matcher: /Focus on subtree only/, type: 'focus-subtree' },
+      { matcher: /Focus on function/, type: 'focus-function' },
+      { matcher: /Collapse function/, type: 'collapse-function-subtree' },
+      { matcher: /XUL/, type: 'collapse-resource' },
+      {
+        matcher: /Collapse direct recursion/,
+        type: 'collapse-direct-recursion',
+      },
       { matcher: /Drop samples/, type: 'drop-function' },
     ];
 
@@ -110,7 +113,7 @@ describe('calltree/CallNodeContextMenu', function() {
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
-      ).toHaveLength(11);
+      ).toHaveLength(7);
     });
 
     it('can look up functions on SearchFox', function() {
