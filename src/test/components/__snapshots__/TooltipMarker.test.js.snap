@@ -3253,7 +3253,11 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       Marker
       :
     </div>
-    UserTiming
+    <div
+      class="tooltipDetailsDescription"
+    >
+      UserTiming
+    </div>
     <div
       class="tooltipLabel"
     >
@@ -3267,7 +3271,11 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       Description
       :
     </div>
-    UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+    <div
+      class="tooltipDetailsDescription"
+    >
+      UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+    </div>
     <div
       class="tooltipLabel"
     >
