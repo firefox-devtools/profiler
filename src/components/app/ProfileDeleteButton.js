@@ -14,7 +14,7 @@ import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-st
 
 import './ProfileDeleteButton.css';
 
-type Props = {|
+type ButtonProps = {|
   +profileName: string,
   +smallProfileName: string,
   +jwtToken: string,
@@ -25,14 +25,83 @@ type Props = {|
   +onCloseSuccessMessage?: () => mixed,
 |};
 
-type State = {|
-  +status: 'idle' | 'working' | 'just-deleted' | 'deleted',
+export class ProfileDeleteButton extends PureComponent<ButtonProps> {
+  _hasBeenDeleted = false;
+  _componentDeleteButtonRef = React.createRef<ButtonWithPanel>();
+
+  onCloseConfirmDialog = () => {
+    // In case we deleted the profile, and the user dismisses the success panel,
+    // let's move directly to the deleted state:
+    if (this._hasBeenDeleted && this.props.onCloseSuccessMessage) {
+      this.props.onCloseSuccessMessage();
+    }
+
+    if (this.props.onCloseConfirmDialog) {
+      this.props.onCloseConfirmDialog();
+    }
+  };
+
+  onProfileDeleted = () => {
+    this._hasBeenDeleted = true;
+  };
+
+  onProfileDeleteCanceled = () => {
+    // Close the panel when the user clicks on the Cancel button.
+    if (this._componentDeleteButtonRef.current) {
+      this._componentDeleteButtonRef.current.closePanel();
+    }
+  };
+
+  render() {
+    const {
+      profileName,
+      smallProfileName,
+      buttonClassName,
+      jwtToken,
+      profileToken,
+    } = this.props;
+
+    return (
+      <ButtonWithPanel
+        ref={this._componentDeleteButtonRef}
+        buttonClassName={classNames(
+          buttonClassName,
+          'photon-button',
+          'photon-button-default'
+        )}
+        label="Delete"
+        title={`Click here to delete the profile ${smallProfileName}`}
+        onPanelOpen={this.props.onOpenConfirmDialog}
+        onPanelClose={this.onCloseConfirmDialog}
+        panelContent={
+          <ProfileDeletePanel
+            profileName={profileName}
+            profileToken={profileToken}
+            jwtToken={jwtToken}
+            onProfileDeleted={this.onProfileDeleted}
+            onProfileDeleteCanceled={this.onProfileDeleteCanceled}
+          />
+        }
+      />
+    );
+  }
+}
+
+type PanelProps = {|
+  +profileName: string,
+  +profileToken: string,
+  +jwtToken: string,
+  +onProfileDeleted: () => mixed,
+  +onProfileDeleteCanceled: () => mixed,
+|};
+
+type PanelState = {|
+  +status: 'idle' | 'working' | 'deleted',
   +error: Error | null,
 |};
 
-export class ProfileDeleteButton extends PureComponent<Props, State> {
+class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
   state = { error: null, status: 'idle' };
-  _componentDeleteButtonRef = React.createRef<ButtonWithPanel>();
 
   onConfirmDeletion = async () => {
     const { profileToken, jwtToken } = this.props;
@@ -46,7 +115,8 @@ export class ProfileDeleteButton extends PureComponent<Props, State> {
       }
       await deleteProfileOnServer({ profileToken, jwtToken });
       await deleteProfileData(profileToken);
-      this.setState({ status: 'just-deleted' });
+      this.setState({ status: 'deleted' });
+      this.props.onProfileDeleted();
     } catch (e) {
       this.setState({
         error: e,
@@ -61,11 +131,12 @@ export class ProfileDeleteButton extends PureComponent<Props, State> {
   };
 
   onCancelDeletion = () => {
-    // Close the panel when the user clicks on the Cancel button.
-    if (this._componentDeleteButtonRef.current) {
-      this._componentDeleteButtonRef.current.closePanel();
-    }
+    this.props.onProfileDeleteCanceled();
   };
+
+  preventClick(e: SyntheticMouseEvent<>) {
+    e.preventDefault();
+  }
 
   _renderPossibleErrorMessage() {
     const { error } = this.state;
@@ -82,75 +153,43 @@ export class ProfileDeleteButton extends PureComponent<Props, State> {
       </p>
     );
   }
-
-  onCloseConfirmDialog = () => {
-    // In case we deleted the profile, and the user dismisses the success panel,
-    // let's move directly to the deleted state:
-    if (this.state.status === 'just-deleted') {
-      this.setState({ status: 'deleted' });
-      if (this.props.onCloseSuccessMessage) {
-        this.props.onCloseSuccessMessage();
-      }
-    }
-
-    if (this.props.onCloseConfirmDialog) {
-      this.props.onCloseConfirmDialog();
-    }
-  };
-
-  preventClick(e: SyntheticMouseEvent<>) {
-    e.preventDefault();
-  }
-
   render() {
-    const { profileName, smallProfileName, buttonClassName } = this.props;
+    const { profileName } = this.props;
     const { status } = this.state;
 
+    if (status === 'deleted') {
+      return (
+        <p className="profileDeleteButtonSuccess">
+          Successfully deleted uploaded data.
+        </p>
+      );
+    }
+
     return (
-      <ButtonWithPanel
-        ref={this._componentDeleteButtonRef}
-        buttonClassName={classNames(
-          buttonClassName,
-          'photon-button',
-          'photon-button-default'
-        )}
-        label="Delete"
-        title={`Click here to delete the profile ${smallProfileName}`}
-        onPanelOpen={this.props.onOpenConfirmDialog}
-        onPanelClose={this.onCloseConfirmDialog}
-        panelContent={
-          status === 'just-deleted' ? (
-            <p className="profileDeleteButtonSuccess">
-              Successfully deleted uploaded data.
-            </p>
-          ) : (
-            <div className="confirmDialog">
-              <h2 className="confirmDialogTitle">Delete {profileName}</h2>
-              <div className="confirmDialogContent">
-                Are you sure you want to delete uploaded data for this profile?
-                Links that were previously shared will no longer work.
-                {this._renderPossibleErrorMessage()}
-              </div>
-              <div className="confirmDialogButtons">
-                <input
-                  type="button"
-                  className="photon-button photon-button-default"
-                  value="Cancel"
-                  disabled={status === 'working'}
-                  onClick={this.onCancelDeletion}
-                />
-                <input
-                  type="button"
-                  className="photon-button photon-button-destructive"
-                  value={status === 'working' ? 'Deleting…' : 'Delete'}
-                  disabled={status === 'working'}
-                  onClick={this.onConfirmDeletion}
-                />
-              </div>
-            </div>
-          )
-        }
-      />
+      <div className="confirmDialog">
+        <h2 className="confirmDialogTitle">Delete {profileName}</h2>
+        <div className="confirmDialogContent">
+          Are you sure you want to delete uploaded data for this profile? Links
+          that were previously shared will no longer work.
+          {this._renderPossibleErrorMessage()}
+        </div>
+        <div className="confirmDialogButtons">
+          <input
+            type="button"
+            className="photon-button photon-button-default"
+            value="Cancel"
+            disabled={status === 'working'}
+            onClick={this.props.onProfileDeleteCanceled}
+          />
+          <input
+            type="button"
+            className="photon-button photon-button-destructive"
+            value={status === 'working' ? 'Deleting…' : 'Delete'}
+            disabled={status === 'working'}
+            onClick={this.onConfirmDeletion}
+          />
+        </div>
+      </div>
     );
   }
 }
