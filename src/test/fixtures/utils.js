@@ -325,3 +325,14 @@ export function fireFullContextMenu(
   fireEvent(element, getMouseEvent('mouseup', options));
   fireEvent(element, getMouseEvent('contextmenu', options));
 }
+
+/**
+ * React Testing Library only sends one event at a time, but a lot of component logic
+ * assumes that events come in a natural cascade. This utility ensures that cascasde
+ * gets fired correctly.
+ */
+export function fireFullKeyPress(element: HTMLElement, options?: *) {
+  fireEvent.keyDown(element, options);
+  fireEvent.keyPress(element, options);
+  fireEvent.keyUp(element, options);
+}
