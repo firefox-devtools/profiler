@@ -7,7 +7,8 @@
   margin-inline-end: 8px;
   pointer-events: auto;
 }
-.react-contextmenu-item--selected > .callNodeContextMenuIcon {
+.react-contextmenu-item:hover .callNodeContextMenuIcon,
+.react-contextmenu-item:active .callNodeContextMenuIcon {
   filter: invert(1);
 }
 
@@ -31,6 +32,7 @@
 .callNodeContextMenuLabel {
   color: #555;
   font-weight: bold;
+  margin-inline: 2px;
 }
 
 .react-contextmenu-item--selected > .callNodeContextMenuLabel {
