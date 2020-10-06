@@ -3286,3 +3286,40 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
   </div>
 </div>
 `;
+
+exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
+<div
+  class="tooltipMarker"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        70ms
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        70.00ms event processing delay
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+</div>
+`;
