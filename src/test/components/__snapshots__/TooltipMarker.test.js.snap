@@ -1301,7 +1301,7 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662-10 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -1315,59 +1315,13 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
       <div
         class="tooltipTitle"
       >
-        Bailout
+        Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -&gt; resource://bar.js:3662
       </div>
     </div>
   </div>
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Type
-      :
-    </div>
-    ShapeGuard
-    <div
-      class="tooltipLabel"
-    >
-      Where
-      :
-    </div>
-    after getelem
-    <div
-      class="tooltipLabel"
-    >
-      Script
-      :
-    </div>
-    resource://foo.js -&gt; resource://bar.js
-    <div
-      class="tooltipLabel"
-    >
-      Function Line
-      :
-    </div>
-    3,662
-    <div
-      class="tooltipLabel"
-    >
-      Bailout Line
-      :
-    </div>
-    3,666
-    <div
-      class="tooltipLabel"
-    >
-      Description
-      :
-    </div>
-    <div
-      style="max-width: 300px;"
-    >
-      A shape guard based on TI information failed. (We saw an object whose shape does not match that / any of those observed by the baseline IC.)
-    </div>
     <div
       class="tooltipLabel"
     >
@@ -2422,7 +2376,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Invalidate http://mozilla.com/script.js:1234-10 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -2436,27 +2390,13 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
       <div
         class="tooltipTitle"
       >
-        Invalidate
+        Invalidate http://mozilla.com/script.js:1234
       </div>
     </div>
   </div>
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      URL
-      :
-    </div>
-    http://mozilla.com/script.js
-    <div
-      class="tooltipLabel"
-    >
-      Line
-      :
-    </div>
-    1,234
     <div
       class="tooltipLabel"
     >
