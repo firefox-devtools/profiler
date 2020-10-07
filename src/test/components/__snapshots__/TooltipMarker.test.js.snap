@@ -1333,6 +1333,45 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard 
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTitle"
+      >
+        Bailout
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Details
+      :
+    </div>
+    NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -2397,6 +2436,45 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate http://m
   <div
     class="tooltipDetails"
   >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTitle"
+      >
+        Invalidate
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Details
+      :
+    </div>
+    https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518
     <div
       class="tooltipLabel"
     >
