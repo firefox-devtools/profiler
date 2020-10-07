@@ -89,7 +89,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 
   handleButtonFocus = () => {
     this.setState({ focusedWithKey: this.getKey() });
-
+    
     const input = this.inputRef.current;
     if (input) {
       requestAnimationFrame(() => {
@@ -125,7 +125,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
             display: isFocused ? 'none' : 'block',
           }}
           title={title}
-          className="profileNameButton"
+          className="profileNameButton menuButtonsButton"
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >
