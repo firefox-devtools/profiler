@@ -3316,13 +3316,6 @@ exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
     <div
       class="tooltipLabel"
     >
-      Delay
-      :
-    </div>
-    70ms
-    <div
-      class="tooltipLabel"
-    >
       Description
       :
     </div>

@@ -236,9 +236,8 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     name: 'Jank',
     display: ['marker-table', 'marker-chart'],
     tooltipLabel: 'Jank – event processing delay',
-    tableLabel: 'Event processing delay — {marker.data.delay}',
+    tableLabel: 'Event processing delay',
     data: [
-      { key: 'delay', label: 'Delay', format: 'duration' },
       {
         label: 'Description',
         value: oneLine`

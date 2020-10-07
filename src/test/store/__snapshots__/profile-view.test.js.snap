@@ -2701,7 +2701,6 @@ Array [
   Object {
     "category": 1,
     "data": Object {
-      "delay": 50,
       "type": "Jank",
     },
     "end": 55,

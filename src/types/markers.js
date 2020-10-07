@@ -673,7 +673,7 @@ export type MediaSampleMarkerPayload = {|
 /**
  * This type is generated on the Firefox Profiler side, and doesn't come from Gecko.
  */
-export type JankPayload = {| type: 'Jank', delay: Milliseconds |};
+export type JankPayload = {| type: 'Jank' |};
 
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,

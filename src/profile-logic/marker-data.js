@@ -74,10 +74,7 @@ export function deriveJankMarkers(
       end: lastTimestamp,
       name: 'Jank',
       category: otherCategoryIndex,
-      data: {
-        type: 'Jank',
-        delay: lastResponsiveness,
-      },
+      data: { type: 'Jank' },
     });
 
   let lastResponsiveness: number = 0;
