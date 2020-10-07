@@ -218,7 +218,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             const key = label + '-' + value;
             details.push(
               <TooltipDetail key={key} label={label}>
-                {value}
+                <div className="tooltipDetailsDescription">{value}</div>
               </TooltipDetail>
             );
           }

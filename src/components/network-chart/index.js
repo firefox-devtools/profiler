@@ -11,8 +11,8 @@ import explicitConnect from '../../utils/connect';
 import NetworkSettings from '../shared/NetworkSettings';
 import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
-import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
-import NetworkChartRow from './NetworkChartRow';
+import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
+import { NetworkChartRow } from './NetworkChartRow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import {
@@ -56,7 +56,7 @@ type OwnProps = {| ...SizeProps |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class NetworkChart extends React.PureComponent<Props> {
+class NetworkChartImpl extends React.PureComponent<Props> {
   _memoizedGetSpecialItems = memoize(
     rightClickedMarkerIndex => {
       if (rightClickedMarkerIndex !== null) {
@@ -190,11 +190,11 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
       threadsKey: getSelectedThreadsKey(state),
     }),
     mapDispatchToProps: { changeRightClickedMarker },
-    component: NetworkChart,
+    component: NetworkChartImpl,
   }
 );
 
-export default withSize<OwnProps>(ConnectedComponent);
+export const NetworkChart = withSize<OwnProps>(ConnectedComponent);
 
 /**
  * Our definition of markers does not currently have the ability to refine
