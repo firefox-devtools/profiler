@@ -17,7 +17,10 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 
-import { markerSchema } from '../profile-logic/marker-schema';
+import {
+  markerSchemaGecko,
+  markerSchemaFrontEndOnly,
+} from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -175,7 +178,12 @@ export const getContentfulSpeedIndexProgress: Selector<
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
 
-export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
+export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
+  // TODO - This will be replaced with a function to get the schema. For now
+  // trivially pass in the Gecko schema.
+  () => markerSchemaGecko,
+  schema => [...schema, ...markerSchemaFrontEndOnly]
+);
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,

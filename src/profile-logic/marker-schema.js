@@ -27,7 +27,7 @@ import type {
  * TODO - These will eventually be stored in the profile, but for now
  * define them here.
  */
-export const markerSchema: MarkerSchema[] = [
+export const markerSchemaGecko: MarkerSchema[] = [
   {
     name: 'Bailout',
     display: ['marker-chart', 'marker-table'],
@@ -228,6 +228,25 @@ export const markerSchema: MarkerSchema[] = [
     name: 'Network',
     display: ['marker-table'],
     data: [],
+  },
+];
+
+export const markerSchemaFrontEndOnly: MarkerSchema[] = [
+  {
+    name: 'Jank',
+    display: ['marker-table', 'marker-chart'],
+    tooltipLabel: 'Jank – event processing delay',
+    tableLabel: 'Event processing delay',
+    data: [
+      {
+        label: 'Description',
+        value: oneLine`
+          Jank markers show when the main event loop of a thread has been busy. It is
+          a good indicator that there may be some kind of performance problem that
+          is worth investigating.
+        `,
+      },
+    ],
   },
 ];
 

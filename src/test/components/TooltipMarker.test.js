@@ -13,6 +13,7 @@ import {
   getProfileFromTextSamples,
   getNetworkMarkers,
   getProfileWithMarkers,
+  getProfileWithEventDelays,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
@@ -684,6 +685,38 @@ describe('TooltipMarker', function() {
           marker={marker}
           threadsKey={threadIndex}
           className="propClass"
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('shows a tooltip for Jank markers', function() {
+    const eventDelay = [
+      0,
+      20,
+      40,
+      60,
+      70,
+      // break point
+      0,
+      20,
+      40,
+    ];
+
+    const profile = getProfileWithEventDelays(eventDelay);
+    const store = storeWithProfile(profile);
+    const { getState } = store;
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={0}
+          marker={getMarker(0)}
+          threadsKey={0}
           restrictHeightWidth={true}
         />
       </Provider>
