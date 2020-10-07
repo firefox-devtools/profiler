@@ -89,7 +89,6 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 
   handleButtonFocus = () => {
     this.setState({ focusedWithKey: this.getKey() });
-    
     const input = this.inputRef.current;
     if (input) {
       requestAnimationFrame(() => {
