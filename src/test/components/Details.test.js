@@ -24,7 +24,9 @@ jest.mock('../../components/flame-graph', () => 'flame-graph');
 jest.mock('../../components/stack-chart', () => 'stack-chart');
 jest.mock('../../components/marker-chart', () => 'marker-chart');
 jest.mock('../../components/marker-table', () => 'marker-table');
-jest.mock('../../components/network-chart', () => 'network-chart');
+jest.mock('../../components/network-chart', () => ({
+  NetworkChart: 'network-chart',
+}));
 jest.mock('../../components/js-tracer', () => 'js-tracer');
 
 describe('app/Details', function() {
