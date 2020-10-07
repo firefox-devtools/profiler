@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
 import MarkerTable from '../../components/marker-table';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
   updatePreviewSelection,
   changeMarkersSearchString,
@@ -43,7 +43,7 @@ describe('MarkerTable', function() {
     const renderResult = render(
       <Provider store={store}>
         <>
-          <MarkerContextMenu />
+          <MaybeMarkerContextMenu />
           <MarkerTable />
         </>
       </Provider>
@@ -79,8 +79,8 @@ describe('MarkerTable', function() {
   it('renders some basic markers and updates when needed', () => {
     const { container, fixedRows, scrolledRows, dispatch } = setup();
 
-    expect(fixedRows()).toHaveLength(5);
-    expect(scrolledRows()).toHaveLength(5);
+    expect(fixedRows()).toHaveLength(7);
+    expect(scrolledRows()).toHaveLength(7);
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */

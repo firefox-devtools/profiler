@@ -95,7 +95,6 @@ export type Marker = {|
   start: Milliseconds,
   end: Milliseconds | null,
   name: string,
-  title: string | null,
   category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,

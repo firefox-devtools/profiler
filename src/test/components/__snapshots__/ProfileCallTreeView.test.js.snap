@@ -413,7 +413,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -951,7 +951,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 64px; width: 3000px;"
+            style="height: 64px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -1489,7 +1489,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -2139,7 +2139,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -2789,7 +2789,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -3863,7 +3863,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -4481,7 +4481,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -5099,7 +5099,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -5686,7 +5686,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; width: 3000px;"
+            style="height: 112px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -6259,7 +6259,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; width: 3000px;"
+            style="height: 112px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -6770,7 +6770,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 80px; width: 3000px;"
+            style="height: 80px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -7224,7 +7224,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 80px; width: 3000px;"
+            style="height: 80px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -7740,7 +7740,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 112px; width: 3000px;"
+            style="height: 112px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"

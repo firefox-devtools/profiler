@@ -430,6 +430,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
       return (
         <TooltipMarker
+          markerIndex={markerIndex}
           marker={getMarker(markerIndex)}
           threadsKey={threadsKey}
           restrictHeightWidth={true}

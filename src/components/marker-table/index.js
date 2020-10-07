@@ -13,6 +13,7 @@ import MarkerTableEmptyReasons from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
   getScrollToSelectionGeneration,
+  getMarkerSchemaByName,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadsKey } from '../../selectors/url-state';
@@ -22,10 +23,6 @@ import {
 } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
-import {
-  getMarkerFullDescription,
-  getMarkerCategory,
-} from '../../profile-logic/marker-data';
 
 import './index.css';
 
@@ -34,15 +31,20 @@ import type {
   Marker,
   MarkerIndex,
   Milliseconds,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
+import { getMarkerSchemaName } from '../../profile-logic/marker-schema';
+
+// Limit how many characters in the description get sent to the DOM.
+const MAX_DESCRIPTION_CHARACTERS = 500;
 
 type MarkerDisplayData = {|
   start: string,
   duration: string | null,
   name: string,
-  category: string,
+  type: string,
 |};
 
 class MarkerTree {
@@ -50,16 +52,22 @@ class MarkerTree {
   _markerIndexes: MarkerIndex[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
+  _markerSchemaByName: MarkerSchemaByName;
+  _getMarkerLabel: MarkerIndex => string;
 
   constructor(
     getMarker: MarkerIndex => Marker,
     markerIndexes: MarkerIndex[],
-    zeroAt: Milliseconds
+    zeroAt: Milliseconds,
+    markerSchemaByName: MarkerSchemaByName,
+    getMarkerLabel: MarkerIndex => string
   ) {
     this._getMarker = getMarker;
     this._markerIndexes = markerIndexes;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
+    this._markerSchemaByName = markerSchemaByName;
+    this._getMarkerLabel = getMarkerLabel;
   }
 
   getRoots(): MarkerIndex[] {
@@ -95,8 +103,14 @@ class MarkerTree {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
       const marker = this._getMarker(markerIndex);
-      const name = getMarkerFullDescription(marker);
-      const category = getMarkerCategory(marker);
+
+      let name = this._getMarkerLabel(markerIndex);
+
+      if (name.length > MAX_DESCRIPTION_CHARACTERS) {
+        // This was adapted from the log marker payloads as a general rule for
+        // the marker table. This way no special handling is needed.
+        name = name.substring(0, MAX_DESCRIPTION_CHARACTERS) + '…';
+      }
 
       let duration = null;
       if (marker.incomplete) {
@@ -109,7 +123,7 @@ class MarkerTree {
         start: _formatStart(marker.start, this._zeroAt),
         duration,
         name,
-        category,
+        type: getMarkerSchemaName(this._markerSchemaByName, marker),
       };
       this._displayDataByIndex.set(markerIndex, displayData);
     }
@@ -129,6 +143,8 @@ type StateProps = {|
   +rightClickedMarkerIndex: MarkerIndex | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
+  +markerSchemaByName: MarkerSchemaByName,
+  +getMarkerLabel: MarkerIndex => string,
 |};
 
 type DispatchProps = {|
@@ -142,7 +158,7 @@ class MarkerTable extends PureComponent<Props> {
   _fixedColumns = [
     { propName: 'start', title: 'Start' },
     { propName: 'duration', title: 'Duration' },
-    { propName: 'category', title: 'Category' },
+    { propName: 'type', title: 'Type' },
   ];
   _mainColumn = { propName: 'name', title: 'Description' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
@@ -191,8 +207,16 @@ class MarkerTable extends PureComponent<Props> {
       zeroAt,
       selectedMarker,
       rightClickedMarkerIndex,
+      markerSchemaByName,
+      getMarkerLabel,
     } = this.props;
-    const tree = this.getMarkerTree(getMarker, markerIndexes, zeroAt);
+    const tree = this.getMarkerTree(
+      getMarker,
+      markerIndexes,
+      zeroAt,
+      markerSchemaByName,
+      getMarkerLabel
+    );
     return (
       <div
         className="markerTable"
@@ -237,6 +261,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     zeroAt: getZeroAt(state),
+    markerSchemaByName: getMarkerSchemaByName(state),
+    getMarkerLabel: selectedThreadSelectors.getMarkerTableLabelGetter(state),
   }),
   mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },
   component: MarkerTable,

@@ -1,12 +1,8 @@
 .sidebar {
   overflow: auto;
-  padding: 1em;
   border-top: 1px solid var(--grey-30);
   background: var(--grey-10);
   font-size: 11px;
-
-  /* Subtract the splitter size. */
-  padding-inline-start: calc(1em - 5px);
 
   --sidebar-indent: 16px;
 }
@@ -14,7 +10,11 @@
 .sidebar-contents-wrapper {
   /* Allow absolute positioning that is dependent of the scrolling. */
   position: relative;
+  margin: 16px;
   line-height: 1.5;
+
+  /* Subtract the splitter size. */
+  margin-inline-start: calc(16px - 5px);
 }
 
 .sidebar-calltree .sidebar-contents-wrapper {

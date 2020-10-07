@@ -97,9 +97,9 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         Duration
       </span>
       <span
-        class="treeViewHeaderColumn treeViewFixedColumn category"
+        class="treeViewHeaderColumn treeViewFixedColumn type"
       >
-        Category
+        Type
       </span>
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
@@ -121,7 +121,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 96px;"
+            style="height: 128px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -147,7 +147,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   0s
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="UserTiming"
                 >
                   UserTiming
@@ -168,7 +168,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   title=""
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Paint"
                 >
                   Paint
@@ -191,10 +191,10 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   unknown
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
-                  title="IPC out"
+                  class="treeViewRowColumn treeViewFixedColumn type"
+                  title="IPC"
                 >
-                  IPC out
+                  IPC
                 </span>
               </div>
               <div
@@ -214,7 +214,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   584.00ns
                 </span>
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Text"
                 >
                   Text
@@ -222,6 +222,29 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn start"
+                  title="0.153s"
+                >
+                  0.153s
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn duration"
+                  title="584.00ns"
+                >
+                  584.00ns
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn type"
+                  title="Text"
+                >
+                  Text
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -235,17 +258,40 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   title=""
                 />
                 <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn type"
                   title="Log"
                 >
                   Log
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn start"
+                  title="0.162s"
+                >
+                  0.162s
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn duration"
+                  title="1ms"
+                >
+                  1ms
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn type"
+                  title="FileIO"
+                >
+                  FileIO
                 </span>
               </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 96px; width: 3000px;"
+            style="height: 128px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -314,7 +360,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  PContent::Msg_PreferenceUpdate — sent to 2222
+                  IPCOut — PContent::Msg_PreferenceUpdate — sent to 2222
                 </span>
               </div>
               <div
@@ -335,7 +381,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  setTimeout — 5.5
+                  setTimeout — 5.5
                 </span>
               </div>
               <div
@@ -356,8 +402,50 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Q…
+                </span>
+              </div>
+              <div
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
                   (nsJarProtocol) nsJARChannel::nsJARChannel [this=0x87f1ec80]
 
+                </span>
+              </div>
+              <div
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  (PoisonIOInterposer) create/open — /foo/bar
                 </span>
               </div>
             </div>

@@ -1398,20 +1398,13 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
       <div
         class="tooltipTitle"
       >
-        commandupdate
+        commandupdate — DOMEvent
       </div>
     </div>
   </div>
   <div
     class="tooltipDetails"
   >
-    <div
-      class="tooltipLabel"
-    >
-      Marker
-      :
-    </div>
-    DOMEvent
     <div
       class="tooltipLabel"
     >
@@ -2276,7 +2269,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       <div
         class="tooltipTitle"
       >
-        IPC — sent to 2222
+        IPC — sent to 2222
       </div>
     </div>
   </div>
@@ -2297,6 +2290,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
       :
     </div>
     false
+    <div
+      class="tooltipLabel"
+    >
+      From
+      :
+    </div>
+    Main Thread (Thread ID: 0)
     <div
       class="tooltipLabel"
     >
@@ -2355,7 +2355,7 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       <div
         class="tooltipTitle"
       >
-        IPC — sent to 2222
+        IPC — sent to 2222
       </div>
     </div>
   </div>
@@ -2376,6 +2376,13 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
       :
     </div>
     false
+    <div
+      class="tooltipLabel"
+    >
+      From
+      :
+    </div>
+    Main Thread (Thread ID: 0)
     <div
       class="tooltipLabel"
     >
@@ -3246,7 +3253,11 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       Marker
       :
     </div>
-    UserTiming
+    <div
+      class="tooltipDetailsDescription"
+    >
+      UserTiming
+    </div>
     <div
       class="tooltipLabel"
     >
@@ -3260,7 +3271,11 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       Description
       :
     </div>
-    UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+    <div
+      class="tooltipDetailsDescription"
+    >
+      UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+    </div>
     <div
       class="tooltipLabel"
     >
@@ -3268,6 +3283,54 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
       :
     </div>
     Main Thread
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
+<div
+  class="tooltipMarker"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        70ms
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Jank – event processing delay
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Description
+      :
+    </div>
+    <div
+      class="tooltipDetailsDescription"
+    >
+      Jank markers show when the main event loop of a thread has been busy. It is a good indicator that there may be some kind of performance problem that is worth investigating.
+    </div>
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
   </div>
 </div>
 `;
