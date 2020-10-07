@@ -18,7 +18,6 @@ import {
   getPageList,
   getZeroAt,
   getThreadIdToNameMap,
-  getMarkerLabelMakerByName,
   getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
 
@@ -38,7 +37,6 @@ import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import {
   formatFromMarkerSchema,
   getMarkerSchema,
-  getMarkerSchemaName,
 } from '../../profile-logic/marker-schema';
 
 import type {
@@ -49,7 +47,7 @@ import type {
   ThreadsKey,
   PageList,
   MarkerSchemaByName,
-  MarkerLabelMakerByName,
+  MarkerIndex,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -70,6 +68,7 @@ function _maybeFormatDuration(
 }
 
 type OwnProps = {|
+  +markerIndex: MarkerIndex,
   +marker: Marker,
   +threadsKey: ThreadsKey,
   +className?: string,
@@ -87,7 +86,7 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
-  +markerLabelMakerByName: MarkerLabelMakerByName,
+  +getMarkerLabel: MarkerIndex => string,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -195,14 +194,19 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           if (schemaData.value === undefined) {
             const { key, label, format } = schemaData;
             if (key in data) {
-              details.push(
-                <TooltipDetail
-                  key={schema.name + '-' + key}
-                  label={label || key}
-                >
-                  {formatFromMarkerSchema(schema.name, format, data[key])}
-                </TooltipDetail>
-              );
+              const value = data[key];
+
+              // Don't add undefined values, as values are optional.
+              if (value !== undefined && value !== null) {
+                details.push(
+                  <TooltipDetail
+                    key={schema.name + '-' + key}
+                    label={label || key}
+                  >
+                    {formatFromMarkerSchema(schema.name, format, value)}
+                  </TooltipDetail>
+                );
+              }
             }
           }
 
@@ -253,22 +257,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           // Network markers embed lots of timing information inside of them, that
           // must be reworked in the tooltip.
           details.push(...getNetworkMarkerDetails(data));
-          break;
-        }
-        case 'tracing': {
-          // The DOMEvent markers include a latency that is computed from a timestamp
-          // and the marker start time.
-          if (data.category === 'DOMEvent') {
-            const latency =
-              data.timeStamp === undefined
-                ? null
-                : formatMilliseconds(marker.start - data.timeStamp);
-            details.push(
-              <TooltipDetail label="Latency" key="tracing-Latency">
-                {latency}
-              </TooltipDetail>
-            );
-          }
           break;
         }
         case 'IPC': {
@@ -368,19 +356,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _renderTitle(): string {
-    const { marker, markerSchemaByName, markerLabelMakerByName } = this.props;
-    const { data } = marker;
-    if (data) {
-      // Add the details for the markers based on their Marker schema.
-      const applyLabel =
-        markerLabelMakerByName[getMarkerSchemaName(markerSchemaByName, marker)];
-      if (applyLabel) {
-        return applyLabel(data);
-      }
-    }
-
-    // Fallback to the title or the marker name.
-    return marker.title || marker.name;
+    const { markerIndex, getMarkerLabel } = this.props;
+    return getMarkerLabel(markerIndex);
   }
 
   /**
@@ -443,7 +420,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       zeroAt: getZeroAt(state),
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
-      markerLabelMakerByName: getMarkerLabelMakerByName(state),
+      getMarkerLabel: selectors.getMarkerTooltipLabelGetter(state),
     };
   },
   component: MarkerTooltipContents,

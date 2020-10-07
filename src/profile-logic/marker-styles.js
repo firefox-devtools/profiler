@@ -4,18 +4,16 @@
 // @flow
 import * as colors from 'photon-colors';
 
-import type { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels, Marker } from 'firefox-profiler/types';
 
-type MarkerStyles = {
-  +[styleName: string]: {|
-    +top: CssPixels,
-    +height: CssPixels,
-    +background: string,
-    +squareCorners: boolean,
-    +borderLeft: null | string,
-    +borderRight: null | string,
-  |},
-};
+type MarkerStyle = {|
+  +top: CssPixels,
+  +height: CssPixels,
+  +background: string,
+  +squareCorners: boolean,
+  +borderLeft: null | string,
+  +borderRight: null | string,
+|};
 
 const defaultStyle = {
   top: 0,
@@ -39,7 +37,22 @@ const ccStyle = {
   background: colors.ORANGE_50,
 };
 
-export const markerStyles: MarkerStyles = {
+/**
+ * Get the marker style. Start off by looking at the marker name, then fallback to
+ * the marker type.
+ */
+export function getMarkerStyle(marker: Marker): MarkerStyle {
+  const { data, name } = marker;
+  if (name in markerStyles) {
+    return markerStyles[name];
+  }
+  if (data && data.type in markerStyles) {
+    return markerStyles[data.type];
+  }
+  return markerStyles.default;
+}
+
+const markerStyles: { +[styleName: string]: MarkerStyle } = {
   default: defaultStyle,
   RefreshDriverTick: {
     ...defaultStyle,

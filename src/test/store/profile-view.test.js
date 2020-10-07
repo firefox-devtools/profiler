@@ -182,7 +182,7 @@ describe('getJankMarkersForHeader', function() {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
-      .getJankMarkerIndexesForHeader(getState())
+      .getTimelineJankMarkerIndexes(getState())
       .map(getMarker);
   }
 
@@ -191,7 +191,7 @@ describe('getJankMarkersForHeader', function() {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     return selectedThreadSelectors
-      .getJankMarkerIndexesForHeader(getState())
+      .getTimelineJankMarkerIndexes(getState())
       .map(getMarker);
   }
 
@@ -962,6 +962,7 @@ describe('actions/ProfileView', function() {
             direction: 'receiving',
             phase: 'endpoint',
             sync: false,
+            niceDirection: 'receiving from Content Process (Thread ID: 1111)',
           },
         ],
         ['c', 2, null],
@@ -983,6 +984,7 @@ describe('actions/ProfileView', function() {
             direction: 'sending',
             phase: 'endpoint',
             sync: false,
+            niceDirection: 'sending to 9999',
           },
         ],
       ]);
@@ -1090,12 +1092,9 @@ describe('actions/ProfileView', function() {
           0,
           null,
           {
-            type: 'tracing',
-            category: 'DOMEvent',
-            timeStamp: 1001,
-            interval: 'start',
+            type: 'DOMEvent',
+            latency: 1001,
             eventType: 'mousedown',
-            phase: 1,
           },
         ],
         [
@@ -1739,7 +1738,7 @@ describe('snapshots of selectors/profile', function() {
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     expect(
       selectedThreadSelectors
-        .getJankMarkerIndexesForHeader(getState())
+        .getTimelineJankMarkerIndexes(getState())
         .map(getMarker)
     ).toMatchSnapshot();
   });
