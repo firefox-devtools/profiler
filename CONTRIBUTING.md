@@ -2,7 +2,7 @@
 
 **NOTE**: In October 2020, due to the Outreachy contribution period, we moved our `good first issue` label to `outreachy onboarding` label. We did this to give priority to Outreachy applicants. If you are an Outreachy applicant, please look at this label instead. If you are not, we are sorry, but we don't offer any mentored starter issues this month since we have limited resources. If you still want to contribute, you can pick one of the [more challenging issues](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22outreachy+onboarding%22+-label%3Aassigned).
 
-**This project doesn't take part to Hacktoberfest 2020**, because we focus on [Outreachy](https://www.outreachy.org/) during this month.
+**This project doesn't take part in Hacktoberfest 2020**, because we focus on [Outreachy](https://www.outreachy.org/) during this month.
 
 First off, thanks for taking the time to contribute to Mozilla and the Firefox Profiler! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
 
