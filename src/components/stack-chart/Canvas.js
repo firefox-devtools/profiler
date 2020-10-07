@@ -87,7 +87,7 @@ const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
-class StackChartCanvas extends React.PureComponent<Props> {
+class StackChartCanvasImpl extends React.PureComponent<Props> {
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
 
@@ -576,6 +576,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  StackChartCanvas
-);
+export const StackChartCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(StackChartCanvasImpl);

@@ -21,7 +21,9 @@ import type { TabSlug } from '../../app-logic/tabs-handling';
 // warning.
 jest.mock('../../components/calltree/ProfileCallTreeView', () => 'call-tree');
 jest.mock('../../components/flame-graph', () => 'flame-graph');
-jest.mock('../../components/stack-chart', () => 'stack-chart');
+jest.mock('../../components/stack-chart', () => ({
+  StackChart: 'stack-chart',
+}));
 jest.mock('../../components/marker-chart', () => 'marker-chart');
 jest.mock('../../components/marker-table', () => 'marker-table');
 jest.mock('../../components/network-chart', () => ({

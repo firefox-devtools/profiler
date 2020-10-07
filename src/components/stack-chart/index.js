@@ -10,7 +10,7 @@ import {
   JS_TRACER_MAXIMUM_CHART_ZOOM,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import StackChartCanvas from './Canvas';
+import { StackChartCanvas } from './Canvas';
 import {
   getCommittedRange,
   getProfileInterval,
@@ -24,7 +24,7 @@ import {
   getShowUserTimings,
   getSelectedThreadsKey,
 } from '../../selectors/url-state';
-import StackChartEmptyReasons from './StackChartEmptyReasons';
+import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
@@ -86,7 +86,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class StackChartGraph extends React.PureComponent<Props> {
+class StackChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
   /**
    * Determine the maximum amount available to zoom in.
@@ -220,7 +220,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const showUserTimings = getShowUserTimings(state);
     const combinedTimingRows = showUserTimings
@@ -256,7 +256,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
     updatePreviewSelection,
   },
-  component: StackChartGraph,
+  component: StackChartImpl,
 });
 
 // This function is given the StackChartCanvas's chartProps.
