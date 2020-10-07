@@ -1165,43 +1165,6 @@ export function sanitizeTextMarker(
   };
 }
 
-export function getMarkerCategory(marker: Marker) {
-  let category = 'unknown';
-  if (marker.data) {
-    const data = marker.data;
-
-    if (typeof data.category === 'string') {
-      category = data.category;
-    }
-
-    switch (data.type) {
-      case 'UserTiming':
-        category = marker.name;
-        break;
-      case 'FileIO':
-        category = data.type;
-        break;
-      case 'Bailout':
-        category = 'Bailout';
-        break;
-      case 'Network':
-        category = 'Network';
-        break;
-      case 'Text':
-        category = 'Text';
-        break;
-      case 'Log':
-        category = 'Log';
-        break;
-      case 'IPC':
-        category = data.direction === 'sending' ? 'IPC out' : 'IPC in';
-        break;
-      default:
-    }
-  }
-  return category;
-}
-
 /**
  * Markers can be filtered by display area using the marker schema. Get a list of
  * marker "types" (the type field in the Payload) for a specific location.
