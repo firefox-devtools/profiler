@@ -18,8 +18,8 @@ import {
 } from '../profile-logic/marker-data';
 
 import {
-  markerSchema,
-  getMarkerLabelMaker,
+  markerSchemaGecko,
+  markerSchemaFrontEndOnly,
 } from '../profile-logic/marker-schema';
 
 import type {
@@ -70,7 +70,6 @@ import type {
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
-  MarkerLabelMakerByName,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -179,7 +178,12 @@ export const getContentfulSpeedIndexProgress: Selector<
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
 
-export const getMarkerSchema: Selector<MarkerSchema[]> = () => markerSchema;
+export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
+  // TODO - This will be replaced with a function to get the schema. For now
+  // trivially pass in the Gecko schema.
+  () => markerSchemaGecko,
+  schema => [...schema, ...markerSchemaFrontEndOnly]
+);
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,
@@ -189,19 +193,6 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelecto
       result[schema.name] = schema;
     }
     return result;
-  }
-);
-
-export const getMarkerLabelMakerByName: Selector<MarkerLabelMakerByName> = createSelector(
-  getMarkerSchema,
-  markerSchemaList => {
-    const results: MarkerLabelMakerByName = Object.create(null);
-    for (const schema of markerSchemaList) {
-      if (schema.tooltipLabel) {
-        results[schema.name] = getMarkerLabelMaker(schema.tooltipLabel);
-      }
-    }
-    return results;
   }
 );
 

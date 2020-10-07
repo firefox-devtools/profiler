@@ -14,7 +14,7 @@ import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
 import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
-import NetworkChart from '../network-chart/';
+import { NetworkChart } from '../network-chart/';
 import FlameGraph from '../flame-graph/';
 import { JsTracer } from '../js-tracer/';
 import { selectSidebar } from '../sidebar';
@@ -24,7 +24,7 @@ import { getSelectedTab } from '../../selectors/url-state';
 import { getIsSidebarOpen } from '../../selectors/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
-import MarkerContextMenu from '../shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../shared/MarkerContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -105,7 +105,7 @@ class ProfileViewer extends PureComponent<Props> {
           }
         </ErrorBoundary>
         <CallNodeContextMenu />
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
       </div>
     );
   }

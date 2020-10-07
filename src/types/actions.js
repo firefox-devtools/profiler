@@ -120,6 +120,11 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
+export type RightClickedMarkerInfo = {|
+  +threadsKey: ThreadsKey,
+  +markerIndex: MarkerIndex,
+|};
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',

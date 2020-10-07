@@ -1171,9 +1171,6 @@ export function adjustMarkerTimestamps(
         if (newData.cause) {
           newData.cause.time += delta;
         }
-        if (newData.category === 'DOMEvent' && 'timeStamp' in newData) {
-          newData.timeStamp += delta;
-        }
       }
       if (newData.type === 'Network') {
         if (typeof newData.domainLookupStart === 'number') {

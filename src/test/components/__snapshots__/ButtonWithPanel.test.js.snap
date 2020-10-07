@@ -5,6 +5,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton buttonButton"
     type="button"
     value="My Button"
@@ -35,6 +36,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
     title="Click here to open the panel"
     type="button"
@@ -66,6 +68,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton buttonButton"
     type="button"
     value="My Button"
@@ -96,6 +99,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
     title="Click here to open the panel"
     type="button"
@@ -127,6 +131,7 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton"
     type="button"
     value="My Button"
@@ -157,6 +162,7 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
     title="Click here to open the panel"
     type="button"
