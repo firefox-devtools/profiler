@@ -43,13 +43,6 @@ import type {
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
-function _formatIPCMarkerDirection(data) {
-  if (data.direction === 'sending') {
-    return `sent to ${data.recvThreadName || data.otherPid}`;
-  }
-  return `received from ${data.sendThreadName || data.otherPid}`;
-}
-
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
  * feature that can be turned on and off. When on, every sample includes a responsiveness
@@ -79,15 +72,14 @@ export function deriveJankMarkers(
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       end: lastTimestamp,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
       category: otherCategoryIndex,
-      data: null,
+      data: { type: 'Jank' },
     });
 
   let lastResponsiveness: number = 0;
   let lastTimestamp: number = 0;
-  const jankInstances = [];
+  const jankInstances: Marker[] = [];
   for (let i = 0; i < samples.length; i++) {
     let currentResponsiveness;
     if (samples.eventDelay) {
@@ -613,7 +605,6 @@ export function deriveMarkersFromRawMarkerTable(
                 start: startStartTime,
                 end: endEndTime,
                 name: stringTable.getString(name),
-                title: null,
                 category,
                 data: {
                   ...endData,
@@ -637,7 +628,6 @@ export function deriveMarkersFromRawMarkerTable(
                 start,
                 end,
                 name: stringTable.getString(name),
-                title: null,
                 category,
                 data: {
                   ...endData,
@@ -673,7 +663,6 @@ export function deriveMarkersFromRawMarkerTable(
               start: previousStartTime,
               end: thisStartTime,
               name: 'CompositorScreenshot',
-              title: null,
               category,
               data,
             });
@@ -725,14 +714,20 @@ export function deriveMarkersFromRawMarkerTable(
             incomplete = false;
           }
 
-          const allData = { ...data, ...sharedData };
+          const allData = {
+            ...data,
+            ...sharedData,
+            niceDirection:
+              data.direction === 'sending'
+                ? `sent to ${sharedData.recvThreadName || data.otherPid}`
+                : `received from ${sharedData.sendThreadName || data.otherPid}`,
+          };
 
           // TODO - How do I get the other rawMarkerIndexes
           addMarker([rawMarkerIndex], {
             start,
             end,
             name,
-            title: `IPC — ${_formatIPCMarkerDirection(allData)}`,
             category,
             data: allData,
             incomplete,
@@ -755,7 +750,6 @@ export function deriveMarkersFromRawMarkerTable(
           ),
           end: null,
           name: stringTable.getString(name),
-          title: null,
           category,
           data,
         });
@@ -775,7 +769,6 @@ export function deriveMarkersFromRawMarkerTable(
             start: startTime,
             end: endTime,
             name: stringTable.getString(name),
-            title: null,
             category,
             data,
           });
@@ -816,7 +809,6 @@ export function deriveMarkersFromRawMarkerTable(
               start,
               name: stringTable.getString(name),
               end: endTime,
-              title: null,
               category,
               data: rawMarkers.data[startIndex],
             });
@@ -838,7 +830,6 @@ export function deriveMarkersFromRawMarkerTable(
               start,
               name: stringTable.getString(name),
               end: endTime,
-              title: null,
               category,
               data,
               incomplete: true,
@@ -867,7 +858,6 @@ export function deriveMarkersFromRawMarkerTable(
         name: stringTable.getString(rawMarkers.name[startIndex]),
         data: rawMarkers.data[startIndex],
         category: rawMarkers.category[startIndex],
-        title: null,
         incomplete: true,
       });
     }
@@ -882,7 +872,6 @@ export function deriveMarkersFromRawMarkerTable(
       start: startTime,
       end: Math.max(endOfThread, startTime),
       name: stringTable.getString(rawMarkers.name[startIndex]),
-      title: null,
       category: rawMarkers.category[startIndex],
       data: rawMarkers.data[startIndex],
       incomplete: true,
@@ -901,7 +890,6 @@ export function deriveMarkersFromRawMarkerTable(
       name: 'CompositorScreenshot',
       category: rawMarkers.category[previousScreenshotMarker],
       data: rawMarkers.data[previousScreenshotMarker],
-      title: null,
     });
   }
 
@@ -1272,52 +1260,6 @@ export function sanitizeTextMarker(
     ...payload,
     name: removeURLs(payload.name),
   };
-}
-
-export function getMarkerFullDescription(marker: Marker) {
-  let description = marker.name;
-
-  if (marker.data) {
-    const data = marker.data;
-    switch (data.type) {
-      case 'tracing':
-        if (typeof data.category === 'string') {
-          if (data.category === 'log' && description.length > 100) {
-            description = description.substring(0, 100) + '...';
-          } else if (data.category === 'DOMEvent') {
-            description = data.eventType;
-          }
-        }
-        break;
-      case 'UserTiming':
-        description = data.name;
-        break;
-      case 'FileIO':
-        if (data.source) {
-          description = `(${data.source}) `;
-        }
-        description += data.operation;
-        if (data.filename) {
-          description = data.operation
-            ? `${description} — ${data.filename}`
-            : data.filename;
-        }
-        break;
-      case 'Text':
-        description += ` — ${data.name}`;
-        break;
-      case 'Log':
-        description = `(${data.module}) ${data.name}`;
-        break;
-      case 'IPC':
-        description = `${data.messageType} — ${_formatIPCMarkerDirection(
-          data
-        )}`;
-        break;
-      default:
-    }
-  }
-  return description;
 }
 
 export function getMarkerCategory(marker: Marker) {

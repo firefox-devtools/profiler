@@ -13,6 +13,7 @@ import MenuButtons from './MenuButtons';
 import WindowTitle from '../shared/WindowTitle';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
+import BeforeUnloadManager from './BeforeUnloadManager';
 
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import Timeline from '../timeline';
@@ -135,6 +136,7 @@ class ProfileViewer extends PureComponent<Props> {
           </SplitterLayout>
           <WindowTitle />
           <SymbolicationStatusOverlay />
+          <BeforeUnloadManager />
         </div>
       </div>
     );

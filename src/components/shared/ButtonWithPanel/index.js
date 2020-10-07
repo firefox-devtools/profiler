@@ -43,7 +43,6 @@ type Props = {|
   +buttonClassName?: string,
   +onPanelOpen?: () => mixed,
   +onPanelClose?: () => mixed,
-  +buttonRef?: {| -current: null | HTMLInputElement |},
   +title?: string,
 |};
 
@@ -53,6 +52,8 @@ type State = {|
 
 export class ButtonWithPanel extends React.PureComponent<Props, State> {
   _panel: ArrowPanel | null = null;
+  _buttonRef = React.createRef<HTMLInputElement>();
+  _wrapperRef = React.createRef<HTMLElement>();
 
   constructor(props: Props) {
     super(props);
@@ -83,6 +84,16 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   _onPanelClose = () => {
     this.setState({ open: false });
+
+    // Let's focus the delete button after dismissing the dialog, but _only_ if
+    // the focus was part of the dialog before.
+    // Note this branch isn't tested because jsdom doesn't support the
+    // :focus-within selector.
+    /* istanbul ignore if */
+    if (this.isFocusWithin()) {
+      this.focus();
+    }
+
     if (this.props.onPanelClose) {
       this.props.onPanelClose();
     }
@@ -122,6 +133,27 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
     }
   };
 
+  // This function isn't called in tests because isFocusWithin never returns
+  // true in jsdom. So let's ignore ir from the code coverage report.
+  /* istanbul ignore next */
+  focus() {
+    if (this._buttonRef.current) {
+      this._buttonRef.current.focus();
+    }
+  }
+
+  isFocusWithin(): boolean {
+    try {
+      if (this._wrapperRef.current) {
+        return this._wrapperRef.current.matches(':focus-within');
+      }
+    } catch {
+      // This browser doesn't support :focus-within (especially JSDOM), let's
+      // degrade gracefully.
+    }
+    return false;
+  }
+
   render() {
     const {
       className,
@@ -129,19 +161,22 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
       panelContent,
       panelClassName,
       buttonClassName,
-      buttonRef,
       title,
     } = this.props;
     const { open } = this.state;
     return (
-      <div className={classNames('buttonWithPanel', className, { open })}>
+      <div
+        className={classNames('buttonWithPanel', className, { open })}
+        ref={this._wrapperRef}
+      >
         <input
           type="button"
           className={classNames('buttonWithPanelButton', buttonClassName)}
           value={label}
+          aria-expanded={String(open)}
           title={open ? null : title}
           onClick={this._onButtonClick}
-          ref={buttonRef}
+          ref={this._buttonRef}
         />
         <ArrowPanel
           className={panelClassName}

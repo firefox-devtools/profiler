@@ -13,6 +13,7 @@ import {
   getProfileFromTextSamples,
   getNetworkMarkers,
   getProfileWithMarkers,
+  getProfileWithEventDelays,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
@@ -74,11 +75,8 @@ describe('TooltipMarker', function() {
         10.5,
         11.3,
         {
-          type: 'tracing',
-          category: 'DOMEvent',
+          type: 'DOMEvent',
           eventType: 'commandupdate',
-          interval: 'start',
-          phase: 2,
           innerWindowID: innerWindowID,
         },
       ],
@@ -357,6 +355,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'endpoint',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -374,6 +373,7 @@ describe('TooltipMarker', function() {
           direction: 'sending',
           phase: 'transferStart',
           sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
@@ -413,6 +413,7 @@ describe('TooltipMarker', function() {
       const { container } = render(
         <Provider store={store}>
           <TooltipMarker
+            markerIndex={markerIndex}
             marker={marker}
             threadsKey={threadIndex}
             className="propClass"
@@ -451,6 +452,7 @@ describe('TooltipMarker', function() {
     return render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={0}
           className="propClass"
@@ -679,9 +681,42 @@ describe('TooltipMarker', function() {
     const { container } = render(
       <Provider store={store}>
         <TooltipMarker
+          markerIndex={markerIndexes[0]}
           marker={marker}
           threadsKey={threadIndex}
           className="propClass"
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('shows a tooltip for Jank markers', function() {
+    const eventDelay = [
+      0,
+      20,
+      40,
+      60,
+      70,
+      // break point
+      0,
+      20,
+      40,
+    ];
+
+    const profile = getProfileWithEventDelays(eventDelay);
+    const store = storeWithProfile(profile);
+    const { getState } = store;
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={0}
+          marker={getMarker(0)}
+          threadsKey={0}
           restrictHeightWidth={true}
         />
       </Provider>

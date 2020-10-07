@@ -81,6 +81,15 @@ export type MarkerSchema = {|
   // If none is provided, then the name is used.
   tooltipLabel?: string, // e.g. "Cycle Collect"
 
+  // This is how the marker shows up in the Marker Table description.
+  // If none is provided, then the name is used.
+  tableLabel?: string, // e.g. "{marker.data.eventType} – DOMEvent"
+
+  // This is how the marker shows up in the Marker Chart, where it is drawn
+  // on the screen as a bar.
+  // If none is provided, then the name is used.
+  chartLabel?: string,
+
   // The locations to display
   display: MarkerDisplayLocation[],
 
@@ -101,14 +110,6 @@ export type MarkerSchema = {|
 |};
 
 export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
-
-// This type is a more dynamic version of the Payload type.
-type DynamicMarkerPayload = { [key: string]: any };
-// Marker schema can create a dynamic tooltip label. For instance a schema with
-// a `tooltipLabel` field of "Event at {url}" would create a label based off of the
-// "url" property in the payload.
-export type MarkerLabelMaker = DynamicMarkerPayload => string;
-export type MarkerLabelMakerByName = ObjectMap<MarkerLabelMaker>;
 
 /**
  * Markers can include a stack. These are converted to a cause backtrace, which includes
@@ -544,12 +545,9 @@ export type LogMarkerPayload = {|
 |};
 
 export type DOMEventMarkerPayload = {|
-  type: 'tracing',
-  category: 'DOMEvent',
-  timeStamp?: Milliseconds,
-  interval: 'start' | 'end',
+  type: 'DOMEvent',
+  latency?: Milliseconds,
   eventType: string,
-  phase: 0 | 1 | 2 | 3,
   innerWindowID?: number,
 |};
 
@@ -661,6 +659,9 @@ export type IPCMarkerPayload = {|
   recvTid?: number,
   sendThreadName?: string,
   recvThreadName?: string,
+
+  // This field is a nicely formatted field for the direction.
+  niceDirection: string,
 |};
 
 export type MediaSampleMarkerPayload = {|
@@ -668,6 +669,11 @@ export type MediaSampleMarkerPayload = {|
   sampleStartTimeUs: Microseconds,
   sampleEndTimeUs: Microseconds,
 |};
+
+/**
+ * This type is generated on the Firefox Profiler side, and doesn't come from Gecko.
+ */
+export type JankPayload = {| type: 'Jank' |};
 
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
@@ -702,6 +708,7 @@ export type MarkerPayload =
   | ChromeDurationTraceEventPayload
   | ChromeInstantTraceEventPayload
   | MediaSampleMarkerPayload
+  | JankPayload
   | null;
 
 export type MarkerPayload_Gecko =
