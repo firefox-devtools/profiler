@@ -85,6 +85,8 @@ describe('timeline/TrackContextMenu', function() {
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
+       
+      const hideAllTracksByType= () => getByText(/Hide "Content Process"/);
 
       return {
         ...results,
@@ -95,6 +97,7 @@ describe('timeline/TrackContextMenu', function() {
         isolateProcessMainThreadItem,
         isolateScreenshotTrack,
         hideContentProcess,
+        hideAllTracksByType,
         trackItem,
       };
     }
@@ -110,7 +113,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { getState } = setupGlobalTrack();
+      const { hideAllTracksByType, getState } = setupGlobalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
@@ -200,6 +203,9 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
+
+
+
     it('can toggle a global track by clicking it', function() {
       const { trackItem, trackIndex, getState } = setupGlobalTrack();
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
@@ -250,6 +256,7 @@ describe('timeline/TrackContextMenu', function() {
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
       const hideDOMWorker = () => getByText('Hide "DOM Worker"');
+      const hideAllTracksByType = () => getByText('Hide "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {
@@ -259,6 +266,7 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateLocalTrackItem,
         hideDOMWorker,
+        hideAllTracksByType,
         trackItem,
         pid,
       };
@@ -270,7 +278,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { getState } = setupLocalTrack();
+      const { hideAllTracksByType, getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
