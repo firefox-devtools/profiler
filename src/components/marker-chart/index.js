@@ -9,7 +9,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import MarkerChartCanvas from './Canvas';
+import { MarkerChartCanvas } from './Canvas';
 import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
