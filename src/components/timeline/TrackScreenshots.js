@@ -217,14 +217,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
 
-    const distanceToTopFromTrackCenter = trackHeight / 2 + containerTop;
-    // If the hover height exceeds the top of screen,
-    // set it to the value so that it reaches the top of screen when it is centered.
-    if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
-      hoverHeight = 2 * distanceToTopFromTrackCenter;
-      hoverWidth = (hoverHeight * windowWidth) / windowHeight;
-    }
-
     if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
       // This is a really wide image, limit the height so it lays out reasonably.
       hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
