@@ -1301,6 +1301,38 @@ exports[`TooltipMarker renders properly redirect network markers 1`] = `
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTitle"
+      >
+        Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -&gt; resource://bar.js:3662
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -1325,49 +1357,42 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
     <div
       class="tooltipLabel"
     >
-      Type
+      Details
       :
     </div>
-    ShapeGuard
+    NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27
     <div
       class="tooltipLabel"
     >
-      Where
+      Thread
       :
     </div>
-    after getelem
+    Main Thread
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
     <div
-      class="tooltipLabel"
+      class="tooltipOneLine"
     >
-      Script
-      :
+      <div
+        class="tooltipTitle"
+      >
+        BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388
+      </div>
     </div>
-    resource://foo.js -&gt; resource://bar.js
-    <div
-      class="tooltipLabel"
-    >
-      Function Line
-      :
-    </div>
-    3,662
-    <div
-      class="tooltipLabel"
-    >
-      Bailout Line
-      :
-    </div>
-    3,666
-    <div
-      class="tooltipLabel"
-    >
-      Description
-      :
-    </div>
-    <div
-      style="max-width: 300px;"
-    >
-      A shape guard based on TI information failed. (We saw an object whose shape does not match that / any of those observed by the baseline IC.)
-    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
     <div
       class="tooltipLabel"
     >
@@ -2422,6 +2447,38 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: Invalidate http://mozilla.com/script.js:1234-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTitle"
+      >
+        Invalidate http://mozilla.com/script.js:1234
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -2446,17 +2503,10 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
     <div
       class="tooltipLabel"
     >
-      URL
+      Details
       :
     </div>
-    http://mozilla.com/script.js
-    <div
-      class="tooltipLabel"
-    >
-      Line
-      :
-    </div>
-    1,234
+    https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518
     <div
       class="tooltipLabel"
     >

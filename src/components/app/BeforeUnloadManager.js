@@ -16,7 +16,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class BeforeUnloadManager extends React.PureComponent<Props> {
+class BeforeUnloadManagerImpl extends React.PureComponent<Props> {
   manageBeforeUnloadListener() {
     const { isUploading } = this.props;
     if (isUploading) {
@@ -51,9 +51,9 @@ class BeforeUnloadManager extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const BeforeUnloadManager = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     isUploading: getUploadPhase(state) === 'uploading',
   }),
-  component: BeforeUnloadManager,
+  component: BeforeUnloadManagerImpl,
 });
