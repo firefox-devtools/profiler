@@ -8,7 +8,7 @@ import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
-import CallTreeEmptyReasons from './CallTreeEmptyReasons';
+import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import Icon from '../shared/Icon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
@@ -71,7 +71,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class CallTreeComponent extends PureComponent<Props> {
+class CallTreeComponentImpl extends PureComponent<Props> {
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
@@ -298,7 +298,11 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const CallTreeComponent = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -327,5 +331,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
   },
-  component: CallTreeComponent,
+  component: CallTreeComponentImpl,
 });
