@@ -71,7 +71,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class CallTreeComponentImpl extends PureComponent<Props> {
+class CallTreeComponent extends PureComponent<Props> {
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
@@ -298,11 +298,7 @@ class CallTreeComponentImpl extends PureComponent<Props> {
   }
 }
 
-export const CallTreeComponent = explicitConnect<
-  {||},
-  StateProps,
-  DispatchProps
->({
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -331,5 +327,5 @@ export const CallTreeComponent = explicitConnect<
     changeExpandedCallNodes,
     addTransformToStack,
   },
-  component: CallTreeComponentImpl,
+  component: CallTreeComponent,
 });
