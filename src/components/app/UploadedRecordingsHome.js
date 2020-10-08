@@ -5,10 +5,10 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { AppHeader } from './AppHeader';
-import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
+import { AppHeader } from 'firefox-profiler/components/app/AppHeader';
+import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 
-import './UploadedRecordingsHome.css';
+import 'firefox-profiler/components/app/UploadedRecordingsHome.css';
 
 // This component represents the root page for uploaded recordings. It doesn't
 // do much more than providing a header for ListOfPublishedProfiles.

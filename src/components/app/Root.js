@@ -5,12 +5,12 @@
 
 import React, { PureComponent } from 'react';
 import { Provider } from 'react-redux';
-import { UrlManager } from './UrlManager';
-import { FooterLinks } from './FooterLinks';
-import { ErrorBoundary } from './ErrorBoundary';
-import { AppViewRouter } from './AppViewRouter';
-import { ProfileLoader } from './ProfileLoader';
-import ServiceWorkerManager from './ServiceWorkerManager';
+import { UrlManager } from 'firefox-profiler/components/app/UrlManager';
+import { FooterLinks } from 'firefox-profiler/components/app/FooterLinks';
+import { ErrorBoundary } from 'firefox-profiler/components/app/ErrorBoundary';
+import { AppViewRouter } from 'firefox-profiler/components/app/AppViewRouter';
+import { ProfileLoader } from 'firefox-profiler/components/app/ProfileLoader';
+import ServiceWorkerManager from 'firefox-profiler/components/app/ServiceWorkerManager';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -18,7 +18,7 @@ type RootProps = {
   store: Store,
 };
 
-import { DragAndDrop } from './DragAndDrop';
+import { DragAndDrop } from 'firefox-profiler/components/app/DragAndDrop';
 
 export class Root extends PureComponent<RootProps> {
   render() {
