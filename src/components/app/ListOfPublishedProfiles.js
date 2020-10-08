@@ -185,20 +185,32 @@ type State = {|
 |};
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
+  _isMounted = false;
+
   state = {
     profileDataList: null,
   };
 
-  async _refreshList() {
+  _refreshList = async () => {
     const profileDataList = await listAllProfileData();
-    this.setState({
-      // We want to display the list with the most recent uploaded profile first.
-      profileDataList: profileDataList.reverse(),
-    });
-  }
+    if (this._isMounted) {
+      // It isn't ideal to use a setState here, but this is the only way.
+      this.setState({
+        // We want to display the list with the most recent uploaded profile first.
+        profileDataList: profileDataList.reverse(),
+      });
+    }
+  };
 
   async componentDidMount() {
+    this._isMounted = true;
     this._refreshList();
+    window.addEventListener('focus', this._refreshList);
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    window.removeEventListener('focus', this._refreshList);
   }
 
   onProfileDelete = () => {
