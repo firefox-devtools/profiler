@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import FlameGraphCanvas from './Canvas';
+import { FlameGraphCanvas } from './Canvas';
 import {
   getCategories,
   getCommittedRange,
@@ -89,7 +89,7 @@ type DispatchProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class FlameGraph extends React.PureComponent<Props> {
+class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
   _onSelectedCallNodeChange = (
@@ -339,8 +339,8 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
@@ -381,5 +381,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
   },
   options: { forwardRef: true },
-  component: FlameGraph,
+  component: FlameGraphImpl,
 });

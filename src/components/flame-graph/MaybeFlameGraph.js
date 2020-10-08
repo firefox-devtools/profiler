@@ -8,7 +8,7 @@ import explicitConnect from '../../utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
-import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
+import { FlameGraphEmptyReasons } from './FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -66,7 +66,7 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     return {
       invertCallstack: getInvertCallstack(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
