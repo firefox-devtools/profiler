@@ -32,6 +32,7 @@ import {
   getUploadPhase,
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 
@@ -78,8 +79,32 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     this.props.dismissNewlyPublished();
   }
 
+  _getUploadedStatus(dataSource: DataSource) {
+    switch (dataSource) {
+      case 'public':
+      case 'compare':
+      case 'from-url':
+        return 'uploaded';
+      case 'from-addon':
+      case 'from-file':
+        return 'local';
+      case 'none':
+      case 'uploaded-recordings':
+      case 'local':
+        throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
+      default:
+        throw assertExhaustiveCheck(dataSource);
+    }
+  }
+
   _renderMetaInfoButton() {
-    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    const {
+      profile,
+      symbolicationStatus,
+      resymbolicateProfile,
+      dataSource,
+    } = this.props;
+    const uploadedStatus = this._getUploadedStatus(dataSource);
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
@@ -115,7 +140,8 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       );
     }
 
-    const isRepublish = dataSource === 'public' || dataSource === 'compare';
+    const uploadedStatus = this._getUploadedStatus(dataSource);
+    const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
     let label = 'Publish…';
