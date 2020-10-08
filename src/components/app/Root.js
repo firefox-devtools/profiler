@@ -5,8 +5,8 @@
 
 import React, { PureComponent } from 'react';
 import { Provider } from 'react-redux';
-import UrlManager from './UrlManager';
-import FooterLinks from './FooterLinks';
+import { UrlManager } from './UrlManager';
+import { FooterLinks } from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
@@ -20,7 +20,7 @@ type RootProps = {
 
 import { DragAndDrop } from './DragAndDrop';
 
-export default class Root extends PureComponent<RootProps> {
+export class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (

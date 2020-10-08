@@ -25,7 +25,7 @@ import {
 } from '../../selectors/zipped-profiles';
 import { getPathInZipFileFromUrl } from '../../selectors/url-state';
 import TreeView from '../shared/TreeView';
-import ProfileViewer from './ProfileViewer';
+import { ProfileViewer } from './ProfileViewer';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
@@ -122,7 +122,7 @@ const ZipFileRow = explicitConnect<
  * to a particular one. However, it is a general purpose zip file
  * viewer to load profiles, so it can be used on arbitrary profiles.
  */
-class ZipFileViewer extends React.PureComponent<Props> {
+class ZipFileViewerImpl extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
   _treeView: ?TreeView<ZipDisplayData>;
@@ -338,7 +338,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const zipFileTree = getZipFileTree(state);
     if (zipFileTree === null) {
@@ -370,5 +370,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     returnToZipFileList,
     showErrorForNoFileInZip,
   },
-  component: ZipFileViewer,
+  component: ZipFileViewerImpl,
 });
