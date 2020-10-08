@@ -121,7 +121,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           <div className="menuButtonsPublishIcon" />
           <h1 className="menuButtonsPublishTitle">
             {isRepublish
-              ? 'Re-publish Performance Profile'
+              ? 'Re-upload Performance Profile'
               : 'Share Performance Profile'}
           </h1>
           <p className="menuButtonsPublishInfoDescription">
@@ -167,7 +167,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               className="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
             >
               <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload" />
-              Publish
+              Upload
             </button>
           </div>
         </form>

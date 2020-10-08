@@ -15,16 +15,26 @@
 }
 
 .profileNameButton {
+  position: relative; /* to be able to position the right border */
   overflow: hidden;
   padding: 0 9px;
   border: none;
-  border-right: 1px solid var(--grey-30);
   color: var(--grey-60);
   font: inherit;
   font-weight: 700;
   margin-inline-end: 5px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.profileNameButton::after {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  width: 1px;
+  height: calc(100% - 8px);
+  background: var(--grey-30);
+  content: '';
 }
 
 /* Using the style for links rather than for normal inputs, because we don't

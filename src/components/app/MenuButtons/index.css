@@ -6,9 +6,8 @@
   display: flex;
   height: 100%;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 12px;
   border: 0;
-  border-left: 1px solid var(--grey-30);
   margin: 0;
   background: none;
 
@@ -27,16 +26,62 @@
   background-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Use this class if a button has an icon */
+.menuButtonsButtonButton__hasIcon::before {
+  /* The icon size and width and height are defined as 1em so that it's adjusted automatically
+   * with the font-size. Then it has 4px padding on the right side (because it's
+   * at the left of the content), and the image is at the left of this space.
+   * So here is the layout for this element:
+   * <-left padding-> <-ICON (1em)-> <-4px-> CONTENT
+   */
+  width: 1em;
+  height: 1em;
+  padding-right: 4px;
+  background: no-repeat left/1em;
+  content: '';
+}
+
 .menuButtonsLink {
   position: relative; /* This allows positioning the ::before element. */
   cursor: default;
   text-decoration: none;
 }
 
+/* We're using ::after because ::before is used for icons. Even if the docs link
+ * doesn't define its icon like this yet, this is more future-proof.
+ */
+.menuButtonsLink::after {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 1px;
+  height: calc(100% - 8px);
+  background: var(--grey-30);
+  content: '';
+}
+
+/* This icon is defined as a separate element, so that it can possibly be reused
+ * in other places. */
 .open-in-new {
-  padding: 10px;
-  background-image: url(firefox-profiler-res/img/svg/open-in-new.svg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 11px;
+  /* The icon size and width and height are defined as 1em so that it's adjusted automatically
+   * with the font-size. Then it has 4px padding on the left side (because it's
+   * at the right of the content), and the image is at the right of this space.
+   */
+  width: 1em;
+  height: 1em;
+  padding-left: 4px;
+  background: url(firefox-profiler-res/img/svg/open-in-new.svg) no-repeat right /
+    1em;
+}
+
+.menuButtonsMetaInfoButtonButton__uploaded::before {
+  background-image: url(firefox-profiler-res/img/svg/material/cloud_on.svg);
+}
+
+.menuButtonsMetaInfoButtonButton__local::before {
+  background-image: url(firefox-profiler-res/img/svg/material/cloud_off.svg);
+}
+
+.menuButtonsRevertButton::before {
+  background-image: url(firefox-profiler-res/img/svg/undo-dark.svg);
 }

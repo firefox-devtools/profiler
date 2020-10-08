@@ -108,8 +108,10 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
-        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
-        label="Profile Info"
+        buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButtonButton__hasIcon menuButtonsMetaInfoButtonButton__${uploadedStatus}`}
+        label={
+          uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
+        }
         panelClassName="metaInfoPanel"
         panelContent={
           <MetaInfoPanel
@@ -132,7 +134,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       return (
         <button
           type="button"
-          className="menuButtonsButton menuButtonsAbortUploadButton"
+          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon menuButtonsShareButtonButton__uploading"
           onClick={abortFunction}
         >
           Cancel Upload
@@ -144,22 +146,23 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
-    let label = 'Publish…';
+    let label = 'Upload';
     if (isRepublish) {
-      label = 'Re-publish…';
+      label = 'Re-upload';
     }
+
     if (isError) {
-      label = 'Error publishing…';
+      label = 'Error uploading';
     }
 
     return (
       <ButtonWithPanel
-        className={classNames({
-          menuButtonsShareButton: true,
-          menuButtonsShareButtonOriginal: !isRepublish && !isError,
-          menuButtonsShareButtonError: isError,
-        })}
-        buttonClassName="menuButtonsButton"
+        buttonClassName={classNames(
+          'menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon',
+          {
+            menuButtonsShareButtonError: isError,
+          }
+        )}
         panelClassName="menuButtonsPublishPanel"
         label={label}
         panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
@@ -191,7 +194,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     return (
       <button
         type="button"
-        className="menuButtonsButton menuButtonsRevertButton"
+        className="menuButtonsButton menuButtonsButtonButton__hasIcon menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
         Revert to Original Profile
