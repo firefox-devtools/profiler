@@ -95,7 +95,6 @@ export type Marker = {|
   start: Milliseconds,
   end: Milliseconds | null,
   name: string,
-  title: string | null,
   category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
@@ -370,6 +369,7 @@ export type InitialSelectedTrackReference = HTMLElement;
  * Page data for ProfileFilterNavigator component.
  */
 export type ProfileFilterPageData = {|
+  origin: string,
   hostname: string,
   favicon: string,
 |};

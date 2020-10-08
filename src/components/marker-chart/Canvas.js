@@ -72,7 +72,7 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
 
-class MarkerChartCanvas extends React.PureComponent<Props, State> {
+class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
 
   drawCanvas = (
@@ -555,6 +555,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const marker = this.props.getMarker(markerIndex);
     return (
       <TooltipMarker
+        markerIndex={markerIndex}
         marker={marker}
         threadsKey={this.props.threadsKey}
         restrictHeightWidth={true}
@@ -582,6 +583,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  MarkerChartCanvas
-);
+export const MarkerChartCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(MarkerChartCanvasImpl);

@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ZipFileViewer from '../../components/app/ZipFileViewer';
+import { ZipFileViewer } from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 

@@ -15,3 +15,59 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.metaInfoPanel {
+  width: 350px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.metaInfoPanel,
+.metaInfoPanel .arrowPanelArrow::before {
+  background-color: white;
+}
+
+.metaInfoSection {
+  margin-top: 7px;
+  margin-bottom: 12px;
+}
+
+.metaInfoLabel,
+.metaInfoWideLabel {
+  display: inline-block;
+  width: 120px;
+  color: var(--grey-50);
+}
+
+.metaInfoWideLabel {
+  width: 140px;
+}
+
+.visualMetricsLabel {
+  display: inline-block;
+  width: 145px;
+  color: var(--grey-50);
+}
+
+.metaInfoList {
+  padding: 0;
+
+  /* Explanations about this margin line:
+   * - we need to reset it anyway, because we need to remove the default style
+   *   for <ul> tags.
+   * - -19px moves the list up, next to the label.
+   * - 122px is 120px (the width of the label) + a few pixels so that this looks
+   *   better.
+   */
+  margin: -19px 0 0 122px;
+  list-style: circle inside;
+}
+
+.metaInfoSubTitle {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 700;
+}

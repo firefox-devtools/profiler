@@ -34,7 +34,7 @@ type DispatchProps = {|
 |};
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
-class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
+class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
   _getItemsWithFirstElement = memoize(
     (firstItem, items) => [firstItem, ...items],
     {
@@ -55,15 +55,18 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
 
     let firstItem;
     if (filterPageData) {
-      firstItem = (
-        <>
-          <Icon iconUrl={filterPageData.favicon} />
-          {filterPageData.hostname} (
-          {getFormattedTimeLength(rootRange.end - rootRange.start)})
-        </>
-      );
+      firstItem = {
+        title: filterPageData.origin,
+        content: (
+          <>
+            <Icon iconUrl={filterPageData.favicon} />
+            {filterPageData.hostname} (
+            {getFormattedTimeLength(rootRange.end - rootRange.start)})
+          </>
+        ),
+      };
     } else {
-      firstItem = 'Full Range';
+      firstItem = { content: <>Full Range</> };
     }
 
     const itemsWithFirstElement = this._getItemsWithFirstElement(
@@ -82,7 +85,11 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileFilterNavigator = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
@@ -107,5 +114,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     onPop: popCommittedRanges,
   },
-  component: ProfileFilterNavigatorBar,
+  component: ProfileFilterNavigatorBarImpl,
 });

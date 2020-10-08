@@ -12,7 +12,7 @@ import {
   TimelineMarkersOverview,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
 import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -68,7 +68,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
           threadsKey={0}
           onSelect={() => {}}
         />
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
       </>
     </Provider>
   );
@@ -221,7 +221,7 @@ describe('TimelineMarkers', function() {
     it('when right clicking on a marker', () => {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(
         { rangeStart: 0, rangeEnd: 10 },
-        [['DOMEvent', 0, 10]]
+        [['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'mousedown' }]]
       );
 
       // The "DOMEvent" marker is drawn from 0,0 to 5,200.
@@ -232,8 +232,7 @@ describe('TimelineMarkers', function() {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy');
-
-      expect(copy).toHaveBeenLastCalledWith('DOMEvent');
+      expect(copy).toHaveBeenLastCalledWith('mousedown — DOMEvent');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();

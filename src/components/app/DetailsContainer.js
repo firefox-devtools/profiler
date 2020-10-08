@@ -6,8 +6,8 @@
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 
-import Details from './Details';
-import selectSidebar from '../sidebar';
+import { Details } from './Details';
+import { selectSidebar } from '../sidebar';
 
 import { invalidatePanelLayout } from '../../actions/app';
 import { getSelectedTab } from '../../selectors/url-state';
@@ -30,7 +30,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-function DetailsContainer({
+function DetailsContainerImpl({
   selectedTab,
   isSidebarOpen,
   invalidatePanelLayout,
@@ -50,7 +50,11 @@ function DetailsContainer({
   );
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const DetailsContainer = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
@@ -58,5 +62,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     invalidatePanelLayout,
   },
-  component: DetailsContainer,
+  component: DetailsContainerImpl,
 });

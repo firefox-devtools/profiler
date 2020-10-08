@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import Tooltip from '../tooltip/Tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import bisection from 'bisection';
 

@@ -4,10 +4,6 @@
 // @flow
 import type {
   CategoryList,
-  DOMEventMarkerPayload,
-  UserTimingMarkerPayload,
-  MarkerPayload,
-  TextMarkerPayload,
   Marker,
   MarkerIndex,
   MarkerTiming,
@@ -76,6 +72,7 @@ export function getMarkerTimingAndBuckets(
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
+  getLabel: MarkerIndex => string,
   categories: ?CategoryList
 ): MarkerTimingAndBuckets {
   // Each marker type will have it's own timing information, later collapse these into
@@ -121,7 +118,7 @@ export function getMarkerTimingAndBuckets(
           // The chart will then be responsible for drawing this as a dot.
           marker.end === null ? marker.start : marker.end
         );
-        markerTiming.label.push(computeMarkerLabel(marker.data));
+        markerTiming.label.push(getLabel(markerIndex));
         markerTiming.index.push(markerIndex);
         markerTiming.length++;
         break;
@@ -168,39 +165,20 @@ export function getMarkerTimingAndBuckets(
 
 export function getMarkerTiming(
   getMarker: MarkerIndex => Marker,
-  markerIndexes: MarkerIndex[]
+  markerIndexes: MarkerIndex[],
+  getLabel: MarkerIndex => string
 ): MarkerTiming[] {
   // Flow didn't understand the filter operation here, so filter out bucket names
   // imperatively.
   const onlyTiming = [];
   for (const timingOrString of getMarkerTimingAndBuckets(
     getMarker,
-    markerIndexes
+    markerIndexes,
+    getLabel
   )) {
     if (typeof timingOrString !== 'string') {
       onlyTiming.push(timingOrString);
     }
   }
   return onlyTiming;
-}
-
-function computeMarkerLabel(data: MarkerPayload): string {
-  // Satisfy flow's type checker.
-  if (data !== null && typeof data === 'object') {
-    // Handle different marker payloads.
-    switch (data.type) {
-      case 'UserTiming':
-        return (data: UserTimingMarkerPayload).name;
-      case 'tracing':
-        if (data.category === 'DOMEvent') {
-          return (data: DOMEventMarkerPayload).eventType;
-        }
-        break;
-      case 'Text':
-        return (data: TextMarkerPayload).name;
-      default:
-    }
-  }
-
-  return '';
 }

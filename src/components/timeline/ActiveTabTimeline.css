@@ -26,7 +26,7 @@
   position: relative;
   height: var(--resources-header-height);
   padding-left: 20px;
-  cursor: default;
+  cursor: pointer;
   font-size: 12px;
   line-height: var(--resources-header-height);
 }
@@ -101,8 +101,8 @@
   overflow: hidden;
   max-width: calc(100% - 55px);
   padding: 0 5px 0 30px;
+  cursor: pointer;
   line-height: var(--resources-header-height);
-  pointer-events: none;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

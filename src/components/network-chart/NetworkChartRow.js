@@ -7,7 +7,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import { TooltipMarker } from '../tooltip/Marker';
-import Tooltip from '../tooltip/Tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 
 import {
   guessMimeTypeFromNetworkMarker,
@@ -332,7 +332,10 @@ type State = {|
   hovered: ?boolean,
 |};
 
-class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
+export class NetworkChartRow extends React.PureComponent<
+  NetworkChartRowProps,
+  State
+> {
   state = {
     pageX: 0,
     pageY: 0,
@@ -452,6 +455,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   render() {
     const {
       index,
+      markerIndex,
       marker,
       networkPayload,
       width,
@@ -495,6 +499,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <TooltipMarker
               className="tooltipNetwork"
+              markerIndex={markerIndex}
               marker={marker}
               threadsKey={this.props.threadsKey}
               restrictHeightWidth={true}
@@ -505,5 +510,3 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     );
   }
 }
-
-export default NetworkChartRow;

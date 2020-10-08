@@ -5,6 +5,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton buttonButton"
     type="button"
     value="My Button"
@@ -35,7 +36,9 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
@@ -65,6 +68,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton buttonButton"
     type="button"
     value="My Button"
@@ -95,7 +99,9 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
@@ -125,6 +131,7 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
   class="buttonWithPanel button open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton"
     type="button"
     value="My Button"
@@ -155,113 +162,11 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
   class="buttonWithPanel button"
 >
   <input
+    aria-expanded="false"
     class="buttonWithPanelButton buttonButton"
+    title="Click here to open the panel"
     type="button"
     value="My Button"
   />
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-    </div>
-  </div>
-</div>
-`;
-
-exports[`shared/ButtonWithPanel various panel contents renders panels with default buttons and titles 1`] = `
-<div
-  class="buttonWithPanel button open"
->
-  <input
-    class="buttonWithPanelButton"
-    type="button"
-    value="My Button"
-  />
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel open hasTitle hasButtons panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-      <h1
-        class="arrowPanelTitle"
-      >
-        Wonderful content
-      </h1>
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
-      <div
-        class="arrowPanelButtons"
-      >
-        <input
-          class="photon-button photon-button-default"
-          type="button"
-          value="Cancel"
-        />
-        <input
-          class="photon-button photon-button-primary"
-          type="button"
-          value="Confirm"
-        />
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`shared/ButtonWithPanel various panel contents renders panels with specified buttons 1`] = `
-<div
-  class="buttonWithPanel button open"
->
-  <input
-    class="buttonWithPanelButton"
-    type="button"
-    value="My Button"
-  />
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel open hasButtons panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
-      <div
-        class="arrowPanelButtons"
-      >
-        <input
-          class="photon-button photon-button-default"
-          type="button"
-          value="Cancel"
-        />
-        <input
-          class="photon-button photon-button-destructive"
-          type="button"
-          value="Confirm"
-        />
-      </div>
-    </div>
-  </div>
 </div>
 `;

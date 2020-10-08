@@ -12,20 +12,21 @@ import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { TooltipMarker } from '../tooltip/Marker';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { ThreadsKey, Marker } from 'firefox-profiler/types';
+import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
 type StateProps = {|
   +selectedThreadsKey: ThreadsKey,
   +marker: Marker | null,
+  +markerIndex: MarkerIndex | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class MarkerSidebar extends React.PureComponent<Props> {
+class MarkerSidebarImpl extends React.PureComponent<Props> {
   render() {
-    const { marker, selectedThreadsKey } = this.props;
+    const { marker, markerIndex, selectedThreadsKey } = this.props;
 
-    if (marker === null) {
+    if (marker === null || markerIndex === null) {
       return (
         <div className="sidebar sidebar-marker-table">
           Select a marker to display some information about it.
@@ -37,6 +38,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
       <aside className="sidebar sidebar-marker-table">
         <div className="sidebar-contents-wrapper">
           <TooltipMarker
+            markerIndex={markerIndex}
             marker={marker}
             threadsKey={selectedThreadsKey}
             restrictHeightWidth={false}
@@ -47,10 +49,11 @@ class MarkerSidebar extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const MarkerSidebar = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     marker: selectedThreadSelectors.getSelectedMarker(state),
+    markerIndex: selectedThreadSelectors.getSelectedMarkerIndex(state),
     selectedThreadsKey: getSelectedThreadsKey(state),
   }),
-  component: MarkerSidebar,
+  component: MarkerSidebarImpl,
 });

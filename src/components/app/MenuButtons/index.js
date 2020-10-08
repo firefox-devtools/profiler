@@ -21,8 +21,7 @@ import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
-import ArrowPanel from '../../shared/ArrowPanel';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
 import { revertToPrePublishedState } from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
 import {
@@ -70,7 +69,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class MenuButtons extends React.PureComponent<Props> {
+class MenuButtonsImpl extends React.PureComponent<Props> {
   componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
@@ -113,12 +112,9 @@ class MenuButtons extends React.PureComponent<Props> {
           menuButtonsShareButtonError: isError,
         })}
         buttonClassName="menuButtonsButton"
+        panelClassName="menuButtonsPublishPanel"
         label={label}
-        panel={
-          <ArrowPanel className="menuButtonsPublishPanel">
-            <MenuButtonsPublish isRepublish={isRepublish} />
-          </ArrowPanel>
-        }
+        panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
       />
     );
   }
@@ -184,21 +180,23 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    profile: getProfile(state),
-    rootRange: getProfileRootRange(state),
-    dataSource: getDataSource(state),
-    isNewlyPublished: getIsNewlyPublished(state),
-    uploadPhase: getUploadPhase(state),
-    hasPrePublishedState: getHasPrePublishedState(state),
-    symbolicationStatus: getSymbolicationStatus(state),
-    abortFunction: getAbortFunction(state),
-  }),
-  mapDispatchToProps: {
-    dismissNewlyPublished,
-    revertToPrePublishedState,
-    resymbolicateProfile,
-  },
-  component: MenuButtons,
-});
+export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      profile: getProfile(state),
+      rootRange: getProfileRootRange(state),
+      dataSource: getDataSource(state),
+      isNewlyPublished: getIsNewlyPublished(state),
+      uploadPhase: getUploadPhase(state),
+      hasPrePublishedState: getHasPrePublishedState(state),
+      symbolicationStatus: getSymbolicationStatus(state),
+      abortFunction: getAbortFunction(state),
+    }),
+    mapDispatchToProps: {
+      dismissNewlyPublished,
+      revertToPrePublishedState,
+      resymbolicateProfile,
+    },
+    component: MenuButtonsImpl,
+  }
+);

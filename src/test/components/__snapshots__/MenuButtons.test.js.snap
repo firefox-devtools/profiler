@@ -5,6 +5,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
     type="button"
     value="Profile Info"
@@ -13,7 +14,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="arrowPanel open metaInfoPanel"
     >
       <div
         class="arrowPanelArrow"
@@ -22,12 +23,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
         class="arrowPanelContent"
       >
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Profile Information
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -57,7 +58,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            31
+            32
           </div>
           <div
             class="metaInfoRow"
@@ -80,7 +81,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             20 seconds
           </div>
           <div
-            class="arrowPanelSection"
+            class="metaInfoSection"
           >
             <div
               class="metaInfoRow"
@@ -156,12 +157,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Application
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -234,12 +235,12 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Platform
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -288,61 +289,61 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
                 Overhead
               </div>
               <div>
-                227ns
+                227μs
               </div>
               <div>
-                410ns
+                410μs
               </div>
               <div>
-                38.0ns
+                38μs
               </div>
               <div>
                 Cleaning
               </div>
               <div>
-                54.1ns
+                54μs
               </div>
               <div>
-                100ns
+                100μs
               </div>
               <div>
-                7.00ns
+                7.0μs
               </div>
               <div>
                 Counter
               </div>
               <div>
-                59.1ns
+                59μs
               </div>
               <div>
-                105ns
+                105μs
               </div>
               <div>
-                12.0ns
+                12μs
               </div>
               <div>
                 Interval
               </div>
               <div>
-                857ns
+                857μs
               </div>
               <div>
-                1,000ns
+                1,000μs
               </div>
               <div>
-                0.0000ns
+                0.000μs
               </div>
               <div>
                 Lockings
               </div>
               <div>
-                49.1ns
+                49μs
               </div>
               <div>
-                95.0ns
+                95μs
               </div>
               <div>
-                2.00ns
+                2.0μs
               </div>
             </div>
             <div
@@ -356,7 +357,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoValueRight"
               >
-                1,586ns
+                1,586μs
               </span>
             </div>
             <div
@@ -384,7 +385,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               <span
                 class="metaInfoValueRight"
               >
-                6.00ns
+                6.0μs
               </span>
             </div>
           </div>
@@ -400,6 +401,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
   class="buttonWithPanel menuButtonsMetaInfoButton open"
 >
   <input
+    aria-expanded="true"
     class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
     type="button"
     value="Profile Info"
@@ -408,7 +410,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="arrowPanel open metaInfoPanel"
     >
       <div
         class="arrowPanelArrow"
@@ -417,12 +419,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
         class="arrowPanelContent"
       >
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Profile Information
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -452,7 +454,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             >
               Profile Version:
             </span>
-            31
+            32
           </div>
           <div
             class="metaInfoRow"
@@ -479,12 +481,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Application
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -557,12 +559,12 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
           </div>
         </div>
         <h2
-          class="arrowPanelSubTitle"
+          class="metaInfoSubTitle"
         >
           Platform
         </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoSection"
         >
           <div
             class="metaInfoRow"
@@ -621,21 +623,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     class="buttonWithPanel menuButtonsMetaInfoButton"
   >
     <input
+      aria-expanded="false"
       class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
       type="button"
       value="Profile Info"
     />
-    <div
-      class="arrowPanelAnchor"
-    >
-      <div
-        class="arrowPanel arrowPanelOpenMetaInfo"
-      >
-        <div
-          class="arrowPanelArrow"
-        />
-      </div>
-    </div>
   </div>
   <div
     class="menuButtons"
@@ -644,21 +636,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
     >
       <input
+        aria-expanded="false"
         class="buttonWithPanelButton menuButtonsButton"
         type="button"
         value="Publish…"
       />
-      <div
-        class="arrowPanelAnchor"
-      >
-        <div
-          class="arrowPanel menuButtonsPublishPanel"
-        >
-          <div
-            class="arrowPanelArrow"
-          />
-        </div>
-      </div>
     </div>
     <a
       class="menuButtonsLink"

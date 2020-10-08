@@ -15,8 +15,8 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import MarkerChart from '../../components/marker-chart';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { MarkerChart } from '../../components/marker-chart';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 
@@ -58,11 +58,8 @@ const MARKERS: TestDefinedMarkers = [
     5,
     10,
     {
-      type: 'tracing',
-      category: 'DOMEvent',
+      type: 'DOMEvent',
       eventType: 'click',
-      interval: 'start',
-      phase: 2,
     },
   ],
   [
@@ -109,7 +106,7 @@ function setupWithProfile(profile) {
   const renderResult = render(
     <Provider store={store}>
       <>
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
         <MarkerChart />
       </>
     </Provider>
