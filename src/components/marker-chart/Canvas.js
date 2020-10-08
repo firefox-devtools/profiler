@@ -119,14 +119,19 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
         containerHeight,
       },
     } = this.props;
-    const hoveredMarker =
-      hoveredItems === null ? null : hoveredItems.markerIndex;
-    const hoveredLabel =
-      hoveredItems === null ? null : hoveredItems.rowIndexOfLabel;
-    const prevHoveredMarker =
-      prevHoveredItems === null ? null : prevHoveredItems.markerIndex;
-    const prevHoveredLabel =
-      prevHoveredItems === null ? null : prevHoveredItems.rowIndexOfLabel;
+    let hoveredMarker = null;
+    let hoveredLabel = null;
+    let prevHoveredMarker = null;
+    let prevHoveredLabel = null;
+
+    if (hoveredItems) {
+      hoveredMarker = hoveredItems.markerIndex;
+      hoveredLabel = hoveredItems.rowIndexOfLabel;
+    }
+    if (prevHoveredItems) {
+      prevHoveredMarker = prevHoveredItems.markerIndex;
+      prevHoveredLabel = prevHoveredItems.rowIndexOfLabel;
+    }
 
     // Convert CssPixels to Stack Depth
     const startRow = Math.floor(viewportTop / rowHeight);
@@ -151,7 +156,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       hoveredLabel !== null
     ) {
       // If it's active tab view and we don't know the row yet, assign
-      // `hoveredLabel` if it's non-null.
+      // `hoveredLabel` if it's non-null. This is needed because we can hover
+      // the label and not the marker. That way we are making sure that we
+      // select the correct row.
       newRow = hoveredLabel;
     }
 
@@ -168,7 +175,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
         prevHoveredLabel !== null
       ) {
         // If it's active tab view and we don't know the row yet, assign
-        // `prevHoveredLabel` if it's non-null.
+        // `prevHoveredLabel` if it's non-null. This is needed because we can
+        // hover the label and not the marker. That way we are making sure that
+        // previous hovered row is correct.
         oldRow = prevHoveredLabel;
       }
 
