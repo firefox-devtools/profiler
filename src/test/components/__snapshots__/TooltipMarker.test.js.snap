@@ -1372,6 +1372,38 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388-10 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTitle"
+      >
+        BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
