@@ -58,7 +58,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerChart extends React.PureComponent<Props> {
+class MarkerChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
   /**
@@ -169,7 +169,7 @@ function viewportNeedsUpdate(
   return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
@@ -187,5 +187,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
-  component: MarkerChart,
+  component: MarkerChartImpl,
 });
