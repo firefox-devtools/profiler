@@ -5,11 +5,11 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { formatPercent } from '../../utils/format-numbers';
-import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
-import { Tooltip } from '../tooltip/Tooltip';
+import { withSize } from 'firefox-profiler/components/timeline/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { formatPercent } from 'firefox-profiler/utils/format-numbers';
+import { getCommittedRange, getProfileInterval } from 'firefox-profiler/selectors/profile';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import bisection from 'bisection';
 import { BLUE_50, BLUE_60 } from 'photon-colors';
 
@@ -19,10 +19,10 @@ import type {
   CssPixels,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from '../shared/WithSize';
-import type { ConnectedProps } from '../../utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackVisualProgress.css';
+import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.

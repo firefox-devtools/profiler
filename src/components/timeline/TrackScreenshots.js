@@ -5,14 +5,14 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { getScreenshotTrackHeight } from '../../selectors/app';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { withSize, type SizeProps } from '../shared/WithSize';
+} from 'firefox-profiler/selectors/profile';
+import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { withSize, type SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type {
@@ -23,10 +23,10 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import { ensureExists } from '../../utils/flow';
-import './TrackScreenshots.css';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import 'firefox-profiler/components/screenshots/TrackScreenshots.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
