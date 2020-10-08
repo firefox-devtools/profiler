@@ -640,6 +640,141 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
+
+
+/** 
+    Hiding all my tracks by creating a new function. 
+
+**/
+
+export function hideAllTracksByType(
+ pid: Pid,
+  trackIndexToHide: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const localTracks = getLocalTracks(getState(), pid);
+    const globalTracks = getGlobalTracks(getState(), pid);
+    const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
+    // const globalTracks = getHiddenGlobalTracks(getState(), pid);
+    const localTrackToHide = localTracks[trackIndexToHide];
+    const globalTrackToHide = globalTracks[tracksIndextoGlobal];
+    const oldSelectedThreadIndexes = getSelectedThreadIndexes(getState());
+    const newSelectedThreadIndexes: Set<ThreadIndex> = new Set(
+      oldSelectedThreadIndexes
+    );
+
+    if (localTrackToHide.type === 'thread') {
+      newSelectedThreadIndexes.delete(localTrackToHide.threadIndex);
+    }
+
+    if (globalTrackToHide.type === 'thread') {
+      newSelectedThreadIndexes.delete(globalTrackToHide.threadIndex);
+    }
+
+    if (hiddenLocalTracks.has(trackIndexToHide)) {
+     
+      return;
+    }
+
+    if (hiddenGlobalTracks.has(trackIndexToHide)) {
+     
+      return;
+    }
+
+    const { globalTrack, globalTrackIndex } = getGlobalTrackAndIndexByPid(
+      getState(),
+      pid
+    );
+
+    const { localTrack, localTrackIndex } = getLocalTrackAndIndexByPid(
+      getState(),
+      pid
+    );
+
+    if (hiddenLocalTracks.size + 1 === localTracks.length) {
+      
+      if (globalTrack.mainThreadIndex === null) {
+     dispatch(hideGlobalTrack(globalTrackIndex));
+        return;
+      }
+
+    
+    }
+
+    if (hiddenGlobalTracks.size + 1 === globalTracks.length) {
+      
+      if (localTrack.mainThreadIndex === null) {
+     dispatch(hideLocalTrack(localTrackIndex));
+        return;
+      }
+
+    
+    }
+
+
+
+    if (newSelectedThreadIndexes.size === 0) {
+     
+      for (let trackIndex = 0; trackIndex < localTracks.length; trackIndex++) {
+        const track = localTracks[trackIndex];
+        // const track = globalTracks[trackIndex];
+        if (!hiddenLocalTracks.has(trackIndex)) {
+          
+          if (track.type === 'thread' && trackIndex !== trackIndexToHide) {
+            newSelectedThreadIndexes.add(track.threadIndex);
+            break;
+          }
+        }
+      }
+
+      if (
+        newSelectedThreadIndexes.size === 0 &&
+        globalTrack.mainThreadIndex !== null &&
+        globalTrack.mainThreadIndex !== undefined
+      ) {
+        
+        newSelectedThreadIndexes.add(globalTrack.mainThreadIndex);
+      }
+
+      if (newSelectedThreadIndexes.size === 0) {
+        
+        const otherThreadIndex = _findOtherVisibleThread(
+          getState,
+          globalTrackIndex,
+          trackIndexToHide
+        );
+        if (otherThreadIndex !== null) {
+          newSelectedThreadIndexes.add(otherThreadIndex);
+        }
+      }
+
+      if (newSelectedThreadIndexes.size === 0) {
+        
+        return;
+      }
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'hide all tracks by type',
+    });
+
+    dispatch({
+      type: 'HIDE_ALL_TRACKS_BY_TYPE',
+      pid,
+      trackIndex: trackIndexToHide,
+      selectedThreadIndexes: newSelectedThreadIndexes,
+    });
+  };
+}
+
+
+
+
+
+
+
 /**
  * This function isolates a process global track, and leaves its local tracks visible.
  */
