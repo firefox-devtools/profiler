@@ -49,34 +49,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
-  ],
-  Array [
-    "fillRect",
-    149,
-    0,
-    1,
-    300,
-  ],
-  Array [
-    "fillRect",
-    0,
-    143,
-    365,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "UserTiming",
-    5,
-    139,
-  ],
-  Array [
-    "set fillStyle",
     "rgba(40, 122, 169, 0.2)",
   ],
   Array [
@@ -123,6 +95,34 @@ Array [
     "fillText",
     "Marker B",
     178,
+    139,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    149,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    0,
+    143,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "UserTiming",
+    5,
     139,
   ],
 ]
@@ -780,6 +780,526 @@ Array [
     "fillText",
     "Idle",
     155,
+    11,
+  ],
+]
+`;
+
+exports[`MarkerChart with active tab does not render the hovered label 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#fff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    365,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "rgba(40, 122, 169, 0.2)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    365,
+    15,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    89,
+    17,
+    129.25,
+    1,
+  ],
+  Array [
+    "fillRect",
+    88,
+    18,
+    131.25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    89,
+    29,
+    129.25,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "click",
+    91,
+    27,
+  ],
+]
+`;
+
+exports[`MarkerChart with active tab renders the hovered marker properly 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#fff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    365,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "rgba(40, 122, 169, 0.2)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    365,
+    15,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "Highlight",
+  ],
+  Array [
+    "fillRect",
+    89,
+    17,
+    129.25,
+    1,
+  ],
+  Array [
+    "fillRect",
+    88,
+    18,
+    131.25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    89,
+    29,
+    129.25,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "HighlightText",
+  ],
+  Array [
+    "fillText",
+    "click",
+    91,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffffbf",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    85,
+    16,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker DomEvent",
+    5,
+    27,
+  ],
+]
+`;
+
+exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 102px; top: 38px;"
+>
+  <div
+    class="tooltipMarker"
+    style="--tooltip-detail-max-width: 600px;"
+  >
+    <div
+      class="tooltipHeader"
+    >
+      <div
+        class="tooltipOneLine"
+      >
+        <div
+          class="tooltipTiming"
+        >
+          6ms
+        </div>
+        <div
+          class="tooltipTitle"
+        >
+          click — DOMEvent
+        </div>
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Latency
+        :
+      </div>
+      7ms
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
+      <div
+        class="tooltipLabel"
+      >
+        URL
+        :
+      </div>
+      Page #1
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MarkerChart with active tab renders the marker chart and matches the snapshot 1`] = `
+<div
+  aria-labelledby="marker-chart-tab-button"
+  class="markerChart"
+  id="marker-chart-tab"
+  role="tabpanel"
+>
+  <div
+    class="markerSettings"
+  >
+    <div
+      class="markerSettingsSpacer"
+    />
+    <div
+      class="panelSearchField markerSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter Markers: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <div
+    class="react-contextmenu-wrapper treeViewContextMenu"
+  >
+    <div
+      class="chartViewport"
+      tabindex="0"
+    >
+      <div>
+        <canvas
+          class="chartCanvas markerChartCanvas"
+          height="600"
+          style="width: 365px; height: 300px;"
+          width="730"
+        />
+      </div>
+      <div
+        class="chartViewportScroll hidden"
+      >
+        Zoom Chart:
+        <kbd
+          class="chartViewportScrollKbd"
+        >
+          Ctrl + Scroll
+        </kbd>
+        or
+        <kbd
+          class="chartViewportScrollKbd"
+        >
+          Shift + Scroll
+        </kbd>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MarkerChart with active tab renders the marker chart and matches the snapshot 2`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    2,
+    2,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "fillRect",
+    88.5,
+    17,
+    129.25,
+    1,
+  ],
+  Array [
+    "fillRect",
+    87.5,
+    18,
+    131.25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    88.5,
+    29,
+    129.25,
+    1,
+  ],
+  Array [
+    "measureText",
+    "click",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "click",
+    90.5,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    70.5,
+    39.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "measureText",
+    "Marker DomEvent",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffffbf",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    85,
+    16,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker DomEvent",
+    5,
+    27,
+  ],
+  Array [
+    "measureText",
+    "Marker Navigation",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffffbf",
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    95,
+    16,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker Navigation",
+    5,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    16,
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "fillRect",
+    0,
+    -1,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Idle",
+    5,
     11,
   ],
 ]
