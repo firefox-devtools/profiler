@@ -9,7 +9,7 @@ import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
-import MarkerTableEmptyReasons from './MarkerTableEmptyReasons';
+import { MarkerTableEmptyReasons } from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
   getScrollToSelectionGeneration,

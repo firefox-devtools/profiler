@@ -85,8 +85,8 @@ describe('timeline/TrackContextMenu', function() {
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
-       
-      const hideAllTracksByType= () => getByText(/Hide "Content Process"/);
+
+      const hideAllTracksByType = () => getByText(/Hide "Content Process"/);
 
       return {
         ...results,
@@ -202,9 +202,6 @@ describe('timeline/TrackContextMenu', function() {
         '  - show [thread Style]',
       ]);
     });
-
-
-
 
     it('can toggle a global track by clicking it', function() {
       const { trackItem, trackIndex, getState } = setupGlobalTrack();

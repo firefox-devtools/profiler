@@ -5,10 +5,16 @@
 // @flow
 
 import * as React from 'react';
-import { withSize, type SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import {
+  withSize,
+  type SizeProps,
+} from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatMilliseconds } from 'firefox-profiler/utils/format-numbers';
-import { getCommittedRange, getProfileInterval } from 'firefox-profiler/selectors/profile';
+import {
+  getCommittedRange,
+  getProfileInterval,
+} from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';

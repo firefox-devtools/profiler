@@ -6,7 +6,17 @@
 // @flow
 import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from 'firefox-profiler/selectors/app';
-import { getCounterSelectors, getGlobalTracks, getGlobalTrackAndIndexByPid, getLocalTracks, getLocalTrackFromReference, getGlobalTrackFromReference, getPreviewSelection, getActiveTabGlobalTrackFromReference, getActiveTabResourceTrackFromReference } from 'firefox-profiler/selectors/profile';
+import {
+  getCounterSelectors,
+  getGlobalTracks,
+  getGlobalTrackAndIndexByPid,
+  getLocalTracks,
+  getLocalTrackFromReference,
+  getGlobalTrackFromReference,
+  getPreviewSelection,
+  getActiveTabGlobalTrackFromReference,
+  getActiveTabResourceTrackFromReference,
+} from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
   getThreadSelectorsFromThreadsKey,
@@ -630,15 +640,13 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
-
-
 /** 
     Hiding all my tracks by creating a new function. 
 
 **/
 
 export function hideAllTracksByType(
- pid: Pid,
+  pid: Pid,
   trackIndexToHide: TrackIndex
 ): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -662,12 +670,10 @@ export function hideAllTracksByType(
     }
 
     if (hiddenLocalTracks.has(trackIndexToHide)) {
-     
       return;
     }
 
     if (hiddenGlobalTracks.has(trackIndexToHide)) {
-     
       return;
     }
 
@@ -682,34 +688,24 @@ export function hideAllTracksByType(
     );
 
     if (hiddenLocalTracks.size + 1 === localTracks.length) {
-      
       if (globalTrack.mainThreadIndex === null) {
-     dispatch(hideGlobalTrack(globalTrackIndex));
+        dispatch(hideGlobalTrack(globalTrackIndex));
         return;
       }
-
-    
     }
 
     if (hiddenGlobalTracks.size + 1 === globalTracks.length) {
-      
       if (localTrack.mainThreadIndex === null) {
-     dispatch(hideLocalTrack(localTrackIndex));
+        dispatch(hideLocalTrack(localTrackIndex));
         return;
       }
-
-    
     }
 
-
-
     if (newSelectedThreadIndexes.size === 0) {
-     
       for (let trackIndex = 0; trackIndex < localTracks.length; trackIndex++) {
         const track = localTracks[trackIndex];
         // const track = globalTracks[trackIndex];
         if (!hiddenLocalTracks.has(trackIndex)) {
-          
           if (track.type === 'thread' && trackIndex !== trackIndexToHide) {
             newSelectedThreadIndexes.add(track.threadIndex);
             break;
@@ -722,12 +718,10 @@ export function hideAllTracksByType(
         globalTrack.mainThreadIndex !== null &&
         globalTrack.mainThreadIndex !== undefined
       ) {
-        
         newSelectedThreadIndexes.add(globalTrack.mainThreadIndex);
       }
 
       if (newSelectedThreadIndexes.size === 0) {
-        
         const otherThreadIndex = _findOtherVisibleThread(
           getState,
           globalTrackIndex,
@@ -739,7 +733,6 @@ export function hideAllTracksByType(
       }
 
       if (newSelectedThreadIndexes.size === 0) {
-        
         return;
       }
     }
@@ -758,12 +751,6 @@ export function hideAllTracksByType(
     });
   };
 }
-
-
-
-
-
-
 
 /**
  * This function isolates a process global track, and leaves its local tracks visible.

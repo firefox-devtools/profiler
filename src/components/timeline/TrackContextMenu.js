@@ -516,7 +516,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
-
   renderHideAllTracksByType() {
     const { rightClickedTrack } = this.props;
     if (rightClickedTrack === null) {
@@ -554,7 +553,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
     const hideTrack = this.renderHideTrack();
-    const hideAllTracksByType= this.renderHideAllTracksByType();
+    const hideAllTracksByType = this.renderHideAllTracksByType();
     const separator =
       isolateProcessMainThread ||
       isolateProcess ||

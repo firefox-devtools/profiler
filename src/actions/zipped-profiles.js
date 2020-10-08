@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getZipFileTable, getZipFileState } from 'firefox-profiler/selectors/zipped-profiles';
+import {
+  getZipFileTable,
+  getZipFileState,
+} from 'firefox-profiler/selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { loadProfile } from 'firefox-profiler/actions/receive-profile';
 

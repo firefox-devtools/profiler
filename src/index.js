@@ -6,21 +6,21 @@
 // Import all global css. Ensure that this is these CSS imports happen before any
 // JS imports happen, as this determines the rule order. Global CSS should be easy
 // to overwrite with a simple class name.
-import 'res/css/focus.css';
+import '../res/css/focus.css';
 import 'photon-colors/photon-colors.css';
-import 'res/css/photon/index.css';
-import 'res/css/protocol/index.css';
-import 'res/css/style.css';
-import 'res/css/global.css';
-import 'res/css/categories.css';
-import 'res/css/network.css';
+import '../res/css/photon/index.css';
+import '../res/css/protocol/index.css';
+import '../res/css/style.css';
+import '../res/css/global.css';
+import '../res/css/categories.css';
+import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
 
 // Now import the JS after the CSS.
 import React from 'react';
 import { render } from 'react-dom';
-import Root from 'firefox-profiler/components/app/Root';
-import createStore from 'firefox-profiler/app-logic/create-store';
+import { Root } from './components/app/Root';
+import createStore from './app-logic/create-store';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,

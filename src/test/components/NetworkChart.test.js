@@ -15,7 +15,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import NetworkChart from '../../components/network-chart';
+import { NetworkChart } from '../../components/network-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';

@@ -10,7 +10,10 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
-import { symbolicateProfile, applySymbolicationStep } from 'firefox-profiler/profile-logic/symbolication';
+import {
+  symbolicateProfile,
+  applySymbolicationStep,
+} from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
 import { decompress } from 'firefox-profiler/utils/gz';
@@ -68,7 +71,10 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
-import { assertExhaustiveCheck, ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the

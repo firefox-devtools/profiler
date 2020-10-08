@@ -332,7 +332,10 @@ type State = {|
   hovered: ?boolean,
 |};
 
-class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
+export class NetworkChartRow extends React.PureComponent<
+  NetworkChartRowProps,
+  State
+> {
   state = {
     pageX: 0,
     pageY: 0,
@@ -507,5 +510,3 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     );
   }
 }
-
-export default NetworkChartRow;

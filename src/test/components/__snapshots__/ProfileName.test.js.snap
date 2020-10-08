@@ -3,7 +3,7 @@
 exports[`ProfileName matches the snapshot 1`] = `
 <div>
   <button
-    class="profileNameButton"
+    class="profileNameButton menuButtonsButton"
     style="display: block;"
     title="Edit the profile name"
     type="button"
