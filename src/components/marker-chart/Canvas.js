@@ -60,12 +60,10 @@ type MarkerDrawingInformation = {
 // instead when both of the states are null, because that's what our shared
 // canvas component require.
 type IndexIntoHoveredLabelRow = number;
-type HoveredMarkerChartItems = [
-  MarkerIndex | null,
-  IndexIntoHoveredLabelRow | null
-];
-const HOVERED_MARKER_INDEX = 0;
-const HOVERED_LABEL_INDEX = 1;
+type HoveredMarkerChartItems = {|
+  markerIndex: MarkerIndex | null,
+  rowIndexOfLabel: IndexIntoHoveredLabelRow | null,
+|};
 
 type OwnProps = {|
   +rangeStart: Milliseconds,
@@ -122,13 +120,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       },
     } = this.props;
     const hoveredMarker =
-      hoveredItems === null ? null : hoveredItems[HOVERED_MARKER_INDEX];
+      hoveredItems === null ? null : hoveredItems.markerIndex;
     const hoveredLabel =
-      hoveredItems === null ? null : hoveredItems[HOVERED_LABEL_INDEX];
+      hoveredItems === null ? null : hoveredItems.rowIndexOfLabel;
     const prevHoveredMarker =
-      prevHoveredItems === null ? null : prevHoveredItems[HOVERED_MARKER_INDEX];
+      prevHoveredItems === null ? null : prevHoveredItems.markerIndex;
     const prevHoveredLabel =
-      prevHoveredItems === null ? null : prevHoveredItems[HOVERED_LABEL_INDEX];
+      prevHoveredItems === null ? null : prevHoveredItems.rowIndexOfLabel;
 
     // Convert CssPixels to Stack Depth
     const startRow = Math.floor(viewportTop / rowHeight);
@@ -609,12 +607,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     // items then?". Well, on the shared canvas component we have a function
     // called `hoveredItemsAreEqual` that shallowly checks for equality of
     // objects and arrays. So it's safe to return a new array all the time.
-    return [markerIndex, rowIndexOfLabel];
+    return { markerIndex, rowIndexOfLabel };
   };
 
   onDoubleClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
-    const markerIndex =
-      hoveredItems === null ? null : hoveredItems[HOVERED_MARKER_INDEX];
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     if (markerIndex === null) {
       return;
     }
@@ -640,8 +637,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
   };
 
   onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
-    const markerIndex =
-      hoveredItems === null ? null : hoveredItems[HOVERED_MARKER_INDEX];
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     const { changeRightClickedMarker, threadsKey } = this.props;
     changeRightClickedMarker(threadsKey, markerIndex);
   };
@@ -662,9 +658,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = ([
-    markerIndex: MarkerIndex | null,
-  ]: HoveredMarkerChartItems): React.Node => {
+  getHoveredMarkerInfo = ({
+    markerIndex,
+  }: HoveredMarkerChartItems): React.Node => {
     if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
       return null;
     }
