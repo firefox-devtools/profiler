@@ -495,7 +495,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
 
       if (timelineTrackOrganization.type === 'active-tab') {
         // Draw the text backgound for active tab.
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillStyle = '#ffffffbf'; // white with 75% opacity
         const textWidth = textMeasurement.getTextWidth(fittedText);
         ctx.fillRect(0, y, textWidth + LABEL_PADDING * 2, rowHeight);
 
