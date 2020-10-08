@@ -7,23 +7,23 @@ import * as React from 'react';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
-import explicitConnect from '../../utils/connect';
-import MarkerChartCanvas from './Canvas';
-import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
-import MarkerSettings from '../shared/MarkerSettings';
+} from 'firefox-profiler/app-logic/constants';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import MarkerChartCanvas from 'firefox-profiler/components/marker-chart/Canvas';
+import MarkerChartEmptyReasons from 'firefox-profiler/components/marker-chart/MarkerChartEmptyReasons';
+import MarkerSettings from 'firefox-profiler/components/shared/MarkerSettings';
 
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
-} from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
 import type {
   Marker,
@@ -35,9 +35,9 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+require('firefox-profiler/components/marker-chart/index.css');
 
 const ROW_HEIGHT = 16;
 
