@@ -21,23 +21,30 @@
     THE SOFTWARE. 
 */
 
+// @flow
+
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  *
- * @param {Array} array The array containing the items.
- * @param {Number} x The item that needs to be added to the array.
- * @param {Number} low Inital Index that is used to start searching, optional.
- * @param {Number} high The maximum Index that is used to stop searching, optional.
- * @returns {Number} the index where item X should be placed
+ * @param {number[] | $ArrayBufferView} array The array containing the items.
+ * @param {number} x The item that needs to be added to the arrayarn add --dev @babel/core @babel/cli @babel/preset-flowy.
+ * @param {number} low Inital Index that is used to start searching, optional.
+ * @param {number} high The maximum Index that is used to stop searching, optional.
+ * @returns {number} the index where item X should be placed
  */
-function bisection(array, x, low, high) {
+export function bisectionRight(
+  array: number[] | $ArrayBufferView,
+  x: number,
+  low?: number,
+  high?: number
+): number {
   // The low and high bounds the inital slice of the array that needs to be searched
   // this is optional
+
   low = low || 0;
   high = high || array.length;
 
   var mid;
-
   while (low < high) {
     mid = (low + high) >> 1;
 
@@ -52,27 +59,26 @@ function bisection(array, x, low, high) {
 }
 
 /**
- * A right bisection is default, so just reference the same function
- */
-bisection.right = bisection;
-
-/**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  *
- * @param {Array} array The array containing the items.
+ * @param {number[] | $ArrayBufferView} array The array containing the items.
  * @param {number} x The item that needs to be added to the array.
  * @param {number} low Inital Index that is used to start searching, optional.
  * @param {number} high The maximum Index that is used to stop searching, optional.
  * @return {number} the index where item X should be placed
  */
-bisection.left = function left(array, x, low, high) {
+export function bisectionLeft(
+  array: number[] | $ArrayBufferView,
+  x: number,
+  low?: number,
+  high?: number
+): number {
   // The low and high bounds the inital slice of the array that needs to be searched
   // this is optional
   low = low || 0;
   high = high || array.length;
 
   var mid;
-
   while (low < high) {
     mid = (low + high) >> 1;
 
@@ -84,11 +90,4 @@ bisection.left = function left(array, x, low, high) {
   }
 
   return low;
-};
-
-/**
- * Library version
- */
-bisection.version = '0.0.4';
-
-module.exports = bisection;
+}
