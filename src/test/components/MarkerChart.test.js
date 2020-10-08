@@ -15,7 +15,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import MarkerChart from '../../components/marker-chart';
+import { MarkerChart } from '../../components/marker-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
