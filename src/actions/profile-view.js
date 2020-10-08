@@ -5,23 +5,13 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../selectors/app';
-import {
-  getCounterSelectors,
-  getGlobalTracks,
-  getGlobalTrackAndIndexByPid,
-  getLocalTracks,
-  getLocalTrackFromReference,
-  getGlobalTrackFromReference,
-  getPreviewSelection,
-  getActiveTabGlobalTrackFromReference,
-  getActiveTabResourceTrackFromReference,
-} from '../selectors/profile';
+import { getLastVisibleThreadTabSlug } from 'firefox-profiler/selectors/app';
+import { getCounterSelectors, getGlobalTracks, getGlobalTrackAndIndexByPid, getLocalTracks, getLocalTrackFromReference, getGlobalTrackFromReference, getPreviewSelection, getActiveTabGlobalTrackFromReference, getActiveTabResourceTrackFromReference } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
   getThreadSelectorsFromThreadsKey,
   selectedThreadSelectors,
-} from '../selectors/per-thread';
+} from 'firefox-profiler/selectors/per-thread';
 import {
   getImplementationFilter,
   getSelectedThreadIndexes,
@@ -31,16 +21,16 @@ import {
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenLocalTracks,
-} from '../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
-} from '../profile-logic/profile-data';
-import { assertExhaustiveCheck } from '../utils/flow';
-import { sendAnalytics } from '../utils/analytics';
-import { objectShallowEquals } from '../utils/index';
+} from 'firefox-profiler/profile-logic/profile-data';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { sendAnalytics } from 'firefox-profiler/utils/analytics';
+import { objectShallowEquals } from 'firefox-profiler/utils/index';
 
 import type {
   PreviewSelection,
