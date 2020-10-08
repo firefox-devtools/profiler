@@ -38,7 +38,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class SymbolicationStatusOverlay extends PureComponent<Props> {
+class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
   render() {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
@@ -66,10 +66,14 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const SymbolicationStatusOverlay = explicitConnect<
+  {||},
+  StateProps,
+  {||}
+>({
   mapStateToProps: state => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),
-  component: SymbolicationStatusOverlay,
+  component: SymbolicationStatusOverlayImpl,
 });

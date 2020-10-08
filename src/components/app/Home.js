@@ -243,7 +243,7 @@ type PopupAddonInstallPhase =
   // Other browsers:
   | 'other-browser';
 
-class Home extends React.PureComponent<HomeProps, HomeState> {
+class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   constructor(props: HomeProps) {
     super(props);
     // Start by suggesting that we install the add-on.
@@ -542,7 +542,7 @@ function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-export default explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
+export const Home = explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
   mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
-  component: Home,
+  component: HomeImpl,
 });
