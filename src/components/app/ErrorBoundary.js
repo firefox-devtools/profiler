@@ -4,7 +4,7 @@
 // @flow
 
 import * as React from 'react';
-import { reportError } from 'firefox-profiler/utils/analytics';
+import { reportError } from '../../utils/analytics';
 import './ErrorBoundary.css';
 
 type State = {|

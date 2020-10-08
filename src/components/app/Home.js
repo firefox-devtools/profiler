@@ -6,9 +6,9 @@
 
 import * as React from 'react';
 
-import { AppHeader } from 'firefox-profiler/components/app/AppHeader';
+import { AppHeader } from './AppHeader';
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
-import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
+import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
@@ -18,25 +18,25 @@ import FirefoxPopupScreenshot from '../../../res/img/jpg/firefox-profiler-button
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
-} from 'firefox-profiler/actions/receive-profile';
+} from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
-} from 'firefox-profiler/app-logic/web-channel';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+} from '../../app-logic/web-channel';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
-} from 'firefox-profiler/utils/connect';
+} from '../../utils/connect';
 
 require('./Home.css');
 
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 
-import { DragAndDropOverlay } from 'firefox-profiler/components/app/DragAndDrop';
+import { DragAndDropOverlay } from './DragAndDrop';
 
 type InstallButtonProps = {
   name: string,

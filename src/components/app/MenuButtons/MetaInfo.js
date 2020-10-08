@@ -4,21 +4,18 @@
 
 // @flow
 import * as React from 'react';
-import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
-import { MetaOverheadStatistics } from 'firefox-profiler/components/app/MenuButtons/MetaOverheadStatistics';
-import {
-  formatBytes,
-  formatTimestamp,
-} from 'firefox-profiler/utils/format-numbers';
+import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
+import { MetaOverheadStatistics } from './MetaOverheadStatistics';
+import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 import {
   formatProductAndVersion,
   formatPlatform,
-} from 'firefox-profiler/profile-logic/profile-metainfo';
+} from '../../../profile-logic/profile-metainfo';
 
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
-import { typeof resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { typeof resymbolicateProfile } from '../../../actions/receive-profile';
+import { assertExhaustiveCheck } from '../../../utils/flow';
 
 import './MetaInfo.css';
 
