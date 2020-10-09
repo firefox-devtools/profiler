@@ -6,13 +6,13 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import {
+import{
   getCommittedRange,
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { 
+import{ 
   withSize, 
   type SizeProps,
 } from 'firefox-profiler/components/shared/WithSize';

@@ -8,7 +8,7 @@ import * as React from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
-import { 
+import{ 
   getCommittedRange, 
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
