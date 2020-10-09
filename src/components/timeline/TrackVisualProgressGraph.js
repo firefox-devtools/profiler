@@ -19,7 +19,7 @@ import type {
   CssPixels,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from 'components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import 'components/timeline/TrackVisualProgress.css';
