@@ -5,20 +5,20 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import { getCommittedRange } from '../../selectors/profile';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { TrackVisualProgressGraph } from './TrackVisualProgressGraph';
+import { explicitConnect } from 'firefox-profiler/utils/connect';
+import { getCommittedRange } from 'firefox-profiler/selectors/profile';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { TrackVisualProgressGraph } from 'firefox-profiler/components/timeline/TrackVisualProgressGraph';
 import {
   TRACK_VISUAL_PROGRESS_LINE_WIDTH,
   TRACK_VISUAL_PROGRESS_HEIGHT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 
 import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackVisualProgress.css';
+import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
 
 type OwnProps = {|
   +progressGraphData: ProgressGraphData[],

@@ -5,19 +5,19 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getCounterSelectors,
-} from '../../selectors/profile';
-import { TimelineMarkersMemory } from './Markers';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { TrackMemoryGraph } from './TrackMemoryGraph';
+} from 'firefox-profiler/selectors/profile';
+import { TimelineMarkersMemory } from 'firefox-profiler/components/timeline/Markers';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { TrackMemoryGraph } from 'firefox-profiler/components/timeline/TrackMemoryGraph';
 import {
   TRACK_MEMORY_GRAPH_HEIGHT,
   TRACK_MEMORY_MARKERS_HEIGHT,
   TRACK_MEMORY_LINE_WIDTH,
-} from '../../app-logic/constants';
+} from '.firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -25,9 +25,9 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackMemory.css';
+import 'firefox-profiler/components/timeline/TrackMemory.css';
 
 type OwnProps = {|
   +counterIndex: CounterIndex,
