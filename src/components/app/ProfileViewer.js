@@ -7,13 +7,13 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import DetailsContainer from './DetailsContainer';
-import ProfileFilterNavigator from './ProfileFilterNavigator';
-import MenuButtons from './MenuButtons';
+import { DetailsContainer } from './DetailsContainer';
+import { ProfileFilterNavigator } from './ProfileFilterNavigator';
+import { MenuButtons } from './MenuButtons';
 import WindowTitle from '../shared/WindowTitle';
-import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
+import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
-import BeforeUnloadManager from './BeforeUnloadManager';
+import { BeforeUnloadManager } from './BeforeUnloadManager';
 
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import Timeline from '../timeline';
@@ -53,7 +53,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewer extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props> {
   render() {
     const {
       hasZipFile,
@@ -143,7 +143,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
@@ -157,5 +157,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     returnToZipFileList,
     invalidatePanelLayout,
   },
-  component: ProfileViewer,
+  component: ProfileViewerImpl,
 });

@@ -18,7 +18,7 @@ type StateProps = {|
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
-class MarkerChartEmptyReasons extends PureComponent<Props> {
+class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { isMarkerChartEmptyInFullRange, threadName } = this.props;
 
@@ -36,12 +36,12 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const MarkerChartEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     isMarkerChartEmptyInFullRange: selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(
       state
     ),
   }),
-  component: MarkerChartEmptyReasons,
+  component: MarkerChartEmptyReasonsImpl,
 });

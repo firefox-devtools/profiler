@@ -10,12 +10,12 @@ import {
   toggleCheckedSharingOptions,
   attemptToPublish,
   resetUploadState,
-} from '../../../actions/publish';
+} from 'firefox-profiler/actions/publish';
 import {
   getProfile,
   getProfileRootRange,
   getHasPreferenceMarkers,
-} from '../../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import {
   getAbortFunction,
   getCheckedSharingOptions,
@@ -27,11 +27,13 @@ import {
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
-} from '../../../selectors/publish';
-import { BlobUrlLink } from '../../shared/BlobUrlLink';
-import { assertExhaustiveCheck } from '../../../utils/flow';
+} from 'firefox-profiler/selectors/publish';
+import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import explicitConnect, { type ConnectedProps } from '../../../utils/connect';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 
 import type {
   Profile,

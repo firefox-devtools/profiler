@@ -10,7 +10,6 @@ import type {
   Address,
   Microseconds,
   Bytes,
-  Nanoseconds,
 } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
@@ -458,28 +457,28 @@ export type Counter = {|
  * individual and overall overhead timings.
  */
 export type ProfilerOverheadStats = {|
-  maxCleaning: Nanoseconds,
-  maxCounter: Nanoseconds,
-  maxInterval: Nanoseconds,
-  maxLockings: Nanoseconds,
-  maxOverhead: Nanoseconds,
-  maxThread: Nanoseconds,
-  meanCleaning: Nanoseconds,
-  meanCounter: Nanoseconds,
-  meanInterval: Nanoseconds,
-  meanLockings: Nanoseconds,
-  meanOverhead: Nanoseconds,
-  meanThread: Nanoseconds,
-  minCleaning: Nanoseconds,
-  minCounter: Nanoseconds,
-  minInterval: Nanoseconds,
-  minLockings: Nanoseconds,
-  minOverhead: Nanoseconds,
-  minThread: Nanoseconds,
-  overheadDurations: Nanoseconds,
-  overheadPercentage: Nanoseconds,
-  profiledDuration: Nanoseconds,
-  samplingCount: Nanoseconds,
+  maxCleaning: Microseconds,
+  maxCounter: Microseconds,
+  maxInterval: Microseconds,
+  maxLockings: Microseconds,
+  maxOverhead: Microseconds,
+  maxThread: Microseconds,
+  meanCleaning: Microseconds,
+  meanCounter: Microseconds,
+  meanInterval: Microseconds,
+  meanLockings: Microseconds,
+  meanOverhead: Microseconds,
+  meanThread: Microseconds,
+  minCleaning: Microseconds,
+  minCounter: Microseconds,
+  minInterval: Microseconds,
+  minLockings: Microseconds,
+  minOverhead: Microseconds,
+  minThread: Microseconds,
+  overheadDurations: Microseconds,
+  overheadPercentage: Microseconds,
+  profiledDuration: Microseconds,
+  samplingCount: Microseconds,
 |};
 
 /**
@@ -504,10 +503,10 @@ export type ProfilerConfiguration = {|
  * threads: Time spent during threads sampling and marker collection.
  */
 export type ProfilerOverheadSamplesTable = {|
-  counters: Array<Nanoseconds>,
-  expiredMarkerCleaning: Array<Nanoseconds>,
-  locking: Array<Nanoseconds>,
-  threads: Array<Nanoseconds>,
+  counters: Array<Microseconds>,
+  expiredMarkerCleaning: Array<Microseconds>,
+  locking: Array<Microseconds>,
+  threads: Array<Microseconds>,
   time: Array<Milliseconds>,
   length: number,
 |};

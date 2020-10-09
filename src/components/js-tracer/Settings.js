@@ -21,7 +21,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class JsTracerSettings extends PureComponent<Props> {
+class JsTracerSettingsImpl extends PureComponent<Props> {
   _onCheckboxChange = () => {
     this.props.changeShowJsTracerSummary(!this.props.showJsTracerSummary);
   };
@@ -48,12 +48,16 @@ class JsTracerSettings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const JsTracerSettings = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     showJsTracerSummary: getShowJsTracerSummary(state),
   }),
   mapDispatchToProps: {
     changeShowJsTracerSummary,
   },
-  component: JsTracerSettings,
+  component: JsTracerSettingsImpl,
 });

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import TabBar from '../../components/app/TabBar';
+import { TabBar } from '../../components/app/TabBar';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('app/TabBar', () => {
