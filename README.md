@@ -49,9 +49,11 @@ yarn install
 yarn start
 ```
 
-You can also develop the Firefox Profiler online in a pre-configured development environment:
+You can also develop the Firefox Profiler online in a pre-configured development environment.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
+
+You can follow the steps described in [settinng up profiler on gitpod](./docs-user/gitpod.md) section to set up a gitpod development environment.
 
 For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
