@@ -6,11 +6,11 @@
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
-import explicitConnect from 'firefox-profiler/utils/connect';
-import TreeView from 'firefox-profiler/components/shared/TreeView';
-import CallTreeEmptyReasons from 'firefox-profiler/components/calltree/CallTreeEmptyReasons';
-import Icon from 'firefox-profiler/components/shared/Icon';
-import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
+import explicitConnect from '../../utils/connect';
+import TreeView from '../shared/TreeView';
+import CallTreeEmptyReasons from './CallTreeEmptyReasons';
+import Icon from '../shared/Icon';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
