@@ -6,6 +6,8 @@
 // Import all global css. Ensure that this is these CSS imports happen before any
 // JS imports happen, as this determines the rule order. Global CSS should be easy
 // to overwrite with a simple class name.
+import React from 'react';
+import { render } from 'react-dom';
 import 'res/css/focus.css';
 import 'photon-colors/photon-colors.css';
 import 'res/css/photon/index.css';
@@ -15,22 +17,10 @@ import 'res/css/global.css';
 import 'res/css/categories.css';
 import 'res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
-// All absolute path added
-
-// Now import the JS after the CSS.
-import React from 'react';
-import { render } from 'react-dom';
-import Root from 'firefox-profiler/components/app/Root';
-import createStore from 'firefox-profiler/app-logic/create-store';
-import {
-  addDataToWindowObject,
-  logFriendlyPreamble,
-  logDevelopmentTips,
-} from 'firefox-profiler/utils/window-console';
+import { Root } from 'firefox-profiler/components/app/Root';
+import { createStore } from 'firefox-profiler/app-logic/create-store';
+import { addDataToWindowObject, logFriendlyPreamble, logDevelopmentTips } from 'firefox-profiler/utils/window-console';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-
-// Mock out Google Analytics for anything that's not production so that we have run-time
-// code coverage in development and testing.
 if (process.env.NODE_ENV === 'development') {
   window.ga = (event: string, ...payload: mixed[]) => {
     const style = 'color: #FF6D00; font-weight: bold';
