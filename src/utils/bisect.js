@@ -33,22 +33,23 @@
  * @returns {number} the index where item X should be placed
  */
 export function bisectionRight(
-  array: number[] | $ArrayBufferView,
+  array: {
+    length: number,
+    [index: number]: number,
+  },
   x: number,
   low?: number,
   high?: number
 ): number {
   // The low and high bounds the inital slice of the array that needs to be searched
   // this is optional
-
   low = low || 0;
   high = high || array.length;
 
-  var mid;
   while (low < high) {
-    mid = (low + high) >> 1;
+    const mid = (low + high) >> 1;
 
-    if (x < array[mid]) {
+    if (mid && x < array[mid]) {
       high = mid;
     } else {
       low = mid + 1;
@@ -68,7 +69,10 @@ export function bisectionRight(
  * @return {number} the index where item X should be placed
  */
 export function bisectionLeft(
-  array: number[] | $ArrayBufferView,
+  array: {
+    length: number,
+    [index: number]: number,
+  },
   x: number,
   low?: number,
   high?: number
@@ -78,9 +82,8 @@ export function bisectionLeft(
   low = low || 0;
   high = high || array.length;
 
-  var mid;
   while (low < high) {
-    mid = (low + high) >> 1;
+    const mid = (low + high) >> 1;
 
     if (x <= array[mid]) {
       high = mid;
