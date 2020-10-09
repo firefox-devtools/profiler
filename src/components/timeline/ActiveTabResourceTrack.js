@@ -12,7 +12,7 @@ import {
   getSelectedTab,
 } from 'firefox-profiler/selectors/url-state';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import TrackThread from 'firefox-profiler/components/timeline/TrackThread';
+import TrackThread from './TrackThread';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {

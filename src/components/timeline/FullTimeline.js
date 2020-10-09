@@ -6,12 +6,12 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
-import TimelineGlobalTrack from 'firefox-profiler/components/timeline/GlobalTrack';
-import TimelineRuler from 'firefox-profiler/components/timeline/Ruler';
-import TimelineSelection from 'firefox-profiler/components/timeline/Selection';
-import OverflowEdgeIndicator from 'firefox-profiler/components/timeline/OverflowEdgeIndicator';
-import Reorderable from 'firefox-profiler/components/shared/Reorderable';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import TimelineGlobalTrack from './GlobalTrack';
+import TimelineRuler from './Ruler';
+import TimelineSelection from './Selection';
+import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import Reorderable from '../shared/Reorderable';
+import { withSize } from '../shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
@@ -30,11 +30,11 @@ import {
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
-import TimelineTrackContextMenu from 'firefox-profiler/components/timeline/TrackContextMenu';
+import TimelineTrackContextMenu from './TrackContextMenu';
 
-import 'firefox-profiler/components/timeline/index.css';
+import './index.css';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeGlobalTrackOrder,

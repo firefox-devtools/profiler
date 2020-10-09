@@ -16,10 +16,10 @@ import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
 } from 'firefox-profiler/selectors/profile';
-import 'firefox-profiler/components/timeline/Track.css';
-import TimelineTrackThread from 'firefox-profiler/components/timeline/TrackThread';
-import TimelineTrackScreenshots from 'firefox-profiler/components/timeline/TrackScreenshots';
-import ActiveTabResourcesPanel from 'firefox-profiler/components/timeline/ActiveTabResourcesPanel';
+import './Track.css';
+import TimelineTrackThread from './TrackThread';
+import TimelineTrackScreenshots from './TrackScreenshots';
+import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';

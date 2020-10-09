@@ -10,18 +10,18 @@ import {
   overlayFills,
   getMarkerStyle,
 } from 'firefox-profiler/profile-logic/marker-styles';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import { withSize } from '../shared/WithSize';
+import { Tooltip } from '../tooltip/Tooltip';
+import { TooltipMarker } from '../tooltip/Marker';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
-import 'firefox-profiler/components/timeline/Markers.css';
+import './Markers.css';
 
 import type {
   Milliseconds,
@@ -31,7 +31,7 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 

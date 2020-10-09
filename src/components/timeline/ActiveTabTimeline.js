@@ -5,11 +5,11 @@
 // @flow
 
 import * as React from 'react';
-import TimelineRuler from 'firefox-profiler/components/timeline/Ruler';
-import TimelineSelection from 'firefox-profiler/components/timeline/Selection';
-import OverflowEdgeIndicator from 'firefox-profiler/components/timeline/OverflowEdgeIndicator';
-import ActiveTabTimelineGlobalTrack from 'firefox-profiler/components/timeline/ActiveTabGlobalTrack';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import TimelineRuler from './Ruler';
+import TimelineSelection from './Selection';
+import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
+import { withSize } from '../shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
@@ -19,10 +19,10 @@ import {
   getActiveTabGlobalTrackReferences,
 } from 'firefox-profiler/selectors/profile';
 
-import 'firefox-profiler/components/timeline/index.css';
-import 'firefox-profiler/components/timeline/ActiveTabTimeline.css';
+import './index.css';
+import './ActiveTabTimeline.css';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from '/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,

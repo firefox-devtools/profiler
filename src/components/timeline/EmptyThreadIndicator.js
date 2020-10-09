@@ -4,8 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import { DivWithTooltip } from 'firefox-profiler/components/tooltip/DivWithTooltip';
+import { withSize } from '../shared/WithSize';
+import { DivWithTooltip } from '../tooltip/DivWithTooltip';
 import { oneLine } from 'common-tags';
 
 import type {
@@ -14,9 +14,9 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { SizeProps } from '../shared/WithSize';
 
-import 'firefox-profiler/components/timeline/EmptyThreadIndicator.css';
+import './EmptyThreadIndicator.css';
 
 type SyntheticCssDeclarations = {
   [string]: string | number,

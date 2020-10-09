@@ -11,7 +11,7 @@ import {
   selectTrack,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
@@ -23,11 +23,11 @@ import {
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import TrackThread from 'firefox-profiler/components/timeline/TrackThread';
-import { TrackEventDelay } from 'firefox-profiler/components/timeline/TrackEventDelay';
-import TrackNetwork from 'firefox-profiler/components/timeline/TrackNetwork';
-import { TrackMemory } from 'firefox-profiler/components/timeline/TrackMemory';
-import { TrackIPC } from 'firefox-profiler/components/timeline/TrackIPC';
+import TrackThread from './TrackThread';
+import { TrackEventDelay } from './TrackEventDelay';
+import TrackNetwork from './TrackNetwork';
+import { TrackMemory } from './TrackMemory';
+import { TrackIPC } from './TrackIPC';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import type {
   TrackReference,

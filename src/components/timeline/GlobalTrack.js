@@ -29,12 +29,12 @@ import {
   getContentfulSpeedIndexProgress,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import 'firefox-profiler/components/timeline/Track.css';
-import TimelineTrackThread from 'firefox-profiler/components/timeline/TrackThread';
-import TimelineTrackScreenshots from 'firefox-profiler/components/timeline/TrackScreenshots';
-import TimelineLocalTrack from 'firefox-profiler/components/timeline/LocalTrack';
-import { TrackVisualProgress } from 'firefox-profiler/components/timeline/TrackVisualProgress';
-import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import './Track.css';
+import TimelineTrackThread from './TrackThread';
+import TimelineTrackScreenshots from './TrackScreenshots';
+import TimelineLocalTrack from './LocalTrack';
+import { TrackVisualProgress } from './TrackVisualProgress';
+import Reorderable from '../shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 

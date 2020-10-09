@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import { TIMELINE_RULER_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import 'firefox-profiler/components/timeline/Ruler.css';
+import './Ruler.css';
 
 import type { Milliseconds, CssPixels } from 'firefox-profiler/types';
 
