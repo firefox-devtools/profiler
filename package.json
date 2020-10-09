@@ -45,7 +45,6 @@
   "dependencies": {
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
-    "bisection": "^0.0.3",
     "clamp": "^1.0.1",
     "classnames": "^2.2.6",
     "common-tags": "^1.8.0",

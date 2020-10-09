@@ -5,10 +5,11 @@
 // @flow
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
-import bisection from 'bisection';
 
 import type { RequestedLib } from 'firefox-profiler/types';
 import type { SymbolTableAsTuple } from './symbol-store-db';
+
+import { bisectionRight } from '../utils/bisect';
 
 export type LibSymbolicationRequest = {
   lib: RequestedLib,
@@ -67,14 +68,14 @@ export function readSymbolsFromSymbolTable(
     // Look up address in symbolTableAddrs. symbolTableAddrs is sorted, so we
     // can do the lookup using bisection. And address is >= the previously
     // looked up address, so we can use the last found index as a lower bound
-    // during the bisection.
+    // during the bisectionRight.
     // We're not looking for an exact match here. We're looking for the
     // largest symbolIndex for which symbolTableAddrs[symbolIndex] <= address.
-    // bisection() returns the insertion index, which is one position after
+    // bisectionRight() returns the insertion index, which is one position after
     // the index that we consider the match, so we need to subtract 1 from the
     // result.
     const symbolIndex =
-      bisection(symbolTableAddrs, address, currentSymbolIndex) - 1;
+      bisectionRight(symbolTableAddrs, address, currentSymbolIndex) - 1;
 
     if (symbolIndex >= 0) {
       if (symbolIndex !== currentSymbolIndex) {

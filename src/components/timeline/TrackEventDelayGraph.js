@@ -12,7 +12,6 @@ import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { Tooltip } from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import bisection from 'bisection';
 
 import type {
   Thread,
@@ -23,6 +22,7 @@ import type {
   EventDelayInfo,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
+import { bisectionRight } from '../../utils/bisect';
 
 import './TrackEventDelay.css';
 
@@ -228,7 +228,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
     } else {
       // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredDelay;
-      const bisectionDelay = bisection.right(samples.time, timeAtMouse);
+      const bisectionDelay = bisectionRight(samples.time, timeAtMouse);
       if (bisectionDelay > 0 && bisectionDelay < samples.time.length) {
         const leftDistance = timeAtMouse - samples.time[bisectionDelay - 1];
         const rightDistance = samples.time[bisectionDelay] - timeAtMouse;

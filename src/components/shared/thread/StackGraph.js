@@ -4,7 +4,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import bisection from 'bisection';
 import classNames from 'classnames';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { timeCode } from 'firefox-profiler/utils/time-code';
@@ -24,6 +23,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
+import { bisectionRight } from '../../../utils/bisect';
 
 type Props = {|
   +className: string,
@@ -127,11 +127,11 @@ export class ThreadStackGraph extends PureComponent<Props> {
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
 
-    const firstDrawnSampleIndex = bisection.right(
+    const firstDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       firstDrawnSampleTime
     );
-    const afterLastDrawnSampleIndex = bisection.right(
+    const afterLastDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       lastDrawnSampleTime,
       firstDrawnSampleIndex

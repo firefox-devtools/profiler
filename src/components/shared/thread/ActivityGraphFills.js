@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import bisection from 'bisection';
 import clamp from 'clamp';
 
 import './ActivityGraph.css';
@@ -17,6 +16,7 @@ import type {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
+import { bisectionRight } from '../../../utils/bisect';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React
@@ -562,11 +562,11 @@ export class ActivityFillGraphQuerier {
 
     // Now find the samples where the range [mid(previousSample.time, thisSample.time), mid(thisSample.time, nextSample.time)]
     // overlaps with contributionTimeRange.
-    const firstSampleAfterContributionTimeRangeStart = bisection.right(
+    const firstSampleAfterContributionTimeRangeStart = bisectionRight(
       samples.time,
       contributionTimeRangeStart
     );
-    const firstSampleAfterContributionTimeRangeEnd = bisection.right(
+    const firstSampleAfterContributionTimeRangeEnd = bisectionRight(
       samples.time,
       contributionTimeRangeEnd
     );

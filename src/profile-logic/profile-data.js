@@ -57,8 +57,8 @@ import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 
-import bisection from 'bisection';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import { bisectionRight } from '../utils/bisect';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1935,7 +1935,7 @@ export function getSampleIndexClosestToTime(
   interval: Milliseconds
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
-  const index = bisection.right(samples.time, time);
+  const index = bisectionRight(samples.time, time);
 
   if (index === 0) {
     return 0;

@@ -26,17 +26,14 @@
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  *
- * @param {number[] | $ArrayBufferView} array The array containing the items.
+ * @param {number[] | ArrayBufferView} array The array containing the items.
  * @param {number} x The item that needs to be added to the arrayarn add --dev @babel/core @babel/cli @babel/preset-flowy.
  * @param {number} low Inital Index that is used to start searching, optional.
  * @param {number} high The maximum Index that is used to stop searching, optional.
  * @returns {number} the index where item X should be placed
  */
 export function bisectionRight(
-  array: {
-    length: number,
-    [index: number]: number,
-  },
+  array: number[] | ArrayBufferView,
   x: number,
   low?: number,
   high?: number
@@ -62,17 +59,14 @@ export function bisectionRight(
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  *
- * @param {number[] | $ArrayBufferView} array The array containing the items.
+ * @param {number[] | ArrayBufferView} array The array containing the items.
  * @param {number} x The item that needs to be added to the array.
  * @param {number} low Inital Index that is used to start searching, optional.
  * @param {number} high The maximum Index that is used to stop searching, optional.
  * @return {number} the index where item X should be placed
  */
 export function bisectionLeft(
-  array: {
-    length: number,
-    [index: number]: number,
-  },
+  array: number[] | ArrayBufferView,
   x: number,
   low?: number,
   high?: number
