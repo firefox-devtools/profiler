@@ -33,7 +33,7 @@ import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
-const LEFT = 200;
+const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
@@ -71,8 +71,22 @@ describe('timeline/TrackScreenshots', function() {
   it('moves the hover when moving the mouse', () => {
     const { moveMouseAndGetLeft } = setup();
     const base = moveMouseAndGetLeft(LEFT);
-    expect(moveMouseAndGetLeft(LEFT + 10)).toBe(base + 10);
-    expect(moveMouseAndGetLeft(LEFT + 20)).toBe(base + 20);
+    // LEFT is 100 and the screenshot's width is 300px.
+    // So hovering between 100 and 150px should give a result of left == 0.
+    // As soon as we pass 150px the left value should also move up.
+    expect(moveMouseAndGetLeft(150 + 10)).toBe(base + 10);
+    expect(moveMouseAndGetLeft(150 + 20)).toBe(base + 20);
+  });
+
+  it('places the hover image in the center of the track if there is enough space', () => {
+    const { setBoundingClientRectOffset, moveMouseAndGetTop } = setup();
+    const containerTop = 100;
+    const screenshotHeight = 150; // This value is defined in the fixtures.
+    setBoundingClientRectOffset({ left: LEFT, top: containerTop });
+    const pageX = LEFT;
+    const expectedTop =
+      containerTop + FULL_TRACK_SCREENSHOT_HEIGHT / 2 - screenshotHeight / 2;
+    expect(moveMouseAndGetTop(pageX)).toBe(expectedTop);
   });
 
   it('makes sure the hover image does not go off the end of the container', () => {
@@ -84,13 +98,13 @@ describe('timeline/TrackScreenshots', function() {
   it('makes sure the hover image does not go off the left side of screen', () => {
     const { moveMouseAndGetLeft } = setup();
     const pageX = LEFT;
-    expect(moveMouseAndGetLeft(pageX) >= 0).toBe(true);
+    expect(moveMouseAndGetLeft(pageX)).toBe(0);
   });
 
   it('makes sure the hover image does not go off the top side of screen', () => {
     const { moveMouseAndGetTop } = setup();
     const pageX = LEFT;
-    expect(moveMouseAndGetTop(pageX) >= 0).toBe(true);
+    expect(moveMouseAndGetTop(pageX)).toBe(0);
   });
 
   it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
@@ -162,19 +176,32 @@ function setup(
   jest
     .spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockImplementation(() => ctx);
+  let leftOffset = LEFT;
+  let topOffset = TOP;
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
       const rect = getBoundingBox(TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT);
       // Add some arbitrary X offset.
-      rect.left += LEFT;
-      rect.right += LEFT;
-      rect.x += LEFT;
-      rect.y += TOP;
-      rect.top += TOP;
-      rect.bottom += TOP;
+      rect.left += leftOffset;
+      rect.right += leftOffset;
+      rect.x += leftOffset;
+      rect.y += topOffset;
+      rect.top += topOffset;
+      rect.bottom += topOffset;
       return rect;
     });
+
+  function setBoundingClientRectOffset({
+    left,
+    top,
+  }: {
+    left: number,
+    top: number,
+  }) {
+    leftOffset = left;
+    topOffset = top;
+  }
 
   const renderResult = render(<Provider store={store}>{component}</Provider>);
   const { container } = renderResult;
@@ -224,6 +251,7 @@ function setup(
     moveMouse,
     moveMouseAndGetLeft,
     moveMouseAndGetTop,
+    setBoundingClientRectOffset,
   };
 }
 

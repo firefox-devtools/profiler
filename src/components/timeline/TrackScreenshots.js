@@ -156,9 +156,9 @@ type HoverPreviewProps = {|
   +trackHeight: number,
 |};
 
-const MAXIMUM_HOVER_SIZE = 350;
+const MAXIMUM_HOVER_SIZE = 300;
 
-const HOVER_MAX_WIDTH_RATIO = 1.75;
+const HOVER_MAX_WIDTH_RATIO = 2.0;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
