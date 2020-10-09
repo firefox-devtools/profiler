@@ -12,7 +12,7 @@ import {
   withSize, 
   type SizeProps,
    } from 'firefox-profiler/components/shared/WithSize';
-import  ThreadStackGraph  from 'firefox-profiler/components/shared/thread/StackGraph';
+import ThreadStackGraph  from 'firefox-profiler/components/shared/thread/StackGraph';
 import ThreadActivityGraph  from 'firefox-profiler/components/shared/thread/ActivityGraph';
 import {
   getProfileInterval,

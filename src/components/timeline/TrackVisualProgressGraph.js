@@ -5,10 +5,13 @@
 // @flow
 
 import * as React from 'react';
-import  withSize from 'firefox-profiler/components/timeline/shared/WithSize';
+import withSize from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
-import { getCommittedRange, getProfileInterval } from 'firefox-profiler/selectors/profile';
+import { 
+  getCommittedRange, 
+  getProfileInterval,
+  } from 'firefox-profiler/selectors/profile';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import bisection from 'bisection';
 import { BLUE_50, BLUE_60 } from 'photon-colors';

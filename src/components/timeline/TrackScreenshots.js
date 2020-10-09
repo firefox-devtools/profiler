@@ -12,7 +12,10 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { withSize, type SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import { 
+  withSize, 
+  type SizeProps,
+  } from 'firefox-profiler/components/shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type {

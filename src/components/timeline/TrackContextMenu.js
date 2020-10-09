@@ -4,10 +4,7 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { 
-  ContextMenu, 
-  MenuItem,
-  } from 'react-contextmenu';
+import { ContextMenu, MenuItem } from 'react-contextmenu';
 import 'firefox-profiler/components/timeline/TrackContextMenu.css';
 import {
   hideGlobalTrack,
