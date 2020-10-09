@@ -275,6 +275,14 @@ export type UrlState = {|
 
 export type IconState = Set<string>;
 
+// This is used to display the loading progress when fetching a profile from add-on
+export type LoadingStep = 'promise' | 'raw' | 'decompress' | 'decode' | 'done';
+
+export type LoadingState = {|
+  +loadingStep: LoadingStep,
+  +progress: number,
+|};
+
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
@@ -282,6 +290,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
+  +loadingState: LoadingState,
 |};
 
 export type IconWithClassName = {|

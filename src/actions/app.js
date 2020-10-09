@@ -40,6 +40,7 @@ import type {
   Action,
   ThunkAction,
   UrlState,
+  LoadingStep,
 } from 'firefox-profiler/types';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
@@ -292,4 +293,11 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
 
     return true;
   };
+}
+
+export function changeLoadProgress(
+  loadingStep: LoadingStep,
+  progress: number
+): Action {
+  return { type: 'CHANGE_LOAD_PROGRESS', loadingStep, progress };
 }
