@@ -14,7 +14,7 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
+import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';

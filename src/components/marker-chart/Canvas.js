@@ -9,7 +9,7 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
+import { ChartCanvas } from '../shared/chart/Canvas';
 import { TooltipMarker } from '../tooltip/Marker';
 import TextMeasurement from '../../utils/text-measurement';
 import memoize from 'memoize-immutable';
