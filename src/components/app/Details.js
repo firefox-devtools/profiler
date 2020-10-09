@@ -15,7 +15,7 @@ import MarkerTable from '../marker-table';
 import { StackChart } from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import { NetworkChart } from '../network-chart/';
-import { FlameGraph } from '../flame-graph/';
+import FlameGraph from '../flame-graph/';
 import { JsTracer } from '../js-tracer/';
 import { selectSidebar } from '../sidebar';
 
@@ -112,7 +112,7 @@ class ProfileViewer extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: (state) => ({
+  mapStateToProps: state => ({
     visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),

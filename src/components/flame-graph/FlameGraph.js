@@ -340,7 +340,7 @@ function viewportNeedsUpdate() {
 }
 
 export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: (state) => ({
+  mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
