@@ -27,3 +27,7 @@
   color: rgba(0, 0, 0, 0.55);
   font-style: normal;
 }
+
+.backtraceStackFrame_isFrameLabel {
+  color: rgba(0, 0, 0, 0.6);
+}
