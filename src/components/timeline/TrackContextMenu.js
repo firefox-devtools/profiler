@@ -19,7 +19,7 @@ import {
   hideLocalTrack,
   showLocalTrack,
 } from 'firefox-profiler/actions/profile-view';
-import { explicitConnect } from 'firefox-profiler/utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getThreads,
@@ -36,7 +36,7 @@ import {
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
 } from 'firefox-profiler/selectors/url-state';
-import { classNames } from 'classnames';
+import classNames from 'classnames';
 
 import type {
   Thread,

@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from 'firefox-profiler/components/timeline/shared/WithSize';
+import  withSize from 'firefox-profiler/components/timeline/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
 import { getCommittedRange, getProfileInterval } from 'firefox-profiler/selectors/profile';
@@ -19,10 +19,10 @@ import type {
   CssPixels,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from 'components/shared/WithSize';
+import type SizeProps from 'components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'components/timeline/TrackVisualProgress.css';
+import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
 
 
 /**
