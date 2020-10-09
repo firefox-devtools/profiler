@@ -29,17 +29,6 @@ import type {
  */
 export const markerSchemaGecko: MarkerSchema[] = [
   {
-    name: 'Bailout',
-    display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'bailoutType', label: 'Type', format: 'string' },
-      { key: 'where', label: 'Where', format: 'string' },
-      { key: 'script', label: 'Script', format: 'string' },
-      { key: 'functionLine', label: 'Function Line', format: 'integer' },
-      { key: 'bailoutLine', label: 'Bailout Line', format: 'integer' },
-    ],
-  },
-  {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
     data: [
@@ -129,14 +118,6 @@ export const markerSchemaGecko: MarkerSchema[] = [
       { key: 'prefKind', label: 'Kind', format: 'string' },
       { key: 'prefType', label: 'Type', format: 'string' },
       { key: 'prefValue', label: 'Value', format: 'string' },
-    ],
-  },
-  {
-    name: 'Invalidation',
-    display: ['marker-chart', 'marker-table'],
-    data: [
-      { key: 'url', label: 'URL', format: 'url' },
-      { key: 'line', label: 'Line', format: 'integer' },
     ],
   },
   {
