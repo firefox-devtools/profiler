@@ -9,8 +9,8 @@ import classNames from 'classnames';
 import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { 
-withSize, 
-type SizeProps,
+  withSize, 
+  type SizeProps,
 } from 'firefox-profiler/components/shared/WithSize';
 import ThreadStackGraph from 'firefox-profiler/components/shared/thread/StackGraph';
 import ThreadActivityGraph from 'firefox-profiler/components/shared/thread/ActivityGraph';
