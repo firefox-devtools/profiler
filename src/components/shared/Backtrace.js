@@ -28,7 +28,7 @@ type Props = {|
   +implementationFilter: ImplementationFilter,
 |};
 
-function Backtrace(props: Props) {
+export function Backtrace(props: Props) {
   const { stackIndex, thread, implementationFilter, maxStacks } = props;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
@@ -65,4 +65,4 @@ function Backtrace(props: Props) {
   );
 }
 
-export default Backtrace;
+
