@@ -9,7 +9,7 @@ import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
 import { 
-   getCommittedRange, 
+  getCommittedRange, 
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
