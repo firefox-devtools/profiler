@@ -9,7 +9,7 @@ import CallTree from './CallTree';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 
-const ProfileCallTreeView = () => (
+export const ProfileCallTreeView = () => (
   <div
     className="treeAndSidebarWrapper"
     id="calltree-tab"
@@ -21,5 +21,3 @@ const ProfileCallTreeView = () => (
     <CallTree />
   </div>
 );
-
-export default ProfileCallTreeView;
