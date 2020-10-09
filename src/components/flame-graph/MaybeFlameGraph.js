@@ -4,14 +4,14 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import { getInvertCallstack } from '../../selectors/url-state';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { changeInvertCallstack } from '../../actions/profile-view';
-import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getInvertCallstack } from 'firefox-profiler/selectors/url-state';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { changeInvertCallstack } from 'firefox-profiler/actions/profile-view';
+import FlameGraphEmptyReasons from 'firefox-profiler/components/flame-graph/FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 require('./MaybeFlameGraph.css');
 

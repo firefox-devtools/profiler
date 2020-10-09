@@ -4,8 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import FlameGraphCanvas from './Canvas';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import FlameGraphCanvas from 'firefox-profiler/components/flame-graph/Canvas';
 import {
   getCategories,
   getCommittedRange,
@@ -13,18 +13,18 @@ import {
   getScrollToSelectionGeneration,
   getProfileInterval,
   getPageList,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
-} from '../../actions/profile-view';
+} from 'firefox-profiler/actions/profile-view';
 
 import type {
   Thread,
@@ -42,11 +42,11 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
+import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
 
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 require('./FlameGraph.css');
 

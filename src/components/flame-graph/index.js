@@ -4,9 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
-import MaybeFlameGraph from './MaybeFlameGraph';
+import StackSettings from 'firefox-profiler/components/shared/StackSettings';
+import TransformNavigator from 'firefox-profiler/components/shared/TransformNavigator';
+import MaybeFlameGraph from 'firefox-profiler/components/flame-graph/MaybeFlameGraph';
 
 const FlameGraphView = () => (
   <div
