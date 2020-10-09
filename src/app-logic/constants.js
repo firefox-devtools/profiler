@@ -16,6 +16,7 @@ export const PROCESSED_PROFILE_VERSION = 32;
 // components need to share these values.
 export const TIMELINE_MARGIN_RIGHT = 15;
 export const TIMELINE_MARGIN_LEFT = 150;
+export const ACTIVE_TAB_TIMELINE_MARGIN_LEFT = 0;
 
 export const TIMELINE_SETTINGS_HEIGHT = 26;
 
