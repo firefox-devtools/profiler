@@ -22,7 +22,7 @@ import {
 import './index.css';
 import './ActiveTabTimeline.css';
 
-import type { SizeProps } from '/WithSize';
+import type { SizeProps } from '../shared/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
