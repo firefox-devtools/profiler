@@ -238,6 +238,22 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         <MenuItem onClick={this.setEndRange}>
           Set selection end time here
         </MenuItem>
+        <SubMenu title="Set selection start ">
+          <MenuItem onClick={this.setStartRange}>
+            From the start of this marker
+          </MenuItem>
+          <MenuItem onClick={this.setEndRange}>
+            From the end of this marker
+          </MenuItem>
+        </SubMenu>
+        <SubMenu title="Set selection end ">
+          <MenuItem onClick={this.setStartRange}>
+            From the start of this marker
+          </MenuItem>
+          <MenuItem onClick={this.setEndRange}>
+            From the end of this marker
+          </MenuItem>
+        </SubMenu>
         <MenuItem
           onClick={this.setRangeByDuration}
           disabled={this._isZeroDurationMarker(marker)}
