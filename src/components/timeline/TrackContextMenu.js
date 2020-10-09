@@ -4,8 +4,11 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { ContextMenu, MenuItem } from 'react-contextmenu';
-import './TrackContextMenu.css';
+import { 
+  ContextMenu, 
+  MenuItem,
+  } from 'react-contextmenu';
+import 'firefox-profiler/components/timeline/TrackContextMenu.css';
 import {
   hideGlobalTrack,
   showGlobalTrack,
@@ -15,9 +18,9 @@ import {
   isolateScreenshot,
   hideLocalTrack,
   showLocalTrack,
-} from '../../actions/profile-view';
-import explicitConnect from '../../utils/connect';
-import { ensureExists } from '../../utils/flow';
+} from 'firefox-profiler/actions/profile-view';
+import { explicitConnect } from 'firefox-profiler/utils/connect';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
@@ -26,14 +29,14 @@ import {
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import {
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
-} from '../../selectors/url-state';
-import classNames from 'classnames';
+} from 'firefox-profiler/selectors/url-state';
+import { classNames } from 'classnames';
 
 import type {
   Thread,
@@ -46,7 +49,7 @@ import type {
   TrackReference,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +threads: Thread[],
