@@ -14,8 +14,6 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 
 import { tabSlugs } from '../../app-logic/tabs-handling';
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import { FlameGraph } from '../../components/flame-graph/FlameGraph';
-
 // Let's mock all possible views so that we don't spend too much time rendering stuff.
 // We use the tab slugs as class names. `call-tree` is an exception because if
 // we need a dash to masquerade as custom elements so that React doesn't emit a
