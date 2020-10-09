@@ -13,7 +13,7 @@ import {
 import {
   withChartViewport,
   type WithChartViewport,
-} from 'firefox-profiler/shared/chart/Viewport';
+} from 'firefox-profiler/components/shared/chart/Viewport';
 import ChartCanvas from 'firefox-profiler/components/shared/chart/Canvas';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { FastFillStyle } from 'firefox-profiler/utils';
