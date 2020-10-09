@@ -26,7 +26,7 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import 'firefox-profiler/components/screenshots/TrackScreenshots.css';
+import 'firefox-profiler/components/TrackScreenshots.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
