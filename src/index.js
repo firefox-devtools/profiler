@@ -17,8 +17,8 @@ import '../res/css/network.css';
 import 'react-splitter-layout/lib/index.css';
 import React from 'react';
 import { render } from 'react-dom';
-import {Root} from 'firefox-profiler/components/app/Root';
-import createStore from 'firefox-profiler/app-logic/create-store';
+import { Root } from './components/app/Root';
+import createStore from './app-logic/create-store';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,

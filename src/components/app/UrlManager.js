@@ -82,7 +82,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  *       view with the `UrlState` information.
  *    4. Display the profile view.
  */
-class UrlManager extends React.PureComponent<Props> {
+class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
     const {
       startFetchingProfiles,
@@ -237,7 +237,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
@@ -251,5 +251,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     setupInitialUrlState,
     getProfilesFromRawUrl,
   },
-  component: UrlManager,
+  component: UrlManagerImpl,
 });
