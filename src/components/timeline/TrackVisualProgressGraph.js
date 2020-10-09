@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from "firefox-profiler/components/shared/WithSize;
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
 import { 
