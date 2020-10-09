@@ -8,7 +8,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import type { InitialSelectedTrackReference } from 'firefox-profiler/types';
 
-import './OverflowEdgeIndicator.css';
+import 'firefox-profiler/components/timeline/OverflowEdgeIndicator.css';
 
 type Props = {
   className: string,

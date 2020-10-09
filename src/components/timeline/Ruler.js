@@ -5,9 +5,9 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { TIMELINE_RULER_HEIGHT } from '../../app-logic/constants';
+import { TIMELINE_RULER_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import './Ruler.css';
+import 'firefox-profiler/components/timeline/Ruler.css';
 
 import type { Milliseconds, CssPixels } from 'firefox-profiler/types';
 

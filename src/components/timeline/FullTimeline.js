@@ -6,13 +6,13 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
-import TimelineGlobalTrack from './GlobalTrack';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import Reorderable from '../shared/Reorderable';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
+import TimelineGlobalTrack from 'firefox-profiler/components/timeline/GlobalTrack';
+import TimelineRuler from 'firefox-profiler/components/timeline/Ruler';
+import TimelineSelection from 'firefox-profiler/components/timeline/Selection';
+import OverflowEdgeIndicator from 'firefox-profiler/components/timeline/OverflowEdgeIndicator';
+import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getZeroAt,
@@ -29,19 +29,19 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
-} from '../../app-logic/constants';
-import TimelineTrackContextMenu from './TrackContextMenu';
+} from 'firefox-profiler/app-logic/constants';
+import TimelineTrackContextMenu from 'firefox-profiler/components/timeline/TrackContextMenu';
 
-import './index.css';
+import 'firefox-profiler/components/timeline/index.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
   changeTimelineType,
   changeRightClickedTrack,
-} from '../../actions/profile-view';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/profile-view';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   BrowsingContextID,
@@ -56,7 +56,7 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,

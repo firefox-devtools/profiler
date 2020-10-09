@@ -5,24 +5,24 @@
 // @flow
 
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../selectors/app';
+import TimelineRuler from 'firefox-profiler/components/timeline/Ruler';
+import TimelineSelection from 'firefox-profiler/components/timeline/Selection';
+import OverflowEdgeIndicator from 'firefox-profiler/components/timeline/OverflowEdgeIndicator';
+import ActiveTabTimelineGlobalTrack from 'firefox-profiler/components/timeline/ActiveTabGlobalTrack';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
   getActiveTabGlobalTracks,
   getActiveTabGlobalTrackReferences,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 
-import './index.css';
-import './ActiveTabTimeline.css';
+import 'firefox-profiler/components/timeline/index.css';
+import 'firefox-profiler/components/timeline/ActiveTabTimeline.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
@@ -31,7 +31,7 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,

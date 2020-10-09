@@ -6,12 +6,12 @@
 
 import memoize from 'memoize-immutable';
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import TimelineRuler from 'firefox-profiler/components/timeline/Ruler';
+import TimelineSelection from 'firefox-profiler/components/timeline/Selection';
+import OverflowEdgeIndicator from 'firefox-profiler/components/timeline/OverflowEdgeIndicator';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import {
   getPanelLayoutGeneration,
   getCommittedRange,
@@ -19,10 +19,10 @@ import {
   getOriginsTimeline,
   getThreads,
 } from 'firefox-profiler/selectors';
-import { getFriendlyThreadName } from '../../profile-logic/profile-data';
-import { changeSelectedThreads } from '../../actions/profile-view';
+import { getFriendlyThreadName } from 'firefox-profiler/profile-logic/profile-data';
+import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   Thread,
   ThreadIndex,
@@ -33,9 +33,9 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './OriginsTimeline.css';
+import 'firefox-profiler/components/timeline/OriginsTimeline.css';
 
 type StateProps = {|
   +committedRange: StartEndRange,
