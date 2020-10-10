@@ -7,16 +7,19 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
+import {
+  TooltipDetail,
+  type TooltipDetailComponent,
+} from 'firefox-profiler/components/tooltip/TooltipDetails';
 import {
   getColorClassNameForMimeType,
   guessMimeTypeFromNetworkMarker,
-} from '../../profile-logic/marker-data';
+} from 'firefox-profiler/profile-logic/marker-data';
 import {
   formatBytes,
   formatNumber,
   formatMilliseconds,
-} from '../../utils/format-numbers';
+} from 'firefox-profiler/utils/format-numbers';
 
 import type { NetworkPayload, Milliseconds } from 'firefox-profiler/types';
 
