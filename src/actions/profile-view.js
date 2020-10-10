@@ -639,7 +639,6 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
-
 /**
  * This function isolates a process global track, and leaves its local tracks visible.
  */
