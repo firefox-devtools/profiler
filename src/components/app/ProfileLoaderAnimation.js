@@ -5,15 +5,15 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from '../../selectors/app';
-import { getDataSource } from '../../selectors/url-state';
+import { ProfileRootMessage } from 'firefox-profiler/components/app/ProfileRootMessage';
+import { getView } from 'firefox-profiler/selectors/app';
+import { getDataSource } from 'firefox-profiler/selectors/url-state';
 
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': 'Importing the profile directly from Firefox...',
