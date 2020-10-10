@@ -486,36 +486,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
-  renderHideTrack() {
-    const { rightClickedTrack } = this.props;
-    if (rightClickedTrack === null) {
-      return null;
-    }
-    const trackIndex = rightClickedTrack.trackIndex;
-    if (rightClickedTrack.type === 'global') {
-      return (
-        <MenuItem
-          key={trackIndex}
-          preventClose={false}
-          data={rightClickedTrack}
-          onClick={this._toggleGlobalTrackVisibility}
-        >
-          Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
-        </MenuItem>
-      );
-    }
-    return (
-      <MenuItem
-        key={trackIndex}
-        preventClose={false}
-        data={rightClickedTrack}
-        onClick={this._toggleLocalTrackVisibility}
-      >
-        Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
-      </MenuItem>
-    );
-  }
-
   renderHideAllTracksByType() {
     const { rightClickedTrack } = this.props;
     if (rightClickedTrack === null) {
@@ -552,7 +522,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
-    const hideTrack = this.renderHideTrack();
     const hideAllTracksByType = this.renderHideAllTracksByType();
     const separator =
       isolateProcessMainThread ||
@@ -575,7 +544,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateProcess}
         {isolateLocalTrack}
         {isolateScreenshot}
-        {hideTrack}
         {hideAllTracksByType}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {

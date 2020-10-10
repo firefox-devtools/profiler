@@ -113,7 +113,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { hideAllTracksByType, getState } = setupGlobalTrack();
+      const { getState } = setupGlobalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
@@ -275,7 +275,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { hideAllTracksByType, getState } = setupLocalTrack();
+      const { getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
