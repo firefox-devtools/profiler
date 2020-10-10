@@ -17,7 +17,7 @@ import {
   TRACK_MEMORY_GRAPH_HEIGHT,
   TRACK_MEMORY_MARKERS_HEIGHT,
   TRACK_MEMORY_LINE_WIDTH,
-} from '.firefox-profiler/app-logic/constants';
+} from '../../app-logic/constants';
 
 import type {
   CounterIndex,
