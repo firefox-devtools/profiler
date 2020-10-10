@@ -5,15 +5,15 @@
 // @flow
 
 import * as React from 'react';
-import { TrackEventDelayGraph } from './TrackEventDelayGraph';
+import { TrackEventDelayGraph } from 'firefox-profiler/components/timeline/TrackEventDelayGraph';
 import {
   TRACK_EVENT_DELAY_HEIGHT,
   TRACK_EVENT_DELAY_LINE_WIDTH,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 
 import type { ThreadIndex } from 'firefox-profiler/types';
 
-import './TrackEventDelay.css';
+import 'firefox-profiler/components/timeline/TrackEventDelay.css';
 
 type Props = {|
   +threadIndex: ThreadIndex,

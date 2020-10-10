@@ -19,14 +19,14 @@ import 'react-splitter-layout/lib/index.css';
 // Now import the JS after the CSS.
 import React from 'react';
 import { render } from 'react-dom';
-import Root from './components/app/Root';
+import { Root } from './components/app/Root';
 import createStore from './app-logic/create-store';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,
   logDevelopmentTips,
-} from './utils/window-console';
-import { ensureExists } from './utils/flow';
+} from 'firefox-profiler/utils/window-console';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.

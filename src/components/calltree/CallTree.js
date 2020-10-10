@@ -8,7 +8,7 @@ import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
-import CallTreeEmptyReasons from './CallTreeEmptyReasons';
+import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import Icon from '../shared/Icon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {

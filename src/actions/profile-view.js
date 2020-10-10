@@ -1,12 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- * Working on hiding all tracks components */
-
+*/
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../selectors/app';
-import {
+import { getLastVisibleThreadTabSlug } from 'firefox-profiler/selectors/app';
+import { 
   getCounterSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
@@ -16,12 +15,8 @@ import {
   getPreviewSelection,
   getActiveTabGlobalTrackFromReference,
   getActiveTabResourceTrackFromReference,
-} from '../selectors/profile';
-import {
-  getThreadSelectors,
-  getThreadSelectorsFromThreadsKey,
-  selectedThreadSelectors,
-} from '../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors, getThreadSelectorsFromThreadsKey, selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getImplementationFilter,
   getSelectedThreadIndexes,
@@ -31,16 +26,16 @@ import {
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenLocalTracks,
-} from '../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
-} from '../profile-logic/profile-data';
-import { assertExhaustiveCheck } from '../utils/flow';
-import { sendAnalytics } from '../utils/analytics';
-import { objectShallowEquals } from '../utils/index';
+} from 'firefox-profiler/profile-logic/profile-data';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { sendAnalytics } from 'firefox-profiler/utils/analytics';
+import { objectShallowEquals } from 'firefox-profiler/utils/index';
 
 import type {
   PreviewSelection,
@@ -636,6 +631,118 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     dispatch({
       type: 'SHOW_GLOBAL_TRACK',
       trackIndex,
+    });
+  };
+}
+
+/** 
+    Hiding all my tracks by creating a new function. 
+
+**/
+
+export function hideAllTracksByType(
+  pid: Pid,
+  trackIndexToHide: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const localTracks = getLocalTracks(getState(), pid);
+    const globalTracks = getGlobalTracks(getState(), pid);
+    const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
+    // const globalTracks = getHiddenGlobalTracks(getState(), pid);
+    const localTrackToHide = localTracks[trackIndexToHide];
+    const globalTrackToHide = globalTracks[tracksIndextoGlobal];
+    const oldSelectedThreadIndexes = getSelectedThreadIndexes(getState());
+    const newSelectedThreadIndexes: Set<ThreadIndex> = new Set(
+      oldSelectedThreadIndexes
+    );
+
+    if (localTrackToHide.type === 'thread') {
+      newSelectedThreadIndexes.delete(localTrackToHide.threadIndex);
+    }
+
+    if (globalTrackToHide.type === 'thread') {
+      newSelectedThreadIndexes.delete(globalTrackToHide.threadIndex);
+    }
+
+    if (hiddenLocalTracks.has(trackIndexToHide)) {
+      return;
+    }
+
+    if (hiddenGlobalTracks.has(trackIndexToHide)) {
+      return;
+    }
+
+    const { globalTrack, globalTrackIndex } = getGlobalTrackAndIndexByPid(
+      getState(),
+      pid
+    );
+
+    const { localTrack, localTrackIndex } = getLocalTrackAndIndexByPid(
+      getState(),
+      pid
+    );
+
+    if (hiddenLocalTracks.size + 1 === localTracks.length) {
+      if (globalTrack.mainThreadIndex === null) {
+        dispatch(hideGlobalTrack(globalTrackIndex));
+        return;
+      }
+    }
+
+    if (hiddenGlobalTracks.size + 1 === globalTracks.length) {
+      if (localTrack.mainThreadIndex === null) {
+        dispatch(hideLocalTrack(localTrackIndex));
+        return;
+      }
+    }
+
+    if (newSelectedThreadIndexes.size === 0) {
+      for (let trackIndex = 0; trackIndex < localTracks.length; trackIndex++) {
+        const track = localTracks[trackIndex];
+        // const track = globalTracks[trackIndex];
+        if (!hiddenLocalTracks.has(trackIndex)) {
+          if (track.type === 'thread' && trackIndex !== trackIndexToHide) {
+            newSelectedThreadIndexes.add(track.threadIndex);
+            break;
+          }
+        }
+      }
+
+      if (
+        newSelectedThreadIndexes.size === 0 &&
+        globalTrack.mainThreadIndex !== null &&
+        globalTrack.mainThreadIndex !== undefined
+      ) {
+        newSelectedThreadIndexes.add(globalTrack.mainThreadIndex);
+      }
+
+      if (newSelectedThreadIndexes.size === 0) {
+        const otherThreadIndex = _findOtherVisibleThread(
+          getState,
+          globalTrackIndex,
+          trackIndexToHide
+        );
+        if (otherThreadIndex !== null) {
+          newSelectedThreadIndexes.add(otherThreadIndex);
+        }
+      }
+
+      if (newSelectedThreadIndexes.size === 0) {
+        return;
+      }
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'hide all tracks by type',
+    });
+
+    dispatch({
+      type: 'HIDE_ALL_TRACKS_BY_TYPE',
+      pid,
+      trackIndex: trackIndexToHide,
+      selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };
 }

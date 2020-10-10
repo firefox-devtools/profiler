@@ -16,15 +16,12 @@
 
 .profileNameButton {
   overflow: hidden;
-  height: 25px;
   padding: 0 9px;
   border: none;
   border-right: 1px solid var(--grey-30);
-  background: none;
   color: var(--grey-60);
   font: inherit;
   font-weight: 700;
-  line-height: 24px;
   margin-inline-end: 5px;
   text-overflow: ellipsis;
   white-space: nowrap;

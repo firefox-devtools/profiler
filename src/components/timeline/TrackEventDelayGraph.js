@@ -5,13 +5,19 @@
 // @flow
 
 import * as React from 'react';
-import { withSize, type SizeProps } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { formatMilliseconds } from '../../utils/format-numbers';
-import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { Tooltip } from '../tooltip/Tooltip';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
+import {
+  withSize,
+  type SizeProps,
+} from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { formatMilliseconds } from 'firefox-profiler/utils/format-numbers';
+import {
+  getCommittedRange,
+  getProfileInterval,
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';
 import bisection from 'bisection';
 
 import type {
@@ -22,9 +28,9 @@ import type {
   StartEndRange,
   EventDelayInfo,
 } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackEventDelay.css';
+import 'firefox-profiler/components/timeline/TrackEventDelay.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.
