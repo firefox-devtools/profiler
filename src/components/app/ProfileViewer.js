@@ -15,7 +15,7 @@ import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 
 import { returnToZipFileList } from '../../actions/zipped-profiles';
-import Timeline from '../timeline';
+import { Timeline } from '../timeline';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
 import { invalidatePanelLayout } from '../../actions/app';
