@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ProfileCallTreeView } from '../calltree/ProfileCallTreeView';
@@ -19,16 +19,19 @@ import FlameGraph from '../flame-graph/';
 import { JsTracer } from '../js-tracer/';
 import { selectSidebar } from '../sidebar';
 
-import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from '../../selectors/url-state';
-import { getIsSidebarOpen } from '../../selectors/app';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  changeSelectedTab,
+  changeSidebarOpenState,
+} from 'firefox-profiler/actions/app';
+import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
+import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import { MaybeMarkerContextMenu } from '../shared/MarkerContextMenu';
-import { toValidTabSlug } from '../../utils/flow';
+import { toValidTabSlug } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
-import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './Details.css';
 
