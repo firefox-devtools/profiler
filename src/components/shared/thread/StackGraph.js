@@ -257,4 +257,3 @@ export class ThreadStackGraph extends PureComponent<Props> {
     );
   }
 }
-

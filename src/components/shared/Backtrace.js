@@ -64,5 +64,3 @@ export function Backtrace(props: Props) {
     </div>
   );
 }
-
-
