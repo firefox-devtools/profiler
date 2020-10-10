@@ -5,11 +5,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { changeShowJsTracerSummary } from '../../actions/profile-view';
-import { getShowJsTracerSummary } from '../../selectors/url-state';
-import explicitConnect, { type ConnectedProps } from '../../utils/connect';
+import { changeShowJsTracerSummary } from 'firefox-profiler/actions/profile-view';
+import { getShowJsTracerSummary } from 'firefox-profiler/selectors/url-state';
+import explicitConnect, { type ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './Settings.css';
+import 'firefox-profiler/components/js-tracer/Settings.css';
 
 type StateProps = {|
   +showJsTracerSummary: boolean,
