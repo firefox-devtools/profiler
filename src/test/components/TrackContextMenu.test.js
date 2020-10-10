@@ -86,8 +86,6 @@ describe('timeline/TrackContextMenu', function() {
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
 
-      const hideAllTracksByType = () => getByText(/Hide "Content Process"/);
-
       return {
         ...results,
         trackReference,
@@ -97,7 +95,6 @@ describe('timeline/TrackContextMenu', function() {
         isolateProcessMainThreadItem,
         isolateScreenshotTrack,
         hideContentProcess,
-        hideAllTracksByType,
         trackItem,
       };
     }
@@ -253,7 +250,6 @@ describe('timeline/TrackContextMenu', function() {
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
       const hideDOMWorker = () => getByText('Hide "DOM Worker"');
-      const hideAllTracksByType = () => getByText('Hide "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {
@@ -263,7 +259,6 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateLocalTrackItem,
         hideDOMWorker,
-        hideAllTracksByType,
         trackItem,
         pid,
       };
