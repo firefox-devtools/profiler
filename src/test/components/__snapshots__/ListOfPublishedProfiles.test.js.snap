@@ -187,6 +187,42 @@ exports[`ListOfPublishedProfiles profile deletion can delete profiles 1`] = `
 </div>
 `;
 
+exports[`ListOfPublishedProfiles profile deletion renders a generic message when the final profile on the list has been deleted 1`] = `
+<div
+  class="arrowPanelContent"
+>
+  <div
+    class="confirmDialog"
+  >
+    <h2
+      class="confirmDialogTitle"
+    >
+      Delete 
+      Profile #012345
+    </h2>
+    <div
+      class="confirmDialogContent"
+    >
+      Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+    </div>
+    <div
+      class="confirmDialogButtons"
+    >
+      <input
+        class="photon-button photon-button-default"
+        type="button"
+        value="Cancel"
+      />
+      <input
+        class="photon-button photon-button-destructive"
+        type="button"
+        value="Delete"
+      />
+    </div>
+  </div>
+</div>
+`;
+
 exports[`ListOfPublishedProfiles renders a generic message when there is no profiles 1`] = `
 <div>
   <p
