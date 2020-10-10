@@ -40,10 +40,28 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
+import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import 'firefox-profiler/components/timeline/TrackThread.css';
+
+import type {
+  TimelineType,
+  Thread,
+  ThreadIndex,
+  CategoryList,
+  IndexIntoSamplesTable,
+  Milliseconds,
+  StartEndRange,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+  SelectedState,
+  State,
+  TimelineTrackOrganization,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +threadsKey: ThreadsKey,
