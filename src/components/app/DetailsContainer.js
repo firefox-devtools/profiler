@@ -9,13 +9,13 @@ import SplitterLayout from 'react-splitter-layout';
 import { Details } from './Details';
 import { selectSidebar } from '../sidebar';
 
-import { invalidatePanelLayout } from '../../actions/app';
-import { getSelectedTab } from '../../selectors/url-state';
-import { getIsSidebarOpen } from '../../selectors/app';
-import explicitConnect from '../../utils/connect';
+import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
+import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
+import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { ConnectedProps } from '../../utils/connect';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './DetailsContainer.css';
 
