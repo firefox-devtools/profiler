@@ -12,10 +12,7 @@ import {
 } from '../../selectors/profile';
 import { getScreenshotTrackHeight } from '../../selectors/app';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import {
-  withSize,
-  type SizeProps,
-} from '../shared/WithSize';
+import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type {
