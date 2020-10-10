@@ -27,10 +27,8 @@ import type {
   MarkerIndex,
   IPCSharedData,
   IPCMarkerPayload,
-  BailoutPayload,
   NetworkPayload,
   PrefMarkerPayload,
-  InvalidationPayload,
   FileIoPayload,
   TextMarkerPayload,
   StartEndRange,
@@ -229,103 +227,6 @@ export function getTabFilteredMarkerIndexes(
 
     if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
       newMarkers.push(markerIndex);
-    }
-  }
-
-  return newMarkers;
-}
-
-/**
- * This function takes a marker that packs in a marker payload into the string of the
- * name. This extracts that and turns it into a payload.
- */
-export function extractMarkerDataFromName(
-  markers: RawMarkerTable,
-  stringTable: UniqueStringArray
-): RawMarkerTable {
-  const newMarkers: RawMarkerTable = {
-    data: markers.data.slice(),
-    name: markers.name.slice(),
-    startTime: markers.startTime.slice(),
-    endTime: markers.endTime.slice(),
-    phase: markers.phase.slice(),
-    category: markers.category.slice(),
-    length: markers.length,
-  };
-
-  // Match: "Bailout_MonitorTypes after add on line 1013 of self-hosted:1008"
-  // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
-  // Match: "Bailout_ShapeGuard at jumptarget on line 7 of moz-extension://<URL>"
-  const bailoutRegex =
-    // Capture groups:
-    //       type   afterAt    where        bailoutLine  script     functionLine
-    //        ↓     ↓          ↓                  ↓        ↓        ↓
-    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*?)(?::(\d+))?$/;
-  //                                                               ↑
-  // Colon in non-capturing group which only matches when functionLine is present
-
-  // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
-  // Match: "Invalidate self-hosted:4032"
-  // Match: "Invalidate moz-extension://<URL>"
-  const invalidateRegex =
-    // Capture groups:
-    //         url        line
-    //           ↓        ↓
-    /^Invalidate (.*?)(?::(\d+))?$/;
-
-  const bailoutStringIndex = stringTable.indexForString('Bailout');
-  const invalidationStringIndex = stringTable.indexForString('Invalidate');
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const nameIndex = markers.name[markerIndex];
-    const name = stringTable.getString(nameIndex);
-    let matchFound = false;
-    if (name.startsWith('Bailout_')) {
-      matchFound = true;
-      const match = name.match(bailoutRegex);
-      if (!match) {
-        console.error(`Could not match regex for bailout: "${name}"`);
-      } else {
-        const [
-          ,
-          type,
-          afterAt,
-          where,
-          bailoutLine,
-          script,
-          functionLine,
-        ] = match;
-        newMarkers.name[markerIndex] = bailoutStringIndex;
-        newMarkers.data[markerIndex] = ({
-          type: 'Bailout',
-          bailoutType: type,
-          where: afterAt + ' ' + where,
-          script: script,
-          bailoutLine: +bailoutLine,
-          functionLine: functionLine === undefined ? null : +functionLine,
-        }: BailoutPayload);
-      }
-    } else if (name.startsWith('Invalidate ')) {
-      matchFound = true;
-      const match = name.match(invalidateRegex);
-      if (!match) {
-        console.error(`Could not match regex for invalidation: "${name}"`);
-      } else {
-        const [, url, line] = match;
-        newMarkers.name[markerIndex] = invalidationStringIndex;
-        newMarkers.data[markerIndex] = ({
-          type: 'Invalidation',
-          url,
-          line: line === undefined ? null : line,
-        }: InvalidationPayload);
-      }
-    }
-    if (matchFound && markers.data[markerIndex]) {
-      console.error(
-        "A marker's payload was rewritten based off the text content of the marker. " +
-          "profiler.firefox.com assumed that the payload was empty, but it turns out it wasn't. " +
-          'This is most likely an error and should be fixed. The marker name is:',
-        name
-      );
     }
   }
 
@@ -1260,43 +1161,6 @@ export function sanitizeTextMarker(
     ...payload,
     name: removeURLs(payload.name),
   };
-}
-
-export function getMarkerCategory(marker: Marker) {
-  let category = 'unknown';
-  if (marker.data) {
-    const data = marker.data;
-
-    if (typeof data.category === 'string') {
-      category = data.category;
-    }
-
-    switch (data.type) {
-      case 'UserTiming':
-        category = marker.name;
-        break;
-      case 'FileIO':
-        category = data.type;
-        break;
-      case 'Bailout':
-        category = 'Bailout';
-        break;
-      case 'Network':
-        category = 'Network';
-        break;
-      case 'Text':
-        category = 'Text';
-        break;
-      case 'Log':
-        category = 'Log';
-        break;
-      case 'IPC':
-        category = data.direction === 'sending' ? 'IPC out' : 'IPC in';
-        break;
-      default:
-    }
-  }
-  return category;
 }
 
 /**

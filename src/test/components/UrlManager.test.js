@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
-import UrlManager from '../../components/app/UrlManager';
+import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
 import {
   getDataSource,

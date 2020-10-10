@@ -385,29 +385,6 @@ export type GCSliceMarkerPayload_Gecko = {|
 |};
 
 /**
- * The bailout payload describes a bailout from JIT code where some assumption in
- * the optimization was broken, and the code had to fall back to Baseline. Currently
- * this information is encoded as a string and extracted as a selector.
- */
-export type BailoutPayload = {|
-  type: 'Bailout',
-  bailoutType: string,
-  where: string,
-  script: string,
-  bailoutLine: number,
-  functionLine: number | null,
-|};
-
-/**
- * TODO - Please describe an invalidation.
- */
-export type InvalidationPayload = {|
-  type: 'Invalidation',
-  url: string,
-  line: number | null,
-|};
-
-/**
  * Network http/https loads - one marker for each load that reaches the
  * STOP state that occurs, plus one for the initial START of the load, with
  * the URI and the status.  A unique ID is included to allow these to be linked.
@@ -683,8 +660,6 @@ export type JankPayload = {| type: 'Jank' |};
 export type MarkerPayload =
   | FileIoPayload
   | GPUMarkerPayload
-  | BailoutPayload
-  | InvalidationPayload
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
