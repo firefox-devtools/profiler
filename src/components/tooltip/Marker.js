@@ -375,7 +375,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       <div
         className={classNames('tooltipMarker', className)}
         style={{
-          '--tooltip-detail-max-width': restrictHeightWidth ? '600px' : '100%',
+          '--tooltip-detail-max-width': '600px',
         }}
       >
         <div className="tooltipHeader">
