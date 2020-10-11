@@ -94,6 +94,7 @@ export type ProfileViewState = {
     rightClickedTrack: TrackReference | null,
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: RightClickedMarker | null,
+    mouseTimePosition: Milliseconds | null,
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,

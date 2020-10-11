@@ -52,6 +52,17 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return state;
   }
 };
+const mouseTimePosition: Reducer<Millseconds | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_MOUSE_TIME_POSITION':
+      return action.mouseTimePosition;
+    default:
+      return state;
+  }
+};
 
 const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {

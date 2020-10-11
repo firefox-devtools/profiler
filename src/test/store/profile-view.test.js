@@ -3604,3 +3604,27 @@ describe('getProcessedEventDelays', function() {
     ]);
   });
 });
+
+// This test is for 'mouseTimePosition' redux store
+describe('mouseTimePosition', function() {
+  function setup() {
+    const profile = getProfileFromTextSamples('A');
+
+    return storeWithProfile(profile.profile);
+  }
+
+  it('should get mouse time position', () => {
+    // Test just the redux store here.
+    const { dispatch, getState } = setup();
+
+    const mouseTimePosition = ProfileViewSelectors.getMouseTimePosition(
+      getState()
+    );
+
+    dispatch(ProfileView.changeMouseTimePosition(null));
+    expect(mouseTimePosition).toBeNull;
+
+    dispatch(ProfileView.changeMouseTimePosition(1000));
+    expect(mouseTimePosition).toBe(1000);
+  });
+});
