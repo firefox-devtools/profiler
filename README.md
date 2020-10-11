@@ -53,7 +53,7 @@ You can also develop the Firefox Profiler online in a pre-configured development
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
 
-You can follow the steps described in [settinng up profiler on gitpod](./docs-user/gitpod.md) section to set up a gitpod development environment.
+Please look at our [gitpod documentation](./docs-user/gitpod.md) for more information.
 
 For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
@@ -64,6 +64,7 @@ For more detailed information on getting started contributing. We have plenty of
 |[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
 |[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
 |[End-User Documentation](https://profiler.firefox.com/docs/#/)| These docs are customized for actual users of the profiler, not just folks contributing |
+|[Gitpod documentatation](./docs-user/gitpod.md)| Start here if you want to set up a work space on gitpod |
 
 ### Discussion
 
