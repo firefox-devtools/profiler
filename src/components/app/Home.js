@@ -6,11 +6,11 @@
 
 import * as React from 'react';
 
-import { AppHeader } from 'firefox-profiler/components/app/AppHeader';
+import { AppHeader } from './AppHeader';
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
-import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
+import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
@@ -36,7 +36,7 @@ require('./Home.css');
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 
-import { DragAndDropOverlay } from 'firefox-profiler/components/app/DragAndDrop';
+import { DragAndDropOverlay } from './DragAndDrop';
 
 type InstallButtonProps = {
   name: string,

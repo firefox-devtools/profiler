@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
-import { MetaOverheadStatistics } from 'firefox-profiler/components/app/MenuButtons/MetaOverheadStatistics';
+import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import {
   formatBytes,
   formatTimestamp,
