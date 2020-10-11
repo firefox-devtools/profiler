@@ -7,7 +7,9 @@
 import React, { PureComponent } from 'react';
 import { changeShowJsTracerSummary } from 'firefox-profiler/actions/profile-view';
 import { getShowJsTracerSummary } from 'firefox-profiler/selectors/url-state';
-import explicitConnect, { type ConnectedProps } from 'firefox-profiler/utils/connect';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 
 import 'firefox-profiler/components/js-tracer/Settings.css';
 

@@ -8,7 +8,9 @@ import React, { PureComponent } from 'react';
 import EmptyReasons from 'firefox-profiler/components/shared/EmptyReasons';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
-import explicitConnect, { type ConnectedProps } from 'firefox-profiler/utils/connect';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 
 import type { State } from 'firefox-profiler/types';
 
