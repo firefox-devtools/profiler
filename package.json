@@ -60,7 +60,7 @@
     "offline-plugin": "^5.0.7",
     "photon-colors": "^3.3.2",
     "prop-types": "^15.7.2",
-    "query-string": "^6.13.2",
+    "query-string": "^6.13.5",
     "react": "^16.8.6",
     "react-contextmenu": "~2.14.0",
     "react-dom": "^16.8.6",
