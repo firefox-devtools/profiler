@@ -13,7 +13,7 @@ To authorize access, click your avatar/profile picture at the top right hand sec
 
 ## Open the profiler UI in your web browser
 
-A popup box, "Open Ports View", also appears at the bottom right hand section of the setup with the message `A service is available on port 4242`. You can click `Open Browser` which will open profiler UI, [profiler.firefox.com](https://profiler.firefox.com/), for your setup in a separate tab. If you have closed "Open Ports View", you can display it by clicking "PORTS" at the right hand section of the bottom bar.
+A popup box, `Open Ports View`, also appears at the bottom right hand section of the setup with the message `A service is available on port 4242`. You can click `Open Browser` which will open profiler UI, [profiler.firefox.com](https://profiler.firefox.com/), for your setup in a separate tab. If you have closed `Open Ports View`, you can display it by clicking `PORTS` at the right hand section of the bottom bar.
 
 ## Load custom profiles
 
