@@ -48,7 +48,12 @@ function Backtrace(props: Props) {
           // Truncate the stacks
           .slice(0, maxStacks)
           .map(({ funcName, origin }, i) => (
-            <li key={i} className="backtraceStackFrame">
+            <li
+              key={i}
+              className={classNames('backtraceStackFrame', {
+                backtraceStackFrame_isFrameLabel: isFrameLabel,
+              })}
+            >
               {funcName}
               <em className="backtraceStackFrameOrigin">{origin}</em>
             </li>
