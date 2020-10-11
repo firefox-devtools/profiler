@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import classNames from 'classnames';
-import IdleSearchField from './IdleSearchField';
+import { IdleSearchField } from './IdleSearchField';
 
 import './PanelSearch.css';
 
