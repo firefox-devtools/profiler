@@ -15,8 +15,8 @@ import {
 } from '../../selectors/profile';
 import { getCommittedRangeLabels } from '../../selectors/url-state';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
-import FilterNavigatorBar from '../shared/FilterNavigatorBar';
-import Icon from '../shared/Icon';
+import { FilterNavigatorBar } from '../shared/FilterNavigatorBar';
+import { Icon } from '../shared/Icon';
 
 import type { ElementProps } from 'react';
 import type {

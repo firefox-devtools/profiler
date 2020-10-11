@@ -6,7 +6,7 @@
 
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import FilterNavigatorBar from './FilterNavigatorBar';
+import { FilterNavigatorBar } from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 
 import type { State } from 'firefox-profiler/types';
