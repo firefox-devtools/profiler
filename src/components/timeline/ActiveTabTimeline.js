@@ -9,7 +9,7 @@ import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
-import { withSize } from '../shared/WithSize';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
@@ -22,7 +22,7 @@ import {
 import './index.css';
 import './ActiveTabTimeline.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,

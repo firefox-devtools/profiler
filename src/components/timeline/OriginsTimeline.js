@@ -22,7 +22,7 @@ import {
 import { getFriendlyThreadName } from 'firefox-profiler/profile-logic/profile-data';
 import { changeSelectedThreads } from 'firefox-profiler/actions/profile-view';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   Thread,
   ThreadIndex,

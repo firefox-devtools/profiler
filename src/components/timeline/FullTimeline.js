@@ -10,8 +10,8 @@ import TimelineGlobalTrack from './GlobalTrack';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import Reorderable from '../shared/Reorderable';
-import { withSize } from '../shared/WithSize';
+import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
@@ -34,7 +34,7 @@ import TimelineTrackContextMenu from './TrackContextMenu';
 
 import './index.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeGlobalTrackOrder,

@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { withSize } from '../shared/WithSize';
+import { withSize } from 'firefox-profiler/components//shared/WithSize';
 import { getIsActiveTabResourcesPanelOpen } from 'firefox-profiler/selectors/url-state';
 import { getActiveTabResourcesThreadsKey } from 'firefox-profiler/selectors/profile';
 import { toggleResourcesPanel } from 'firefox-profiler/actions/app';
@@ -15,7 +15,7 @@ import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from 'firefox-profiler/ap
 import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
 import TrackThread from './TrackThread';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   ActiveTabResourceTrack,
   InitialSelectedTrackReference,
