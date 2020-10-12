@@ -401,6 +401,42 @@ describe('ListOfPublishedProfiles', () => {
       );
     });
 
+    it('renders a generic message when the final profile on the list has been deleted', async () => {
+      const { profileToken, jwtToken } = listOfProfileInformations[0];
+      const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
+      mockFetchForDeleteProfile({ endpointUrl, jwtToken });
+
+      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
+      await storeProfileInformations(listOfProfileInformations.slice(0, 1));
+      const {
+        container,
+        getDeleteButtonForProfile,
+        findByText,
+        queryByText,
+        getConfirmDeleteButton,
+      } = setup({
+        withActionButtons: true,
+      });
+
+      // Wait for the full rendering with a find* operation.
+      await findByText(/Fennec/);
+      const workingButton = getDeleteButtonForProfile('#012345');
+
+      // Click on the delete button
+      fireFullClick(workingButton);
+      jest.runAllTimers(); // Opening the panel involves a timeout.
+      expect(container.querySelector('.arrowPanelContent')).toMatchSnapshot();
+
+      // Click on the confirm button
+      fireFullClick(getConfirmDeleteButton());
+      await findByText(/successfully/i);
+
+      // Clicking elsewhere should make the successful message disappear and a generic message appear.
+      fireFullClick((window: any));
+      await findByText(/no profile/i);
+      expect(queryByText(/no profile/i)).toBeTruthy();
+    });
+
     it('can handle errors', async () => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
       const { profileToken } = listOfProfileInformations[0];
