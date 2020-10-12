@@ -15,6 +15,15 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   >
     Hide other screenshot tracks
   </div>
+    <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all
+    "Screenshots"
+  </div>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
@@ -62,6 +71,15 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     Only show 
     "Content Process"
   </div>
+   <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all
+    "Content Process"
+  </div>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
@@ -76,7 +94,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     role="menuitem"
     tabindex="-1"
   >
-    Hide 
+    Hide
     "Content Process"
   </div>
   <div
@@ -138,6 +156,15 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     tabindex="-1"
   >
     Hide 
+    "Process 0"
+  </div>
+   <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all
     "Process 0"
   </div>
   <div>
@@ -205,6 +232,15 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     tabindex="-1"
   >
     Hide 
+    "DOM Worker"
+  </div>
+    <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all
     "DOM Worker"
   </div>
   <div
