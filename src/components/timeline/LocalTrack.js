@@ -9,26 +9,26 @@ import classNames from 'classnames';
 import {
   changeRightClickedTrack,
   selectTrack,
-} from '../../actions/profile-view';
-import { assertExhaustiveCheck } from '../../utils/flow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
   getHiddenLocalTracks,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import TrackThread from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
-import { getTrackSelectionModifier } from '../../utils';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import type {
   TrackReference,
   Pid,
@@ -36,7 +36,7 @@ import type {
   LocalTrack,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +pid: Pid,

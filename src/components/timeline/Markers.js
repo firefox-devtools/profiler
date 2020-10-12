@@ -9,18 +9,18 @@ import memoize from 'memoize-immutable';
 import {
   overlayFills,
   getMarkerStyle,
-} from '../../profile-logic/marker-styles';
-import { withSize } from '../shared/WithSize';
-import { Tooltip } from '../tooltip/Tooltip';
-import { TooltipMarker } from '../tooltip/Marker';
-import { timeCode } from '../../utils/time-code';
-import explicitConnect from '../../utils/connect';
-import { getPreviewSelection } from '../../selectors/profile';
-import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
-import { getSelectedThreadIndexes } from '../../selectors/url-state';
-import { changeRightClickedMarker } from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import { hasThreadKeys } from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/marker-styles';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import { timeCode } from 'firefox-profiler/utils/time-code';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
+import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
+import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import './Markers.css';
 
 import type {
@@ -31,9 +31,9 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from '../shared/WithSize';
-import type { ConnectedProps } from '../../utils/connect';
-import { getStartEndRangeForMarker } from '../../utils';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
 // Exported for tests.
 export const MIN_MARKER_WIDTH = 0.3;
