@@ -5,11 +5,14 @@
 
 import * as React from 'react';
 import { computeActivityGraphFills } from './ActivityGraphFills';
-import { timeCode } from '../../../utils/time-code';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
-import { Tooltip, MOUSE_OFFSET } from '../../tooltip/Tooltip';
-import SampleTooltipContents from '../SampleTooltipContents';
-import { mapCategoryColorNameToStyles } from '../../../utils/colors';
+import {
+  Tooltip,
+  MOUSE_OFFSET,
+} from 'firefox-profiler/components/tooltip/Tooltip';
+import SampleTooltipContents from 'firefox-profiler/components/shared/SampleTooltipContents';
+import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
 import './ActivityGraph.css';
 

@@ -5,7 +5,7 @@
 // @flow
 
 import { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
   getProfileNameFromUrl,
@@ -16,7 +16,7 @@ import {
 } from 'firefox-profiler/selectors';
 
 import type { Profile } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +profile: Profile,

@@ -9,6 +9,7 @@ import type {
   CategoryList,
   Thread,
 } from 'firefox-profiler/types';
+
 import { Backtrace } from './Backtrace';
 import { getCategoryPairLabel } from '../../profile-logic/profile-data';
 

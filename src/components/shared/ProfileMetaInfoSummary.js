@@ -8,7 +8,7 @@ import React from 'react';
 import {
   formatProductAndVersion,
   formatPlatform,
-} from '../../profile-logic/profile-metainfo';
+} from 'firefox-profiler/profile-logic/profile-metainfo';
 
 import './ProfileMetaInfoSummary.css';
 
