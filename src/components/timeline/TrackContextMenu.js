@@ -486,7 +486,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
-  renderHideAllTracksByType() {
+  renderHideTrack() {
     const { rightClickedTrack } = this.props;
     if (rightClickedTrack === null) {
       return null;
@@ -516,12 +516,43 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  renderHideAllTracksByType() {
+    const { rightClickedTrack, globalTracks, localTracksByPid } = this.props;
+    if (rightClickedTrack === null) {
+      return null;
+    }
+    const trackIndex = rightClickedTrack.trackIndex;
+    if (rightClickedTrack.type === 'global') {
+      return (
+        <MenuItem
+          key={trackIndex}
+          preventClose={false}
+          data={(rightClickedTrack, globalTracks, localTracksByPid)}
+          onClick={this._toggleGlobalTrackVisibility}
+        >
+          Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+        </MenuItem>
+      );
+    }
+    return (
+      <MenuItem
+        key={trackIndex}
+        preventClose={false}
+        data={(rightClickedTrack, globalTracks, localTracksByPid)}
+        onClick={this._toggleLocalTrackVisibility}
+      >
+        Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+      </MenuItem>
+    );
+  }
+
   render() {
     const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
+    const hideTrack = this.renderHideTrack();
     const hideAllTracksByType = this.renderHideAllTracksByType();
     const separator =
       isolateProcessMainThread ||
@@ -544,6 +575,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateProcess}
         {isolateLocalTrack}
         {isolateScreenshot}
+        {hideTrack}
         {hideAllTracksByType}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
