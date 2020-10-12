@@ -10,7 +10,7 @@ import type {
   Thread,
 } from 'firefox-profiler/types';
 import Backtrace from './Backtrace';
-import { getCategoryPairLabel } from '../../profile-logic/profile-data';
+import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
 
 type Props = {|
   +sampleIndex: IndexIntoSamplesTable,
