@@ -4,16 +4,16 @@
 
 // @flow
 
-import type { Reducer, LoadingState } from 'firefox-profiler/types';
+import type { Reducer, ProfileLoadingState } from 'firefox-profiler/types';
 
-const loadingState: Reducer<LoadingState> = (
-  state = { loadingStep: 'promise', progress: 0 },
+const ProfileloadingState: Reducer<ProfileLoadingState> = (
+  state = { profileLoadingStep: 'promise', progress: 0 },
   action
 ) => {
   switch (action.type) {
     case 'CHANGE_LOAD_PROGRESS':
       return {
-        loadingStep: action.loadingStep,
+        profileLoadingStep: action.profileLoadingStep,
         progress: action.progress,
       };
     default:
@@ -21,4 +21,4 @@ const loadingState: Reducer<LoadingState> = (
   }
 };
 
-export default loadingState;
+export default ProfileloadingState;

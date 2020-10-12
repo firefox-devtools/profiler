@@ -28,7 +28,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State, LoadingStep } from './state';
+import type { UrlState, UploadState, State, ProfileLoadingStep } from './state';
 import type { CssPixels, StartEndRange } from './units';
 
 export type DataSource =
@@ -466,9 +466,9 @@ type DragAndDropAction =
       +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
     |};
 
-type LoadingStateAction = {|
+type ProfileLoadingStateAction = {|
   +type: 'CHANGE_LOAD_PROGRESS',
-  +loadingStep: LoadingStep,
+  +profileLoadingStep: ProfileLoadingStep,
   +progress: number,
 |};
 
@@ -481,4 +481,4 @@ export type Action =
   | IconsAction
   | PublishAction
   | DragAndDropAction
-  | LoadingStateAction;
+  | ProfileLoadingStateAction;
