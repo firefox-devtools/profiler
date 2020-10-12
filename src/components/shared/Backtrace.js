@@ -6,11 +6,11 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Thread,

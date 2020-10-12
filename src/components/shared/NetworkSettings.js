@@ -5,12 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { changeNetworkSearchString } from '../../actions/profile-view';
-import { getNetworkSearchString } from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { changeNetworkSearchString } from 'firefox-profiler/actions/profile-view';
+import { getNetworkSearchString } from 'firefox-profiler/selectors/url-state';
+import PanelSearch from 'firefox-profiler/components/shared/PanelSearch';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './NetworkSettings.css';
 
