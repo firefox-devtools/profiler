@@ -9,7 +9,6 @@ import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 import { MaybeFlameGraph } from './MaybeFlameGraph';
 
-
 const FlameGraphView = () => (
   <div
     className="flameGraph"
