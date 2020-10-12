@@ -523,16 +523,19 @@ describe('ListOfPublishedProfiles', () => {
       await storeProfileData({
         ...exampleProfileData,
         profileToken: 'PROFILE-4',
+        name: 'NEW-PROFILE', // Adding with a new name so that we can look it up.
       });
 
-      // Nothing is updated yet.
+      // Nothing is updated yet: looking for the new profile name will throw.
+      await expect(() => findAllByText(/NEW-PROFILE/)).rejects.toThrow(
+        /Unable to find an element with the text/
+      );
       expect(await findAllByText(/PROFILE/)).toHaveLength(3);
 
       // The new profile is now listed.
       window.dispatchEvent(new Event('focus'));
-      setTimeout(async () => {
-        expect(await findAllByText(/PROFILE/)).toHaveLength(4);
-      }, 500);
+      await findAllByText(/NEW-PROFILE/);
+      expect(await findAllByText(/PROFILE/)).toHaveLength(4);
     });
   });
 });
