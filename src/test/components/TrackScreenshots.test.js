@@ -96,17 +96,6 @@ describe('timeline/TrackScreenshots', function() {
     expect(pageX > moveMouseAndGetLeft(pageX)).toBe(true);
   });
 
-  it('makes sure the hover image does not go off the left side of screen', () => {
-    const { moveMouseAndGetLeft } = setup();
-    const pageX = LEFT;
-
-    expect(moveMouseAndGetLeft(pageX)).toBe(0);
-    //with a screenshot of width=262.50px, we should have left == 0 until hovering at 131px.
-    //Then at ~133px (becuase of rounding) this should start moving.
-    expect(moveMouseAndGetLeft(132)).toBe(0);
-    expect(moveMouseAndGetLeft(133)).toBe(1);
-  });
-
   it('makes sure the hover image does not go off the top side of screen', () => {
     const { moveMouseAndGetTop } = setup();
     const pageX = LEFT;

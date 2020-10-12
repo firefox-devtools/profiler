@@ -158,7 +158,7 @@ type HoverPreviewProps = {|
 
 const MAXIMUM_HOVER_SIZE = 300;
 
-const HOVER_MAX_WIDTH_RATIO = 1.75;
+//const HOVER_MAX_WIDTH_RATIO = 1.75;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
@@ -216,12 +216,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
         : MAXIMUM_HOVER_SIZE / windowWidth;
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
-
-    if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
-      // This is a really wide image, limit the height so it lays out reasonably.
-      hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = (hoverWidth / windowWidth) * windowHeight;
-    }
 
     hoverWidth = Math.round(hoverWidth);
     hoverHeight = Math.round(hoverHeight);
