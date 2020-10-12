@@ -70,7 +70,8 @@ describe('timeline/TrackScreenshots', function() {
 
   it('moves the hover when moving the mouse', () => {
     const { moveMouseAndGetLeft } = setup();
-    const base = moveMouseAndGetLeft(LEFT);
+    //Considering base to be 150, this value is big enough as a base
+    const base = moveMouseAndGetLeft(150);
     // LEFT is 100 and the screenshot's width is 300px.
     // So hovering between 100 and 150px should give a result of left == 0.
     // As soon as we pass 150px the left value should also move up.
@@ -98,7 +99,12 @@ describe('timeline/TrackScreenshots', function() {
   it('makes sure the hover image does not go off the left side of screen', () => {
     const { moveMouseAndGetLeft } = setup();
     const pageX = LEFT;
+
     expect(moveMouseAndGetLeft(pageX)).toBe(0);
+    //with a screenshot of width=262.50px, we should have left == 0 until hovering at 131px.
+    //Then at ~133px (becuase of rounding) this should start moving.
+    expect(moveMouseAndGetLeft(132)).toBe(0);
+    expect(moveMouseAndGetLeft(133)).toBe(1);
   });
 
   it('makes sure the hover image does not go off the top side of screen', () => {
