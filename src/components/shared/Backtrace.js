@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
+import classNames from 'classnames';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
@@ -46,8 +47,13 @@ function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin }, i) => (
-            <li key={i} className="backtraceStackFrame">
+          .map(({ funcName, origin, isFrameLabel }, i) => (
+            <li
+              key={i}
+              className={classNames('backtraceStackFrame', {
+                backtraceStackFrame_isFrameLabel: isFrameLabel,
+              })}
+            >
               {funcName}
               <em className="backtraceStackFrameOrigin">{origin}</em>
             </li>
