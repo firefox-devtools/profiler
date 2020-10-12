@@ -512,7 +512,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={rightClickedTrack}
         onClick={this._toggleLocalTrackVisibility}
       >
+
         Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+      
       </MenuItem>
     );
   }
@@ -531,7 +533,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
           onClick={this._toggleGlobalTrackVisibility}
         >
-          Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+
+        Hide all {`"${this.getRightClickedTrackName(rightClickedTrack)}"`} tracks
+        
         </MenuItem>
       );
     }
@@ -542,7 +546,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
         onClick={this._toggleLocalTrackVisibility}
       >
-        Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+
+      Hide all {`"${this.getRightClickedTrackName(rightClickedTrack)}"`} tracks
+      
       </MenuItem>
     );
   }
