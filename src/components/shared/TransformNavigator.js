@@ -4,10 +4,10 @@
 
 // @flow
 
-import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import FilterNavigatorBar from './FilterNavigatorBar';
-import { popTransformsFromStack } from '../../actions/profile-view';
+import { popTransformsFromStack } from 'firefox-profiler/actions/profile-view';
 
 import type { State } from 'firefox-profiler/types';
 import type { ElementProps } from 'react';

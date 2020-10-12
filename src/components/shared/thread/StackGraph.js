@@ -6,13 +6,13 @@
 import React, { PureComponent } from 'react';
 import bisection from 'bisection';
 import classNames from 'classnames';
-import { ensureExists } from '../../../utils/flow';
-import { timeCode } from '../../../utils/time-code';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
   getSamplesSelectedStates,
   getSampleIndexClosestToTime,
-} from '../../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
