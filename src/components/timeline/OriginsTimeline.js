@@ -9,7 +9,7 @@ import * as React from 'react';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import { withSize } from '../shared/WithSize';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import {

@@ -11,7 +11,7 @@ import {
   selectTrack,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
