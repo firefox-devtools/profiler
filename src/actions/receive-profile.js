@@ -51,6 +51,7 @@ import {
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
+import { changeLoadProgress } from './';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type {
@@ -777,11 +778,12 @@ const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
-async function _unpackGeckoProfileFromAddon(profile) {
+async function _unpackGeckoProfileFromAddon(profile, dispatch) {
   // Note: the following check will work for array buffers coming from another
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
+    dispatch(changeLoadProgress('decompress', 0));
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress
@@ -791,7 +793,7 @@ async function _unpackGeckoProfileFromAddon(profile) {
     } else {
       decompressedProfile = profile;
     }
-
+    dispatch(changeLoadProgress('raw', 0));
     const textDecoder = new TextDecoder();
     return JSON.parse(textDecoder.decode(decompressedProfile));
   }
@@ -806,7 +808,10 @@ async function getProfileFromAddon(
 
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
-  const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
+  const unpackedProfile = await _unpackGeckoProfileFromAddon(
+    rawGeckoProfile,
+    dispatch
+  );
   const profile = processProfile(unpackedProfile);
   await dispatch(loadProfile(profile, { geckoProfiler }));
 
@@ -902,6 +907,7 @@ export async function doSymbolicateProfile(
 
 export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
+    dispatch(changeLoadProgress('promise', 0));
     try {
       const timeoutId = setTimeout(() => {
         dispatch(

@@ -294,10 +294,3 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
     return true;
   };
 }
-
-export function changeLoadProgress(
-  profileLoadingStep: ProfileLoadingStep,
-  progress: number
-): Action {
-  return { type: 'CHANGE_LOAD_PROGRESS', profileLoadingStep, progress };
-}

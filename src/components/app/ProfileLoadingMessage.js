@@ -32,11 +32,11 @@ class ProfileLoadingMessage extends React.PureComponent<Props> {
   // }
 
   render() {
-    // const { profileLoadingStep, progress } = this.props;
+    const { profileLoadingStep, progress } = this.props;
     return (
       <div className="profileLoadingMessageContainer">
-        <div className="loadingStep">This is the loading step</div>
-        <div className="loadingStepProgress">This is the progress</div>
+        <div className="loadingStep">Current Step: {profileLoadingStep}</div>
+        <div className="loadingStepProgress">Progress: {progress}</div>
       </div>
     );
   }

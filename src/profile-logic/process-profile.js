@@ -35,6 +35,7 @@ import {
   getOrCreateURIResource,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
+import { changeLoadProgress } from '../actions/profile-loading';
 
 import type {
   Profile,
