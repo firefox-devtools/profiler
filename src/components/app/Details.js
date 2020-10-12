@@ -11,7 +11,7 @@ import explicitConnect from '../../utils/connect';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ProfileCallTreeView } from '../calltree/ProfileCallTreeView';
-import MarkerTable from '../marker-table';
+import { MarkerTable } from '../marker-table';
 import { StackChart } from '../stack-chart/';
 import { MarkerChart } from '../marker-chart/';
 import { NetworkChart } from '../network-chart/';
