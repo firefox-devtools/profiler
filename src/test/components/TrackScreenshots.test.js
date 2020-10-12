@@ -72,21 +72,22 @@ describe('timeline/TrackScreenshots', function() {
     const { moveMouseAndGetLeft } = setup();
     //Considering base to be 150, this value is big enough as a base
     const base = moveMouseAndGetLeft(150);
-    // LEFT is 100 and the screenshot's width is 300px.
-    // So hovering between 100 and 150px should give a result of left == 0.
-    // As soon as we pass 150px the left value should also move up.
-    expect(moveMouseAndGetLeft(150 + 10)).toBe(base + 10);
-    expect(moveMouseAndGetLeft(150 + 20)).toBe(base + 20);
+    // LEFT is 100 and the zoomed in screenshot's width is 350px.
+    // So hovering between 100 and 175px should give a result of left == 0.
+    // As soon as we pass 175px the left value should also move up.
+    expect(moveMouseAndGetLeft(175 + 10)).toBe(base + 10);
+    expect(moveMouseAndGetLeft(175 + 20)).toBe(base + 20);
   });
 
   it('places the hover image in the center of the track if there is enough space', () => {
     const { setBoundingClientRectOffset, moveMouseAndGetTop } = setup();
     const containerTop = 100;
-    const screenshotHeight = 150; // This value is defined in the fixtures.
+    const screenshotHeight = 175; // This is the height of the zoomed-in screenshot.
     setBoundingClientRectOffset({ left: LEFT, top: containerTop });
     const pageX = LEFT;
-    const expectedTop =
-      containerTop + FULL_TRACK_SCREENSHOT_HEIGHT / 2 - screenshotHeight / 2;
+    const expectedTop = Math.floor(
+      containerTop + FULL_TRACK_SCREENSHOT_HEIGHT / 2 - screenshotHeight / 2
+    );
     expect(moveMouseAndGetTop(pageX)).toBe(expectedTop);
   });
 
@@ -99,15 +100,15 @@ describe('timeline/TrackScreenshots', function() {
   it('makes sure the hover image does not go off the left side of screen', () => {
     const { moveMouseAndGetLeft } = setup();
 
-    // Because the hover screenshot's size is 300px, it's stuck at the
+    // Because the zoomed in hover screenshot's size is 350px, it's stuck at the
     // left of the window when the mouse is between 100 (the left of
-    // the track) and 150px.
+    // the track) and 175px.
     expect(moveMouseAndGetLeft(100)).toBe(0);
-    expect(moveMouseAndGetLeft(120)).toBe(0);
     expect(moveMouseAndGetLeft(150)).toBe(0);
+    expect(moveMouseAndGetLeft(175)).toBe(0);
 
-    // Starting at 151px, the hover tooltip starts to move.
-    expect(moveMouseAndGetLeft(151)).toBe(1);
+    // Starting at 176px, the hover tooltip starts to move.
+    expect(moveMouseAndGetLeft(176)).toBe(1);
   });
 
   it('makes sure the hover image does not go off the top side of screen', () => {
