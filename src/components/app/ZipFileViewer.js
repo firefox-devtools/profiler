@@ -163,7 +163,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
    * method is what keeps the ZipFileViewer and ZipFileState in sync
    * with the UrlState.
    */
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
+  componentDidUpdate(prevProps: Props) {
     const {
       pathInZipFile,
       zipFileState,
@@ -171,7 +171,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       zipFileTable,
       returnToZipFileList,
       showErrorForNoFileInZip,
-    } = nextProps;
+    } = prevProps;
     if (pathInZipFile !== zipFileState.pathInZipFile) {
       // The UrlState and ZipFileState are out of sync, they need to be
       // updated.
@@ -191,9 +191,6 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         }
       }
     }
-  }
-
-  componentDidUpdate(prevProps: Props) {
     if (
       prevProps.zipFileState.phase !== 'LIST_FILES_IN_ZIP_FILE' &&
       this.props.zipFileState.phase === 'LIST_FILES_IN_ZIP_FILE'
