@@ -29,7 +29,7 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import 'firefox-profiler/components/timeline/TrackScreenshots.css';
+import './TrackScreenshots.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,

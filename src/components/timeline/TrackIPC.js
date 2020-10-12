@@ -15,7 +15,7 @@ import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackIPC.css';
+import './TrackIPC.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,

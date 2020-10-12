@@ -12,7 +12,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { TimelineMarkersMemory } from 'firefox-profiler/components/timeline/Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { TrackMemoryGraph } from 'firefox-profiler/components/timeline/TrackMemoryGraph';
+import { TrackMemoryGraph } from './TrackMemoryGraph';
 import {
   TRACK_MEMORY_GRAPH_HEIGHT,
   TRACK_MEMORY_MARKERS_HEIGHT,
@@ -27,7 +27,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackMemory.css';
+import './TrackMemory.css';
 
 type OwnProps = {|
   +counterIndex: CounterIndex,

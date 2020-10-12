@@ -29,7 +29,7 @@ import {
   TimelineMarkersFileIo,
   TimelineMarkersOverview,
   TimelineMarkersMemory,
-} from 'firefox-profiler/components/timeline/Markers';
+} from './Markers';
 import {
   updatePreviewSelection,
   changeRightClickedTrack,
@@ -43,7 +43,7 @@ import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import 'firefox-profiler/components/timeline/TrackThread.css';
+import './TrackThread.css';
 
 import type {
   TimelineType,

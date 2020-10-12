@@ -24,7 +24,7 @@ import type {
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
+import './TrackVisualProgress.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.

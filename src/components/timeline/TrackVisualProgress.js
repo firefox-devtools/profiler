@@ -8,7 +8,7 @@ import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { TrackVisualProgressGraph } from 'firefox-profiler/components/timeline/TrackVisualProgressGraph';
+import { TrackVisualProgressGraph } from './TrackVisualProgressGraph';
 import {
   TRACK_VISUAL_PROGRESS_LINE_WIDTH,
   TRACK_VISUAL_PROGRESS_HEIGHT,
@@ -18,7 +18,7 @@ import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
+import './TrackVisualProgress.css';
 
 type OwnProps = {|
   +progressGraphData: ProgressGraphData[],

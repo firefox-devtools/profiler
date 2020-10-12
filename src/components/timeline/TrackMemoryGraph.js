@@ -15,7 +15,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';
+import EmptyThreadIndicator from './EmptyThreadIndicator';
 import bisection from 'bisection';
 
 import type {
@@ -32,7 +32,7 @@ import type {
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackMemory.css';
+import './TrackMemory.css';
 
 /**
  * When adding properties to these props, please consider the comment above the component.

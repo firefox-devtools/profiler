@@ -32,7 +32,7 @@ import type {
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackNetwork.css';
+import './TrackNetwork.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
