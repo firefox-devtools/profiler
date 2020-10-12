@@ -262,6 +262,22 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             </span>
             x86_64-gcc3
           </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              CPU:
+            </span>
+            4
+             physical 
+            cores
+            , 
+            8
+             logical 
+            cores
+          </div>
         </div>
         <details>
           <summary
@@ -585,6 +601,22 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
               ABI:
             </span>
             x86_64-gcc3
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              CPU:
+            </span>
+            4
+             physical 
+            cores
+            , 
+            8
+             logical 
+            cores
           </div>
         </div>
       </div>

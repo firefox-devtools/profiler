@@ -31,7 +31,9 @@ jest.mock('../../components/stack-chart', () => ({
 jest.mock('../../components/marker-chart', () => ({
   MarkerChart: 'marker-chart',
 }));
-jest.mock('../../components/marker-table', () => 'marker-table');
+jest.mock('../../components/marker-table', () => ({
+  MarkerTable: 'marker-table',
+}));
 jest.mock('../../components/network-chart', () => ({
   NetworkChart: 'network-chart',
 }));
