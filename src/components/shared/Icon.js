@@ -5,12 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from 'firefox-profiler/src/utils/connect';
-import { getIconClassName } from 'firefox-profiler/src/selectors/icons';
-import { iconStartLoading } from 'firefox-profiler/src/actions/icons';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getIconClassName } from 'firefox-profiler/selectors/icons';
+import { iconStartLoading } from 'firefox-profiler/actions/icons';
 
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
-import type { ConnectedProps } from 'firefox-profiler/src/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps =
   | {|

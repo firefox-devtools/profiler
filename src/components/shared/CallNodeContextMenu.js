@@ -5,28 +5,28 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from 'firefox-profiler/src/components/shared/ContextMenu';
-import explicitConnect from 'firefox-profiler/src/utils/connect';
-import { funcHasRecursiveCall } from 'firefox-profiler/src/profile-logic/transforms';
-import { getFunctionName } from 'firefox-profiler/src/profile-logic/function-info';
+import ContextMenu from 'firefox-profiler/components/shared/ContextMenu';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
+import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
   setContextMenuVisibility,
-} from 'firefox-profiler/src/actions/profile-view';
+} from 'firefox-profiler/actions/profile-view';
 import {
   getSelectedTab,
   getImplementationFilter,
   getInvertCallstack,
-} from 'firefox-profiler/src/selectors/url-state';
-import { getRightClickedCallNodeInfo } from 'firefox-profiler/src/selectors/right-clicked-call-node';
-import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/src/selectors/per-thread';
+} from 'firefox-profiler/selectors/url-state';
+import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
+import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 
 import {
   convertToTransformType,
   assertExhaustiveCheck,
-} from 'firefox-profiler/src/utils/flow';
+} from 'firefox-profiler/utils/flow';
 
 import type {
   TransformType,
@@ -38,8 +38,8 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { TabSlug } from 'firefox-profiler/src/app-logic/tabs-handling';
-import type { ConnectedProps } from 'firefox-profiler/src/utils/connect';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +thread: Thread | null,
