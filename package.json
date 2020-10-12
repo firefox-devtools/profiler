@@ -38,10 +38,7 @@
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "license": "MPL-2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/firefox-devtools/profiler"
-  },
+  "repository": "https://github.com/firefox-devtools/profiler",
   "dependencies": {
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
@@ -164,5 +161,9 @@
       "post-rewrite": "node bin/post-rewrite.js",
       "pre-push": "yarn test-all"
     }
-  }
+  },
+  "name": "my-first-contribution",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Profiler contributor"
 }
