@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from '../shared/ContextMenu';
+import ContextMenu from './ContextMenu';
 import explicitConnect from '../../utils/connect';
 import {
   setContextMenuVisibility,

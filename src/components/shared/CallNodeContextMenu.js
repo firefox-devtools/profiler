@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from '../shared/ContextMenu';
+import ContextMenu from './ContextMenu';
 import explicitConnect from '../../utils/connect';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';

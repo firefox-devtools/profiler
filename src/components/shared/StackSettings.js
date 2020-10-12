@@ -19,7 +19,7 @@ import {
   getShowUserTimings,
   getCurrentSearchString,
 } from '../../selectors/url-state';
-import { PanelSearch } from '../shared/PanelSearch';
+import { PanelSearch } from './PanelSearch';
 import {
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,
