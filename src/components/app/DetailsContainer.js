@@ -7,7 +7,7 @@ import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 
 import { Details } from './Details';
-import { selectSidebar } from '../sidebar';
+import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
 import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';

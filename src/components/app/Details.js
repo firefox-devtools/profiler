@@ -10,14 +10,14 @@ import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ProfileCallTreeView } from '../calltree/ProfileCallTreeView';
-import MarkerTable from '../marker-table';
-import { StackChart } from '../stack-chart/';
-import { MarkerChart } from '../marker-chart/';
-import { NetworkChart } from '../network-chart/';
-import FlameGraph from '../flame-graph/';
-import { JsTracer } from '../js-tracer/';
-import { selectSidebar } from '../sidebar';
+import { ProfileCallTreeView } from 'firefox-profiler/components/calltree/ProfileCallTreeView';
+import MarkerTable from 'firefox-profiler/components/marker-table';
+import { StackChart } from 'firefox-profiler/components/stack-chart/';
+import { MarkerChart } from 'firefox-profiler/components/marker-chart/';
+import { NetworkChart } from 'firefox-profiler/components/network-chart/';
+import FlameGraph from 'firefox-profiler/components/flame-graph/';
+import { JsTracer } from 'firefox-profiler/components/js-tracer/';
+import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
 import {
   changeSelectedTab,
@@ -26,8 +26,8 @@ import {
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import CallNodeContextMenu from '../shared/CallNodeContextMenu';
-import { MaybeMarkerContextMenu } from '../shared/MarkerContextMenu';
+import CallNodeContextMenu from 'firefox-profiler/components/shared/CallNodeContextMenu';
+import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
 import { toValidTabSlug } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
