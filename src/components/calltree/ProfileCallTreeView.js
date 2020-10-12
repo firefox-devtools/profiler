@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import CallTree from './CallTree';
+import { CallTree } from './CallTree';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 
