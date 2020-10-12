@@ -7,10 +7,10 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import ProfileViewer from './ProfileViewer';
-import ZipFileViewer from './ZipFileViewer';
-import Home from './Home';
-import CompareHome from './CompareHome';
+import { ProfileViewer } from './ProfileViewer';
+import { ZipFileViewer } from './ZipFileViewer';
+import { Home } from './Home';
+import { CompareHome } from './CompareHome';
 import { ProfileRootMessage } from './ProfileRootMessage';
 import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';

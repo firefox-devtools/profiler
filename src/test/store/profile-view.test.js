@@ -1742,12 +1742,6 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable', function() {
-    const { getState, markerThreadSelectors } = setupStore();
-    expect(
-      markerThreadSelectors.getProcessedRawMarkerTable(getState())
-    ).toMatchSnapshot();
-  });
   it('matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(

@@ -4,13 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
+import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import MarkerChartCanvas from './Canvas';
-import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
+import { MarkerChartCanvas } from './Canvas';
+import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
 import {
@@ -18,7 +15,11 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
+import {
+  getSelectedThreadsKey,
+  getTimelineTrackOrganization,
+} from '../../selectors/url-state';
+import { getTimelineMarginLeft } from '../../selectors/app';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -33,6 +34,8 @@ import type {
   StartEndRange,
   PreviewSelection,
   ThreadsKey,
+  CssPixels,
+  TimelineTrackOrganization,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -54,11 +57,13 @@ type StateProps = {|
   +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +timelineMarginLeft: CssPixels,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerChart extends React.PureComponent<Props> {
+class MarkerChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
   /**
@@ -103,6 +108,8 @@ class MarkerChart extends React.PureComponent<Props> {
       updatePreviewSelection,
       changeRightClickedMarker,
       rightClickedMarkerIndex,
+      timelineMarginLeft,
+      timelineTrackOrganization,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -134,7 +141,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 maxViewportHeight,
                 viewportNeedsUpdate,
                 maximumZoom: this.getMaximumZoom(),
-                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 containerRef: this._takeViewportRef,
               }}
@@ -148,10 +155,11 @@ class MarkerChart extends React.PureComponent<Props> {
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
                 threadsKey,
-                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
+                timelineTrackOrganization,
               }}
             />
           </ContextMenuTrigger>
@@ -169,7 +177,7 @@ function viewportNeedsUpdate(
   return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
@@ -184,8 +192,10 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
         state
       ),
+      timelineMarginLeft: getTimelineMarginLeft(state),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
-  component: MarkerChart,
+  component: MarkerChartImpl,
 });

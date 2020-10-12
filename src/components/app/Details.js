@@ -8,12 +8,12 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
-import TabBar from './TabBar';
+import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
-import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
+import { ProfileCallTreeView } from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
 import { StackChart } from '../stack-chart/';
-import MarkerChart from '../marker-chart/';
+import { MarkerChart } from '../marker-chart/';
 import { NetworkChart } from '../network-chart/';
 import FlameGraph from '../flame-graph/';
 import { JsTracer } from '../js-tracer/';
@@ -45,7 +45,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewer extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props> {
   _onSelectTab = (selectedTab: string) => {
     const { changeSelectedTab } = this.props;
     const tabSlug = toValidTabSlug(selectedTab);
@@ -111,7 +111,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
@@ -121,5 +121,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedTab,
     changeSidebarOpenState,
   },
-  component: ProfileViewer,
+  component: ProfileViewerImpl,
 });

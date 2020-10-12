@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { render } from '@testing-library/react';
 
-import Root from '../../components/app/Root';
+import { Root } from '../../components/app/Root';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
