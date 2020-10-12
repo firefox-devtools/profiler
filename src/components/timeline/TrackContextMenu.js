@@ -478,6 +478,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     // We check that it's less or equal to 1 (instead of just equal to 1)
     // because we want to also leave the item disabled when we hide the last
     // screenshot track while the menu is open.
+    // Trying to hide all types of tracks.
     const isDisabled = this.getVisibleScreenshotTracks().length <= 1;
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
