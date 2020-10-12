@@ -96,6 +96,20 @@ describe('timeline/TrackScreenshots', function() {
     expect(pageX > moveMouseAndGetLeft(pageX)).toBe(true);
   });
 
+  it('makes sure the hover image does not go off the left side of screen', () => {
+    const { moveMouseAndGetLeft } = setup();
+
+    // Because the hover screenshot's size is 300px, it's stuck at the
+    // left of the window when the mouse is between 100 (the left of
+    // the track) and 150px.
+    expect(moveMouseAndGetLeft(100)).toBe(0);
+    expect(moveMouseAndGetLeft(120)).toBe(0);
+    expect(moveMouseAndGetLeft(150)).toBe(0);
+
+    // Starting at 151px, the hover tooltip starts to move.
+    expect(moveMouseAndGetLeft(151)).toBe(1);
+  });
+
   it('makes sure the hover image does not go off the top side of screen', () => {
     const { moveMouseAndGetTop } = setup();
     const pageX = LEFT;
