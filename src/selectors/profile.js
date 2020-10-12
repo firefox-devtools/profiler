@@ -70,6 +70,7 @@ import type {
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
+  ProfileLoadingState,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -80,6 +81,8 @@ export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = stat
   getProfileView(state).activeTab;
 export const getOriginsProfileView: Selector<OriginsViewState> = state =>
   getProfileView(state).origins;
+export const getProfileLoadingState: Selector<ProfileLoadingState> = state =>
+  state.profileLoadingState;
 
 /**
  * Profile View Options
