@@ -24,7 +24,7 @@ type State = {|
   profile2: string,
 |};
 
-class CompareHome extends PureComponent<Props, State> {
+class CompareHomeImpl extends PureComponent<Props, State> {
   state = { profile1: '', profile2: '' };
 
   handleInputChange = (event: SyntheticInputEvent<>) => {
@@ -91,7 +91,7 @@ class CompareHome extends PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, {||}, DispatchProps>({
+export const CompareHome = explicitConnect<{||}, {||}, DispatchProps>({
   mapDispatchToProps: { changeProfilesToCompare },
-  component: CompareHome,
+  component: CompareHomeImpl,
 });

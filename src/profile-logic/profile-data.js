@@ -2102,11 +2102,12 @@ export function getOriginAnnotationForFunc(
 export function getFuncNamesAndOriginsForPath(
   path: CallNodePath,
   thread: Thread
-): Array<{ funcName: string, origin: string }> {
+): Array<{ funcName: string, isFrameLabel: boolean, origin: string }> {
   const { funcTable, stringTable, resourceTable } = thread;
 
   return path.map(func => ({
     funcName: stringTable.getString(funcTable.name[func]),
+    isFrameLabel: funcTable.resource[func] === -1,
     origin: getOriginAnnotationForFunc(
       func,
       funcTable,

@@ -24,7 +24,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
  * This component attempts to tell why exactly a call tree is empty with no samples
  * and display a friendly message to the end user.
  */
-class CallTreeEmptyReasons extends PureComponent<Props> {
+class CallTreeEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { thread, rangeFilteredThread, threadName } = this.props;
     let reason;
@@ -50,11 +50,11 @@ class CallTreeEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const CallTreeEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
   }),
-  component: CallTreeEmptyReasons,
+  component: CallTreeEmptyReasonsImpl,
 });
