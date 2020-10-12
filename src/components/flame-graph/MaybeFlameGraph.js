@@ -8,8 +8,8 @@ import explicitConnect from '../../utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
-import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
-import FlameGraph from './FlameGraph';
+import { FlameGraphEmptyReasons } from './FlameGraphEmptyReasons';
+import { FlameGraph } from './FlameGraph';
 
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -24,7 +24,7 @@ type DispatchProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MaybeFlameGraph extends React.PureComponent<Props> {
+class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
 
   _onSwitchToNormalCallstackClick = () => {
@@ -65,17 +65,19 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    return {
-      invertCallstack: getInvertCallstack(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
-    };
-  },
-  mapDispatchToProps: {
-    changeInvertCallstack,
-  },
-  component: MaybeFlameGraph,
-});
+export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => {
+      return {
+        invertCallstack: getInvertCallstack(state),
+        maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+          state
+        ),
+      };
+    },
+    mapDispatchToProps: {
+      changeInvertCallstack,
+    },
+    component: MaybeFlameGraphImpl,
+  }
+);
