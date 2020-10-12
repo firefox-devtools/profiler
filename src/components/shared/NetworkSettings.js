@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import { changeNetworkSearchString } from '../../actions/profile-view';
 import { getNetworkSearchString } from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+import { PanelSearch } from '../shared/PanelSearch';
 
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -24,7 +24,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class Settings extends PureComponent<Props> {
+class NetworkSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeNetworkSearchString(value);
   };
@@ -46,10 +46,10 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const NetworkSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     searchString: getNetworkSearchString(state),
   }),
   mapDispatchToProps: { changeNetworkSearchString },
-  component: Settings,
+  component: NetworkSettingsImpl,
 });
