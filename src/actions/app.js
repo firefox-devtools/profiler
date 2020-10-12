@@ -10,28 +10,28 @@ import {
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndexes,
   getLocalTrackOrderByPid,
-} from '../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
 import {
   getTrackThreadHeights,
   getIsEventDelayTracksEnabled,
-} from '../selectors/app';
+} from 'firefox-profiler/selectors/app';
 import {
   getActiveTabMainTrack,
   getLocalTracksByPid,
   getThreads,
-} from '../selectors/profile';
-import { sendAnalytics } from '../utils/analytics';
+} from 'firefox-profiler/selectors/profile';
+import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
   stateFromLocation,
   withHistoryReplaceStateSync,
-} from '../app-logic/url-handling';
-import { finalizeProfileView } from './receive-profile';
-import { fatalError } from './errors';
+} from 'firefox-profiler/app-logic/url-handling';
+import { finalizeProfileView } from 'firefox-profiler/receive-profile';
+import { fatalError } from 'firefox-profiler/errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
-} from '../profile-logic/tracks';
-import { selectedThreadSelectors } from '../selectors/per-thread';
+} from 'firefox-profiler/profile-logic/tracks';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
 import type {
   Profile,
@@ -41,7 +41,7 @@ import type {
   ThunkAction,
   UrlState,
 } from 'firefox-profiler/types';
-import type { TabSlug } from '../app-logic/tabs-handling';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
