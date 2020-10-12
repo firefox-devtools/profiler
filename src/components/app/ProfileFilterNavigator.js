@@ -12,12 +12,11 @@ import {
   getPreviewSelection,
   getProfileFilterPageData,
   getProfileRootRange,
-
-} from '../../selectors/profile';
-import { getCommittedRangeLabels } from '../../selectors/url-state';
-import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
-import { FilterNavigatorBar } from '../shared/FilterNavigatorBar';
-import { Icon } from '../shared/Icon';
+} from 'firefox-profiler/selectors/profile';
+import { getCommittedRangeLabels } from 'firefox-profiler/selectors/url-state';
+import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
 
 import type { ElementProps } from 'react';
 import type {

@@ -4,7 +4,6 @@
 
 // @flow
 
-
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { FilterNavigatorBar } from './FilterNavigatorBar';
