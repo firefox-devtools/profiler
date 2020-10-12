@@ -5,8 +5,8 @@
 // @flow
 
 import React from 'react';
-import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import classNames from 'classnames';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
