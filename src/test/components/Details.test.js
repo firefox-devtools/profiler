@@ -23,6 +23,7 @@ jest.mock('../../components/calltree/ProfileCallTreeView', () => ({
   ProfileCallTreeView: 'call-tree',
 }));
 jest.mock('../../components/flame-graph', () => 'flame-graph');
+
 jest.mock('../../components/stack-chart', () => ({
   StackChart: 'stack-chart',
 }));
