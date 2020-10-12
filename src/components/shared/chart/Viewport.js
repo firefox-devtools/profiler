@@ -5,13 +5,13 @@
 // @flow
 import * as React from 'react';
 import classNames from 'classnames';
-import explicitConnect from '../../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getHasZoomedViaMousewheel,
   getPanelLayoutGeneration,
-} from '../../../selectors/app';
-import { setHasZoomedViaMousewheel } from '../../../actions/app';
-import { updatePreviewSelection } from '../../../actions/profile-view';
+} from 'firefox-profiler/selectors/app';
+import { setHasZoomedViaMousewheel } from 'firefox-profiler/actions/app';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 
 import type {
   CssPixels,
@@ -20,11 +20,11 @@ import type {
   PreviewSelection,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getObjectValuesAsUnion,
   assertExhaustiveCheck,
-} from '../../../utils/flow';
+} from 'firefox-profiler/utils/flow';
 
 /**
  * Viewport terminology:

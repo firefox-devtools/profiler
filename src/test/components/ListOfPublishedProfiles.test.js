@@ -479,4 +479,63 @@ describe('ListOfPublishedProfiles', () => {
       );
     });
   });
+
+  describe('The uploaded recordings list should update on window focus', () => {
+    it('will update the stored profiles on window focus', async function() {
+      // Add 3 examples, all with the same name.
+      // mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
+
+      const exampleProfileData = {
+        profileToken: 'MACOSX',
+        jwtToken: null,
+        publishedDate: new Date('4 Jul 2020 13:00'),
+        name: 'PROFILE',
+        preset: null,
+        originHostname: 'https://mozilla.org',
+        meta: {
+          product: 'Firefox',
+          platform: 'Macintosh',
+          toolkit: 'cocoa',
+          misc: 'rv:62.0',
+          oscpu: 'Intel Mac OS X 10.12',
+        },
+        urlPath: '/public/MACOSX/marker-chart/',
+        publishedRange: { start: 2000, end: 40000 },
+      };
+
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-1',
+      });
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-2',
+      });
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-3',
+      });
+
+      const { findAllByText } = setup();
+      expect(await findAllByText(/PROFILE/)).toHaveLength(3);
+
+      // Add one more.
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-4',
+        name: 'NEW-PROFILE', // Adding with a new name so that we can look it up.
+      });
+
+      // Nothing is updated yet: looking for the new profile name will throw.
+      await expect(() => findAllByText(/NEW-PROFILE/)).rejects.toThrow(
+        /Unable to find an element with the text/
+      );
+      expect(await findAllByText(/PROFILE/)).toHaveLength(3);
+
+      // The new profile is now listed.
+      window.dispatchEvent(new Event('focus'));
+      await findAllByText(/NEW-PROFILE/);
+      expect(await findAllByText(/PROFILE/)).toHaveLength(4);
+    });
+  });
 });
