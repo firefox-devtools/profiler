@@ -5,11 +5,12 @@
 // @flow
 
 import React from 'react';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/src/profile-logic/transforms';
+
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/src/profile-logic/profile-data';
 
 import type {
   Thread,

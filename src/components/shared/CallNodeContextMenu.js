@@ -5,28 +5,28 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from '../shared/ContextMenu';
-import explicitConnect from '../../utils/connect';
-import { funcHasRecursiveCall } from '../../profile-logic/transforms';
-import { getFunctionName } from '../../profile-logic/function-info';
+import ContextMenu from 'firefox-profiler/src/components/shared/ContextMenu';
+import explicitConnect from 'firefox-profiler/src/utils/connect';
+import { funcHasRecursiveCall } from 'firefox-profiler/src/profile-logic/transforms';
+import { getFunctionName } from 'firefox-profiler/src/profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
   setContextMenuVisibility,
-} from '../../actions/profile-view';
+} from 'firefox-profiler/src/actions/profile-view';
 import {
   getSelectedTab,
   getImplementationFilter,
   getInvertCallstack,
-} from '../../selectors/url-state';
-import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
-import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
+} from 'firefox-profiler/src/selectors/url-state';
+import { getRightClickedCallNodeInfo } from 'firefox-profiler/src/selectors/right-clicked-call-node';
+import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/src/selectors/per-thread';
 
 import {
   convertToTransformType,
   assertExhaustiveCheck,
-} from '../../utils/flow';
+} from 'firefox-profiler/src/utils/flow';
 
 import type {
   TransformType,
@@ -38,8 +38,8 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { ConnectedProps } from '../../utils/connect';
+import type { TabSlug } from 'firefox-profiler/src/app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/src/utils/connect';
 
 type StateProps = {|
   +thread: Thread | null,
