@@ -154,7 +154,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerTable extends PureComponent<Props> {
+class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
     { propName: 'start', title: 'Start' },
     { propName: 'duration', title: 'Duration' },
@@ -250,7 +250,7 @@ class MarkerTable extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -265,5 +265,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     getMarkerLabel: selectedThreadSelectors.getMarkerTableLabelGetter(state),
   }),
   mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },
-  component: MarkerTable,
+  component: MarkerTableImpl,
 });

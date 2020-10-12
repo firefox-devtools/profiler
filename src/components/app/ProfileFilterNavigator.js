@@ -6,12 +6,13 @@
 
 import React from 'react';
 import memoize from 'memoize-immutable';
-import explicitConnect from '../../utils/connect';
-import { popCommittedRanges } from '../../actions/profile-view';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
   getProfileFilterPageData,
   getProfileRootRange,
+
 } from '../../selectors/profile';
 import { getCommittedRangeLabels } from '../../selectors/url-state';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';

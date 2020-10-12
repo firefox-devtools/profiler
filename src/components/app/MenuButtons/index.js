@@ -10,27 +10,27 @@ import './index.css';
 
 import * as React from 'react';
 import classNames from 'classnames';
-import explicitConnect from '../../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getProfile,
   getProfileRootRange,
   getSymbolicationStatus,
-} from '../../../selectors/profile';
-import { getDataSource } from '../../../selectors/url-state';
-import { getIsNewlyPublished } from '../../../selectors/app';
-import { MenuButtonsMetaInfo } from './MetaInfo';
-import { MenuButtonsPublish } from './Publish';
-import { MenuButtonsPermalink } from './Permalink';
-import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
-import { revertToPrePublishedState } from '../../../actions/publish';
-import { dismissNewlyPublished } from '../../../actions/app';
+} from 'firefox-profiler/selectors/profile';
+import { getDataSource } from 'firefox-profiler/selectors/url-state';
+import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
+import { MenuButtonsMetaInfo } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
+import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
+import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
+import { dismissNewlyPublished } from 'firefox-profiler/actions/app';
 import {
   getAbortFunction,
   getUploadPhase,
   getHasPrePublishedState,
-} from '../../../selectors/publish';
+} from 'firefox-profiler/selectors/publish';
 
-import { resymbolicateProfile } from '../../../actions/receive-profile';
+import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
@@ -40,7 +40,7 @@ import type {
   SymbolicationStatus,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
