@@ -73,6 +73,7 @@ function _formatRange(range: StartEndRange): string {
 }
 
 type PublishedProfileProps = {|
+  +onProfileDelete: () => void,
   +profileData: ProfileData,
   +nowTimestamp: Milliseconds,
   +withActionButtons: boolean,
@@ -80,7 +81,6 @@ type PublishedProfileProps = {|
 
 type PublishedProfileState = {|
   +confirmDialogIsOpen: boolean,
-  +hasBeenDeleted: boolean,
 |};
 
 /**
@@ -92,7 +92,6 @@ class PublishedProfile extends React.PureComponent<
 > {
   state = {
     confirmDialogIsOpen: false,
-    hasBeenDeleted: false,
   };
 
   onOpenConfirmDialog = () => {
@@ -104,16 +103,12 @@ class PublishedProfile extends React.PureComponent<
   };
 
   onCloseSuccessMessage = () => {
-    this.setState({ hasBeenDeleted: true });
+    this.props.onProfileDelete();
   };
 
   render() {
     const { profileData, nowTimestamp, withActionButtons } = this.props;
-    const { confirmDialogIsOpen, hasBeenDeleted } = this.state;
-
-    if (hasBeenDeleted) {
-      return null;
-    }
+    const { confirmDialogIsOpen } = this.state;
 
     let { urlPath } = profileData;
     if (!urlPath.startsWith('/')) {
@@ -190,20 +185,37 @@ type State = {|
 |};
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
+  _isMounted = false;
+
   state = {
     profileDataList: null,
   };
 
-  async componentDidMount() {
+  _refreshList = async () => {
     const profileDataList = await listAllProfileData();
+    if (this._isMounted) {
+      // It isn't ideal to use a setState here, but this is the only way.
+      this.setState({
+        // We want to display the list with the most recent uploaded profile first.
+        profileDataList: profileDataList.reverse(),
+      });
+    }
+  };
 
-    // It isn't ideal to use a setState here, but this is the only way.
-    // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({
-      // We want to display the list with the most recent uploaded profile first.
-      profileDataList: profileDataList.reverse(),
-    });
+  async componentDidMount() {
+    this._isMounted = true;
+    this._refreshList();
+    window.addEventListener('focus', this._refreshList);
   }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    window.removeEventListener('focus', this._refreshList);
+  }
+
+  onProfileDelete = () => {
+    this._refreshList();
+  };
 
   render() {
     const { limit, withActionButtons } = this.props;
@@ -247,6 +259,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         <ul className="publishedProfilesList">
           {reducedProfileDataList.map(profileData => (
             <PublishedProfile
+              onProfileDelete={this.onProfileDelete}
               key={profileData.profileToken}
               profileData={profileData}
               nowTimestamp={nowTimestamp}

@@ -5,12 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { changeMarkersSearchString } from '../../actions/profile-view';
-import { getMarkersSearchString } from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
+import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
+import PanelSearch from 'firefox-profiler/components/shared/PanelSearch';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MarkerSettings.css';
 
