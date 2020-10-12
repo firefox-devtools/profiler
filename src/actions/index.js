@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import * as app from 'firefox-profiler/app';
-import * as icons from 'firefox-profiler/icons';
-import * as profileView from 'firefox-profiler/profile-view';
-import * as publish from 'firefox-profiler/publish';
-import * as receiveProfile from 'firefox-profiler/receive-profile';
-import * as zippedProfiles from 'firefox-profiler/zipped-profiles';
+import * as app from './app';
+import * as icons from './icons';
+import * as profileView from './profile-view';
+import * as publish from './publish';
+import * as receiveProfile from './receive-profile';
+import * as zippedProfiles from './zipped-profiles';
 
 export default Object.assign(
   {},
