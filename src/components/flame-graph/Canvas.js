@@ -85,7 +85,7 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class FlameGraphCanvas extends React.PureComponent<Props> {
+class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
   componentDidUpdate(prevProps) {
@@ -421,6 +421,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  FlameGraphCanvas
-);
+export const FlameGraphCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(FlameGraphCanvasImpl);
