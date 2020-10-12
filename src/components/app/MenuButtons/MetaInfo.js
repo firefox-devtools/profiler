@@ -190,9 +190,12 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
               {meta.physicalCPUs && meta.logicalCPUs ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">CPU:</span>
-                  {meta.physicalCPUs} physical {meta.physicalCPUs === 1 ? 'core' : 'cores'}, {meta.logicalCPUs} logical {meta.logicalCPUs === 1 ? 'core' : 'cores'}
+                  {meta.physicalCPUs} physical{' '}
+                  {meta.physicalCPUs === 1 ? 'core' : 'cores'},
+                  {meta.logicalCPUs} logical{' '}
+                  {meta.logicalCPUs === 1 ? 'core' : 'cores'}
                 </div>
-              ) : null}  
+              ) : null}
             </div>
             {meta.visualMetrics ? (
               <>
