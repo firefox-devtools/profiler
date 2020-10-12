@@ -4,17 +4,14 @@
 
 // @flow
 
-import { PureComponent } from 'react';
+import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 
 import { getProfileLoadingState } from '../../selectors/profile';
 
-import type {
-  ProfileLoadingState,
-  ProfileLoadingStep,
-} from 'firefox-profiler/types';
+import type { ProfileLoadingStep } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from 'firefox-profiler/types';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +profileLoadingStep: ProfileLoadingStep,
@@ -23,8 +20,32 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class ProfileLoadingMessage extends PureComponent<Props> {
-  // get profile loading state
-  // display current loading step
-  // display progress bar, if any
+class ProfileLoadingMessage extends React.PureComponent<Props> {
+  // updateProfileLoadingMessage = () => {};
+
+  // componentDidMount() {
+  //   this.updateProfileLoadingMessage();
+  // }
+
+  // componentDidUpdate() {
+  //   this.updateProfileLoadingMessage();
+  // }
+
+  render() {
+    // const { profileLoadingStep, progress } = this.props;
+    return (
+      <div className="profileLoadingMessageContainer">
+        <div className="loadingStep">This is the loading step</div>
+        <div className="loadingStepProgress">This is the progress</div>
+      </div>
+    );
+  }
 }
+
+export default explicitConnect<{||}, StateProps, {||}>({
+  mapStateToProps: state => ({
+    profileLoadingStep: getProfileLoadingState(state).profileLoadingStep,
+    progress: getProfileLoadingState(state).progress,
+  }),
+  component: ProfileLoadingMessage,
+});

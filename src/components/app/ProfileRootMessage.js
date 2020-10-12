@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-
+import ProfileLoadingMessage from './ProfileLoadingMessage';
 import './ProfileRootMessage.css';
 
 type Props = {|
@@ -34,6 +34,7 @@ export class ProfileRootMessage extends React.PureComponent<Props> {
               <a href="/">Back to home</a>
             </div>
           ) : null}
+          <ProfileLoadingMessage />
           {showLoader ? (
             <div className="loading">
               <div className="loading-div loading-div-1 loading-row-1" />
