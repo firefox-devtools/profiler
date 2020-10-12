@@ -238,39 +238,6 @@ body,
   color: #000;
 }
 
-.focusCallstackButton {
-  overflow: hidden;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  margin: 0;
-  margin-left: 5px;
-  background: none 0 0 no-repeat transparent;
-  background-image: url(../img/svg/circlearrow.svg);
-  color: transparent;
-  visibility: hidden;
-}
-
-.focusCallstackButton:active:hover {
-  background-position: -16px 0;
-}
-
-.treeViewRow:hover > .focusCallstackButton {
-  visibility: visible;
-}
-
-.treeViewBody:focus .treeViewRow.isSelected > .focusCallstackButton {
-  background-position: -32px 0;
-}
-
-.treeViewBody:focus
-  .treeViewRow.isSelected
-  > .focusCallstackButton:active:hover {
-  background-position: -48px 0;
-}
-
 .treeRowToggleButton {
   width: 0;
   height: 0;
