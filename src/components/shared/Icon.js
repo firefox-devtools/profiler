@@ -41,7 +41,7 @@ class Icon extends PureComponent<Props> {
     }
   }
 
-  getDerivedStateFromProps(nextProps) {
+  static getDerivedStateFromProps(nextProps) {
     if (nextProps.icon) {
       nextProps.iconStartLoading(nextProps.icon);
     }
