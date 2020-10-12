@@ -6,14 +6,14 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import { selectActiveTabTrack } from '../../actions/profile-view';
+import { selectActiveTabTrack } from 'firefox-profiler/actions/profile-view';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import TrackThread from './TrackThread';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   ActiveTabTrackReference,
@@ -22,7 +22,7 @@ import type {
   InitialSelectedTrackReference,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +resourceTrack: ActiveTabResourceTrack,
