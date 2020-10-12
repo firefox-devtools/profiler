@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import CallTree from 'firefox-profiler/components/calltree/CallTree';
+import CallTree from './CallTree';
 import StackSettings from 'firefox-profiler/components/shared/StackSettings';
 import TransformNavigator from 'firefox-profiler/components/shared/TransformNavigator';
 

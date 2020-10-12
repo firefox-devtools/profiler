@@ -8,7 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { getInvertCallstack } from 'firefox-profiler/selectors/url-state';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { changeInvertCallstack } from 'firefox-profiler/actions/profile-view';
-import FlameGraphEmptyReasons from 'firefox-profiler/components/flame-graph/FlameGraphEmptyReasons';
+import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';

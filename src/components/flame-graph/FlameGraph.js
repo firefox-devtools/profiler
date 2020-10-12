@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import FlameGraphCanvas from 'firefox-profiler/components/flame-graph/Canvas';
+import FlameGraphCanvas from './Canvas';
 import {
   getCategories,
   getCommittedRange,
