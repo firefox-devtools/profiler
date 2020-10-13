@@ -210,6 +210,11 @@ export class CallTree {
     };
   }
 
+  seperateText = (text) => {
+   let result =  text.match(/"([^"]*)"/)[1];
+   return result;
+  }
+
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
    
     let displayData: CallNodeDisplayData | void = this._displayDataByIndex.get(
@@ -251,7 +256,7 @@ export class CallTree {
         const resourceNameIndex = this._resourceTable.name[resourceIndex];  
         if (resourceNameIndex !== undefined) {
         let iconText = this._stringTable.getString(resourceNameIndex); 
-        icon = iconText.match(/"([^"]*)"/)[1];
+        icon = this.seperateText(iconText)
         }
         //End Extension Function
       }
