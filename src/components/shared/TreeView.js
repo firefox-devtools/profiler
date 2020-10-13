@@ -7,7 +7,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import VirtualList from './VirtualList';
+import { VirtualList } from './VirtualList';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 

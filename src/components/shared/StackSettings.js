@@ -63,7 +63,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class StackSettings extends PureComponent<Props> {
+class StackSettingsImpl extends PureComponent<Props> {
   _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeImplementationFilter(
       // This function is here to satisfy Flow that we are getting a valid
@@ -240,7 +240,11 @@ class StackSettings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const StackSettings = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
     selectedTab: getSelectedTab(state),
@@ -265,5 +269,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeCallTreeSummaryStrategy,
     changeShowUserTimings,
   },
-  component: StackSettings,
+  component: StackSettingsImpl,
 });
