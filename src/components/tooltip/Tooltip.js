@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
 import { ensureExists } from '../../utils/flow';
-require('./Tooltip.css');
+import './Tooltip.css';
 
 export const MOUSE_OFFSET = 11;
 // If changing this value, make sure and adjust the max-width in the .tooltip class.

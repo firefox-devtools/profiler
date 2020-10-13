@@ -40,7 +40,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
