@@ -10,7 +10,7 @@ import { AppHeader } from './AppHeader';
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
@@ -18,18 +18,18 @@ import FirefoxPopupScreenshot from '../../../res/img/jpg/firefox-profiler-button
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
-} from '../../app-logic/web-channel';
-import { assertExhaustiveCheck } from '../../utils/flow';
+} from 'firefox-profiler/app-logic/web-channel';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
-} from '../../utils/connect';
+} from 'firefox-profiler/utils/connect';
 
 require('./Home.css');
 

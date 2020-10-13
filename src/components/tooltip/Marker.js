@@ -33,7 +33,6 @@ import {
 } from './TooltipDetails';
 import Backtrace from '../shared/Backtrace';
 
-import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import {
   formatFromMarkerSchema,
   getMarkerSchema,
@@ -239,18 +238,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         case 'GCSlice': {
           // The GC schema is mostly ignored.
           details.push(...getGCSliceDetails(data));
-          break;
-        }
-        case 'Bailout': {
-          details.push(
-            // Bailout also has marker schema, but it's helpful to look up the bailout
-            // reason.
-            <TooltipDetail label="Description" key="Bailout-Description">
-              <div style={{ maxWidth: '300px' }}>
-                {bailoutTypeInformation['Bailout_' + data.bailoutType]}
-              </div>
-            </TooltipDetail>
-          );
           break;
         }
         case 'Network': {

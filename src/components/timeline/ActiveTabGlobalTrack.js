@@ -6,23 +6,23 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import { selectActiveTabTrack } from '../../actions/profile-view';
+import { selectActiveTabTrack } from 'firefox-profiler/actions/profile-view';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   GlobalTrackReference,
   TrackIndex,
@@ -31,7 +31,7 @@ import type {
   ActiveTabResourceTrack,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +trackReference: GlobalTrackReference,

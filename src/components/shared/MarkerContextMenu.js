@@ -5,17 +5,17 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from '../shared/ContextMenu';
-import explicitConnect from '../../utils/connect';
+import ContextMenu from 'firefox-profiler/components/shared/ContextMenu';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   setContextMenuVisibility,
   updatePreviewSelection,
-} from '../../actions/profile-view';
+} from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
   getCommittedRange,
-} from '../../selectors/profile';
-import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
+} from 'firefox-profiler/selectors/profile';
+import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
 import type {
@@ -29,15 +29,15 @@ import type {
   RightClickedMarkerInfo,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
-import { getImplementationFilter } from '../../selectors/url-state';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
 
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
-import { getThreadSelectorsFromThreadsKey } from '../../selectors/per-thread';
+import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 
 type OwnProps = {|
   +rightClickedMarkerInfo: RightClickedMarkerInfo,
