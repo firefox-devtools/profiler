@@ -526,7 +526,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (rightClickedTrack.type === 'global') {
       return (
         <MenuItem
-          key={trackIndex}
+          key={trackIndex + 'hide-all'}
           preventClose={false}
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
           onClick={this._toggleGlobalTrackVisibility}
