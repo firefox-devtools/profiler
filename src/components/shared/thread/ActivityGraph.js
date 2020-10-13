@@ -59,7 +59,7 @@ function _stopPropagation(e: TransitionEvent) {
   e.stopPropagation();
 }
 
-class ThreadActivityGraph extends React.PureComponent<Props, State> {
+export class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
@@ -303,8 +303,6 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default ThreadActivityGraph;
 
 /**
  * Filtered out samples use a diagonal stripe pattern, create that here.

@@ -9,8 +9,8 @@ import classNames from 'classnames';
 import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
 import { withSize, type SizeProps } from '../shared/WithSize';
-import ThreadStackGraph from '../shared/thread/StackGraph';
-import ThreadActivityGraph from '../shared/thread/ActivityGraph';
+import { ThreadStackGraph } from '../shared/thread/StackGraph';
+import { ThreadActivityGraph } from '../shared/thread/ActivityGraph';
 import {
   getProfileInterval,
   getCommittedRange,
