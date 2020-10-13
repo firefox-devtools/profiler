@@ -5,10 +5,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeNetworkSearchString } from 'firefox-profiler/actions/profile-view';
 import { getNetworkSearchString } from 'firefox-profiler/selectors/url-state';
-import PanelSearch from 'firefox-profiler/components/shared/PanelSearch';
+import { PanelSearch } from './PanelSearch';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -24,7 +25,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class Settings extends PureComponent<Props> {
+class NetworkSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeNetworkSearchString(value);
   };
@@ -46,10 +47,12 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    searchString: getNetworkSearchString(state),
-  }),
-  mapDispatchToProps: { changeNetworkSearchString },
-  component: Settings,
-});
+export const NetworkSettings = explicitConnect<{||}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      searchString: getNetworkSearchString(state),
+    }),
+    mapDispatchToProps: { changeNetworkSearchString },
+    component: NetworkSettingsImpl,
+  }
+);

@@ -19,7 +19,8 @@ import {
   getShowUserTimings,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
-import PanelSearch from 'firefox-profiler/components/shared/PanelSearch';
+import { PanelSearch } from './PanelSearch';
+
 import {
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
 import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
-import Icon from '../shared/Icon';
+import { Icon } from '../shared/Icon';
 import {
   getFriendlyStackTypeName,
   getCategoryPairLabel,

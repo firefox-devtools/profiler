@@ -5,10 +5,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
 import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
-import PanelSearch from 'firefox-profiler/components/shared/PanelSearch';
+import { PanelSearch } from './PanelSearch';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
@@ -24,7 +25,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class Settings extends PureComponent<Props> {
+class MarkerSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeMarkersSearchString(value);
   };
@@ -46,10 +47,10 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     searchString: getMarkersSearchString(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
-  component: Settings,
+  component: MarkerSettingsImpl,
 });
