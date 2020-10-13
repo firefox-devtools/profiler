@@ -1498,7 +1498,7 @@ export function processEventDelays(
     );
   }
 
-  const eventDelays: number[] = new Array(samples.length).fill(0);
+  const eventDelays: number[] = new Float32Array(samples.length);
   const rawEventDelays = ensureExists(
     samples.eventDelay,
     'eventDelays field is not present in this profile'
