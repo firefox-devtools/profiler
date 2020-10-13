@@ -211,6 +211,7 @@ export class CallTree {
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
+   
     let displayData: CallNodeDisplayData | void = this._displayDataByIndex.get(
       callNodeIndex
     );
@@ -227,11 +228,32 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-      let icon = null;
+      // let icon = null;
+      // if (resourceType === resourceTypes.webhost) {
+      
+       
+      //   icon =   extractFaviconFromLibname(libName);
+      // } else if (resourceType === resourceTypes.addon) {
+      //   icon = ExtensionIcon;
+      // }
+
+      let iconSrc = null;
+      let icon="";
+      
       if (resourceType === resourceTypes.webhost) {
+        iconSrc = extractFaviconFromLibname(libName);
         icon = extractFaviconFromLibname(libName);
-      } else if (resourceType === resourceTypes.addon) {
-        icon = ExtensionIcon;
+      }
+      //Start Extension function
+       else if (resourceType === resourceTypes.addon) {
+        iconSrc = ExtensionIcon;
+        //Call function to get name
+        const resourceNameIndex = this._resourceTable.name[resourceIndex];  
+        if (resourceNameIndex !== undefined) {
+        let iconText = this._stringTable.getString(resourceNameIndex); 
+        icon = iconText.match(/"([^"]*)"/)[1];
+        }
+        //End Extension Function
       }
 
       const formattedTotal = formatCallNodeNumber(
@@ -305,6 +327,7 @@ export class CallTree {
           subcategoryIndex
         ),
         categoryColor: this._categories[categoryIndex].color,
+        iconSrc,
         icon,
         ariaLabel,
       };

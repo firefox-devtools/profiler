@@ -98,7 +98,7 @@ export type Marker = {|
   category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
-|};
+|}; 
 
 /**
  * A value with this type uniquely identifies a marker. This is the index of a
@@ -131,7 +131,8 @@ export type CallNodeDisplayData = $Exact<
     isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
-    icon: string | null,
+    iconSrc: string | null,
+    icon: string,
     ariaLabel: string,
   }>
 >;

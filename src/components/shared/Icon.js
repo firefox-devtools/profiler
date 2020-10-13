@@ -55,7 +55,7 @@ class Icon extends PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, ownProps) => {
     const icon = ownProps.displayData
-      ? ownProps.displayData.icon
+      ? ownProps.displayData.iconSrc
       : ownProps.iconUrl;
 
     return {
