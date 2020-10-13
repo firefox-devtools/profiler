@@ -25,8 +25,8 @@ import {
   stateFromLocation,
   withHistoryReplaceStateSync,
 } from 'firefox-profiler/app-logic/url-handling';
-import { finalizeProfileView } from 'firefox-profiler/receive-profile';
-import { fatalError } from 'firefox-profiler/errors';
+import { finalizeProfileView } from './receive-profile';
+import { fatalError } from './errors';
 import {
   addEventDelayTracksForThreads,
   initializeLocalTrackOrderByPid,
