@@ -19,7 +19,7 @@ import {
   getFriendlyStackTypeName,
   shouldDisplaySubcategoryInfoForCategory,
 } from 'firefox-profiler/profile-logic/profile-data';
-import { CanSelectContent } from 'firefox-profiler/components/sidebar/CanSelectContent';
+import { CanSelectContent } from './CanSelectContent';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type {
