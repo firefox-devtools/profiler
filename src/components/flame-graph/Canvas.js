@@ -8,10 +8,10 @@ import memoize from 'memoize-immutable';
 import {
   withChartViewport,
   type WithChartViewport,
-} from 'firefox-profiler/components/shared/chart/Viewport';
-import ChartCanvas from 'firefox-profiler/components/shared/chart/Canvas';
-import TextMeasurement from 'firefox-profiler/utils/text-measurement';
-import { mapCategoryColorNameToStackChartStyles } from 'firefox-profiler/utils/colors';
+} from '../shared/chart/Viewport';
+import { ChartCanvas } from '../shared/chart/Canvas';
+import TextMeasurement from '../../utils/text-measurement';
+import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import {
   formatCallNodeNumberWithUnit,
   formatPercent,
