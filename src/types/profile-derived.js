@@ -131,8 +131,8 @@ export type CallNodeDisplayData = $Exact<
     isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
-    iconSrc: string,
-    icon: string | null,
+    iconSrc: string | null,
+    icon: string ,
     ariaLabel: string,
   }>
 >;
