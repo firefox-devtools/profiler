@@ -7,7 +7,7 @@
 import React from 'react';
 import { CallTree } from './CallTree';
 import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
+import { TransformNavigator } from '../shared/TransformNavigator';
 
 export const ProfileCallTreeView = () => (
   <div

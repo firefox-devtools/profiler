@@ -20,7 +20,7 @@ type DispatchProps = {|
 |};
 type StateProps = $Diff<Props, DispatchProps>;
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const TransformNavigator = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => {
     const items = selectedThreadSelectors.getTransformLabels(state);
     return {

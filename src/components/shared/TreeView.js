@@ -343,7 +343,7 @@ type TreeViewProps<DisplayData> = {|
   +indentWidth: CssPixels,
 |};
 
-class TreeView<DisplayData: Object> extends React.PureComponent<
+export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
   _specialItems: [NodeIndex | void, NodeIndex | void];
@@ -735,5 +735,3 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     );
   }
 }
-
-export default TreeView;

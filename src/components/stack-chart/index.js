@@ -27,7 +27,7 @@ import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
+import { TransformNavigator } from '../shared/TransformNavigator';
 import {
   updatePreviewSelection,
   changeSelectedCallNode,
