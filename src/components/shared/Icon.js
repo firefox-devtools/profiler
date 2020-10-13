@@ -41,7 +41,7 @@ class Icon extends PureComponent<Props> {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  componentDidUpdate(nextProps: Props) {
     if (nextProps.icon) {
       nextProps.iconStartLoading(nextProps.icon);
     }
