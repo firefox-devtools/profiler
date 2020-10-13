@@ -38,7 +38,7 @@ type State<HoveredItem> = {
   pageY: CssPixels,
 };
 
-require('./Canvas.css');
+import './Canvas.css';
 
 /**
  * The maximum amount of movement in either direction between the
