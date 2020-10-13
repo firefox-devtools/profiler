@@ -11,7 +11,7 @@ import {
   Tooltip,
   MOUSE_OFFSET,
 } from 'firefox-profiler/components/tooltip/Tooltip';
-import SampleTooltipContents from 'firefox-profiler/components/shared/SampleTooltipContents';
+import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
 import './ActivityGraph.css';
