@@ -6,11 +6,11 @@
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
-import explicitConnect from '../../utils/connect';
-import TreeView from '../shared/TreeView';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import TreeView from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
-import Icon from 'f../shared/Icon';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import Icon from 'firefox-profiler/components/shared/Icon';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -40,9 +40,7 @@ import type {
   CallNodeDisplayData,
   WeightType,
 } from 'firefox-profiler/types';
-  
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-
+import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
 import type { Column } from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
