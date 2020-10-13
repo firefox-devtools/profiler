@@ -5,10 +5,11 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from 'firefox-profiler/components/shared/ContextMenu';
+import ContextMenu from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
+
 import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
