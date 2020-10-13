@@ -15,7 +15,7 @@
     ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
     ["module-resolver", {
       "alias": {
-        "firefox-profiler": "./src",
+        "firefox-profiler": "./src"
       }
     }]
   ]
