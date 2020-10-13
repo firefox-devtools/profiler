@@ -4,9 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { timeCode } from '../../../utils/time-code';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
-import { Tooltip } from '../../tooltip/Tooltip';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 

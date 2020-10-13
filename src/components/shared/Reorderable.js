@@ -12,7 +12,7 @@ import {
   getContentRect,
   getMarginRect,
   extractDomRectValue,
-} from '../../utils/css-geometry-tools';
+} from 'firefox-profiler/utils/css-geometry-tools';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
