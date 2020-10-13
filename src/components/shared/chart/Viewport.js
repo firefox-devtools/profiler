@@ -165,7 +165,7 @@ type State = {|
   isSizeSet: boolean,
 |};
 
-require('./Viewport.css');
+import './Viewport.css';
 
 // The overall zoom speed for shift and pinch zooming.
 const ZOOM_SPEED = 1.003;
