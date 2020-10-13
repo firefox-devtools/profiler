@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import { Tooltip } from './Tooltip';
 import type { CssPixels } from 'firefox-profiler/types';
 
 type Props = {

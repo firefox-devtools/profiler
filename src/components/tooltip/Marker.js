@@ -24,13 +24,13 @@ import {
 import {
   TooltipNetworkMarkerPhases,
   getNetworkMarkerDetails,
-} from 'firefox-profiler/components/tooltip/NetworkMarker';
+} from './NetworkMarker';
 import {
   TooltipDetails,
   TooltipDetail,
   type TooltipDetailComponent,
   TooltipDetailSeparator,
-} from 'firefox-profiler/components/tooltip/TooltipDetails';
+} from './TooltipDetails';
 import Backtrace from 'firefox-profiler/components/shared/Backtrace';
 
 import {
@@ -54,7 +54,7 @@ import {
   getGCMinorDetails,
   getGCMajorDetails,
   getGCSliceDetails,
-} from 'firefox-profiler/components/tooltip/GCMarker';
+} from './GCMarker';
 
 function _maybeFormatDuration(
   start: number | void,

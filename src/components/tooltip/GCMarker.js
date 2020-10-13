@@ -15,10 +15,7 @@ import {
   formatValueTotal,
 } from 'firefox-profiler/utils/format-numbers';
 
-import {
-  TooltipDetail,
-  type TooltipDetailComponent,
-} from 'firefox-profiler/components/tooltip/TooltipDetails';
+import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 
 import type {
   Microseconds,
