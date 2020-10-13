@@ -60,7 +60,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-require('./CallNodeContextMenu.css');
+import './CallNodeContextMenu.css';
 
 class CallNodeContextMenu extends PureComponent<Props> {
   _hidingTimeout: TimeoutID | null = null;
