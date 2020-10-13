@@ -44,7 +44,7 @@ type Props = {|
   +trackName: string,
 |};
 
-class StackGraph extends PureComponent<Props> {
+export class ThreadStackGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
@@ -257,5 +257,3 @@ class StackGraph extends PureComponent<Props> {
     );
   }
 }
-
-export default StackGraph;
