@@ -211,8 +211,8 @@ export class CallTree {
   }
 
   seperateText (text: string) {
-   let result =  text.match(/"([^"]*)"/)[1];
-   return result;
+   let result =  text.match(/"([^"]*)"/);
+   return result[1];
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
