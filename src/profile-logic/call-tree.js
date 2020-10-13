@@ -210,7 +210,7 @@ export class CallTree {
     };
   }
 
-  seperateText = (text) => {
+  seperateText (text: string) {
    let result =  text.match(/"([^"]*)"/)[1];
    return result;
   }
