@@ -7,7 +7,10 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
+import {
+  TooltipDetail,
+  type TooltipDetailComponent,
+} from 'firefox-profiler/components/tooltip/TooltipDetails';
 import {
   getColorClassNameForMimeType,
   guessMimeTypeFromNetworkMarker,
