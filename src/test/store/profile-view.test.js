@@ -3421,7 +3421,7 @@ describe('traced timing', function() {
 // Verify that getProcessedEventDelays gives the correct values for event delays.
 describe('getProcessedEventDelays', function() {
   // Setup a profile with meaningful event delay values.
-  function setup(eventDelay: ?Array<?Milliseconds>) {
+  function setup(eventDelay: ?Float32Array<?Milliseconds>) {
     const profile = getEmptyProfile();
 
     // Create event delay values.
@@ -3429,7 +3429,7 @@ describe('getProcessedEventDelays', function() {
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
-      samples.eventDelay = Array(50).fill(0);
+      samples.eventDelay = new Float32Array(50);
       samples.eventDelay.push(10, 20, 30, 40, 50, 0);
       //                                      ^
       //                                      |
@@ -3462,7 +3462,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3519,13 +3519,13 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- goes down until it's done.
-        ],
+        ]),
       },
     ]);
   });
 
   it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
-    const eventDelay = Array(50).fill(0);
+    const eventDelay = new Float32Array(50);
     eventDelay.push(10, 20, 30, 40, 50, 0, 0, 10, 20, 0);
     //                              ^             ^
     //                              |             |
@@ -3536,7 +3536,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3599,7 +3599,7 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- Second event delay is done now too.
-        ],
+        ]),
       },
     ]);
   });
