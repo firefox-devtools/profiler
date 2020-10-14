@@ -99,9 +99,8 @@ export class IdleSearchField extends Component<Props, State> {
         value: nextProps.defaultValue || '',
       });
       return true;
-    }  
+    }
     return false;
-    
   }
 
   render() {
