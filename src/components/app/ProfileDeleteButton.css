@@ -1,0 +1,23 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.profileDeleteButtonSuccess {
+  /* Note: 20px is: 16px (icon width) + 4px (distance from the text) */
+  padding-left: 20px;
+  margin: 0;
+  background: url(../../../res/img/svg/check-dark.svg) no-repeat left / 16px
+    16px;
+  white-space: nowrap;
+}
+
+.profileDeleteButtonError {
+  /* Note: 24px is: 16px (icon width) + 4px (icon padding) + 4px (distance from the text) */
+  padding-left: 24px;
+
+  /* The icon is 4px below the top */
+  background: url(../../../res/img/svg/error-red.svg) no-repeat 0 4px / 16px
+    16px;
+  color: var(--red-60);
+  word-break: break-word;
+}

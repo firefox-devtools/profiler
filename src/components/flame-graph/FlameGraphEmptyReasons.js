@@ -24,7 +24,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
  * This component attempts to tell why exactly a flame graph is empty with no samples
  * and display a friendly message to the end user.
  */
-class FlameGraphEmptyReasons extends PureComponent<Props> {
+class FlameGraphEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { thread, rangeFilteredThread, threadName } = this.props;
     let reason;
@@ -50,11 +50,11 @@ class FlameGraphEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const FlameGraphEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
   }),
-  component: FlameGraphEmptyReasons,
+  component: FlameGraphEmptyReasonsImpl,
 });
