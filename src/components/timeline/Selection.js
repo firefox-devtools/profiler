@@ -18,7 +18,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
-import Draggable from 'firefox-profiler/components/shared/Draggable';
+import { Draggable } from 'firefox-profiler/components/shared/Draggable';
 import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
