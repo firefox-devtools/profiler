@@ -132,7 +132,7 @@ export type CallNodeDisplayData = $Exact<
     categoryName: string,
     categoryColor: string,
     iconSrc: string | null,
-    icon: string ,
+    icon: string | null ,
     ariaLabel: string,
   }>
 >;
