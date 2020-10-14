@@ -6,11 +6,11 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Thread,
@@ -29,7 +29,7 @@ type Props = {|
   +implementationFilter: ImplementationFilter,
 |};
 
-function Backtrace(props: Props) {
+export function Backtrace(props: Props) {
   const { stackIndex, thread, implementationFilter, maxStacks } = props;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
@@ -70,5 +70,3 @@ function Backtrace(props: Props) {
     </div>
   );
 }
-
-export default Backtrace;

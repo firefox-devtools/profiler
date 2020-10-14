@@ -16,7 +16,7 @@ type Props = {|
  * This component tells why a panel is empty and display a friendly message to
  * the end user.
  */
-export default class EmptyReasons extends PureComponent<Props> {
+export class EmptyReasons extends PureComponent<Props> {
   render() {
     const { viewName, reason, threadName } = this.props;
 

@@ -11,21 +11,24 @@ import {
   changeCallTreeSearchString,
   changeCallTreeSummaryStrategy,
   changeShowUserTimings,
-} from '../../actions/profile-view';
+} from 'firefox-profiler/actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
   getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
-} from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+} from 'firefox-profiler/selectors/url-state';
+import { PanelSearch } from './PanelSearch';
+
 import {
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,
-} from '../../profile-logic/profile-data';
-import explicitConnect, { type ConnectedProps } from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/profile-logic/profile-data';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
 import './StackSettings.css';
 
