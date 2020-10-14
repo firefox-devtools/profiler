@@ -63,7 +63,7 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 require('./CallNodeContextMenu.css');
 
-class CallNodeContextMenu extends PureComponent<Props> {
+class CallNodeContextMenuImpl extends PureComponent<Props> {
   _hidingTimeout: TimeoutID | null = null;
 
   // Using setTimeout here is a bit complex, but is necessary to make the menu
@@ -548,7 +548,11 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const CallNodeContextMenu = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => {
     const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
 
@@ -586,5 +590,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     expandAllCallNodeDescendants,
     setContextMenuVisibility,
   },
-  component: CallNodeContextMenu,
+  component: CallNodeContextMenuImpl,
 });

@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
 import { FlameGraph } from '../../components/flame-graph';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
