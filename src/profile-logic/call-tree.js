@@ -227,7 +227,6 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-
       let iconSrc = null;
       let icon = '';
 
