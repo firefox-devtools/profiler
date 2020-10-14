@@ -34,7 +34,7 @@ import classNames from 'classnames';
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./ProfileViewer.css');
+import './ProfileViewer.css';
 
 type StateProps = {|
   +hasZipFile: boolean,
