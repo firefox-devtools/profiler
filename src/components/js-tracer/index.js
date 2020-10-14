@@ -5,9 +5,9 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { JsTracerChart } from 'firefox-profiler/components/js-tracer/Chart';
-import { JsTracerSettings } from 'firefox-profiler/components/js-tracer/Settings';
-import { JsTracerEmptyReasons } from 'firefox-profiler/components/js-tracer/EmptyReasons';
+import { JsTracerChart } from './Chart';
+import { JsTracerSettings } from './Settings';
+import { JsTracerEmptyReasons } from './EmptyReasons';
 
 import { getProfile } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -24,7 +24,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('firefox-profiler/components/js-tracer/index.css');
+require('./index.css');
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,

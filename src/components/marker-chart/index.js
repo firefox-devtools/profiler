@@ -6,8 +6,8 @@
 import * as React from 'react';
 import { TIMELINE_MARGIN_RIGHT } from 'firefox-profiler/app-logic/constants';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { MarkerChartCanvas } from 'firefox-profiler/components/marker-chart/Canvas';
-import { MarkerChartEmptyReasons } from 'firefox-profiler/components/marker-chart/MarkerChartEmptyReasons';
+import { MarkerChartCanvas } from './Canvas';
+import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
 import MarkerSettings from 'firefox-profiler/components/shared/MarkerSettings';
 
 import {
@@ -40,7 +40,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('firefox-profiler/components/marker-chart/index.css');
+require('./index.css');
 
 const ROW_HEIGHT = 16;
 

@@ -10,7 +10,7 @@ import {
   JS_TRACER_MAXIMUM_CHART_ZOOM,
 } from 'firefox-profiler/app-logic/constants';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { JsTracerCanvas } from 'firefox-profiler/components/js-tracer/Canvas';
+import { JsTracerCanvas } from './Canvas';
 
 import {
   getCommittedRange,
@@ -35,7 +35,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('firefox-profiler/components/js-tracer/index.css');
+require('./index.css');
 
 const ROW_HEIGHT: CssPixels = 16;
 

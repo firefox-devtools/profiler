@@ -11,7 +11,7 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/js-tracer/Settings.css';
+import './Settings.css';
 
 type StateProps = {|
   +showJsTracerSummary: boolean,
