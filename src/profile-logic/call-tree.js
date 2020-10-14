@@ -227,7 +227,6 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-
       let iconSrc = null;
       let icon = '';
 
@@ -241,8 +240,10 @@ export class CallTree {
         //Call function to get name
         const resourceNameIndex = this._resourceTable.name[resourceIndex];
         if (resourceNameIndex !== undefined) {
-          const iconText = (this._stringTable.getString(resourceNameIndex): any);
-          icon = iconText.match(/"([^"]*)"/)[1]
+          const iconText = (this._stringTable.getString(
+            resourceNameIndex
+          ): any);
+          icon = iconText.match(/"([^"]*)"/)[1];
         }
         //End Extension Function Here
       }
