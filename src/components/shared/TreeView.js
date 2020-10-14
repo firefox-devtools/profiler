@@ -45,7 +45,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
     // If there is nothing to display in the header, do not render it.
     return null;
   }
-  
+
   return (
     <div className="treeViewHeader">
       {fixedColumns.map(col => (
