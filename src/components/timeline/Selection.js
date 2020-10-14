@@ -18,7 +18,7 @@ import {
 } from '../../actions/profile-view';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-import Draggable from '../shared/Draggable';
+import { Draggable } from '../shared/Draggable';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import './Selection.css';
 
