@@ -256,7 +256,7 @@ export class CallTree {
           const iconText = this._stringTable.getString(resourceNameIndex);
           icon = this.seperateText(iconText);
         }
-        //End Extension Function
+        //End Extension Function Here
       }
 
       const formattedTotal = formatCallNodeNumber(
