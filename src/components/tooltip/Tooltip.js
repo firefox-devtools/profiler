@@ -127,9 +127,9 @@ export class Tooltip extends React.PureComponent<Props, State> {
     }
 
     const style = {
+      '--tooltip-detail-max-width' : '600px',
       left,
       top,
-      '--tooltip-detail-max-width': '600px',
     };
 
     return ReactDOM.createPortal(
