@@ -15,9 +15,9 @@ import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import {
   formatCallNodeNumberWithUnit,
   formatPercent,
-} from '../../utils/format-numbers';
-import { TooltipCallNode } from '../tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
+} from 'firefox-profiler/utils/format-numbers';
+import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
+import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
 import type {
@@ -38,10 +38,10 @@ import type {
   FlameGraphTiming,
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
-} from '../../profile-logic/flame-graph';
+} from 'firefox-profiler/profile-logic/flame-graph';
 
-import type { CallTree } from '../../profile-logic/call-tree';
-import type { Viewport } from '../shared/chart/Viewport';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,

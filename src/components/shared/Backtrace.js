@@ -18,7 +18,7 @@ import type {
   ImplementationFilter,
 } from 'firefox-profiler/types';
 
-require('./Backtrace.css');
+import './Backtrace.css';
 
 type Props = {|
   +thread: Thread,

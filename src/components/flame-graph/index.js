@@ -4,6 +4,7 @@
 
 // @flow
 import * as React from 'react';
+
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 import { MaybeFlameGraph } from './MaybeFlameGraph';
