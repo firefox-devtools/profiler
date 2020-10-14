@@ -57,18 +57,15 @@ export function getMarkerSelectorsPerThread(
    * variants of the selectors that are created for specific views that have been
    * omitted, but the ordered steps below give the general picture.
    *
-   * 1. _getRawMarkerTable - Get the RawMarkerTable from the current thread.
-   * 2. getProcessedRawMarkerTable - Process marker payloads out of raw strings, and
-   *                                 other future processing needs. This returns a
-   *                                 RawMarkerTable still.
-   * 3a. _getDerivedMarkers        - Match up start/end markers, and start
+   * 1. _getRawMarkerTable         - Get the RawMarkerTable from the current thread.
+   * 2a. _getDerivedMarkers        - Match up start/end markers, and start
    *                                 returning the Marker[] type.
-   * 3b. _getDerivedJankMarkers    - Jank markers come from our samples data, and
+   * 2b. _getDerivedJankMarkers    - Jank markers come from our samples data, and
    *                                 this selector returns Marker structures out of
    *                                 the samples structure.
-   * 4. getFullMarkerList          - Concatenates and sorts all markers coming from
+   * 3. getFullMarkerList          - Concatenates and sorts all markers coming from
    *                                 different origin structures.
-   * 5. getFullMarkerListIndexes   - From the full marker list, generates an array
+   * 4. getFullMarkerListIndexes   - From the full marker list, generates an array
    *                                 containing the sequence of indexes for all markers.
    * 5. getCommittedRangeFilteredMarkerIndexes - Apply the committed range.
    * 6. getSearchFilteredMarkerIndexes         - Apply the search string
@@ -77,11 +74,6 @@ export function getMarkerSelectorsPerThread(
    * Selectors are commonly written using the utility filterMarkerIndexesCreator
    * (see below for more information about this function).
    */
-  const getProcessedRawMarkerTable: Selector<RawMarkerTable> = createSelector(
-    _getRawMarkerTable,
-    threadSelectors.getStringTable,
-    MarkerData.extractMarkerDataFromName
-  );
 
   const _getThreadId: Selector<number | void> = state =>
     threadSelectors.getThread(state).tid;
@@ -90,7 +82,7 @@ export function getMarkerSelectorsPerThread(
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
   const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
-    getProcessedRawMarkerTable,
+    _getRawMarkerTable,
     threadSelectors.getStringTable,
     _getThreadId,
     threadSelectors.getThreadRange,
@@ -611,7 +603,6 @@ export function getMarkerSelectorsPerThread(
   return {
     getMarkerGetter,
     getTimelineJankMarkerIndexes,
-    getProcessedRawMarkerTable,
     getDerivedMarkerInfo,
     getMarkerIndexToRawMarkerIndexes,
     getFullMarkerListIndexes,

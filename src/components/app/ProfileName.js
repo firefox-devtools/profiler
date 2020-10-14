@@ -5,11 +5,11 @@
 // @flow
 import * as React from 'react';
 
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors';
-import { changeProfileName } from '../../actions/profile-view';
+import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileName.css';
 
@@ -89,7 +89,6 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 
   handleButtonFocus = () => {
     this.setState({ focusedWithKey: this.getKey() });
-
     const input = this.inputRef.current;
     if (input) {
       requestAnimationFrame(() => {
@@ -125,7 +124,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
             display: isFocused ? 'none' : 'block',
           }}
           title={title}
-          className="profileNameButton"
+          className="profileNameButton menuButtonsButton"
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >

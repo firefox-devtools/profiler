@@ -270,15 +270,8 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               CPU:
             </span>
-            4
-             physical
-             
-            cores
-            ,
-            8
-             logical
-             
-            cores
+            4 physical cores 
+            8 logical cores
           </div>
         </div>
         <details>
@@ -612,15 +605,8 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             >
               CPU:
             </span>
-            4
-             physical
-             
-            cores
-            ,
-            8
-             logical
-             
-            cores
+            4 physical cores 
+            8 logical cores
           </div>
         </div>
       </div>
