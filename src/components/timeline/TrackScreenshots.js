@@ -161,8 +161,6 @@ type HoverPreviewProps = {|
 
 const MAXIMUM_HOVER_SIZE = 350;
 
-const HOVER_MAX_WIDTH_RATIO = 1.75;
-
 class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
@@ -219,20 +217,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
         : MAXIMUM_HOVER_SIZE / windowWidth;
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
-
-    const distanceToTopFromTrackCenter = trackHeight / 2 + containerTop;
-    // If the hover height exceeds the top of screen,
-    // set it to the value so that it reaches the top of screen when it is centered.
-    if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
-      hoverHeight = 2 * distanceToTopFromTrackCenter;
-      hoverWidth = (hoverHeight * windowWidth) / windowHeight;
-    }
-
-    if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
-      // This is a really wide image, limit the height so it lays out reasonably.
-      hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = (hoverWidth / windowWidth) * windowHeight;
-    }
 
     hoverWidth = Math.round(hoverWidth);
     hoverHeight = Math.round(hoverHeight);

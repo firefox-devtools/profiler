@@ -10,15 +10,15 @@ import {
   changeRightClickedTrack,
   changeLocalTrackOrder,
   selectTrack,
-} from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenGlobalTracks,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getGlobalTracks,
   getLocalTracks,
@@ -27,18 +27,18 @@ import {
   getVisualProgress,
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
-import Reorderable from '../shared/Reorderable';
-import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
-import { getTrackSelectionModifier } from '../../utils';
+import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   GlobalTrackReference,
   Pid,
@@ -49,7 +49,7 @@ import type {
   InitialSelectedTrackReference,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +trackReference: GlobalTrackReference,

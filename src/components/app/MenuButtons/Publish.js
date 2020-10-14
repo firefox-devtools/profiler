@@ -42,7 +42,7 @@ import type {
   UploadPhase,
 } from 'firefox-profiler/types';
 
-require('./Publish.css');
+import './Publish.css';
 
 type OwnProps = {|
   +isRepublish?: boolean,

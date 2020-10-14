@@ -7,7 +7,7 @@ import * as React from 'react';
 import {
   formatMicroseconds,
   formatPercent,
-} from '../../../utils/format-numbers';
+} from 'firefox-profiler/utils/format-numbers';
 
 import type { ProfilerOverhead } from 'firefox-profiler/types';
 

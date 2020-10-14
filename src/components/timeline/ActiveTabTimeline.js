@@ -9,20 +9,20 @@ import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../selectors/app';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
   getActiveTabGlobalTracks,
   getActiveTabGlobalTrackReferences,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 
 import './index.css';
 import './ActiveTabTimeline.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
@@ -31,7 +31,7 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,

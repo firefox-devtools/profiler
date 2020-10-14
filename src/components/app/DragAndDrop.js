@@ -6,21 +6,21 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import { retrieveProfileFromFile } from '../../actions/receive-profile';
-import type { ConnectedProps } from '../../utils/connect';
-import explicitConnect from '../../utils/connect';
+import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
   startDragging,
   stopDragging,
   registerDragAndDropOverlay,
   unregisterDragAndDropOverlay,
-} from '../../actions/app';
+} from 'firefox-profiler/actions/app';
 import {
   getIsDragAndDropDragging,
   getIsDragAndDropOverlayRegistered,
   getIsNewProfileLoadAllowed,
-} from '../../selectors/app';
+} from 'firefox-profiler/selectors/app';
 
 import './DragAndDrop.css';
 
