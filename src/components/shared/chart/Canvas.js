@@ -53,7 +53,7 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
-export default class ChartCanvas<HoveredItem> extends React.Component<
+export class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
