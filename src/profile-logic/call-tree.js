@@ -210,11 +210,6 @@ export class CallTree {
     };
   }
 
-  seperateText(text: string) {
-    const result = (text.match(/"([^"]*)"/): any);
-    return result[1];
-  }
-
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData: CallNodeDisplayData | void = this._displayDataByIndex.get(
       callNodeIndex
@@ -232,13 +227,6 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-      // let icon = null;
-      // if (resourceType === resourceTypes.webhost) {
-
-      //   icon =   extractFaviconFromLibname(libName);
-      // } else if (resourceType === resourceTypes.addon) {
-      //   icon = ExtensionIcon;
-      // }
 
       let iconSrc = null;
       let icon = '';
@@ -254,7 +242,7 @@ export class CallTree {
         const resourceNameIndex = this._resourceTable.name[resourceIndex];
         if (resourceNameIndex !== undefined) {
           const iconText = this._stringTable.getString(resourceNameIndex);
-          icon = this.seperateText(iconText);
+          icon = (iconText.match(/"([^"]*)"/)[1]: any);
         }
         //End Extension Function Here
       }
