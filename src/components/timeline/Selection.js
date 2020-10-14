@@ -20,7 +20,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
 import Draggable from 'firefox-profiler/components/shared/Draggable';
 import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
-import 'firefox-profiler/components/timeline/Selection.css';
+import './Selection.css';
 
 import type { OnMove } from 'firefox-profiler/components/shared/Draggable';
 import type {
