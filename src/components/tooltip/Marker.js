@@ -312,14 +312,14 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">
           <div className="tooltipDetailsBackTrace">
-          <h2 className="tooltipBackTraceTitle">
-            {data.type === 'Styles' || marker.name === 'Reflow' ? (
-                `First invalidated ${formatNumber(causeAge)}ms before the flush,
+            <h2 className="tooltipBackTraceTitle">
+              {data.type === 'Styles' || marker.name === 'Reflow'
+                ? `First invalidated ${formatNumber(
+                    causeAge
+                  )}ms before the flush,
                 at:`
-            ) : (
-              `Triggered ${formatNumber(causeAge)}ms ago,
-              at:`
-            )}
+                : `Triggered ${formatNumber(causeAge)}ms ago,
+              at:`}
             </h2>
             <Backtrace
               maxStacks={restrictHeightWidth ? 20 : Infinity}
