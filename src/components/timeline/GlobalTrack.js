@@ -11,7 +11,7 @@ import {
   changeLocalTrackOrder,
   selectTrack,
 } from 'firefox-profiler/actions/profile-view';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getLocalTrackOrder,

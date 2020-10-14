@@ -24,7 +24,7 @@ import {
   updatePreviewSelection,
   changeRightClickedMarker,
 } from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import type {
   Marker,

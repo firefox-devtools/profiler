@@ -19,7 +19,7 @@ import {
   getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,

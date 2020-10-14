@@ -13,7 +13,7 @@ import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import {
   getPreviewSelection,
