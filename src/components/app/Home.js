@@ -31,7 +31,7 @@ import type {
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
 
-require('./Home.css');
+import './Home.css';
 
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';

@@ -31,7 +31,7 @@ import {
   type TooltipDetailComponent,
   TooltipDetailSeparator,
 } from './TooltipDetails';
-import Backtrace from '../shared/Backtrace';
+import { Backtrace } from '../shared/Backtrace';
 
 import {
   formatFromMarkerSchema,

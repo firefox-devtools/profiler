@@ -5,7 +5,7 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from '../shared/EmptyReasons';
+import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
