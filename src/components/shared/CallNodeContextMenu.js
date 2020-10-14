@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from './ContextMenu';
+import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
