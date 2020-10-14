@@ -385,7 +385,6 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
-    mouseTimePosition: getMouseTimePosition(state),
   }),
   mapDispatchToProps: {
     updatePreviewSelection,

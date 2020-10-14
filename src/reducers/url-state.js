@@ -52,6 +52,9 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return state;
   }
 };
+
+//TODO: This is not used yet, see issue #222
+//This is for tracking mouse position in timeline-axis
 const mouseTimePosition: Reducer<Millseconds | null> = (
   state = null,
   action

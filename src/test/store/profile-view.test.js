@@ -3617,14 +3617,10 @@ describe('mouseTimePosition', function() {
     // Test just the redux store here.
     const { dispatch, getState } = setup();
 
-    const mouseTimePosition = ProfileViewSelectors.getMouseTimePosition(
-      getState()
-    );
-
     dispatch(ProfileView.changeMouseTimePosition(null));
-    expect(mouseTimePosition).toBeNull;
+    expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBeNull();
 
     dispatch(ProfileView.changeMouseTimePosition(1000));
-    expect(mouseTimePosition).toBe(1000);
+    expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBe(1000);
   });
 });
