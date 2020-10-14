@@ -58,7 +58,7 @@ import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import { bisectionRight } from '../utils/bisect';
+import { bisectionLeft, bisectionRight } from '../utils/bisect';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1208,18 +1208,9 @@ export function getSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  // TODO: This should really use bisect. table.time is sorted.
-  const firstSample = table.time.findIndex(t => t >= rangeStart);
-  if (firstSample === -1) {
-    return [table.length, table.length];
-  }
-  const afterLastSample = table.time
-    .slice(firstSample)
-    .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstSample, table.length];
-  }
-  return [firstSample, firstSample + afterLastSample];
+  const sampleStart = bisectionLeft(table.time, rangeStart);
+  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return [sampleStart, sampleEnd];
 }
 
 export function filterThreadSamplesToRange(
