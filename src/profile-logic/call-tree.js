@@ -211,7 +211,7 @@ export class CallTree {
   }
 
   seperateText (text: string) {
-   let result =  (text.match(/"([^"]*)"/): any);
+   const result =  (text.match(/"([^"]*)"/): any);
    return result[1];
   }
 
@@ -243,7 +243,7 @@ export class CallTree {
       // }
 
       let iconSrc = null;
-      let icon="";
+      let icon = '';
       
       if (resourceType === resourceTypes.webhost) {
         iconSrc = extractFaviconFromLibname(libName);
@@ -255,7 +255,7 @@ export class CallTree {
         //Call function to get name
         const resourceNameIndex = this._resourceTable.name[resourceIndex];  
         if (resourceNameIndex !== undefined) {
-        let iconText = this._stringTable.getString(resourceNameIndex); 
+        const iconText = this._stringTable.getString(resourceNameIndex); 
         icon = this.seperateText(iconText)
         }
         //End Extension Function
