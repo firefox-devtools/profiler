@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
@@ -22,7 +22,8 @@ type State = {
   value: string,
 };
 
-export class IdleSearchField extends PureComponent<Props, State> {
+//I used “shouldComponentUpdate” lifecycle here which should not be used in a purecomponent and that is why I changed from purecomponent to component
+export class IdleSearchField extends Component<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
@@ -91,12 +92,16 @@ export class IdleSearchField extends PureComponent<Props, State> {
     e.preventDefault();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
+  shouldComponentUpdate(nextProps: Props) {
     if (nextProps.defaultValue !== this.props.defaultValue) {
       this._notifyIfChanged(nextProps.defaultValue || '');
       this.setState({
         value: nextProps.defaultValue || '',
       });
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
