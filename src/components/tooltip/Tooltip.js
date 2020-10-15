@@ -7,7 +7,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 require('./Tooltip.css');
 
 export const MOUSE_OFFSET = 11;
