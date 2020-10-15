@@ -69,6 +69,7 @@ type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
   +displayStackType: boolean,
+  +searchStringsRegExp: RegExp | null,
 |};
 
 type Props = $ReadOnly<{|
@@ -165,6 +166,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         viewportTop,
         viewportBottom,
       },
+      searchStringsRegExp,
     } = this.props;
     const fastFillStyle = new FastFillStyle(ctx);
 
@@ -342,6 +344,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
               ? colorStyles.selectedFillStyle
               : colorStyles.unselectedFillStyle
           );
+
           ctx.fillRect(
             intX,
             intY,
@@ -352,6 +355,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             intW + BORDER_OPACITY,
             intH
           );
+
+          if (searchStringsRegExp && searchStringsRegExp.test(text)) {
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(intX, intY, intW + BORDER_OPACITY, intH);
+          }
+
           lastDrawnPixelX =
             intX +
             intW +
