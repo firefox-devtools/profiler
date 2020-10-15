@@ -496,7 +496,11 @@ export class NetworkChartRow extends React.PureComponent<
         {shouldDisplayTooltips() && this.state.hovered ? (
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
-          <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
+          <Tooltip
+            key={this.state.pageX}
+            mouseX={this.state.pageX}
+            mouseY={this.state.pageY + 5}
+          >
             <TooltipMarker
               className="tooltipNetwork"
               markerIndex={markerIndex}

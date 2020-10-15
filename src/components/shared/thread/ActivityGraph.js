@@ -174,7 +174,7 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
           onMouseUp={this._onMouseUp}
         />
         {hoveredSample === null ? null : (
-          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+          <Tooltip key={mouseX} mouseX={mouseX} mouseY={mouseY}>
             <SampleTooltipContents
               sampleIndex={hoveredSample}
               fullThread={fullThread}

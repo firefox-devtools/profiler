@@ -22,7 +22,6 @@ type Props = {
 
 type State = {
   interiorElement: HTMLElement | null,
-  isNewContentLaidOut: boolean,
 };
 
 export class Tooltip extends React.PureComponent<Props, State> {
@@ -30,7 +29,6 @@ export class Tooltip extends React.PureComponent<Props, State> {
 
   state = {
     interiorElement: null,
-    isNewContentLaidOut: false,
   };
 
   _overlayElement = ensureExists(
@@ -41,44 +39,6 @@ export class Tooltip extends React.PureComponent<Props, State> {
   _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
   };
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.children !== this.props.children) {
-      // If the children are different, allow them to do an initial lay out on the DOM.
-      this.setState({ isNewContentLaidOut: false });
-      this._forceUpdateAfterRAF();
-    }
-  }
-
-  componentDidUpdate() {
-    // Force an additional update to this component if the children content is
-    // different as it needs to fully lay out one time on the DOM to proper calculate
-    // sizing and positioning.
-    const { interiorElement, isNewContentLaidOut } = this.state;
-    if (interiorElement && !isNewContentLaidOut) {
-      this._forceUpdateAfterRAF();
-    }
-  }
-
-  /**
-   * Children content needs to be on the DOM (not just virtual DOM) in order to correctly
-   * calculate the sizing and positioning of the tooltip.
-   */
-  _forceUpdateAfterRAF() {
-    requestAnimationFrame(() => {
-      if (this._isMounted) {
-        this.setState({ isNewContentLaidOut: true });
-      }
-    });
-  }
 
   render() {
     const { children, mouseX, mouseY } = this.props;
