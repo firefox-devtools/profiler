@@ -600,22 +600,24 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
   <div
     class="buttonWithPanel menuButtonsMetaInfoButton"
   >
-    <input
+    <button
       aria-expanded="false"
       class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
       type="button"
-      value="Profile Info"
-    />
+    >
+      Profile Info
+    </button>
   </div>
   <div
     class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
   >
-    <input
+    <button
       aria-expanded="false"
       class="buttonWithPanelButton menuButtonsButton"
       type="button"
-      value="Publish…"
-    />
+    >
+      Publish…
+    </button>
   </div>
   <a
     class="menuButtonsButton menuButtonsLink"
