@@ -28,7 +28,7 @@
 // @flow
 
 export function bisectionLeft(
-  array: number[] | ArrayBufferView,
+  array: number[] | $ArrayBufferView,
   x: number,
   low?: number,
   high?: number
@@ -50,7 +50,7 @@ export function bisectionLeft(
 }
 
 export function bisectionRight(
-  array: number[] | ArrayBufferView,
+  array: number[] | $ArrayBufferView,
   x: number,
   low?: number,
   high?: number
@@ -61,7 +61,7 @@ export function bisectionRight(
   while (low < high) {
     const mid = (low + high) >> 1;
 
-    if (mid && x < array[mid]) {
+    if (x < array[mid]) {
       high = mid;
     } else {
       low = mid + 1;
