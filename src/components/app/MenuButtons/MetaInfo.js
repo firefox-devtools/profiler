@@ -91,29 +91,29 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     let physicalCPUs = null;
     let logicalCPUs = null;
     if (meta.physicalCPUs || meta.logicalCPUs) {
-        if(meta.physicalCPUs) {
-            physicalCPUs =
-            meta.physicalCPUs +
-            ' physical ' + 
-            (meta.physicalCPUs === 1 ? 'core' : 'cores');
-        }
-        if(meta.logicalCPUs) {
-            logicalCPUs =
-            meta.logicalCPUs +
-            ' logical ' +
-            (meta.logicalCPUs === 1 ? 'core' : 'cores');
-        }
-        cpuCount = (
-            <div className="metaInfoRow">
-                <span className="metaInfoLabel">CPU:</span>
-                {physicalCPUs ? (
-                    physicalCPUs + ' '
-                ) : null}
-                {logicalCPUs ? (
-                    logicalCPUs
-                ) : null}
-            </div>
-        );
+      if (meta.physicalCPUs) {
+        physicalCPUs =
+          meta.physicalCPUs +
+          ' physical ' + 
+          (meta.physicalCPUs === 1 ? 'core' : 'cores');
+      }
+      if (meta.logicalCPUs) {
+        logicalCPUs =
+          meta.logicalCPUs +
+          ' logical ' +
+          (meta.logicalCPUs === 1 ? 'core' : 'cores');
+      }
+      cpuCount = (
+        <div className="metaInfoRow">
+          <span className="metaInfoLabel">CPU:</span>
+          {physicalCPUs ? (
+            physicalCPUs + ' '
+          ) : null}
+          {logicalCPUs ? (
+            logicalCPUs
+          ) : null}
+        </div>
+      );
     }
 
     return (
@@ -219,9 +219,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   {meta.abi}
                 </div>
               ) : null}
-              {cpuCount ? (
-                cpuCount
-              ) : null}
+              {cpuCount ? (cpuCount) : null}
             </div>
             {meta.visualMetrics ? (
               <>
