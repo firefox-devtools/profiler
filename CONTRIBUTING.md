@@ -18,7 +18,8 @@ This project is made up of a cross section of different parts of Mozilla, includ
 | ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
 | ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
 | ![][fqueze] | Florian Quèze | [@fqueze](https://github.com/fqueze) | Firefox Profiler Team Manager |
-| ![][mstange] | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+<!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
 [gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
