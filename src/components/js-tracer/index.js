@@ -24,7 +24,7 @@ import type {
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
