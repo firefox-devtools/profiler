@@ -4,16 +4,16 @@
 // @flow
 import * as React from 'react';
 
-import { getStackType } from '../../profile-logic/transforms';
-import { objectEntries } from '../../utils/flow';
-import { formatCallNodeNumberWithUnit } from '../../utils/format-numbers';
-import { Icon } from '../shared/Icon';
+import { getStackType } from 'firefox-profiler/profile-logic/transforms';
+import { objectEntries } from 'firefox-profiler/utils/flow';
+import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
 import {
   getFriendlyStackTypeName,
   getCategoryPairLabel,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
   Thread,
   CategoryList,
@@ -26,7 +26,7 @@ import type {
   CallTreeSummaryStrategy,
 } from 'firefox-profiler/types';
 
-import type { TimingsForPath } from '../../profile-logic/profile-data';
+import type { TimingsForPath } from 'firefox-profiler/profile-logic/profile-data';
 
 import './CallNode.css';
 
