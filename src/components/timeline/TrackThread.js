@@ -41,7 +41,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
-import EmptyThreadIndicator from 'firefox-profiler/components/timeline/EmptyThreadIndicator';
+import EmptyThreadIndicator from './EmptyThreadIndicator';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import './TrackThread.css';

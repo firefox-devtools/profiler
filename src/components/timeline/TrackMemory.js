@@ -10,7 +10,7 @@ import {
   getCommittedRange,
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
-import { TimelineMarkersMemory } from 'firefox-profiler/components/timeline/Markers';
+import { TimelineMarkersMemory } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackMemoryGraph } from './TrackMemoryGraph';
 import {

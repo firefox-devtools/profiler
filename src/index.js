@@ -25,8 +25,8 @@ import {
   addDataToWindowObject,
   logFriendlyPreamble,
   logDevelopmentTips,
-} from 'firefox-profiler/utils/window-console';
-import { ensureExists } from 'firefox-profiler/utils/flow';
+} from './utils/window-console';
+import { ensureExists } from './utils/flow';
 
 // Mock out Google Analytics for anything that's not production so that we have run-time
 // code coverage in development and testing.

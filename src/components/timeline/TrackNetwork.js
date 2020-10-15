@@ -13,7 +13,7 @@ import {
   getPageList,
 } from '../../selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { VerticalIndicators } from 'firefox-profiler/components/timeline/VerticalIndicators';
+import { VerticalIndicators } from './VerticalIndicators';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
