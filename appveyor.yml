@@ -14,11 +14,7 @@ test_script:
   # Output useful info for debugging.
   - yarn versions
   # run tests
-  - yarn license-check
-  - yarn test-alex
-  - yarn lint
-  - yarn flow:ci
-  - yarn test
+  - yarn test-all:ci
   - yarn build-prod:quiet
 
 cache:
