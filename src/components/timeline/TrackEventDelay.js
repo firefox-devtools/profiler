@@ -9,7 +9,7 @@ import { TrackEventDelayGraph } from './TrackEventDelayGraph';
 import {
   TRACK_EVENT_DELAY_HEIGHT,
   TRACK_EVENT_DELAY_LINE_WIDTH,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 
 import type { ThreadIndex } from 'firefox-profiler/types';
 
