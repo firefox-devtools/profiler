@@ -5,7 +5,7 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from 'firefox-profiler/components/shared/EmptyReasons';
+import { EmptyReasons } from  'firefox-profiler/components/shared/EmptyReasons';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
 import explicitConnect, {

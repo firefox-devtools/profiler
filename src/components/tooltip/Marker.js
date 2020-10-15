@@ -10,8 +10,8 @@ import {
   formatNumber,
   formatMilliseconds,
   formatTimestamp,
-} from '../../utils/format-numbers';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/utils/format-numbers';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getMarkerSchemaByName,
   getImplementationFilter,
@@ -31,12 +31,12 @@ import {
   type TooltipDetailComponent,
   TooltipDetailSeparator,
 } from './TooltipDetails';
-import Backtrace from '../shared/Backtrace';
+import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
   formatFromMarkerSchema,
   getMarkerSchema,
-} from '../../profile-logic/marker-schema';
+} from 'firefox-profiler/profile-logic/marker-schema';
 
 import type {
   Milliseconds,
@@ -49,7 +49,7 @@ import type {
   MarkerIndex,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getGCMinorDetails,
   getGCMajorDetails,

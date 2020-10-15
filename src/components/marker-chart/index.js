@@ -8,7 +8,7 @@ import { TIMELINE_MARGIN_RIGHT } from 'firefox-profiler/app-logic/constants';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { MarkerChartCanvas } from './Canvas';
 import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
-import MarkerSettings from 'firefox-profiler/components/shared/MarkerSettings';
+import { MarkerSettings } from 'firefox-profiler/components/shared/MarkerSettings';
 
 import {
   getCommittedRange,

@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import FlameGraph from '../../components/flame-graph';
+import { FlameGraph } from '../../components/flame-graph';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

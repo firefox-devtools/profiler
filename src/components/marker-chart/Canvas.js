@@ -9,7 +9,7 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from 'firefox-profiler/components/shared/chart/Viewport';
-import ChartCanvas from 'firefox-profiler/components/shared/chart/Canvas';
+import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import memoize from 'memoize-immutable';
