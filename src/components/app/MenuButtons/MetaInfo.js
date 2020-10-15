@@ -88,15 +88,21 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     const platformInformation = formatPlatform(meta);
 
     let cpuCount = null;
+    let physicalCPUs = null;
+    let logicalCPUs = null;
     if (meta.physicalCPUs || meta.logicalCPUs) {
-        const physicalCPUs =
+        if(meta.physicalCPUs) {
+            physicalCPUs =
             meta.physicalCPUs +
-            ' physical ' +
+            ' physical ' + 
             (meta.physicalCPUs === 1 ? 'core' : 'cores');
-        const logicalCPUs =
+        }
+        if(meta.logicalCPUs) {
+            logicalCPUs =
             meta.logicalCPUs +
             ' logical ' +
             (meta.logicalCPUs === 1 ? 'core' : 'cores');
+        }
         cpuCount = (
             <div className="metaInfoRow">
                 <span className="metaInfoLabel">CPU:</span>
