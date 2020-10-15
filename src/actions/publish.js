@@ -25,7 +25,7 @@ import {
   getCommittedRange,
   getProfileFilterPageData,
 } from 'firefox-profiler/selectors/profile';
-import { viewProfile } from 'firefox-profiler/actions/receive-profile';
+import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
