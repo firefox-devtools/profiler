@@ -28,7 +28,7 @@
 // @flow
 
 export function bisectionLeft(
-  array: number[] | $ArrayBufferView,
+  array: number[] | $TypedArray,
   x: number,
   low?: number,
   high?: number
@@ -50,7 +50,7 @@ export function bisectionLeft(
 }
 
 export function bisectionRight(
-  array: number[] | $ArrayBufferView,
+  array: number[] | $TypedArray,
   x: number,
   low?: number,
   high?: number

@@ -1940,12 +1940,10 @@ export function getSampleIndexClosestToTime(
   // and its predecessor.
   const previousIndex = index - 1;
 
-  let weight = interval;
-  let previousWeight = interval;
-  if (samples.weight) {
-    weight = Math.abs(samples.weight[index]);
-    previousWeight = Math.abs(samples.weight[previousIndex]);
-  }
+  const weight = samples.weight ? Math.abs(samples.weight[index]) : interval;
+  const previousWeight = samples.weight
+    ? Math.abs(samples.weight[previousIndex])
+    : interval;
 
   const distanceToThis = samples.time[index] + weight / 2 - time;
   const distanceToLast =
