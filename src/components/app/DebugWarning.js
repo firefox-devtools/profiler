@@ -27,7 +27,7 @@ class DebugWarning extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<StateProps, {||}, {||}>({
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     profile: getProfile(state),
   }),
