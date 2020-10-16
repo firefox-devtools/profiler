@@ -34,7 +34,7 @@ import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
-import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 

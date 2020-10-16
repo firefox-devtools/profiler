@@ -227,11 +227,19 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
+      let iconSrc = null;
       let icon = null;
+
       if (resourceType === resourceTypes.webhost) {
-        icon = extractFaviconFromLibname(libName);
+        icon = iconSrc = extractFaviconFromLibname(libName);
       } else if (resourceType === resourceTypes.addon) {
-        icon = ExtensionIcon;
+        iconSrc = ExtensionIcon;
+
+        const resourceNameIndex = this._resourceTable.name[resourceIndex];
+        if (resourceNameIndex !== undefined) {
+          const iconText = this._stringTable.getString(resourceNameIndex);
+          icon = iconText;
+        }
       }
 
       const formattedTotal = formatCallNodeNumber(
@@ -305,6 +313,7 @@ export class CallTree {
           subcategoryIndex
         ),
         categoryColor: this._categories[categoryIndex].color,
+        iconSrc,
         icon,
         ariaLabel,
       };

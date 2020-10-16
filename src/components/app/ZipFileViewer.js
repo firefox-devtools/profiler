@@ -24,7 +24,7 @@ import {
   getZipFileErrorMessage,
 } from '../../selectors/zipped-profiles';
 import { getPathInZipFileFromUrl } from '../../selectors/url-state';
-import TreeView from '../shared/TreeView';
+import { TreeView } from '../shared/TreeView';
 import { ProfileViewer } from './ProfileViewer';
 
 import type { ConnectedProps } from '../../utils/connect';
