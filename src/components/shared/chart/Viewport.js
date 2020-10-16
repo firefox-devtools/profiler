@@ -165,7 +165,7 @@ type State = {|
   isSizeSet: boolean,
 |};
 
-require('./Viewport.css');
+import './Viewport.css';
 
 // The overall zoom speed for shift and pinch zooming.
 const ZOOM_SPEED = 1.003;
@@ -346,7 +346,49 @@ export const withChartViewport: WithChartViewport<*, *> =
         requestAnimationFrame(this._setSize);
       };
 
-      _mouseWheelListener = (event: SyntheticWheelEvent<>) => {
+      // To scroll and zoom the chart, we need to install a wheel event listener.
+      // This listener needs to call `preventDefault()` in order to be able to
+      // consume wheel events, so that the browser does not trigger additional
+      // scrolling, zooming, or back/forward swiping for events that the Viewport
+      // already handles. In other words, this listener cannot be a "passive"
+      // event listener.
+      // In the past, we were using ReactDOM's onWheel attribute to install the
+      // event listener. However, this has two drawbacks:
+      //
+      //  1. It does not let us control which DOM element the listener is
+      //     installed on - ReactDOM will use event delegation and install the
+      //     actual listener on an ancester DOM node. More specifically, on
+      //     React versions before v17, the listener will be installed on the
+      //     document, and starting with v17 the listener will be installed on
+      //     the React root.
+      //  2. It does not let us control the event listener options ("passive").
+      //
+      // As a general rule, non-passive wheel event listeners should be attached
+      // to an element that only covers the area of the page that actually needs
+      // to consume wheel events - the listener should be scoped as "tightly" as
+      // possible. That's because these listeners require additional roundtrips
+      // to the main thread for asynchronous scrolling, and browsers have added
+      // optimizations to ensure that this extra roundtrip only affects the area
+      // of the page covered by the DOM subtree that the listener is attached to.
+      // So we really don't want React to put our wheel event listener on the
+      // document or on the React root; we want it to be on the DOM element for
+      // our Viewport component so that there is no scrolling performance impact
+      // on elements outside the Viewport component.
+      // Another problem with React setting the listener on the document is the
+      // fact that, due to a recent intervention by some browsers (at least
+      // Firefox and Chrome), `preventDefault()` no longer has any effect in
+      // wheel event listeners that are set on the document, unless that
+      // listener is explicitly marked with `{passive: false}` (which React
+      // doesn't let us do).
+      //
+      // So, instead of using a ReactDOM onWheel listener, we use a native DOM
+      // wheel event listener. We set/unset it when the Viewport component
+      // mounts/unmounts.
+      // This solves both problems: It makes `preventDefault()` work, and it
+      // limits the performance impact from the non-passiveness to the Viewport
+      // component itself, so that scrolling outside of the Viewport can proceed
+      // in a fully accelerated and asynchronous fashion.
+      _mouseWheelListener = (event: WheelEvent) => {
         // We handle the wheel event, so disable the browser's handling, such
         // as back/forward swiping or scrolling.
         event.preventDefault();
@@ -419,7 +461,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       zoomWithMouseWheel(
-        event: SyntheticWheelEvent<>,
+        event: WheelEvent,
         // Allow different handlers to make the zoom faster or slower.
         zoomModifier: number = 1
       ) {
@@ -726,12 +768,24 @@ export const withChartViewport: WithChartViewport<*, *> =
         // is not fully layed out correctly yet.
         this._setSize();
         this._setSizeNextFrame();
+        if (this._container) {
+          this._container.addEventListener('wheel', this._mouseWheelListener, {
+            passive: false,
+          });
+        }
       }
 
       componentWillUnmount() {
         window.removeEventListener('resize', this._setSizeNextFrame, false);
         window.removeEventListener('mousemove', this._mouseMoveListener, true);
         window.removeEventListener('mouseup', this._mouseUpListener, true);
+        if (this._container) {
+          this._container.removeEventListener(
+            'wheel',
+            this._mouseWheelListener,
+            { passive: false }
+          );
+        }
       }
 
       render() {
@@ -780,7 +834,6 @@ export const withChartViewport: WithChartViewport<*, *> =
         return (
           <div
             className={viewportClassName}
-            onWheel={this._mouseWheelListener}
             onMouseDown={this._mouseDownListener}
             onKeyDown={this._keyDownListener}
             onKeyUp={this._keyUpListener}
@@ -825,7 +878,7 @@ const SCROLL_LINE_SIZE = 15;
  * into CssPixels. https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaMode
  */
 function getNormalizedScrollDelta(
-  event: SyntheticWheelEvent<>,
+  event: WheelEvent,
   pageHeight: number,
   key: 'deltaY' | 'deltaX'
 ): CssPixels {

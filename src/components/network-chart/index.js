@@ -8,8 +8,8 @@ import * as React from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import NetworkSettings from '../shared/NetworkSettings';
-import VirtualList from '../shared/VirtualList';
+import { NetworkSettings } from '../shared/NetworkSettings';
+import { VirtualList } from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';

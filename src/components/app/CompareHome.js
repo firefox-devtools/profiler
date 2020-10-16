@@ -7,9 +7,9 @@
 import React, { PureComponent } from 'react';
 
 import { AppHeader } from './AppHeader';
-import { changeProfilesToCompare } from '../../actions/app';
-import explicitConnect from '../../utils/connect';
-import type { ConnectedProps } from '../../utils/connect';
+import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CompareHome.css';
 

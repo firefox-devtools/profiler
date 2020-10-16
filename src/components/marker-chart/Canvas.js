@@ -8,17 +8,17 @@ import * as React from 'react';
 import {
   withChartViewport,
   type WithChartViewport,
-} from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
-import { TooltipMarker } from '../tooltip/Marker';
-import TextMeasurement from '../../utils/text-measurement';
+} from 'firefox-profiler/components/shared/chart/Viewport';
+import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
+import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
-} from '../../actions/profile-view';
-import { BLUE_40 } from '../../utils/colors';
-import { TIMELINE_MARGIN_LEFT } from '../../app-logic/constants';
+} from 'firefox-profiler/actions/profile-view';
+import { BLUE_40 } from 'firefox-profiler/utils/colors';
+import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
   CssPixels,
@@ -31,8 +31,8 @@ import type {
 } from 'firefox-profiler/types';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 
-import type { Viewport } from '../shared/chart/Viewport';
-import type { WrapFunctionInDispatch } from '../../utils/connect';
+import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 type MarkerDrawingInformation = {
   x: CssPixels,
   y: CssPixels,
