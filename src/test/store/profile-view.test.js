@@ -3421,7 +3421,7 @@ describe('traced timing', function() {
 // Verify that getProcessedEventDelays gives the correct values for event delays.
 describe('getProcessedEventDelays', function() {
   // Setup a profile with meaningful event delay values.
-  function setup(eventDelay: ?Float32Array<?Milliseconds>) {
+  function setup(eventDelay: Float32Array) {
     const profile = getEmptyProfile();
 
     // Create event delay values.
@@ -3430,7 +3430,7 @@ describe('getProcessedEventDelays', function() {
       samples.eventDelay = eventDelay;
     } else {
       samples.eventDelay = new Float32Array(50);
-      samples.eventDelay.push(10, 20, 30, 40, 50, 0);
+      samples.eventDelay.set([10, 20, 30, 40, 50, 0], ...samples.eventDelay);
       //                                      ^
       //                                      |
       //                              Event delay peak
@@ -3526,7 +3526,7 @@ describe('getProcessedEventDelays', function() {
 
   it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
     const eventDelay = new Float32Array(50);
-    eventDelay.push(10, 20, 30, 40, 50, 0, 0, 10, 20, 0);
+    eventDelay.set([10, 20, 30, 40, 50, 0, 0, 10, 20, 0], ...eventDelay);
     //                              ^             ^
     //                              |             |
     //                              First peak    Second peak
