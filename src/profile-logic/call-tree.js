@@ -48,7 +48,7 @@ export type CallTreeCountsAndSummary = {
   rootTotalSummary: number,
 };
 
-function extractFaviconFromLibname(libname: string): string {
+function extractFaviconFromLibname(libname: string): string | null {
   try {
     const url = new URL('/favicon.ico', libname);
     if (url.protocol === 'http:') {
@@ -61,7 +61,7 @@ function extractFaviconFromLibname(libname: string): string {
       'Error while extracing the favicon from the libname',
       libname
     );
-    return '';
+    return null;
   }
 }
 
@@ -227,7 +227,7 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-      let iconSrc = '';
+      let iconSrc = null;
       let icon = null;
 
       if (resourceType === resourceTypes.webhost) {

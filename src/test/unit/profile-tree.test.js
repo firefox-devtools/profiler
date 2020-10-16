@@ -323,7 +323,7 @@ describe('unfiltered call tree', function() {
           ariaLabel:
             'A, running count is 3 samples (100%), self count is 0 samples',
           isFrameLabel: true,
-          iconSrc: '',
+          iconSrc: null,
           icon: null,
           lib: '',
           name: 'A',
@@ -339,7 +339,7 @@ describe('unfiltered call tree', function() {
           ariaLabel:
             'I, running count is 1 sample (33%), self count is 1 sample',
           isFrameLabel: false,
-          iconSrc: '',
+          iconSrc: null,
           icon: null,
           lib: 'libI.so',
           name: 'I',
