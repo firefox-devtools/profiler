@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import MarkerTable from '../../components/marker-table';
+import { MarkerTable } from '../../components/marker-table';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
   updatePreviewSelection,

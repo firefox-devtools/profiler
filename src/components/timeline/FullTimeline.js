@@ -10,9 +10,9 @@ import TimelineGlobalTrack from './GlobalTrack';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import Reorderable from '../shared/Reorderable';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
+import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getZeroAt,
@@ -29,19 +29,19 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 import TimelineTrackContextMenu from './TrackContextMenu';
 
 import './index.css';
 
-import type { SizeProps } from '../shared/WithSize';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
   changeTimelineType,
   changeRightClickedTrack,
-} from '../../actions/profile-view';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/profile-view';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   BrowsingContextID,
@@ -56,7 +56,7 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,

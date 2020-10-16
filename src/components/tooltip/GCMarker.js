@@ -13,7 +13,7 @@ import {
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
-} from '../../utils/format-numbers';
+} from 'firefox-profiler/utils/format-numbers';
 
 import { TooltipDetail, type TooltipDetailComponent } from './TooltipDetails';
 
