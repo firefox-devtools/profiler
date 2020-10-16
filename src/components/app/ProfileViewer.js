@@ -30,10 +30,9 @@ import {
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import classNames from 'classnames';
-
+import DebugWarning from '../debug-warning/index';
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
-import Warning from '../shared/Warning';
 
 require('./ProfileViewer.css');
 
@@ -114,7 +113,7 @@ class ProfileViewer extends PureComponent<Props> {
               // with actual content in them do.
             }
             <div className="profileViewerSpacer" />
-            <Warning message="This profile was recorded in a build without release optimizations. Performance obervations might not apply to the release population." />
+            <DebugWarning />
             <MenuButtons />
 
             {isUploading ? (
