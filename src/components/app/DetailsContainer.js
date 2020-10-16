@@ -8,7 +8,6 @@ import SplitterLayout from 'react-splitter-layout';
 
 import { Details } from './Details';
 import { selectSidebar } from '../sidebar';
-
 import { invalidatePanelLayout } from '../../actions/app';
 import { getSelectedTab } from '../../selectors/url-state';
 import { getIsSidebarOpen } from '../../selectors/app';

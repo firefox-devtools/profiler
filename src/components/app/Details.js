@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-
 import explicitConnect from '../../utils/connect';
 import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -25,10 +24,8 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import { MaybeMarkerContextMenu } from '../shared/MarkerContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
-
 import type { ConnectedProps } from '../../utils/connect';
 import type { TabSlug } from '../../app-logic/tabs-handling';
-
 import './Details.css';
 
 type StateProps = {|

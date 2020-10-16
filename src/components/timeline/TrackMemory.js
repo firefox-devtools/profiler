@@ -27,7 +27,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackMemory.css';
+import './TrackMemory.css';
 
 type OwnProps = {|
   +counterIndex: CounterIndex,

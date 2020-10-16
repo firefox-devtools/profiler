@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import { TrackEventDelayGraph } from 'firefox-profiler/components/timeline/TrackEventDelayGraph';
+import { TrackEventDelayGraph } from './TrackEventDelayGraph';
 import {
   TRACK_EVENT_DELAY_HEIGHT,
   TRACK_EVENT_DELAY_LINE_WIDTH,

@@ -9,7 +9,6 @@ import explicitConnect from '../../utils/connect';
 import { MarkerChartCanvas } from './Canvas';
 import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
-
 import {
   getCommittedRange,
   getPreviewSelection,

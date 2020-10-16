@@ -8,7 +8,7 @@ import {
   getZipFileState,
 } from 'firefox-profiler/selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
-import { loadProfile } from 'firefox-profiler/actions/receive-profile';
+import { loadProfile } from './receive-profile';
 
 import type { Action, ThunkAction } from 'firefox-profiler/types';
 import type { IndexIntoZipFileTable } from 'firefox-profiler/profile-logic/zip-files';
