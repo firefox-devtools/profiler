@@ -49,8 +49,8 @@ import {
   getVisibleThreads,
 } from 'firefox-profiler/profile-logic/tracks';
 import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
-import { setDataSource } from 'firefox-profiler/actions/profile-view';
-import { fatalError } from 'firefox-profiler/actions/errors';
+import { setDataSource } from './profile-view';
+import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type {
