@@ -10,7 +10,7 @@ type StateProps = {|
   +profile: Profile,
 |};
 
-type Props = ConnectedProps<{||}, OwnProps, {||}>;
+type Props = ConnectedProps<{||}, StateProps, {||}>;
 class DebugWarning extends PureComponent<Props> {
   render() {
     const { profile } = this.props;
@@ -27,7 +27,7 @@ class DebugWarning extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, {||}, {||}>({
+export default explicitConnect<StateProps, {||}, {||}>({
   mapStateToProps: state => ({
     profile: getProfile(state),
   }),
