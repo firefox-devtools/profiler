@@ -227,25 +227,21 @@ export class CallTree {
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
-      let iconSrc = null;
-      let icon = '';
+      let iconSrc = '';
+      let icon = null;
 
       if (resourceType === resourceTypes.webhost) {
-        iconSrc = extractFaviconFromLibname(libName);
-        icon = extractFaviconFromLibname(libName);
-      }
-      //Start Extension function
-      else if (resourceType === resourceTypes.addon) {
+        icon = iconSrc = extractFaviconFromLibname(libName);
+      } else if (resourceType === resourceTypes.addon) {
         iconSrc = ExtensionIcon;
-        //Call function to get name
+
         const resourceNameIndex = this._resourceTable.name[resourceIndex];
         if (resourceNameIndex !== undefined) {
           const iconText = (this._stringTable.getString(
             resourceNameIndex
           ): any);
-          icon = iconText.match(/"([^"]*)"/)[1];
+          icon = iconText;
         }
-        //End Extension Function Here
       }
 
       const formattedTotal = formatCallNodeNumber(
