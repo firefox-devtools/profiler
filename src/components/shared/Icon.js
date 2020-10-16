@@ -5,12 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { getIconClassName } from '../../selectors/icons';
-import { iconStartLoading } from '../../actions/icons';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getIconClassName } from 'firefox-profiler/selectors/icons';
+import { iconStartLoading } from 'firefox-profiler/actions/icons';
 
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps =
   | {|
@@ -33,7 +33,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class Icon extends PureComponent<Props> {
+class IconImpl extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     if (props.icon) {
@@ -52,7 +52,7 @@ class Icon extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const Icon = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, ownProps) => {
     const icon = ownProps.displayData
       ? ownProps.displayData.icon
@@ -64,5 +64,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     };
   },
   mapDispatchToProps: { iconStartLoading },
-  component: Icon,
+  component: IconImpl,
 });

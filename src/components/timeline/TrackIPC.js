@@ -7,7 +7,7 @@
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getCommittedRange } from 'firefox-profiler/selectors/profile';
-import { TimelineMarkersIPC } from 'firefox-profiler/components/timeline/Markers';
+import { TimelineMarkersIPC } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TRACK_IPC_MARKERS_HEIGHT } from 'firefox-profiler/app-logic/constants';
 

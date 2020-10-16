@@ -4,25 +4,25 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { JsTracerChart } from './Chart';
 import { JsTracerSettings } from './Settings';
 import { JsTracerEmptyReasons } from './EmptyReasons';
 
-import { getProfile } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getProfile } from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getShowJsTracerSummary,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+} from 'firefox-profiler/selectors/url-state';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 
 import type {
   Profile,
   JsTracerTable,
   ThreadsKey,
 } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 require('./index.css');
 
