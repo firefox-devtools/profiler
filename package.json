@@ -52,7 +52,7 @@
     "copy-to-clipboard": "^3.1.0",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.2.0",
-    "idb": "^5.0.6",
+    "idb": "^5.0.7",
     "jszip": "^3.5.0",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
