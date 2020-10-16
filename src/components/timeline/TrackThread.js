@@ -29,7 +29,7 @@ import {
   TimelineMarkersFileIo,
   TimelineMarkersOverview,
   TimelineMarkersMemory,
-} from 'firefox-profiler/components/timeline/Markers';
+} from './Markers';
 import {
   updatePreviewSelection,
   changeRightClickedTrack,
