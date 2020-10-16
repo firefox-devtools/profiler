@@ -42,8 +42,8 @@ class Icon extends PureComponent<Props> {
   }
 
   componentDidUpdate() {
-    if (this.props.icon) {
-     this.props.iconStartLoading(this.props.icon);
+    if ( this.props.icon ) {
+     this.props.iconStartLoading( this.props.icon );
     }
   }
 
