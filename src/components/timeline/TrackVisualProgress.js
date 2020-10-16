@@ -18,7 +18,7 @@ import type { ProgressGraphData, Milliseconds } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import 'firefox-profiler/components/timeline/TrackVisualProgress.css';
+import './TrackVisualProgress.css';
 
 type OwnProps = {|
   +progressGraphData: ProgressGraphData[],

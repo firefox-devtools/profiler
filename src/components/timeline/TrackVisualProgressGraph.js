@@ -18,8 +18,10 @@ import type {
   Milliseconds,
   CssPixels,
 } from 'firefox-profiler/types';
+
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
+
 import './TrackVisualProgress.css';
 
 /**

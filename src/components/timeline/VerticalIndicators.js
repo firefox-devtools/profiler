@@ -17,7 +17,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import 'firefox-profiler/components/timeline/VerticalIndicators.css';
+import './VerticalIndicators.css';
 
 type Props = {|
   +getMarker: MarkerIndex => Marker,

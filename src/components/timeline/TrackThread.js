@@ -14,6 +14,7 @@ import {
 } from 'firefox-profiler/components/shared/WithSize';
 import ThreadStackGraph from 'firefox-profiler/components/shared/thread/StackGraph';
 import ThreadActivityGraph from 'firefox-profiler/components/shared/thread/ActivityGraph';
+
 import {
   getProfileInterval,
   getCommittedRange,
@@ -43,8 +44,7 @@ import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-import 'firefox-profiler/components/timeline/TrackThread.css';
-
+import './TrackThread.css';
 import type {
   TimelineType,
   Thread,

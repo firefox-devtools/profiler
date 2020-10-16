@@ -22,7 +22,9 @@ import type {
   Marker,
   Milliseconds,
 } from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
+
 import { ensureExists } from '../../utils/flow';
 import './TrackScreenshots.css';
 
