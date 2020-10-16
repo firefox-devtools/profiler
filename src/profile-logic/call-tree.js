@@ -48,7 +48,7 @@ export type CallTreeCountsAndSummary = {
   rootTotalSummary: number,
 };
 
-function extractFaviconFromLibname(libname: string): string | null {
+function extractFaviconFromLibname(libname: string): string {
   try {
     const url = new URL('/favicon.ico', libname);
     if (url.protocol === 'http:') {
@@ -61,7 +61,7 @@ function extractFaviconFromLibname(libname: string): string | null {
       'Error while extracing the favicon from the libname',
       libname
     );
-    return '' | null;
+    return '';
   }
 }
 
