@@ -237,9 +237,7 @@ export class CallTree {
 
         const resourceNameIndex = this._resourceTable.name[resourceIndex];
         if (resourceNameIndex !== undefined) {
-          const iconText = (this._stringTable.getString(
-            resourceNameIndex
-          ): any);
+          const iconText = this._stringTable.getString(resourceNameIndex);
           icon = iconText;
         }
       }
