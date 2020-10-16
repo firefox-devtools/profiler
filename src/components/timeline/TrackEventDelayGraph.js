@@ -25,6 +25,7 @@ import type {
 import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackEventDelay.css';
+
 /**
  * When adding properties to these props, please consider the comment above the component.
  */

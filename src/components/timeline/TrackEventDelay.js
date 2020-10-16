@@ -13,7 +13,7 @@ import {
 
 import type { ThreadIndex } from 'firefox-profiler/types';
 
-import 'firefox-profiler/components/timeline/TrackEventDelay.css';
+import './TrackEventDelay.css';
 
 type Props = {|
   +threadIndex: ThreadIndex,
