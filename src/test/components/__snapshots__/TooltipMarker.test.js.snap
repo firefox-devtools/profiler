@@ -76,8 +76,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
       <h2
         class="tooltipBackTraceTitle"
       >
-        Triggered 98ms ago,
-              at:
+        Triggered 97.500ms ago, at:
       </h2>
       <ul
         class="backtrace"
@@ -1544,8 +1543,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
       <h2
         class="tooltipBackTraceTitle"
       >
-        Triggered 98ms ago,
-              at:
+        Triggered 97.500ms ago, at:
       </h2>
       <ul
         class="backtrace"
@@ -1786,8 +1784,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
       <h2
         class="tooltipBackTraceTitle"
       >
-        Triggered 97ms ago,
-              at:
+        Triggered 97ms ago, at:
       </h2>
       <ul
         class="backtrace"
@@ -2826,8 +2823,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
       <h2
         class="tooltipBackTraceTitle"
       >
-        Triggered 1.5ms ago,
-              at:
+        Triggered 1.500ms ago, at:
       </h2>
       <ul
         class="backtrace"
@@ -3082,8 +3078,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
       <h2
         class="tooltipBackTraceTitle"
       >
-        First invalidated 0.50ms before the flush,
-                at:
+        First invalidated 0.50ms before the flush, at:
       </h2>
       <ul
         class="backtrace"

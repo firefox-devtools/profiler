@@ -316,10 +316,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               {data.type === 'Styles' || marker.name === 'Reflow'
                 ? `First invalidated ${formatNumber(
                     causeAge
-                  )}ms before the flush,
-                at:`
-                : `Triggered ${formatNumber(causeAge)}ms ago,
-              at:`}
+                  )}ms before the flush, at:`
+                : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
             </h2>
             <Backtrace
               maxStacks={restrictHeightWidth ? 20 : Infinity}
