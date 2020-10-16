@@ -3429,8 +3429,9 @@ describe('getProcessedEventDelays', function() {
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
-      samples.eventDelay = new Float32Array(50);
-      samples.eventDelay.set([10, 20, 30, 40, 50, 0], ...samples.eventDelay);
+      const extraDelays = [10, 20, 30, 40, 50, 0];
+      samples.eventDelay = new Float32Array(50 + extraDelays.length);
+      samples.eventDelay.set(extraDelays, 50);
       //                                      ^
       //                                      |
       //                              Event delay peak
@@ -3525,8 +3526,9 @@ describe('getProcessedEventDelays', function() {
   });
 
   it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
-    const eventDelay = new Float32Array(50);
-    eventDelay.set([10, 20, 30, 40, 50, 0, 0, 10, 20, 0], ...eventDelay);
+    const extraDelays = [10, 20, 30, 40, 50, 0, 0, 10, 20, 0];
+    const eventDelay = new Float32Array(50 + extraDelays.length);
+    eventDelay.set(extraDelays, 50);
     //                              ^             ^
     //                              |             |
     //                              First peak    Second peak
