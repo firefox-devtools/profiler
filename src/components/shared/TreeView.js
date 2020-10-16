@@ -45,7 +45,6 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
     // If there is nothing to display in the header, do not render it.
     return null;
   }
-
   return (
     <div className="treeViewHeader">
       {fixedColumns.map(col => (
@@ -142,6 +141,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
         {columns.map(col => {
           const RenderComponent = col.component;
           const text = displayData[col.propName] || '';
+
           return (
             <span
               className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
