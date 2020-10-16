@@ -3059,8 +3059,8 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         class="tooltipBackTraceTitle"
       >
         First invalidated 
-        0.50
-        ms before the flush, at:
+        500μs
+         before the flush, at:
       </h2>
       <ul
         class="backtrace"

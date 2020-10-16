@@ -7,7 +7,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
-  formatNumber,
   formatMilliseconds,
   formatTimestamp,
 } from '../../utils/format-numbers';
@@ -314,7 +313,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           <div className="tooltipDetailsBackTrace">
             {data.type === 'Styles' || marker.name === 'Reflow' ? (
               <h2 className="tooltipBackTraceTitle">
-                First invalidated {formatNumber(causeAge)}ms before the flush,
+                First invalidated {formatTimestamp(causeAge)} before the flush,
                 at:
               </h2>
             ) : null}
