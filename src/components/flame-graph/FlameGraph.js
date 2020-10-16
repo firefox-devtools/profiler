@@ -50,7 +50,7 @@ import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./FlameGraph.css');
+import './FlameGraph.css' ;
 
 const STACK_FRAME_HEIGHT = 16;
 
