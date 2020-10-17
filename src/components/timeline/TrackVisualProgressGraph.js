@@ -8,12 +8,12 @@ import * as React from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatPercent } from 'firefox-profiler/utils/format-numbers';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import bisection from 'bisection';
 import { BLUE_50, BLUE_60 } from 'photon-colors';
 
 import type {
@@ -236,7 +236,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
       const graphTimestamps = progressGraphData.map(
         ({ timestamp }) => timestamp
       );
-      let hoveredVisualProgress = bisection.right(graphTimestamps, timeAtMouse);
+      let hoveredVisualProgress = bisectionRight(graphTimestamps, timeAtMouse);
       if (hoveredVisualProgress === progressGraphData.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the
