@@ -303,6 +303,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const { threadsKey, selectedMarker } = action;
       return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
     }
+    case 'CHANGE_SELECTED_NETWORK_MARKER': {
+      const { threadsKey, selectedNetworkMarker } = action;
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedNetworkMarker,
+      });
+    }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadsKey, transform, transformedThread } = action;
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);

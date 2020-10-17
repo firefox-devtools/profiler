@@ -31,7 +31,8 @@
 }
 
 .networkChartRowItem:hover,
-.networkChartRowItem.isRightClicked {
+.networkChartRowItem.isRightClicked,
+.networkChartRowItem.isLeftClicked{
   background-color: #bbe0f6;
 }
 

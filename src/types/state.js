@@ -42,6 +42,7 @@ export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
 |};
 
 export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };

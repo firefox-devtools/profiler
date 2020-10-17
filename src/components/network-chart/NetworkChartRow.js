@@ -321,6 +321,8 @@ type NetworkChartRowProps = {|
   +width: CssPixels,
   +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
+  +isSelected: boolean,
+  +isLeftClicked: boolean,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
   +shouldDisplayTooltips: () => boolean,
@@ -365,6 +367,7 @@ export class NetworkChartRow extends React.PureComponent<
 
   _onMouseDown = (e: SyntheticMouseEvent<>) => {
     const { markerIndex, onLeftClick, onRightClick } = this.props;
+    console.log(e.button);
     if (e.button === 0) {
       if (onLeftClick) {
         onLeftClick(markerIndex);
@@ -462,23 +465,29 @@ export class NetworkChartRow extends React.PureComponent<
       timeRange,
       isRightClicked,
       shouldDisplayTooltips,
+      isLeftClicked,
+      isSelected,
     } = this.props;
 
     if (networkPayload === null) {
       return null;
     }
 
+    // Generates className for a row
     const itemClassName = classNames(
       'networkChartRowItem',
       this._getClassNameTypeForMarker(),
       {
         odd: index % 2 === 1,
         isRightClicked,
+        isLeftClicked,
+        isSelected,
       }
     );
 
     return (
       <div
+        // The className below is responsible for the blue hover effect
         className={itemClassName}
         onMouseEnter={this._hoverIn}
         onMouseLeave={this._hoverOut}
@@ -493,7 +502,8 @@ export class NetworkChartRow extends React.PureComponent<
           width={width}
           timeRange={timeRange}
         />
-        {shouldDisplayTooltips() && this.state.hovered ? (
+        {(shouldDisplayTooltips() && this.state.hovered) ||
+        (shouldDisplayTooltips() && this.props.isSelected) ? (
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
