@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import { DetailsContainer } from './DetailsContainer';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
-import WindowTitle from '../shared/WindowTitle';
+import { WindowTitle } from '../shared/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
@@ -34,7 +34,7 @@ import classNames from 'classnames';
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./ProfileViewer.css');
+import './ProfileViewer.css';
 
 type StateProps = {|
   +hasZipFile: boolean,

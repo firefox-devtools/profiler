@@ -15,21 +15,8 @@
     ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
     ["module-resolver", {
       "alias": {
-        "firefox-profiler": "./src",
+        "firefox-profiler": "./src"
       }
     }]
-  ],
-  env: {
-    test: {
-      presets: [
-        "@babel/preset-env",
-        "@babel/preset-react",
-        ["@babel/preset-flow", { all: true }]
-      ],
-      plugins: [
-        ["@babel/plugin-proposal-class-properties", { loose: true }],
-        ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
-      ],
-    }
-  }
+  ]
 }

@@ -6,23 +6,23 @@
 
 import * as React from 'react';
 import clamp from 'clamp';
-import { getContentRect } from '../../utils/css-geometry-tools';
+import { getContentRect } from 'firefox-profiler/utils/css-geometry-tools';
 import {
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import {
   updatePreviewSelection,
   commitRange,
-} from '../../actions/profile-view';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/actions/profile-view';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
-import Draggable from '../shared/Draggable';
-import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
+import { Draggable } from 'firefox-profiler/components/shared/Draggable';
+import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
-import type { OnMove } from '../shared/Draggable';
+import type { OnMove } from 'firefox-profiler/components/shared/Draggable';
 import type {
   Milliseconds,
   CssPixels,
@@ -30,7 +30,7 @@ import type {
   PreviewSelection,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 

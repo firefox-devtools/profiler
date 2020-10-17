@@ -859,7 +859,7 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 200.36363636363637px; top: 54px;"
+  style="--tooltip-detail-max-width: 600px; left: 200.36363636363637px; top: 54px;"
 >
   <div
     class="tooltipMarker"

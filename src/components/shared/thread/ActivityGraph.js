@@ -11,7 +11,7 @@ import {
   Tooltip,
   MOUSE_OFFSET,
 } from 'firefox-profiler/components/tooltip/Tooltip';
-import SampleTooltipContents from 'firefox-profiler/components/shared/SampleTooltipContents';
+import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
 import './ActivityGraph.css';
@@ -59,7 +59,7 @@ function _stopPropagation(e: TransitionEvent) {
   e.stopPropagation();
 }
 
-class ThreadActivityGraph extends React.PureComponent<Props, State> {
+export class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
@@ -303,8 +303,6 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default ThreadActivityGraph;
 
 /**
  * Filtered out samples use a diagonal stripe pattern, create that here.

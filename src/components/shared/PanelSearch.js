@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import classNames from 'classnames';
-import IdleSearchField from './IdleSearchField';
+import { IdleSearchField } from './IdleSearchField';
 
 import './PanelSearch.css';
 
@@ -19,7 +19,7 @@ type Props = {|
 
 type State = {| searchFieldFocused: boolean |};
 
-class PanelSearch extends React.PureComponent<Props, State> {
+export class PanelSearch extends React.PureComponent<Props, State> {
   state = { searchFieldFocused: false };
   _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.onSearch(value);
@@ -67,5 +67,3 @@ class PanelSearch extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default PanelSearch;
