@@ -281,22 +281,35 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         onShow={this._onShow}
         onHide={this._onHide}
       >
-        <SubMenu title="Set selection start ">
-          <MenuItem onClick={this.setStartRangeFromMarkerStart}>
-            From the start of this marker
-          </MenuItem>
-          <MenuItem onClick={this.setStartRangeFromMarkerEnd}>
-            From the end of this marker
-          </MenuItem>
-        </SubMenu>
-        <SubMenu title="Set selection end ">
-          <MenuItem onClick={this.setEndRangeFromMarkerStart}>
-            From the start of this marker
-          </MenuItem>
-          <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
-            From the end of this marker
-          </MenuItem>
-        </SubMenu>
+        {this._isZeroDurationMarker(marker) ? (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              Set selection start time here
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              Set selection end time here
+            </MenuItem>
+          </>
+        ) : (
+          <>
+            <SubMenu title="Set selection start ">
+              <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+                From the start of this marker
+              </MenuItem>
+              <MenuItem onClick={this.setStartRangeFromMarkerEnd}>
+                From the end of this marker
+              </MenuItem>
+            </SubMenu>
+            <SubMenu title="Set selection end ">
+              <MenuItem onClick={this.setEndRangeFromMarkerStart}>
+                From the start of this marker
+              </MenuItem>
+              <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+                From the end of this marker
+              </MenuItem>
+            </SubMenu>
+          </>
+        )}
 
         <MenuItem
           onClick={this.setRangeByDuration}
