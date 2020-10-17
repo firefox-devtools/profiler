@@ -30,7 +30,7 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
       return (
         <div className="sidebar sidebar-marker-table">
           <div className="sidebar-contents-wrapper">
-          Select a marker to display some information about it.
+            Select a marker to display some information about it.
           </div>
         </div>
       );
