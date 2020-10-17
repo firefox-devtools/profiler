@@ -29,7 +29,9 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
     if (marker === null || markerIndex === null) {
       return (
         <div className="sidebar sidebar-marker-table">
+          <div className="sidebar-contents-wrapper">
           Select a marker to display some information about it.
+          </div>
         </div>
       );
     }
