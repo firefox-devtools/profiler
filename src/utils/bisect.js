@@ -1,4 +1,5 @@
-// This file originally comes from https://github.com/3rd-Eden/node-bisection/
+// This file originally comes from https://github.com/3rd-Eden/node-bisection/, but has been
+// imported and changed to fix some bugs.
 
 /*
     Copyright (c) 2010/2011 Arnout Kazemier,3rd-Eden
@@ -60,10 +61,10 @@ export function bisectionLeft(
   while (low < high) {
     const mid = (low + high) >> 1;
 
-    if (x < array[mid]) {
-      low = mid + 1;
-    } else {
+    if (x <= array[mid]) {
       high = mid;
+    } else {
+      low = mid + 1;
     }
   }
 
