@@ -13,6 +13,8 @@
 
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
+import type { Dispatch } from 'firefox-profiler/types';
+import { updateLoadProgress } from '../actions/profile-loading';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -23,9 +25,15 @@ const UNANNOTATED_VERSION = 0;
  * Throws an exception if the profile is too new.
  * @param {object} profile The profile in the "Gecko profile" format.
  */
-export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
+export function upgradeGeckoProfileToCurrentVersion(
+  profile: Object,
+  dispatch: Dispatch | null = null
+) {
   const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
   if (profileVersion === GECKO_PROFILE_VERSION) {
+    if (dispatch) {
+      dispatch(updateLoadProgress('upgrade', 100));
+    }
     return;
   }
 
@@ -45,6 +53,10 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
   ) {
     if (destVersion in _upgraders) {
       _upgraders[destVersion](profile);
+    }
+    const progress = destVersion / GECKO_PROFILE_VERSION;
+    if (dispatch) {
+      dispatch(updateLoadProgress('upgrade', progress));
     }
   }
 

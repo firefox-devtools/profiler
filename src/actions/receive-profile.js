@@ -51,7 +51,7 @@ import {
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
-import { changeLoadProgress } from './';
+import { updateLoadProgress } from '../actions/profile-loading';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type {
@@ -783,7 +783,7 @@ async function _unpackGeckoProfileFromAddon(profile, dispatch) {
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    dispatch(changeLoadProgress('decompress', 0));
+    dispatch(updateLoadProgress('decompress'));
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress
@@ -793,7 +793,7 @@ async function _unpackGeckoProfileFromAddon(profile, dispatch) {
     } else {
       decompressedProfile = profile;
     }
-    dispatch(changeLoadProgress('raw', 0));
+    dispatch(updateLoadProgress('raw'));
     const textDecoder = new TextDecoder();
     return JSON.parse(textDecoder.decode(decompressedProfile));
   }
@@ -807,12 +807,13 @@ async function getProfileFromAddon(
   dispatch(waitingForProfileFromAddon());
 
   // XXX update state to show that we're connected to the profiler addon
+  dispatch(updateLoadProgress('raw'));
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(
     rawGeckoProfile,
     dispatch
   );
-  const profile = processProfile(unpackedProfile);
+  const profile = processProfile(unpackedProfile, dispatch);
   await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
@@ -907,7 +908,7 @@ export async function doSymbolicateProfile(
 
 export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
-    dispatch(changeLoadProgress('promise', 0));
+    dispatch(updateLoadProgress('promise'));
     try {
       const timeoutId = setTimeout(() => {
         dispatch(

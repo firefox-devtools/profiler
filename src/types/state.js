@@ -178,6 +178,7 @@ export type AppState = {|
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
+  +profileLoadingState: ProfileLoadingState,
 |};
 
 export type UploadPhase =
@@ -281,11 +282,12 @@ export type ProfileLoadingStep =
   | 'raw'
   | 'decompress'
   | 'decode'
-  | 'done';
+  | 'upgrade'
+  | 'process';
 
 export type ProfileLoadingState = {|
   +profileLoadingStep: ProfileLoadingStep,
-  +progress: number,
+  +progress: number | null,
 |};
 
 export type State = {|
@@ -295,7 +297,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
-  +profileLoadingState: ProfileLoadingState,
+  // +profileLoadingState: ProfileLoadingState,
 |};
 
 export type IconWithClassName = {|

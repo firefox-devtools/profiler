@@ -467,9 +467,9 @@ type DragAndDropAction =
     |};
 
 type ProfileLoadingStateAction = {|
-  +type: 'CHANGE_LOAD_PROGRESS',
+  +type: 'UPDATE_LOAD_PROGRESS',
   +profileLoadingStep: ProfileLoadingStep,
-  +progress: number,
+  +progress: number | null,
 |};
 
 export type Action =

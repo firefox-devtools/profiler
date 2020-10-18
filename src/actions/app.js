@@ -40,7 +40,6 @@ import type {
   Action,
   ThunkAction,
   UrlState,
-  ProfileLoadingStep,
 } from 'firefox-profiler/types';
 import type { TabSlug } from '../app-logic/tabs-handling';
 

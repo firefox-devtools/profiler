@@ -15,28 +15,20 @@ import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +profileLoadingStep: ProfileLoadingStep,
-  +progress: number,
+  +progress: number | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class ProfileLoadingMessage extends React.PureComponent<Props> {
-  // updateProfileLoadingMessage = () => {};
-
-  // componentDidMount() {
-  //   this.updateProfileLoadingMessage();
-  // }
-
-  // componentDidUpdate() {
-  //   this.updateProfileLoadingMessage();
-  // }
-
   render() {
     const { profileLoadingStep, progress } = this.props;
     return (
       <div className="profileLoadingMessageContainer">
         <div className="loadingStep">Current Step: {profileLoadingStep}</div>
-        <div className="loadingStepProgress">Progress: {progress}</div>
+        <div className="loadingStepProgress">
+          {progress !== null ? `Progress: ${progress}` : ''}
+        </div>
       </div>
     );
   }

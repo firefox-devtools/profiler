@@ -8,9 +8,9 @@
 
 import type { Action, ProfileLoadingStep } from 'firefox-profiler/types';
 
-export function changeLoadProgress(
+export function updateLoadProgress(
   profileLoadingStep: ProfileLoadingStep,
-  progress: number
+  progress: number | null = null
 ): Action {
-  return { type: 'CHANGE_LOAD_PROGRESS', profileLoadingStep, progress };
+  return { type: 'UPDATE_LOAD_PROGRESS', profileLoadingStep, progress };
 }

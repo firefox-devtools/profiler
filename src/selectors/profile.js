@@ -82,7 +82,7 @@ export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = stat
 export const getOriginsProfileView: Selector<OriginsViewState> = state =>
   getProfileView(state).origins;
 export const getProfileLoadingState: Selector<ProfileLoadingState> = state =>
-  state.profileLoadingState;
+  state.app.profileLoadingState;
 
 /**
  * Profile View Options
