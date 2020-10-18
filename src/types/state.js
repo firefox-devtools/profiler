@@ -178,6 +178,7 @@ export type AppState = {|
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
+  +profileLoadingState: ProfileLoadingState,
 |};
 
 export type UploadPhase =
@@ -275,6 +276,20 @@ export type UrlState = {|
 
 export type IconState = Set<string>;
 
+// This is used to display the loading progress when fetching a profile from add-on
+export type ProfileLoadingStep =
+  | 'promise'
+  | 'raw'
+  | 'decompress'
+  | 'decode'
+  | 'upgrade'
+  | 'process';
+
+export type ProfileLoadingState = {|
+  +profileLoadingStep: ProfileLoadingStep,
+  +progress: number | null,
+|};
+
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
@@ -282,6 +297,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
+  // +profileLoadingState: ProfileLoadingState,
 |};
 
 export type IconWithClassName = {|

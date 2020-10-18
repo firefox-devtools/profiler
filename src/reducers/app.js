@@ -16,6 +16,7 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
   CssPixels,
+  ProfileLoadingState,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -245,6 +246,21 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const profileLoadingState: Reducer<ProfileLoadingState> = (
+  state = { profileLoadingStep: 'promise', progress: 0 },
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_LOAD_PROGRESS':
+      return {
+        profileLoadingStep: action.profileLoadingStep,
+        progress: action.progress,
+      };
+    default:
+      return state;
+  }
+};
+
 /**
  * Experimental features that are mostly disabled by default. You need to enable
  * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
@@ -268,6 +284,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isDragAndDropDragging,
   isDragAndDropOverlayRegistered,
   experimental,
+  profileLoadingState,
 });
 
 export default appStateReducer;

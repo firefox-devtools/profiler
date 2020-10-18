@@ -35,6 +35,7 @@ import {
   getOrCreateURIResource,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
+import { updateLoadProgress } from '../actions/profile-loading';
 
 import type {
   Profile,
@@ -80,6 +81,7 @@ import type {
   GCMajorAborted,
   PhaseTimes,
   SerializableProfile,
+  Dispatch,
 } from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
@@ -1217,14 +1219,15 @@ export function adjustMarkerTimestamps(
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
 export function processProfile(
-  rawProfile: GeckoProfile | { profile: GeckoProfile }
+  rawProfile: GeckoProfile | { profile: GeckoProfile },
+  dispatch: Dispatch | null = null
 ): Profile {
   // We may have been given a DevTools profile, in that case extract the Gecko Profile.
   const geckoProfile = rawProfile.profile ? rawProfile.profile : rawProfile;
 
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
-  upgradeGeckoProfileToCurrentVersion(geckoProfile);
+  upgradeGeckoProfileToCurrentVersion(geckoProfile, dispatch);
 
   let threads = [];
 
