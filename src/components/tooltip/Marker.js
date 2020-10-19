@@ -7,7 +7,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
-  formatNumber,
   formatMilliseconds,
   formatTimestamp,
 } from 'firefox-profiler/utils/format-numbers';
@@ -314,9 +313,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           <div className="tooltipDetailsBackTrace">
             <h2 className="tooltipBackTraceTitle">
               {data.type === 'Styles' || marker.name === 'Reflow'
-                ? `First invalidated ${formatNumber(
+                ? `First invalidated ${formatTimestamp(
                     causeAge
-                  )}ms before the flush, at:`
+                  )} before the flush, at:`
                 : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
             </h2>
             <Backtrace
