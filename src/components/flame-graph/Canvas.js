@@ -57,6 +57,7 @@ export type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +onDoubleClickItem: (IndexIntoCallNodeTable | null) => void,
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
@@ -398,9 +399,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return null;
   };
 
-  // Starting working
-
-  _noOp = () => {};
+  _onDoubleClickItem = (hoveredItem: HoveredStackTiming | null) => {
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onRightClick(callNodeIndex);
+  };
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
@@ -412,7 +414,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         scaleCtxToCssPixels={true}
-        onDoubleClickItem={this._noOp}
+        onDoubleClickItem={this._onDoubleClickItem}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
