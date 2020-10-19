@@ -31,7 +31,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 const SEPARATOR = ' – ';
 const PRODUCT = 'Firefox Profiler';
 
-class WindowTitle extends PureComponent<Props> {
+class WindowTitleImpl extends PureComponent<Props> {
   // This component updates window title in the form of:
   // profile name - version - platform - date time - data source - 'Firefox Profiler'
   _updateTitle() {
@@ -86,7 +86,7 @@ function _formatDateTime(timestamp: number): string {
   return dateTimeLabel;
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     profileNameFromUrl: getProfileNameFromUrl(state),
     fileNameInZipFilePath: getFileNameInZipFilePath(state),
@@ -94,5 +94,5 @@ export default explicitConnect<{||}, StateProps, {||}>({
     profile: getProfile(state),
     dataSource: getDataSource(state),
   }),
-  component: WindowTitle,
+  component: WindowTitleImpl,
 });

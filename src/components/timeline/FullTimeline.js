@@ -10,7 +10,7 @@ import TimelineGlobalTrack from './GlobalTrack';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import Reorderable from 'firefox-profiler/components/shared/Reorderable';
+import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {

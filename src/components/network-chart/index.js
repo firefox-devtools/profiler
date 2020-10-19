@@ -9,7 +9,7 @@ import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
 import { NetworkSettings } from '../shared/NetworkSettings';
-import VirtualList from '../shared/VirtualList';
+import { VirtualList } from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';
@@ -34,7 +34,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 

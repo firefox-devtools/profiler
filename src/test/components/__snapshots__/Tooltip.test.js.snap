@@ -4,7 +4,7 @@ exports[`shared/Tooltip is rendered appropriately 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 11px; top: 11px;"
+  style="--tooltip-detail-max-width: 600px; left: 11px; top: 11px;"
 >
   <p>
     Lorem ipsum

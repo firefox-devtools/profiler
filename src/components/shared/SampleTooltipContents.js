@@ -23,7 +23,7 @@ type Props = {|
  * This class displays the tooltip contents for a given sample. Typically the user
  * will want to know what the function is, and its category.
  */
-export default class SampleTooltipContents extends React.PureComponent<Props> {
+export class SampleTooltipContents extends React.PureComponent<Props> {
   render() {
     const { sampleIndex, fullThread, categories } = this.props;
     const { samples, stackTable } = fullThread;
