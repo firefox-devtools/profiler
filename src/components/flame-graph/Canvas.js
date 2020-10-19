@@ -398,6 +398,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return null;
   };
 
+  // Starting working
+
   _noOp = () => {};
 
   render() {
