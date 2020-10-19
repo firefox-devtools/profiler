@@ -317,7 +317,7 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
-              onDoubleClick: this._onDoubleClickrdCallNodeChange,
+              onDoubleClick: this._onDoubleClickedCallNodeChange,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
