@@ -35,7 +35,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT: CssPixels = 16;
 

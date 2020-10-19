@@ -19,7 +19,7 @@ import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import './Markers.css';
 
