@@ -194,44 +194,47 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       displayData = callTree.getDisplayData(callNodeIndex);
     }
 
-    let resourceOrFileName = null;
+    let fileName = null;
+
     // Only JavaScript functions have a filename.
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
-      let fileName = thread.stringTable.getString(fileNameIndex);
+      let fileNameURL = thread.stringTable.getString(fileNameIndex);
       const lineNumber = thread.funcTable.lineNumber[funcIndex];
       if (lineNumber !== null) {
-        fileName += ':' + lineNumber;
+        fileNameURL += ':' + lineNumber;
         const columnNumber = thread.funcTable.columnNumber[funcIndex];
         if (columnNumber !== null) {
-          fileName += ':' + columnNumber;
+          fileNameURL += ':' + columnNumber;
         }
       }
 
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
       // the elements as direct children.
-      resourceOrFileName = [
+      fileName = [
         <div className="tooltipLabel" key="file">
           Script URL:
         </div>,
-        fileName,
+        fileNameURL,
       ];
-    } else {
-      const resourceIndex = thread.funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-        if (resourceNameIndex !== -1) {
-          // Because of our use of Grid Layout, all our elements need to be direct
-          // children of the grid parent. That's why we use arrays here, to add
-          // the elements as direct children.
-          resourceOrFileName = [
-            <div className="tooltipLabel" key="resource">
-              Resource:
-            </div>,
-            thread.stringTable.getString(resourceNameIndex),
-          ];
-        }
+    }
+
+    let resource = null;
+    const resourceIndex = thread.funcTable.resource[funcIndex];
+
+    if (resourceIndex !== -1) {
+      const resourceNameIndex = thread.resourceTable.name[resourceIndex];
+      if (resourceNameIndex !== -1) {
+        // Because of our use of Grid Layout, all our elements need to be direct
+        // children of the grid parent. That's why we use arrays here, to add
+        // the elements as direct children.
+        resource = [
+          <div className="tooltipLabel" key="resource">
+            Resource:
+          </div>,
+          thread.stringTable.getString(resourceNameIndex),
+        ];
       }
     }
 
@@ -342,8 +345,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             </div>
             {/* --------------------------------------------------------------- */}
             {pageAndParentPageURL}
-            {/* --------------------------------------------------------------- */}
-            {resourceOrFileName}
+            {fileName}
+            {resource}
           </div>
         </div>
       </div>
