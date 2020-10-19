@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -22,6 +22,7 @@ import {
   getMouseEvent,
   fireFullClick,
   fireFullContextMenu,
+  findFillTextPositionFromDrawLog,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
@@ -71,16 +72,30 @@ describe('FlameGraph', function() {
   });
 
   it('shows a tooltip when hovering', () => {
-    const { getTooltip, moveMouse } = setupFlameGraph();
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
     expect(getTooltip()).toBe(null);
-    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    moveMouse(findFillTextPosition('A'));
     expect(getTooltip()).toBeTruthy();
   });
 
   it('has a tooltip that matches the snapshot', () => {
-    const { getTooltip, moveMouse } = setupFlameGraph();
-    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
+    moveMouse(findFillTextPosition('A'));
     expect(getTooltip()).toMatchSnapshot();
+  });
+
+  it('shows a tooltip with the resource information', () => {
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
+    moveMouse(findFillTextPosition('J'));
+    const tooltip = ensureExists(getTooltip());
+
+    // First, a targeted test.
+    const { getByText } = within(tooltip);
+    const resourceLabel = getByText('Resource:');
+    const valueElement = ensureExists(resourceLabel.nextSibling);
+    expect(valueElement.textContent).toBe('libxul.so');
+    // But also do a good old snapshot.
+    expect(tooltip).toMatchSnapshot();
   });
 
   it('can be navigated with the keyboard', () => {
@@ -119,9 +134,14 @@ describe('FlameGraph', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const { rightClick, clickMenuItem, getContextMenu } = setupFlameGraph();
+    const {
+      rightClick,
+      clickMenuItem,
+      getContextMenu,
+      findFillTextPosition,
+    } = setupFlameGraph();
 
-    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    rightClick(findFillTextPosition('A'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
@@ -129,7 +149,7 @@ describe('FlameGraph', function() {
     jest.runAllTimers();
 
     // Try another node to make sure the menu can handle other nodes than the first.
-    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 25);
+    rightClick(findFillTextPosition('B'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
@@ -189,6 +209,7 @@ function setupFlameGraph() {
     C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
     D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
     E[cat:Graphics]  G[cat:Graphics]
+                     J[lib:libxul.so]
   `);
 
   // Add some file and line number to the profile so that tooltips generate
@@ -245,9 +266,9 @@ function setupFlameGraph() {
     fireEvent(canvas, getMouseEvent(eventName, options));
   }
 
-  // Note to a future developer: the x/y values can be derived from the
-  // array returned by flushDrawLog().
-  function rightClick(x: CssPixels, y: CssPixels) {
+  // You can use findFillTextPosition to derive the x, y positioning from the
+  // draw log.
+  function rightClick({ x, y }: { x: CssPixels, y: CssPixels }) {
     const positioningOptions = getPositioningOptions(x, y);
 
     fireMouseEvent('mousemove', positioningOptions);
@@ -255,7 +276,7 @@ function setupFlameGraph() {
     flushRafCalls();
   }
 
-  function moveMouse(x, y) {
+  function moveMouse({ x, y }) {
     fireMouseEvent('mousemove', getPositioningOptions(x, y));
   }
 
@@ -287,6 +308,10 @@ function setupFlameGraph() {
     fireFullClick(getByText(strOrRegexp));
   }
 
+  function findFillTextPosition(fillText: string) {
+    return findFillTextPositionFromDrawLog(ctx.__flushDrawLog(), fillText);
+  }
+
   return {
     ...store,
     ...renderResult,
@@ -298,6 +323,7 @@ function setupFlameGraph() {
     getContentDiv,
     getContextMenu,
     clickMenuItem,
+    findFillTextPosition,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }
