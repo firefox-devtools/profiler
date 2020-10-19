@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { VirtualList } from './VirtualList';
 
-import ContextMenuTrigger from './ContextMenuTrigger';
+import { ContextMenuTrigger } from './ContextMenuTrigger';
 
 import type { CssPixels } from 'firefox-profiler/types';
 

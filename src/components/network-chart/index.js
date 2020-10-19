@@ -13,7 +13,7 @@ import { VirtualList } from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import {
   getPreviewSelection,
@@ -34,7 +34,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
