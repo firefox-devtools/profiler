@@ -9,16 +9,16 @@ import classNames from 'classnames';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 import {
   withChartViewport,
   type WithChartViewport,
-} from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
-import TextMeasurement from '../../utils/text-measurement';
-import { FastFillStyle } from '../../utils';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { BLUE_40 } from '../../utils/colors';
+} from 'firefox-profiler/components/shared/chart/Viewport';
+import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
+import TextMeasurement from 'firefox-profiler/utils/text-measurement';
+import { FastFillStyle } from 'firefox-profiler/utils';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { BLUE_40 } from 'firefox-profiler/utils/colors';
 
 import type {
   Milliseconds,
@@ -31,8 +31,8 @@ import type {
   JsTracerTiming,
 } from 'firefox-profiler/types';
 
-import type { Viewport } from '../shared/chart/Viewport';
-import type { WrapFunctionInDispatch } from '../../utils/connect';
+import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +rangeStart: Milliseconds,
@@ -88,7 +88,7 @@ const TEXT_OFFSET_START: CssPixels = 3;
 const ROW_LABEL_OFFSET_LEFT: CssPixels = 5;
 const FONT_SIZE: CssPixels = 10;
 
-class JsTracerCanvas extends React.PureComponent<Props, State> {
+class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
   state = {
     hasFirstDraw: false,
   };
@@ -630,6 +630,7 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  JsTracerCanvas
-);
+export const JsTracerCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(JsTracerCanvasImpl);

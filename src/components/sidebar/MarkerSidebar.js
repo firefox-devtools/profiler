@@ -6,12 +6,12 @@
 
 import * as React from 'react';
 
-import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
-import { TooltipMarker } from '../tooltip/Marker';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ThreadsKey, Marker, MarkerIndex } from 'firefox-profiler/types';
 
 type StateProps = {|
@@ -29,7 +29,9 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
     if (marker === null || markerIndex === null) {
       return (
         <div className="sidebar sidebar-marker-table">
-          Select a marker to display some information about it.
+          <div className="sidebar-contents-wrapper">
+            Select a marker to display some information about it.
+          </div>
         </div>
       );
     }

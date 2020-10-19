@@ -1498,7 +1498,7 @@ export function processEventDelays(
     );
   }
 
-  const eventDelays: number[] = new Array(samples.length).fill(0);
+  const eventDelays = new Float32Array(samples.length);
   const rawEventDelays = ensureExists(
     samples.eventDelay,
     'eventDelays field is not present in this profile'
@@ -2102,11 +2102,12 @@ export function getOriginAnnotationForFunc(
 export function getFuncNamesAndOriginsForPath(
   path: CallNodePath,
   thread: Thread
-): Array<{ funcName: string, origin: string }> {
+): Array<{ funcName: string, isFrameLabel: boolean, origin: string }> {
   const { funcTable, stringTable, resourceTable } = thread;
 
   return path.map(func => ({
     funcName: stringTable.getString(funcTable.name[func]),
+    isFrameLabel: funcTable.resource[func] === -1,
     origin: getOriginAnnotationForFunc(
       func,
       funcTable,

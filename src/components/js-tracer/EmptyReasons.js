@@ -5,10 +5,12 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from '../shared/EmptyReasons';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { EmptyReasons } from 'firefox-profiler/components/shared/EmptyReasons';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
-import explicitConnect, { type ConnectedProps } from '../../utils/connect';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 
 import type { State } from 'firefox-profiler/types';
 
@@ -17,7 +19,7 @@ type StateProps = {|
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
-class MarkerChartEmptyReasons extends PureComponent<Props> {
+class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { threadName } = this.props;
 
@@ -31,9 +33,9 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const JsTracerEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
   }),
-  component: MarkerChartEmptyReasons,
+  component: MarkerChartEmptyReasonsImpl,
 });

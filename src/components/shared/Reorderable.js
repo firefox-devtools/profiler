@@ -12,7 +12,7 @@ import {
   getContentRect,
   getMarginRect,
   extractDomRectValue,
-} from '../../utils/css-geometry-tools';
+} from 'firefox-profiler/utils/css-geometry-tools';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
@@ -48,7 +48,7 @@ type XY = {|
 
 type EventWithPageProperties = { pageX: number, pageY: number };
 
-class Reorderable extends React.PureComponent<Props, State> {
+export class Reorderable extends React.PureComponent<Props, State> {
   _xy: {| horizontal: XY, vertical: XY |} = {
     horizontal: {
       pageXY: 'pageX',
@@ -300,5 +300,3 @@ class Reorderable extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default Reorderable;

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import Details from '../../components/app/Details';
+import { Details } from '../../components/app/Details';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -19,13 +19,27 @@ import type { TabSlug } from '../../app-logic/tabs-handling';
 // We use the tab slugs as class names. `call-tree` is an exception because if
 // we need a dash to masquerade as custom elements so that React doesn't emit a
 // warning.
-jest.mock('../../components/calltree/ProfileCallTreeView', () => 'call-tree');
-jest.mock('../../components/flame-graph', () => 'flame-graph');
-jest.mock('../../components/stack-chart', () => 'stack-chart');
-jest.mock('../../components/marker-chart', () => 'marker-chart');
-jest.mock('../../components/marker-table', () => 'marker-table');
-jest.mock('../../components/network-chart', () => 'network-chart');
-jest.mock('../../components/js-tracer', () => 'js-tracer');
+jest.mock('../../components/calltree/ProfileCallTreeView', () => ({
+  ProfileCallTreeView: 'call-tree',
+}));
+jest.mock('../../components/flame-graph', () => ({
+  FlameGraph: 'flame-graph',
+}));
+jest.mock('../../components/stack-chart', () => ({
+  StackChart: 'stack-chart',
+}));
+jest.mock('../../components/marker-chart', () => ({
+  MarkerChart: 'marker-chart',
+}));
+jest.mock('../../components/marker-table', () => ({
+  MarkerTable: 'marker-table',
+}));
+jest.mock('../../components/network-chart', () => ({
+  NetworkChart: 'network-chart',
+}));
+jest.mock('../../components/js-tracer', () => ({
+  JsTracer: 'js-tracer',
+}));
 
 describe('app/Details', function() {
   function setup() {

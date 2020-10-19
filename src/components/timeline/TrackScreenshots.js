@@ -5,14 +5,17 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { getScreenshotTrackHeight } from '../../selectors/app';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { withSize, type SizeProps } from '../shared/WithSize';
+} from 'firefox-profiler/selectors/profile';
+import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import {
+  withSize,
+  type SizeProps,
+} from 'firefox-profiler/components/shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type {
@@ -23,9 +26,9 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import './TrackScreenshots.css';
 
 type OwnProps = {|
@@ -158,8 +161,6 @@ type HoverPreviewProps = {|
 
 const MAXIMUM_HOVER_SIZE = 350;
 
-const HOVER_MAX_WIDTH_RATIO = 1.75;
-
 class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
@@ -216,20 +217,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
         : MAXIMUM_HOVER_SIZE / windowWidth;
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
-
-    const distanceToTopFromTrackCenter = trackHeight / 2 + containerTop;
-    // If the hover height exceeds the top of screen,
-    // set it to the value so that it reaches the top of screen when it is centered.
-    if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
-      hoverHeight = 2 * distanceToTopFromTrackCenter;
-      hoverWidth = (hoverHeight * windowWidth) / windowHeight;
-    }
-
-    if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
-      // This is a really wide image, limit the height so it lays out reasonably.
-      hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = (hoverWidth / windowWidth) * windowHeight;
-    }
 
     hoverWidth = Math.round(hoverWidth);
     hoverHeight = Math.round(hoverHeight);

@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import Home from '../../components/app/Home';
+import { Home } from '../../components/app/Home';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';

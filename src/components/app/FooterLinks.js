@@ -4,11 +4,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-require('./FooterLinks.css');
+import './FooterLinks.css';
 
 type State = {| hide: boolean |};
 
-class FooterLinks extends PureComponent<{||}, State> {
+export class FooterLinks extends PureComponent<{||}, State> {
   _onClick = () => {
     this.setState({ hide: true });
   };
@@ -60,5 +60,3 @@ class FooterLinks extends PureComponent<{||}, State> {
     );
   }
 }
-
-export default FooterLinks;

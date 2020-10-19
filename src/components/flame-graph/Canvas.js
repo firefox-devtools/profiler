@@ -9,15 +9,15 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
+import { ChartCanvas } from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import {
   formatCallNodeNumberWithUnit,
   formatPercent,
-} from '../../utils/format-numbers';
-import { TooltipCallNode } from '../tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
+} from 'firefox-profiler/utils/format-numbers';
+import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
+import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
 import type {
@@ -38,10 +38,10 @@ import type {
   FlameGraphTiming,
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
-} from '../../profile-logic/flame-graph';
+} from 'firefox-profiler/profile-logic/flame-graph';
 
-import type { CallTree } from '../../profile-logic/call-tree';
-import type { Viewport } from '../shared/chart/Viewport';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -79,13 +79,13 @@ type HoveredStackTiming = {|
   +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
 |};
 
-require('./Canvas.css');
+import './Canvas.css';
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class FlameGraphCanvas extends React.PureComponent<Props> {
+class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
   componentDidUpdate(prevProps) {
@@ -421,6 +421,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  FlameGraphCanvas
-);
+export const FlameGraphCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(FlameGraphCanvasImpl);
