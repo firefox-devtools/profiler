@@ -401,7 +401,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
 
   _onDoubleClickItem = (hoveredItem: HoveredStackTiming | null) => {
     const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onRightClick(callNodeIndex);
+    this.props.onDoubleClickItem(callNodeIndex);
   };
 
   render() {
