@@ -22,7 +22,7 @@ import {
   getThreads,
   getRightClickedTrack,
   getGlobalTracks,
-  getRightClickedTrackType
+  getRightClickedTrackType,
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
