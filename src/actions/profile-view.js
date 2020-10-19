@@ -120,7 +120,6 @@ export function changeRightClickedCallNode(
   };
 }
 
-
 export function changeDoubleClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null

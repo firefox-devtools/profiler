@@ -400,8 +400,41 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   };
 
   _onDoubleClickItem = (hoveredItem: HoveredStackTiming | null) => {
-    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onDoubleClick(callNodeIndex);
+    const {
+      thread,
+      flameGraphTiming,
+      scrollToSelectionGeneration,
+      tracedTiming,
+      maxStackDepth,
+      selectedCallNodeIndex,
+      viewport: { containerWidth, viewportBottom },
+    } = this.props;
+
+    const depth = Math.floor(
+      maxStackDepth + viewportBottom / TEXT_OFFSET_START
+    );
+
+    const stackNumber = scrollToSelectionGeneration;
+    const stackTiming = flameGraphTiming[depth];
+
+    const startDepth = Math.floor(maxStackDepth + viewportBottom);
+    const endDepth = Math.ceil(maxStackDepth + viewportBottom);
+
+    for (let i = 0; i < stackTiming.length; i += 1) {
+      const start = stackTiming.start[i];
+      const end = stackTiming.end[i];
+
+      if (start && end) {
+        return { depth, scrollToSelectionGeneration: i };
+        if (start && !end) {
+          return 'scrollToSelectionGeneration';
+        }
+        if (!start && end) {
+          return 'flameGraphTiming';
+        }
+        return 'none';
+      }
+    }
   };
 
   render() {

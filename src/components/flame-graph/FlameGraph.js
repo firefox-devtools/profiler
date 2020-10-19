@@ -24,8 +24,6 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
-  changeDoubleClickedCallNode,
-
 } from '../../actions/profile-view';
 
 import type {
@@ -119,7 +117,11 @@ class FlameGraph extends React.PureComponent<Props> {
   _onDoubleClickedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadsKey, changeDoubleClickedCallNode } = this.props;
+    const {
+      callNodeInfo,
+      threadsKey,
+      changeDoubleClickedCallNode,
+    } = this.props;
     changeDoubleClickedCallNode(
       threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
