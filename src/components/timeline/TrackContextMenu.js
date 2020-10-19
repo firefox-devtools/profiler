@@ -304,10 +304,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
     if (localTrackNames === 'local') {
     return localTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
-
-    }
     
-   }    
+    }    
   }
 
   renderIsolateProcess() {
