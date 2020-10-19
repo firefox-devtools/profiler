@@ -112,6 +112,16 @@ class FlameGraph extends React.PureComponent<Props> {
     );
   };
 
+  _onDoubleClickedCallNodeChange = (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    const { callNodeInfo, threadsKey, changeDoubleClickedCallNode } = this.props;
+    changeDoubleClickedCallNode(
+      threadsKey,
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+  };
+
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
