@@ -22,7 +22,7 @@ import {
   getThreads,
   getRightClickedTrack,
   getGlobalTracks,
-  getRightClickedTrackType,
+  getRightClickedThreadIndex,
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
@@ -295,17 +295,16 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return localTrackNames[rightClickedTrack.trackIndex];
   }
 
-  getRightClickedTrackType(rightClickedTrack: TrackReference): string{
-     const { globalTrackNames, localTrackNamesByPid } = this.props;
+  getRightClickedTrackType(rightClickedTrack: TrackReference): string {
+    const { globalTrackNames, localTrackNamesByPid } = this.props;
 
-     if (rightClickedTrack.type === 'global') {
+    if (rightClickedTrack.type === 'global') {
       return globalTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
     }
     const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
     if (localTrackNames === 'local') {
-    return localTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
-    
-    }    
+      return localTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
+    }
   }
 
   renderIsolateProcess() {

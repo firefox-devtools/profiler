@@ -313,6 +313,25 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
+    it('can hide all the DOM worker thread', function() {
+      const { hideAllTracksByType, getState } = setupLocalTrack();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - show [thread Style]',
+      ]);
+
+      fireFullClick(hideAllTracksByType());
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab]',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style] SELECTED',
+      ]);
+    });
+
     it('can toggle a local track by clicking it', function() {
       const { trackItem, pid, trackIndex, getState } = setupLocalTrack();
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
