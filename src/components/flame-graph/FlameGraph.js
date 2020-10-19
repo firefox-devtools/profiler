@@ -24,6 +24,8 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  changeDoubleClickedCallNode,
+
 } from '../../actions/profile-view';
 
 import type {
@@ -74,6 +76,7 @@ type StateProps = {|
   +threadsKey: ThreadsKey,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +doubleClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
   +interval: Milliseconds,
@@ -86,6 +89,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
+  +changeDoubleClickedCallNode: typeof changeRightClickedCallNode,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -372,6 +376,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      state
+    ),
+    doubleClickedCallNodeIndex: selectedThreadSelectors.getDoubleClickedCallNodeIndex(
       state
     ),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),

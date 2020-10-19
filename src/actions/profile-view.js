@@ -120,6 +120,18 @@ export function changeRightClickedCallNode(
   };
 }
 
+
+export function changeDoubleClickedCallNode(
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_DOUBLE_CLICKED_CALL_NODE',
+    threadsKey,
+    callNodePath,
+  };
+}
+
 /**
  * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
  * of that sample's stack.
