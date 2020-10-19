@@ -348,7 +348,9 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     if (selectedNodeIndex === null) {
       return (
         <div className="sidebar sidebar-calltree">
-          Select a node to display some information about it.
+          <div className="sidebar-contents-wrapper">
+            Select a node to display some information about it.
+          </div>
         </div>
       );
     }
