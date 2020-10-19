@@ -21,7 +21,7 @@ import {
   getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   changeSelectedCallNode,
