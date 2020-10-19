@@ -252,7 +252,7 @@ describe('timeline/TrackContextMenu', function() {
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
       const hideDOMWorker = () => getByText('Hide "DOM Worker"');
-      const hideAllTracksByType = () => getByText('Hide "DOM Worker"');
+      const hideAllTracksByType = () => getByText('Hide all "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {

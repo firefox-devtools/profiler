@@ -552,12 +552,12 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
     return (
       <MenuItem
-        key={trackIndex}
+        key={trackIndex + 'hide-all'}
         preventClose={false}
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
         onClick={this._toggleLocalTrackVisibility}
       >
-        Hide all {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}{' '}
+        Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
         tracks
       </MenuItem>
     );
