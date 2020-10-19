@@ -1618,9 +1618,12 @@ describe('snapshots of selectors/profile', function() {
     markersThread.name = 'Thread with markers';
 
     // Creating jank sample
-    samplesThread.samples.eventDelay = Array(50).fill(0);
+    const extraDelays = [10, 15, 25, 30, 40, 50, 0];
+    samplesThread.samples.eventDelay = new Float32Array(
+      50 + extraDelays.length
+    );
     const eventDelay = ensureExists(samplesThread.samples.eventDelay);
-    eventDelay.push(10, 15, 25, 30, 40, 50, 0);
+    eventDelay.set(extraDelays, 50);
     samplesThread.samples.time = Array(eventDelay.length)
       .fill(0)
       .map((_, i) => i);

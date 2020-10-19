@@ -57,7 +57,7 @@ export function getEmptySamplesTableWithEventDelay(): SamplesTable {
     // be caught by the type system.
     weightType: 'samples',
     weight: null,
-    eventDelay: [],
+    eventDelay: new Float32Array(),
     stack: [],
     time: [],
     length: 0,

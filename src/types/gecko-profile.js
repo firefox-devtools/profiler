@@ -120,7 +120,7 @@ export type GeckoSampleStructWithResponsiveness = {|
 export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
-  eventDelay: Array<?Milliseconds>,
+  eventDelay: Float32Array,
   length: number,
 |};
 
