@@ -1618,12 +1618,9 @@ describe('snapshots of selectors/profile', function() {
     markersThread.name = 'Thread with markers';
 
     // Creating jank sample
-    const extraDelays = [10, 15, 25, 30, 40, 50, 0];
-    samplesThread.samples.eventDelay = new Float32Array(
-      50 + extraDelays.length
-    );
+    samplesThread.samples.eventDelay = Array(50).fill(0);
     const eventDelay = ensureExists(samplesThread.samples.eventDelay);
-    eventDelay.set(extraDelays, 50);
+    eventDelay.push(10, 15, 25, 30, 40, 50, 0);
     samplesThread.samples.time = Array(eventDelay.length)
       .fill(0)
       .map((_, i) => i);
@@ -3424,7 +3421,7 @@ describe('traced timing', function() {
 // Verify that getProcessedEventDelays gives the correct values for event delays.
 describe('getProcessedEventDelays', function() {
   // Setup a profile with meaningful event delay values.
-  function setup(eventDelay: Float32Array) {
+  function setup(eventDelay: ?Array<?Milliseconds>) {
     const profile = getEmptyProfile();
 
     // Create event delay values.
@@ -3432,9 +3429,8 @@ describe('getProcessedEventDelays', function() {
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
-      const extraDelays = [10, 20, 30, 40, 50, 0];
-      samples.eventDelay = new Float32Array(50 + extraDelays.length);
-      samples.eventDelay.set(extraDelays, 50);
+      samples.eventDelay = Array(50).fill(0);
+      samples.eventDelay.push(10, 20, 30, 40, 50, 0);
       //                                      ^
       //                                      |
       //                              Event delay peak
@@ -3529,9 +3525,8 @@ describe('getProcessedEventDelays', function() {
   });
 
   it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
-    const extraDelays = [10, 20, 30, 40, 50, 0, 0, 10, 20, 0];
-    const eventDelay = new Float32Array(50 + extraDelays.length);
-    eventDelay.set(extraDelays, 50);
+    const eventDelay = Array(50).fill(0);
+    eventDelay.push(10, 20, 30, 40, 50, 0, 0, 10, 20, 0);
     //                              ^             ^
     //                              |             |
     //                              First peak    Second peak

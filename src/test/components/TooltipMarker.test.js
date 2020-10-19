@@ -724,7 +724,7 @@ describe('TooltipMarker', function() {
   });
 
   it('shows a tooltip for Jank markers', function() {
-    const eventDelay = new Float32Array([
+    const eventDelay = [
       0,
       20,
       40,
@@ -734,7 +734,7 @@ describe('TooltipMarker', function() {
       0,
       20,
       40,
-    ]);
+    ];
 
     const profile = getProfileWithEventDelays(eventDelay);
     const store = storeWithProfile(profile);

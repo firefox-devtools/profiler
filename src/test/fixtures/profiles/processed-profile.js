@@ -1132,7 +1132,7 @@ export function getThreadWithJsTracerEvents(
 
   // Re-create the table so that it creates a Flow error if we don't handle part of it.
   thread.samples = {
-    eventDelay: Float32Array(endOfEvents),
+    eventDelay: Array(endOfEvents).fill(null),
     stack: Array(endOfEvents).fill(null),
     time: Array(endOfEvents)
       .fill(0)
@@ -1207,7 +1207,7 @@ export function getThreadWithEventDelay(
   const thread = getEmptyThread();
 
   // Creating some empty event delays because they will be filled with the pre-process.
-  let eventDelay = new Float32Array(50);
+  let eventDelay = Array(50).fill(0);
 
   if (userEventDelay !== undefined && userEventDelay !== null) {
     eventDelay = [...eventDelay, ...userEventDelay];

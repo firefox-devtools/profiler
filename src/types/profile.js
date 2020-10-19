@@ -157,7 +157,7 @@ export type SamplesTable = {|
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
   // This is optional because older profiles didn't have that field.
-  eventDelay: Float32Array,
+  eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   // An optional weight array. If not present, then the weight is assumed to be 1.
