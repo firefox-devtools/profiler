@@ -122,6 +122,7 @@ type CpuProfileData = {
   timeDeltas: number[],
   startTime: number,
   endTime: number,
+  traceEvents: number[],
 };
 
 type ThreadNameEvent = TracingEvent<{|
@@ -164,7 +165,7 @@ export function isChromeProfile(profile: mixed): boolean {
   if (!profile || typeof profile !== 'object') {
     return false;
   }
-
+  
   let event;
   if (Array.isArray(profile)) {
     // Chrome profiles come as a list of events.
@@ -172,8 +173,8 @@ export function isChromeProfile(profile: mixed): boolean {
   } else if (Array.isArray(profile.traceEvents)) {
     event = profile.traceEvents[0];
   }
-  if (event) {
-    // Lightly check that some properties exist that are in the TracingEvent.
+    if (event) {
+       // Lightly check that some properties exist that are in the TracingEvent.
     return (
       typeof event === 'object' &&
       event !== null &&
@@ -181,13 +182,17 @@ export function isChromeProfile(profile: mixed): boolean {
       'cat' in event &&
       'args' in event
     );
-  } // A node.js profile is a single CpuProfileData, as opposed to a list of events.
-  return (
-    'samples' in profile &&
-    'timeDeltas' in profile &&
-    'startTime' in profile &&
-    'endTime' in profile
-  );
+    } // A node.js profile is a single CpuProfileData, as opposed to a list of events.
+    return (
+      'samples' in profile &&
+      'timeDeltas' in profile &&
+      'startTime' in profile &&
+      'endTime' in profile
+    );
+   
+ 
+
+  
 }
 
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
@@ -208,19 +213,24 @@ function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
 export function convertChromeProfile(
   profile: CpuProfileData | TracingEventUnion[]
 ): Promise<Profile> {
+
+  console.log('profile shit', profile)
+
   if (!Array.isArray(profile) && !Array.isArray(profile.traceEvents)) {
     // Assume that this is CpuProfileData from a node profile. Wrap it
     // in a list of TracingEvents so that the logic below can be re-used.
     profile = [wrapCpuProfileInEvent(profile)];
-  }
+  } 
 
+  
+  
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
 
   let events;
   if (Array.isArray(profile)) {
-    events = profile;
+    events = profile
   } else {
-    events = profile.traceEvents;
+    events = profile.traceEvents
   }
 
   for (const tracingEvent of events) {
