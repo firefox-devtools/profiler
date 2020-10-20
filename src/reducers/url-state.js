@@ -53,20 +53,6 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   }
 };
 
-//TODO: This is not used yet, see issue #222
-//This is for tracking mouse position in timeline-axis
-const mouseTimePosition: Reducer<Millseconds | null> = (
-  state = null,
-  action
-) => {
-  switch (action.type) {
-    case 'CHANGE_MOUSE_TIME_POSITION':
-      return action.mouseTimePosition;
-    default:
-      return state;
-  }
-};
-
 const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':

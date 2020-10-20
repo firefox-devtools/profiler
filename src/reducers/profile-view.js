@@ -572,6 +572,22 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
 };
 
 /**
+ * TODO: This is not used yet, see issue #222
+ * This is for tracking mouse position in timeline-axis
+ */
+const mouseTimePosition: Reducer<Millseconds | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_MOUSE_TIME_POSITION':
+      return action.mouseTimePosition;
+    default:
+      return state;
+  }
+};
+
+/**
  * The origins timeline is experimental. See the OriginsTimeline component
  * for more information.
  */
@@ -620,6 +636,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,
+      mouseTimePosition,
     }),
     profile,
     full: combineReducers({
