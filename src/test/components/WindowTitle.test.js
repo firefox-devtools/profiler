@@ -14,13 +14,14 @@ import {
   getEmptyThread,
 } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
-import { changeProfileName } from '../../actions/profile-view';
+import { changeProfileName, setDataSource } from '../../actions/profile-view';
 
 describe('WindowTitle', () => {
   it('shows basic window title', () => {
     const profile = getEmptyProfile();
     profile.threads.push(getEmptyThread());
     const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
     render(
       <Provider store={store}>
         <WindowTitle />
@@ -41,6 +42,7 @@ describe('WindowTitle', () => {
       toolkit: 'cocoa',
     });
     const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
     render(
       <Provider store={store}>
         <WindowTitle />
@@ -62,6 +64,7 @@ describe('WindowTitle', () => {
     });
     const store = storeWithProfile(profile);
     store.dispatch(changeProfileName('good profile'));
+    store.dispatch(setDataSource('from-url'));
     render(
       <Provider store={store}>
         <WindowTitle />
@@ -84,6 +87,7 @@ describe('WindowTitle', () => {
       product: '',
     });
     const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('from-url'));
     render(
       <Provider store={store}>
         <WindowTitle />
@@ -91,5 +95,19 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe('1/1/1970, 12:00:00 AM UTC – Firefox Profiler');
+  });
+
+  it('shows the correct title for uploaded recordings', () => {
+    const profile = getEmptyProfile();
+    profile.threads.push(getEmptyThread());
+    const store = storeWithProfile(profile);
+    store.dispatch(setDataSource('uploaded-recordings'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Uploaded Recordings – Firefox Profiler');
   });
 });
