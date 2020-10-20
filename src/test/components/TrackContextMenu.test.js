@@ -136,9 +136,9 @@ describe('timeline/TrackContextMenu', function() {
       const { hideAllTracksByType, getState } = setupGlobalTrack();
       fireFullClick(hideAllTracksByType());
       expect(getHumanReadableTracks(getState())).toEqual([
-        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
-        '  - hide [thread DOM Worker] SELECTED',
+        '  - hide all [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
       ]);
     });
