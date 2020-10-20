@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
 
-import ContextMenu from './ContextMenu';
+import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {

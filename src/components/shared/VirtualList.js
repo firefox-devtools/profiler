@@ -264,7 +264,9 @@ type Geometry = {
   innerRectY: CssPixels,
 };
 
-class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
+export class VirtualList<Item> extends React.PureComponent<
+  VirtualListProps<Item>
+> {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
   _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
   _geometry: ?Geometry;
@@ -423,5 +425,3 @@ class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
     );
   }
 }
-
-export default VirtualList;

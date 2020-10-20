@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { render } from '@testing-library/react';
-import ContextMenu from '../../components/shared/ContextMenu';
+import { ContextMenu } from '../../components/shared/ContextMenu';
 
 describe('ContextMenu', function() {
   it('correctly renders the context-menu with the props that were passed through', () => {

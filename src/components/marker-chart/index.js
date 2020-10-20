@@ -24,7 +24,7 @@ import {
   updatePreviewSelection,
   changeRightClickedMarker,
 } from 'firefox-profiler/actions/profile-view';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
 import type {
   Marker,
@@ -40,7 +40,7 @@ import type {
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
