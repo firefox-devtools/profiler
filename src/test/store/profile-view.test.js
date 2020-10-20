@@ -3605,16 +3605,14 @@ describe('getProcessedEventDelays', function() {
   });
 });
 
-// This test is for 'mouseTimePosition' redux store
+// This test is for 'mouseTimePosition' redux store, which tracks mouse position in timeline-axis
 describe('mouseTimePosition', function() {
   function setup() {
     const profile = getProfileFromTextSamples('A');
-
     return storeWithProfile(profile.profile);
   }
 
   it('should get mouse time position', () => {
-    // Test just the redux store here.
     const { dispatch, getState } = setup();
 
     dispatch(ProfileView.changeMouseTimePosition(null));
