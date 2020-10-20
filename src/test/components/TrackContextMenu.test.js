@@ -132,6 +132,17 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
+    it('can hide all the process', function() {
+      const { hideAllTracksByType, getState } = setupGlobalTrack();
+      fireFullClick(hideAllTracksByType());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide all [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
     it("can isolate the process's main thread", function() {
       const { isolateProcessMainThreadItem, getState } = setupGlobalTrack();
       fireFullClick(isolateProcessMainThreadItem());
@@ -318,7 +329,7 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker] SELECTED',
+        '  - hide [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
       ]);
 
@@ -327,8 +338,8 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
-        '  - show [thread Style] SELECTED',
+        '  - hide all [thread DOM Worker] SELECTED',
+        '  - show [thread Style] ',
       ]);
     });
 
