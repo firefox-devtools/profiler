@@ -165,9 +165,14 @@ export function isChromeProfile(profile: mixed): boolean {
     return false;
   }
 
+  let event;
   if (Array.isArray(profile)) {
     // Chrome profiles come as a list of events.
-    const event = profile[0];
+    event = profile[0];
+  } else if (Array.isArray(profile.traceEvents)) {
+    event = profile.traceEvents[0];
+  }
+  if (event) {
     // Lightly check that some properties exist that are in the TracingEvent.
     return (
       typeof event === 'object' &&
@@ -176,9 +181,7 @@ export function isChromeProfile(profile: mixed): boolean {
       'cat' in event &&
       'args' in event
     );
-  }
-
-  // A node.js profile is a single CpuProfileData, as opposed to a list of events.
+  } // A node.js profile is a single CpuProfileData, as opposed to a list of events.
   return (
     'samples' in profile &&
     'timeDeltas' in profile &&
@@ -205,7 +208,7 @@ function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
 export function convertChromeProfile(
   profile: CpuProfileData | TracingEventUnion[]
 ): Promise<Profile> {
-  if (!Array.isArray(profile)) {
+  if (!Array.isArray(profile) && !Array.isArray(profile.traceEvents)) {
     // Assume that this is CpuProfileData from a node profile. Wrap it
     // in a list of TracingEvents so that the logic below can be re-used.
     profile = [wrapCpuProfileInEvent(profile)];
@@ -213,7 +216,14 @@ export function convertChromeProfile(
 
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
 
-  for (const tracingEvent of profile) {
+  let events;
+  if (Array.isArray(profile)) {
+    events = profile;
+  } else {
+    events = profile.traceEvents;
+  }
+
+  for (const tracingEvent of events) {
     if (
       typeof tracingEvent !== 'object' ||
       tracingEvent === null ||
