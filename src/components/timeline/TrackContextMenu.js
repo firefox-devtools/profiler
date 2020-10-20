@@ -308,7 +308,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return localTrackNames[rightClickedTrack.trackIndex];
   }
 
-  getRightClickedTrackType( rightClickedThreadIndex: TrackReference ): string {
+  getRightClickedTrackType(rightClickedThreadIndex: TrackReference): string {
     const { getLocalTracksByPid, getGlobalTracks } = this.props;
 
     if (rightClickedThreadIndex.type === 'global') {
