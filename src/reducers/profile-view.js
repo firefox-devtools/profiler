@@ -29,6 +29,7 @@ import type {
   CallNodePath,
   IndexIntoFuncTable,
   ThreadsKey,
+  Milliseconds,
 } from 'firefox-profiler/types';
 import { objectMap } from '../utils/flow';
 
@@ -575,7 +576,7 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
  * TODO: This is not used yet, see issue #222
  * This is for tracking mouse position in timeline-axis
  */
-const mouseTimePosition: Reducer<Millseconds | null> = (
+const mouseTimePosition: Reducer<Milliseconds | null> = (
   state = null,
   action
 ) => {

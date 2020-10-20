@@ -62,6 +62,7 @@ import type {
   MarkerIndex,
   Transform,
   ThreadsKey,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 /**
