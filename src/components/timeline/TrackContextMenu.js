@@ -295,16 +295,22 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return localTrackNames[rightClickedTrack.trackIndex];
   }
 
-  getRightClickedTrackType(rightClickedTrack: TrackReference): pid {
+  getRightClickedTrackType(rightClickedThreadIndex: TrackReference): string {
     const { globalTrackNames, localTrackNamesByPid } = this.props;
 
-    if (rightClickedTrack.type === 'global') {
-      return globalTrackNames[rightClickedTrack.trackIndex];
+    if (rightClickedThreadIndex.type === 'global') {
+      return globalTrackNames[rightClickedThreadIndex.trackIndex];
     }
-    const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
-    if (localTrackNames === 'local') {
-      return localTrackNames[rightClickedTrack.trackIndex];
+    const localTrackNames = localTrackNamesByPid.get(
+      rightClickedThreadIndex.pid
+    );
+    if (localTrackNames === undefined) {
+      console.error(
+        'Expected to find a local and globaltrack name for the given pid.'
+      );
+      return 'Unknown Track';
     }
+    return localTrackNames[rightClickedThreadIndex.trackIndex];
   }
 
   renderIsolateProcess() {
@@ -552,7 +558,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         key={trackIndex + 'hide-all'}
         preventClose={false}
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
-        onClick={this._toggleLocalTrackVisibility}
+        onClick={this._toggleGlobalTrackVisibility}
       >
         Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
         tracks
