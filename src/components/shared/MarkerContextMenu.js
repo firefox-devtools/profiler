@@ -98,7 +98,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.end,
+      selectionStart: marker.end || marker.start,
       selectionEnd,
     });
   };
@@ -115,7 +115,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       ? previewSelection.selectionStart
       : committedRange.start;
 
-    let selectionEnd = marker.start || marker.end;
+    let selectionEnd = marker.start;
 
     if (selectionEnd === selectionStart) {
       // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
@@ -292,7 +292,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
           </>
         ) : (
           <>
-            <SubMenu title="Set selection start ">
+            <SubMenu title="Set selection start">
               <MenuItem onClick={this.setStartRangeFromMarkerStart}>
                 From the start of this marker
               </MenuItem>
@@ -300,7 +300,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
                 From the end of this marker
               </MenuItem>
             </SubMenu>
-            <SubMenu title="Set selection end ">
+            <SubMenu title="Set selection end">
               <MenuItem onClick={this.setEndRangeFromMarkerStart}>
                 From the start of this marker
               </MenuItem>
