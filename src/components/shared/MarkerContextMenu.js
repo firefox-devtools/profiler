@@ -63,12 +63,11 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class MarkerContextMenuImpl extends PureComponent<Props> {
-  setStartRangeFromMarkerStart = () => {
+  _setStartRange = (selectionStart: number) => {
     const {
       updatePreviewSelection,
       previewSelection,
       committedRange,
-      marker,
     } = this.props;
 
     const selectionEnd = previewSelection.hasSelection
@@ -78,87 +77,55 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.start,
+      selectionStart,
       selectionEnd,
     });
+  };
+
+  _setEndRange = (selectionEnd: number) => {
+    const {
+      updatePreviewSelection,
+      committedRange,
+      previewSelection,
+    } = this.props;
+
+    const selectionStart = previewSelection.hasSelection
+      ? previewSelection.selectionStart
+      : committedRange.start;
+
+    if (selectionEnd === selectionStart) {
+      // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
+      // small bit of time at the end to make sure the selected marker doesn't disappear
+      // from view.
+      selectionEnd += 0.0001;
+    }
+
+    updatePreviewSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart,
+      selectionEnd,
+    });
+  };
+
+  setStartRangeFromMarkerStart = () => {
+    const { marker } = this.props;
+    this._setStartRange(marker.start);
   };
 
   setStartRangeFromMarkerEnd = () => {
-    const {
-      updatePreviewSelection,
-      previewSelection,
-      committedRange,
-      marker,
-    } = this.props;
-
-    const selectionEnd = previewSelection.hasSelection
-      ? previewSelection.selectionEnd
-      : committedRange.end;
-
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: marker.end || marker.start,
-      selectionEnd,
-    });
+    const { marker } = this.props;
+    this._setStartRange(marker.end || marker.start);
   };
 
   setEndRangeFromMarkerStart = () => {
-    const {
-      marker,
-      updatePreviewSelection,
-      committedRange,
-      previewSelection,
-    } = this.props;
-
-    const selectionStart = previewSelection.hasSelection
-      ? previewSelection.selectionStart
-      : committedRange.start;
-
-    let selectionEnd = marker.start;
-
-    if (selectionEnd === selectionStart) {
-      // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
-      // small bit of time at the end to make sure the selected marker doesn't disappear
-      // from view.
-      selectionEnd += 0.0001;
-    }
-
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart,
-      selectionEnd,
-    });
+    const { marker } = this.props;
+    this._setEndRange(marker.start);
   };
 
   setEndRangeFromMarkerEnd = () => {
-    const {
-      marker,
-      updatePreviewSelection,
-      committedRange,
-      previewSelection,
-    } = this.props;
-
-    const selectionStart = previewSelection.hasSelection
-      ? previewSelection.selectionStart
-      : committedRange.start;
-
-    let selectionEnd = marker.end || marker.start;
-
-    if (selectionEnd === selectionStart) {
-      // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
-      // small bit of time at the end to make sure the selected marker doesn't disappear
-      // from view.
-      selectionEnd += 0.0001;
-    }
-
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart,
-      selectionEnd,
-    });
+    const { marker } = this.props;
+    this._setEndRange(marker.end || marker.start);
   };
 
   setRangeByDuration = () => {
