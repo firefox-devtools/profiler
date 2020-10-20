@@ -36,6 +36,10 @@ export function bisectionRight(
   low = low || 0;
   high = high || array.length;
 
+  if (low < 0 || low > array.length || high < 0 || high > array.length) {
+    throw new TypeError("low and high must lie within the array's range");
+  }
+
   while (low < high) {
     const mid = (low + high) >> 1;
 
@@ -57,6 +61,10 @@ export function bisectionLeft(
 ): number {
   low = low || 0;
   high = high || array.length;
+
+  if (low < 0 || low > array.length || high < 0 || high > array.length) {
+    throw new TypeError("low and high must lie within the array's range");
+  }
 
   while (low < high) {
     const mid = (low + high) >> 1;

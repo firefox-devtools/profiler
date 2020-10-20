@@ -31,6 +31,15 @@ describe('bisectionRight', function() {
   it('returns array length if x is greater than all elements', function() {
     expect(bisectionRight(array, 15)).toBe(13);
   });
+
+  it('throws TypeError if either low or high are outside the range of the array', function() {
+    expect(() => bisectionRight(array, 15, -2)).toThrow(TypeError);
+    expect(() => bisectionRight(array, 15, 100)).toThrow(TypeError);
+    expect(() => bisectionRight(array, 15, 2, -10)).toThrow(TypeError);
+    expect(() => bisectionRight(array, 15, 2, 100)).toThrow(TypeError);
+    expect(() => bisectionRight(array, 15, -20, -10)).toThrow(TypeError);
+    expect(() => bisectionRight(array, 15, 100, 200)).toThrow(TypeError);
+  });
 });
 
 describe('bisectionLeft', function() {
@@ -58,5 +67,14 @@ describe('bisectionLeft', function() {
 
   it('returns array length if x is greater than all elements', function() {
     expect(bisectionLeft(array, 15)).toBe(13);
+  });
+
+  it('throws TypeError if either low or high are outside the range of the array', function() {
+    expect(() => bisectionLeft(array, 15, -2)).toThrow(TypeError);
+    expect(() => bisectionLeft(array, 15, 100)).toThrow(TypeError);
+    expect(() => bisectionLeft(array, 15, 2, -10)).toThrow(TypeError);
+    expect(() => bisectionLeft(array, 15, 2, 100)).toThrow(TypeError);
+    expect(() => bisectionLeft(array, 15, -20, -10)).toThrow(TypeError);
+    expect(() => bisectionLeft(array, 15, 100, 200)).toThrow(TypeError);
   });
 });
