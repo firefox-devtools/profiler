@@ -299,11 +299,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const { globalTrackNames, localTrackNamesByPid } = this.props;
 
     if (rightClickedTrack.type === 'global') {
-      return globalTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
+      return globalTrackNames[rightClickedTrack.trackIndex];
     }
     const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
     if (localTrackNames === 'local') {
-      return localTrackNames[rightClickedTrack.trackIndex + 'hide-all'];
+      return localTrackNames[rightClickedTrack.trackInde + 'hide-all'];
     }
   }
 
