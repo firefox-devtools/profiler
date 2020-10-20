@@ -138,7 +138,7 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
-        '  - hide all [thread DOM Worker]',
+        '  - hide [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
       ]);
     });
