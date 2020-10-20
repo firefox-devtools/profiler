@@ -89,6 +89,19 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
   };
 
+  _toggleHideAllTrackVisibility = (
+    _,
+    data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
+  ): void => {
+    const { trackIndex, pid } = data;
+    const { hideLocalTrack, hiddenGlobalTracks, hideGlobalTrack } = this.props;
+    if (hiddenGlobalTracks.has(trackIndex)) {
+      hideGlobalTrack(trackIndex);
+    } else {
+      hideLocalTrack(pid);
+    }
+  };
+
   _toggleLocalTrackVisibility = (
     _,
     data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
@@ -296,21 +309,19 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 
   getRightClickedTrackType(rightClickedThreadIndex: TrackReference): string {
-    const { globalTrackNames, localTrackNamesByPid } = this.props;
+    const { getLocalTracksByPid, getGlobalTracks } = this.props;
 
     if (rightClickedThreadIndex.type === 'global') {
-      return globalTrackNames[rightClickedThreadIndex.trackIndex];
+      return getLocalTracksByPid[rightClickedThreadIndex.trackIndex];
     }
-    const localTrackNames = localTrackNamesByPid.get(
-      rightClickedThreadIndex.pid
-    );
-    if (localTrackNames === undefined) {
+    const globalTrackNames = getGlobalTracks.get(rightClickedThreadIndex.pid);
+    if (globalTrackNames === undefined) {
       console.error(
         'Expected to find a local and globaltrack name for the given pid.'
       );
       return 'Unknown Track';
     }
-    return localTrackNames[rightClickedThreadIndex.trackIndex];
+    return globalTrackNames[rightClickedThreadIndex.trackIndex];
   }
 
   renderIsolateProcess() {
@@ -546,7 +557,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           key={trackIndex + 'hide-all'}
           preventClose={false}
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
-          onClick={this._toggleGlobalTrackVisibility}
+          onClick={this._toggleHideAllTrackVisibility}
         >
           Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
           tracks
@@ -558,7 +569,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         key={trackIndex + 'hide-all'}
         preventClose={false}
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
-        onClick={this._toggleGlobalTrackVisibility}
+        onClick={this._toggleHideAllTrackVisibility}
       >
         Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
         tracks
