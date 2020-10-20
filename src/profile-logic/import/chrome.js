@@ -209,8 +209,6 @@ function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
 export function convertChromeProfile(
   profile: CpuProfileData | TracingEventUnion[]
 ): Promise<Profile> {
-  console.log('profile shit', profile);
-
   if (!Array.isArray(profile) && !Array.isArray(profile.traceEvents)) {
     // Assume that this is CpuProfileData from a node profile. Wrap it
     // in a list of TracingEvents so that the logic below can be re-used.
