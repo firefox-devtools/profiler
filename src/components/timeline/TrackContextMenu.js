@@ -98,7 +98,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (hiddenGlobalTracks.has(trackIndex)) {
       hideGlobalTrack(trackIndex);
     } else {
-      hideLocalTrack(pid);
+      hideLocalTrack(pid, trackIndex);
     }
   };
 
@@ -308,7 +308,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return localTrackNames[rightClickedTrack.trackIndex];
   }
 
-  getRightClickedTrackType(rightClickedThreadIndex: TrackReference): string {
+  getRightClickedTrackType(
+    rightClickedThreadIndex: TrackReference,
+    getLocalTracksByPid: LocalTrack,
+    getGlobalTracks: GlobalTrack
+  ): string {
     const { getLocalTracksByPid, getGlobalTracks } = this.props;
 
     if (rightClickedThreadIndex.type === 'global') {
