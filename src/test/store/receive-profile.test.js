@@ -1461,30 +1461,36 @@ describe('actions/receive-profile', function() {
       url2: string,
     |};
 
+    type SetupOptionsParams = $Shape<{|
+      +skipMarkers: boolean,
+    |}>;
+
     async function setup(
       { profile1, profile2 }: SetupProfileParams,
-      { url1, url2 }: SetupUrlParams
+      { url1, url2 }: SetupUrlParams,
+      { skipMarkers }: SetupOptionsParams = {}
     ): * {
-      profile1.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['A', 1, 3],
-          ['A', 1],
-          ['B', 2],
-          ['C', 3],
-          ['D', 4],
-          ['E', 5],
-        ])
-      );
-      profile2.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['F', 1, 3],
-          ['G', 2],
-          ['H', 3],
-          ['I', 4],
-          ['J', 5],
-        ])
-      );
-
+      if (skipMarkers !== true) {
+        profile1.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['A', 1, 3],
+            ['A', 1],
+            ['B', 2],
+            ['C', 3],
+            ['D', 4],
+            ['E', 5],
+          ])
+        );
+        profile2.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['F', 1, 3],
+            ['G', 2],
+            ['H', 3],
+            ['I', 4],
+            ['J', 5],
+          ])
+        );
+      }
       window.fetch
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
@@ -1576,6 +1582,31 @@ describe('actions/receive-profile', function() {
       // Check that expandUrl has been called
       expect(expandUrl).toHaveBeenCalledWith(shortUrl1);
       expect(expandUrl).toHaveBeenCalledWith(shortUrl2);
+    });
+
+    it('keeps the initial rootRange as default', async function() {
+      //Time sample has been set for 100000ms (100s)
+      const { profile } = getProfileFromTextSamples(`
+        100000 
+        A
+      `); //
+      const {
+        profile1,
+        profile2,
+        dispatch,
+        getState,
+        resultProfile,
+        globalTracks,
+        rootRange,
+      } = await setup(
+        { profile1: profile, profile2: profile },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        },
+        { skipMarkers: true }
+      );
+      expect(rootRange).toEqual({ start: 0, end: 1 });
     });
 
     it('filters samples and markers, according to the URL', async function() {
