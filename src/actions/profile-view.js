@@ -119,7 +119,6 @@ export function changeRightClickedCallNode(
   };
 }
 
-
 /**
  * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
  * of that sample's stack.
