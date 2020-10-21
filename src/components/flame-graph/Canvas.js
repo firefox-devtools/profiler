@@ -406,6 +406,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     if (depth === null) {
       return;
     }
+    
     const {
       maxStackDepth,
       updatePreviewSelection,
