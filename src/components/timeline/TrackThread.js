@@ -7,10 +7,14 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
-import explicitConnect from '../../utils/connect';
-import { withSize, type SizeProps } from '../shared/WithSize';
-import ThreadStackGraph from '../shared/thread/StackGraph';
-import ThreadActivityGraph from '../shared/thread/ActivityGraph';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import {
+  withSize,
+  type SizeProps,
+} from 'firefox-profiler/components/shared/WithSize';
+import { ThreadStackGraph } from 'firefox-profiler/components/shared/thread/StackGraph';
+import { ThreadActivityGraph } from 'firefox-profiler/components/shared/thread/ActivityGraph';
+
 import {
   getProfileInterval,
   getCommittedRange,
@@ -34,12 +38,12 @@ import {
   focusCallTree,
   selectLeafCallNode,
   selectRootCallNode,
-} from '../../actions/profile-view';
-import { reportTrackThreadHeight } from '../../actions/app';
-import { hasThreadKeys } from '../../profile-logic/profile-data';
+} from 'firefox-profiler/actions/profile-view';
+import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
+import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import { getTrackSelectionModifier } from '../../utils';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import './TrackThread.css';
 
 import type {
@@ -58,7 +62,7 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +threadsKey: ThreadsKey,
