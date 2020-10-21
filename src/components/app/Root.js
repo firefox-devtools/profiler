@@ -14,6 +14,8 @@ import ServiceWorkerManager from './ServiceWorkerManager';
 
 import type { Store } from 'firefox-profiler/types';
 
+import './Root.css';
+
 type RootProps = {
   store: Store,
 };
