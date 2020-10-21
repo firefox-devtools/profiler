@@ -1590,15 +1590,7 @@ describe('actions/receive-profile', function() {
         100000 
         A
       `); //
-      const {
-        profile1,
-        profile2,
-        dispatch,
-        getState,
-        resultProfile,
-        globalTracks,
-        rootRange,
-      } = await setup(
+      const { rootRange } = await setup(
         { profile1: profile, profile2: profile },
         {
           url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
