@@ -4,6 +4,8 @@
 
 // @flow
 import * as React from 'react';
+import memoize from 'memoize-immutable';
+import NamedTupleMap from 'namedtuplemap';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
@@ -157,7 +159,6 @@ type State = {|
   containerLeft: CssPixels,
   viewportTop: CssPixels,
   viewportBottom: CssPixels,
-  horizontalViewport: HorizontalViewport,
   dragX: CssPixels,
   dragY: CssPixels,
   isDragging: boolean,
@@ -247,11 +248,6 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       getDefaultState(props: ViewportProps) {
-        const { previewSelection, timeRange } = props.viewportProps;
-        const horizontalViewport = this.getHorizontalViewport(
-          previewSelection,
-          timeRange
-        );
         const { startsAtBottom, maxViewportHeight } = props.viewportProps;
         return {
           containerWidth: 0,
@@ -259,7 +255,6 @@ export const withChartViewport: WithChartViewport<*, *> =
           containerLeft: 0,
           viewportTop: 0,
           viewportBottom: startsAtBottom ? maxViewportHeight : 0,
-          horizontalViewport,
           dragX: 0,
           dragY: 0,
           isDragging: false,
@@ -297,21 +292,23 @@ export const withChartViewport: WithChartViewport<*, *> =
         ) {
           this.setState(this.getDefaultState(newProps));
           this._setSizeNextFrame();
-        } else if (
-          this.props.viewportProps.previewSelection !==
-            newProps.viewportProps.previewSelection ||
-          this.props.viewportProps.timeRange !==
-            newProps.viewportProps.timeRange
-        ) {
-          const { previewSelection, timeRange } = newProps.viewportProps;
+        }
+      }
+
+      horizontalViewportMemoized = memoize(
+        (props: ViewportProps) => {
+          const { previewSelection, timeRange } = props.viewportProps;
           const horizontalViewport = this.getHorizontalViewport(
             previewSelection,
             timeRange
           );
-          this.setState({
-            horizontalViewport,
-          });
-        } else if (
+          return horizontalViewport;
+        },
+        { cache: new NamedTupleMap() }
+      );
+
+      componentDidUpdate(newProps: ViewportProps) {
+        if (
           this.props.panelLayoutGeneration !== newProps.panelLayoutGeneration
         ) {
           this._setSizeNextFrame();
@@ -800,11 +797,14 @@ export const withChartViewport: WithChartViewport<*, *> =
           containerHeight,
           viewportTop,
           viewportBottom,
-          horizontalViewport: { viewportLeft, viewportRight },
           isDragging,
           isScrollHintVisible,
           isSizeSet,
         } = this.state;
+
+        const { viewportLeft, viewportRight } = this.horizontalViewportMemoized(
+          this.props
+        );
 
         const viewportClassName = classNames(
           {
