@@ -8,17 +8,17 @@ import {
   stringifyCommittedRanges,
   stringifyStartEnd,
   parseCommittedRanges,
-} from 'firefox-profiler/profile-logic/committed-ranges';
+} from '../profile-logic/committed-ranges';
 import {
   stringifyTransforms,
   parseTransforms,
-} from 'firefox-profiler/profile-logic/transforms';
+} from '../profile-logic/transforms';
 import {
   assertExhaustiveCheck,
   toValidTabSlug,
   ensureExists,
-} from 'firefox-profiler/utils/flow';
-import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
+} from '../utils/flow';
+import { toValidCallTreeSummaryStrategy } from '../profile-logic/profile-data';
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
