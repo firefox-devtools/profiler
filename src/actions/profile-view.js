@@ -622,6 +622,85 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
 }
 
 /**
+ * This action hide all global and local track.
+ */
+
+export function hideAllTracksByType(
+  trackIndex: TrackIndex,
+  pid: Pid
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
+    const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
+
+    if (hiddenGlobalTracks.has(trackIndex)) {
+      return;
+    }
+
+    if (hiddenLocalTracks.has(trackIndex)) {
+      return;
+    }
+
+    const globalTracks = getGlobalTracks(getState());
+    if (globalTracks.length === hiddenGlobalTracks.size + 1) {
+      return;
+    }
+
+    const localTracks = getLocalTracks(getState(), pid);
+    if (localTrackToHide.type === 'thread') {
+      newSelectedThreadIndexes.delete(localTrackToHide.threadIndex);
+    }
+
+    const globalTrackToHide = globalTracks[trackIndex];
+    const newSelectedThreadIndexes: Set<ThreadIndex> = new Set(
+      getSelectedThreadIndexes(getState())
+    );
+
+    const localTrackToHide = localTracks[trackIndex];
+    if (hiddenLocalTracks.size + 1 === localTracks.length) {
+      if (globalTracks.mainThreadIndex === null) {
+        return;
+      }
+
+      if (globalTrackToHide.type === 'process') {
+        if (globalTrackToHide.mainThreadIndex !== null) {
+          newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
+        }
+
+        if (globalTrackToHide.mainThreadIndex !== null) {
+          newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
+        }
+
+        if (newSelectedThreadIndexes.size === 0) {
+          const threadIndex = _findOtherVisibleThread(getState, trackIndex);
+          if (threadIndex === null) {
+            return;
+          }
+          newSelectedThreadIndexes.add(threadIndex);
+        }
+      }
+
+      if (newSelectedThreadIndexes.size === 0) {
+        return;
+      }
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'hideAllTracksByType',
+    });
+
+    dispatch({
+      type: 'HIDE_ALL_TRACKS_BY_TYPE',
+      pid,
+      trackIndex: trackIndex,
+      selectedThreadIndexes: newSelectedThreadIndexes,
+    });
+  };
+}
+
+/**
  * This action shows a specific global track.
  */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {

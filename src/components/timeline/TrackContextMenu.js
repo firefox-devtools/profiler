@@ -59,6 +59,7 @@ type StateProps = {|
   +rightClickedThreadIndex: ThreadIndex | null,
   +globalTrackNames: string[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +hideAllTracksByType: Map<Pid, Set<TrackIndex>>,
   +localTrackNamesByPid: Map<Pid, string[]>,
 |};
 
@@ -67,6 +68,7 @@ type DispatchProps = {|
   +showGlobalTrack: typeof showGlobalTrack,
   +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
+  +hideAllTracksByType: typeof hideAllTracksByType,
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
@@ -89,16 +91,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
   };
 
-  _toggleHideAllTrackVisibility = (
+  _hideAllTracksByType = (
     _,
     data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
   ): void => {
     const { trackIndex, pid } = data;
-    const { hideLocalTrack, hiddenGlobalTracks, hideGlobalTrack } = this.props;
-    if (hiddenGlobalTracks.has(trackIndex)) {
-      hideGlobalTrack(trackIndex);
-    } else {
-      hideLocalTrack(pid, trackIndex);
+    const { hideAllTracksByType } = this.props;
+    if (hideAllTracksByType.has(trackIndex)) {
+      hideAllTracksByType(pid, trackIndex);
     }
   };
 
@@ -312,18 +312,16 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const { localTracksByPid, globalTracks } = this.props;
 
     if (rightClickedThreadIndex.type === 'global') {
-      return localTracksByPid[rightClickedThreadIndex.trackIndex];
+      return localTracksByPid[rightClickedThreadIndex.trackIndex].type;
     }
-    const globalTrackNames = globalTracks.get(
-      rightClickedThreadIndex.trackIndex
-    );
-    if (globalTrackNames === undefined) {
+    const globalTrack = globalTracks.get(rightClickedThreadIndex.trackIndex);
+    if (globalTrack === undefined) {
       console.error(
         'Expected to find a local and globaltrack name for the given pid.'
       );
       return 'Unknown Track';
     }
-    return globalTracks[rightClickedThreadIndex.trackIndex];
+    return globalTracks[rightClickedThreadIndex.trackIndex].type;
   }
 
   renderIsolateProcess() {
@@ -559,7 +557,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           key={trackIndex + 'hide-all'}
           preventClose={false}
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
-          onClick={this._toggleHideAllTrackVisibility}
+          onClick={this._hideAllTracksByType}
         >
           Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
           tracks
@@ -571,7 +569,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         key={trackIndex + 'hide-all'}
         preventClose={false}
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
-        onClick={this._toggleHideAllTrackVisibility}
+        onClick={this._hideAllTracksByType}
       >
         Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
         tracks
@@ -672,6 +670,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     hideGlobalTrack,
+    hideAllTracksByType,
     showGlobalTrack,
     isolateProcess,
     isolateLocalTrack,
