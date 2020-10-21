@@ -4,7 +4,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-require('./FooterLinks.css');
+import './FooterLinks.css';
 
 type State = {| hide: boolean |};
 
