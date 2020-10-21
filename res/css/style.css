@@ -44,13 +44,6 @@ body,
   color: var(--grey-90);
 }
 
-.nodeIcon {
-  min-width: 14px;
-  height: 100%;
-  min-height: 14px;
-  background: center / contain no-repeat;
-}
-
 .treeView {
   display: flex;
   flex: 1;
