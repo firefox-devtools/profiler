@@ -647,8 +647,8 @@ export function hideAllTracksByType(
     }
 
     const localTracks = getLocalTracks(getState(), pid);
-    if (localTrackToHide.type === 'thread') {
-      newSelectedThreadIndexes.delete(localTrackToHide.threadIndex);
+    if (localTracks.type === 'thread') {
+      newSelectedThreadIndexes.delete(localTracks.threadIndex);
     }
 
     const globalTrackToHide = globalTracks[trackIndex];
@@ -656,7 +656,6 @@ export function hideAllTracksByType(
       getSelectedThreadIndexes(getState())
     );
 
-    const localTrackToHide = localTracks[trackIndex];
     if (hiddenLocalTracks.size + 1 === localTracks.length) {
       if (globalTracks.mainThreadIndex === null) {
         return;

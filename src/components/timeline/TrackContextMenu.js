@@ -68,7 +68,6 @@ type DispatchProps = {|
   +showGlobalTrack: typeof showGlobalTrack,
   +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
-  +hideAllTracksByType: typeof hideAllTracksByType,
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
@@ -314,7 +313,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (rightClickedThreadIndex.type === 'global') {
       return localTracksByPid[rightClickedThreadIndex.trackIndex].type;
     }
-    const globalTrack = globalTracks.get(rightClickedThreadIndex.trackIndex);
+    const globalTrack = globalTracks(rightClickedThreadIndex.trackIndex);
     if (globalTrack === undefined) {
       console.error(
         'Expected to find a local and globaltrack name for the given pid.'
@@ -661,7 +660,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     hiddenGlobalTracks: getHiddenGlobalTracks(state),
     rightClickedTrack: getRightClickedTrack(state),
     globalTracks: getGlobalTracks(state),
-    hideAllTracksByType: getRightClickedTrackType(state),
     hiddenLocalTracksByPid: getHiddenLocalTracksByPid(state),
     localTrackOrderByPid: getLocalTrackOrderByPid(state),
     rightClickedThreadIndex: getRightClickedThreadIndex(state),
@@ -671,7 +669,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     hideGlobalTrack,
-    hideAllTracksByType,
     showGlobalTrack,
     isolateProcess,
     isolateLocalTrack,
