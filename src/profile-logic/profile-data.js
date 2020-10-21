@@ -1763,21 +1763,14 @@ export function computeCallNodeMaxDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo
 ): number {
-  let maxDepth = 0;
-  const { samples } = thread;
-  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  for (let i = 0; i < samples.length; i++) {
-    const stackIndex = samples.stack[i];
-    if (stackIndex !== null) {
-      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      // Change to one-based depth
-      const depth = callNodeTable.depth[callNodeIndex] + 1;
-      if (depth > maxDepth) {
-        maxDepth = depth;
-      }
-    }
+  if (
+    thread.samples.length === 0 ||
+    callNodeInfo.callNodeTable.depth.length === 0
+  ) {
+    return 0;
   }
-  return maxDepth;
+
+  return Math.max(...callNodeInfo.callNodeTable.depth) + 1;
 }
 
 export function invertCallstack(
