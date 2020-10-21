@@ -405,7 +405,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
     const {
       maxStackDepth,
-      flameGraphTiming,
+      stackFrameHeight,
       thread,
       weightType,
     } = this.props;
@@ -417,7 +417,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       depthItem
     );
 
-    flameGraphTiming({
+    stackFrameHeight({
       hasSelection: true,
       isModifying: true,
       selectionStart: start,
