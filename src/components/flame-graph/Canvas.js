@@ -52,6 +52,9 @@ export type OwnProps = {|
   +maxStackDepth: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
+  +updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >,
   +callTree: CallTree,
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -405,7 +408,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
     const {
       maxStackDepth,
-      selectedCallNodeIndex,
+      updatePreviewSelection,
       thread,
       weightType,
     } = this.props;
@@ -417,7 +420,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       depthItem
     );
 
-    selectedCallNodeIndex({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: true,
       selectionStart: start,
