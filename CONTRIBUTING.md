@@ -69,7 +69,7 @@ The web app doesn't include any performance profiles by default, so you'll need 
  #### 1. Record a profile: 
  - Open `about:config` in Firefox.
  - Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
- - Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com/) homepage to enable it.
+ - Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
  - Record a profile using the menu button, and it should open up in your local environment automatically.
 
  #### 2. Use an existing profile:
