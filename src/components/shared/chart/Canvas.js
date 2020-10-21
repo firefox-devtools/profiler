@@ -317,7 +317,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
           onDoubleClick={this._onDoubleClick}
         />
         {!isDragging && tooltipContents ? (
-          <Tooltip key={this.state.pageX} mouseX={pageX} mouseY={pageY}>
+          <Tooltip mouseX={pageX} mouseY={pageY}>
             {tooltipContents}
           </Tooltip>
         ) : null}

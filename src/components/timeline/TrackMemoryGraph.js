@@ -407,7 +407,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
         {hoveredCounter === null ? null : (
           <>
             {this._renderMemoryDot(hoveredCounter)}
-            <Tooltip key={mouseX} mouseX={mouseX} mouseY={mouseY}>
+            <Tooltip mouseX={mouseX} mouseY={mouseY}>
               {this._renderTooltip(hoveredCounter)}
             </Tooltip>
           </>

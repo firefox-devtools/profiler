@@ -25,8 +25,6 @@ type State = {
 };
 
 export class Tooltip extends React.PureComponent<Props, State> {
-  _isMounted: boolean = false;
-
   state = {
     interiorElement: null,
   };
@@ -39,6 +37,15 @@ export class Tooltip extends React.PureComponent<Props, State> {
   _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
   };
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.children !== this.props.children) {
+      // Force an additional update to this component if the children content is
+      // different as it needs to fully lay out one time on the DOM to proper calculate
+      // sizing and positioning.
+      this.forceUpdate();
+    }
+  }
 
   render() {
     const { children, mouseX, mouseY } = this.props;
