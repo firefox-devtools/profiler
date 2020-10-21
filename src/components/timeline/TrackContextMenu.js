@@ -661,6 +661,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     hiddenGlobalTracks: getHiddenGlobalTracks(state),
     rightClickedTrack: getRightClickedTrack(state),
     globalTracks: getGlobalTracks(state),
+    hideAllTracksByType: getRightClickedTrackType(state),
     hiddenLocalTracksByPid: getHiddenLocalTracksByPid(state),
     localTrackOrderByPid: getLocalTrackOrderByPid(state),
     rightClickedThreadIndex: getRightClickedThreadIndex(state),
