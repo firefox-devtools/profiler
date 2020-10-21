@@ -153,6 +153,11 @@ export function mergeProfilesForDiffing(
       ),
     };
 
+    //Screenshot markers is in different threads of the imported profile.
+    //These markers are extracted and merged here using the mergeScreenshotMarkers().
+    const { markerTable } = mergeScreenshotMarkers(profile.threads, thread);
+    thread.markers = { ...thread.markers, ...markerTable };
+
     // We filter the profile using the range from the state for this profile.
     const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
     const committedRange =
@@ -1097,4 +1102,68 @@ function mergeMarkers(
   });
 
   return { markerTable: newMarkerTable, translationMaps };
+}
+
+/**
+ * Merge screenshot markers from different threads. And update the target threads string table while doing it.
+ */
+function mergeScreenshotMarkers(
+  threads: Thread[],
+  targetThread: Thread
+): {
+  markerTable: RawMarkerTable,
+  translationMaps: TranslationMapForMarkers[],
+} {
+  const targetMarkerTable = { ...targetThread.markers };
+  const translationMaps = [];
+
+  threads.forEach(thread => {
+    if (thread.stringTable.hasString('CompositorScreenshot')) {
+      const translationMap = new Map();
+      const { markers, stringTable } = thread;
+
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        if (
+          markers.data[markerIndex] !== null &&
+          markers.data[markerIndex].type === 'CompositorScreenshot'
+        ) {
+          // We need to move the name string to the new string table if doesn't exist.
+          const nameIndex = markers.name[markerIndex];
+          const newName =
+            nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+          targetMarkerTable.name.push(
+            newName === null
+              ? -1
+              : targetThread.stringTable.indexForString(newName)
+          );
+
+          // We need to move the url string to the new string table if doesn't exist.
+          const urlIndex = markers.data[markerIndex].url;
+          const newUrl = urlIndex >= 0 ? stringTable.getString(urlIndex) : null;
+
+          // Move compositor screenshot marker data to the new marker table.
+          const compositorScreenshotMarkerData = {
+            ...markers.data[markerIndex],
+          };
+          compositorScreenshotMarkerData.url =
+            newUrl === null
+              ? -1
+              : targetThread.stringTable.indexForString(newUrl);
+          targetMarkerTable.data.push(compositorScreenshotMarkerData);
+          // Move all other arrays to the new marker table
+          targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
+          targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
+          targetMarkerTable.phase.push(markers.phase[markerIndex]);
+          targetMarkerTable.category.push(markers.category[markerIndex]);
+
+          // Set the translation map and increase the table length.
+          translationMap.set(markerIndex, targetMarkerTable.length);
+          targetMarkerTable.length++;
+        }
+      }
+      translationMaps.push(translationMap);
+    }
+  });
+
+  return { markerTable: targetMarkerTable, translationMaps };
 }
