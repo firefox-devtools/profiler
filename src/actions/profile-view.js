@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- * Working on hiding all tracks components */
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
 import { oneLine } from 'common-tags';
@@ -120,16 +119,6 @@ export function changeRightClickedCallNode(
   };
 }
 
-export function changeDoubleClickedCallNode(
-  threadsKey: ThreadsKey,
-  callNodePath: CallNodePath | null
-) {
-  return {
-    type: 'CHANGE_DOUBLE_CLICKED_CALL_NODE',
-    threadsKey,
-    callNodePath,
-  };
-}
 
 /**
  * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
