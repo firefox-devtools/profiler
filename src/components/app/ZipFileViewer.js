@@ -171,7 +171,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       zipFileTable,
       returnToZipFileList,
       showErrorForNoFileInZip,
-    } = prevProps;
+    } = this.props;
     if (pathInZipFile !== zipFileState.pathInZipFile) {
       // The UrlState and ZipFileState are out of sync, they need to be
       // updated.
