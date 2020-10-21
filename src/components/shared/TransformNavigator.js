@@ -6,7 +6,7 @@
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import FilterNavigatorBar from './FilterNavigatorBar';
+import { FilterNavigatorBar } from './FilterNavigatorBar';
 import { popTransformsFromStack } from 'firefox-profiler/actions/profile-view';
 
 import type { State } from 'firefox-profiler/types';
@@ -20,7 +20,11 @@ type DispatchProps = {|
 |};
 type StateProps = $Diff<Props, DispatchProps>;
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const TransformNavigator = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State) => {
     const items = selectedThreadSelectors.getTransformLabels(state);
     return {

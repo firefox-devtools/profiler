@@ -9,8 +9,9 @@ import type {
   CategoryList,
   Thread,
 } from 'firefox-profiler/types';
-import Backtrace from './Backtrace';
-import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
+
+import { Backtrace } from './Backtrace';
+import { getCategoryPairLabel } from '../../profile-logic/profile-data';
 
 type Props = {|
   +sampleIndex: IndexIntoSamplesTable,
@@ -22,7 +23,7 @@ type Props = {|
  * This class displays the tooltip contents for a given sample. Typically the user
  * will want to know what the function is, and its category.
  */
-export default class SampleTooltipContents extends React.PureComponent<Props> {
+export class SampleTooltipContents extends React.PureComponent<Props> {
   render() {
     const { sampleIndex, fullThread, categories } = this.props;
     const { samples, stackTable } = fullThread;
