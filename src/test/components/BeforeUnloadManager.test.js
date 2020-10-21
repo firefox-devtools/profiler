@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react';
-import BeforeUnloadManager from '../../components/app/BeforeUnloadManager';
+import { BeforeUnloadManager } from '../../components/app/BeforeUnloadManager';
 import { blankStore } from '../fixtures/stores';
 import { Provider } from 'react-redux';
 import { uploadStarted } from 'firefox-profiler/actions/publish';

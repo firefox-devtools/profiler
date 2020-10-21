@@ -27,7 +27,6 @@ body {
 }
 
 body,
-#root,
 .profileViewer {
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
@@ -43,10 +42,6 @@ body,
   --animation-curve: cubic-bezier(0.07, 0.95, 0, 1);
 
   color: var(--grey-90);
-}
-
-#root {
-  z-index: 0;
 }
 
 .nodeIcon {
@@ -236,39 +231,6 @@ body,
   border-radius: 2px;
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.3);
   color: #000;
-}
-
-.focusCallstackButton {
-  overflow: hidden;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  margin: 0;
-  margin-left: 5px;
-  background: none 0 0 no-repeat transparent;
-  background-image: url(../img/svg/circlearrow.svg);
-  color: transparent;
-  visibility: hidden;
-}
-
-.focusCallstackButton:active:hover {
-  background-position: -16px 0;
-}
-
-.treeViewRow:hover > .focusCallstackButton {
-  visibility: visible;
-}
-
-.treeViewBody:focus .treeViewRow.isSelected > .focusCallstackButton {
-  background-position: -32px 0;
-}
-
-.treeViewBody:focus
-  .treeViewRow.isSelected
-  > .focusCallstackButton:active:hover {
-  background-position: -48px 0;
 }
 
 .treeRowToggleButton {

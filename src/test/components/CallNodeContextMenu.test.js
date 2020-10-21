@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { render } from '@testing-library/react';

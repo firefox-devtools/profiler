@@ -1742,12 +1742,6 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable', function() {
-    const { getState, markerThreadSelectors } = setupStore();
-    expect(
-      markerThreadSelectors.getProcessedRawMarkerTable(getState())
-    ).toMatchSnapshot();
-  });
   it('matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
@@ -3468,7 +3462,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3525,7 +3519,7 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- goes down until it's done.
-        ],
+        ]),
       },
     ]);
   });
@@ -3542,7 +3536,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3605,7 +3599,7 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- Second event delay is done now too.
-        ],
+        ]),
       },
     ]);
   });

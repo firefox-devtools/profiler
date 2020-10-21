@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import MenuButtons from '../../components/app/MenuButtons';
+import { MenuButtons } from '../../components/app/MenuButtons';
 import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';

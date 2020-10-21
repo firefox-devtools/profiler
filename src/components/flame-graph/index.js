@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
-import MaybeFlameGraph from './MaybeFlameGraph';
+
+import { StackSettings } from '../shared/StackSettings';
+import { TransformNavigator } from '../shared/TransformNavigator';
+import { MaybeFlameGraph } from './MaybeFlameGraph';
 
 const FlameGraphView = () => (
   <div
@@ -21,4 +22,4 @@ const FlameGraphView = () => (
   </div>
 );
 
-export default FlameGraphView;
+export const FlameGraph = FlameGraphView;
