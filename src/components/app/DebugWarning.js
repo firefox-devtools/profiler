@@ -1,21 +1,22 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import React, { PureComponent } from 'react';
 import { Warning } from '../shared/Warning';
 import explicitConnect from '../../utils/connect';
-import { getProfile } from '../../selectors/profile';
-import type { Profile } from 'firefox-profiler/types';
+import { getMeta } from '../../selectors/profile';
+import type { ProfileMeta } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
-  +profile: Profile,
+  +meta: ProfileMeta,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
-class DebugWarning extends PureComponent<Props> {
+class DebugWarningImp extends PureComponent<Props> {
   render() {
-    const { profile } = this.props;
-
-    const { meta } = profile;
+    const { meta } = this.props;
 
     return (
       <>
@@ -27,9 +28,9 @@ class DebugWarning extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const DebugWarning = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
-    profile: getProfile(state),
+    meta: getMeta(state),
   }),
-  component: DebugWarning,
+  component: DebugWarningImp,
 });

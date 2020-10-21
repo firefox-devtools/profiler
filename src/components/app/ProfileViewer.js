@@ -30,7 +30,8 @@ import {
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import classNames from 'classnames';
-import DebugWarning from '../app/DebugWarning';
+import { DebugWarning } from '../app/DebugWarning';
+
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -113,9 +114,7 @@ class ProfileViewer extends PureComponent<Props> {
               // with actual content in them do.
             }
             <div className="profileViewerSpacer" />
-            <DebugWarning />
             <MenuButtons />
-
             {isUploading ? (
               <div
                 className="menuButtonsPublishUploadBarInner"
@@ -139,6 +138,7 @@ class ProfileViewer extends PureComponent<Props> {
           <WindowTitle />
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
+          <DebugWarning />
         </div>
       </div>
     );
