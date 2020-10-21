@@ -405,7 +405,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
     const {
       maxStackDepth,
-      callTreeSummaryStrategy
+      callTreeSummaryStrategy,
       thread,
       weightType,
     } = this.props;
