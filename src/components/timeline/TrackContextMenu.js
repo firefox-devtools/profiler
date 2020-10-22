@@ -95,12 +95,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     _,
     data: { trackIndex: TrackIndex, pid: Pid, globalTrackIndex: TrackIndex }
   ): void => {
-    const { trackIndex, pid } = data;
-    const { hideAllTracksByType, hideGlobalTrack, hideLocalTrack } = this.props;
-    if (hideAllTracksByType.has(trackIndex)) {
+    const { trackIndex } = data;
+    const { hiddenGlobalTracks, hideGlobalTrack } = this.props;
+    if (hiddenGlobalTracks.has(trackIndex)) {
       hideGlobalTrack(trackIndex);
-    } else {
-      hideLocalTrack(trackIndex, pid);
     }
   };
 
