@@ -41,7 +41,6 @@ import type {
 } from '../../profile-logic/flame-graph';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
-
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
 
@@ -403,7 +402,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return null;
   };
 
- _noOp = (hoveredItem: HoveredStackTiming | null) => {
+  _noOp = (hoveredItem: HoveredStackTiming | null) => {
     if (hoveredItem === null) {
       return;
     }

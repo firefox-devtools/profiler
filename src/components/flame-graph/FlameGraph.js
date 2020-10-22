@@ -25,9 +25,8 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
-  updatePreviewSelection,
+  typeof updatePreviewSelection,
 } from '../../actions/profile-view';
-
 import type {
   Thread,
   CategoryList,
@@ -88,6 +87,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -259,6 +259,7 @@ class FlameGraph extends React.PureComponent<Props> {
       threadsKey,
       maxStackDepth,
       flameGraphTiming,
+      updatePreviewSelection,
       callTree,
       callNodeInfo,
       timeRange,
@@ -382,6 +383,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
+    updatePreviewSelection,
   },
   options: { forwardRef: true },
   component: FlameGraph,
