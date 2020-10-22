@@ -8,7 +8,6 @@
   min-height: 32px;
   box-sizing: border-box;
   flex-wrap: wrap;
-  align-items: flex-start;
 
   /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
@@ -27,11 +26,10 @@
   line-height: 1.4;
 }
 
-.child-section {
-  display: flex;
-  width: 100%;
-  line-height: 2;
+.multi-line {
+  width: 300px;
 }
+
 .photon-message-bar-action-button {
   flex: none;
   margin: 2px 0;
