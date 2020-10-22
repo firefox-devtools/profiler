@@ -30,6 +30,7 @@ import {
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { getPreviewSelection } from '../../selectors/profile';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
@@ -54,6 +55,19 @@ describe('timeline/TrackScreenshots', function() {
     expect(screenshotHover).toThrow();
     moveMouse(LEFT + 0);
     expect(screenshotHover()).toBeTruthy();
+  });
+
+  it('sets a preview selection when clicking with the mouse', () => {
+    const {
+      selectionOverlay,
+      screenshotClick,
+      getState,
+      previewSelection,
+    } = setup(undefined, <Timeline />);
+    expect(selectionOverlay).toThrow();
+    screenshotClick(LEFT);
+    expect(getPreviewSelection(getState())).toEqual(previewSelection());
+    expect(selectionOverlay()).toBeTruthy();
   });
 
   it('removes the hover when moving the mouse out', () => {
@@ -226,6 +240,26 @@ function setup(
     );
   }
 
+  function selectionOverlay() {
+    return ensureExists(
+      document.querySelector('.timelineSelectionOverlay'),
+      `Couldn't find the selection element, with selector .timelineSelectionOverlay`
+    );
+  }
+
+  function screenshotClick(pageX: number) {
+    fireEvent(screenshotTrack(), getMouseEvent('click', { pageX, pageY: 0 }));
+  }
+
+  function previewSelection() {
+    return {
+      hasSelection: true,
+      isModifying: false,
+      selectionEnd: 1,
+      selectionStart: 0,
+    };
+  }
+
   function screenshotTrack() {
     return ensureExists(
       container.querySelector('.timelineTrackScreenshot'),
@@ -262,6 +296,9 @@ function setup(
     moveMouseAndGetLeft,
     moveMouseAndGetTop,
     setBoundingClientRectOffset,
+    selectionOverlay,
+    screenshotClick,
+    previewSelection,
   };
 }
 
