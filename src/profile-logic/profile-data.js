@@ -52,12 +52,12 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 
-import bisection from 'bisection';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
@@ -1498,7 +1498,7 @@ export function processEventDelays(
     );
   }
 
-  const eventDelays: number[] = new Array(samples.length).fill(0);
+  const eventDelays = new Float32Array(samples.length);
   const rawEventDelays = ensureExists(
     samples.eventDelay,
     'eventDelays field is not present in this profile'
@@ -1935,7 +1935,7 @@ export function getSampleIndexClosestToTime(
   interval: Milliseconds
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
-  const index = bisection.right(samples.time, time);
+  const index = bisectionRight(samples.time, time);
 
   if (index === 0) {
     return 0;
@@ -1952,8 +1952,9 @@ export function getSampleIndexClosestToTime(
   let weight = interval;
   let previousWeight = interval;
   if (samples.weight) {
-    weight = Math.abs(samples.weight[index]);
-    previousWeight = Math.abs(samples.weight[previousIndex]);
+    const samplesWeight = samples.weight;
+    weight = Math.abs(samplesWeight[index]);
+    previousWeight = Math.abs(samplesWeight[previousIndex]);
   }
 
   const distanceToThis = samples.time[index] + weight / 2 - time;

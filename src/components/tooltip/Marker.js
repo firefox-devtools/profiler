@@ -7,11 +7,10 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
-  formatNumber,
   formatMilliseconds,
   formatTimestamp,
-} from '../../utils/format-numbers';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/utils/format-numbers';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getMarkerSchemaByName,
   getImplementationFilter,
@@ -31,12 +30,12 @@ import {
   type TooltipDetailComponent,
   TooltipDetailSeparator,
 } from './TooltipDetails';
-import Backtrace from '../shared/Backtrace';
+import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
   formatFromMarkerSchema,
   getMarkerSchema,
-} from '../../profile-logic/marker-schema';
+} from 'firefox-profiler/profile-logic/marker-schema';
 
 import type {
   Milliseconds,
@@ -49,7 +48,7 @@ import type {
   MarkerIndex,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import {
   getGCMinorDetails,
   getGCMajorDetails,
@@ -312,12 +311,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">
           <div className="tooltipDetailsBackTrace">
-            {data.type === 'Styles' || marker.name === 'Reflow' ? (
-              <h2 className="tooltipBackTraceTitle">
-                First invalidated {formatNumber(causeAge)}ms before the flush,
-                at:
-              </h2>
-            ) : null}
+            <h2 className="tooltipBackTraceTitle">
+              {data.type === 'Styles' || marker.name === 'Reflow'
+                ? `First invalidated ${formatTimestamp(
+                    causeAge
+                  )} before the flush, at:`
+                : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
+            </h2>
             <Backtrace
               maxStacks={restrictHeightWidth ? 20 : Infinity}
               stackIndex={cause.stack}
