@@ -179,11 +179,19 @@ export function getMarkerSelectorsPerThread(
    *    )
    *  );
    */
-  const filterMarkerIndexesCreator = (filterFunc: Marker => boolean) => (
-    getMarker: MarkerIndex => Marker,
-    markerIndexes: MarkerIndex[]
-  ): MarkerIndex[] =>
-    MarkerData.filterMarkerIndexes(getMarker, markerIndexes, filterFunc);
+  const filterMarkerIndexesCreator = (
+    filterFunc: Marker => boolean,
+    auxFilterFunc: Marker => boolean
+    ) => (
+      getMarker: MarkerIndex => Marker,
+      markerIndexes: MarkerIndex[],
+      derivedMarkers: Marker[]
+    ): MarkerIndex[] =>
+      MarkerData.filterMarkerIndexes(
+        getMarker,
+        markerIndexes,
+        derivedMarkers && derivedMarkers.length === 0 ? auxFilterFunc : filterFunc
+    );
 
   /**
    * This selector applies the committed range to the full list of markers.
