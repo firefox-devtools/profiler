@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
-import ServiceWorkerManager from '../../components/app/ServiceWorkerManager';
+import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
 import {
