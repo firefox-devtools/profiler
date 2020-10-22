@@ -329,8 +329,8 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
-        '  - show [thread Style] SELECTED',
+        '  - show [thread DOM Worker] SELECTED'
+        '  - show [thread Style]',
       ]);
 
       fireFullClick(hideAllTracksByType());
