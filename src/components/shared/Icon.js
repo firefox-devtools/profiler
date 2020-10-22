@@ -43,9 +43,9 @@ class IconImpl extends PureComponent<Props> {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.icon) {
-      nextProps.iconStartLoading(nextProps.icon);
+  componentDidUpdate() {
+    if (this.props.icon) {
+      this.props.iconStartLoading(this.props.icon);
     }
   }
 
