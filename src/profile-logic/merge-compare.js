@@ -132,20 +132,26 @@ export function mergeProfilesForDiffing(
       );
     }
     const profile = profiles[i];
-    let thread = profile.threads[selectedThreadIndex];
+    let thread = { ...profile.threads[selectedThreadIndex] };
     transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
     implementationFilters.push(profileSpecific.implementation);
 
     // We adjust the categories using the maps computed above.
     // TODO issue #2151: Also adjust subcategories.
-    thread.stackTable.category = adjustCategories(
-      thread.stackTable.category,
-      translationMapsForCategories[i]
-    );
-    thread.frameTable.category = adjustNullableCategories(
-      thread.frameTable.category,
-      translationMapsForCategories[i]
-    );
+    thread.stackTable = {
+      ...thread.stackTable,
+      category: adjustCategories(
+        thread.stackTable.category,
+        translationMapsForCategories[i]
+      ),
+    };
+    thread.frameTable = {
+      ...thread.frameTable,
+      category: adjustNullableCategories(
+        thread.frameTable.category,
+        translationMapsForCategories[i]
+      ),
+    };
 
     // We filter the profile using the range from the state for this profile.
     const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
