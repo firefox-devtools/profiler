@@ -46,6 +46,7 @@ describe('actions/icons', function() {
       categoryName: 'Other',
       categoryColor: 'grey',
       icon,
+      iconSrc: 'https://edition.cnn.com/favicon.ico',
       ariaLabel: 'fake aria label',
     };
   }

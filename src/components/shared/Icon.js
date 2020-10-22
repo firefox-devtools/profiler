@@ -41,9 +41,9 @@ class IconImpl extends PureComponent<Props> {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.icon) {
-      nextProps.iconStartLoading(nextProps.icon);
+  componentDidUpdate() {
+    if (this.props.icon) {
+      this.props.iconStartLoading(this.props.icon);
     }
   }
 
@@ -55,7 +55,7 @@ class IconImpl extends PureComponent<Props> {
 export const Icon = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, ownProps) => {
     const icon = ownProps.displayData
-      ? ownProps.displayData.icon
+      ? ownProps.displayData.iconSrc
       : ownProps.iconUrl;
 
     return {

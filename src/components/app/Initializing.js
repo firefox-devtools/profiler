@@ -7,7 +7,7 @@ import React from 'react';
 
 const PROFILER_URL = 'https://github.com/firefox-devtools/Gecko-Profiler-Addon';
 
-export default function Initializing() {
+export function Initializing() {
   return (
     <div className="initializing">
       <div className="initializing-text">

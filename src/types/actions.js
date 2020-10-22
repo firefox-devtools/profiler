@@ -29,7 +29,7 @@ import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { UrlState, UploadState, State } from './state';
-import type { CssPixels, StartEndRange } from './units';
+import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
 export type DataSource =
   | 'none'
@@ -400,6 +400,10 @@ type UrlStateAction =
   | {|
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
+    |}
+  | {|
+      +type: 'CHANGE_MOUSE_TIME_POSITION',
+      +mouseTimePosition: Milliseconds | null,
     |}
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',
