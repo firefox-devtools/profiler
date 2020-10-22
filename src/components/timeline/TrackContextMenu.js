@@ -8,6 +8,7 @@ import { ContextMenu, MenuItem } from 'react-contextmenu';
 import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
+  hideAllTracksByType,
   showGlobalTrack,
   isolateProcess,
   isolateLocalTrack,
@@ -92,12 +93,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _hideAllTracksByType = (
     _,
-    data: { trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
+    data: { trackIndex: TrackIndex, pid: Pid, globalTrackIndex: TrackIndex }
   ): void => {
-    const { trackIndex } = data;
-    const { hideAllTracksByType } = this.props;
+    const { trackIndex, pid } = data;
+    const { hideAllTracksByType, hideGlobalTrack, hideLocalTrack } = this.props;
     if (hideAllTracksByType.has(trackIndex)) {
-      hideAllTracksByType(trackIndex);
+      hideGlobalTrack(trackIndex);
+    } else {
+      hideLocalTrack(trackIndex, pid);
     }
   };
 
