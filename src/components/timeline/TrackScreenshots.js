@@ -16,6 +16,7 @@ import {
   withSize,
   type SizeProps,
 } from 'firefox-profiler/components/shared/WithSize';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { createPortal } from 'react-dom';
 
 import type {
@@ -44,7 +45,9 @@ type StateProps = {|
   +isMakingPreviewSelection: boolean,
   +trackHeight: number,
 |};
-type DispatchProps = {||};
+type DispatchProps = {|
+  +updatePreviewSelection: typeof updatePreviewSelection,
+|};
 type Props = {|
   ...SizeProps,
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
@@ -61,6 +64,22 @@ class Screenshots extends PureComponent<Props, State> {
     pageX: null,
     containerTop: null,
   };
+
+  findScreenshotAtMouse(offsetX: number): number | null {
+    const { width, rangeStart, rangeEnd, screenshots } = this.props;
+    const rangeLength = rangeEnd - rangeStart;
+    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
+
+    // Loop backwards to find the latest screenshot that has a time less
+    // than the current time at the mouse position.
+    for (let i = screenshots.length - 1; i >= 0; i--) {
+      const screenshotTime = screenshots[i].start;
+      if (mouseTime >= screenshotTime) {
+        return i;
+      }
+    }
+    return null;
+  }
 
   _handleMouseLeave = () => {
     this.setState({
@@ -79,6 +98,23 @@ class Screenshots extends PureComponent<Props, State> {
     });
   };
 
+  _handleClick = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+    const { screenshots, updatePreviewSelection } = this.props;
+    const { left } = event.currentTarget.getBoundingClientRect();
+    const offsetX = event.pageX - left;
+    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
+    if (screenshotIndex === null) return null;
+    const { start, end } = screenshots[screenshotIndex];
+    if (end === null) return null;
+    updatePreviewSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: start,
+      selectionEnd: end,
+    });
+    return null;
+  };
+
   render() {
     const {
       screenshots,
@@ -89,13 +125,24 @@ class Screenshots extends PureComponent<Props, State> {
       rangeEnd,
       trackHeight,
     } = this.props;
+
     const { pageX, offsetX, containerTop } = this.state;
+    let payload: ScreenshotPayload | null = null;
+
+    if (offsetX !== null) {
+      const screenshotIndex = this.findScreenshotAtMouse(offsetX);
+      if (screenshotIndex !== null) {
+        payload = (screenshots[screenshotIndex].data: any);
+      }
+    }
+
     return (
       <div
         className="timelineTrackScreenshot"
         style={{ height: trackHeight }}
         onMouseLeave={this._handleMouseLeave}
         onMouseMove={this._handleMouseMove}
+        onClick={this._handleClick}
       >
         <ScreenshotStrip
           thread={thread}
@@ -105,18 +152,20 @@ class Screenshots extends PureComponent<Props, State> {
           screenshots={screenshots}
           trackHeight={trackHeight}
         />
-        <HoverPreview
-          screenshots={screenshots}
-          thread={thread}
-          isMakingPreviewSelection={isMakingPreviewSelection}
-          width={width}
-          pageX={pageX}
-          offsetX={offsetX}
-          containerTop={containerTop}
-          rangeEnd={rangeEnd}
-          rangeStart={rangeStart}
-          trackHeight={trackHeight}
-        />
+        {payload ? (
+          <HoverPreview
+            thread={thread}
+            isMakingPreviewSelection={isMakingPreviewSelection}
+            width={width}
+            pageX={pageX}
+            offsetX={offsetX}
+            containerTop={containerTop}
+            rangeEnd={rangeEnd}
+            rangeStart={rangeStart}
+            trackHeight={trackHeight}
+            payload={payload}
+          />
+        ) : null}
       </div>
     );
   }
@@ -143,6 +192,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       trackHeight: getScreenshotTrackHeight(state),
     };
   },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+  },
   component: withSize<Props>(Screenshots),
 });
 
@@ -150,35 +202,18 @@ type HoverPreviewProps = {|
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +screenshots: Marker[],
   +isMakingPreviewSelection: boolean,
   +offsetX: null | number,
   +pageX: null | number,
   +containerTop: null | number,
   +width: number,
   +trackHeight: number,
+  +payload: ScreenshotPayload,
 |};
 
 const MAXIMUM_HOVER_SIZE = 350;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
-  findScreenshotAtMouse(offsetX: number): number | null {
-    const { width, rangeStart, rangeEnd, screenshots } = this.props;
-    const rangeLength = rangeEnd - rangeStart;
-    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
-
-    // Loop backwards to find the latest screenshot that has a time less
-    // than the current time at the mouse position.
-    for (let i = screenshots.length - 1; i >= 0; i--) {
-      const screenshotTime = screenshots[i].start;
-      if (mouseTime >= screenshotTime) {
-        return i;
-      }
-    }
-
-    return null;
-  }
-
   _overlayElement = ensureExists(
     document.querySelector('#root-overlay'),
     'Expected to find a root overlay element.'
@@ -186,7 +221,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 
   render() {
     const {
-      screenshots,
       thread,
       isMakingPreviewSelection,
       width,
@@ -194,21 +228,13 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       offsetX,
       containerTop,
       trackHeight,
+      payload,
     } = this.props;
 
     if (isMakingPreviewSelection || offsetX === null || pageX === null) {
       return null;
     }
-
-    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-    if (screenshotIndex === null) {
-      return null;
-    }
-
-    // Coerce the payload into a screenshot one.
-    const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
     const { url, windowWidth, windowHeight } = payload;
-
     // Compute the hover image's thumbnail size.
     // Coefficient should be according to bigger side.
     const coefficient =
