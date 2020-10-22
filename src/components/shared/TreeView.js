@@ -13,6 +13,8 @@ import { ContextMenuTrigger } from './ContextMenuTrigger';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
+import './TreeView.css';
+
 /**
  * This number is used to decide how many lines the selection moves when the
  * user presses PageUp or PageDown.
