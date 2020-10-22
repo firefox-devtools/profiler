@@ -39,6 +39,8 @@ import type {
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
+import { updatePreviewSelection } from '../../actions/profile-view';
+import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
@@ -53,6 +55,9 @@ export type OwnProps = {|
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
   +callTree: CallTree,
+  +updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >,
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
@@ -398,30 +403,17 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return null;
   };
 
-  _noOp = (hoveredItem: HoveredStackTiming | null) => {
-    const depth = hoveredItem === null ? null : hoveredItem.depth;
-    if (depth === null) {
+ _noOp = (hoveredItem: HoveredStackTiming | null) => {
+    if (hoveredItem === null) {
       return;
     }
-    const {
-      selectedCallNodeIndex,
-      tracedTiming,
-      thread,
-      weightType,
-    } = this.props;
-
-    const depthItem = selectedCallNodeIndex(depth);
-    const { start, end } = getTimingsForCallNodeIndex(
-      thread,
-      weightType,
-      depthItem
-    );
-
-    tracedTiming({
+    const { depth, flameGraphTimingIndex } = hoveredItem;
+    const { flameGraphTiming, updatePreviewSelection } = this.props;
+    updatePreviewSelection({
       hasSelection: true,
-      isModifying: true,
-      selectionStart: start,
-      selectionEnd: end,
+      isModifying: false,
+      selectionStart: flameGraphTiming[depth].start[flameGraphTimingIndex],
+      selectionEnd: flameGraphTiming[depth].end[flameGraphTimingIndex],
     });
   };
 

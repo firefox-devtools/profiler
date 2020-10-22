@@ -25,6 +25,7 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  updatePreviewSelection,
 } from '../../actions/profile-view';
 
 import type {
@@ -304,6 +305,7 @@ class FlameGraph extends React.PureComponent<Props> {
             chartProps={{
               thread,
               pages,
+              updatePreviewSelection,
               weightType,
               unfilteredThread,
               sampleIndexOffset,
