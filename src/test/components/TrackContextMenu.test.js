@@ -329,7 +329,7 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker] SELECTED'
+        '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
       ]);
 
