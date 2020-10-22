@@ -4,10 +4,9 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { ContextMenuTrigger as ReactContextMenuTrigger } from 'react-contextmenu';
-
-export class ContextMenuTrigger extends PureComponent<{}> {
+import { ContextMenuTrigger } from 'react-contextmenu';
+export default class MyContextMenuTrigger extends PureComponent<{}> {
   render() {
-    return <ReactContextMenuTrigger holdToDisplay={-1} {...this.props} />;
+    return <ContextMenuTrigger holdToDisplay={-1} {...this.props} />;
   }
 }

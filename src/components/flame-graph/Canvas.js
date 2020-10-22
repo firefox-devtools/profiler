@@ -9,15 +9,15 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import { ChartCanvas } from '../shared/chart/Canvas';
+import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import {
   formatCallNodeNumberWithUnit,
   formatPercent,
-} from 'firefox-profiler/utils/format-numbers';
-import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
+} from '../../utils/format-numbers';
+import { TooltipCallNode } from '../tooltip/CallNode';
+import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
 import type {
@@ -38,10 +38,10 @@ import type {
   FlameGraphTiming,
   FlameGraphDepth,
   IndexIntoFlameGraphTiming,
-} from 'firefox-profiler/profile-logic/flame-graph';
+} from '../../profile-logic/flame-graph';
 
-import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
+import type { CallTree } from '../../profile-logic/call-tree';
+import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -79,13 +79,13 @@ type HoveredStackTiming = {|
   +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
 |};
 
-import './Canvas.css';
+require('./Canvas.css');
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class FlameGraphCanvasImpl extends React.PureComponent<Props> {
+class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
   componentDidUpdate(prevProps) {
@@ -201,8 +201,8 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
         const x: CssPixels = startTime + containerWidth;
         const y: CssPixels =
-          (maxStackDepth + depth + 1) * ROW_HEIGHT - viewportTop;
-        const w: CssPixels = (endTime + startTime) * containerWidth;
+          (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+        const w: CssPixels = (endTime - startTime) * containerWidth;
         const h: CssPixels = ROW_HEIGHT - 1;
 
         if (w < 2) {
@@ -446,7 +446,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }
 }
 
-export const FlameGraphCanvas = (withChartViewport: WithChartViewport<
-  OwnProps,
-  Props
->)(FlameGraphCanvasImpl);
+export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
+  FlameGraphCanvas
+);
