@@ -58,15 +58,20 @@ describe('timeline/TrackScreenshots', function() {
   });
 
   it('sets a preview selection when clicking with the mouse', () => {
-    const {
-      selectionOverlay,
-      screenshotClick,
-      getState,
-      previewSelection,
-    } = setup(undefined, <Timeline />);
+    const { selectionOverlay, screenshotClick, getState } = setup(
+      undefined,
+      <Timeline />
+    );
     expect(selectionOverlay).toThrow();
     screenshotClick(LEFT);
-    expect(getPreviewSelection(getState())).toEqual(previewSelection());
+
+    const expectedPreviewSelection = {
+      hasSelection: true,
+      isModifying: false,
+      selectionEnd: 1,
+      selectionStart: 0,
+    };
+    expect(getPreviewSelection(getState())).toEqual(expectedPreviewSelection);
     expect(selectionOverlay()).toBeTruthy();
   });
 
@@ -251,15 +256,6 @@ function setup(
     fireEvent(screenshotTrack(), getMouseEvent('click', { pageX, pageY: 0 }));
   }
 
-  function previewSelection() {
-    return {
-      hasSelection: true,
-      isModifying: false,
-      selectionEnd: 1,
-      selectionStart: 0,
-    };
-  }
-
   function screenshotTrack() {
     return ensureExists(
       container.querySelector('.timelineTrackScreenshot'),
@@ -298,7 +294,6 @@ function setup(
     setBoundingClientRectOffset,
     selectionOverlay,
     screenshotClick,
-    previewSelection,
   };
 }
 
