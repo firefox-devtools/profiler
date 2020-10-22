@@ -307,20 +307,19 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return localTrackNames[rightClickedTrack.trackIndex];
   }
 
-  getRightClickedTrackType(rightClickedTrackIndex: TrackReference): string {
+  getRightClickedTrackType(rightClickedThreadIndex: TrackReference): string {
     const { localTracksByPid, globalTracks } = this.props;
 
-    if (rightClickedTrackIndex.type === 'global') {
-      return localTracksByPid[rightClickedTrackIndex.trackIndex].type;
+    if (rightClickedThreadIndex.type === 'global') {
+      return globalTracks[rightClickedThreadIndex.trackIndex].type;
     }
-    const globalTrack = globalTracks(rightClickedTrackIndex.trackIndex).type;
-    if (globalTrack === undefined) {
+    if (rightClickedThreadIndex.type === 'local') {
       console.error(
-        'Expected to find a local and globaltrack name for the given pid.'
+        'Expected to find a global and local track name for the given pid.'
       );
       return 'Unknown Track';
     }
-    return globalTracks[rightClickedTrackIndex.trackIndex].type;
+    return localTracksByPid[rightClickedThreadIndex.trackIndex];
   }
 
   renderIsolateProcess() {

@@ -626,13 +626,12 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
  */
 
 export function hideAllTracksByType(
-  trackIndex: TrackIndex,
-  pid: Pid
+  pid: Pid,
+  trackIndex: TrackIndex
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
-
     if (hiddenGlobalTracks.has(trackIndex)) {
       return;
     }
@@ -647,8 +646,8 @@ export function hideAllTracksByType(
     }
 
     const localTracks = getLocalTracks(getState(), pid);
-    if (localTracks.type === 'thread') {
-      newSelectedThreadIndexes.delete(localTracks.threadIndex);
+    if (localTracks.length === hiddenLocalTracks.size + 1) {
+      return;
     }
 
     const globalTrackToHide = globalTracks[trackIndex];
@@ -656,44 +655,45 @@ export function hideAllTracksByType(
       getSelectedThreadIndexes(getState())
     );
 
-    if (hiddenLocalTracks.size + 1 === localTracks.length) {
-      if (globalTracks.mainThreadIndex === null) {
-        return;
+
+    if (globalTrackToHide.type === 'process') {
+      if (globalTrackToHide.mainThreadIndex !== null) {
+        newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
       }
-
-      if (globalTrackToHide.type === 'process') {
-        if (globalTrackToHide.mainThreadIndex !== null) {
-          newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
-        }
-
-        if (globalTrackToHide.mainThreadIndex !== null) {
-          newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
-        }
-
-        if (newSelectedThreadIndexes.size === 0) {
-          const threadIndex = _findOtherVisibleThread(getState, trackIndex);
-          if (threadIndex === null) {
-            return;
+      if (newSelectedThreadIndexes.size !== 0) {
+        for (const localTrack of getLocalTracks(
+          getState(),
+          globalTrackToHide.pid
+        )) {
+          if (localTrack.type === 'thread') {
+            newSelectedThreadIndexes.delete(localTrack.threadIndex);
+            break;
           }
-          newSelectedThreadIndexes.add(threadIndex);
         }
       }
-
       if (newSelectedThreadIndexes.size === 0) {
-        return;
+        const threadIndex = _findOtherVisibleThread(getState, trackIndex);
+        if (threadIndex === null) {
+          return;
+        }
+        newSelectedThreadIndexes.add(threadIndex);
       }
+    }
+
+    if (newSelectedThreadIndexes.size === 0) {
+      return;
     }
 
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
-      eventAction: 'hideAllTracksByType',
+      eventAction: 'hide All Tracks By Type',
     });
 
     dispatch({
       type: 'HIDE_ALL_TRACKS_BY_TYPE',
-      pid,
       trackIndex: trackIndex,
+      pid,
       selectedThreadIndexes: newSelectedThreadIndexes,
     });
   };

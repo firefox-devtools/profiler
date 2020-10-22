@@ -191,6 +191,12 @@ type ProfileAction =
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
+      +type: 'HIDE_ALL_TRACKS_BY_TYPE',
+      +pid: Pid,
+      +trackIndex: TrackIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
       +type: 'SHOW_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
     |}
