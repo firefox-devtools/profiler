@@ -654,8 +654,6 @@ export function hideAllTracksByType(
     const newSelectedThreadIndexes: Set<ThreadIndex> = new Set(
       getSelectedThreadIndexes(getState())
     );
-
-
     if (globalTrackToHide.type === 'process') {
       if (globalTrackToHide.mainThreadIndex !== null) {
         newSelectedThreadIndexes.delete(globalTrackToHide.mainThreadIndex);
