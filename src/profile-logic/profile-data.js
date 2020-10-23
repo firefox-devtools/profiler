@@ -52,7 +52,7 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 import { timeCode } from '../utils/time-code';
@@ -1208,18 +1208,9 @@ export function getSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  // TODO: This should really use bisect. table.time is sorted.
-  const firstSample = table.time.findIndex(t => t >= rangeStart);
-  if (firstSample === -1) {
-    return [table.length, table.length];
-  }
-  const afterLastSample = table.time
-    .slice(firstSample)
-    .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstSample, table.length];
-  }
-  return [firstSample, firstSample + afterLastSample];
+  const sampleStart = bisectionLeft(table.time, rangeStart);
+  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return [sampleStart, sampleEnd];
 }
 
 export function filterThreadSamplesToRange(
