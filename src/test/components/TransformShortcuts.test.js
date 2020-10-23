@@ -9,11 +9,11 @@ import { Provider } from 'react-redux';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { changeSelectedCallNode } from '../../actions/profile-view';
-import FlameGraph from '../../components/flame-graph';
+import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { ensureExists } from '../../utils/flow';
 import { fireFullKeyPress } from '../fixtures/utils';
-import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
+import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import type { TransformType } from 'firefox-profiler/types';
 
 type TestSetup = {|
@@ -70,7 +70,7 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
     expect(getTransformType()).toEqual('collapse-function-subtree');
   });
 
-  it('ignores shorcuts with modifiers', () => {
+  it('ignores shortcuts with modifiers', () => {
     const { pressKey, getTransformType } = setup();
     pressKey({ key: 'c', ctrlKey: true });
     pressKey({ key: 'c', metaKey: true });

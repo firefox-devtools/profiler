@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent, Fragment } from 'react';
+import * as React from 'react';
 import { MenuItem } from 'react-contextmenu';
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -64,7 +64,7 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 import './CallNodeContextMenu.css';
 
-class CallNodeContextMenuImpl extends PureComponent<Props> {
+class CallNodeContextMenuImpl extends React.PureComponent<Props> {
   _hidingTimeout: TimeoutID | null = null;
 
   // Using setTimeout here is a bit complex, but is necessary to make the menu
@@ -446,7 +446,7 @@ class CallNodeContextMenuImpl extends PureComponent<Props> {
     const showExpandAll = selectedTab === 'calltree';
 
     return (
-      <Fragment>
+      <>
         <TransformMenuItem
           shortcut="m"
           icon="Merge"
@@ -569,12 +569,12 @@ class CallNodeContextMenuImpl extends PureComponent<Props> {
         <div className="react-contextmenu-separator" />
 
         {showExpandAll ? (
-          <Fragment>
+          <>
             <MenuItem onClick={this._handleClick} data={{ type: 'expand-all' }}>
               Expand all
             </MenuItem>
             <div className="react-contextmenu-separator" />
-          </Fragment>
+          </>
         ) : null}
         <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
           Look up the function name on Searchfox
@@ -593,7 +593,7 @@ class CallNodeContextMenuImpl extends PureComponent<Props> {
         <MenuItem onClick={this._handleClick} data={{ type: 'copy-stack' }}>
           Copy stack
         </MenuItem>
-      </Fragment>
+      </>
     );
   }
 
@@ -662,8 +662,8 @@ export const CallNodeContextMenu = explicitConnect<
 });
 
 function TransformMenuItem(props: {|
-  +children: *,
-  +onClick: *,
+  +children: React.Node,
+  +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
   +transform: string,
   +shortcut: string,
   +icon: string,

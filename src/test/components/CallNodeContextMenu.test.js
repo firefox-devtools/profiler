@@ -27,13 +27,13 @@ describe('calltree/CallNodeContextMenu', function() {
       profile,
       funcNamesDictPerThread: [{ A, B }],
     } = getProfileFromTextSamples(`
-      A               A               A
+      A           A           A
       B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
       B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
       B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      C               C               H
-      D               F               I
-      E               E
+      C           C           H
+      D           F           I
+      E           E
     `);
     const store = storeWithProfile(profile);
 
@@ -113,7 +113,7 @@ describe('calltree/CallNodeContextMenu', function() {
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
-      ).toHaveLength(7);
+      ).toHaveLength(11);
     });
 
     it('can look up functions on SearchFox', function() {
