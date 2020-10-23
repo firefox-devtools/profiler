@@ -32,8 +32,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   >
     Hide all 
     "screenshots"
-     
-    tracks
+     tracks
   </div>
   <div
     class="react-contextmenu-separator"
@@ -98,8 +97,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   >
     Hide all 
     "process"
-     
-    tracks
+     tracks
   </div>
   <div
     class="react-contextmenu-separator"
@@ -170,8 +168,7 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
   >
     Hide all 
     "process"
-     
-    tracks
+     tracks
   </div>
   <div>
     <div
@@ -248,8 +245,7 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
   >
     Hide all 
     "Unknown Track"
-     
-    tracks
+     tracks
   </div>
   <div
     class="react-contextmenu-separator"
