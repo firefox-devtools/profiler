@@ -385,11 +385,11 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     ),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
   }),
-  mapDispatchToProps: {
+  mapDispatchToProps: (dispatch, ownProps) => ({
     changeSelectedCallNode,
     changeRightClickedCallNode,
     updatePreviewSelection,
-  },
+  }),
   options: { forwardRef: true },
   component: FlameGraphImpl,
 });
