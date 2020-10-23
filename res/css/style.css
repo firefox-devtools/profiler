@@ -27,7 +27,6 @@ body {
 }
 
 body,
-#root,
 .profileViewer {
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
@@ -43,17 +42,6 @@ body,
   --animation-curve: cubic-bezier(0.07, 0.95, 0, 1);
 
   color: var(--grey-90);
-}
-
-#root {
-  z-index: 0;
-}
-
-.nodeIcon {
-  min-width: 14px;
-  height: 100%;
-  min-height: 14px;
-  background: center / contain no-repeat;
 }
 
 .treeView {

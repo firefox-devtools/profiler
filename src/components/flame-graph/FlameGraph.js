@@ -21,7 +21,7 @@ import {
   getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import ContextMenuTrigger from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   changeSelectedCallNode,
@@ -50,7 +50,7 @@ import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./FlameGraph.css');
+import './FlameGraph.css';
 
 const STACK_FRAME_HEIGHT = 16;
 

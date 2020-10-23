@@ -79,7 +79,7 @@ type HoveredStackTiming = {|
   +flameGraphTimingIndex: IndexIntoFlameGraphTiming,
 |};
 
-require('./Canvas.css');
+import './Canvas.css';
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;

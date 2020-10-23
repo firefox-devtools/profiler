@@ -10,9 +10,11 @@ import { FooterLinks } from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
-import ServiceWorkerManager from './ServiceWorkerManager';
+import { ServiceWorkerManager } from './ServiceWorkerManager';
 
 import type { Store } from 'firefox-profiler/types';
+
+import './Root.css';
 
 type RootProps = {
   store: Store,

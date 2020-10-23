@@ -14,7 +14,7 @@ import { FlameGraph } from './FlameGraph';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./MaybeFlameGraph.css');
+import './MaybeFlameGraph.css';
 
 type StateProps = {|
   +maxStackDepth: number,

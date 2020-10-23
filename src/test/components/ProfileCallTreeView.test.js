@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
