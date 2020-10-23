@@ -46,7 +46,10 @@ import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-grap
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { ConnectedProps, WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
+import type {
+  ConnectedProps,
+  WrapFunctionInDispatch,
+} from 'firefox-profiler/utils/connect';
 
 import './FlameGraph.css';
 
