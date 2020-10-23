@@ -7,7 +7,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
-import { ensureExists } from 'firefox-profiler/utils/flow';
+import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
 export const MOUSE_OFFSET = 11;
@@ -22,11 +22,16 @@ type Props = {
 
 type State = {
   interiorElement: HTMLElement | null,
+  layoutGeneration: number,
 };
 
 export class Tooltip extends React.PureComponent<Props, State> {
+  _isMounted: boolean = false;
+  _isLayoutScheduled: boolean = false;
+
   state = {
     interiorElement: null,
+    layoutGeneration: 0,
   };
 
   _overlayElement = ensureExists(
@@ -38,13 +43,34 @@ export class Tooltip extends React.PureComponent<Props, State> {
     this.setState({ interiorElement: el });
   };
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   componentDidUpdate(prevProps: Props) {
-    if (prevProps.children !== this.props.children) {
-      // Force an additional update to this component if the children content is
-      // different as it needs to fully lay out one time on the DOM to proper calculate
-      // sizing and positioning.
-      this.forceUpdate();
+    if (prevProps.mouseX !== this.props.mouseX) {
+      this._scheduleRelayout();
     }
+  }
+
+  _scheduleRelayout() {
+    if (this._isLayoutScheduled) {
+      return;
+    }
+    this._isLayoutScheduled = true;
+
+    requestAnimationFrame(() => {
+      this._isLayoutScheduled = false;
+      if (this._isMounted) {
+        this.setState(state => {
+          return { layoutGeneration: state.layoutGeneration + 1 };
+        });
+      }
+    });
   }
 
   render() {
