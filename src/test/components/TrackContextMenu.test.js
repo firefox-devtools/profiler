@@ -85,7 +85,7 @@ describe('timeline/TrackContextMenu', function() {
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
-      const hideAllTracksByType = () => getByText(/Hide all "Content Process"/);
+      const hideAllTracksByType = () => getByText(/Hide "Content Process"/);
       return {
         ...results,
         trackReference,
