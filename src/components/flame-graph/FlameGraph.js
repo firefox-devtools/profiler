@@ -65,6 +65,7 @@ type StateProps = {|
   +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
+  +previewSelection: PreviewSelection,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
   +timeRange: StartEndRange,
@@ -292,6 +293,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
             // ChartViewport props
             viewportProps={{
               timeRange,
+              previewSelection,
               maxViewportHeight,
               maximumZoom: 1,
               previewSelection,
@@ -361,6 +363,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     categories: getCategories(state),
     threadsKey: getSelectedThreadsKey(state),
+    previewSelection: getPreviewSelection(state),
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
