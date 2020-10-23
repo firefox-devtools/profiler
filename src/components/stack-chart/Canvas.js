@@ -77,7 +77,7 @@ type HoveredStackTiming = {|
   +stackTimingIndex: IndexIntoStackTiming,
 |};
 
-import('./Canvas.css');
+import './Canvas.css';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;

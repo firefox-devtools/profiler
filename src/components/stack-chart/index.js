@@ -56,7 +56,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-import('./index.css');
+import './index.css';
 
 const STACK_FRAME_HEIGHT = 16;
 
