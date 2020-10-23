@@ -51,6 +51,8 @@ echo_and_exec_cmd git push -f --no-verify "$UPSTREAM" HEAD:production
 
 echo "Please re-enable now the force push protection on https://github.com/firefox-devtools/profiler/settings/branches"
 printf "Hit enter when you are ready."
+# shellcheck disable=SC2034
+read -r enter
 
 echo ">>> Going back to your previous banch"
 echo_and_exec_cmd git checkout -
