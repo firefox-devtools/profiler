@@ -86,7 +86,7 @@ describe('timeline/TrackContextMenu', function() {
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
       const hideAllTracksByType = () =>
-        getByText(/Hide all "Content Process" tracks/);
+        getByText(/Hide all "Content Process"/);
       return {
         ...results,
         trackReference,
@@ -134,11 +134,19 @@ describe('timeline/TrackContextMenu', function() {
 
     it('can hide all the process', function() {
       const { hideAllTracksByType, getState } = setupGlobalTrack();
-      fireFullClick(hideAllTracksByType());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
-        '  - hide [thread DOM Worker] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      fireFullClick(hideAllTracksByType());
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
         '  - show [thread Style]',
       ]);
     });
