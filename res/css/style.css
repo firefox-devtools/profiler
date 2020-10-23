@@ -475,7 +475,6 @@ body,
 .react-contextmenu.react-contextmenu--visible {
   display: block;
   max-height: 90vh;
-  padding-right: 9px;
   overflow-y: auto;
 }
 
@@ -496,9 +495,9 @@ body,
 .react-contextmenu-item.react-contextmenu-item--active,
 .react-contextmenu-item:hover,
 .react-contextmenu-item--selected {
-  border-color: highlight;
-  background-color: highlight;
-  color: highlighttext;
+  border-color: var(--blue-60);
+  background-color: var(--blue-60);
+  color: #fff;
   text-decoration: none;
 }
 

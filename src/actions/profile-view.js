@@ -30,6 +30,7 @@ import {
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenLocalTracks,
+  getInvertCallstack,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getCallNodePathFromIndex,
@@ -64,6 +65,7 @@ import type {
   ThreadsKey,
   Milliseconds,
 } from 'firefox-profiler/types';
+import { funcHasRecursiveCall } from '../profile-logic/transforms';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1369,5 +1371,109 @@ export function changeMouseTimePosition(
   return {
     type: 'CHANGE_MOUSE_TIME_POSITION',
     mouseTimePosition,
+  };
+}
+
+export function handleCallNodeTransformShortcut(
+  event: SyntheticKeyboardEvent<>,
+  threadsKey: ThreadsKey,
+  callNodeIndex: IndexIntoCallNodeTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const unfilteredThread = threadSelectors.getThread(getState());
+    const { callNodeTable } = threadSelectors.getCallNodeInfo(getState());
+    const implementation = getImplementationFilter(getState());
+    const inverted = getInvertCallstack(getState());
+    const callNodePath = getCallNodePathFromIndex(callNodeIndex, callNodeTable);
+    const funcIndex = callNodeTable.func[callNodeIndex];
+
+    switch (event.key) {
+      case 'F':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-subtree',
+            callNodePath: callNodePath,
+            implementation,
+            inverted,
+          })
+        );
+        break;
+      case 'f':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'M':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-call-node',
+            callNodePath: callNodePath,
+            implementation,
+          })
+        );
+        break;
+      case 'm':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'd':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'drop-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'C': {
+        const { funcTable } = unfilteredThread;
+        const resourceIndex = funcTable.resource[funcIndex];
+        // A new collapsed func will be inserted into the table at the end. Deduce
+        // the index here.
+        const collapsedFuncIndex = funcTable.length;
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'collapse-resource',
+            resourceIndex,
+            collapsedFuncIndex,
+            implementation,
+          })
+        );
+        break;
+      }
+      case 'r': {
+        if (funcHasRecursiveCall(unfilteredThread, implementation, funcIndex)) {
+          dispatch(
+            addTransformToStack(threadsKey, {
+              type: 'collapse-direct-recursion',
+              funcIndex,
+              implementation,
+            })
+          );
+        }
+        break;
+      }
+      case 'c': {
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'collapse-function-subtree',
+            funcIndex,
+          })
+        );
+        break;
+      }
+      default:
+      // This did not match a call tree transform.
+    }
   };
 }
