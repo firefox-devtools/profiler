@@ -315,9 +315,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return globalTracks[rightClickedThreadIndex.trackIndex].type;
     }
     if (rightClickedThreadIndex.type === 'local') {
-      console.error(
-        'Expected to find a global and local track name for the given pid.'
-      );
       return 'Unknown Track';
     }
     return localTracksByPid[rightClickedThreadIndex.trackIndex];
