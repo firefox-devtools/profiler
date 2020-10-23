@@ -42,6 +42,7 @@ import type {
   TracedTiming,
   ThreadsKey,
 } from 'firefox-profiler/types';
+import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
 
@@ -88,7 +89,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: WrapFunctionInDispatch<typeof updatePreviewSelection>,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
