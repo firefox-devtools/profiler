@@ -82,6 +82,18 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   <div
     class="react-contextmenu-separator"
   />
+    <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all
+    "Content Process"
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
   <div>
     <div
       aria-disabled="false"
@@ -205,6 +217,15 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     tabindex="-1"
   >
     Hide 
+    "DOM Worker"
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide all 
     "DOM Worker"
   </div>
   <div
