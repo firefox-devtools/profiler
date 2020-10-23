@@ -28,7 +28,7 @@ fi
 
 # Now to the real stuff.
 echo "This script will reset the production branch on the remote '$UPSTREAM' to the previous version."
-echo -n "Are you sure?"
+printf "Are you sure?"
 read -r enter
 
 echo ">>> Fetching upstream $UPSTREAM"
@@ -44,9 +44,13 @@ echo_and_exec_cmd yarn test-all
 
 echo ">>> Force-pushing to $UPSTREAM's production branch. Note you'll need to disable
 branch protection for this to succeed."
-echo -n "Are you ready?"
+echo "Go to https://github.com/firefox-devtools/profiler/settings/branches and enable force pushing."
+printf "Hit enter when you are ready."
 read -r enter
 echo_and_exec_cmd git push -f --no-verify "$UPSTREAM" HEAD:production
+
+echo "Please re-enable now the force push protection on https://github.com/firefox-devtools/profiler/settings/branches"
+printf "Hit enter when you are ready."
 
 echo ">>> Going back to your previous banch"
 echo_and_exec_cmd git checkout -
