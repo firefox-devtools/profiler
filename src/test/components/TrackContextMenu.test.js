@@ -85,7 +85,7 @@ describe('timeline/TrackContextMenu', function() {
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
-      const hideAllTracksByType = () => getByText(/Hide "Content Process"/);
+      const hideAllTracksByType = () => getByText(/Hide all "Content Process"/);
       return {
         ...results,
         trackReference,
@@ -270,7 +270,7 @@ describe('timeline/TrackContextMenu', function() {
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
       const hideDOMWorker = () => getByText('Hide "DOM Worker"');
-      const hideAllTracksByType = () => getByText('Hide all "DOM Worker"');
+      const hideAllTracksByType = () => getByText('Hide "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {
