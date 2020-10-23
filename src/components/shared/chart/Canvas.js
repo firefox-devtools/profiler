@@ -4,9 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { timeCode } from '../../../utils/time-code';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
-import { Tooltip } from '../../tooltip/Tooltip';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
 type Props<HoveredItem> = {|
@@ -37,7 +37,7 @@ type State<HoveredItem> = {
   pageY: CssPixels,
 };
 
-require('./Canvas.css');
+import './Canvas.css';
 
 /**
  * The maximum amount of movement in either direction between the
@@ -52,7 +52,7 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
-export default class ChartCanvas<HoveredItem> extends React.Component<
+export class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
