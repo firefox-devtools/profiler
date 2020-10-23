@@ -25,7 +25,7 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
-  typeof updatePreviewSelection,
+  updatePreviewSelection,
 } from 'firefox-profiler/actions/profile-view';
 import type {
   Thread,
