@@ -247,7 +247,13 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       ? previewSelection.selectionEnd
       : committedRange.end;
 
+    const selectionStart = previewSelection.hasSelection
+      ? previewSelection.selectionStart
+      : committedRange.start;
+
     const markerEnd = marker.end || marker.start;
+
+    const markerStart = marker.start;
 
     return (
       <ContextMenu
@@ -278,13 +284,13 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
               </MenuItem>
             </SubMenu>
             <SubMenu title="Set selection end">
-              <MenuItem onClick={this.setEndRangeFromMarkerStart}>
+              <MenuItem
+                onClick={this.setEndRangeFromMarkerStart}
+                disabled={selectionStart > markerStart}
+              >
                 From the start of this marker
               </MenuItem>
-              <MenuItem
-                onClick={this.setEndRangeFromMarkerEnd}
-                disabled={markerEnd > selectionEnd}
-              >
+              <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
                 From the end of this marker
               </MenuItem>
             </SubMenu>
