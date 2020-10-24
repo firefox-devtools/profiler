@@ -48,7 +48,6 @@ import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
 import type {
   ConnectedProps,
-  WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
 
 import './FlameGraph.css';
@@ -71,7 +70,6 @@ type StateProps = {|
   +sampleIndexOffset: number,
   +maxStackDepth: number,
   +timeRange: StartEndRange,
-  +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
   +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
@@ -90,9 +88,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
-  +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
-  >,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -264,7 +260,6 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       threadsKey,
       maxStackDepth,
       flameGraphTiming,
-      updatePreviewSelection,
       callTree,
       callNodeInfo,
       timeRange,
@@ -311,12 +306,12 @@ class FlameGraphImpl extends React.PureComponent<Props> {
             chartProps={{
               thread,
               pages,
-              updatePreviewSelection,
               weightType,
               unfilteredThread,
               sampleIndexOffset,
               maxStackDepth,
               flameGraphTiming,
+              updatePreviewSelection,
               callTree,
               callNodeInfo,
               categories,
