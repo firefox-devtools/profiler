@@ -5,7 +5,7 @@
 
 import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
-import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
+import type { IndexIntoStackTable, IndexIntoStringTable, Tid } from './profile';
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
@@ -118,6 +118,7 @@ export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
  * start and end time.
  */
 export type CauseBacktrace = {|
+  tid: Tid,
   time: Milliseconds,
   stack: IndexIntoStackTable,
 |};
