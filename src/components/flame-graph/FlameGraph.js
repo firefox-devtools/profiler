@@ -46,9 +46,7 @@ import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-grap
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 
-import type {
-  ConnectedProps,
-} from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './FlameGraph.css';
 

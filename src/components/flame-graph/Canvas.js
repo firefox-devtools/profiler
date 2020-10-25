@@ -203,7 +203,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const startTime = stackTiming.start[i];
         const endTime = stackTiming.end[i];
 
-        const x: CssPixels = startTime + containerWidth;
+        const x: CssPixels = startTime * containerWidth;
         const y: CssPixels =
           (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
         const w: CssPixels = (endTime - startTime) * containerWidth;
