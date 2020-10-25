@@ -19,11 +19,17 @@ jest.mock('../../actions/receive-profile', () => ({
 // We mock <ProfileViewer> because it's complex and we should really test it
 // elsewhere. Using a custom name makes it possible to test that  _this_
 // component is used.
-jest.mock('../../components/app/ProfileViewer', () => 'profile-viewer');
+jest.mock('../../components/app/ProfileViewer', () => ({
+  ProfileViewer: 'profile-viewer',
+}));
 // We mock <Home> as well because it brings too much noise in snapshots and it's
 // overly tested in another test file.
-jest.mock('../../components/app/Home', () => 'home');
-jest.mock('../../components/app/CompareHome', () => 'compare-home');
+jest.mock('../../components/app/Home', () => ({
+  Home: 'home',
+}));
+jest.mock('../../components/app/CompareHome', () => ({
+  CompareHome: 'compare-home',
+}));
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
 // separate test file.

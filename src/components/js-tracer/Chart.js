@@ -8,20 +8,20 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   JS_TRACER_MAXIMUM_CHART_ZOOM,
-} from '../../app-logic/constants';
-import explicitConnect from '../../utils/connect';
-import JsTracerCanvas from './Canvas';
+} from 'firefox-profiler/app-logic/constants';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { JsTracerCanvas } from './Canvas';
 
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import type { UniqueStringArray } from '../../utils/unique-string-array';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import type {
   JsTracerTable,
   ThreadsKey,
@@ -33,9 +33,9 @@ import type {
   PreviewSelection,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT: CssPixels = 16;
 
@@ -249,7 +249,7 @@ type ChartProps = {|
  * For more information on the life cycle of keyed components see:
  * See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
-export default class JsTracerChart extends React.PureComponent<ChartProps> {
+export class JsTracerChart extends React.PureComponent<ChartProps> {
   render() {
     const {
       profile,

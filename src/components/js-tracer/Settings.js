@@ -5,9 +5,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { changeShowJsTracerSummary } from '../../actions/profile-view';
-import { getShowJsTracerSummary } from '../../selectors/url-state';
-import explicitConnect, { type ConnectedProps } from '../../utils/connect';
+import { changeShowJsTracerSummary } from 'firefox-profiler/actions/profile-view';
+import { getShowJsTracerSummary } from 'firefox-profiler/selectors/url-state';
+import explicitConnect, {
+  type ConnectedProps,
+} from 'firefox-profiler/utils/connect';
 
 import './Settings.css';
 
@@ -21,7 +23,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class JsTracerSettings extends PureComponent<Props> {
+class JsTracerSettingsImpl extends PureComponent<Props> {
   _onCheckboxChange = () => {
     this.props.changeShowJsTracerSummary(!this.props.showJsTracerSummary);
   };
@@ -48,12 +50,16 @@ class JsTracerSettings extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const JsTracerSettings = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     showJsTracerSummary: getShowJsTracerSummary(state),
   }),
   mapDispatchToProps: {
     changeShowJsTracerSummary,
   },
-  component: JsTracerSettings,
+  component: JsTracerSettingsImpl,
 });

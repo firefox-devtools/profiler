@@ -7,28 +7,31 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
-import explicitConnect from '../../utils/connect';
-import TabBar from './TabBar';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { TabBar } from './TabBar';
 import { ErrorBoundary } from './ErrorBoundary';
-import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
-import MarkerTable from '../marker-table';
-import StackChart from '../stack-chart/';
-import MarkerChart from '../marker-chart/';
-import NetworkChart from '../network-chart/';
-import FlameGraph from '../flame-graph/';
-import JsTracer from '../js-tracer/';
-import { selectSidebar } from '../sidebar';
+import { ProfileCallTreeView } from 'firefox-profiler/components/calltree/ProfileCallTreeView';
+import { MarkerTable } from 'firefox-profiler/components/marker-table';
+import { StackChart } from 'firefox-profiler/components/stack-chart/';
+import { MarkerChart } from 'firefox-profiler/components/marker-chart/';
+import { NetworkChart } from 'firefox-profiler/components/network-chart/';
+import { FlameGraph } from 'firefox-profiler/components/flame-graph/';
+import { JsTracer } from 'firefox-profiler/components/js-tracer/';
+import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
-import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from '../../selectors/url-state';
-import { getIsSidebarOpen } from '../../selectors/app';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import CallNodeContextMenu from '../shared/CallNodeContextMenu';
-import { MaybeMarkerContextMenu } from '../shared/MarkerContextMenu';
-import { toValidTabSlug } from '../../utils/flow';
+import {
+  changeSelectedTab,
+  changeSidebarOpenState,
+} from 'firefox-profiler/actions/app';
+import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
+import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { CallNodeContextMenu } from 'firefox-profiler/components/shared/CallNodeContextMenu';
+import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
+import { toValidTabSlug } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
-import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './Details.css';
 
@@ -45,7 +48,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewer extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props> {
   _onSelectTab = (selectedTab: string) => {
     const { changeSelectedTab } = this.props;
     const tabSlug = toValidTabSlug(selectedTab);
@@ -111,7 +114,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
@@ -121,5 +124,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedTab,
     changeSidebarOpenState,
   },
-  component: ProfileViewer,
+  component: ProfileViewerImpl,
 });

@@ -24,8 +24,8 @@ import {
   getZipFileErrorMessage,
 } from '../../selectors/zipped-profiles';
 import { getPathInZipFileFromUrl } from '../../selectors/url-state';
-import TreeView from '../shared/TreeView';
-import ProfileViewer from './ProfileViewer';
+import { TreeView } from '../shared/TreeView';
+import { ProfileViewer } from './ProfileViewer';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
@@ -122,7 +122,7 @@ const ZipFileRow = explicitConnect<
  * to a particular one. However, it is a general purpose zip file
  * viewer to load profiles, so it can be used on arbitrary profiles.
  */
-class ZipFileViewer extends React.PureComponent<Props> {
+class ZipFileViewerImpl extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
   _treeView: ?TreeView<ZipDisplayData>;
@@ -163,7 +163,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
    * method is what keeps the ZipFileViewer and ZipFileState in sync
    * with the UrlState.
    */
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
+  componentDidUpdate(prevProps: Props) {
     const {
       pathInZipFile,
       zipFileState,
@@ -171,7 +171,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       zipFileTable,
       returnToZipFileList,
       showErrorForNoFileInZip,
-    } = nextProps;
+    } = this.props;
     if (pathInZipFile !== zipFileState.pathInZipFile) {
       // The UrlState and ZipFileState are out of sync, they need to be
       // updated.
@@ -191,9 +191,6 @@ class ZipFileViewer extends React.PureComponent<Props> {
         }
       }
     }
-  }
-
-  componentDidUpdate(prevProps: Props) {
     if (
       prevProps.zipFileState.phase !== 'LIST_FILES_IN_ZIP_FILE' &&
       this.props.zipFileState.phase === 'LIST_FILES_IN_ZIP_FILE'
@@ -338,7 +335,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const zipFileTree = getZipFileTree(state);
     if (zipFileTree === null) {
@@ -370,5 +367,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     returnToZipFileList,
     showErrorForNoFileInZip,
   },
-  component: ZipFileViewer,
+  component: ZipFileViewerImpl,
 });

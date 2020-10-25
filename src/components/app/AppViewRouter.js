@@ -5,23 +5,26 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import ProfileViewer from './ProfileViewer';
-import ZipFileViewer from './ZipFileViewer';
-import Home from './Home';
-import CompareHome from './CompareHome';
+import { ProfileViewer } from './ProfileViewer';
+import { ZipFileViewer } from './ZipFileViewer';
+import { Home } from './Home';
+import { CompareHome } from './CompareHome';
 import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from '../../selectors/app';
-import { getHasZipFile } from '../../selectors/zipped-profiles';
-import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
+import { getView } from 'firefox-profiler/selectors/app';
+import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
+import {
+  getDataSource,
+  getProfilesToCompare,
+} from 'firefox-profiler/selectors/url-state';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { UploadedRecordingsHome } from './UploadedRecordingsHome';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the Firefox.",

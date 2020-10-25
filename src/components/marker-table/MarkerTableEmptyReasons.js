@@ -5,7 +5,7 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from '../shared/EmptyReasons';
+import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
@@ -18,7 +18,7 @@ type StateProps = {|
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
-class MarkerTableEmptyReasons extends PureComponent<Props> {
+class MarkerTableEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { isMarkerTableEmptyInFullRange, threadName } = this.props;
 
@@ -36,12 +36,12 @@ class MarkerTableEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const MarkerTableEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     isMarkerTableEmptyInFullRange: selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(
       state
     ),
   }),
-  component: MarkerTableEmptyReasons,
+  component: MarkerTableEmptyReasonsImpl,
 });

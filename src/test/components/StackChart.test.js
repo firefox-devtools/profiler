@@ -15,8 +15,8 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import StackChartGraph from '../../components/stack-chart';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { StackChart } from '../../components/stack-chart';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import {
   getEmptyThread,
   getEmptyProfile,
@@ -185,7 +185,7 @@ describe('StackChart', function() {
       const container = render(
         <Provider store={store}>
           <>
-            <StackChartGraph />
+            <StackChart />
           </>
         </Provider>
       ).container;
@@ -380,7 +380,7 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     <Provider store={store}>
       <>
         <CallNodeContextMenu />
-        <StackChartGraph />
+        <StackChart />
       </>
     </Provider>
   );

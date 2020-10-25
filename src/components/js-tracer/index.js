@@ -4,27 +4,27 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import JsTracerChart from './Chart';
-import JsTracerSettings from './Settings';
-import EmptyReasons from './EmptyReasons';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { JsTracerChart } from './Chart';
+import { JsTracerSettings } from './Settings';
+import { JsTracerEmptyReasons } from './EmptyReasons';
 
-import { getProfile } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getProfile } from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getShowJsTracerSummary,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+} from 'firefox-profiler/selectors/url-state';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 
 import type {
   Profile,
   JsTracerTable,
   ThreadsKey,
 } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+import './index.css';
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
@@ -39,7 +39,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class JsTracer extends React.PureComponent<Props> {
+class JsTracerImpl extends React.PureComponent<Props> {
   _rafGeneration: number = 0;
 
   render() {
@@ -52,7 +52,7 @@ class JsTracer extends React.PureComponent<Props> {
     return (
       <div className="jsTracer">
         {jsTracerTable === null || jsTracerTable.events.length === 0 ? (
-          <EmptyReasons />
+          <JsTracerEmptyReasons />
         ) : (
           <>
             <JsTracerSettings />
@@ -69,7 +69,7 @@ class JsTracer extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const JsTracer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       profile: getProfile(state),
@@ -79,5 +79,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: JsTracer,
+  component: JsTracerImpl,
 });

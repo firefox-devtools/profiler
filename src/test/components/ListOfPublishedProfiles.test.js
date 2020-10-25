@@ -401,6 +401,42 @@ describe('ListOfPublishedProfiles', () => {
       );
     });
 
+    it('renders a generic message when the final profile on the list has been deleted', async () => {
+      const { profileToken, jwtToken } = listOfProfileInformations[0];
+      const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
+      mockFetchForDeleteProfile({ endpointUrl, jwtToken });
+
+      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
+      await storeProfileInformations(listOfProfileInformations.slice(0, 1));
+      const {
+        container,
+        getDeleteButtonForProfile,
+        findByText,
+        queryByText,
+        getConfirmDeleteButton,
+      } = setup({
+        withActionButtons: true,
+      });
+
+      // Wait for the full rendering with a find* operation.
+      await findByText(/Fennec/);
+      const workingButton = getDeleteButtonForProfile('#012345');
+
+      // Click on the delete button
+      fireFullClick(workingButton);
+      jest.runAllTimers(); // Opening the panel involves a timeout.
+      expect(container.querySelector('.arrowPanelContent')).toMatchSnapshot();
+
+      // Click on the confirm button
+      fireFullClick(getConfirmDeleteButton());
+      await findByText(/successfully/i);
+
+      // Clicking elsewhere should make the successful message disappear and a generic message appear.
+      fireFullClick((window: any));
+      await findByText(/no profile/i);
+      expect(queryByText(/no profile/i)).toBeTruthy();
+    });
+
     it('can handle errors', async () => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
       const { profileToken } = listOfProfileInformations[0];
@@ -441,6 +477,65 @@ describe('ListOfPublishedProfiles', () => {
       expect(await retrieveProfileData(profileToken)).toEqual(
         listOfProfileInformations[0]
       );
+    });
+  });
+
+  describe('The uploaded recordings list should update on window focus', () => {
+    it('will update the stored profiles on window focus', async function() {
+      // Add 3 examples, all with the same name.
+      // mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
+
+      const exampleProfileData = {
+        profileToken: 'MACOSX',
+        jwtToken: null,
+        publishedDate: new Date('4 Jul 2020 13:00'),
+        name: 'PROFILE',
+        preset: null,
+        originHostname: 'https://mozilla.org',
+        meta: {
+          product: 'Firefox',
+          platform: 'Macintosh',
+          toolkit: 'cocoa',
+          misc: 'rv:62.0',
+          oscpu: 'Intel Mac OS X 10.12',
+        },
+        urlPath: '/public/MACOSX/marker-chart/',
+        publishedRange: { start: 2000, end: 40000 },
+      };
+
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-1',
+      });
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-2',
+      });
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-3',
+      });
+
+      const { findAllByText } = setup();
+      expect(await findAllByText(/PROFILE/)).toHaveLength(3);
+
+      // Add one more.
+      await storeProfileData({
+        ...exampleProfileData,
+        profileToken: 'PROFILE-4',
+        name: 'NEW-PROFILE', // Adding with a new name so that we can look it up.
+      });
+
+      // Nothing is updated yet: looking for the new profile name will throw.
+      await expect(() => findAllByText(/NEW-PROFILE/)).rejects.toThrow(
+        /Unable to find an element with the text/
+      );
+      expect(await findAllByText(/PROFILE/)).toHaveLength(3);
+
+      // The new profile is now listed.
+      window.dispatchEvent(new Event('focus'));
+      await findAllByText(/NEW-PROFILE/);
+      expect(await findAllByText(/PROFILE/)).toHaveLength(4);
     });
   });
 });

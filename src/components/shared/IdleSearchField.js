@@ -22,7 +22,7 @@ type State = {
   value: string,
 };
 
-class IdleSearchField extends PureComponent<Props, State> {
+export class IdleSearchField extends PureComponent<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
@@ -130,5 +130,3 @@ class IdleSearchField extends PureComponent<Props, State> {
     );
   }
 }
-
-export default IdleSearchField;

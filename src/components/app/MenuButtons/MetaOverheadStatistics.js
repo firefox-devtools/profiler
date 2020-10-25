@@ -5,9 +5,9 @@
 // @flow
 import * as React from 'react';
 import {
-  formatNanoseconds,
+  formatMicroseconds,
   formatPercent,
-} from '../../../utils/format-numbers';
+} from 'firefox-profiler/utils/format-numbers';
 
 import type { ProfilerOverhead } from 'firefox-profiler/types';
 
@@ -94,9 +94,9 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
             {[...calculatedStats].map(([key, val]) => (
               <React.Fragment key={key}>
                 <div>{key}</div>
-                <div>{formatNanoseconds(val.mean)}</div>
-                <div>{formatNanoseconds(val.max)}</div>
-                <div>{formatNanoseconds(val.min)}</div>
+                <div>{formatMicroseconds(val.mean)}</div>
+                <div>{formatMicroseconds(val.max)}</div>
+                <div>{formatMicroseconds(val.min)}</div>
               </React.Fragment>
             ))}
           </div>
@@ -105,7 +105,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoWideLabel">Overhead Durations:</span>
               <span className="metaInfoValueRight">
-                {formatNanoseconds(overheadDurations / totalSamplingCount)}
+                {formatMicroseconds(overheadDurations / totalSamplingCount)}
               </span>
             </div>
           ) : null}
@@ -121,7 +121,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
             <div className="metaInfoRow">
               <span className="metaInfoWideLabel">Profiled Duration:</span>
               <span className="metaInfoValueRight">
-                {formatNanoseconds(profiledDuration / totalSamplingCount)}
+                {formatMicroseconds(profiledDuration / totalSamplingCount)}
               </span>
             </div>
           ) : null}

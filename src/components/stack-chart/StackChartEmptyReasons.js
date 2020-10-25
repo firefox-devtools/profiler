@@ -5,7 +5,7 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from '../shared/EmptyReasons';
+import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
@@ -24,7 +24,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
  * This component attempts to tell why exactly a stack chart is empty with no samples
  * and display a friendly message to the end user.
  */
-class StackChartEmptyReasons extends PureComponent<Props> {
+class StackChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { thread, rangeFilteredThread, threadName } = this.props;
     let reason;
@@ -50,11 +50,11 @@ class StackChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const StackChartEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
   }),
-  component: StackChartEmptyReasons,
+  component: StackChartEmptyReasonsImpl,
 });
