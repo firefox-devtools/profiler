@@ -317,7 +317,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (rightClickedThreadIndex.type === 'local') {
       return 'Unknown Track';
     }
-    return localTracksByPid[rightClickedThreadIndex.trackIndex];
+    return localTracksByPid[rightClickedThreadIndex.trackIndex].type;
   }
 
   renderIsolateProcess() {
@@ -555,7 +555,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
           onClick={this._hideAllTracksByType}
         >
-          Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}
+          Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
+          tracks
         </MenuItem>
       );
     }
@@ -566,7 +567,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
         onClick={this._hideAllTracksByType}
       >
-        Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}
+        Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
+        tracks
       </MenuItem>
     );
   }
