@@ -4,9 +4,10 @@
 
 .arrowPanelAnchor {
   position: absolute;
-  z-index: 10;
+  z-index: 5;
   top: 75%;
   left: 50%;
+  transform: translateZ(3rem);
 }
 
 .arrowPanel {

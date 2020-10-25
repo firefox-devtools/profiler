@@ -1,5 +1,6 @@
 .tooltip {
   position: fixed;
+  z-index: 6;
   display: inline-block;
   overflow: hidden;
 
@@ -17,6 +18,7 @@
   pointer-events: none;
   text-align: left;
   text-overflow: ellipsis;
+  transform: translateZ(4rem);
   transition: opacity 250ms;
 }
 

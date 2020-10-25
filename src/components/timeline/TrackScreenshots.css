@@ -33,6 +33,7 @@
   position: absolute;
   z-index: 4; /* Ensure this is higher than any other timeline element. */
   pointer-events: none;
+  transform: translateZ(2rem);
 }
 
 .timelineTrackScreenshotHoverImg {
