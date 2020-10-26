@@ -32,12 +32,18 @@ import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from '../../utils/connect';
-import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
+import type {
+  UrlState,
+  Phase,
+  UrlSetupPhase,
+  ZipFileState,
+} from 'firefox-profiler/types';
 
 type StateProps = {|
   +phase: Phase,
   +urlState: UrlState,
   +urlSetupPhase: UrlSetupPhase,
+  +zipFileState: ZipFileState,
 |};
 
 type DispatchProps = {|
@@ -193,7 +199,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
   }
 
   componentDidUpdate() {
-    const { urlSetupPhase, phase, urlState } = this.props;
+    const { urlSetupPhase, phase, urlState, zipFileState } = this.props;
     if (urlSetupPhase !== 'done') {
       // Do not change the history before the url setup is done, because the URL
       // state isn't in a consistent state yet.
@@ -210,7 +216,6 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     }
 
     const newUrl = urlFromState(urlState);
-    const zipFileState = getZipFileState(getState());
     if (
       newUrl !== window.location.pathname + window.location.search &&
       zipFileState.phase !== 'PROCESS_PROFILE_FROM_ZIP_FILE'
@@ -248,6 +253,7 @@ export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
     phase: getView(state).phase,
+    zipFileState: getZipFileState(state),
   }),
   mapDispatchToProps: {
     updateUrlState,
