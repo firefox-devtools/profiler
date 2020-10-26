@@ -555,7 +555,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           data={(rightClickedTrack, globalTracks, localTracksByPid)}
           onClick={this._hideAllTracksByType}
         >
-          Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
+          Hide all {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}{' '}
           tracks
         </MenuItem>
       );
@@ -567,7 +567,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={(rightClickedTrack, globalTracks, localTracksByPid)}
         onClick={this._hideAllTracksByType}
       >
-        Hide all {`"${this.getRightClickedTrackType(rightClickedTrack)}"`}{' '}
+        Hide all {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}{' '}
         tracks
       </MenuItem>
     );
