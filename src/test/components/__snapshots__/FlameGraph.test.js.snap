@@ -55,7 +55,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 111px; top: 308px;"
+  style="--tooltip-detail-max-width: 600px; left: 14px; top: 306px;"
 >
   <div
     class="tooltipCallNode"
@@ -686,5 +686,189 @@ Array [
     69.66666666666666,
     231,
   ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    204,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    204,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "J",
+  ],
+  Array [
+    "set fillStyle",
+    "#000",
+  ],
+  Array [
+    "fillText",
+    "J",
+    69.66666666666666,
+    215,
+  ],
 ]
+`;
+
+exports[`FlameGraph shows a tooltip with the resource information 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 80.66666666666666px; top: 226px;"
+>
+  <div
+    class="tooltipCallNode"
+    style="--graph-width: 150px; --graph-height: 10px;"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        1.0ms (33%)
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        J
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipCallNodeImplementation"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 150px;"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeImplementationName tooltipLabel"
+        >
+          Native code
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 150px;"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          1 sample
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          1 sample
+        </div>
+      </div>
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="colored-square category-color-green"
+          />
+          Graphics
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Script URL:
+        </div>
+        path/to/file:17:107
+        <div
+          class="tooltipLabel"
+        >
+          Resource:
+        </div>
+        libxul.so
+      </div>
+    </div>
+  </div>
+</div>
 `;

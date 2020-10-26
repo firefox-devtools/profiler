@@ -8,12 +8,12 @@ import * as React from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import NetworkSettings from '../shared/NetworkSettings';
-import VirtualList from '../shared/VirtualList';
+import { NetworkSettings } from '../shared/NetworkSettings';
+import { VirtualList } from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
 import { NetworkChartRow } from './NetworkChartRow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import {
   getPreviewSelection,
@@ -34,7 +34,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
@@ -76,7 +76,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  _onKeyDown = (_event: KeyboardEvent) => {
+  _onKeyDown = (_event: SyntheticKeyboardEvent<>) => {
     // Not implemented.
   };
 

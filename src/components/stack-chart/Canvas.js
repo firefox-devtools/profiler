@@ -11,7 +11,7 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
+import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
@@ -77,7 +77,7 @@ type HoveredStackTiming = {|
   +stackTimingIndex: IndexIntoStackTiming,
 |};
 
-require('./Canvas.css');
+import './Canvas.css';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;

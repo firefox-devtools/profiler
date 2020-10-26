@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import TreeView from '../shared/TreeView';
+import { TreeView } from '../shared/TreeView';
 import { MarkerTableEmptyReasons } from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
@@ -21,7 +21,7 @@ import {
   changeSelectedMarker,
   changeRightClickedMarker,
 } from '../../actions/profile-view';
-import MarkerSettings from '../shared/MarkerSettings';
+import { MarkerSettings } from '../shared/MarkerSettings';
 import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
 
 import './index.css';

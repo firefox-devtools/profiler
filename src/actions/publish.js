@@ -5,31 +5,31 @@
 // @flow
 import { stripIndent } from 'common-tags';
 
-import { uploadBinaryProfileData } from '../profile-logic/profile-store';
-import { sendAnalytics } from '../utils/analytics';
+import { uploadBinaryProfileData } from 'firefox-profiler/profile-logic/profile-store';
+import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import {
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
   getRemoveProfileInformation,
   getPrePublishedState,
-} from '../selectors/publish';
+} from 'firefox-profiler/selectors/publish';
 import {
   getDataSource,
   getProfileNameForStorage,
   getUrlPredictor,
-} from '../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getZeroAt,
   getCommittedRange,
   getProfileFilterPageData,
-} from '../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
-import { ensureExists } from '../utils/flow';
-import { extractProfileTokenFromJwt } from '../utils/jwt';
-import { withHistoryReplaceStateSync } from '../app-logic/url-handling';
-import { storeProfileData } from '../app-logic/published-profiles-store';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
+import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
+import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
 
 import type {
   Action,
