@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
@@ -20,10 +20,10 @@ type Props = {|
 
 type State = {
   value: string,
+  previousDefaultValue: string,
 };
 
-//I used “shouldComponentUpdate” lifecycle here which should not be used in a purecomponent and that is why I changed from purecomponent to component
-export class IdleSearchField extends Component<Props, State> {
+export class IdleSearchField extends PureComponent<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
@@ -33,6 +33,7 @@ export class IdleSearchField extends Component<Props, State> {
     super(props);
     this.state = {
       value: props.defaultValue || '',
+      previousDefaultValue: props.defaultValue || '',
     };
     this._previouslyNotifiedValue = this.state.value;
   }
@@ -92,15 +93,16 @@ export class IdleSearchField extends Component<Props, State> {
     e.preventDefault();
   }
 
-  shouldComponentUpdate(nextProps: Props) {
-    if (nextProps.defaultValue !== this.props.defaultValue) {
-      this._notifyIfChanged(nextProps.defaultValue || '');
-      this.setState({
-        value: nextProps.defaultValue || '',
-      });
-      return true;
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (
+      props.defaultValue !== state.previousDefaultValue &&
+      props.defaultValue !== state.value
+    ) {
+      return {
+        value: props.defaultValue || '',
+        previousDefaultValue: props.defaultValue || '',
+      };
     }
-    return false;
   }
 
   render() {
