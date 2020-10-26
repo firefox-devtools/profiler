@@ -31,7 +31,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     tabindex="-1"
   >
     Hide all 
-    "screenshots"
+    "Screenshots"
      
     tracks
   </div>
@@ -97,7 +97,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     tabindex="-1"
   >
     Hide all 
-    "process"
+    "Content Process"
      
     tracks
   </div>
@@ -169,7 +169,7 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
     tabindex="-1"
   >
     Hide all 
-    "process"
+    "Process 0"
      
     tracks
   </div>
@@ -247,7 +247,7 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     tabindex="-1"
   >
     Hide all 
-    "Unknown Track"
+    "DOM Worker"
      
     tracks
   </div>

@@ -333,7 +333,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('can hide all the DOM worker thread', function() {
-      const { hideAllTracksByType, getState } = setupLocalTrack();
+      const { hideDOMWorker, getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
@@ -341,7 +341,7 @@ describe('timeline/TrackContextMenu', function() {
         '  - show [thread Style]',
       ]);
 
-      fireFullClick(hideAllTracksByType());
+      fireFullClick(hideDOMWorker());
 
       expect(getHumanReadableTracks(getState())).toEqual([
         'show[thread GeckoMain process]',
