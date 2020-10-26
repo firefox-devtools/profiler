@@ -7,8 +7,6 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
-import { getZipFileState } from 'firefox-profiler/selectors/zipped-profiles';
-
 import {
   updateUrlState,
   startFetchingProfiles,
@@ -32,18 +30,12 @@ import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from '../../utils/connect';
-import type {
-  UrlState,
-  Phase,
-  UrlSetupPhase,
-  ZipFileState,
-} from 'firefox-profiler/types';
+import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {|
   +phase: Phase,
   +urlState: UrlState,
   +urlSetupPhase: UrlSetupPhase,
-  +zipFileState: ZipFileState,
 |};
 
 type DispatchProps = {|
@@ -199,7 +191,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
   }
 
   componentDidUpdate() {
-    const { urlSetupPhase, phase, urlState, zipFileState } = this.props;
+    const { urlSetupPhase, phase, urlState } = this.props;
     if (urlSetupPhase !== 'done') {
       // Do not change the history before the url setup is done, because the URL
       // state isn't in a consistent state yet.
@@ -216,13 +208,11 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     }
 
     const newUrl = urlFromState(urlState);
-    if (
-      newUrl !== window.location.pathname + window.location.search &&
-      zipFileState.phase !== 'PROCESS_PROFILE_FROM_ZIP_FILE'
-    ) {
+    if (newUrl !== window.location.pathname + window.location.search) {
       if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
+
         window.history.pushState(urlState, document.title, newUrl);
       } else {
         // Replace the URL state before the URL setup is done, and if we've specifically
@@ -253,7 +243,6 @@ export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
     phase: getView(state).phase,
-    zipFileState: getZipFileState(state),
   }),
   mapDispatchToProps: {
     updateUrlState,
