@@ -7,6 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
+import { getZipFileState } from 'firefox-profiler/selectors/zipped-profiles';
+
 import {
   updateUrlState,
   startFetchingProfiles,
@@ -208,14 +210,15 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     }
 
     const newUrl = urlFromState(urlState);
-    if (newUrl !== window.location.pathname + window.location.search) {
+    const zipFileState = getZipFileState(getState());
+    if (
+      newUrl !== window.location.pathname + window.location.search &&
+      zipFileState.phase !== 'PROCESS_PROFILE_FROM_ZIP_FILE'
+    ) {
       if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
-        const result = newUrl.split('&');
-        if (result[1] !== 'v=5') {
-          window.history.pushState(urlState, document.title, newUrl);
-        }
+        window.history.pushState(urlState, document.title, newUrl);
       } else {
         // Replace the URL state before the URL setup is done, and if we've specifically
         // flagged to replace the URL state.
