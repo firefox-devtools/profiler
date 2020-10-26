@@ -323,6 +323,7 @@ type NetworkChartRowProps = {|
   +isRightClicked: boolean,
   +isSelected: boolean,
   +isLeftClicked: boolean,
+  +select: MarkerIndex => mixed,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
   +shouldDisplayTooltips: () => boolean,
@@ -367,7 +368,6 @@ export class NetworkChartRow extends React.PureComponent<
 
   _onMouseDown = (e: SyntheticMouseEvent<>) => {
     const { markerIndex, onLeftClick, onRightClick } = this.props;
-    console.log(e.button);
     if (e.button === 0) {
       if (onLeftClick) {
         onLeftClick(markerIndex);

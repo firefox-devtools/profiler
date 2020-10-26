@@ -134,6 +134,7 @@ export const defaultThreadViewOptions = {
   selectedCallNodePath: [],
   expandedCallNodePaths: new PathSet(),
   selectedMarker: null,
+  selectedNetworkMarker: null,
 };
 
 function _getThreadViewOptions(

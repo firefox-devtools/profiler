@@ -16,7 +16,6 @@ import { NetworkChartRow } from './NetworkChartRow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import {
-  getScrollToSelectionGeneration,
   getPreviewSelection,
   getPreviewSelectionRange,
 } from '../../selectors/profile';
@@ -55,7 +54,6 @@ type StateProps = {|
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
-  +scrollToSelectionGeneration: number,
 |};
 
 type OwnProps = {| ...SizeProps |};
@@ -63,7 +61,7 @@ type OwnProps = {| ...SizeProps |};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class NetworkChartImpl extends React.PureComponent<Props> {
-  _virtualListRef = React.createRef<VirtualList>();
+  _virtualListRef = React.createRef();
   _memoizedGetSpecialItems = memoize(
     (selectedNetworkMarkerIndex, rightClickedMarkerIndex) => {
       const specialItems = [undefined, undefined];
@@ -82,11 +80,11 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   componentDidMount() {
     this.focus();
   }
-  componentDidUpdate(/*prevProps*/) {
-    // Not implemented
-  }
+
   focus() {
-    //Not implemented
+    if (this._virtualListRef.current) {
+      this._virtualListRef.current.focus();
+    }
   }
 
   _getSpecialItems = () => {
@@ -101,7 +99,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  _onKeyDown = (_event: KeyboardEvent) => {
+  _onKeyDown = (event: KeyboardEvent) => {
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -243,8 +241,8 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         onRightClick={this._onRightClick}
         isLeftClicked={selectedNetworkMarkerIndex === markerIndex}
         isSelected={selectedNetworkMarkerIndex === markerIndex}
+        select={this._select}
         onLeftClick={this._onLeftClick}
-        ref={this._takeNetworkChartRef}
       />
     );
   };
@@ -303,7 +301,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
     mapStateToProps: state => ({
-      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
         state
       ),

@@ -4030,5 +4030,6 @@ Object {
     1,
   ],
   "selectedMarker": 1,
+  "selectedNetworkMarker": null,
 }
 `;
