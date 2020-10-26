@@ -85,7 +85,7 @@ describe('timeline/TrackContextMenu', function() {
       const isolateScreenshotTrack = () =>
         getByText(/Hide other screenshot tracks/);
       const hideContentProcess = () => getByText(/Hide "Content Process"/);
-      const hideAllTracksByType = () => getByText(/Hide all "Content Process"/);
+      const hideAllTracksByType = () => getByText(/Hide all "Content process"/);
       return {
         ...results,
         trackReference,
@@ -127,25 +127,6 @@ describe('timeline/TrackContextMenu', function() {
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
-      ]);
-    });
-
-    it('can hide all the process', function() {
-      const { hideAllTracksByType, getState } = setupGlobalTrack();
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
-        'show [thread GeckoMain tab] SELECTED',
-        '  - show [thread DOM Worker]',
-        '  - show [thread Style]',
-      ]);
-
-      fireFullClick(hideAllTracksByType());
-
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process] SELECTED',
-        'hide [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
         '  - show [thread Style]',
       ]);
     });
@@ -220,6 +201,25 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
+    it('can hide all the process', function() {
+      const { hideAllTracksByType, getState } = setupGlobalTrack();
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      fireFullClick(hideAllTracksByType());
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
     it('can toggle a global track by clicking it', function() {
       const { trackItem, trackIndex, getState } = setupGlobalTrack();
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
@@ -269,8 +269,7 @@ describe('timeline/TrackContextMenu', function() {
       dispatch(changeRightClickedTrack(trackReference));
 
       const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
-      const hideDOMWorker = () => getByText('Hide "DOM Worker"');
-      const hideAllDOMWorker = () => getByText('Hide all "DOM Worker"');
+      const hideDOMWorker = () => getByText('Hide all "DOM Worker"');
       const trackItem = () => getByText('DOM Worker');
 
       return {
@@ -280,7 +279,6 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateLocalTrackItem,
         hideDOMWorker,
-        hideAllDOMWorker,
         trackItem,
         pid,
       };
@@ -312,7 +310,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can hide the DOM worker thread', function() {
+    it('can hide all the DOM worker thread', function() {
       const { hideDOMWorker, getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -322,25 +320,6 @@ describe('timeline/TrackContextMenu', function() {
       ]);
 
       fireFullClick(hideDOMWorker());
-
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
-        'show [thread GeckoMain tab]',
-        '  - hide [thread DOM Worker]',
-        '  - show [thread Style] SELECTED',
-      ]);
-    });
-
-    it('can hide all the DOM worker thread', function() {
-      const { hideAllDOMWorker, getState } = setupLocalTrack();
-      expect(getHumanReadableTracks(getState())).toEqual([
-        'show [thread GeckoMain process]',
-        'show [thread GeckoMain tab]',
-        '  - show [thread DOM Worker] SELECTED',
-        '  - show [thread Style]',
-      ]);
-
-      fireFullClick(hideAllDOMWorker());
 
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
