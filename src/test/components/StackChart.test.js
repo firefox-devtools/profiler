@@ -16,7 +16,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import { StackChart } from '../../components/stack-chart';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import {
   getEmptyThread,
   getEmptyProfile,

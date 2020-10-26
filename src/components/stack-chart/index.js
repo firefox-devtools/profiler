@@ -25,9 +25,9 @@ import {
 } from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
+import { StackSettings } from '../shared/StackSettings';
+import { TransformNavigator } from '../shared/TransformNavigator';
 import {
   updatePreviewSelection,
   changeSelectedCallNode,
@@ -56,7 +56,7 @@ import type {
 
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const STACK_FRAME_HEIGHT = 16;
 

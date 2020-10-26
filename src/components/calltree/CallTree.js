@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import TreeView from 'firefox-profiler/components/shared/TreeView';
+import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
@@ -28,6 +28,7 @@ import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
   addTransformToStack,
+  handleCallNodeTransformShortcut,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -67,6 +68,7 @@ type DispatchProps = {|
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -228,6 +230,16 @@ class CallTreeImpl extends PureComponent<Props> {
     );
   };
 
+  _onKeyDown = (
+    event: SyntheticKeyboardEvent<>,
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    if (callNodeIndex !== null) {
+      const { handleCallNodeTransformShortcut, threadsKey } = this.props;
+      handleCallNodeTransformShortcut(event, threadsKey, callNodeIndex);
+    }
+  };
+
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
@@ -293,6 +305,7 @@ class CallTreeImpl extends PureComponent<Props> {
         maxNodeDepth={callNodeMaxDepth}
         rowHeight={16}
         indentWidth={10}
+        onKeyDown={this._onKeyDown}
       />
     );
   }
@@ -326,6 +339,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
     changeExpandedCallNodes,
     addTransformToStack,
+    handleCallNodeTransformShortcut,
   },
   component: CallTreeImpl,
 });
