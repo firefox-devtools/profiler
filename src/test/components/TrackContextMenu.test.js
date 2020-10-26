@@ -280,7 +280,7 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateLocalTrackItem,
         hideDOMWorker,
-        hideAllDOMWorker
+        hideAllDOMWorker,
         trackItem,
         pid,
       };
