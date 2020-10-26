@@ -181,16 +181,17 @@ export function getMarkerSelectorsPerThread(
    */
   const filterMarkerIndexesCreator = (
     filterFunc: Marker => boolean,
-    auxFilterFunc?: Marker => boolean =  marker => Boolean(marker.data && marker.data.type === 'Jank')
-    ) => (
-      getMarker: MarkerIndex => Marker,
-      markerIndexes: MarkerIndex[],
-      derivedMarkers?: Marker[]
-    ): MarkerIndex[] =>
-      MarkerData.filterMarkerIndexes(
-        getMarker,
-        markerIndexes,
-        derivedMarkers && derivedMarkers.length === 0 ? auxFilterFunc : filterFunc
+    auxFilterFunc?: Marker => boolean = marker =>
+      Boolean(marker.data && marker.data.type === 'Jank')
+  ) => (
+    getMarker: MarkerIndex => Marker,
+    markerIndexes: MarkerIndex[],
+    derivedMarkers?: Marker[]
+  ): MarkerIndex[] =>
+    MarkerData.filterMarkerIndexes(
+      getMarker,
+      markerIndexes,
+      derivedMarkers && derivedMarkers.length === 0 ? auxFilterFunc : filterFunc
     );
 
   /**
