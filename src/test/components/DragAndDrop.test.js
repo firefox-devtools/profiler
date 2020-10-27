@@ -58,5 +58,9 @@ describe('app/DragAndDrop', () => {
 
     fireEvent.dragExit(dragAndDrop);
     expect(overlay.classList).not.toContain('dragging');
+
+      fireEvent.drop(dragAndDrop);
+    expect(overlay.classList).not.toContain('dragging');
+  });
   });
 });
