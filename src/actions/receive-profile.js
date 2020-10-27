@@ -10,11 +10,7 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
-import {
-  withHistoryReplaceStateSync,
-  stateFromLocation,
-  getDataSourceFromPathParts,
-} from 'firefox-profiler/app-logic/url-handling';
+
 import {
   symbolicateProfile,
   applySymbolicationStep,
@@ -39,6 +35,12 @@ import {
   getView,
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
+
+import {
+  withHistoryReplaceStateSync,
+  stateFromLocation,
+  getDataSourceFromPathParts,
+} from 'firefox-profiler/app-logic/url-handling';
 
 import {
   initializeLocalTrackOrderByPid,
