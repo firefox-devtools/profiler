@@ -9,7 +9,6 @@ import {
 } from 'firefox-profiler/selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { loadProfile } from './receive-profile';
-import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import type { Action, ThunkAction } from 'firefox-profiler/types';
 import type { IndexIntoZipFileTable } from 'firefox-profiler/profile-logic/zip-files';
 
@@ -70,9 +69,7 @@ export function viewProfileFromZip(
         zipFileState.pathInZipFile === pathInZipFile &&
         zipFileState.phase === 'PROCESS_PROFILE_FROM_ZIP_FILE'
       ) {
-        await withHistoryReplaceStateSync(() => {
-          dispatch(loadProfile(profile, { pathInZipFile }, initialLoad));
-        });
+        await dispatch(loadProfile(profile, { pathInZipFile }, initialLoad));
       }
     } catch (error) {
       console.error(

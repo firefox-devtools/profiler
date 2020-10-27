@@ -11,6 +11,11 @@ import {
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
+  withHistoryReplaceStateSync,
+  stateFromLocation,
+  getDataSourceFromPathParts,
+} from 'firefox-profiler/app-logic/url-handling';
+import {
   symbolicateProfile,
   applySymbolicationStep,
 } from 'firefox-profiler/profile-logic/symbolication';
@@ -34,10 +39,7 @@ import {
   getView,
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
-import {
-  stateFromLocation,
-  getDataSourceFromPathParts,
-} from 'firefox-profiler/app-logic/url-handling';
+
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -1266,7 +1268,9 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            await dispatch(viewProfile(profile));
+            await withHistoryReplaceStateSync(() => {
+              dispatch(viewProfile(profile));
+            });
           }
           break;
         case 'application/zip':
