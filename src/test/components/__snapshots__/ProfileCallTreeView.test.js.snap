@@ -5413,7 +5413,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
-            value=""
+            value="C"
           />
           <input
             class="idleSearchFieldButton"
@@ -5986,7 +5986,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
-            value="C"
+            value="C,"
           />
           <input
             class="idleSearchFieldButton"
@@ -6559,7 +6559,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
-            value="C,"
+            value="C, F"
           />
           <input
             class="idleSearchFieldButton"
@@ -7013,7 +7013,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
-            value="C, F"
+            value="C, F,E"
           />
           <input
             class="idleSearchFieldButton"
@@ -7467,7 +7467,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
-            value="C, F,E"
+            value=" C , E   "
           />
           <input
             class="idleSearchFieldButton"
