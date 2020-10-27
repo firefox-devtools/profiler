@@ -63,4 +63,3 @@ describe('app/DragAndDrop', () => {
     expect(overlay.classList).not.toContain('dragging');
   });
   });
-});
