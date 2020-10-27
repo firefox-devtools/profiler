@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //@flow
-import bisection from 'bisection';
+
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 import type {
   LibSymbolicationRequest,
@@ -40,7 +41,7 @@ export class FakeSymbolStore {
       if (symbolTable) {
         const results = new Map();
         for (const address of addresses) {
-          const index = bisection.right(symbolTable.addrs, address) - 1;
+          const index = bisectionRight(symbolTable.addrs, address) - 1;
           results.set(address, {
             name: symbolTable.syms[index],
             functionOffset: address - symbolTable.addrs[index],

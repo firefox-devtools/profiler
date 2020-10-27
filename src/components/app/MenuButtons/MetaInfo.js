@@ -4,18 +4,21 @@
 
 // @flow
 import * as React from 'react';
-import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
-import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
+import {
+  formatBytes,
+  formatTimestamp,
+} from 'firefox-profiler/utils/format-numbers';
 import {
   formatProductAndVersion,
   formatPlatform,
-} from '../../../profile-logic/profile-metainfo';
+} from 'firefox-profiler/profile-logic/profile-metainfo';
 
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
-import { typeof resymbolicateProfile } from '../../../actions/receive-profile';
-import { assertExhaustiveCheck } from '../../../utils/flow';
+import { typeof resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import './MetaInfo.css';
 
@@ -83,6 +86,32 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     const { configuration } = meta;
 
     const platformInformation = formatPlatform(meta);
+
+    let cpuCount = null;
+    if (meta.physicalCPUs || meta.logicalCPUs) {
+      let physicalCPUs = null;
+      let logicalCPUs = null;
+      if (meta.physicalCPUs) {
+        physicalCPUs =
+          meta.physicalCPUs +
+          ' physical ' +
+          (meta.physicalCPUs === 1 ? 'core' : 'cores');
+      }
+      if (meta.logicalCPUs) {
+        logicalCPUs =
+          meta.logicalCPUs +
+          ' logical ' +
+          (meta.logicalCPUs === 1 ? 'core' : 'cores');
+      }
+      cpuCount = (
+        <div className="metaInfoRow">
+          <span className="metaInfoLabel">CPU:</span>
+          {physicalCPUs}
+          {physicalCPUs && logicalCPUs ? ', ' : null}
+          {logicalCPUs}
+        </div>
+      );
+    }
 
     return (
       <ButtonWithPanel
@@ -187,6 +216,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   {meta.abi}
                 </div>
               ) : null}
+              {cpuCount}
             </div>
             {meta.visualMetrics ? (
               <>

@@ -3,12 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getZipFileTable, getZipFileState } from '../selectors/zipped-profiles';
-import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
+import {
+  getZipFileTable,
+  getZipFileState,
+} from 'firefox-profiler/selectors/zipped-profiles';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { loadProfile } from './receive-profile';
 
 import type { Action, ThunkAction } from 'firefox-profiler/types';
-import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { IndexIntoZipFileTable } from 'firefox-profiler/profile-logic/zip-files';
 
 export function changeSelectedZipFile(
   selectedZipFileIndex: IndexIntoZipFileTable

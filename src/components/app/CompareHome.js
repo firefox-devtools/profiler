@@ -7,9 +7,9 @@
 import React, { PureComponent } from 'react';
 
 import { AppHeader } from './AppHeader';
-import { changeProfilesToCompare } from '../../actions/app';
-import explicitConnect from '../../utils/connect';
-import type { ConnectedProps } from '../../utils/connect';
+import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CompareHome.css';
 
@@ -24,7 +24,7 @@ type State = {|
   profile2: string,
 |};
 
-class CompareHome extends PureComponent<Props, State> {
+class CompareHomeImpl extends PureComponent<Props, State> {
   state = { profile1: '', profile2: '' };
 
   handleInputChange = (event: SyntheticInputEvent<>) => {
@@ -91,7 +91,7 @@ class CompareHome extends PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, {||}, DispatchProps>({
+export const CompareHome = explicitConnect<{||}, {||}, DispatchProps>({
   mapDispatchToProps: { changeProfilesToCompare },
-  component: CompareHome,
+  component: CompareHomeImpl,
 });

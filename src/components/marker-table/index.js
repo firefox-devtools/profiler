@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import TreeView from '../shared/TreeView';
+import { TreeView } from '../shared/TreeView';
 import { MarkerTableEmptyReasons } from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
@@ -21,7 +21,7 @@ import {
   changeSelectedMarker,
   changeRightClickedMarker,
 } from '../../actions/profile-view';
-import MarkerSettings from '../shared/MarkerSettings';
+import { MarkerSettings } from '../shared/MarkerSettings';
 import { formatSeconds, formatTimestamp } from '../../utils/format-numbers';
 
 import './index.css';
@@ -154,7 +154,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerTable extends PureComponent<Props> {
+class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
     { propName: 'start', title: 'Start' },
     { propName: 'duration', title: 'Duration' },
@@ -250,7 +250,7 @@ class MarkerTable extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -265,5 +265,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     getMarkerLabel: selectedThreadSelectors.getMarkerTableLabelGetter(state),
   }),
   mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },
-  component: MarkerTable,
+  component: MarkerTableImpl,
 });

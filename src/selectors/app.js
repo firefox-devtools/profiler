@@ -32,6 +32,8 @@ import {
   TRACK_VISUAL_PROGRESS_HEIGHT,
   ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
   TRACK_EVENT_DELAY_HEIGHT,
+  TIMELINE_MARGIN_LEFT,
+  ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -309,5 +311,26 @@ export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
       (appPhase === 'INITIALIZING' && dataSource !== 'none') ||
       zipPhase === 'PROCESS_PROFILE_FROM_ZIP_FILE';
     return !isLoading;
+  }
+);
+
+/**
+ * Height of screenshot track is different depending on the view.
+ */
+export const getTimelineMarginLeft: Selector<number> = createSelector(
+  getTimelineTrackOrganization,
+  timelineTrackOrganization => {
+    switch (timelineTrackOrganization.type) {
+      case 'active-tab':
+        return ACTIVE_TAB_TIMELINE_MARGIN_LEFT;
+      case 'full':
+      case 'origins':
+        return TIMELINE_MARGIN_LEFT;
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization`
+        );
+    }
   }
 );
