@@ -94,9 +94,16 @@ export class IdleSearchField extends PureComponent<Props, State> {
   }
 
   static getDerivedStateFromProps(props: Props, state: State) {
-    if ( props.defaultValue !== state.previousDefaultValue && props.defaultValue !== state.value ) {
-      return { value: props.defaultValue || '', previousDefaultValue: props.defaultValue || '' }
-    } else return null;
+    if (
+      props.defaultValue !== state.previousDefaultValue &&
+      props.defaultValue !== state.value
+    ) {
+      return {
+        value: props.defaultValue || '',
+        previousDefaultValue: props.defaultValue || '',
+      };
+    }
+    return null;
   }
 
   render() {
