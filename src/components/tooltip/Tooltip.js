@@ -51,10 +51,8 @@ export class Tooltip extends React.PureComponent<Props, State> {
     this._isMounted = false;
   }
 
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.mouseX !== this.props.mouseX) {
-      this._scheduleRelayout();
-    }
+  componentDidUpdate() {
+    this._scheduleRelayout();
   }
 
   _scheduleRelayout() {
