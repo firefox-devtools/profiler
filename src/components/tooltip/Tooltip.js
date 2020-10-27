@@ -7,7 +7,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
-import { ensureExists } from '../../utils/flow';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 require('./Tooltip.css');
 
 export const MOUSE_OFFSET = 11;
@@ -22,15 +22,16 @@ type Props = {
 
 type State = {
   interiorElement: HTMLElement | null,
-  isNewContentLaidOut: boolean,
+  layoutGeneration: number,
 };
 
 export class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean = false;
+  _isLayoutScheduled: boolean = false;
 
   state = {
     interiorElement: null,
-    isNewContentLaidOut: false,
+    layoutGeneration: 0,
   };
 
   _overlayElement = ensureExists(
@@ -50,32 +51,22 @@ export class Tooltip extends React.PureComponent<Props, State> {
     this._isMounted = false;
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.children !== this.props.children) {
-      // If the children are different, allow them to do an initial lay out on the DOM.
-      this.setState({ isNewContentLaidOut: false });
-      this._forceUpdateAfterRAF();
-    }
-  }
-
   componentDidUpdate() {
-    // Force an additional update to this component if the children content is
-    // different as it needs to fully lay out one time on the DOM to proper calculate
-    // sizing and positioning.
-    const { interiorElement, isNewContentLaidOut } = this.state;
-    if (interiorElement && !isNewContentLaidOut) {
-      this._forceUpdateAfterRAF();
-    }
+    this._scheduleRelayout();
   }
 
-  /**
-   * Children content needs to be on the DOM (not just virtual DOM) in order to correctly
-   * calculate the sizing and positioning of the tooltip.
-   */
-  _forceUpdateAfterRAF() {
+  _scheduleRelayout() {
+    if (this._isLayoutScheduled) {
+      return;
+    }
+    this._isLayoutScheduled = true;
+
     requestAnimationFrame(() => {
+      this._isLayoutScheduled = false;
       if (this._isMounted) {
-        this.setState({ isNewContentLaidOut: true });
+        this.setState(state => {
+          return { layoutGeneration: state.layoutGeneration + 1 };
+        });
       }
     });
   }
@@ -127,6 +118,7 @@ export class Tooltip extends React.PureComponent<Props, State> {
     }
 
     const style = {
+      '--tooltip-detail-max-width': '600px',
       left,
       top,
     };

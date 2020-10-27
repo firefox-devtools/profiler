@@ -5,7 +5,7 @@
 // @flow
 
 import { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
   getProfileNameFromUrl,
@@ -16,7 +16,7 @@ import {
 } from 'firefox-profiler/selectors';
 
 import type { Profile } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +profile: Profile,
@@ -31,7 +31,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 const SEPARATOR = ' – ';
 const PRODUCT = 'Firefox Profiler';
 
-class WindowTitle extends PureComponent<Props> {
+class WindowTitleImpl extends PureComponent<Props> {
   // This component updates window title in the form of:
   // profile name - version - platform - date time - data source - 'Firefox Profiler'
   _updateTitle() {
@@ -86,7 +86,7 @@ function _formatDateTime(timestamp: number): string {
   return dateTimeLabel;
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     profileNameFromUrl: getProfileNameFromUrl(state),
     fileNameInZipFilePath: getFileNameInZipFilePath(state),
@@ -94,5 +94,5 @@ export default explicitConnect<{||}, StateProps, {||}>({
     profile: getProfile(state),
     dataSource: getDataSource(state),
   }),
-  component: WindowTitle,
+  component: WindowTitleImpl,
 });

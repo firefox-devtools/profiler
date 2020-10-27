@@ -7,13 +7,13 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import DetailsContainer from './DetailsContainer';
-import ProfileFilterNavigator from './ProfileFilterNavigator';
-import MenuButtons from './MenuButtons';
-import WindowTitle from '../shared/WindowTitle';
-import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
+import { DetailsContainer } from './DetailsContainer';
+import { ProfileFilterNavigator } from './ProfileFilterNavigator';
+import { MenuButtons } from './MenuButtons';
+import { WindowTitle } from '../shared/WindowTitle';
+import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
-import BeforeUnloadManager from './BeforeUnloadManager';
+import { BeforeUnloadManager } from './BeforeUnloadManager';
 
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import Timeline from '../timeline';
@@ -30,11 +30,12 @@ import {
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import classNames from 'classnames';
+import { DebugWarning } from '../app/DebugWarning';
 
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./ProfileViewer.css');
+import './ProfileViewer.css';
 
 type StateProps = {|
   +hasZipFile: boolean,
@@ -53,7 +54,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewer extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props> {
   render() {
     const {
       hasZipFile,
@@ -137,13 +138,14 @@ class ProfileViewer extends PureComponent<Props> {
           <WindowTitle />
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
+          <DebugWarning />
         </div>
       </div>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
@@ -157,5 +159,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     returnToZipFileList,
     invalidatePanelLayout,
   },
-  component: ProfileViewer,
+  component: ProfileViewerImpl,
 });

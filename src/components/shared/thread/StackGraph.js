@@ -4,15 +4,15 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import bisection from 'bisection';
 import classNames from 'classnames';
-import { ensureExists } from '../../../utils/flow';
-import { timeCode } from '../../../utils/time-code';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
   getSamplesSelectedStates,
   getSampleIndexClosestToTime,
-} from '../../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
@@ -44,7 +44,7 @@ type Props = {|
   +trackName: string,
 |};
 
-class StackGraph extends PureComponent<Props> {
+export class ThreadStackGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
@@ -127,11 +127,11 @@ class StackGraph extends PureComponent<Props> {
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
 
-    const firstDrawnSampleIndex = bisection.right(
+    const firstDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       firstDrawnSampleTime
     );
-    const afterLastDrawnSampleIndex = bisection.right(
+    const afterLastDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       lastDrawnSampleTime,
       firstDrawnSampleIndex
@@ -257,5 +257,3 @@ class StackGraph extends PureComponent<Props> {
     );
   }
 }
-
-export default StackGraph;

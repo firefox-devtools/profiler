@@ -5,11 +5,12 @@
 // @flow
 
 import React from 'react';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import classNames from 'classnames';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Thread,
@@ -17,7 +18,7 @@ import type {
   ImplementationFilter,
 } from 'firefox-profiler/types';
 
-require('./Backtrace.css');
+import './Backtrace.css';
 
 type Props = {|
   +thread: Thread,
@@ -28,7 +29,7 @@ type Props = {|
   +implementationFilter: ImplementationFilter,
 |};
 
-function Backtrace(props: Props) {
+export function Backtrace(props: Props) {
   const { stackIndex, thread, implementationFilter, maxStacks } = props;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
@@ -46,8 +47,13 @@ function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin }, i) => (
-            <li key={i} className="backtraceStackFrame">
+          .map(({ funcName, origin, isFrameLabel }, i) => (
+            <li
+              key={i}
+              className={classNames('backtraceStackFrame', {
+                backtraceStackFrame_isFrameLabel: isFrameLabel,
+              })}
+            >
               {funcName}
               <em className="backtraceStackFrameOrigin">{origin}</em>
             </li>
@@ -64,5 +70,3 @@ function Backtrace(props: Props) {
     </div>
   );
 }
-
-export default Backtrace;

@@ -10,15 +10,13 @@ import classNames from 'classnames';
 
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/ProfileMetaInfoSummary';
-import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { ProfileDeleteButton } from './ProfileDeleteButton';
 
 import {
   listAllProfileData,
-  deleteProfileData,
   type ProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
-import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-store';
 
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
 
@@ -75,6 +73,7 @@ function _formatRange(range: StartEndRange): string {
 }
 
 type PublishedProfileProps = {|
+  +onProfileDelete: () => void,
   +profileData: ProfileData,
   +nowTimestamp: Milliseconds,
   +withActionButtons: boolean,
@@ -82,8 +81,6 @@ type PublishedProfileProps = {|
 
 type PublishedProfileState = {|
   +confirmDialogIsOpen: boolean,
-  +status: 'idle' | 'working' | 'just-deleted' | 'deleted',
-  +error: Error | null,
 |};
 
 /**
@@ -95,85 +92,23 @@ class PublishedProfile extends React.PureComponent<
 > {
   state = {
     confirmDialogIsOpen: false,
-    error: null,
-    status: 'idle',
-  };
-  _componentDeleteButtonRef = React.createRef();
-
-  onConfirmDeletion = async () => {
-    const { profileToken, jwtToken } = this.props.profileData;
-
-    this.setState({ status: 'working' });
-    try {
-      if (!jwtToken) {
-        throw new Error(
-          `We have no JWT token for this profile, so we can't delete it. This shouldn't happen.`
-        );
-      }
-      await deleteProfileOnServer({ profileToken, jwtToken });
-      await deleteProfileData(profileToken);
-      this.setState({ status: 'just-deleted' });
-    } catch (e) {
-      this.setState({
-        error: e,
-        status: 'idle',
-      });
-      // Also output the error to the console for easier debugging.
-      console.error(
-        'An error was triggered when we tried to delete a profile.',
-        e
-      );
-    }
-  };
-
-  onCancelDeletion = () => {
-    // Close the panel when the user clicks on the Cancel button.
-    if (this._componentDeleteButtonRef.current) {
-      this._componentDeleteButtonRef.current.closePanel();
-    }
-  };
-
-  onCloseConfirmDialog = () => {
-    this.setState({ confirmDialogIsOpen: false });
-
-    // In case we deleted the profile, and the user dismisses the success panel,
-    // let's move directly to the deleted state:
-    if (this.state.status === 'just-deleted') {
-      this.setState({ status: 'deleted' });
-    }
   };
 
   onOpenConfirmDialog = () => {
     this.setState({ confirmDialogIsOpen: true });
   };
 
-  preventClick(e) {
-    e.preventDefault();
-  }
+  onCloseConfirmDialog = () => {
+    this.setState({ confirmDialogIsOpen: false });
+  };
 
-  _renderPossibleErrorMessage() {
-    const { error } = this.state;
-    if (!error) {
-      return null;
-    }
-
-    return (
-      <p className="publishedProfilesDeleteError">
-        An error happened while deleting this profile.{' '}
-        <a href="#" title={error.message} onClick={this.preventClick}>
-          Hover to know more.
-        </a>
-      </p>
-    );
-  }
+  onCloseSuccessMessage = () => {
+    this.props.onProfileDelete();
+  };
 
   render() {
     const { profileData, nowTimestamp, withActionButtons } = this.props;
-    const { confirmDialogIsOpen, status } = this.state;
-
-    if (status === 'deleted') {
-      return null;
-    }
+    const { confirmDialogIsOpen } = this.state;
 
     let { urlPath } = profileData;
     if (!urlPath.startsWith('/')) {
@@ -213,48 +148,15 @@ class PublishedProfile extends React.PureComponent<
         {withActionButtons ? (
           <div className="publishedProfilesActionButtons">
             {profileData.jwtToken ? (
-              <ButtonWithPanel
-                ref={this._componentDeleteButtonRef}
-                buttonClassName="publishedProfilesDeleteButton photon-button photon-button-default"
-                label="Delete"
-                title={`Click here to delete the profile ${smallProfileName}`}
-                onPanelOpen={this.onOpenConfirmDialog}
-                onPanelClose={this.onCloseConfirmDialog}
-                panelContent={
-                  status === 'just-deleted' ? (
-                    <p className="publishedProfilesDeleteSuccess">
-                      Successfully deleted uploaded data.
-                    </p>
-                  ) : (
-                    <div className="confirmDialog">
-                      <h2 className="confirmDialogTitle">
-                        Delete {profileName}
-                      </h2>
-                      <div className="confirmDialogContent">
-                        Are you sure you want to delete uploaded data for this
-                        profile? Links that were previously shared will no
-                        longer work.
-                        {this._renderPossibleErrorMessage()}
-                      </div>
-                      <div className="confirmDialogButtons">
-                        <input
-                          type="button"
-                          className="photon-button photon-button-default"
-                          value="Cancel"
-                          disabled={status === 'working'}
-                          onClick={this.onCancelDeletion}
-                        />
-                        <input
-                          type="button"
-                          className="photon-button photon-button-destructive"
-                          value={status === 'working' ? 'Deleting…' : 'Delete'}
-                          disabled={status === 'working'}
-                          onClick={this.onConfirmDeletion}
-                        />
-                      </div>
-                    </div>
-                  )
-                }
+              <ProfileDeleteButton
+                buttonClassName="publishedProfilesDeleteButton"
+                profileName={profileName}
+                smallProfileName={smallProfileName}
+                jwtToken={profileData.jwtToken}
+                profileToken={profileData.profileToken}
+                onOpenConfirmDialog={this.onOpenConfirmDialog}
+                onCloseConfirmDialog={this.onCloseConfirmDialog}
+                onCloseSuccessMessage={this.onCloseSuccessMessage}
               />
             ) : (
               <button
@@ -283,20 +185,37 @@ type State = {|
 |};
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
+  _isMounted = false;
+
   state = {
     profileDataList: null,
   };
 
-  async componentDidMount() {
+  _refreshList = async () => {
     const profileDataList = await listAllProfileData();
+    if (this._isMounted) {
+      // It isn't ideal to use a setState here, but this is the only way.
+      this.setState({
+        // We want to display the list with the most recent uploaded profile first.
+        profileDataList: profileDataList.reverse(),
+      });
+    }
+  };
 
-    // It isn't ideal to use a setState here, but this is the only way.
-    // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({
-      // We want to display the list with the most recent uploaded profile first.
-      profileDataList: profileDataList.reverse(),
-    });
+  async componentDidMount() {
+    this._isMounted = true;
+    this._refreshList();
+    window.addEventListener('focus', this._refreshList);
   }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    window.removeEventListener('focus', this._refreshList);
+  }
+
+  onProfileDelete = () => {
+    this._refreshList();
+  };
 
   render() {
     const { limit, withActionButtons } = this.props;
@@ -340,6 +259,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         <ul className="publishedProfilesList">
           {reducedProfileDataList.map(profileData => (
             <PublishedProfile
+              onProfileDelete={this.onProfileDelete}
               key={profileData.profileToken}
               profileData={profileData}
               nowTimestamp={nowTimestamp}

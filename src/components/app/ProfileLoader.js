@@ -5,23 +5,23 @@
 // @flow
 
 import { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfilesToCompare,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
   getProfilesToCompare,
-} from '../../selectors/url-state';
-import { assertExhaustiveCheck } from '../../utils/flow';
+} from 'firefox-profiler/selectors/url-state';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { DataSource } from 'firefox-profiler/types';
 
 type StateProps = {|

@@ -131,6 +131,7 @@ export type CallNodeDisplayData = $Exact<
     isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
+    iconSrc: string | null,
     icon: string | null,
     ariaLabel: string,
   }>
@@ -393,7 +394,7 @@ export type TracedTiming = {|
  * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
  */
 export type EventDelayInfo = {|
-  +eventDelays: Milliseconds[],
+  +eventDelays: Float32Array,
   +minDelay: Milliseconds,
   +maxDelay: Milliseconds,
   +delayRange: Milliseconds,
