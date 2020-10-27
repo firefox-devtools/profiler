@@ -342,7 +342,7 @@ class TrackEventDelayGraphImpl extends React.PureComponent<Props, State> {
         {hoveredDelay === null ? null : (
           <>
             {this._renderEventDelayDot(hoveredDelay)}
-            <Tooltip key={mouseX} mouseX={mouseX} mouseY={mouseY}>
+            <Tooltip mouseX={mouseX} mouseY={mouseY}>
               {this._renderTooltip(hoveredDelay)}
             </Tooltip>
           </>

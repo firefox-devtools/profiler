@@ -328,7 +328,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
         {hoveredVisualProgress === null ? null : (
           <>
             {this._renderVisualProgressDot(hoveredVisualProgress)}
-            <Tooltip key={mouseX} mouseX={mouseX} mouseY={mouseY}>
+            <Tooltip mouseX={mouseX} mouseY={mouseY}>
               {this._renderTooltip(hoveredVisualProgress)}
             </Tooltip>
           </>
