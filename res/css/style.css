@@ -69,24 +69,3 @@ body,
   flex: 1;
   flex-flow: column nowrap;
 }
-
-.filler {
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-name: filler;
-}
-
-@keyframes filler {
-  0% {
-    animation-timing-function: ease-out;
-    opacity: 1;
-  }
-  50% {
-    animation-timing-function: ease-in-out;
-    opacity: 0.5;
-  }
-  100% {
-    animation-timing-function: ease-in;
-    opacity: 1;
-  }
-}
