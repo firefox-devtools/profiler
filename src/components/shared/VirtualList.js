@@ -234,7 +234,7 @@ type VirtualListProps<Item> = {|
   +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
-  +onKeyDown: KeyboardEvent => void,
+  +onKeyDown: (SyntheticKeyboardEvent<>) => void,
   +onCopy: Event => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.

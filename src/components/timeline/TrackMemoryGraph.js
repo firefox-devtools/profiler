@@ -8,6 +8,7 @@ import * as React from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { formatBytes } from 'firefox-profiler/utils/format-numbers';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getCounterSelectors,
@@ -17,7 +18,6 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import bisection from 'bisection';
 
 import type {
   CounterIndex,
@@ -271,7 +271,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     } else {
       // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredCounter;
-      const bisectionCounter = bisection.right(samples.time, timeAtMouse);
+      const bisectionCounter = bisectionRight(samples.time, timeAtMouse);
       if (bisectionCounter > 0 && bisectionCounter < samples.time.length) {
         const leftDistance = timeAtMouse - samples.time[bisectionCounter - 1];
         const rightDistance = samples.time[bisectionCounter] - timeAtMouse;

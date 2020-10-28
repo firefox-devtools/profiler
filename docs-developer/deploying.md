@@ -28,11 +28,14 @@ if you have access.
 
 ## How to revert to a previous version
 
-In case the deployed version is bad we can revert to a previous version using
-Netlify's dashboard.
+The easiest way is to reset the production branch to a previous version, and
+force push it. You'll need to enable force-pushing for the branch production,
+using the [Branch Settings on GitHub](https://github.com/firefox-devtools/profiler/settings/branches).
 
-[Search for the previous production build](https://app.netlify.com/sites/perf-html/deploys?filter=production)
-and deploy it from its detail page.
+You can use the following script:
+```
+sh bin/revert-last-deployment.sh
+```
 
 When you're ready with a fix landed on `main`, you can push a new version to the
 `production` branch as described in the first part.

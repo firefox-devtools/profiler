@@ -27,7 +27,6 @@ body {
 }
 
 body,
-#root,
 .profileViewer {
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
@@ -43,17 +42,6 @@ body,
   --animation-curve: cubic-bezier(0.07, 0.95, 0, 1);
 
   color: var(--grey-90);
-}
-
-#root {
-  z-index: 0;
-}
-
-.nodeIcon {
-  min-width: 14px;
-  height: 100%;
-  min-height: 14px;
-  background: center / contain no-repeat;
 }
 
 .treeView {
@@ -487,7 +475,6 @@ body,
 .react-contextmenu.react-contextmenu--visible {
   display: block;
   max-height: 90vh;
-  padding-right: 9px;
   overflow-y: auto;
 }
 
@@ -508,9 +495,9 @@ body,
 .react-contextmenu-item.react-contextmenu-item--active,
 .react-contextmenu-item:hover,
 .react-contextmenu-item--selected {
-  border-color: highlight;
-  background-color: highlight;
-  color: highlighttext;
+  border-color: var(--blue-60);
+  background-color: var(--blue-60);
+  color: #fff;
   text-decoration: none;
 }
 
