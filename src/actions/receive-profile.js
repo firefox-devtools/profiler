@@ -10,6 +10,7 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
+
 import {
   symbolicateProfile,
   applySymbolicationStep,
@@ -35,7 +36,7 @@ import {
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
 import {
-  withHistoryReplaceStateSync,
+  withHistoryReplaceStateAsync,
   stateFromLocation,
   getDataSourceFromPathParts,
 } from 'firefox-profiler/app-logic/url-handling';
@@ -1267,7 +1268,7 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            await withHistoryReplaceStateSync(() => {
+            withHistoryReplaceStateAsync(() => {
               dispatch(viewProfile(profile));
             });
           }
@@ -1291,7 +1292,9 @@ export function retrieveProfileFromFile(
             throw new Error('Unable to parse the profile.');
           }
 
-          await dispatch(viewProfile(profile));
+          withHistoryReplaceStateAsync(() => {
+            dispatch(viewProfile(profile));
+          });
         }
       }
     } catch (error) {
