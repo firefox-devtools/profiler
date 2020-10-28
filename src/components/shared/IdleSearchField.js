@@ -99,7 +99,6 @@ export class IdleSearchField extends PureComponent<Props, State> {
       props.defaultValue !== state.value
     ) {
       return {
-        value: props.defaultValue || '',
         previousDefaultValue: props.defaultValue || '',
       };
     }
