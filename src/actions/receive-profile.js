@@ -1268,7 +1268,7 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            withHistoryReplaceStateAsync(() => {
+            await withHistoryReplaceStateAsync(() => {
               dispatch(viewProfile(profile));
             });
           }
@@ -1292,7 +1292,7 @@ export function retrieveProfileFromFile(
             throw new Error('Unable to parse the profile.');
           }
 
-          withHistoryReplaceStateAsync(() => {
+          await withHistoryReplaceStateAsync(() => {
             dispatch(viewProfile(profile));
           });
         }
