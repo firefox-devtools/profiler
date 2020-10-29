@@ -5,19 +5,19 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { formatBytes } from '../../utils/format-numbers';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { formatBytes } from 'firefox-profiler/utils/format-numbers';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getCounterSelectors,
   getProfileInterval,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
-import { Tooltip } from '../tooltip/Tooltip';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import bisection from 'bisection';
 
 import type {
   CounterIndex,
@@ -30,8 +30,8 @@ import type {
   StartEndRange,
 } from 'firefox-profiler/types';
 
-import type { SizeProps } from '../shared/WithSize';
-import type { ConnectedProps } from '../../utils/connect';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackMemory.css';
 
@@ -271,7 +271,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     } else {
       // When the mouse pointer hovers between two points, select the point that's closer.
       let hoveredCounter;
-      const bisectionCounter = bisection.right(samples.time, timeAtMouse);
+      const bisectionCounter = bisectionRight(samples.time, timeAtMouse);
       if (bisectionCounter > 0 && bisectionCounter < samples.time.length) {
         const leftDistance = timeAtMouse - samples.time[bisectionCounter - 1];
         const rightDistance = samples.time[bisectionCounter] - timeAtMouse;

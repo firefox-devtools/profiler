@@ -4,7 +4,7 @@ exports[`VerticalIndicators displays tooltips 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 22px; top: 33px;"
+  style="--tooltip-detail-max-width: 600px; left: 22px; top: 33px;"
 >
   <div>
     <span

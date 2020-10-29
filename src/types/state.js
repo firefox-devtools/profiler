@@ -16,7 +16,7 @@ import type {
   CheckedSharingOptions,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange, CssPixels } from './units';
+import type { StartEndRange, CssPixels, Milliseconds } from './units';
 import type { Profile, ThreadIndex, Pid, BrowsingContextID } from './profile';
 
 import type {
@@ -95,6 +95,7 @@ export type ProfileViewState = {
     rightClickedTrack: TrackReference | null,
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: RightClickedMarker | null,
+    mouseTimePosition: Milliseconds | null,
   |},
   +profile: Profile | null,
   +full: FullProfileViewState,

@@ -7,9 +7,9 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import VirtualList from './VirtualList';
+import { VirtualList } from './VirtualList';
 
-import ContextMenuTrigger from './ContextMenuTrigger';
+import { ContextMenuTrigger } from './ContextMenuTrigger';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
@@ -341,9 +341,10 @@ type TreeViewProps<DisplayData> = {|
   +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
+  +onKeyDown?: (SyntheticKeyboardEvent<>, null | NodeIndex) => void,
 |};
 
-class TreeView<DisplayData: Object> extends React.PureComponent<
+export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
   _specialItems: [NodeIndex | void, NodeIndex | void];
@@ -561,7 +562,11 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   };
 
-  _onKeyDown = (event: KeyboardEvent) => {
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    if (this.props.onKeyDown) {
+      this.props.onKeyDown(event, this.props.selectedNodeId);
+    }
+
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -735,5 +740,3 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     );
   }
 }
-
-export default TreeView;

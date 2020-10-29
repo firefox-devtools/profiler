@@ -234,7 +234,7 @@ type VirtualListProps<Item> = {|
   +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
-  +onKeyDown: KeyboardEvent => void,
+  +onKeyDown: (SyntheticKeyboardEvent<>) => void,
   +onCopy: Event => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.
@@ -264,7 +264,9 @@ type Geometry = {
   innerRectY: CssPixels,
 };
 
-class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
+export class VirtualList<Item> extends React.PureComponent<
+  VirtualListProps<Item>
+> {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
   _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
   _geometry: ?Geometry;
@@ -423,5 +425,3 @@ class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
     );
   }
 }
-
-export default VirtualList;
