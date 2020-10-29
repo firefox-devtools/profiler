@@ -118,7 +118,9 @@ export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
  * start and end time.
  */
 export type CauseBacktrace = {|
-  tid: Tid,
+  // `tid` is optional because older processed profiles may not have it.
+  // No upgrader was written for this change.
+  tid?: Tid,
   time: Milliseconds,
   stack: IndexIntoStackTable,
 |};
