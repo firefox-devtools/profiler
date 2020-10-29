@@ -39,6 +39,7 @@ import {
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { getPreviewSelection } from '../../selectors/profile';
 
 import type {
   UserTimingMarkerPayload,
@@ -104,6 +105,7 @@ function setupWithProfile(profile) {
     );
 
   const store = storeWithProfile(profile);
+
   store.dispatch(changeSelectedTab('marker-chart'));
 
   const renderResult = render(
@@ -311,6 +313,7 @@ describe('MarkerChart', function() {
         fireMouseEvent,
         container,
         getByText,
+        getAllByText,
       } = setupResult;
 
       dispatch(changeSelectedTab('marker-chart'));
@@ -361,6 +364,12 @@ describe('MarkerChart', function() {
         fireFullClick(getByText(stringOrRegexp));
       }
 
+      //There are two menu items of the same name
+      function clickOnSubMenuItem(stringOrRegexp, i) {
+        const menuItems = getAllByText(stringOrRegexp);
+        fireFullClick(menuItems[i]);
+      }
+
       function findFillTextPosition(
         fillText: string
       ): {| x: number, y: number |} {
@@ -380,6 +389,7 @@ describe('MarkerChart', function() {
         getContextMenu,
         findFillTextPosition,
         clickOnMenuItem,
+        clickOnSubMenuItem,
       };
     }
 
@@ -387,13 +397,47 @@ describe('MarkerChart', function() {
       const {
         rightClick,
         clickOnMenuItem,
+        clickOnSubMenuItem,
         getContextMenu,
         findFillTextPosition,
+        getState,
       } = setupForContextMenus();
 
       rightClick(findFillTextPosition('UserTiming A'));
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+      clickOnSubMenuItem('From the start of this marker', 0);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 0,
+      });
+
+      clickOnSubMenuItem('From the end of this marker', 0);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 10,
+      });
+
+      clickOnSubMenuItem('From the start of this marker', 1);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 10,
+      });
+
+      clickOnSubMenuItem('From the end of this marker', 1);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 10.0001,
+        selectionStart: 10,
+      });
 
       clickOnMenuItem('Copy');
       expect(copy).toHaveBeenLastCalledWith('UserTiming A');
