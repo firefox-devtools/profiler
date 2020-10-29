@@ -10,7 +10,6 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
-
 import {
   symbolicateProfile,
   applySymbolicationStep,
