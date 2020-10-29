@@ -99,7 +99,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  _onKeyDown = (event: KeyboardEvent) => {
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
