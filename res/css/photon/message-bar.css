@@ -4,16 +4,15 @@
 
 /* See https://design.firefox.com/photon/components/message-bars.html */
 .photon-message-bar {
-  position: relative;
   display: flex;
   min-height: 32px;
   box-sizing: border-box;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 
   /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
    * (space between icon and text) */
-  padding: 4px 24px 4px 32px;
+  padding: 4px 4px 4px 32px;
 
   /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon). And same for the top positioning, because we want the icon
@@ -29,12 +28,10 @@
 
 .photon-message-bar-action-button {
   flex: none;
-  margin: 0 8px 0 0;
+  margin: 0 2px;
 }
 
 .photon-message-bar-close-button {
-  position: absolute;
-  right: 0;
   width: 24px;
   height: 24px;
   flex: none;
@@ -45,8 +42,14 @@
 /* This rule is useful only for message bars that have a close button but no
  * action button. */
 .photon-message-bar-inner-content {
-  min-width: 200px;
+  display: flex;
+  flex-wrap: wrap;
   margin-right: 4px;
+  gap: 8px;
+}
+
+.photon-message-bar-inner-text {
+  display: flex;
 }
 
 .photon-message-bar-error {
