@@ -179,20 +179,11 @@ export function getMarkerSelectorsPerThread(
    *    )
    *  );
    */
-  const filterMarkerIndexesCreator = (
-    filterFunc: Marker => boolean,
-    auxFilterFunc?: Marker => boolean = marker =>
-      Boolean(marker.data && marker.data.type === 'Jank')
-  ) => (
+  const filterMarkerIndexesCreator = (filterFunc: Marker => boolean) => (
     getMarker: MarkerIndex => Marker,
-    markerIndexes: MarkerIndex[],
-    derivedMarkers?: Marker[]
+    markerIndexes: MarkerIndex[]
   ): MarkerIndex[] =>
-    MarkerData.filterMarkerIndexes(
-      getMarker,
-      markerIndexes,
-      derivedMarkers && derivedMarkers.length === 0 ? auxFilterFunc : filterFunc
-    );
+    MarkerData.filterMarkerIndexes(getMarker, markerIndexes, filterFunc);
 
   /**
    * This selector applies the committed range to the full list of markers.
@@ -282,10 +273,13 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     _getDerivedJankMarkers,
-    filterMarkerIndexesCreator(
-      marker => Boolean(marker.data && marker.data.type === 'Jank'),
-      marker => Boolean(marker.data && marker.data.type === 'BHR-detected hang')
-    )
+    (getMarker, markerIndexes, derivedMarkers) => {
+      const type = derivedMarkers.length > 0 ? 'Jank' : 'BHR-detected hang';
+
+      return filterMarkerIndexesCreator(marker =>
+        Boolean(marker.data && marker.data.type === type)
+      )(getMarker, markerIndexes);
+    }
   );
 
   /**
