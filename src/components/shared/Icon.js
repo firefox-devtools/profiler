@@ -12,6 +12,8 @@ import { iconStartLoading } from 'firefox-profiler/actions/icons';
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+import './Icon.css';
+
 type OwnProps =
   | {|
       // This prop is used by call tree.
@@ -41,9 +43,9 @@ class IconImpl extends PureComponent<Props> {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.icon) {
-      nextProps.iconStartLoading(nextProps.icon);
+  componentDidUpdate() {
+    if (this.props.icon) {
+      this.props.iconStartLoading(this.props.icon);
     }
   }
 

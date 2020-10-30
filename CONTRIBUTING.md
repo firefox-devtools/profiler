@@ -67,13 +67,17 @@ Gitpod will automatically install all dependencies; start the webpack server for
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
- * Drag in a saved profile to the loading screen (this makes refreshing hard).
- * Record a new profile.
-  1. Open `about:config` in Firefox.
-  2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
-  3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
-  4. Record a profile using the menu button, and it should open up in your local environment.
+ #### 1. Record a profile: 
+ - Open `about:config` in Firefox.
+ - Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
+ - Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
+ - Record a profile using the menu button, and it should open up in your local environment automatically.
+
+ #### 2. Use an existing profile:
+ - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
+ - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
+
+For more information on loading a profile, visit its [documentation](loading-in-profiles.md).
 
 ## Running the tests
 

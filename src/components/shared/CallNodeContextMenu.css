@@ -7,7 +7,10 @@
   margin-inline-end: 8px;
   pointer-events: auto;
 }
-.react-contextmenu-item--selected > .callNodeContextMenuIcon {
+
+.react-contextmenu-item--selected > .callNodeContextMenuIcon,
+.react-contextmenu-item:hover .callNodeContextMenuIcon,
+.react-contextmenu-item:active .callNodeContextMenuIcon {
   filter: invert(1);
 }
 
@@ -31,8 +34,36 @@
 .callNodeContextMenuLabel {
   color: #555;
   font-weight: bold;
+  margin-inline: 2px;
 }
 
-.react-contextmenu-item--selected > .callNodeContextMenuLabel {
+.react-contextmenu-item--selected > .callNodeContextMenuLabel,
+.react-contextmenu-item:hover .callNodeContextMenuLabel,
+.react-contextmenu-item:active .callNodeContextMenuLabel {
   color: #fff;
+}
+
+.callNodeContextMenuWithKey {
+  display: flex;
+}
+
+.callNodeContextMenuWithKey > div {
+  /* Vertically align the text with the icon */
+  display: flex;
+  flex: 1;
+}
+
+.callNodeContextMenuWithKey > kbd {
+  display: inline-block;
+  padding: 0 5px;
+
+  /* This color is based off of photon grey, but adjusted to have a nice visual look
+     when hovering. */
+  background: #dedee3c9;
+  border-radius: 3px;
+  box-shadow: 1px 1px #0004;
+
+  /* Override the hover color. */
+  color: #000;
+  margin-inline-start: 12px;
 }

@@ -73,7 +73,7 @@ type State = {|
  * loading fails, and resume the process after the reload.
  */
 
-class ServiceWorkerManager extends PureComponent<Props, State> {
+class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   state = {
     installStatus: 'idle',
     isNoticeDisplayed: false,
@@ -344,11 +344,11 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const ServiceWorkerManager = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),
     symbolicationStatus: getSymbolicationStatus(state),
   }),
-  component: ServiceWorkerManager,
+  component: ServiceWorkerManagerImpl,
 });

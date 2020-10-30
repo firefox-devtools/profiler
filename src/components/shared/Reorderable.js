@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
 import {
@@ -13,6 +12,7 @@ import {
   getMarginRect,
   extractDomRectValue,
 } from 'firefox-profiler/utils/css-geometry-tools';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
@@ -204,7 +204,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
       );
       this.setState({
         manipulationDelta: delta,
-        destinationIndex: bisection.right(midPoints, delta),
+        destinationIndex: bisectionRight(midPoints, delta),
       });
     };
     const mouseUpListener = (event: EventWithPageProperties) => {
