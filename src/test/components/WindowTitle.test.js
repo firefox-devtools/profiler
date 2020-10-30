@@ -28,7 +28,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – 01/01/1970, 0:00:00 UTC – Firefox Profiler'
+      'Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
     );
   });
 
@@ -48,7 +48,7 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe(
-      'Firefox – macOS 10.14 – 01/01/1970, 0:00:00 UTC – Firefox Profiler'
+      'Firefox – macOS 10.14 – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
     );
   });
 

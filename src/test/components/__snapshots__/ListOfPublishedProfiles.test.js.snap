@@ -16,7 +16,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         <div
           class="publishedProfilesDate"
         >
-          5 Jul 2020
+          Jul 5, 2020
         </div>
         <div
           class="publishedProfilesInfo"
@@ -61,7 +61,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         <div
           class="publishedProfilesDate"
         >
-          14:00
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -104,7 +104,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
         <div
           class="publishedProfilesDate"
         >
-          13:00
+          1:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -249,7 +249,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          5 Jul 2020
+          Jul 5, 2020
         </div>
         <div
           class="publishedProfilesInfo"
@@ -306,7 +306,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          14:00
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -364,7 +364,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          13:00
+          1:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -421,7 +421,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          3 Jul, 08:00
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -478,7 +478,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
         <div
           class="publishedProfilesDate"
         >
-          20 May 2018
+          May 20, 2018
         </div>
         <div
           class="publishedProfilesInfo"
@@ -544,7 +544,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          14:00
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -587,7 +587,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          3 Jul, 08:00
+          Jul 3, 8:00 AM
         </div>
         <div
           class="publishedProfilesInfo"
@@ -632,7 +632,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          20 May 2018
+          May 20, 2018
         </div>
         <div
           class="publishedProfilesInfo"
@@ -693,7 +693,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
         <div
           class="publishedProfilesDate"
         >
-          14:00
+          2:00 PM
         </div>
         <div
           class="publishedProfilesInfo"
