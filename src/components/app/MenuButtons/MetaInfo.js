@@ -87,6 +87,32 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
 
     const platformInformation = formatPlatform(meta);
 
+    let cpuCount = null;
+    if (meta.physicalCPUs || meta.logicalCPUs) {
+      let physicalCPUs = null;
+      let logicalCPUs = null;
+      if (meta.physicalCPUs) {
+        physicalCPUs =
+          meta.physicalCPUs +
+          ' physical ' +
+          (meta.physicalCPUs === 1 ? 'core' : 'cores');
+      }
+      if (meta.logicalCPUs) {
+        logicalCPUs =
+          meta.logicalCPUs +
+          ' logical ' +
+          (meta.logicalCPUs === 1 ? 'core' : 'cores');
+      }
+      cpuCount = (
+        <div className="metaInfoRow">
+          <span className="metaInfoLabel">CPU:</span>
+          {physicalCPUs}
+          {physicalCPUs && logicalCPUs ? ', ' : null}
+          {logicalCPUs}
+        </div>
+      );
+    }
+
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
@@ -190,6 +216,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   {meta.abi}
                 </div>
               ) : null}
+              {cpuCount}
             </div>
             {meta.visualMetrics ? (
               <>

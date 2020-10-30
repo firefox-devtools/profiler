@@ -1761,7 +1761,12 @@ export function computeCallNodeMaxDepth(
     return 0;
   }
 
-  return Math.max(...callNodeInfo.callNodeTable.depth) + 1;
+  let max = 0;
+  for (const depth of callNodeInfo.callNodeTable.depth) {
+    max = Math.max(max, depth);
+  }
+
+  return max + 1;
 }
 
 export function invertCallstack(
