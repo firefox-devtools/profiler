@@ -700,7 +700,6 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const { container } = setupWithPayload(markers);
 
     const renderedRows = container.querySelectorAll('.networkChartRowItem');
-    console.log('length', renderedRows.length);
     expect(renderedRows.length).toEqual(48);
 
     return {
