@@ -700,7 +700,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const { container } = setupWithPayload(markers);
 
     const renderedRows = container.querySelectorAll('.networkChartRowItem');
-    // only rendered 48 rows due to scroll not being implemented yet.
+    console.log('length', renderedRows.length);
     expect(renderedRows.length).toEqual(48);
 
     return {

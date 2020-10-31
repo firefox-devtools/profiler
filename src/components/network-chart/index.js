@@ -61,7 +61,7 @@ type OwnProps = {| ...SizeProps |};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class NetworkChartImpl extends React.PureComponent<Props> {
-  _virtualListRef = React.createRef();
+  _virtualListRef = React.createRef<VirtualList<MarkerIndex>>();
   _memoizedGetSpecialItems = memoize(
     (selectedNetworkMarkerIndex, rightClickedMarkerIndex) => {
       const specialItems = [undefined, undefined];
@@ -117,65 +117,71 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     event.preventDefault();
 
     const selected = this.props.selectedNetworkMarkerIndex;
-    // const visibleRows = this._getAllVisibleRows(this.props);
-    const visibleRows = this.props.markerIndexes;
-    const selectedRowIndex = visibleRows.findIndex(
+    const allRows = this.props.markerIndexes;
+    const selectedRowIndex = allRows.findIndex(
       markerIndex => markerIndex === selected
     );
+    const list = this._virtualListRef.current;
 
     if (selected === null || selectedRowIndex === -1) {
       // the first condition is redundant, but it makes flow happy
-      this._select(visibleRows[0]);
+      this._select(allRows[0]);
       return;
     }
-    if (isNavigationKey) {
+    if (isNavigationKey && list) {
       switch (event.key) {
         case 'ArrowUp': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the Home gesture
-            this._select(visibleRows[0]);
+            this._select(allRows[0]);
             break;
           }
 
           if (selectedRowIndex > 0) {
-            this._select(visibleRows[selectedRowIndex - 1]);
+            this._select(allRows[selectedRowIndex - 1]);
+            list.scrollItemIntoView(selectedRowIndex - 1, 0);
           }
           break;
         }
         case 'ArrowDown': {
           if (event.metaKey) {
             // On MacOS this is a common shortcut for the End gesture
-            this._select(visibleRows[visibleRows.length - 1]);
+            this._select(allRows[allRows.length - 1]);
             break;
           }
-          if (selectedRowIndex < visibleRows.length - 1) {
-            this._select(visibleRows[selectedRowIndex + 1]);
+          if (selectedRowIndex < allRows.length - 1) {
+            this._select(allRows[selectedRowIndex + 1]);
+            list.scrollItemIntoView(selectedRowIndex + 1, 0);
           }
           break;
         }
         case 'PageUp': {
           if (selectedRowIndex > 0) {
             const nextRow = Math.max(0, selectedRowIndex - ROW_HEIGHT);
-            this._select(visibleRows[nextRow]);
+            this._select(allRows[nextRow]);
+            list.scrollItemIntoView(nextRow, 0);
           }
           break;
         }
         case 'PageDown': {
-          if (selectedRowIndex < visibleRows.length - 1) {
+          if (selectedRowIndex < allRows.length - 1) {
             const nextRow = Math.min(
-              visibleRows.length - 1,
+              allRows.length - 1,
               selectedRowIndex + ROW_HEIGHT
             );
-            this._select(visibleRows[nextRow]);
+            this._select(allRows[nextRow]);
+            list.scrollItemIntoView(nextRow, 0);
           }
           break;
         }
         case 'Home': {
-          this._select(visibleRows[0]);
+          this._select(allRows[0]);
+          list.scrollItemIntoView(0, 0);
           break;
         }
         case 'End': {
-          this._select(visibleRows[visibleRows.length - 1]);
+          this._select(allRows[allRows.length - 1]);
+          list.scrollItemIntoView(allRows.length - 1, 0);
           break;
         }
         default:
