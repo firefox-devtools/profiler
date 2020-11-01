@@ -45,6 +45,7 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
+  getScreenshotTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -206,6 +207,27 @@ describe('actions/receive-profile', function() {
         'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         'hide [thread GeckoMain tab]',
+      ]);
+    });
+
+    it('will show screenshot if the profile has screenshot data', function() {
+      const store = blankStore();
+      let profile = _getSimpleProfile();
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
+      ]);
+
+      profile = getScreenshotTrackProfile();
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
+        'show [screenshots]',
+        'show [screenshots]',
       ]);
     });
 
