@@ -259,6 +259,20 @@ describe('getJankMarkersForHeader', function() {
     expect(jankInstances.length).toEqual(1);
     expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
+
+  it('will show BHR markers when there are no Jank markers present', function() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null, { type: 'BHR-detected hang' }],
+    ]);
+
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const jankInstances = selectedThreadSelectors
+      .getTimelineJankMarkerIndexes(getState())
+      .map(getMarker);
+
+    expect(jankInstances.length).toEqual(1);
+  });
 });
 
 /**
