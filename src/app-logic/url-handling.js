@@ -72,8 +72,11 @@ function _maybeDisableHistoryReplaceState(): void {
  */
 export function withHistoryReplaceStateSync(fn: () => void): void {
   _enableHistoryReplaceState();
-  fn();
-  _maybeDisableHistoryReplaceState();
+  try {
+    fn();
+  } finally {
+    _maybeDisableHistoryReplaceState();
+  }
 }
 
 /**
@@ -83,8 +86,11 @@ export async function withHistoryReplaceStateAsync(
   fn: () => Promise<void>
 ): Promise<void> {
   _enableHistoryReplaceState();
-  await fn();
-  _maybeDisableHistoryReplaceState();
+  try {
+    await fn();
+  } finally {
+    _maybeDisableHistoryReplaceState();
+  }
 }
 
 /**
