@@ -262,7 +262,7 @@ describe('getJankMarkersForHeader', function() {
 
   it('will show BHR markers when there are no Jank markers present', function() {
     const profile = getProfileWithMarkers([
-      ['a', 0, null, { type: 'BHR-detected hang' }],
+      ['a', 0, 10, { type: 'BHR-detected hang' }],
     ]);
 
     const { getState } = storeWithProfile(profile);
@@ -272,6 +272,7 @@ describe('getJankMarkersForHeader', function() {
       .map(getMarker);
 
     expect(jankInstances.length).toEqual(1);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(10);
   });
 });
 
