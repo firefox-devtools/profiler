@@ -1123,10 +1123,9 @@ function mergeScreenshotMarkers(
       const { markers, stringTable } = thread;
 
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        if (
-          markers.data[markerIndex] !== null &&
-          markers.data[markerIndex].type === 'CompositorScreenshot'
-        ) {
+        const data = markers.data[markerIndex];
+
+        if (data !== null && data.type === 'CompositorScreenshot') {
           // We need to move the name string to the new string table if doesn't exist.
           const nameIndex = markers.name[markerIndex];
           const newName =
@@ -1138,12 +1137,12 @@ function mergeScreenshotMarkers(
           );
 
           // We need to move the url string to the new string table if doesn't exist.
-          const urlIndex = markers.data[markerIndex].url;
+          const urlIndex = data.url;
           const newUrl = urlIndex >= 0 ? stringTable.getString(urlIndex) : null;
 
           // Move compositor screenshot marker data to the new marker table.
           const compositorScreenshotMarkerData = {
-            ...markers.data[markerIndex],
+            ...data,
           };
           compositorScreenshotMarkerData.url =
             newUrl === null
