@@ -427,6 +427,9 @@ type UrlStateAction =
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',
       +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
+      +type: 'PROFILE_REMOTELY_DELETED',
     |};
 
 type IconsAction =

@@ -308,3 +308,9 @@ export function setCurrentProfileUploadedInformation(
     uploadedProfileInformation,
   };
 }
+
+export function profileRemotelyDeleted(): Action {
+  // Ideally we should store the current profile data in a local indexeddb, and
+  // set the URL to /local/<indexeddb-key>.
+  return { type: 'PROFILE_REMOTELY_DELETED' };
+}
