@@ -29,6 +29,7 @@ Array [
       "category": "Paint",
       "cause": Object {
         "stack": 2,
+        "tid": 1111,
         "time": 1,
       },
       "interval": "start",
@@ -86,6 +87,7 @@ Array [
       "category": "Paint",
       "cause": Object {
         "stack": 2,
+        "tid": 1111,
         "time": 1,
       },
       "interval": "start",
@@ -101,6 +103,7 @@ Array [
       "category": "Paint",
       "cause": Object {
         "stack": 2,
+        "tid": 1111,
         "time": 1,
       },
       "interval": "start",
@@ -152,6 +155,7 @@ Array [
     "data": Object {
       "cause": Object {
         "stack": 2,
+        "tid": 1111,
         "time": 1,
       },
       "filename": "/foo/bar/",

@@ -76,7 +76,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  _onKeyDown = (_event: KeyboardEvent) => {
+  _onKeyDown = (_event: SyntheticKeyboardEvent<>) => {
     // Not implemented.
   };
 

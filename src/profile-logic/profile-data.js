@@ -52,7 +52,7 @@ import type {
   ThreadsKey,
 } from 'firefox-profiler/types';
 
-import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 import { timeCode } from '../utils/time-code';
@@ -1208,18 +1208,9 @@ export function getSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  // TODO: This should really use bisect. table.time is sorted.
-  const firstSample = table.time.findIndex(t => t >= rangeStart);
-  if (firstSample === -1) {
-    return [table.length, table.length];
-  }
-  const afterLastSample = table.time
-    .slice(firstSample)
-    .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstSample, table.length];
-  }
-  return [firstSample, firstSample + afterLastSample];
+  const sampleStart = bisectionLeft(table.time, rangeStart);
+  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return [sampleStart, sampleEnd];
 }
 
 export function filterThreadSamplesToRange(
@@ -1763,21 +1754,19 @@ export function computeCallNodeMaxDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo
 ): number {
-  let maxDepth = 0;
-  const { samples } = thread;
-  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  for (let i = 0; i < samples.length; i++) {
-    const stackIndex = samples.stack[i];
-    if (stackIndex !== null) {
-      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      // Change to one-based depth
-      const depth = callNodeTable.depth[callNodeIndex] + 1;
-      if (depth > maxDepth) {
-        maxDepth = depth;
-      }
-    }
+  if (
+    thread.samples.length === 0 ||
+    callNodeInfo.callNodeTable.depth.length === 0
+  ) {
+    return 0;
   }
-  return maxDepth;
+
+  let max = 0;
+  for (const depth of callNodeInfo.callNodeTable.depth) {
+    max = Math.max(max, depth);
+  }
+
+  return max + 1;
 }
 
 export function invertCallstack(

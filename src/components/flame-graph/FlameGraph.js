@@ -26,6 +26,7 @@ import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  handleCallNodeTransformShortcut,
 } from 'firefox-profiler/actions/profile-view';
 
 import type {
@@ -88,6 +89,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -189,6 +191,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
       selectedCallNodeIndex,
       changeSelectedCallNode,
+      handleCallNodeTransformShortcut,
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
@@ -246,7 +249,11 @@ class FlameGraphImpl extends React.PureComponent<Props> {
         break;
       }
       default:
-        // Other keys are ignored
+        handleCallNodeTransformShortcut(
+          event,
+          threadsKey,
+          selectedCallNodeIndex
+        );
         break;
     }
   };
@@ -381,6 +388,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
+    handleCallNodeTransformShortcut,
   },
   options: { forwardRef: true },
   component: FlameGraphImpl,
