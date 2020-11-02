@@ -46,6 +46,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'public';
     case 'TRIGGER_LOADING_FROM_URL':
       return 'from-url';
+    case 'PROFILE_REMOTELY_DELETED':
+      return 'unpublished';
     case 'SET_DATA_SOURCE':
       return action.dataSource;
     default:
@@ -58,6 +60,8 @@ const hash: Reducer<string> = (state = '', action) => {
     case 'PROFILE_PUBLISHED':
     case 'SANITIZED_PROFILE_PUBLISHED':
       return action.hash;
+    case 'PROFILE_REMOTELY_DELETED':
+      return '';
     default:
       return state;
   }

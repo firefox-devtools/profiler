@@ -30,7 +30,11 @@ import {
   ProfileDeleteSuccess,
 } from 'firefox-profiler/components/app/ProfileDeleteButton';
 import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
-import { dismissNewlyPublished } from 'firefox-profiler/actions/app';
+import {
+  dismissNewlyPublished,
+  profileRemotelyDeleted,
+} from 'firefox-profiler/actions/app';
+
 import {
   getAbortFunction,
   getUploadPhase,
@@ -75,6 +79,7 @@ type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
   +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
+  +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -125,10 +130,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       case 'from-addon':
       case 'unpublished':
       case 'from-file':
+      case 'local':
         return 'local';
       case 'none':
       case 'uploaded-recordings':
-      case 'local':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
       default:
         throw assertExhaustiveCheck(dataSource);
@@ -142,6 +147,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   };
 
   _onProfileDeleted = () => {
+    this.props.profileRemotelyDeleted();
     this.setState({
       metaInfoPanelState: 'profile-deleted',
     });
@@ -383,6 +389,7 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       dismissNewlyPublished,
       revertToPrePublishedState,
       changeTimelineTrackOrganization,
+      profileRemotelyDeleted,
     },
     component: MenuButtonsImpl,
   }
