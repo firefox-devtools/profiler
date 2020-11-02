@@ -272,9 +272,14 @@ export function getMarkerSelectorsPerThread(
   const getTimelineJankMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(marker =>
-      Boolean(marker.data && marker.data.type === 'Jank')
-    )
+    _getDerivedJankMarkers,
+    (getMarker, markerIndexes, derivedMarkers) => {
+      const type = derivedMarkers.length > 0 ? 'Jank' : 'BHR-detected hang';
+
+      return filterMarkerIndexesCreator(marker =>
+        Boolean(marker.data && marker.data.type === type)
+      )(getMarker, markerIndexes);
+    }
   );
 
   /**
