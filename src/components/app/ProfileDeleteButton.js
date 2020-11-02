@@ -14,11 +14,21 @@ import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-st
 
 import './ProfileDeleteButton.css';
 
+/*
+ * You can use this component directly if you want to provide a button to delete
+ * a specific profile on the server.
+ * If you're interested by the panel displayed when clicking on this button,
+ * you'll want to use ProfileDeletePanel defined below.
+ */
 type ButtonProps = {|
+  /* This string will be used in a title */
   +profileName: string,
+  /* This string will be used in longer sentence in a tooltip */
   +smallProfileName: string,
-  +jwtToken: string,
+  /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
   +profileToken: string,
+  /* This token is used to authenticate the deletion HTTP request to the server. */
+  +jwtToken: string,
   +buttonClassName?: string,
   +onOpenConfirmDialog: () => mixed,
   +onCloseConfirmDialog: () => mixed,
@@ -85,9 +95,15 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
   }
 }
 
+/*
+ * This Panel implements a confirmation dialog to delete a profile, as well as
+ * calling the deletion process when the user confirms.
+ */
 type PanelProps = {|
   +profileName: string,
+  /* This identifies the profile we want to delete. This is also commonly known as the "hash" of the profile. */
   +profileToken: string,
+  /* This token is used to authenticate the deletion HTTP request to the server. */
   +jwtToken: string,
   +onProfileDeleted: () => mixed,
   +onProfileDeleteCanceled: () => mixed,
