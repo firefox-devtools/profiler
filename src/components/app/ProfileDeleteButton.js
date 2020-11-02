@@ -20,9 +20,9 @@ type ButtonProps = {|
   +jwtToken: string,
   +profileToken: string,
   +buttonClassName?: string,
-  +onOpenConfirmDialog?: () => mixed,
-  +onCloseConfirmDialog?: () => mixed,
-  +onCloseSuccessMessage?: () => mixed,
+  +onOpenConfirmDialog: () => mixed,
+  +onCloseConfirmDialog: () => mixed,
+  +onCloseSuccessMessage: () => mixed,
 |};
 
 export class ProfileDeleteButton extends PureComponent<ButtonProps> {
@@ -32,13 +32,11 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
   onCloseConfirmDialog = () => {
     // In case we deleted the profile, and the user dismisses the success panel,
     // let's move directly to the deleted state:
-    if (this._hasBeenDeleted && this.props.onCloseSuccessMessage) {
+    if (this._hasBeenDeleted) {
       this.props.onCloseSuccessMessage();
     }
 
-    if (this.props.onCloseConfirmDialog) {
-      this.props.onCloseConfirmDialog();
-    }
+    this.props.onCloseConfirmDialog();
   };
 
   onProfileDeleted = () => {
