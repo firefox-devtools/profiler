@@ -18,10 +18,13 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getDataSource } from 'firefox-profiler/selectors/url-state';
 import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
-import { MenuButtonsMetaInfo } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
+
+/* Note: the order of import is important, from most general to most specific,
+ * so that the CSS rules are in the correct order. */
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { MetaInfoPanel } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
 import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
 import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
-import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
 import { dismissNewlyPublished } from 'firefox-profiler/actions/app';
 import {
@@ -73,6 +76,25 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
+  }
+
+  _renderMetaInfoButton() {
+    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    return (
+      <ButtonWithPanel
+        className="menuButtonsMetaInfoButton"
+        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
+        label="Profile Info"
+        panelClassName="metaInfoPanel"
+        panelContent={
+          <MetaInfoPanel
+            profile={profile}
+            symbolicationStatus={symbolicationStatus}
+            resymbolicateProfile={resymbolicateProfile}
+          />
+        }
+      />
+    );
   }
 
   _renderPublishPanel() {
@@ -152,15 +174,10 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
     return (
       <>
         {/* Place the info button outside of the menu buttons to allow it to shrink. */}
-        <MenuButtonsMetaInfo
-          profile={profile}
-          symbolicationStatus={symbolicationStatus}
-          resymbolicateProfile={resymbolicateProfile}
-        />
+        {this._renderMetaInfoButton()}
         <div className="menuButtons">
           {this._renderRevertProfile()}
           {this._renderPublishPanel()}

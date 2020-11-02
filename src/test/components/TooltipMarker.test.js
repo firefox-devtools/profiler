@@ -287,6 +287,7 @@ describe('TooltipMarker', function() {
           category: 'Paint',
           interval: 'start',
           cause: {
+            tid: 4444,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -324,6 +325,7 @@ describe('TooltipMarker', function() {
           stylesShared: 15,
           stylesReused: 20,
           cause: {
+            tid: 4445,
             time: 19.5,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -349,6 +351,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4446,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -364,6 +367,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4447,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -690,6 +694,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4448,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },

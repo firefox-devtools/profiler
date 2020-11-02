@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, getByText as globalGetByText } from '@testing-library/react';
+import {
+  render,
+  getByText as globalGetByText,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 import {
@@ -367,7 +371,7 @@ describe('ListOfPublishedProfiles', () => {
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
-      expect(queryByText(/successfully/i)).toBe(null);
+      waitForElementToBeRemoved(queryByText(/successfully/i));
     });
 
     it('can cancel the deletion', async () => {

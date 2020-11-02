@@ -25,6 +25,7 @@ export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
+export type Tid = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
 export type BrowsingContextID = number;
@@ -553,7 +554,7 @@ export type Thread = {|
   processName?: string,
   isJsTracer?: boolean,
   pid: Pid,
-  tid: number | void,
+  tid: Tid | void,
   samples: SamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
