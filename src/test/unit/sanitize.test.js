@@ -413,6 +413,7 @@ describe('sanitizePII', function() {
               marker1File,
             operation: 'create/open',
             cause: {
+              tid: 1112,
               time: 1.0,
               stack: 0,
             },
@@ -430,6 +431,7 @@ describe('sanitizePII', function() {
               marker2File,
             operation: 'create/open',
             cause: {
+              tid: 1113,
               time: 1.0,
               stack: 0,
             },

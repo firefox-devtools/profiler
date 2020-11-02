@@ -1,0 +1,239 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.treeView {
+  display: flex;
+  flex: 1;
+  flex-flow: column nowrap;
+  border-top: 1px solid var(--grey-30);
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.treeViewHeader {
+  position: relative;
+  height: 16px;
+  padding: 1px 0;
+  border-bottom: 1px solid var(--grey-30);
+  background: white;
+}
+
+.treeViewHeaderMainColumn {
+  flex: 1;
+}
+
+.treeViewContextMenu {
+  display: flex;
+  flex: 1;
+}
+
+.treeViewBody {
+  position: relative;
+  z-index: 0;
+  overflow: auto;
+  flex: 1;
+  line-height: 16px;
+  outline: 0;
+  will-change: scroll-position;
+}
+
+.treeViewBodyInnerWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  min-width: 100%;
+  flex-flow: row nowrap;
+}
+
+.treeViewBodyInner0 {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+}
+
+.treeViewBodyInner1 {
+  /* This allows the right column to expand more than its content, so that the
+  * background always extends to the right edge. */
+  flex-grow: 1;
+}
+
+.treeViewBodyInner {
+  overflow: hidden;
+  background: white;
+}
+
+.treeViewRow {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  white-space: nowrap;
+}
+
+.treeViewHeaderColumn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  padding: 1px 5px;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+.treeViewHeaderColumn.treeViewFixedColumn::after {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  bottom: 3px;
+  width: 1px;
+  background: #e5e5e5;
+  content: '';
+}
+
+.treeViewHeaderColumn.total,
+.treeViewHeaderColumn.self {
+  text-align: right;
+}
+
+.treeViewRowColumn.treeViewFixedColumn {
+  overflow: hidden;
+  box-sizing: border-box;
+  border-right: 1px solid var(--grey-30);
+  text-overflow: ellipsis;
+}
+
+.treeViewFixedColumn.total {
+  left: 0;
+  width: 70px;
+}
+
+.treeViewFixedColumn.totalPercent {
+  left: 70px;
+  width: 50px;
+  border-right: none;
+}
+
+.treeViewFixedColumn.self {
+  left: 120px;
+  width: 70px;
+}
+
+.treeViewHeaderColumn.total {
+  width: 120px;
+}
+
+.treeViewFixedColumn.icon {
+  left: 190px;
+  display: flex;
+  width: 19px;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.treeViewRowColumn.total,
+.treeViewRowColumn.totalPercent,
+.treeViewRowColumn.self,
+.treeViewRowColumn.timestamp {
+  padding-right: 5px;
+  text-align: right;
+}
+
+.treeViewRowColumn.type {
+  padding-left: 5px;
+  text-align: left;
+}
+
+.treeRowIndentSpacer {
+  flex-shrink: 0;
+}
+
+.treeViewAppendageColumn {
+  margin-left: 10px;
+  opacity: 0.6;
+}
+
+.treeViewRow.even {
+  background-color: #fff;
+}
+
+.treeViewRow.odd {
+  background-color: #f5f5f5;
+}
+
+/* Note that `isRightClicked` is present before `isSelected` so that it can be overriden. */
+.treeViewRow.isRightClicked {
+  background-color: var(--blue-50-a30);
+}
+
+.treeViewRow.isSelected {
+  background-color: var(--grey-30);
+  color: black;
+}
+
+.treeViewRow.dim > .treeViewMainColumn {
+  opacity: 0.7;
+}
+
+.treeViewBody:focus .treeViewRow.isSelected {
+  background-color: highlight;
+  color: highlighttext;
+}
+
+.treeViewBody:focus .treeViewRow.isSelected a {
+  color: inherit;
+}
+
+.treeViewHighlighting {
+  padding: 1px 0;
+
+  /* This negative margin enlarges the background to the top, so that it fully
+  * covers the underlying background. There's an underlying background when the
+  * line is selected. */
+  margin: -1px 0;
+  background: #cbe8fe;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.3);
+  color: #000;
+}
+
+.treeRowToggleButton {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid;
+  margin-left: 8px;
+  color: #888;
+}
+
+.treeRowToggleButton.expanded {
+  border-top: 8px solid;
+  border-right: 5px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid transparent;
+  margin-top: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.treeRowToggleButton:active:hover {
+  color: var(--grey-60);
+}
+
+.treeViewBody:focus .treeViewRow.isSelected > .treeRowToggleButton {
+  color: #fff;
+}
+
+.treeViewBody:focus
+  .treeViewRow.isSelected
+  > .treeRowToggleButton:active:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.treeRowToggleButton.leaf {
+  visibility: hidden;
+}
