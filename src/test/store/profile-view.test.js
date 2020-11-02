@@ -886,7 +886,7 @@ describe('actions/ProfileView', function() {
           1022,
           1024,
           {
-            cause: { stack: 2, time: 1 },
+            cause: { tid: 2222, stack: 2, time: 1 },
             filename: '/foo/bar/',
             operation: 'create/open',
             source: 'PoisionOIInterposer',
