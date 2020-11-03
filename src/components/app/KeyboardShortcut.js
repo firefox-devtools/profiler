@@ -17,6 +17,8 @@ type Props = {|
 
 type State = {|
   +isOpen: boolean,
+  // The modal steals the focus of the screen. This is the element that was focused
+  // before showing the modal. The focus will be restored once the modal is dismissed.
   +focusAfterClosed: HTMLElement | null,
 |};
 
@@ -26,10 +28,9 @@ type State = {|
 export class KeyboardShortcut extends React.PureComponent<Props, State> {
   state = {
     isOpen: false,
-    // This is a false positive due to how it's used, see the line:
+    // The eslint error is a false positive due to how it's used, see the line:
     //  `focusAfterClosed.focus()`
-    // eslint-disable-next-line react/no-unused-state
-    focusAfterClosed: null,
+    focusAfterClosed: null, // eslint-disable-line react/no-unused-state
   };
 
   _focusArea = React.createRef<HTMLDivElement>();
@@ -143,7 +144,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
     }
   };
 
-  renderShortcuts() {
+  maybeRenderShortcuts() {
     if (!this.state.isOpen) {
       return null;
     }
@@ -227,6 +228,9 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
         >
           {children}
         </div>
+        {/* Always render this div so that we can target the _focusArea ref outside
+            of the React life-cycle. The keyboard shortcuts will only render if the
+            modal is actual open. */}
         <div
           className={classNames({ appKeyboardShortcuts: true, open: isOpen })}
         >
@@ -238,7 +242,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
             aria-modal="true"
             aria-labelledby="AppKeyboardShortcutsHeaderTitle"
           >
-            {this.renderShortcuts()}
+            {this.maybeRenderShortcuts()}
           </div>
         </div>
       </>
