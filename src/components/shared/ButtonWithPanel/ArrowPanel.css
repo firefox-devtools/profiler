@@ -99,13 +99,3 @@
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
 }
-
-.menuButtonsPermalinkPanel .arrowPanelContent {
-  /* Override the default padding for ArrowPanel */
-  padding: 4px;
-}
-
-.menuButtonsPermalinkTextField {
-  width: 16em;
-  height: 19px;
-}

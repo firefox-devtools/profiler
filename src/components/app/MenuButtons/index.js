@@ -176,22 +176,19 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   render() {
     return (
       <>
-        {/* Place the info button outside of the menu buttons to allow it to shrink. */}
         {this._renderMetaInfoButton()}
-        <div className="menuButtons">
-          {this._renderRevertProfile()}
-          {this._renderPublishPanel()}
-          {this._renderPermalink()}
-          <a
-            href="/docs/"
-            target="_blank"
-            className="menuButtonsLink"
-            title="Open the documentation in a new window"
-          >
-            Docs
-            <i className="open-in-new" />
-          </a>
-        </div>
+        {this._renderRevertProfile()}
+        {this._renderPublishPanel()}
+        {this._renderPermalink()}
+        <a
+          href="/docs/"
+          target="_blank"
+          className="menuButtonsButton menuButtonsLink"
+          title="Open the documentation in a new window"
+        >
+          Docs
+          <i className="open-in-new" />
+        </a>
       </>
     );
   }
