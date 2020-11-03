@@ -2,20 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsMetaInfoButton {
-  /* Let this box shrink down to the size of the three dots and a bit of text. */
-  min-width: 75px;
-
-  /* Shrink down twice as fast as the range selection labels. */
-  flex-shrink: 2;
-}
-
-.menuButtonsMetaInfoButtonButton {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .metaInfoPanel {
   width: 350px;
   font-size: 12px;

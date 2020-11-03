@@ -259,6 +259,21 @@ describe('getJankMarkersForHeader', function() {
     expect(jankInstances.length).toEqual(1);
     expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
+
+  it('will show BHR markers when there are no Jank markers present', function() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, 10, { type: 'BHR-detected hang' }],
+    ]);
+
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const jankInstances = selectedThreadSelectors
+      .getTimelineJankMarkerIndexes(getState())
+      .map(getMarker);
+
+    expect(jankInstances.length).toEqual(1);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(10);
+  });
 });
 
 /**
@@ -886,7 +901,7 @@ describe('actions/ProfileView', function() {
           1022,
           1024,
           {
-            cause: { stack: 2, time: 1 },
+            cause: { tid: 2222, stack: 2, time: 1 },
             filename: '/foo/bar/',
             operation: 'create/open',
             source: 'PoisionOIInterposer',

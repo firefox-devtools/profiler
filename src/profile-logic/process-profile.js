@@ -569,10 +569,10 @@ function _processStackTable(
 
 /**
  * Convert stack field to cause field for the given payload. A cause field includes
- * both an IndexIntoStackTable, and the time the stack was captured. If the stack
- * was captured within the the start and end time of the marker, this was a synchronous
- * stack. Otherwise, if it happened before, it was an async stack, and is most likely
- * some event that happened in the past that triggered the marker.
+ * the thread ID (tid), an IndexIntoStackTable, and the time the stack was captured.
+ * If the stack was captured within the start and end time of the marker, this was a
+ * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
+ * most likely some event that happened in the past that triggered the marker.
  */
 function _convertStackToCause(data: Object): Object {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
@@ -580,7 +580,7 @@ function _convertStackToCause(data: Object): Object {
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
     if (stackIndex !== null) {
-      newData.cause = { time, stack: stackIndex };
+      newData.cause = { tid: stack.tid, time, stack: stackIndex };
     }
     return newData;
   }

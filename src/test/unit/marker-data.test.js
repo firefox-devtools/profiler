@@ -631,6 +631,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         // Stack property is converted to a cause.
         cause: {
           stack: 2,
+          tid: 1111,
           time: 1,
         },
         filename: '/foo/bar/',
