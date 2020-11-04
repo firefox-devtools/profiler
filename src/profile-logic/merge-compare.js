@@ -155,6 +155,7 @@ export function mergeProfilesForDiffing(
 
     //Screenshot markers is in different threads of the imported profile.
     //These markers are extracted and merged here using the mergeScreenshotMarkers().
+
     const { markerTable } = mergeScreenshotMarkers(profile.threads, thread);
     thread.markers = { ...thread.markers, ...markerTable };
 
@@ -1130,11 +1131,6 @@ function mergeScreenshotMarkers(
           const nameIndex = markers.name[markerIndex];
           const newName =
             nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
-          targetMarkerTable.name.push(
-            newName === null
-              ? -1
-              : targetThread.stringTable.indexForString(newName)
-          );
 
           // We need to move the url string to the new string table if doesn't exist.
           const urlIndex = data.url;
@@ -1148,8 +1144,13 @@ function mergeScreenshotMarkers(
             newUrl === null
               ? -1
               : targetThread.stringTable.indexForString(newUrl);
+
           targetMarkerTable.data.push(compositorScreenshotMarkerData);
-          // Move all other arrays to the new marker table
+          targetMarkerTable.name.push(
+            newName === null
+              ? -1
+              : targetThread.stringTable.indexForString(newName)
+          );
           targetMarkerTable.startTime.push(markers.startTime[markerIndex]);
           targetMarkerTable.endTime.push(markers.endTime[markerIndex]);
           targetMarkerTable.phase.push(markers.phase[markerIndex]);
