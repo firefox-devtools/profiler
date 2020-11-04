@@ -242,7 +242,65 @@ describe('Timeline multiple thread selection', function() {
     ]);
   });
 
-  it('will select a thread through enter and spacebar keypresses', function() {
+  it('will select a thread through enter and spacebar keypresses for global tracks', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+      key: ' ',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(
+      getByRole('button', { name: 'Content Process PID: 222' }),
+      {
+        key: 'Enter',
+      }
+    );
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will not select a track through a random keypress for a global track', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+      key: 'a',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will select a thread through enter and spacebar keypresses for local tracks', function() {
     const { getState, getByRole } = setup();
 
     expect(getHumanReadableTracks(getState())).toEqual([
@@ -263,19 +321,19 @@ describe('Timeline multiple thread selection', function() {
       '  - show [thread Style]',
     ]);
 
-    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+    fireFullKeyPress(getByRole('button', { name: 'Style' }), {
       key: ' ',
     });
 
     expect(getHumanReadableTracks(getState())).toEqual([
-      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain process]',
       'show [thread GeckoMain tab]',
       '  - show [thread DOM Worker]',
-      '  - show [thread Style]',
+      '  - show [thread Style] SELECTED',
     ]);
   });
 
-  it('will not select a track through a random keypress', function() {
+  it('will not select a track through a random keypress for local tracks', function() {
     const { getState, getByRole } = setup();
 
     const domWorker = getByRole('button', { name: 'DOM Worker' });

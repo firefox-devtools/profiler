@@ -86,7 +86,9 @@ class LocalTrackComponent extends PureComponent<Props> {
    * get in the way of the mouse up behavior. The keypress then needs to check that it's
    * a validation "activation" key, such as Enter of Spacebar.
    */
-  _selectCurrentTrack = (event: MouseEvent | KeyboardEvent) => {
+  _selectCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
     if (
       event.button === 2 ||
       // Macs can right click with the ctrl key.
@@ -181,7 +183,7 @@ class LocalTrackComponent extends PureComponent<Props> {
             <button
               type="button"
               className="timelineTrackNameButton"
-              onKeyPress={this._selectCurrentTrack}
+              onKeyUp={this._selectCurrentTrack}
             >
               {trackName}
             </button>

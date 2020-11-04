@@ -345,7 +345,8 @@ export function fireFullKeyPress(
   element: HTMLElement,
   options: { key: string, ... }
 ) {
-  // Note the key is lowercase here.
+  // Since this is test code, only use QWERTY layout keyboards.
+  // Note the key is always converted to lowercase here.
   const codes: { [key: string]: number } = {
     enter: 13,
     escape: 27,
