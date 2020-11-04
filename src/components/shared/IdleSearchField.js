@@ -92,15 +92,15 @@ export class IdleSearchField extends PureComponent<Props, State> {
   _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
   }
-
+  
   static getDerivedStateFromProps(props: Props, state: State) {
-    if (
-      props.defaultValue !== state.previousDefaultValue &&
-      props.defaultValue !== state.value
-    ) {
-      return {
+    if ( props.defaultValue !== state.previousDefaultValue 
+    ) { 
+     value: props.defaultValue || '';
+     return {
         previousDefaultValue: props.defaultValue || '',
-      };
+        value: props.defaultValue || '',
+        } 
     }
     return null;
   }
