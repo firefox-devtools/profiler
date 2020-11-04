@@ -45,7 +45,7 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
-  getScreenshotTrackProfile,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -207,27 +207,6 @@ describe('actions/receive-profile', function() {
         'show [thread GeckoMain default]',
         'show [thread GeckoMain tab] SELECTED',
         'hide [thread GeckoMain tab]',
-      ]);
-    });
-
-    it('will show screenshot if the profile has screenshot data', function() {
-      const store = blankStore();
-      let profile = _getSimpleProfile();
-
-      store.dispatch(viewProfile(profile));
-      expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [process]',
-        '  - show [thread Empty] SELECTED',
-      ]);
-
-      profile = getScreenshotTrackProfile();
-
-      store.dispatch(viewProfile(profile));
-      expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [process]',
-        '  - show [thread Empty] SELECTED',
-        'show [screenshots]',
-        'show [screenshots]',
       ]);
     });
 
@@ -1682,6 +1661,73 @@ describe('actions/receive-profile', function() {
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
       expect(nodeData.self).toBe(4);
+    });
+
+    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function() {
+      const store = blankStore();
+      const { resultProfile } = await setup(getSomeProfiles(), {
+        url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+      });
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
+    it('includes screenshot track of both profiles if they have screenshot markers', async function() {
+      const store = blankStore();
+      //Get profiles with one screenshot track
+      const profile1 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '0',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
     });
   });
 
