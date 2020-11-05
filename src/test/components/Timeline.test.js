@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import {
   getBoundingBox,
@@ -32,17 +33,7 @@ import { ensureExists } from '../../utils/flow';
 import type { Profile } from 'firefox-profiler/types';
 
 describe('Timeline multiple thread selection', function() {
-  const originalDOMRect = global.DOMRect;
-  beforeEach(() => {
-    global.DOMRect = class DOMRect {};
-  });
-  afterEach(() => {
-    if (originalDOMRect) {
-      global.DOMRect = originalDOMRect;
-    } else {
-      delete global.DOMRect;
-    }
-  });
+  autoMockDomRect();
 
   function setup() {
     const profile = getProfileWithNiceTracks();
