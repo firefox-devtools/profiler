@@ -88,21 +88,27 @@
   transition: background-color 300ms;
 }
 
+/* Overcome the selector specificity of the default focus styling by including the tag. */
+a.homeSectionButton:focus,
+button.homeSectionButton:focus {
+  border-radius: 0;
+  box-shadow: var(--photon-focus-shadow);
+  outline: 0;
+}
+
 .homeSectionLoadProfile {
   position: relative;
 }
 
 .homeSectionActionButtons {
-  display: flex;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 1fr 1fr;
 }
 
 .homeSectionActionButtons .homeSectionButton {
   flex: 1;
   margin: 5px 0;
-}
-
-.homeSectionActionButtons button {
-  border-left: none;
 }
 
 .homeSectionLoadFromUrl {

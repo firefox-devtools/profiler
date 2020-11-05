@@ -58,6 +58,14 @@
   background: var(--grey-90-a05);
 }
 
+/**
+ * Overcome the selector specificity of the focus by including the "a"
+ */
+a.publishedProfilesLink:focus {
+  border-radius: 0;
+  box-shadow: var(--photon-focus-shadow);
+}
+
 .publishedProfilesListItem_ConfirmDialogIsOpen,
 .publishedProfilesListItem:focus-within {
   box-shadow: -3px 0 0 var(--blue-60); /* This is a border that doesn't move the content. */

@@ -7,6 +7,9 @@
  * into one file, as it is mostly shared style.
  */
 .timelineTrack {
+  /* Position this element relative, so that the .timelineTrackRow.selected::after rule
+   * can position relative to the track. */
+  position: relative;
   padding: 0;
   border-top: 1px solid var(--grey-30);
   margin: 0;

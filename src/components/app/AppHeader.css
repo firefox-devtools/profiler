@@ -32,9 +32,7 @@
 }
 
 .appHeaderGithubIcon {
-  margin: 0 0.2em;
-}
-
-.appHeaderGithubIcon svg {
-  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.2em;
 }
