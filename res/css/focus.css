@@ -8,20 +8,34 @@ button::-moz-focus-inner {
   border: 0;
 }
 
+:root {
+  --photon-focus-shadow: 0 0 0 1px var(--blue-50) inset,
+    0 0 0 1px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
+}
+
+/**
+ * Use the photon styling for certain input elements. This styling is larger and can
+ * break out of our denser UI, but still works nicely for a few different elements.
+ */
 input[type='radio']:focus,
 input[type='checkbox']:focus,
+input[type='range']:focus {
+  box-shadow: var(--photon-focus-shadow);
+  outline: 0;
+}
+
+/**
+ * Use a simple inset 2px border for other inputs. This matches up nicer for our dense
+ * UI. The photon styling tends to be clipped by hidden overflows otherwise. The box
+ * shadow inset will also not affect layout.
+ */
 input[type='button']:focus,
 input[type='submit']:focus,
 input[type='reset']:focus,
 input[type='image']:focus,
-input[type='range']:focus,
-button:focus {
-  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
-    0 0 0 4px var(--blue-50-a30);
-  outline: 0;
-}
-
+button:focus,
 a:focus {
-  box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 6px var(--blue-50-a30);
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--blue-50) inset;
   outline: 0;
 }
