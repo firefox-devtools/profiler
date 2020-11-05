@@ -300,6 +300,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const {
       marker,
       thread,
+      threadIdToNameMap,
       implementationFilter,
       restrictHeightWidth,
     } = this.props;
@@ -307,9 +308,17 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
       const causeAge = start - cause.time;
+      let causeLabel = 'Stack';
+      if (cause.tid) {
+        const causeTheadName = threadIdToNameMap.get(cause.tid);
+        causeLabel = `Stack from thread ${String(causeTheadName)} (id ${String(
+          cause.tid
+        )})`;
+      }
+
       return [
         <TooltipDetailSeparator key="backtrace-separator" />,
-        <TooltipDetail label="Stack" key="backtrace">
+        <TooltipDetail label={causeLabel} key="backtrace">
           <div className="tooltipDetailsBackTrace">
             <h2 className="tooltipBackTraceTitle">
               {data.type === 'Styles' || marker.name === 'Reflow'
