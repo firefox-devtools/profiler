@@ -6,7 +6,7 @@
 .tabBarTabButton {
   width: 100%;
   height: 100%;
-  padding: 0;
+  padding: 6px 4px;
   border: none;
   margin: 0;
   background: none;
@@ -37,7 +37,7 @@
   position: relative;
   overflow: hidden;
   width: 8em;
-  padding: 6px 4px;
+  padding: 0;
   border: solid transparent;
   border-width: 0 1px 0 1px;
   background-clip: padding-box;
@@ -71,21 +71,28 @@
   background-color: var(--blue-50);
 }
 
-.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
+.tabBarTab:not(.selected):hover {
   border-color: var(--grey-20);
   background-color: var(--grey-20);
 }
 
-.tabBarTabWrapper:not(.beingReordered)
-  > .tabBarTab:not(.selected):hover::before {
+.tabBarTabWrapper > .tabBarTab:not(.selected):hover::before {
   background-color: var(--grey-40);
 }
 
 .tabBarTab.selected {
   /* Cut off the bottom of the border for the tab line. */
   top: 1px;
-  padding-top: 5px;
   border-color: var(--grey-30);
   background: #fff;
   color: var(--blue-60);
+}
+
+.tabBarTab.selected .tabBarTabButton {
+  /* The tab is shifted down 1px, bring the button's height back up 1px so that the
+     focus is not cut off. */
+  height: calc(100% - 1px);
+
+  /* Prevent the text being shifted down when the tabBarTab is re-positioned. */
+  padding-top: 4px;
 }

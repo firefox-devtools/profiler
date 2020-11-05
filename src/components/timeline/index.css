@@ -21,6 +21,20 @@
   overflow-y: auto;
 }
 
+.timelineOverflowEdgeIndicatorScrollbox:focus {
+  outline: 0;
+}
+
+.timelineOverflowEdgeIndicatorScrollbox:focus
+  .timelineTrackRow.selected::after {
+  position: absolute;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--blue-60);
+  content: '';
+}
+
 .timelineThreadList {
   width: calc(100vw - var(--vertical-scrollbar-reserved-width));
   padding: 0;
@@ -62,7 +76,11 @@
   padding: 0;
 }
 
-.timelineSettingsHiddenTracks {
+/**
+ * Increase the selector specificity by 1 to overcome built-in photon focus styles.
+ * This button's rule is also duplicated in focus.css.
+ */
+button.timelineSettingsHiddenTracks {
   /* Make sure and override all rules that have to do with button defaults. */
   position: relative;
   height: 17px;
@@ -78,6 +96,11 @@
 
 .timelineSettingsHiddenTracks:hover {
   background-color: var(--blue-70);
+}
+
+button.timelineSettingsHiddenTracks:focus {
+  border-radius: 12px;
+  box-shadow: var(--photon-focus-shadow);
 }
 
 .timelineSettingsHiddenTracks:active {

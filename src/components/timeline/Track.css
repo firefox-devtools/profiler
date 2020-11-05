@@ -47,11 +47,9 @@
 
 .timelineTrackNameButton {
   overflow: hidden;
-
-  /* The 8px are used by the box-shadow when the button receives focus */
-  width: calc(100% - 8px);
-  height: calc(100% - 8px);
-  padding: 0 0 0 10px;
+  width: 100%;
+  height: 100%;
+  padding: 0 0 0 14px;
   border: none;
   margin: auto;
   background: none;

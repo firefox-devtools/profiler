@@ -24,7 +24,6 @@
   min-width: 0;
   height: 24px;
   flex-flow: row nowrap;
-  padding: 0 6px 0 8px;
   border: solid transparent;
   border-width: 0 8px 0 6px;
   border-right-color: transparent !important;
@@ -37,16 +36,16 @@
 .filterNavigatorBarRootItem {
   max-width: 100%;
   flex-shrink: 0;
-  margin-left: -8px;
+  margin-left: -6px;
 }
 
+/* This rule must reset all of the browser's built-in <button> stylings. */
 .filterNavigatorBarItemContent {
   display: flex;
   overflow: hidden;
-
-  /* These lines are mostly to override the default browser styles for `<button>`.
-   * The 8px are used by the box-shadow when the button receives focus */
-  padding: 0;
+  height: 100%;
+  align-items: center;
+  padding: 0 5px;
   border: none;
   margin: auto;
   background: none;
