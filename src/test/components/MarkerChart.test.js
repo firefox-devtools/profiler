@@ -397,47 +397,13 @@ describe('MarkerChart', function() {
       const {
         rightClick,
         clickOnMenuItem,
-        clickOnSubMenuItem,
         getContextMenu,
         findFillTextPosition,
-        getState,
       } = setupForContextMenus();
 
       rightClick(findFillTextPosition('UserTiming A'));
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
-
-      clickOnSubMenuItem('From the start of this marker', 0);
-      expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
-        isModifying: false,
-        selectionEnd: 11,
-        selectionStart: 0,
-      });
-
-      clickOnSubMenuItem('From the end of this marker', 0);
-      expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
-        isModifying: false,
-        selectionEnd: 11,
-        selectionStart: 10,
-      });
-
-      clickOnSubMenuItem('From the start of this marker', 1);
-      expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
-        isModifying: false,
-        selectionEnd: 11,
-        selectionStart: 10,
-      });
-
-      clickOnSubMenuItem('From the end of this marker', 1);
-      expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
-        isModifying: false,
-        selectionEnd: 10.0001,
-        selectionStart: 10,
-      });
 
       clickOnMenuItem('Copy');
       expect(copy).toHaveBeenLastCalledWith('UserTiming A');
@@ -488,6 +454,52 @@ describe('MarkerChart', function() {
         ([, argument]) => argument === 'Highlight'
       );
       expect(callsWithHighlightColor).toHaveLength(2);
+    });
+
+    it('changes selection range when clicking on submenu', () => {
+      const {
+        rightClick,
+        clickOnSubMenuItem,
+        getContextMenu,
+        findFillTextPosition,
+        getState,
+      } = setupForContextMenus();
+
+      rightClick(findFillTextPosition('UserTiming A'));
+
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+      clickOnSubMenuItem('From the start of this marker', 0);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 0,
+      });
+
+      clickOnSubMenuItem('From the end of this marker', 0);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 10,
+      });
+
+      clickOnSubMenuItem('From the start of this marker', 1);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 11,
+        selectionStart: 10,
+      });
+
+      clickOnSubMenuItem('From the end of this marker', 1);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionEnd: 10.0001,
+        selectionStart: 10,
+      });
     });
   });
 
