@@ -79,6 +79,38 @@ describe('timeline/TrackScreenshots', function() {
     expect(selectionOverlay()).toBeTruthy();
   });
 
+  it('does not change the preview selection when clicking if a selection is already present', () => {
+    const { selectionOverlay, screenshotTrack, getState } = setup(
+      undefined,
+      <Timeline />
+    );
+
+    const track = screenshotTrack();
+    expect(selectionOverlay).toThrow();
+
+    // Mousedown then Mousemove will do a selection.
+    fireEvent(track, getMouseEvent('mousedown', { pageX: LEFT, pageY: TOP }));
+    fireEvent(
+      track,
+      getMouseEvent('mousemove', { pageX: LEFT + 200, pageY: TOP })
+    );
+
+    expect(selectionOverlay()).toBeTruthy();
+    const selectedPreviewSelection = getPreviewSelection(getState());
+
+    // Mouseup should keep this selection.
+    fireEvent(
+      track,
+      getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
+    );
+    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
+    expect(getPreviewSelection(getState())).toEqual({
+      ...selectedPreviewSelection,
+      isModifying: false,
+    });
+    expect(selectionOverlay()).toBeTruthy();
+  });
+
   it('removes the hover when moving the mouse out', () => {
     const { screenshotHover, screenshotTrack, moveMouse } = setup();
 
@@ -225,6 +257,17 @@ function setup(
       return rect;
     });
 
+  jest.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => {
+    return [
+      new DOMRect(
+        LEFT,
+        TOP,
+        LEFT + TRACK_WIDTH,
+        TOP + FULL_TRACK_SCREENSHOT_HEIGHT
+      ),
+    ];
+  });
+
   function setBoundingClientRectOffset({
     left,
     top,
@@ -257,7 +300,7 @@ function setup(
   }
 
   function screenshotClick(pageX: number) {
-    fireFullClick(screenshotTrack(), { pageX, pageY: 0 });
+    fireFullClick(screenshotTrack(), { pageX, pageY: TOP });
   }
 
   function screenshotTrack() {
@@ -270,7 +313,7 @@ function setup(
   function moveMouse(pageX: number) {
     fireEvent(
       screenshotTrack(),
-      getMouseEvent('mousemove', { pageX, pageY: 0 })
+      getMouseEvent('mousemove', { pageX, pageY: TOP })
     );
   }
 
