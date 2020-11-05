@@ -293,8 +293,8 @@ export function fireFullClick(
   options?: FakeMouseEventInit
 ) {
   fireEvent(element, getMouseEvent('mousedown', options));
-  fireEvent(element, getMouseEvent('click', options));
   fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('click', options));
 }
 
 /**

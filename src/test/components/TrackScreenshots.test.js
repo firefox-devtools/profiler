@@ -27,10 +27,12 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getPreviewSelection } from '../../selectors/profile';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
@@ -38,6 +40,8 @@ const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
+  autoMockDomRect();
+
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -253,7 +257,7 @@ function setup(
   }
 
   function screenshotClick(pageX: number) {
-    fireEvent(screenshotTrack(), getMouseEvent('click', { pageX, pageY: 0 }));
+    fireFullClick(screenshotTrack(), { pageX, pageY: 0 });
   }
 
   function screenshotTrack() {
