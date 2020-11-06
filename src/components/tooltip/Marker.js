@@ -310,8 +310,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       const causeAge = start - cause.time;
       let causeLabel = 'Stack';
       if (cause.tid) {
-        const causeTheadName = threadIdToNameMap.get(cause.tid);
-        causeLabel = `Stack from thread ${String(causeTheadName)} (id ${String(
+        const causeThreadName = threadIdToNameMap.get(cause.tid);
+        causeLabel = `Stack from thread ${String(causeThreadName)} (id ${String(
           cause.tid
         )})`;
       }
