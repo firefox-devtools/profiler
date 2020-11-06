@@ -6,7 +6,6 @@
   --internal-selected-color: var(--selected-color, var(--blue-60));
 
   display: flex;
-  overflow: hidden;
   height: 24px;
   flex-flow: row nowrap;
   flex-shrink: 0;
@@ -15,6 +14,8 @@
   cursor: default;
   -webkit-user-select: none;
   user-select: none;
+
+  /* Note: no overflow: hidden so that we can see the exit animation for ranges */
 }
 
 .filterNavigatorBarItem {
@@ -29,7 +30,6 @@
   border-right-color: transparent !important;
   background-clip: padding-box;
   line-height: 24px;
-  transition: color 700ms ease-in;
 }
 
 .filterNavigatorBarRootItem {
@@ -132,30 +132,30 @@
 
 /* Animation */
 
+.filterNavigatorBarUncommittedTransition-exit {
+  /* Because of the underlying transition library, this element is still here
+   * while the new "committed" element is created, which pushes it further
+   * right. By using display: none here, we prevent this bad effect. */
+  display: none;
+}
+
 .filterNavigatorBarTransition-enter {
-  z-index: 0;
-  opacity: 0.1;
-  transform: translateX(0);
+  color: inherit;
+  opacity: 0.65;
 }
 
 .filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {
+  color: var(--internal-selected-color);
   opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms ease-out, translate 0ms;
+  transition: color 300ms, opacity 300ms;
 }
 
 .filterNavigatorBarTransition-exit {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .filterNavigatorBarTransition-exit.filterNavigatorBarTransition-exit-active {
-  opacity: 0.01;
+  opacity: 0.1;
   transform: translateX(100%);
   transition: opacity 300ms, transform 300ms;
-}
-
-.filterNavigatorBarUncommittedTransition-exit.filterNavigatorBarUncommittedTransition-exit-active {
-  display: none;
-  visibility: hidden;
 }
