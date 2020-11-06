@@ -4,7 +4,11 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  getByText as globalGetByText,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -313,7 +317,6 @@ describe('MarkerChart', function() {
         fireMouseEvent,
         container,
         getByText,
-        getAllByText,
       } = setupResult;
 
       dispatch(changeSelectedTab('marker-chart'));
@@ -364,10 +367,14 @@ describe('MarkerChart', function() {
         fireFullClick(getByText(stringOrRegexp));
       }
 
-      //There are two menu items of the same name
-      function clickOnSubMenuItem(stringOrRegexp, i) {
-        const menuItems = getAllByText(stringOrRegexp);
-        fireFullClick(menuItems[i]);
+      // Ideally we would simulate hovering on the parent before clicking the
+      // submenu, but this is a bit more work. Maybe later...
+      function clickOnSubMenuItem(parentLookup, submenuLookup) {
+        const parentItem = getByText(parentLookup);
+        // $FlowExpectError Flow thinks parentNode is a Node.
+        const parentNode: HTMLElement = parentItem.parentNode;
+        const submenu = globalGetByText(parentNode, submenuLookup);
+        fireFullClick(submenu);
       }
 
       function findFillTextPosition(
@@ -465,40 +472,61 @@ describe('MarkerChart', function() {
         getState,
       } = setupForContextMenus();
 
-      rightClick(findFillTextPosition('UserTiming A'));
+      rightClick(findFillTextPosition('UserTiming B'));
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnSubMenuItem('From the start of this marker', 0);
+      clickOnSubMenuItem(/selection start/, /From the start/);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
+        selectionStart: 2,
         selectionEnd: 11,
+      });
+
+      clickOnSubMenuItem(/selection start/, /From the end/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // This one doesn't work because it's disabled.
+      clickOnSubMenuItem(/selection end/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // Reset the selection by using the other marker.
+      rightClick(findFillTextPosition('UserTiming A'));
+      clickOnSubMenuItem(/selection start/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
         selectionStart: 0,
-      });
-
-      clickOnSubMenuItem('From the end of this marker', 0);
-      expect(getPreviewSelection(getState())).toEqual({
-        hasSelection: true,
-        isModifying: false,
         selectionEnd: 11,
-        selectionStart: 10,
       });
 
-      clickOnSubMenuItem('From the start of this marker', 1);
+      rightClick(findFillTextPosition('UserTiming B'));
+
+      clickOnSubMenuItem(/selection end/, /From the start/);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
-        selectionEnd: 11,
-        selectionStart: 10,
+        selectionStart: 0,
+        selectionEnd: 2,
       });
 
-      clickOnSubMenuItem('From the end of this marker', 1);
+      clickOnSubMenuItem(/selection end/, /From the end/);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
-        selectionEnd: 10.0001,
-        selectionStart: 10,
+        selectionStart: 0,
+        selectionEnd: 8,
       });
     });
   });
