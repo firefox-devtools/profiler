@@ -257,15 +257,9 @@ body,
 .react-contextmenu.react-contextmenu--visible {
   display: block;
   max-height: 90vh;
-  overflow-y: auto;
 }
 
-/* max-height for timeline track context menu */
-.react-contextmenu.react-contextmenu--visible.timeline-context-menu {
-  max-height: 43.5vh;
-}
-
-.react-contextmenu-item {
+.react-contextmenu-item:not(.react-contextmenu-submenu) {
   overflow: hidden;
   padding: 2px 12px;
   cursor: default;
@@ -293,10 +287,6 @@ body,
   padding: 2px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   margin-bottom: 3px;
-}
-
-.react-contextmenu-item.react-contextmenu-submenu {
-  padding: 0;
 }
 
 /* Submenu arrow */
