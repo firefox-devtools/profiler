@@ -67,7 +67,7 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
     <div
       class="tooltipLabel"
     >
-      Stack
+      Stack from thread GeckoMain (id 111111)
       :
     </div>
     <div
@@ -1534,7 +1534,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
     <div
       class="tooltipLabel"
     >
-      Stack
+      Stack from thread GeckoMain (id 111111)
       :
     </div>
     <div
@@ -1775,7 +1775,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
     <div
       class="tooltipLabel"
     >
-      Stack
+      Stack from thread GeckoMain (id 111111)
       :
     </div>
     <div
@@ -2814,7 +2814,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
     <div
       class="tooltipLabel"
     >
-      Stack
+      Stack from thread GeckoMain (id 111111)
       :
     </div>
     <div
@@ -3069,7 +3069,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
     <div
       class="tooltipLabel"
     >
-      Stack
+      Stack from thread GeckoMain (id 111111)
       :
     </div>
     <div
