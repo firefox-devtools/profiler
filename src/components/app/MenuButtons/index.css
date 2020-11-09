@@ -107,3 +107,40 @@
 .menuButtonsRevertToFullView::before {
   background-image: url(firefox-profiler-res/img/svg/maximize-dark-12.svg);
 }
+
+.profileInfoUploadedActions {
+  padding: 8px 0 8px 40px; /* The 40px padding leaves the room for the cloud image */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 13px;
+}
+
+.profileInfoUploadedLabel {
+  padding-right: 8px;
+  color: var(--grey-50);
+}
+
+.profileInfoUploadedDate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.profileInfoUploadedDate::before {
+  position: absolute;
+  left: -40px;
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url(firefox-profiler-res/img/svg/cloud-dark-12.svg) no-repeat left /
+    32px;
+  content: '';
+  opacity: 0.5;
+}
+
+.profileInfoUploadedActionsButtons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  gap: 8px;
+}

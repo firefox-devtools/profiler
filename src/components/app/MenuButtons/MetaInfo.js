@@ -127,7 +127,6 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
 
     return (
       <>
-        <h2 className="metaInfoSubTitle">Profile Information</h2>
         <div className="metaInfoSection">
           {meta.startTime ? (
             <div className="metaInfoRow">
