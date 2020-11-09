@@ -114,7 +114,6 @@ class PublishedProfile extends React.PureComponent<
     if (!urlPath.startsWith('/')) {
       urlPath = '/' + urlPath;
     }
-    const location = `${window.location.origin}/${urlPath}`;
     const slicedProfileToken = profileData.profileToken.slice(0, 6);
     const profileName = profileData.name
       ? profileData.name
@@ -131,7 +130,7 @@ class PublishedProfile extends React.PureComponent<
       >
         <a
           className="publishedProfilesLink"
-          href={location}
+          href={urlPath}
           title={`Click here to load profile ${smallProfileName}`}
         >
           <div className="publishedProfilesDate">
