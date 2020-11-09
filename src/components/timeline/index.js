@@ -21,7 +21,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class Timeline extends React.PureComponent<Props> {
+class TimelineImpl extends React.PureComponent<Props> {
   render() {
     const { timelineTrackOrganization } = this.props;
     switch (timelineTrackOrganization.type) {
@@ -40,9 +40,9 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const Timeline = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     timelineTrackOrganization: getTimelineTrackOrganization(state),
   }),
-  component: Timeline,
+  component: TimelineImpl,
 });
