@@ -7,9 +7,9 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Timeline } from '../../components/timeline';
-import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
-import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
-import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
+import { ActiveTabGlobalTrackComponent } from '../../components/timeline/ActiveTabGlobalTrack';
+import { ActiveTabResourcesPanel } from '../../components/timeline/ActiveTabResourcesPanel';
+import { ActiveTabResourceTrackComponent } from '../../components/timeline/ActiveTabResourceTrack';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -102,7 +102,7 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabGlobalTrack
+          <ActiveTabGlobalTrackComponent
             trackIndex={trackIndex}
             trackReference={trackReference}
             setInitialSelected={setInitialSelected}
@@ -289,7 +289,7 @@ describe('ActiveTabTimeline', function() {
       const trackIndex = 1;
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourceTrack
+          <ActiveTabResourceTrackComponent
             resourceTrack={resourceTracks[1]}
             trackIndex={trackIndex}
             setInitialSelected={() => {}}

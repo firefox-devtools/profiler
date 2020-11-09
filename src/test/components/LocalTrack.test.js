@@ -19,7 +19,7 @@ import {
   changeSelectedThreads,
   hideLocalTrack,
 } from '../../actions/profile-view';
-import TimelineLocalTrack from '../../components/timeline/LocalTrack';
+import { LocalTrackComponent } from '../../components/timeline/LocalTrack';
 import {
   getRightClickedTrack,
   getLocalTrackFromReference,
@@ -172,7 +172,7 @@ function setup(
 
   const renderResult = render(
     <Provider store={store}>
-      <TimelineLocalTrack
+      <LocalTrackComponent
         pid={PID}
         localTrack={localTrack}
         trackIndex={trackReference.trackIndex}

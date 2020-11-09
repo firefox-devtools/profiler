@@ -380,7 +380,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const Selection = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),

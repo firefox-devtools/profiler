@@ -6,14 +6,14 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import explicitConnect from 'firefox-profiler/utils/connect';
-import { withSize } from 'firefox-profiler/components//shared/WithSize';
-import { getIsActiveTabResourcesPanelOpen } from 'firefox-profiler/selectors/url-state';
-import { getActiveTabResourcesThreadsKey } from 'firefox-profiler/selectors/profile';
-import { toggleResourcesPanel } from 'firefox-profiler/actions/app';
-import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from 'firefox-profiler/app-logic/constants';
-import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
-import TrackThread from './TrackThread';
+import explicitConnect from '../../utils/connect';
+import { withSize } from '../shared/WithSize';
+import { getIsActiveTabResourcesPanelOpen } from '../../selectors/url-state';
+import { getActiveTabResourcesThreadsKey } from '../../selectors/profile';
+import { toggleResourcesPanel } from '../../actions/app';
+import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from '../../app-logic/constants';
+import { ActiveTabResourceTrackComponent } from './ActiveTabResourceTrack';
+import { TrackThread } from './TrackThread';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
@@ -45,7 +45,7 @@ type Props = {|
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
 |};
 
-class ActiveTabResourcesPanel extends React.PureComponent<Props> {
+class ActiveTabResourcesPanelImpl extends React.PureComponent<Props> {
   render() {
     const {
       resourceTracks,
@@ -77,7 +77,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
         {isActiveTabResourcesPanelOpen ? (
           <ol className="timelineResourceTracks">
             {resourceTracks.map((resourceTrack, trackIndex) => (
-              <ActiveTabTimelineResourceTrack
+              <ActiveTabResourceTrackComponent
                 key={trackIndex}
                 resourceTrack={resourceTrack}
                 trackIndex={trackIndex}
@@ -91,11 +91,15 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const ActiveTabResourcesPanel = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),
     resourcesThreadsKey: getActiveTabResourcesThreadsKey(state),
   }),
   mapDispatchToProps: { toggleResourcesPanel },
-  component: withSize<Props>(ActiveTabResourcesPanel),
+  component: withSize<Props>(ActiveTabResourcesPanelImpl),
 });

@@ -5,13 +5,13 @@
 // @flow
 
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import explicitConnect from 'firefox-profiler/utils/connect';
-import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
+import { Ruler } from './Ruler';
+import { Selection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
+import { ActiveTabGlobalTrackComponent } from './ActiveTabGlobalTrack';
+import { withSize } from '../shared/WithSize';
+import explicitConnect from '../../utils/connect';
+import { getPanelLayoutGeneration } from '../../selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
@@ -51,7 +51,7 @@ type State = {|
   forceLayoutGeneration: number,
 |};
 
-class ActiveTabTimeline extends React.PureComponent<Props, State> {
+class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
     forceLayoutGeneration: 0,
@@ -89,8 +89,8 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <TimelineSelection width={width} className="activeTab">
-          <TimelineRuler
+        <Selection width={width} className="activeTab">
+          <Ruler
             zeroAt={zeroAt}
             rangeStart={committedRange.start}
             rangeEnd={committedRange.end}
@@ -104,7 +104,7 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
           >
             <ol className="timelineThreadList">
               {globalTracks.map((globalTrack, trackIndex) => (
-                <ActiveTabTimelineGlobalTrack
+                <ActiveTabGlobalTrackComponent
                   key={trackIndex}
                   trackIndex={trackIndex}
                   trackReference={globalTrackReferences[trackIndex]}
@@ -113,13 +113,13 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
               ))}
             </ol>
           </OverflowEdgeIndicator>
-        </TimelineSelection>
+        </Selection>
       </>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const ActiveTabTimeline = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     globalTracks: getActiveTabGlobalTracks(state),
     globalTrackReferences: getActiveTabGlobalTrackReferences(state),
@@ -127,5 +127,5 @@ export default explicitConnect<{||}, StateProps, {||}>({
     zeroAt: getZeroAt(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
   }),
-  component: withSize<Props>(ActiveTabTimeline),
+  component: withSize<Props>(ActiveTabTimelineImpl),
 });

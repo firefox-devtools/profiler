@@ -16,7 +16,7 @@ import { render } from '@testing-library/react';
 
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
-import TrackThread from '../../components/timeline/TrackThread';
+import { TrackThread } from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';

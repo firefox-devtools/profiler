@@ -83,4 +83,4 @@ class TimelineRuler extends PureComponent<Props> {
   }
 }
 
-export default TimelineRuler;
+export { TimelineRuler as Ruler };

@@ -25,7 +25,7 @@ type State = {
   overflowsOnLeft: boolean,
 };
 
-class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
+class OverflowEdgeIndicatorImpl extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null = null;
   _contentsWrapper: HTMLDivElement | null = null;
   _scrolledToInitialSelected: boolean = false;
@@ -134,4 +134,4 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   }
 }
 
-export default OverflowEdgeIndicator;
+export { OverflowEdgeIndicatorImpl as OverflowEdgeIndicator };

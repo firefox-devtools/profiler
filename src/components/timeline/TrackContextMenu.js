@@ -591,7 +591,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const TrackContextMenu = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     globalTrackOrder: getGlobalTrackOrder(state),

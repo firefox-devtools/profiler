@@ -9,7 +9,8 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';
 
-import EmptyThreadIndicator, {
+import {
+  EmptyThreadIndicator,
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';

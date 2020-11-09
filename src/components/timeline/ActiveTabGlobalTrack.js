@@ -17,10 +17,10 @@ import {
   getActiveTabResourceTracks,
 } from 'firefox-profiler/selectors/profile';
 import './Track.css';
-import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
-import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { TrackThread } from './TrackThread';
+import { TrackScreenshots } from './TrackScreenshots';
+import { ActiveTabResourcesPanel } from './ActiveTabResourcesPanel';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -60,7 +60,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  * it shows either screenshot and a single main track for active tab and
  * resources tracks inside it.
  */
-class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
+class ActiveTabGlobalTrackComponentImpl extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
   _selectCurrentTrack = () => {
@@ -74,7 +74,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
       case 'tab': {
         const { threadsKey } = globalTrack;
         return (
-          <TimelineTrackThread
+          <TrackThread
             threadsKey={threadsKey}
             showMemoryMarkers={false}
             trackType="expanded"
@@ -84,9 +84,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
       }
       case 'screenshots': {
         const { threadIndex, id } = globalTrack;
-        return (
-          <TimelineTrackScreenshots threadIndex={threadIndex} windowId={id} />
-        );
+        return <TrackScreenshots threadIndex={threadIndex} windowId={id} />;
       }
       default:
         console.error(
@@ -152,7 +150,11 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
 // Provide an empty list, so that strict equality checks work for component updates.
 const EMPTY_RESOURCE_TRACKS = [];
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const ActiveTabGlobalTrackComponent = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getActiveTabGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
@@ -194,5 +196,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapDispatchToProps: {
     selectActiveTabTrack,
   },
-  component: ActiveTabGlobalTrackComponent,
+  component: ActiveTabGlobalTrackComponentImpl,
 });

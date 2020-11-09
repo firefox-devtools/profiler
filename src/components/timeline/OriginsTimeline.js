@@ -6,12 +6,12 @@
 
 import memoize from 'memoize-immutable';
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { Ruler } from './Ruler';
+import { Selection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
+import { withSize } from '../shared/WithSize';
+import explicitConnect from '../../utils/connect';
+import { assertExhaustiveCheck } from '../../utils/flow';
 import {
   getPanelLayoutGeneration,
   getCommittedRange,
@@ -64,7 +64,7 @@ type State = {|
  * attempting to view threads organized according to their origin. The origin is
  * the `https://example.com` part of a full URL.
  */
-class OriginsTimelineView extends React.PureComponent<Props, State> {
+class OriginsTimelineViewImpl extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
   };
@@ -147,8 +147,8 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <TimelineSelection width={width}>
-          <TimelineRuler
+        <Selection width={width}>
+          <Ruler
             zeroAt={zeroAt}
             rangeStart={committedRange.start}
             rangeEnd={committedRange.end}
@@ -163,13 +163,17 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
               {originsTimeline.map(this.renderTrack)}
             </ol>
           </OverflowEdgeIndicator>
-        </TimelineSelection>
+        </Selection>
       </>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const OriginsTimelineView = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     threads: getThreads(state),
     committedRange: getCommittedRange(state),
@@ -180,5 +184,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     changeSelectedThreads,
   },
-  component: withSize<Props>(OriginsTimelineView),
+  component: withSize<Props>(OriginsTimelineViewImpl),
 });

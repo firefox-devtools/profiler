@@ -16,7 +16,7 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
-import TrackThread from '../../components/timeline/TrackThread';
+import { TrackThread } from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';

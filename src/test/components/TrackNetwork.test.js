@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, getByTestId, fireEvent } from '@testing-library/react';
 
-import TrackNetwork from '../../components/timeline/TrackNetwork';
+import { TrackNetwork } from '../../components/timeline/TrackNetwork';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,

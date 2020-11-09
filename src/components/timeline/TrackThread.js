@@ -38,12 +38,12 @@ import {
   focusCallTree,
   selectLeafCallNode,
   selectRootCallNode,
-} from 'firefox-profiler/actions/profile-view';
-import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
-import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
-import { getTrackSelectionModifier } from 'firefox-profiler/utils';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+} from '../../actions/profile-view';
+import { reportTrackThreadHeight } from '../../actions/app';
+import { hasThreadKeys } from '../../profile-logic/profile-data';
+import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { getTrackSelectionModifier } from '../../utils';
+import { assertExhaustiveCheck } from '../../utils/flow';
 import './TrackThread.css';
 
 import type {
@@ -333,51 +333,53 @@ const _getTimelineIsSelected = memoize(
   { limit: 1 }
 );
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: (state: State, ownProps: OwnProps) => {
-    const { threadsKey } = ownProps;
-    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const selectedThreadIndexes = getSelectedThreadIndexes(state);
-    const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex = _getTimelineIsSelected(
-      selectedThreadIndexes,
-      threadsKey
-    )
-      ? selectors.getSelectedCallNodeIndex(state)
-      : null;
-    return {
-      invertCallstack: getInvertCallstack(state),
-      filteredThread: selectors.getFilteredThread(state),
-      fullThread: selectors.getRangeFilteredThread(state),
-      tabFilteredThread: selectors.getTabFilteredThread(state),
-      callNodeInfo: selectors.getCallNodeInfo(state),
-      selectedCallNodeIndex,
-      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
-      interval: getProfileInterval(state),
-      rangeStart: committedRange.start,
-      rangeEnd: committedRange.end,
-      categories: getCategories(state),
-      timelineType: getTimelineType(state),
-      hasFileIoMarkers:
-        selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
-      samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
-        state
-      ),
-      treeOrderSampleComparator: selectors.getTreeOrderComparatorInFilteredThread(
-        state
-      ),
-      timelineTrackOrganization: getTimelineTrackOrganization(state),
-      selectedThreadIndexes,
-    };
-  },
-  mapDispatchToProps: {
-    updatePreviewSelection,
-    changeRightClickedTrack,
-    changeSelectedCallNode,
-    focusCallTree,
-    selectLeafCallNode,
-    selectRootCallNode,
-    reportTrackThreadHeight,
-  },
-  component: withSize<Props>(TimelineTrackThread),
-});
+export const TrackThread = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: (state: State, ownProps: OwnProps) => {
+      const { threadsKey } = ownProps;
+      const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
+      const selectedThreadIndexes = getSelectedThreadIndexes(state);
+      const committedRange = getCommittedRange(state);
+      const selectedCallNodeIndex = _getTimelineIsSelected(
+        selectedThreadIndexes,
+        threadsKey
+      )
+        ? selectors.getSelectedCallNodeIndex(state)
+        : null;
+      return {
+        invertCallstack: getInvertCallstack(state),
+        filteredThread: selectors.getFilteredThread(state),
+        fullThread: selectors.getRangeFilteredThread(state),
+        tabFilteredThread: selectors.getTabFilteredThread(state),
+        callNodeInfo: selectors.getCallNodeInfo(state),
+        selectedCallNodeIndex,
+        unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+        interval: getProfileInterval(state),
+        rangeStart: committedRange.start,
+        rangeEnd: committedRange.end,
+        categories: getCategories(state),
+        timelineType: getTimelineType(state),
+        hasFileIoMarkers:
+          selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
+        samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
+          state
+        ),
+        treeOrderSampleComparator: selectors.getTreeOrderComparatorInFilteredThread(
+          state
+        ),
+        timelineTrackOrganization: getTimelineTrackOrganization(state),
+        selectedThreadIndexes,
+      };
+    },
+    mapDispatchToProps: {
+      updatePreviewSelection,
+      changeRightClickedTrack,
+      changeSelectedCallNode,
+      focusCallTree,
+      selectLeafCallNode,
+      selectRootCallNode,
+      reportTrackThreadHeight,
+    },
+    component: withSize<Props>(TimelineTrackThread),
+  }
+);
