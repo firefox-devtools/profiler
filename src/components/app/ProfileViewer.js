@@ -14,6 +14,7 @@ import { WindowTitle } from '../shared/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
+import { KeyboardShortcut } from './KeyboardShortcut';
 
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import Timeline from '../timeline';
@@ -69,8 +70,8 @@ class ProfileViewerImpl extends PureComponent<Props> {
     } = this.props;
 
     return (
-      <div
-        className={classNames({
+      <KeyboardShortcut
+        wrapperClassName={classNames({
           profileViewerWrapper: true,
           profileViewerWrapperBackground: hasSanitizedProfile,
         })}
@@ -140,7 +141,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <BeforeUnloadManager />
           <DebugWarning />
         </div>
-      </div>
+      </KeyboardShortcut>
     );
   }
 }

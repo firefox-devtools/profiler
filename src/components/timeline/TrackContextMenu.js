@@ -534,7 +534,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return (
       <ContextMenu
         id="TimelineTrackContextMenu"
-        className="timeline-context-menu"
+        className="timelineTrackContextMenu"
       >
         {
           // The menu items header items to isolate tracks may or may not be

@@ -7,17 +7,6 @@
   color: #fff;
 }
 
-.menuButtonsUploadingButtonLabel {
-  position: relative;
-  padding: 0 10px;
-  color: hsla(0, 0%, 100%, 0.7);
-  cursor: default;
-  line-height: 24px;
-  text-align: center;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
 .menuButtonsShareButtonOriginal {
   background-color: var(--green-70);
   color: white;
@@ -70,11 +59,6 @@
 .menuButtonsPublishDataChoicesLabel {
   display: flex;
   margin: 4px 0;
-}
-
-.menuButtonsPublishDataLabel {
-  display: block;
-  line-height: 2.3;
 }
 
 .menuButtonsPublishButtons {

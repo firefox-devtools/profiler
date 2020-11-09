@@ -98,21 +98,32 @@ class Screenshots extends PureComponent<Props, State> {
     });
   };
 
-  _handleClick = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const { screenshots, updatePreviewSelection } = this.props;
+  // This selects a screenshot when clicking on the screenshot strip. Note that
+  // we use the mouseup event so that isMakingPreviewSelection is still
+  // accurate.
+  _selectScreenshotOnClick = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+    const {
+      screenshots,
+      updatePreviewSelection,
+      isMakingPreviewSelection,
+    } = this.props;
+    if (isMakingPreviewSelection) {
+      // Avoid reseting the selection if the user is currently selecting one.
+      return;
+    }
+
     const { left } = event.currentTarget.getBoundingClientRect();
     const offsetX = event.pageX - left;
     const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-    if (screenshotIndex === null) return null;
+    if (screenshotIndex === null) return;
     const { start, end } = screenshots[screenshotIndex];
-    if (end === null) return null;
+    if (end === null) return;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: start,
       selectionEnd: end,
     });
-    return null;
   };
 
   render() {
@@ -142,7 +153,7 @@ class Screenshots extends PureComponent<Props, State> {
         style={{ height: trackHeight }}
         onMouseLeave={this._handleMouseLeave}
         onMouseMove={this._handleMouseMove}
-        onClick={this._handleClick}
+        onMouseUp={this._selectScreenshotOnClick}
       >
         <ScreenshotStrip
           thread={thread}

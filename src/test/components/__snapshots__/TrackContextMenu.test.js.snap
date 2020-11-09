@@ -2,7 +2,7 @@
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global non-process track 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -48,7 +48,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -126,7 +126,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 
 exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for ctxId 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -184,7 +184,7 @@ exports[`timeline/TrackContextMenu selected global track network track will be d
 
 exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
