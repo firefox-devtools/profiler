@@ -5,7 +5,6 @@
 import {
   formatFromMarkerSchema,
   parseLabel,
-  markerSchemaGecko,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
 import type { MarkerSchema, Marker } from 'firefox-profiler/types';
@@ -13,6 +12,7 @@ import { getDefaultCategories } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 
 /**
  * Generally, higher level type of testing is preferred to detailed unit tests of
@@ -295,13 +295,13 @@ describe('marker schema formatting', function() {
 describe('getMarkerSchema', function() {
   it('combines front-end and Gecko marker schema', function() {
     const { profile } = getProfileFromTextSamples('A');
-    profile.meta.markerSchema = markerSchemaGecko;
+    profile.meta.markerSchema = markerSchemaForTests;
     const { getState } = storeWithProfile(profile);
     const combinedSchema = getMarkerSchema(getState());
 
     // Find front-end only marker schema.
     expect(
-      markerSchemaGecko.find(schema => schema.name === 'Jank')
+      profile.meta.markerSchema.find(schema => schema.name === 'Jank')
     ).toBeUndefined();
     expect(
       markerSchemaFrontEndOnly.find(schema => schema.name === 'Jank')
@@ -310,7 +310,7 @@ describe('getMarkerSchema', function() {
 
     // Find the Gecko only marker schema.
     expect(
-      markerSchemaGecko.find(schema => schema.name === 'GCMajor')
+      profile.meta.markerSchema.find(schema => schema.name === 'GCMajor')
     ).toBeTruthy();
     expect(
       markerSchemaFrontEndOnly.find(schema => schema.name === 'GCMajor')
