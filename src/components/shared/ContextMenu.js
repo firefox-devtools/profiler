@@ -8,6 +8,8 @@ import type { ElementConfig } from 'react';
 import ReactDOM from 'react-dom';
 import { ContextMenu as ReactContextMenu } from 'react-contextmenu';
 
+import './ContextMenu.css';
+
 type Props = ElementConfig<typeof ReactContextMenu>;
 
 export class ContextMenu extends PureComponent<Props> {
