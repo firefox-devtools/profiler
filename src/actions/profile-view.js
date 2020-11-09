@@ -1360,13 +1360,13 @@ export function changeProfileName(
   profileName: string | null
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    if (window.indexedDB && profileName) {
+    if (window.indexedDB) {
       const hash = getHash(getState());
       const storedProfile = await retrieveProfileData(hash);
       if (storedProfile && storedProfile.name !== profileName) {
         const newProfileData = {
           ...storedProfile,
-          name: profileName,
+          name: profileName || '',
         };
         await storeProfileData(newProfileData);
       }

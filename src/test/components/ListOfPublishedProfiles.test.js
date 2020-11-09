@@ -582,5 +582,13 @@ describe('ListOfPublishedProfiles', () => {
     // The list will update with a focus event.
     window.dispatchEvent(new Event('focus'));
     expect(await screen.findByText(/My Profile Name/)).toBeTruthy();
+
+    // Now let's remove the name altogether -> the displayed information
+    // should now use the profile token prefixed with #.
+    await storeWithProfileViewer.dispatch(changeProfileName(null));
+
+    // The list will update with a focus event.
+    window.dispatchEvent(new Event('focus'));
+    expect(await screen.findByText(/Profile #\w/)).toBeTruthy();
   });
 });
