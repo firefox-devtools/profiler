@@ -82,16 +82,11 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   componentDidMount() {
     this.focus();
   }
-  componentDidUpdate(prevProps) {
-    if (
-      this.props.scrollToSelectionGeneration >
-      prevProps.scrollToSelectionGeneration
-    ) {
-      if (this._virtualListRef.current) {
-        this.scrollSelectionIntoView();
-      }
-    }
+
+  componentDidUpdate() {
+    this.scrollSelectionIntoView();
   }
+
   focus() {
     if (this._virtualListRef.current) {
       this._virtualListRef.current.focus();
@@ -108,8 +103,8 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 
   scrollSelectionIntoView() {
     const { selectedNetworkMarkerIndex, markerIndexes } = this.props;
-    if (this._virtualListRef.current && selectedNetworkMarkerIndex !== null) {
-      const list = this._virtualListRef.current; // this temp variable so that flow knows that it's non-null
+    const list = this._virtualListRef.current;
+    if (list && selectedNetworkMarkerIndex !== null) {
       const selectedRowIndex = markerIndexes.findIndex(
         markerIndex => markerIndex === selectedNetworkMarkerIndex
       );

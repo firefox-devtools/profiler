@@ -658,17 +658,6 @@ describe('Network Chart/tooltip behavior', () => {
     expect(queryByTestId('tooltip')).toBeFalsy();
   });
 
-  it('shows a tooltip when row is selected', () => {
-    const { rowItem, queryByTestId, getByTestId } = setupWithPayload(
-      getNetworkMarkers()
-    );
-
-    expect(queryByTestId('tooltip')).toBeFalsy();
-    fireFullClick(rowItem());
-    expect(rowItem()).toHaveClass('isSelected');
-    expect(getByTestId('tooltip')).toBeTruthy();
-  });
-
   it('does not show tooltips when a context menu is displayed', () => {
     // Context menus trigger asynchronous operations for some behaviors, so we
     // use fake timers to avoid bad interactions between tests.
@@ -724,12 +713,14 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
         ).textContent,
     };
   }
+
   it('selects row on left click', () => {
     const { rowItem } = setupWithPayload(getNetworkMarkers());
 
     fireFullClick(rowItem());
     expect(rowItem()).toHaveClass('isSelected');
   });
+
   it('reacts properly to up/down navigation keys', () => {
     // This generates a profile where function "name<i + 1>" is present
     // <length - i> times, which means it will have a self time of <length - i>
@@ -747,7 +738,9 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
         );
       return [].concat(...arrayOfNetworkMarkers);
     })();
+
     const { simulateKey, selectedText } = setup(markers);
+
     simulateKey('ArrowDown');
     expect(selectedText()).toBe(`https://mozilla.org/1`);
     simulateKey('PageDown');
