@@ -16,6 +16,7 @@ import { NetworkChartRow } from './NetworkChartRow';
 import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import {
+  getScrollToSelectionGeneration,
   getPreviewSelection,
   getPreviewSelectionRange,
 } from '../../selectors/profile';
@@ -54,6 +55,7 @@ type StateProps = {|
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
+  +scrollToSelectionGeneration: number,
 |};
 
 type OwnProps = {| ...SizeProps |};
@@ -80,7 +82,16 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   componentDidMount() {
     this.focus();
   }
-
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.scrollToSelectionGeneration >
+      prevProps.scrollToSelectionGeneration
+    ) {
+      if (this._virtualListRef.current) {
+        this.scrollSelectionIntoView();
+      }
+    }
+  }
   focus() {
     if (this._virtualListRef.current) {
       this._virtualListRef.current.focus();
@@ -94,6 +105,17 @@ class NetworkChartImpl extends React.PureComponent<Props> {
       rightClickedMarkerIndex
     );
   };
+
+  scrollSelectionIntoView() {
+    const { selectedNetworkMarkerIndex, markerIndexes } = this.props;
+    if (this._virtualListRef.current && selectedNetworkMarkerIndex !== null) {
+      const list = this._virtualListRef.current; // this temp variable so that flow knows that it's non-null
+      const selectedRowIndex = markerIndexes.findIndex(
+        markerIndex => markerIndex === selectedNetworkMarkerIndex
+      );
+      list.scrollItemIntoView(selectedRowIndex, 0);
+    }
+  }
 
   _onCopy = (_event: Event) => {
     // Not implemented.
@@ -121,14 +143,13 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     const selectedRowIndex = allRows.findIndex(
       markerIndex => markerIndex === selected
     );
-    const list = this._virtualListRef.current;
 
     if (selected === null || selectedRowIndex === -1) {
       // the first condition is redundant, but it makes flow happy
       this._select(allRows[0]);
       return;
     }
-    if (isNavigationKey && list) {
+    if (isNavigationKey) {
       switch (event.key) {
         case 'ArrowUp': {
           if (event.metaKey) {
@@ -139,7 +160,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
 
           if (selectedRowIndex > 0) {
             this._select(allRows[selectedRowIndex - 1]);
-            list.scrollItemIntoView(selectedRowIndex - 1, 0);
           }
           break;
         }
@@ -151,7 +171,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
           }
           if (selectedRowIndex < allRows.length - 1) {
             this._select(allRows[selectedRowIndex + 1]);
-            list.scrollItemIntoView(selectedRowIndex + 1, 0);
           }
           break;
         }
@@ -159,7 +178,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
           if (selectedRowIndex > 0) {
             const nextRow = Math.max(0, selectedRowIndex - ROW_HEIGHT);
             this._select(allRows[nextRow]);
-            list.scrollItemIntoView(nextRow, 0);
           }
           break;
         }
@@ -170,18 +188,15 @@ class NetworkChartImpl extends React.PureComponent<Props> {
               selectedRowIndex + ROW_HEIGHT
             );
             this._select(allRows[nextRow]);
-            list.scrollItemIntoView(nextRow, 0);
           }
           break;
         }
         case 'Home': {
           this._select(allRows[0]);
-          list.scrollItemIntoView(0, 0);
           break;
         }
         case 'End': {
           this._select(allRows[allRows.length - 1]);
-          list.scrollItemIntoView(allRows.length - 1, 0);
           break;
         }
         default:
@@ -310,6 +325,7 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
       markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
         state
       ),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       selectedNetworkMarkerIndex: selectedThreadSelectors.getSelectedNetworkMarkerIndex(
         state
       ),
