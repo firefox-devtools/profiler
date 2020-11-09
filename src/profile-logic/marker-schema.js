@@ -45,6 +45,22 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
       },
     ],
   },
+  // Note, these can also come from Gecko, but since we have lots of special handling
+  // for IPC, the Gecko ones get overwritten by this definition.
+  {
+    name: 'IPC',
+    tooltipLabel: 'IPC — {marker.data.niceDirection}',
+    tableLabel:
+      '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
+    chartLabel: '{marker.data.messageType}',
+    display: ['marker-chart', 'marker-table', 'timeline-ipc'],
+    data: [
+      { key: 'messageType', label: 'Type', format: 'string' },
+      { key: 'sync', label: 'Sync', format: 'string' },
+      { key: 'sendThreadName', label: 'From', format: 'string' },
+      { key: 'recvThreadName', label: 'To', format: 'string' },
+    ],
+  },
 ];
 
 /**

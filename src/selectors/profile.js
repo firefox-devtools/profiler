@@ -183,12 +183,19 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
-export const getMarkerSchema: Selector<
-  MarkerSchema[]
-> = createSelector(getMarkerSchemaGecko, schema => [
-  ...schema,
-  ...markerSchemaFrontEndOnly,
-]);
+export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
+  getMarkerSchemaGecko,
+  geckoSchema => {
+    const frontEndSchemaNames = new Set([
+      ...markerSchemaFrontEndOnly.map(schema => schema.name),
+    ]);
+    return [
+      // Don't duplicate schema definitions that the front-end already has.
+      ...geckoSchema.filter(schema => !frontEndSchemaNames.has(schema.name)),
+      ...markerSchemaFrontEndOnly,
+    ];
+  }
+);
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
   getMarkerSchema,
