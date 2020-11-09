@@ -10,6 +10,7 @@ import {
   render,
   getByText as globalGetByText,
   waitForElementToBeRemoved,
+  screen,
 } from '@testing-library/react';
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
@@ -17,7 +18,11 @@ import {
   storeProfileData,
   retrieveProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
+import { changeProfileName } from 'firefox-profiler/actions/profile-view';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { ensureExists } from 'firefox-profiler/utils/flow';
+
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
@@ -541,5 +546,41 @@ describe('ListOfPublishedProfiles', () => {
       await findAllByText(/NEW-PROFILE/);
       expect(await findAllByText(/PROFILE/)).toHaveLength(4);
     });
+  });
+
+  it('can rename stored profiles', async () => {
+    mockDate('4 Jul 2020 15:00');
+    const profileData = {
+      ...listOfProfileInformations[0],
+      name: 'Initial Profile Name',
+    };
+    await storeProfileData(profileData);
+
+    // We use 2 different stores to simulate 2 different pages.
+    const storeWithListOfProfiles = blankStore();
+    const storeWithProfileViewer = blankStore();
+    storeWithProfileViewer.dispatch(
+      updateUrlState(
+        stateFromLocation({
+          pathname: `/public/${profileData.profileToken}/marker-chart/`,
+          search: '',
+          hash: '',
+        })
+      )
+    );
+
+    render(
+      <Provider store={storeWithListOfProfiles}>
+        <ListOfPublishedProfiles withActionButtons={false} />
+      </Provider>
+    );
+
+    expect(await screen.findByText(/Initial Profile Name/)).toBeTruthy();
+
+    await storeWithProfileViewer.dispatch(changeProfileName('My Profile Name'));
+
+    // The list will update with a focus event.
+    window.dispatchEvent(new Event('focus'));
+    expect(await screen.findByText(/My Profile Name/)).toBeTruthy();
   });
 });
