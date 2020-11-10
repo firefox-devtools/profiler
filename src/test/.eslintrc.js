@@ -3,7 +3,7 @@ module.exports = {
   env: {
     jest: true,
   },
-  plugins: ['testing-library'],
+  plugins: ['jest', 'testing-library'],
   extends: ['plugin:jest/recommended', 'plugin:testing-library/react'],
   rules: {
     'react/jsx-no-bind': 0,
