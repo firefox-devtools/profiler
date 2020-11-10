@@ -67,10 +67,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
-import {
-  retrieveProfileData,
-  storeProfileData,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+import { changeStoredProfileName } from 'firefox-profiler/app-logic/published-profiles-store';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1360,21 +1357,15 @@ export function changeProfileName(
   profileName: string | null
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    if (window.indexedDB) {
-      const hash = getHash(getState());
-      const storedProfile = await retrieveProfileData(hash);
-      if (storedProfile && storedProfile.name !== profileName) {
-        const newProfileData = {
-          ...storedProfile,
-          name: profileName || '',
-        };
-        await storeProfileData(newProfileData);
-      }
-    }
     dispatch({
       type: 'CHANGE_PROFILE_NAME',
       profileName,
     });
+
+    if (window.indexedDB) {
+      const hash = getHash(getState());
+      await changeStoredProfileName(hash, profileName || '');
+    }
   };
 }
 
