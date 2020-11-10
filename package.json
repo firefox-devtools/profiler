@@ -107,6 +107,7 @@
     "eslint-plugin-jest": "^24.1.0",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-testing-library": "^3.10.0",
     "fake-indexeddb": "^3.1.2",
     "file-loader": "^6.2.0",
     "flow-bin": "^0.96.0",

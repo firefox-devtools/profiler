@@ -371,7 +371,7 @@ describe('ListOfPublishedProfiles', () => {
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
-      waitForElementToBeRemoved(queryByText(/successfully/i));
+      await waitForElementToBeRemoved(queryByText(/successfully/i));
     });
 
     it('can cancel the deletion', async () => {
