@@ -1366,6 +1366,12 @@ export function changeProfileName(
       const hash = getHash(getState());
       await changeStoredProfileName(hash, profileName || '');
     }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change profile name',
+    });
   };
 }
 
