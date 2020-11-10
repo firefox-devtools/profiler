@@ -584,6 +584,21 @@ export function getMarkerSelectorsPerThread(
     return getMarker(selectedMarkerIndex);
   };
 
+  const getSelectedNetworkMarkerIndex: Selector<MarkerIndex | null> = state =>
+    threadSelectors.getViewOptions(state).selectedNetworkMarker;
+
+  // Do we need this function?
+  const getSelectedNetworkMarker: Selector<Marker | null> = state => {
+    const getMarker = getMarkerGetter(state);
+    const selectedNetworkMarkerIndex = getSelectedNetworkMarkerIndex(state);
+
+    if (selectedNetworkMarkerIndex === null) {
+      return null;
+    }
+
+    return getMarker(selectedNetworkMarkerIndex);
+  };
+
   const getRightClickedMarkerIndex: Selector<null | MarkerIndex> = createSelector(
     getRightClickedMarkerInfo,
     rightClickedMarkerInfo => {
@@ -634,6 +649,8 @@ export function getMarkerSelectorsPerThread(
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
     getSelectedMarker,
+    getSelectedNetworkMarkerIndex,
+    getSelectedNetworkMarker,
     getIsNetworkChartEmptyInFullRange,
     getUserTimingMarkerIndexes,
     getUserTimingMarkerTiming,

@@ -321,6 +321,9 @@ type NetworkChartRowProps = {|
   +width: CssPixels,
   +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
+  +isSelected: boolean,
+  +isLeftClicked: boolean,
+  +select: MarkerIndex => mixed,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
   +shouldDisplayTooltips: () => boolean,
@@ -462,23 +465,29 @@ export class NetworkChartRow extends React.PureComponent<
       timeRange,
       isRightClicked,
       shouldDisplayTooltips,
+      isLeftClicked,
+      isSelected,
     } = this.props;
 
     if (networkPayload === null) {
       return null;
     }
 
+    // Generates className for a row
     const itemClassName = classNames(
       'networkChartRowItem',
       this._getClassNameTypeForMarker(),
       {
         odd: index % 2 === 1,
         isRightClicked,
+        isLeftClicked,
+        isSelected,
       }
     );
 
     return (
       <div
+        // The className below is responsible for the blue hover effect
         className={itemClassName}
         onMouseEnter={this._hoverIn}
         onMouseLeave={this._hoverOut}

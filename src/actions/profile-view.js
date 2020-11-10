@@ -1135,7 +1135,16 @@ export function changeSelectedMarker(
     threadsKey,
   };
 }
-
+export function changeSelectedNetworkMarker(
+  threadsKey: ThreadsKey,
+  selectedNetworkMarker: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_NETWORK_MARKER',
+    selectedNetworkMarker,
+    threadsKey,
+  };
+}
 /**
  * This action is used when the user right clicks a marker, and is especially
  * used to display its context menu.
