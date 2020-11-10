@@ -30,6 +30,8 @@
   border-right-color: transparent !important;
   background-clip: padding-box;
   line-height: 24px;
+  transition: opacity 250ms var(--animation-curve),
+    transform 250ms var(--animation-curve);
 }
 
 .filterNavigatorBarRootItem {
@@ -85,18 +87,17 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
-  animation: fadein 700ms;
+  animation: fadeIn 250ms var(--animation-curve);
   background-image: url(../../../res/img/svg/scope-bar-separator.svg);
   background-position: -18px -12px;
   background-repeat: no-repeat;
   background-size: 24px 24px;
 }
 
-@keyframes fadein {
+@keyframes fadeIn {
   from {
-    opacity: 0.1;
+    opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -141,13 +142,16 @@
 
 .filterNavigatorBarTransition-enter {
   color: inherit;
+
+  /* We use the same value as the uncommitted item.
+   * Note that the "uncommitted item" won't have this "enter" class when
+   * committing, because of how we insert it (it's not part of the same loop). */
   opacity: 0.65;
 }
 
 .filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {
   color: var(--internal-selected-color);
   opacity: 1;
-  transition: color 300ms, opacity 300ms;
 }
 
 .filterNavigatorBarTransition-exit {
@@ -155,7 +159,6 @@
 }
 
 .filterNavigatorBarTransition-exit.filterNavigatorBarTransition-exit-active {
-  opacity: 0.1;
-  transform: translateX(100%);
-  transition: opacity 300ms, transform 300ms;
+  opacity: 0;
+  transform: translateX(50%);
 }
