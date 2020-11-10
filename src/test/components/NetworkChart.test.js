@@ -680,3 +680,84 @@ describe('Network Chart/tooltip behavior', () => {
     expect(queryByTestId('tooltip')).toBeFalsy();
   });
 });
+
+describe('calltree/ProfileCallTreeView navigation keys', () => {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  function setup(markers) {
+    const { container } = setupWithPayload(markers);
+
+    const renderedRows = container.querySelectorAll('.networkChartRowItem');
+    expect(renderedRows.length).toEqual(48);
+
+    return {
+      // take either a key as a string, or a full event if we need more
+      // information like modifier keys.
+      simulateKey: (param: string | { key: string }) => {
+        const treeViewBody = ensureExists(
+          container.querySelector('div.treeViewBody'),
+          `Couldn't find the tree view body with selector .networkChart`
+        );
+        fireEvent.keyDown(
+          treeViewBody,
+          // There's a shortcoming in either Flow or the flow type for the
+          // `keyDown` method. $FlowExpectError
+          param.key ? param : { key: param }
+        );
+      },
+      selectedText: () =>
+        ensureExists(
+          container.querySelector('.isSelected'),
+          `Couldn't find the selected row with selector .isSelected`
+        ).textContent,
+    };
+  }
+
+  it('selects row on left click', () => {
+    const { rowItem } = setupWithPayload(getNetworkMarkers());
+
+    fireFullClick(rowItem());
+    expect(rowItem()).toHaveClass('isSelected');
+  });
+
+  it('reacts properly to up/down navigation keys', () => {
+    // This generates a profile where function "name<i + 1>" is present
+    // <length - i> times, which means it will have a self time of <length - i>
+    // ms. This is a good way to control the order we'll get in the call tree
+    // view: function "name1" will be first, etc.
+    const markers = (function() {
+      const arrayOfNetworkMarkers = Array(48)
+        .fill()
+        .map((_, i) =>
+          getNetworkMarkers({
+            uri: `https://mozilla.org/${i + 1}`,
+            id: i,
+            startTime: 3 + 0.1 * i,
+          })
+        );
+      return [].concat(...arrayOfNetworkMarkers);
+    })();
+
+    const { simulateKey, selectedText } = setup(markers);
+
+    simulateKey('ArrowDown');
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
+    simulateKey('PageDown');
+    expect(selectedText()).toBe(`https://mozilla.org/17`); // 15 rows below
+    simulateKey('End');
+    expect(selectedText()).toBe(`https://mozilla.org/48`);
+    simulateKey('ArrowUp');
+    expect(selectedText()).toBe(`https://mozilla.org/47`);
+    simulateKey('PageUp');
+    expect(selectedText()).toBe(`https://mozilla.org/31`); // 15 rows above
+    simulateKey('Home');
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
+
+    // These are MacOS shortcuts.
+    simulateKey({ key: 'ArrowDown', metaKey: true });
+    expect(selectedText()).toBe(`https://mozilla.org/48`);
+    simulateKey({ key: 'ArrowUp', metaKey: true });
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
+  });
+});

@@ -4,7 +4,7 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { MenuItem } from 'react-contextmenu';
+import { MenuItem, SubMenu } from 'react-contextmenu';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -63,12 +63,11 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class MarkerContextMenuImpl extends PureComponent<Props> {
-  setStartRange = () => {
+  _setStartRange = (selectionStart: number) => {
     const {
       updatePreviewSelection,
       previewSelection,
       committedRange,
-      marker,
     } = this.props;
 
     const selectionEnd = previewSelection.hasSelection
@@ -78,14 +77,13 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.start,
+      selectionStart,
       selectionEnd,
     });
   };
 
-  setEndRange = () => {
+  _setEndRange = (selectionEnd: number) => {
     const {
-      marker,
       updatePreviewSelection,
       committedRange,
       previewSelection,
@@ -94,8 +92,6 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
       : committedRange.start;
-
-    let selectionEnd = marker.end || marker.start;
 
     if (selectionEnd === selectionStart) {
       // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
@@ -110,6 +106,26 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       selectionStart,
       selectionEnd,
     });
+  };
+
+  setStartRangeFromMarkerStart = () => {
+    const { marker } = this.props;
+    this._setStartRange(marker.start);
+  };
+
+  setStartRangeFromMarkerEnd = () => {
+    const { marker } = this.props;
+    this._setStartRange(marker.end || marker.start);
+  };
+
+  setEndRangeFromMarkerStart = () => {
+    const { marker } = this.props;
+    this._setEndRange(marker.start);
+  };
+
+  setEndRangeFromMarkerEnd = () => {
+    const { marker } = this.props;
+    this._setEndRange(marker.end || marker.start);
   };
 
   setRangeByDuration = () => {
@@ -224,20 +240,63 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
   };
 
   render() {
-    const { marker } = this.props;
+    const { marker, previewSelection, committedRange } = this.props;
     const { data } = marker;
+
+    const selectionEnd = previewSelection.hasSelection
+      ? previewSelection.selectionEnd
+      : committedRange.end;
+
+    const selectionStart = previewSelection.hasSelection
+      ? previewSelection.selectionStart
+      : committedRange.start;
+
+    const markerEnd = marker.end || marker.start;
+
+    const markerStart = marker.start;
+
     return (
       <ContextMenu
         id="MarkerContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
       >
-        <MenuItem onClick={this.setStartRange}>
-          Set selection start time here
-        </MenuItem>
-        <MenuItem onClick={this.setEndRange}>
-          Set selection end time here
-        </MenuItem>
+        {this._isZeroDurationMarker(marker) ? (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              Set selection start time here
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              Set selection end time here
+            </MenuItem>
+          </>
+        ) : (
+          <>
+            <SubMenu title="Set selection start">
+              <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+                From the start of this marker
+              </MenuItem>
+              <MenuItem
+                onClick={this.setStartRangeFromMarkerEnd}
+                disabled={markerEnd > selectionEnd}
+              >
+                From the end of this marker
+              </MenuItem>
+            </SubMenu>
+            <SubMenu title="Set selection end">
+              <MenuItem
+                onClick={this.setEndRangeFromMarkerStart}
+                disabled={selectionStart > markerStart}
+              >
+                From the start of this marker
+              </MenuItem>
+              <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+                From the end of this marker
+              </MenuItem>
+            </SubMenu>
+          </>
+        )}
+
         <MenuItem
           onClick={this.setRangeByDuration}
           disabled={this._isZeroDurationMarker(marker)}

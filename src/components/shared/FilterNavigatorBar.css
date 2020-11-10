@@ -6,7 +6,6 @@
   --internal-selected-color: var(--selected-color, var(--blue-60));
 
   display: flex;
-  overflow: hidden;
   height: 24px;
   flex-flow: row nowrap;
   flex-shrink: 0;
@@ -15,6 +14,8 @@
   cursor: default;
   -webkit-user-select: none;
   user-select: none;
+
+  /* Note: no overflow: hidden so that we can see the exit animation for ranges */
 }
 
 .filterNavigatorBarItem {
@@ -29,6 +30,8 @@
   border-right-color: transparent !important;
   background-clip: padding-box;
   line-height: 24px;
+  transition: opacity 250ms var(--animation-curve),
+    transform 250ms var(--animation-curve);
 }
 
 .filterNavigatorBarRootItem {
@@ -58,11 +61,6 @@
   margin-inline-end: 5px;
 }
 
-.filterNavigatorBarLeafItem {
-  padding-right: 8px;
-  margin-right: -8px;
-}
-
 .filterNavigatorBarItem::before,
 .filterNavigatorBarItem::after {
   position: absolute;
@@ -89,10 +87,20 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
+  animation: fadeIn 250ms var(--animation-curve);
   background-image: url(../../../res/img/svg/scope-bar-separator.svg);
   background-position: -18px -12px;
   background-repeat: no-repeat;
   background-size: 24px 24px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .filterNavigatorBarSelectedItem {
@@ -125,25 +133,32 @@
 
 /* Animation */
 
+.filterNavigatorBarUncommittedTransition-exit {
+  /* Because of the underlying transition library, this element is still here
+   * while the new "committed" element is created, which pushes it further
+   * right. By using display: none here, we prevent this bad effect. */
+  display: none;
+}
+
 .filterNavigatorBarTransition-enter {
-  z-index: 0;
-  opacity: 0.1;
-  transform: translateX(-100%);
+  color: inherit;
+
+  /* We use the same value as the uncommitted item.
+   * Note that the "uncommitted item" won't have this "enter" class when
+   * committing, because of how we insert it (it's not part of the same loop). */
+  opacity: 0.65;
 }
 
 .filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {
+  color: var(--internal-selected-color);
   opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms ease-out, transform 300ms ease-out;
 }
 
 .filterNavigatorBarTransition-exit {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .filterNavigatorBarTransition-exit.filterNavigatorBarTransition-exit-active {
-  opacity: 0.01;
-  transform: translateX(100%);
-  transition: opacity 300ms, transform 300ms;
+  opacity: 0;
+  transform: translateX(50%);
 }

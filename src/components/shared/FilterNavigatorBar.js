@@ -41,7 +41,7 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
           <CSSTransition
             key={i}
             classNames="filterNavigatorBarTransition"
-            timeout={300}
+            timeout={250}
           >
             <li
               data-index={i}
