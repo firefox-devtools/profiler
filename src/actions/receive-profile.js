@@ -35,6 +35,7 @@ import {
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
 import {
+  withHistoryReplaceStateAsync,
   stateFromLocation,
   getDataSourceFromPathParts,
 } from 'firefox-profiler/app-logic/url-handling';
@@ -1266,7 +1267,9 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            await dispatch(viewProfile(profile));
+            await withHistoryReplaceStateAsync(async () => {
+              await dispatch(viewProfile(profile));
+            });
           }
           break;
         case 'application/zip':
@@ -1288,7 +1291,9 @@ export function retrieveProfileFromFile(
             throw new Error('Unable to parse the profile.');
           }
 
-          await dispatch(viewProfile(profile));
+          await withHistoryReplaceStateAsync(async () => {
+            await dispatch(viewProfile(profile));
+          });
         }
       }
     } catch (error) {

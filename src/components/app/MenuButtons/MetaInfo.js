@@ -4,7 +4,6 @@
 
 // @flow
 import * as React from 'react';
-import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import {
   formatBytes,
@@ -31,7 +30,7 @@ type Props = {|
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
-export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
+export class MetaInfoPanel extends React.PureComponent<Props> {
   /**
    * This method provides information about the symbolication status, and a button
    * to re-trigger symbolication.
@@ -114,143 +113,135 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     }
 
     return (
-      <ButtonWithPanel
-        className="menuButtonsMetaInfoButton"
-        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
-        label="Profile Info"
-        panelClassName="metaInfoPanel"
-        panelContent={
+      <>
+        <h2 className="metaInfoSubTitle">Profile Information</h2>
+        <div className="metaInfoSection">
+          {meta.startTime ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Recording started:</span>
+              {_formatDate(meta.startTime)}
+            </div>
+          ) : null}
+          {meta.interval ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Interval:</span>
+              {formatTimestamp(meta.interval, 4, 1)}
+            </div>
+          ) : null}
+          {meta.preprocessedProfileVersion ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Profile Version:</span>
+              {meta.preprocessedProfileVersion}
+            </div>
+          ) : null}
+          {configuration ? (
+            <>
+              <div className="metaInfoRow">
+                <span className="metaInfoLabel">Buffer Capacity:</span>
+                {formatBytes(configuration.capacity)}
+              </div>
+              <div className="metaInfoRow">
+                <span className="metaInfoLabel">Buffer Duration:</span>
+                {configuration.duration
+                  ? `${configuration.duration} seconds`
+                  : 'Unlimited'}
+              </div>
+              <div className="metaInfoSection">
+                {_renderRowOfList('Features', configuration.features)}
+                {_renderRowOfList('Threads Filter', configuration.threads)}
+              </div>
+            </>
+          ) : null}
+          {this.renderSymbolication()}
+        </div>
+        <h2 className="metaInfoSubTitle">Application</h2>
+        <div className="metaInfoSection">
+          {meta.product ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Name and version:</span>
+              {formatProductAndVersion(meta)}
+            </div>
+          ) : null}
+          {meta.updateChannel ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Update Channel:</span>
+              {meta.updateChannel}
+            </div>
+          ) : null}
+          {meta.appBuildID ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Build ID:</span>
+              {meta.sourceURL ? (
+                <a
+                  href={meta.sourceURL}
+                  title={meta.sourceURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {meta.appBuildID}
+                </a>
+              ) : (
+                meta.appBuildID
+              )}
+            </div>
+          ) : null}
+          {meta.debug !== undefined ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Build Type:</span>
+              {meta.debug ? 'Debug' : 'Opt'}
+            </div>
+          ) : null}
+          {meta.extensions
+            ? _renderRowOfList('Extensions', meta.extensions.name)
+            : null}
+        </div>
+        <h2 className="metaInfoSubTitle">Platform</h2>
+        <div className="metaInfoSection">
+          {platformInformation ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">OS:</span>
+              {platformInformation}
+            </div>
+          ) : null}
+          {meta.abi ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">ABI:</span>
+              {meta.abi}
+            </div>
+          ) : null}
+          {cpuCount}
+        </div>
+        {meta.visualMetrics ? (
           <>
-            <h2 className="metaInfoSubTitle">Profile Information</h2>
+            <h2 className="metaInfoSubTitle">Visual Metrics</h2>
             <div className="metaInfoSection">
-              {meta.startTime ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Recording started:</span>
-                  {_formatDate(meta.startTime)}
-                </div>
-              ) : null}
-              {meta.interval ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Interval:</span>
-                  {formatTimestamp(meta.interval, 4, 1)}
-                </div>
-              ) : null}
-              {meta.preprocessedProfileVersion ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Profile Version:</span>
-                  {meta.preprocessedProfileVersion}
-                </div>
-              ) : null}
-              {configuration ? (
-                <>
-                  <div className="metaInfoRow">
-                    <span className="metaInfoLabel">Buffer Capacity:</span>
-                    {formatBytes(configuration.capacity)}
-                  </div>
-                  <div className="metaInfoRow">
-                    <span className="metaInfoLabel">Buffer Duration:</span>
-                    {configuration.duration
-                      ? `${configuration.duration} seconds`
-                      : 'Unlimited'}
-                  </div>
-                  <div className="metaInfoSection">
-                    {_renderRowOfList('Features', configuration.features)}
-                    {_renderRowOfList('Threads Filter', configuration.threads)}
-                  </div>
-                </>
-              ) : null}
-              {this.renderSymbolication()}
+              <div className="metaInfoRow">
+                <span className="visualMetricsLabel">Speed Index:</span>
+                {meta.visualMetrics.SpeedIndex}
+              </div>
+              <div className="metaInfoRow">
+                <span className="visualMetricsLabel">
+                  Perceptual Speed Index:
+                </span>
+                {meta.visualMetrics.PerceptualSpeedIndex}
+              </div>
+              <div className="metaInfoRow">
+                <span className="visualMetricsLabel">
+                  Contentful Speed Index:
+                </span>
+                {meta.visualMetrics.ContentfulSpeedIndex}
+              </div>
             </div>
-            <h2 className="metaInfoSubTitle">Application</h2>
-            <div className="metaInfoSection">
-              {meta.product ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Name and version:</span>
-                  {formatProductAndVersion(meta)}
-                </div>
-              ) : null}
-              {meta.updateChannel ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Update Channel:</span>
-                  {meta.updateChannel}
-                </div>
-              ) : null}
-              {meta.appBuildID ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Build ID:</span>
-                  {meta.sourceURL ? (
-                    <a
-                      href={meta.sourceURL}
-                      title={meta.sourceURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {meta.appBuildID}
-                    </a>
-                  ) : (
-                    meta.appBuildID
-                  )}
-                </div>
-              ) : null}
-              {meta.debug !== undefined ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">Build Type:</span>
-                  {meta.debug ? 'Debug' : 'Opt'}
-                </div>
-              ) : null}
-              {meta.extensions
-                ? _renderRowOfList('Extensions', meta.extensions.name)
-                : null}
-            </div>
-            <h2 className="metaInfoSubTitle">Platform</h2>
-            <div className="metaInfoSection">
-              {platformInformation ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">OS:</span>
-                  {platformInformation}
-                </div>
-              ) : null}
-              {meta.abi ? (
-                <div className="metaInfoRow">
-                  <span className="metaInfoLabel">ABI:</span>
-                  {meta.abi}
-                </div>
-              ) : null}
-              {cpuCount}
-            </div>
-            {meta.visualMetrics ? (
-              <>
-                <h2 className="metaInfoSubTitle">Visual Metrics</h2>
-                <div className="metaInfoSection">
-                  <div className="metaInfoRow">
-                    <span className="visualMetricsLabel">Speed Index:</span>
-                    {meta.visualMetrics.SpeedIndex}
-                  </div>
-                  <div className="metaInfoRow">
-                    <span className="visualMetricsLabel">
-                      Perceptual Speed Index:
-                    </span>
-                    {meta.visualMetrics.PerceptualSpeedIndex}
-                  </div>
-                  <div className="metaInfoRow">
-                    <span className="visualMetricsLabel">
-                      Contentful Speed Index:
-                    </span>
-                    {meta.visualMetrics.ContentfulSpeedIndex}
-                  </div>
-                </div>
-              </>
-            ) : null}
-            {/*
+          </>
+        ) : null}
+        {/*
               Older profiles(before FF 70) don't have any overhead info.
               Don't show anything if that's the case.
             */}
-            {profilerOverhead ? (
-              <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
-            ) : null}
-          </>
-        }
-      />
+        {profilerOverhead ? (
+          <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
+        ) : null}
+      </>
     );
   }
 }

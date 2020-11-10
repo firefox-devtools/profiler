@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, getByText as globalGetByText } from '@testing-library/react';
+import {
+  render,
+  getByText as globalGetByText,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 import {
@@ -45,7 +49,7 @@ const listOfProfileInformations = [
       // Not more meta information, to test that we can handle profiles that
       // don't have this information.
     },
-    urlPath: '/',
+    urlPath: '/public/0123456789/',
     publishedRange: { start: 1000, end: 3000 },
   },
   {
@@ -62,7 +66,7 @@ const listOfProfileInformations = [
       oscpu: 'Linux x86_64',
       misc: 'rv:68.0',
     },
-    urlPath: '/',
+    urlPath: '/public/ABCDEFGHI/',
     publishedRange: { start: 1000, end: 1005 },
   },
   {
@@ -367,7 +371,7 @@ describe('ListOfPublishedProfiles', () => {
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
-      expect(queryByText(/successfully/i)).toBe(null);
+      waitForElementToBeRemoved(queryByText(/successfully/i));
     });
 
     it('can cancel the deletion', async () => {

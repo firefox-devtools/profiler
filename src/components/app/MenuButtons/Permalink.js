@@ -8,6 +8,8 @@ import * as React from 'react';
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
 
+import './Permalink.css';
+
 type Props = {|
   +isNewlyPublished: boolean,
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
