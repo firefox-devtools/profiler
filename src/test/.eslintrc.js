@@ -3,8 +3,12 @@ module.exports = {
   env: {
     jest: true,
   },
-  plugins: ['jest', 'testing-library', 'jest-formatting'],
-  extends: ['plugin:jest/recommended', 'plugin:testing-library/react'],
+  plugins: ['jest', 'testing-library', 'jest-formatting', 'jest-dom'],
+  extends: [
+    'plugin:jest/recommended',
+    'plugin:testing-library/react',
+    'plugin:jest-dom/recommended',
+  ],
   rules: {
     'react/jsx-no-bind': 0,
     // This rule isn't useful because use Flow.
