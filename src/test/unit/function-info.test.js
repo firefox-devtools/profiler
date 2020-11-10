@@ -26,14 +26,17 @@ describe('strip-function-arguments', function() {
       'ns::fn'
     );
   });
+
   it('should do nothing if not ending with parentheses', function() {
     expect(stripFunctionArguments('ns::fn [clone .part.123]')).toEqual(
       'ns::fn [clone .part.123]'
     );
   });
+
   it('should do nothing if not a function call', function() {
     expect(stripFunctionArguments('(root)')).toEqual('(root)');
   });
+
   it('should remove also the storage class', function() {
     expect(
       stripFunctionArguments('static nsThread::ThreadFunc(void*)')

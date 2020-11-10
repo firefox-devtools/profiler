@@ -55,6 +55,7 @@ describe('actions/icons', function() {
     function getInitialState() {
       return blankStore().getState();
     }
+
     it('getIcons return an empty set', function() {
       const initialState = iconsAccessors.getIcons(getInitialState());
       expect(initialState).toBeInstanceOf(Set);

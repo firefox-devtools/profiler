@@ -414,6 +414,7 @@ describe('actions/ProfileView', function() {
         trackIndex: 1,
         pid: 0,
       };
+
       it('starts out with the thread track and call tree selected', function() {
         const profile = getNetworkTrackProfile();
         const { getState } = storeWithProfile(profile);
@@ -424,6 +425,7 @@ describe('actions/ProfileView', function() {
           'calltree'
         );
       });
+
       it('can switch to the network track, which selects the network chart tab', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
@@ -435,6 +437,7 @@ describe('actions/ProfileView', function() {
           'network-chart'
         );
       });
+
       it('can switch back to the thread, which remembers the last viewed panel', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
@@ -1678,18 +1681,22 @@ describe('snapshots of selectors/profile', function() {
       C,
     };
   }
+
   it('matches the last stored run of getProfile', function() {
     const { getState } = setupStore();
     expect(ProfileViewSelectors.getProfile(getState())).toMatchSnapshot();
   });
+
   it('matches the last stored run of getProfileInterval', function() {
     const { getState } = setupStore();
     expect(ProfileViewSelectors.getProfileInterval(getState())).toEqual(1);
   });
+
   it('matches the last stored run of getThreads', function() {
     const { getState } = setupStore();
     expect(ProfileViewSelectors.getThreads(getState())).toMatchSnapshot();
   });
+
   it('matches the last stored run of getThreadNames', function() {
     const { getState } = setupStore();
     expect(ProfileViewSelectors.getThreadNames(getState())).toEqual([
@@ -1697,28 +1704,33 @@ describe('snapshots of selectors/profile', function() {
       'Thread with markers',
     ]);
   });
+
   it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
     expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual(null);
   });
+
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
     expect(selectedThreadSelectors.getThread(getState())).toEqual(
       samplesThread
     );
   });
+
   it('matches the last stored run of selectedThreadSelector.getViewOptions', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getViewOptions(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getTransformStack', function() {
     const { getState, mergeFunction } = setupStore();
     expect(selectedThreadSelectors.getTransformStack(getState())).toEqual([
       mergeFunction,
     ]);
   });
+
   it('matches the last stored run of selectedThreadSelector.getTransformLabels', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.getTransformLabels(getState())).toEqual([
@@ -1726,6 +1738,7 @@ describe('snapshots of selectors/profile', function() {
       'Merge: C',
     ]);
   });
+
   it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
     const { getState, dispatch } = setupStore();
 
@@ -1736,18 +1749,21 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors.getTabFilteredThread(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getRangeFilteredThread(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getRangeAndTransformFilteredThread(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getJankMarkersForHeader', function() {
     const { getState } = setupStore();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -1757,18 +1773,21 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
       markerThreadSelectors.getFullMarkerListIndexes(getState()).map(getMarker)
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of markerThreadSelectors.getMarkerChartTimingAndBuckets', function() {
     const { getState, markerThreadSelectors } = setupStore();
     expect(
       markerThreadSelectors.getMarkerChartTimingAndBuckets(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
@@ -1777,6 +1796,7 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of markerThreadSelectors.getTimelineOverviewMarkerIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
@@ -1785,40 +1805,47 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getFilteredThread', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getFilteredThread(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getPreviewFilteredThread', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getPreviewFilteredThread(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getCallNodeInfo(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getCallNodeMaxDepth', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.getCallNodeMaxDepth(getState())).toEqual(4);
   });
+
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
     const { getState, A, B } = setupStore();
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
     ).toEqual([A, B]);
   });
+
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getSelectedCallNodeIndex(getState())
     ).toEqual(1);
   });
+
   // assertSetContainsOnly is an assertion
   // eslint-disable-next-line jest/expect-expect
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodePaths', function() {
@@ -1828,34 +1855,40 @@ describe('snapshots of selectors/profile', function() {
       [[A], [A, B]]
     );
   });
+
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodeIndexes', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
     ).toEqual([0, 1]);
   });
+
   it('matches the last stored run of selectedThreadSelector.getCallTree', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.getCallTree(getState())).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getFlameGraphTiming', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getFlameGraphTiming(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.getFriendlyThreadName', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.getFriendlyThreadName(getState())).toEqual(
       'Thread with samples'
     );
   });
+
   it('matches the last stored run of selectedThreadSelector.getThreadProcessDetails', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of markerThreadSelectors.getSearchFilteredMarkerIndexes', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
@@ -1864,6 +1897,7 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
+
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.unfilteredSamplesRange(getState())).toEqual({

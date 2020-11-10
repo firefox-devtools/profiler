@@ -3,7 +3,7 @@ module.exports = {
   env: {
     jest: true,
   },
-  plugins: ['jest', 'testing-library'],
+  plugins: ['jest', 'testing-library', 'jest-formatting'],
   extends: ['plugin:jest/recommended', 'plugin:testing-library/react'],
   rules: {
     'react/jsx-no-bind': 0,
@@ -17,5 +17,9 @@ module.exports = {
     'testing-library/prefer-explicit-assert': 'error',
     'testing-library/prefer-presence-queries': 'error',
     'testing-library/prefer-wait-for': 'error',
+
+    // Individual jest-formatting rules so that we format only test and describe blocks
+    'jest-formatting/padding-around-describe-blocks': 2,
+    'jest-formatting/padding-around-test-blocks': 2,
   },
 };

@@ -191,6 +191,7 @@ describe('unfiltered call tree', function() {
       E  G
     `);
     const callTree = callTreeFromProfile(profile);
+
     it('computes an unfiltered call tree', function() {
       expect(formatTree(callTree)).toEqual([
         '- A (total: 3, self: —)',
@@ -222,6 +223,7 @@ describe('unfiltered call tree', function() {
       E           G
     `);
     const callTree = callTreeFromProfile(profile);
+
     it('computes an unfiltered call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: —)',

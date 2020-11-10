@@ -55,6 +55,7 @@ describe('EmptyThreadIndicator', function() {
       height: 10,
     };
   }
+
   describe('rendering', function() {
     it('matches the snapshot when rendering all three types of indicators', () => {
       const props = propsFromViewportRange({ start: 0, end: 10 });
