@@ -548,47 +548,84 @@ describe('ListOfPublishedProfiles', () => {
     });
   });
 
-  it('can rename stored profiles', async () => {
-    mockDate('4 Jul 2020 15:00');
-    const profileData = {
-      ...listOfProfileInformations[0],
-      name: 'Initial Profile Name',
-    };
-    await storeProfileData(profileData);
+  describe('renaming profiles', () => {
+    async function setup(initialName: string) {
+      mockDate('4 Jul 2020 15:00');
+      const templateData = listOfProfileInformations[0];
+      const profileData = {
+        ...templateData,
+        name: initialName,
+        urlPath: `${templateData.urlPath}?profileName=${encodeURIComponent(
+          initialName
+        )}`,
+      };
+      await storeProfileData(profileData);
 
-    // We use 2 different stores to simulate 2 different pages.
-    const storeWithListOfProfiles = blankStore();
-    const storeWithProfileViewer = blankStore();
-    storeWithProfileViewer.dispatch(
-      updateUrlState(
-        stateFromLocation({
-          pathname: `/public/${profileData.profileToken}/marker-chart/`,
-          search: '',
-          hash: '',
-        })
-      )
-    );
+      // We use 2 different stores to simulate 2 different pages.
+      const storeWithListOfProfiles = blankStore();
+      const storeWithProfileViewer = blankStore();
+      storeWithProfileViewer.dispatch(
+        updateUrlState(
+          stateFromLocation({
+            pathname: `/public/${profileData.profileToken}/marker-chart/`,
+            search: '',
+            hash: '',
+          })
+        )
+      );
 
-    render(
-      <Provider store={storeWithListOfProfiles}>
-        <ListOfPublishedProfiles withActionButtons={false} />
-      </Provider>
-    );
+      render(
+        <Provider store={storeWithListOfProfiles}>
+          <ListOfPublishedProfiles withActionButtons={false} />
+        </Provider>
+      );
 
-    expect(await screen.findByText(/Initial Profile Name/)).toBeTruthy();
+      async function findLinkByText(strOrRegexp): Promise<HTMLLinkElement> {
+        const element = await screen.findByRole('link', { name: strOrRegexp });
+        return element;
+      }
 
-    await storeWithProfileViewer.dispatch(changeProfileName('My Profile Name'));
+      return {
+        storeWithListOfProfiles,
+        storeWithProfileViewer,
+        findLinkByText,
+        profileData,
+      };
+    }
 
-    // The list will update with a focus event.
-    window.dispatchEvent(new Event('focus'));
-    expect(await screen.findByText(/My Profile Name/)).toBeTruthy();
+    function profileNameFromLinkElement(
+      profileLink: HTMLLinkElement
+    ): string | null {
+      const searchParams = new URL(profileLink.href).searchParams;
+      return searchParams.get('profileName');
+    }
 
-    // Now let's remove the name altogether -> the displayed information
-    // should now use the profile token prefixed with #.
-    await storeWithProfileViewer.dispatch(changeProfileName(null));
+    it('can rename stored profiles', async () => {
+      const { storeWithProfileViewer, findLinkByText } = await setup(
+        'Initial Profile Name'
+      );
+      let profileLink = await findLinkByText(/Initial Profile Name/);
+      expect(profileNameFromLinkElement(profileLink)).toBe(
+        'Initial Profile Name'
+      );
 
-    // The list will update with a focus event.
-    window.dispatchEvent(new Event('focus'));
-    expect(await screen.findByText(/Profile #\w/)).toBeTruthy();
+      await storeWithProfileViewer.dispatch(
+        changeProfileName('My Profile Name')
+      );
+
+      // The list will update with a focus event.
+      window.dispatchEvent(new Event('focus'));
+      profileLink = await findLinkByText(/My Profile Name/);
+      expect(profileNameFromLinkElement(profileLink)).toBe('My Profile Name');
+
+      // Now let's remove the name altogether -> the displayed information
+      // should now use the profile token prefixed with #.
+      await storeWithProfileViewer.dispatch(changeProfileName(null));
+
+      // The list will update with a focus event.
+      window.dispatchEvent(new Event('focus'));
+      profileLink = await findLinkByText(/Profile #\w/i);
+      expect(profileNameFromLinkElement(profileLink)).toBe(null);
+    });
   });
 });
