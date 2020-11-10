@@ -14,6 +14,8 @@ import explicitConnect from '../../utils/connect';
 import type { RequestedLib } from 'firefox-profiler/types';
 import type { ConnectedProps } from '../../utils/connect';
 
+import './SymbolicationStatusOverlay.css';
+
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
 }

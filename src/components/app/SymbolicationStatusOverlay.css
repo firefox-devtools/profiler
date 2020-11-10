@@ -1,0 +1,29 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.symbolicationStatusOverlay {
+  position: fixed;
+  top: -8px;
+  right: 30%;
+  left: 30%;
+  overflow: hidden;
+  height: 20px;
+  padding-top: 8px;
+  padding-right: 10px;
+  padding-left: 10px;
+  background: var(--grey-20);
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 20px;
+  text-align: center;
+  text-overflow: ellipsis;
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  white-space: nowrap;
+  will-change: opacity, transform;
+}
+
+.symbolicationStatusOverlay.hidden {
+  opacity: 0;
+  transform: translateY(-30px);
+}
