@@ -94,7 +94,11 @@ export function getStartEndRangeForMarker(
  * See issue #2710 about adding "shift" behavior.
  */
 export function getTrackSelectionModifier(
-  event: MouseEvent | KeyboardEvent | SyntheticMouseEvent<>
+  event:
+    | MouseEvent
+    | KeyboardEvent
+    | SyntheticMouseEvent<>
+    | SyntheticKeyboardEvent<>
 ): 'ctrl' | 'none' {
   if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
     return 'ctrl';

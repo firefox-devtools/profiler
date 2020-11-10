@@ -259,6 +259,21 @@ describe('getJankMarkersForHeader', function() {
     expect(jankInstances.length).toEqual(1);
     expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
   });
+
+  it('will show BHR markers when there are no Jank markers present', function() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, 10, { type: 'BHR-detected hang' }],
+    ]);
+
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const jankInstances = selectedThreadSelectors
+      .getTimelineJankMarkerIndexes(getState())
+      .map(getMarker);
+
+    expect(jankInstances.length).toEqual(1);
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(10);
+  });
 });
 
 /**
@@ -886,7 +901,7 @@ describe('actions/ProfileView', function() {
           1022,
           1024,
           {
-            cause: { stack: 2, time: 1 },
+            cause: { tid: 2222, stack: 2, time: 1 },
             filename: '/foo/bar/',
             operation: 'create/open',
             source: 'PoisionOIInterposer',
@@ -1740,12 +1755,6 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors
         .getTimelineJankMarkerIndexes(getState())
         .map(getMarker)
-    ).toMatchSnapshot();
-  });
-  it('matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable', function() {
-    const { getState, markerThreadSelectors } = setupStore();
-    expect(
-      markerThreadSelectors.getProcessedRawMarkerTable(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes', function() {
@@ -3468,7 +3477,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3525,7 +3534,7 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- goes down until it's done.
-        ],
+        ]),
       },
     ]);
   });
@@ -3542,7 +3551,7 @@ describe('getProcessedEventDelays', function() {
         maxDelay: 52,
         minDelay: 1,
         delayRange: 51,
-        eventDelays: [
+        eventDelays: new Float32Array([
           0,
           1,
           1,
@@ -3605,8 +3614,26 @@ describe('getProcessedEventDelays', function() {
           3,
           2,
           1, // <---- Second event delay is done now too.
-        ],
+        ]),
       },
     ]);
+  });
+});
+
+// This test is for 'mouseTimePosition' redux store, which tracks mouse position in timeline-axis
+describe('mouseTimePosition', function() {
+  function setup() {
+    const profile = getProfileFromTextSamples('A');
+    return storeWithProfile(profile.profile);
+  }
+
+  it('should get mouse time position', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeMouseTimePosition(null));
+    expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBeNull();
+
+    dispatch(ProfileView.changeMouseTimePosition(1000));
+    expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBe(1000);
   });
 });

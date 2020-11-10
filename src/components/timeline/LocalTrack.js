@@ -9,26 +9,26 @@ import classNames from 'classnames';
 import {
   changeRightClickedTrack,
   selectTrack,
-} from '../../actions/profile-view';
-import { assertExhaustiveCheck } from '../../utils/flow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
   getHiddenLocalTracks,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import TrackThread from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
-import { getTrackSelectionModifier } from '../../utils';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import type {
   TrackReference,
   Pid,
@@ -36,7 +36,7 @@ import type {
   LocalTrack,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +pid: Pid,
@@ -68,7 +68,27 @@ class LocalTrackComponent extends PureComponent<Props> {
     }
   };
 
-  _selectCurrentTrack = (event: MouseEvent) => {
+  /**
+   * Special care must be taken when selecting a track. This handler is registered in two
+   * places.
+   *
+   *  1. mouse up of the entire track's wrapping div.
+   *  2. keypress of the focusable button
+   *
+   * This is done to allow for two behaviors that conflict with each other. It's important
+   * when making a preview selection to not select a track on the mouse up. In order to
+   * prevent this, the mouse up handler in the preview selection component prevents further
+   * propagation.
+   *
+   * However, for accessibility reasons, we want to be able to select tracks using the
+   * keyboard. In order to still allow for this behavior, we also listen for the keypress
+   * handler on the button. We do this rather than with the onClick event, as this would
+   * get in the way of the mouse up behavior. The keypress then needs to check that it's
+   * a validation "activation" key, such as Enter of Spacebar.
+   */
+  _selectCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
     if (
       event.button === 2 ||
       // Macs can right click with the ctrl key.
@@ -77,6 +97,18 @@ class LocalTrackComponent extends PureComponent<Props> {
       // This is a right click, do nothing.
       return;
     }
+
+    if (
+      // Is this a keypress?
+      typeof event.key === 'string' &&
+      // Only allow Spacebar and Enter, which signals the button is being pressed.
+      event.key !== ' ' &&
+      event.key !== 'Enter'
+    ) {
+      // Ignore this keypress.
+      return;
+    }
+
     this.props.selectTrack(
       this._getTrackReference(),
       getTrackSelectionModifier(event)
@@ -148,7 +180,11 @@ class LocalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            <button type="button" className="timelineTrackNameButton">
+            <button
+              type="button"
+              className="timelineTrackNameButton"
+              onKeyUp={this._selectCurrentTrack}
+            >
               {trackName}
             </button>
           </ContextMenuTrigger>

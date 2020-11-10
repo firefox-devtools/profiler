@@ -29,6 +29,7 @@ import type {
   CallNodePath,
   IndexIntoFuncTable,
   ThreadsKey,
+  Milliseconds,
 } from 'firefox-profiler/types';
 import { objectMap } from '../utils/flow';
 
@@ -134,6 +135,7 @@ export const defaultThreadViewOptions = {
   selectedCallNodePath: [],
   expandedCallNodePaths: new PathSet(),
   selectedMarker: null,
+  selectedNetworkMarker: null,
 };
 
 function _getThreadViewOptions(
@@ -303,6 +305,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const { threadsKey, selectedMarker } = action;
       return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
     }
+    case 'CHANGE_SELECTED_NETWORK_MARKER': {
+      const { threadsKey, selectedNetworkMarker } = action;
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedNetworkMarker,
+      });
+    }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadsKey, transform, transformedThread } = action;
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);
@@ -444,6 +452,7 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'CHANGE_SELECTED_MARKER':
+    case 'CHANGE_SELECTED_NETWORK_MARKER':
       return state + 1;
     default:
       return state;
@@ -572,6 +581,22 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
 };
 
 /**
+ * TODO: This is not used yet, see issue #222
+ * This is for tracking mouse position in timeline-axis
+ */
+const mouseTimePosition: Reducer<Milliseconds | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_MOUSE_TIME_POSITION':
+      return action.mouseTimePosition;
+    default:
+      return state;
+  }
+};
+
+/**
  * The origins timeline is experimental. See the OriginsTimeline component
  * for more information.
  */
@@ -620,6 +645,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,
+      mouseTimePosition,
     }),
     profile,
     full: combineReducers({

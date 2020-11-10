@@ -33,7 +33,7 @@ type State = {
  * x and y deltas compared to the mouse position at mousedown.
  * During the drag, the additional className 'dragging' is set on the element.
  */
-export default class Draggable extends React.PureComponent<Props, State> {
+export class Draggable extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null = null;
   _handlers: {
     mouseMoveHandler: MouseEvent => *,

@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import Timeline from '../../components/timeline';
+import { Timeline } from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';

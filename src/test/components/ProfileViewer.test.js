@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import ProfileViewer from '../../components/app/ProfileViewer';
+import { ProfileViewer } from '../../components/app/ProfileViewer';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';

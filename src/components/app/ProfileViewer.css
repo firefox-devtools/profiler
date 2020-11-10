@@ -79,8 +79,11 @@
 }
 
 .profileViewerSplitter {
-  /* Reset the position: absolute that is set by the splitter-layout class */
-  position: unset;
+  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
+     viewer. In addition, the built-in class uses position: absolute, which is not
+     appropriate here. */
+  position: relative;
+  z-index: 0;
 }
 
 .profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {

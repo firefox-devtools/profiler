@@ -293,8 +293,8 @@ export function fireFullClick(
   options?: FakeMouseEventInit
 ) {
   fireEvent(element, getMouseEvent('mousedown', options));
-  fireEvent(element, getMouseEvent('click', options));
   fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('click', options));
 }
 
 /**
@@ -324,4 +324,79 @@ export function fireFullContextMenu(
   fireEvent(element, getMouseEvent('mousedown', options));
   fireEvent(element, getMouseEvent('mouseup', options));
   fireEvent(element, getMouseEvent('contextmenu', options));
+}
+
+/**
+ * React Testing Library only sends one event at a time, but a lot of component logic
+ * assumes that events come in a natural cascade. This utility ensures that cascasde
+ * gets fired more correctly.
+ *
+ * Note, that this utility is not quite complete in it's implementation. There are
+ * more complex interactions with prevent defaulting, and passing in the correct
+ * keycode information.
+ *
+ * For a more complete implementation see:
+ * https://github.com/testing-library/user-event/blob/c187639cbc7d2651d3392db6967f614a75a32695/src/type.js#L283
+ *
+ * And addition Julien's review comments here:
+ * https://github.com/firefox-devtools/profiler/pull/2842/commits/6be20eb6eafca56644b1d55010cc1824a1d03695#r501061693
+ */
+export function fireFullKeyPress(
+  element: HTMLElement,
+  options: { key: string, ... }
+) {
+  // Since this is test code, only use QWERTY layout keyboards.
+  // Note the key is always converted to lowercase here.
+  const codes: { [key: string]: number } = {
+    enter: 13,
+    escape: 27,
+    ' ': 32,
+    '?': 191,
+    a: 65,
+    b: 66,
+    c: 67,
+    d: 68,
+    e: 69,
+    f: 70,
+    g: 71,
+    h: 72,
+    i: 73,
+    j: 74,
+    k: 75,
+    l: 76,
+    m: 77,
+    n: 78,
+    o: 79,
+    p: 80,
+    q: 81,
+    r: 82,
+    s: 83,
+    t: 84,
+    u: 85,
+    v: 86,
+    w: 87,
+    x: 88,
+    y: 89,
+    z: 90,
+  };
+
+  // It's important that the codes are correctly configured here, or else the keypress
+  // event won't fire.
+  // https://github.com/testing-library/react-testing-library/issues/269#issuecomment-455854112
+  const optionsConfigured = {
+    code: codes[options.key.toLowerCase()],
+    charCode: codes[options.key.toLowerCase()],
+    ...options,
+  };
+
+  if (!optionsConfigured.code) {
+    throw new Error(
+      `An unhandled keypress key was encountered: "${options.key}", look it up here:` +
+        ` https://keycode.info/ and then add to this function.`
+    );
+  }
+
+  fireEvent.keyDown(element, optionsConfigured);
+  fireEvent.keyPress(element, optionsConfigured);
+  fireEvent.keyUp(element, optionsConfigured);
 }

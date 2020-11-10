@@ -6,30 +6,31 @@
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import { oneLine } from 'common-tags';
-import explicitConnect from '../../utils/connect';
-import TreeView from '../shared/TreeView';
-import CallTreeEmptyReasons from './CallTreeEmptyReasons';
-import Icon from '../shared/Icon';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { TreeView } from 'firefox-profiler/components/shared/TreeView';
+import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
-} from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   changeExpandedCallNodes,
   addTransformToStack,
-} from '../../actions/profile-view';
-import { assertExhaustiveCheck } from '../../utils/flow';
+  handleCallNodeTransformShortcut,
+} from 'firefox-profiler/actions/profile-view';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   State,
@@ -40,16 +41,16 @@ import type {
   CallNodeDisplayData,
   WeightType,
 } from 'firefox-profiler/types';
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { Column } from '../shared/TreeView';
-import type { ConnectedProps } from '../../utils/connect';
+import type { Column } from 'firefox-profiler/components/shared/TreeView';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
   +focusCallTreeGeneration: number,
-  +tree: CallTree,
+  +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -67,11 +68,12 @@ type DispatchProps = {|
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class CallTreeComponent extends PureComponent<Props> {
+class CallTreeImpl extends PureComponent<Props> {
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
@@ -228,6 +230,16 @@ class CallTreeComponent extends PureComponent<Props> {
     );
   };
 
+  _onKeyDown = (
+    event: SyntheticKeyboardEvent<>,
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    if (callNodeIndex !== null) {
+      const { handleCallNodeTransformShortcut, threadsKey } = this.props;
+      handleCallNodeTransformShortcut(event, threadsKey, callNodeIndex);
+    }
+  };
+
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
@@ -293,12 +305,13 @@ class CallTreeComponent extends PureComponent<Props> {
         maxNodeDepth={callNodeMaxDepth}
         rowHeight={16}
         indentWidth={10}
+        onKeyDown={this._onKeyDown}
       />
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -326,6 +339,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedCallNode,
     changeExpandedCallNodes,
     addTransformToStack,
+    handleCallNodeTransformShortcut,
   },
-  component: CallTreeComponent,
+  component: CallTreeImpl,
 });

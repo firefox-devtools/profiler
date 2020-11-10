@@ -20,9 +20,10 @@ type Props = {|
 
 type State = {
   value: string,
+  previousDefaultValue: string,
 };
 
-class IdleSearchField extends PureComponent<Props, State> {
+export class IdleSearchField extends PureComponent<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
@@ -32,6 +33,7 @@ class IdleSearchField extends PureComponent<Props, State> {
     super(props);
     this.state = {
       value: props.defaultValue || '',
+      previousDefaultValue: props.defaultValue || '',
     };
     this._previouslyNotifiedValue = this.state.value;
   }
@@ -90,14 +92,14 @@ class IdleSearchField extends PureComponent<Props, State> {
   _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
   }
-
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.defaultValue !== this.props.defaultValue) {
-      this._notifyIfChanged(nextProps.defaultValue || '');
-      this.setState({
-        value: nextProps.defaultValue || '',
-      });
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.defaultValue !== state.previousDefaultValue) {
+      return {
+        previousDefaultValue: props.defaultValue || '',
+        value: props.defaultValue || '',
+      };
     }
+    return null;
   }
 
   render() {
@@ -130,5 +132,3 @@ class IdleSearchField extends PureComponent<Props, State> {
     );
   }
 }
-
-export default IdleSearchField;

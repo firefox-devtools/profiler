@@ -243,11 +243,41 @@ describe('TooltipMarker', function() {
           },
         },
       ],
+      // This bailout marker was present around Firefox 72.
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,
       ],
+      // This bailout marker was present in Firefox 82.
+      [
+        'BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388',
+        10,
+      ],
+      // This is an old-style invalidation marker. This was changed to a Text marker without
+      // a version bump between Gecko profile version 20-21.
       ['Invalidate http://mozilla.com/script.js:1234', 10],
+      // This is a bailout text marker, as of Gecko profile version 20-21, Firefox 83.
+      [
+        'Bailout',
+        10,
+        null,
+        {
+          type: 'Text',
+          name:
+            'NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27',
+        },
+      ],
+      // This is a Invalidate text marker, as of Gecko profile version 20-21
+      [
+        'Invalidate',
+        10,
+        null,
+        {
+          type: 'Text',
+          name:
+            'https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518',
+        },
+      ],
       [
         'Styles',
         18.5,
@@ -257,6 +287,7 @@ describe('TooltipMarker', function() {
           category: 'Paint',
           interval: 'start',
           cause: {
+            tid: 4444,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -294,6 +325,7 @@ describe('TooltipMarker', function() {
           stylesShared: 15,
           stylesReused: 20,
           cause: {
+            tid: 4445,
             time: 19.5,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -319,6 +351,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4446,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -334,6 +367,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4447,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -660,6 +694,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4448,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },

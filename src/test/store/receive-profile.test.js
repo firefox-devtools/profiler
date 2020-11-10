@@ -45,6 +45,7 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -1461,30 +1462,36 @@ describe('actions/receive-profile', function() {
       url2: string,
     |};
 
+    type SetupOptionsParams = $Shape<{|
+      +skipMarkers: boolean,
+    |}>;
+
     async function setup(
       { profile1, profile2 }: SetupProfileParams,
-      { url1, url2 }: SetupUrlParams
+      { url1, url2 }: SetupUrlParams,
+      { skipMarkers }: SetupOptionsParams = {}
     ): * {
-      profile1.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['A', 1, 3],
-          ['A', 1],
-          ['B', 2],
-          ['C', 3],
-          ['D', 4],
-          ['E', 5],
-        ])
-      );
-      profile2.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['F', 1, 3],
-          ['G', 2],
-          ['H', 3],
-          ['I', 4],
-          ['J', 5],
-        ])
-      );
-
+      if (skipMarkers !== true) {
+        profile1.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['A', 1, 3],
+            ['A', 1],
+            ['B', 2],
+            ['C', 3],
+            ['D', 4],
+            ['E', 5],
+          ])
+        );
+        profile2.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['F', 1, 3],
+            ['G', 2],
+            ['H', 3],
+            ['I', 4],
+            ['J', 5],
+          ])
+        );
+      }
       window.fetch
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
@@ -1578,6 +1585,23 @@ describe('actions/receive-profile', function() {
       expect(expandUrl).toHaveBeenCalledWith(shortUrl2);
     });
 
+    it('keeps the initial rootRange as default', async function() {
+      //Time sample has been set for 100000ms (100s)
+      const { profile } = getProfileFromTextSamples(`
+        100000 
+        A
+      `); //
+      const { rootRange } = await setup(
+        { profile1: profile, profile2: profile },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        },
+        { skipMarkers: true }
+      );
+      expect(rootRange).toEqual({ start: 0, end: 1 });
+    });
+
     it('filters samples and markers, according to the URL', async function() {
       const { resultProfile } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&range=0.0011_0.0043',
@@ -1637,6 +1661,73 @@ describe('actions/receive-profile', function() {
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
       expect(nodeData.self).toBe(4);
+    });
+
+    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function() {
+      const store = blankStore();
+      const { resultProfile } = await setup(getSomeProfiles(), {
+        url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+      });
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
+    it('includes screenshot track of both profiles if they have screenshot markers', async function() {
+      const store = blankStore();
+      //Get profiles with one screenshot track
+      const profile1 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '0',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
     });
   });
 

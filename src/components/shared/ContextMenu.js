@@ -6,13 +6,15 @@
 import React, { PureComponent } from 'react';
 import type { ElementConfig } from 'react';
 import ReactDOM from 'react-dom';
-import { ContextMenu } from 'react-contextmenu';
+import { ContextMenu as ReactContextMenu } from 'react-contextmenu';
 
-type Props = ElementConfig<typeof ContextMenu>;
+import './ContextMenu.css';
 
-export default class MyContextMenu extends PureComponent<Props> {
-  _contextMenu: ContextMenu | null = null;
-  _takeContextMenuRef = (contextMenu: ContextMenu | null) => {
+type Props = ElementConfig<typeof ReactContextMenu>;
+
+export class ContextMenu extends PureComponent<Props> {
+  _contextMenu: ReactContextMenu | null = null;
+  _takeContextMenuRef = (contextMenu: ReactContextMenu | null) => {
     this._contextMenu = contextMenu;
   };
 
@@ -45,9 +47,9 @@ export default class MyContextMenu extends PureComponent<Props> {
 
   render() {
     return (
-      <ContextMenu ref={this._takeContextMenuRef} {...this.props}>
+      <ReactContextMenu ref={this._takeContextMenuRef} {...this.props}>
         {this.props.children ? this.props.children : <div />}
-      </ContextMenu>
+      </ReactContextMenu>
     );
   }
 }

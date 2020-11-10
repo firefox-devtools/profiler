@@ -1,9 +1,5 @@
 # Contributing to the Firefox Profiler
 
-**NOTE**: In October 2020, due to the Outreachy contribution period, we moved our `good first issue` label to `outreachy onboarding` label. We did this to give priority to Outreachy applicants. If you are an Outreachy applicant, please look at this label instead. If you are not, we are sorry, but we don't offer any mentored starter issues this month since we have limited resources. If you still want to contribute, you can pick one of the [more challenging issues](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22outreachy+onboarding%22+-label%3Aassigned).
-
-**This project doesn't take part in Hacktoberfest 2020**, because we focus on [Outreachy](https://www.outreachy.org/) during this month.
-
 First off, thanks for taking the time to contribute to Mozilla and the Firefox Profiler! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
 
 ## Who we are
@@ -12,21 +8,22 @@ This project is made up of a cross section of different parts of Mozilla, includ
 
 | - | Name | Github Handle | Position |
 | - | ---- | ------------- | -------- |
-| ![][digitarald] | Harald Kirschner | [@digitarald](https://github.com/digitarald) | Firefox DevTools Product Manager |
-| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
 | ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox Frontend Engineer |
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
 | ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
 | ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
 | ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
+| ![][fqueze] | Florian Quèze | [@fqueze](https://github.com/fqueze) | Firefox Profiler Team Manager |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+<!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
-[digitarald]:https://avatars.githubusercontent.com/digitarald?size=56
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
 [gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
 [brisad]:https://avatars.githubusercontent.com/brisad?size=56
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
+[fqueze]:https://avatars.githubusercontent.com/fqueze?size=56
 
 We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
@@ -60,19 +57,23 @@ Alternatively, you can also develop the Firefox Profiler online in a pre-configu
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
 
-Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab.
+Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab. Please look at our [gitpod documentation](./docs-user/gitpod.md) for more information.
 
 ## Loading in profiles for development
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
- * Drag in a saved profile to the loading screen (this makes refreshing hard).
- * Record a new profile.
-  1. Open `about:config` in Firefox.
-  2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
-  3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
-  4. Record a profile using the menu button, and it should open up in your local environment.
+ #### 1. Record a profile: 
+ - Open `about:config` in Firefox.
+ - Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
+ - Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
+ - Record a profile using the menu button, and it should open up in your local environment automatically.
+
+ #### 2. Use an existing profile:
+ - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
+ - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
+
+For more information on loading a profile, visit its [documentation](loading-in-profiles.md).
 
 ## Running the tests
 
@@ -103,12 +104,12 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 ## Finding something to work on
 
 If this is your first time here, check out the label
-[outreachy onboarding](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22outreachy+onboarding%22+-label%3Aassigned).
+[good first issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+-label%3Aassigned).
 We will mentor you through the process of completing a first bug, and these are
 usually pretty good self-contained problems.
 
-After leveling up on a few outreachy onboarding issues, we also have the
-[help wanted](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22outreachy+onboarding%22+-label%3Aassigned)
+After leveling up on a few good first issues, we also have the
+[help wanted](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22good+first+issue%22+-label%3Aassigned)
 tag for bugs that no one is actively working on, but are well-scoped and ready
 to be tackled!
 

@@ -8,17 +8,17 @@ import queryString from 'query-string';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
-} from '../profile-logic/process-profile';
-import { SymbolStore } from '../profile-logic/symbol-store';
+} from 'firefox-profiler/profile-logic/process-profile';
+import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
   applySymbolicationStep,
-} from '../profile-logic/symbolication';
-import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { mergeProfilesForDiffing } from '../profile-logic/merge-compare';
-import { decompress } from '../utils/gz';
-import { expandUrl } from '../utils/shorten-url';
-import { TemporaryError } from '../utils/errors';
+} from 'firefox-profiler/profile-logic/symbolication';
+import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
+import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
+import { decompress } from 'firefox-profiler/utils/gz';
+import { expandUrl } from 'firefox-profiler/utils/shorten-url';
+import { TemporaryError } from 'firefox-profiler/utils/errors';
 import JSZip from 'jszip';
 import {
   getSelectedThreadIndexesOrNull,
@@ -35,9 +35,10 @@ import {
   getRelevantPagesForActiveTab,
 } from 'firefox-profiler/selectors';
 import {
+  withHistoryReplaceStateAsync,
   stateFromLocation,
   getDataSourceFromPathParts,
-} from '../app-logic/url-handling';
+} from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -47,8 +48,8 @@ import {
   initializeSelectedThreadIndex,
   initializeHiddenGlobalTracks,
   getVisibleThreads,
-} from '../profile-logic/tracks';
-import { computeActiveTabTracks } from '../profile-logic/active-tab';
+} from 'firefox-profiler/profile-logic/tracks';
+import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
@@ -70,8 +71,11 @@ import type {
   OriginsTimelineRoot,
 } from 'firefox-profiler/types';
 
-import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -1263,7 +1267,9 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            await dispatch(viewProfile(profile));
+            await withHistoryReplaceStateAsync(async () => {
+              await dispatch(viewProfile(profile));
+            });
           }
           break;
         case 'application/zip':
@@ -1285,7 +1291,9 @@ export function retrieveProfileFromFile(
             throw new Error('Unable to parse the profile.');
           }
 
-          await dispatch(viewProfile(profile));
+          await withHistoryReplaceStateAsync(async () => {
+            await dispatch(viewProfile(profile));
+          });
         }
       }
     } catch (error) {

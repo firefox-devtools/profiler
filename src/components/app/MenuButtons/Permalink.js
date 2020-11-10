@@ -5,8 +5,10 @@
 // @flow
 
 import * as React from 'react';
-import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
-import * as UrlUtils from '../../../utils/shorten-url';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
+
+import './Permalink.css';
 
 type Props = {|
   +isNewlyPublished: boolean,

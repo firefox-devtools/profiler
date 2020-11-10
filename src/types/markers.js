@@ -5,7 +5,7 @@
 
 import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
-import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
+import type { IndexIntoStackTable, IndexIntoStringTable, Tid } from './profile';
 import type { ObjectMap } from './utils';
 
 // Provide different formatting options for strings.
@@ -118,6 +118,9 @@ export type MarkerSchemaByName = ObjectMap<MarkerSchema>;
  * start and end time.
  */
 export type CauseBacktrace = {|
+  // `tid` is optional because older processed profiles may not have it.
+  // No upgrader was written for this change.
+  tid?: Tid,
   time: Milliseconds,
   stack: IndexIntoStackTable,
 |};
@@ -382,29 +385,6 @@ export type GCSliceMarkerPayload = {|
 export type GCSliceMarkerPayload_Gecko = {|
   type: 'GCSlice',
   timings: GCSliceData_Gecko,
-|};
-
-/**
- * The bailout payload describes a bailout from JIT code where some assumption in
- * the optimization was broken, and the code had to fall back to Baseline. Currently
- * this information is encoded as a string and extracted as a selector.
- */
-export type BailoutPayload = {|
-  type: 'Bailout',
-  bailoutType: string,
-  where: string,
-  script: string,
-  bailoutLine: number,
-  functionLine: number | null,
-|};
-
-/**
- * TODO - Please describe an invalidation.
- */
-export type InvalidationPayload = {|
-  type: 'Invalidation',
-  url: string,
-  line: number | null,
 |};
 
 /**
@@ -683,8 +663,6 @@ export type JankPayload = {| type: 'Jank' |};
 export type MarkerPayload =
   | FileIoPayload
   | GPUMarkerPayload
-  | BailoutPayload
-  | InvalidationPayload
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload

@@ -4,7 +4,11 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  getByText as globalGetByText,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -15,7 +19,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import MarkerChart from '../../components/marker-chart';
+import { MarkerChart } from '../../components/marker-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
@@ -24,6 +28,8 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
+  addActiveTabInformationToProfile,
+  addMarkersToThreadWithCorrespondingSamples,
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
@@ -36,6 +42,8 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { getPreviewSelection } from '../../selectors/profile';
 
 import type {
   UserTimingMarkerPayload,
@@ -101,6 +109,7 @@ function setupWithProfile(profile) {
     );
 
   const store = storeWithProfile(profile);
+
   store.dispatch(changeSelectedTab('marker-chart'));
 
   const renderResult = render(
@@ -358,6 +367,16 @@ describe('MarkerChart', function() {
         fireFullClick(getByText(stringOrRegexp));
       }
 
+      // Ideally we would simulate hovering on the parent before clicking the
+      // submenu, but this is a bit more work. Maybe later...
+      function clickOnSubMenuItem(parentLookup, submenuLookup) {
+        const parentItem = getByText(parentLookup);
+        // $FlowExpectError Flow thinks parentNode is a Node.
+        const parentNode: HTMLElement = parentItem.parentNode;
+        const submenu = globalGetByText(parentNode, submenuLookup);
+        fireFullClick(submenu);
+      }
+
       function findFillTextPosition(
         fillText: string
       ): {| x: number, y: number |} {
@@ -377,6 +396,7 @@ describe('MarkerChart', function() {
         getContextMenu,
         findFillTextPosition,
         clickOnMenuItem,
+        clickOnSubMenuItem,
       };
     }
 
@@ -442,6 +462,73 @@ describe('MarkerChart', function() {
       );
       expect(callsWithHighlightColor).toHaveLength(2);
     });
+
+    it('changes selection range when clicking on submenu', () => {
+      const {
+        rightClick,
+        clickOnSubMenuItem,
+        getContextMenu,
+        findFillTextPosition,
+        getState,
+      } = setupForContextMenus();
+
+      rightClick(findFillTextPosition('UserTiming B'));
+
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+      clickOnSubMenuItem(/selection start/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 2,
+        selectionEnd: 11,
+      });
+
+      clickOnSubMenuItem(/selection start/, /From the end/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // This one doesn't work because it's disabled.
+      clickOnSubMenuItem(/selection end/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // Reset the selection by using the other marker.
+      rightClick(findFillTextPosition('UserTiming A'));
+      clickOnSubMenuItem(/selection start/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 11,
+      });
+
+      rightClick(findFillTextPosition('UserTiming B'));
+
+      clickOnSubMenuItem(/selection end/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 2,
+      });
+
+      clickOnSubMenuItem(/selection end/, /From the end/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 8,
+      });
+    });
   });
 
   describe('with search strings', function() {
@@ -499,6 +586,177 @@ describe('MarkerChart', function() {
       dispatch(changeSelectedTab('marker-chart'));
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+  });
+
+  describe('with active tab', () => {
+    function setupForActiveTab() {
+      // Setup the profile data for active tab.
+      const {
+        profile,
+        firstTabBrowsingContextID,
+        parentInnerWindowIDsWithChildren,
+      } = addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
+      profile.meta.configuration = {
+        threads: [],
+        features: [],
+        capacity: 1000000,
+        activeBrowsingContextID: firstTabBrowsingContextID,
+      };
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+        [
+          'Marker Navigation',
+          3,
+          null,
+          {
+            type: 'tracing',
+            category: 'Navigation',
+            interval: 'start',
+            innerWindowID: parentInnerWindowIDsWithChildren,
+          },
+        ],
+        [
+          'Marker DomEvent',
+          4,
+          10,
+          {
+            type: 'DOMEvent',
+            latency: 7,
+            eventType: 'click',
+            innerWindowID: parentInnerWindowIDsWithChildren,
+          },
+        ],
+      ]);
+
+      const setupResult = setupWithProfile(profile);
+      // Switch to active tab view.
+      setupResult.dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: firstTabBrowsingContextID,
+        })
+      );
+
+      return {
+        ...setupResult,
+      };
+    }
+
+    it('renders the marker chart and matches the snapshot', () => {
+      window.devicePixelRatio = 2;
+      const {
+        dispatch,
+        flushRafCalls,
+        flushDrawLog,
+        container,
+      } = setupForActiveTab();
+
+      dispatch(changeSelectedTab('marker-chart'));
+      flushRafCalls();
+
+      const drawCalls = flushDrawLog();
+      expect(container.firstChild).toMatchSnapshot();
+      expect(drawCalls).toMatchSnapshot();
+
+      delete window.devicePixelRatio;
+    });
+
+    it('renders the hovered marker properly', () => {
+      window.devicePixelRatio = 1;
+
+      const {
+        dispatch,
+        flushRafCalls,
+        flushDrawLog,
+        fireMouseEvent,
+      } = setupForActiveTab();
+
+      dispatch(changeSelectedTab('marker-chart'));
+      flushRafCalls();
+      // No tooltip displayed yet
+      expect(document.querySelector('.tooltip')).toBeFalsy();
+
+      {
+        const drawLog = flushDrawLog();
+
+        // Find the DomEvent with the eventType 'click'.
+        const { x, y } = findFillTextPositionFromDrawLog(drawLog, 'click');
+
+        // Move the mouse on top of an item.
+        fireMouseEvent('mousemove', {
+          offsetX: x,
+          offsetY: y,
+          pageX: x,
+          pageY: y,
+        });
+      }
+
+      flushRafCalls();
+
+      const drawLog = flushDrawLog();
+      if (drawLog.length === 0) {
+        throw new Error('The mouse move produced no draw commands.');
+      }
+      expect(drawLog).toMatchSnapshot();
+
+      // The tooltip should be displayed
+      expect(
+        ensureExists(
+          document.querySelector('.tooltip'),
+          'A tooltip component must exist for this test.'
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('does not render the hovered label', () => {
+      window.devicePixelRatio = 1;
+
+      const {
+        dispatch,
+        flushRafCalls,
+        flushDrawLog,
+        fireMouseEvent,
+      } = setupForActiveTab();
+
+      dispatch(changeSelectedTab('marker-chart'));
+      flushRafCalls();
+
+      const getLabelFromDrawLog = (drawLog, markerLabel) =>
+        drawLog.filter(
+          ([operation, text]) =>
+            operation === 'fillText' && text === markerLabel
+        );
+
+      {
+        // First make sure that the marker label is present.
+        const drawLog = flushDrawLog();
+        expect(getLabelFromDrawLog(drawLog, 'Marker DomEvent')).toHaveLength(1);
+
+        // Find the DomEvent label.
+        const { x, y } = findFillTextPositionFromDrawLog(
+          drawLog,
+          'Marker DomEvent'
+        );
+
+        // Move the mouse on top of the label.
+        fireMouseEvent('mousemove', {
+          offsetX: x,
+          offsetY: y,
+          pageX: x,
+          pageY: y,
+        });
+      }
+
+      flushRafCalls();
+
+      const drawLog = flushDrawLog();
+      if (drawLog.length === 0) {
+        throw new Error('The mouse move produced no draw commands.');
+      }
+
+      // Now, since we hovered over the label, it should not be rendered.
+      expect(getLabelFromDrawLog(drawLog, 'Marker DomEvent')).toHaveLength(0);
+      expect(drawLog).toMatchSnapshot();
     });
   });
 });

@@ -15,11 +15,10 @@ const es6modulePaths = es6modules.map(module => {
 const config = {
   resolve: {
     alias: {
-      'redux-devtools/lib': path.join(__dirname, '..', '..', 'src'),
-      'redux-devtools': path.join(__dirname, '..', '..', 'src'),
-      react: path.join(__dirname, 'node_modules', 'react'),
+      // Note: the alias for firefox-profiler is defined at the Babel level, so
+      // that Jest can profit from it too.
+      'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
-    extensions: ['.js', '.wasm'],
   },
   devtool: 'source-map',
   module: {
@@ -98,10 +97,6 @@ const config = {
     filename: '[hash].bundle.js',
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
-  },
-  optimization: {
-    // Workaround for https://github.com/webpack/webpack/issues/7760
-    usedExports: false,
   },
 };
 

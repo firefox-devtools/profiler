@@ -10,27 +10,30 @@ import './index.css';
 
 import * as React from 'react';
 import classNames from 'classnames';
-import explicitConnect from '../../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getProfile,
   getProfileRootRange,
   getSymbolicationStatus,
-} from '../../../selectors/profile';
-import { getDataSource } from '../../../selectors/url-state';
-import { getIsNewlyPublished } from '../../../selectors/app';
-import { MenuButtonsMetaInfo } from './MetaInfo';
-import { MenuButtonsPublish } from './Publish';
-import { MenuButtonsPermalink } from './Permalink';
-import { ButtonWithPanel } from '../../shared/ButtonWithPanel';
-import { revertToPrePublishedState } from '../../../actions/publish';
-import { dismissNewlyPublished } from '../../../actions/app';
+} from 'firefox-profiler/selectors/profile';
+import { getDataSource } from 'firefox-profiler/selectors/url-state';
+import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
+
+/* Note: the order of import is important, from most general to most specific,
+ * so that the CSS rules are in the correct order. */
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { MetaInfoPanel } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
+import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
+import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
+import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
+import { dismissNewlyPublished } from 'firefox-profiler/actions/app';
 import {
   getAbortFunction,
   getUploadPhase,
   getHasPrePublishedState,
-} from '../../../selectors/publish';
+} from 'firefox-profiler/selectors/publish';
 
-import { resymbolicateProfile } from '../../../actions/receive-profile';
+import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
@@ -40,7 +43,7 @@ import type {
   SymbolicationStatus,
 } from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
@@ -69,10 +72,29 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class MenuButtons extends React.PureComponent<Props> {
+class MenuButtonsImpl extends React.PureComponent<Props> {
   componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
+  }
+
+  _renderMetaInfoButton() {
+    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    return (
+      <ButtonWithPanel
+        className="menuButtonsMetaInfoButton"
+        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
+        label="Profile Info"
+        panelClassName="metaInfoPanel"
+        panelContent={
+          <MetaInfoPanel
+            profile={profile}
+            symbolicationStatus={symbolicationStatus}
+            resymbolicateProfile={resymbolicateProfile}
+          />
+        }
+      />
+    );
   }
 
   _renderPublishPanel() {
@@ -152,49 +174,43 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 
   render() {
-    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
     return (
       <>
-        {/* Place the info button outside of the menu buttons to allow it to shrink. */}
-        <MenuButtonsMetaInfo
-          profile={profile}
-          symbolicationStatus={symbolicationStatus}
-          resymbolicateProfile={resymbolicateProfile}
-        />
-        <div className="menuButtons">
-          {this._renderRevertProfile()}
-          {this._renderPublishPanel()}
-          {this._renderPermalink()}
-          <a
-            href="/docs/"
-            target="_blank"
-            className="menuButtonsLink"
-            title="Open the documentation in a new window"
-          >
-            Docs
-            <i className="open-in-new" />
-          </a>
-        </div>
+        {this._renderMetaInfoButton()}
+        {this._renderRevertProfile()}
+        {this._renderPublishPanel()}
+        {this._renderPermalink()}
+        <a
+          href="/docs/"
+          target="_blank"
+          className="menuButtonsButton menuButtonsLink"
+          title="Open the documentation in a new window"
+        >
+          Docs
+          <i className="open-in-new" />
+        </a>
       </>
     );
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    profile: getProfile(state),
-    rootRange: getProfileRootRange(state),
-    dataSource: getDataSource(state),
-    isNewlyPublished: getIsNewlyPublished(state),
-    uploadPhase: getUploadPhase(state),
-    hasPrePublishedState: getHasPrePublishedState(state),
-    symbolicationStatus: getSymbolicationStatus(state),
-    abortFunction: getAbortFunction(state),
-  }),
-  mapDispatchToProps: {
-    dismissNewlyPublished,
-    revertToPrePublishedState,
-    resymbolicateProfile,
-  },
-  component: MenuButtons,
-});
+export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      profile: getProfile(state),
+      rootRange: getProfileRootRange(state),
+      dataSource: getDataSource(state),
+      isNewlyPublished: getIsNewlyPublished(state),
+      uploadPhase: getUploadPhase(state),
+      hasPrePublishedState: getHasPrePublishedState(state),
+      symbolicationStatus: getSymbolicationStatus(state),
+      abortFunction: getAbortFunction(state),
+    }),
+    mapDispatchToProps: {
+      dismissNewlyPublished,
+      revertToPrePublishedState,
+      resymbolicateProfile,
+    },
+    component: MenuButtonsImpl,
+  }
+);

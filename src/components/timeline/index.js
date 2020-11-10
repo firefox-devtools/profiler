@@ -5,14 +5,14 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
-import FullTimeline from '../timeline/FullTimeline';
-import ActiveTabTimeline from '../timeline/ActiveTabTimeline';
-import OriginsTimelineView from '../timeline/OriginsTimeline';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import FullTimeline from 'firefox-profiler/components/timeline/FullTimeline';
+import ActiveTabTimeline from 'firefox-profiler/components/timeline/ActiveTabTimeline';
+import OriginsTimelineView from 'firefox-profiler/components/timeline/OriginsTimeline';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { TimelineTrackOrganization } from 'firefox-profiler/types';
 
 type StateProps = {|
@@ -21,7 +21,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class Timeline extends React.PureComponent<Props> {
+class TimelineImpl extends React.PureComponent<Props> {
   render() {
     const { timelineTrackOrganization } = this.props;
     switch (timelineTrackOrganization.type) {
@@ -40,9 +40,9 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const Timeline = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     timelineTrackOrganization: getTimelineTrackOrganization(state),
   }),
-  component: Timeline,
+  component: TimelineImpl,
 });

@@ -23,7 +23,7 @@ type Props = {|
   +uncommittedItem?: string,
 |};
 
-class FilterNavigatorBar extends React.PureComponent<Props> {
+export class FilterNavigatorBar extends React.PureComponent<Props> {
   _onLiClick = (e: SyntheticMouseEvent<HTMLLIElement>) => {
     const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;
@@ -41,7 +41,7 @@ class FilterNavigatorBar extends React.PureComponent<Props> {
           <CSSTransition
             key={i}
             classNames="filterNavigatorBarTransition"
-            timeout={300}
+            timeout={250}
           >
             <li
               data-index={i}
@@ -90,5 +90,3 @@ class FilterNavigatorBar extends React.PureComponent<Props> {
     );
   }
 }
-
-export default FilterNavigatorBar;

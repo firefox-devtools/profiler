@@ -2,36 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtons {
+.menuButtonsButton {
   display: flex;
   height: 100%;
-  flex-flow: row nowrap;
-}
-
-.menuButtonsLink {
-  position: relative;
-  height: 24px;
-  padding: 0 20px;
-  border-left: 1px solid var(--grey-30);
-  color: var(--grey-90);
-  cursor: default;
-  line-height: 24px;
-  text-decoration: none;
-}
-
-.menuButtonsLink:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-.open-in-new {
-  padding: 10px;
-  background-image: url(../../../../res/img/svg/open-in-new.svg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 11px;
-}
-
-.menuButtonsButton {
-  height: 100%;
+  align-items: center;
   padding: 0 20px;
   border: 0;
   border-left: 1px solid var(--grey-30);
@@ -45,10 +19,24 @@
 }
 
 .menuButtonsButton:hover {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
 .menuButtonsButton:hover:active {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.menuButtonsLink {
+  position: relative; /* This allows positioning the ::before element. */
+  cursor: default;
+  text-decoration: none;
+}
+
+.open-in-new {
+  padding: 10px;
+  background-image: url(firefox-profiler-res/img/svg/open-in-new.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
 }

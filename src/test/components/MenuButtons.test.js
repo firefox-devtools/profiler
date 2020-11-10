@@ -4,8 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import MenuButtons from '../../components/app/MenuButtons';
-import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
+import { MenuButtons } from '../../components/app/MenuButtons';
+import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -283,35 +283,29 @@ describe('app/MenuButtons', function() {
   });
 });
 
-describe('<MenuButtonsMetaInfo>', function() {
+describe('<MetaInfoPanel>', function() {
   function setup(profile: Profile, symbolicationStatus = 'DONE') {
-    jest.useFakeTimers();
     jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
       // eslint-disable-next-line babel/no-invalid-this
       return 'toLocaleString ' + this.toUTCString();
     });
-    const store = storeWithProfile(profile);
     const resymbolicateProfile = jest.fn();
 
     const renderResults = render(
-      <Provider store={store}>
-        <MenuButtonsMetaInfo
-          profile={profile}
-          resymbolicateProfile={resymbolicateProfile}
-          symbolicationStatus={symbolicationStatus}
-        />
-      </Provider>
+      <MetaInfoPanel
+        profile={profile}
+        resymbolicateProfile={resymbolicateProfile}
+        symbolicationStatus={symbolicationStatus}
+      />
     );
 
     return {
-      store,
       resymbolicateProfile,
-      renderResults,
       ...renderResults,
     };
   }
 
-  it('matches the snapshot', async () => {
+  it('matches the snapshot', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
     const profile = processProfile(createGeckoProfile());
     profile.meta.configuration = {
@@ -321,15 +315,13 @@ describe('<MenuButtonsMetaInfo>', function() {
       duration: 20,
     };
 
-    const { container, getByText } = setup(profile);
-    const metaInfoButton = getByText('Profile Info');
-    fireFullClick(metaInfoButton);
-    jest.runAllTimers();
-
-    expect(container.firstChild).toMatchSnapshot();
+    const { container } = setup(profile);
+    // This component renders a fragment, so we look at the full container so
+    // that we get all children.
+    expect(container).toMatchSnapshot();
   });
 
-  it('with no statistics object should not make the app crash', async () => {
+  it('with no statistics object should not make the app crash', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
     const profile = processProfile(createGeckoProfile());
     // We are removing statistics objects from all overhead objects to test
@@ -340,13 +332,10 @@ describe('<MenuButtonsMetaInfo>', function() {
       }
     }
 
-    const { getByText, container } = setup(profile);
-
-    const metaInfoButton = getByText('Profile Info');
-    fireFullClick(metaInfoButton);
-    jest.runAllTimers();
-
-    expect(container.firstChild).toMatchSnapshot();
+    const { container } = setup(profile);
+    // This component renders a fragment, so we look at the full container so
+    // that we get all children.
+    expect(container).toMatchSnapshot();
   });
 
   describe('symbolication', function() {
@@ -359,14 +348,7 @@ describe('<MenuButtonsMetaInfo>', function() {
       const { profile } = getProfileFromTextSamples('A');
       profile.meta.symbolicated = config.symbolicated;
 
-      const setupResult = setup(profile, config.symbolicationStatus);
-
-      // Open up the arrow panel for the test.
-      const { getByText } = setupResult;
-      fireEvent.click(getByText('Profile Info'));
-      jest.runAllTimers();
-
-      return setupResult;
+      return setup(profile, config.symbolicationStatus);
     }
 
     it('handles successfully symbolicated profiles', () => {
