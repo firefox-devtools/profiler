@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { cleanup } from '@testing-library/react';
-
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 
@@ -14,8 +12,6 @@ afterEach(function() {
   const { __shutdownWorkers } = (WorkerFactory: Object);
   __shutdownWorkers();
 });
-
-afterEach(cleanup);
 
 afterEach(() => {
   // The configuration to restore and reset all of the mocks in tests does not seem

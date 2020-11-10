@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-jest.mock('react-dom');
-
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { render } from '@testing-library/react';

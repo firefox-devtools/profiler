@@ -9,5 +9,8 @@ module.exports = {
     'react/jsx-no-bind': 0,
     // This rule isn't useful because use Flow.
     'jest/valid-title': 0,
+
+    // Adding more errors now
+    'testing-library/no-manual-cleanup': 'error',
   },
 };
