@@ -3,6 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+// Importing this here makes it work everywhere.
+import '@testing-library/jest-dom';
+
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
 
