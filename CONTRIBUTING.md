@@ -104,12 +104,12 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 ## Finding something to work on
 
 If this is your first time here, check out the label
-[outreachy onboarding](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22outreachy+onboarding%22+-label%3Aassigned).
+[good first issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+-label%3Aassigned).
 We will mentor you through the process of completing a first bug, and these are
 usually pretty good self-contained problems.
 
-After leveling up on a few outreachy onboarding issues, we also have the
-[help wanted](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22outreachy+onboarding%22+-label%3Aassigned)
+After leveling up on a few good first issues, we also have the
+[help wanted](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22good+first+issue%22+-label%3Aassigned)
 tag for bugs that no one is actively working on, but are well-scoped and ready
 to be tackled!
 
