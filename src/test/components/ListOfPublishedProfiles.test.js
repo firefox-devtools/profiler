@@ -49,7 +49,7 @@ const listOfProfileInformations = [
       // Not more meta information, to test that we can handle profiles that
       // don't have this information.
     },
-    urlPath: '/',
+    urlPath: '/public/0123456789/',
     publishedRange: { start: 1000, end: 3000 },
   },
   {
@@ -66,7 +66,7 @@ const listOfProfileInformations = [
       oscpu: 'Linux x86_64',
       misc: 'rv:68.0',
     },
-    urlPath: '/',
+    urlPath: '/public/ABCDEFGHI/',
     publishedRange: { start: 1000, end: 1005 },
   },
   {
