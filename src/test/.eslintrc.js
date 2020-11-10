@@ -14,6 +14,7 @@ module.exports = {
     'testing-library/no-manual-cleanup': 'error',
     'testing-library/no-wait-for-empty-callback': 'error',
     'testing-library/no-wait-for-snapshot': 'error',
+    'testing-library/prefer-presence-queries': 'error',
     'testing-library/prefer-wait-for': 'error',
   },
 };

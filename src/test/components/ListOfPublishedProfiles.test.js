@@ -416,7 +416,7 @@ describe('ListOfPublishedProfiles', () => {
         container,
         getDeleteButtonForProfile,
         findByText,
-        queryByText,
+        getByText,
         getConfirmDeleteButton,
       } = setup({
         withActionButtons: true,
@@ -438,7 +438,7 @@ describe('ListOfPublishedProfiles', () => {
       // Clicking elsewhere should make the successful message disappear and a generic message appear.
       fireFullClick((window: any));
       await findByText(/no profile/i);
-      expect(queryByText(/no profile/i)).toBeTruthy();
+      expect(getByText(/no profile/i)).toBeTruthy();
     });
 
     it('can handle errors', async () => {
