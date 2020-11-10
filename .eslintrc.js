@@ -69,6 +69,7 @@ module.exports = {
     // possible errors
     'array-callback-return': 'error',
     'consistent-return': 'error',
+    curly: 'error',
     'default-case': 'error',
     'dot-notation': 'error',
     eqeqeq: 'error',
