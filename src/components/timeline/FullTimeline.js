@@ -6,13 +6,13 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
-import { GlobalTrackComponent } from './GlobalTrack';
+import { GlobalTrack } from './GlobalTrack';
 import { Ruler } from './Ruler';
 import { Selection } from './Selection';
 import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { Reorderable } from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getZeroAt,
@@ -29,7 +29,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 import { TrackContextMenu } from './TrackContextMenu';
 
 import './index.css';
@@ -46,7 +46,7 @@ import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receiv
 import type {
   BrowsingContextID,
   TrackIndex,
-  GlobalTrack,
+  GlobalTrack as GlobalTracks,
   InitialSelectedTrackReference,
   TimelineTrackOrganization,
   GlobalTrackReference,
@@ -60,7 +60,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,
-  +globalTracks: GlobalTrack[],
+  +globalTracks: GlobalTracks[],
   +globalTrackOrder: TrackIndex[],
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
@@ -296,7 +296,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               onChangeOrder={changeGlobalTrackOrder}
             >
               {globalTracks.map((globalTrack, trackIndex) => (
-                <GlobalTrackComponent
+                <GlobalTrack
                   key={trackIndex}
                   trackIndex={trackIndex}
                   trackReference={globalTrackReferences[trackIndex]}

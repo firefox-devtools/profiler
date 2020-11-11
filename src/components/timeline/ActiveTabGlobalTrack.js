@@ -20,13 +20,13 @@ import './Track.css';
 import { TrackThread } from './TrackThread';
 import { TrackScreenshots } from './TrackScreenshots';
 import { ActiveTabResourcesPanel } from './ActiveTabResourcesPanel';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   GlobalTrackReference,
   TrackIndex,
-  ActiveTabGlobalTrack,
+  ActiveTabGlobalTrack as TabGlobalTrack,
   InitialSelectedTrackReference,
   ActiveTabResourceTrack,
 } from 'firefox-profiler/types';
@@ -43,7 +43,7 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +globalTrack: ActiveTabGlobalTrack,
+  +globalTrack: TabGlobalTrack,
   +isSelected: boolean,
   +selectedTab: TabSlug,
   +resourceTracks: ActiveTabResourceTrack[],
@@ -60,7 +60,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  * it shows either screenshot and a single main track for active tab and
  * resources tracks inside it.
  */
-class ActiveTabGlobalTrackComponentImpl extends PureComponent<Props> {
+class ActiveTabGlobalTrackImpl extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
   _selectCurrentTrack = () => {
@@ -150,7 +150,7 @@ class ActiveTabGlobalTrackComponentImpl extends PureComponent<Props> {
 // Provide an empty list, so that strict equality checks work for component updates.
 const EMPTY_RESOURCE_TRACKS = [];
 
-export const ActiveTabGlobalTrackComponent = explicitConnect<
+export const ActiveTabGlobalTrack = explicitConnect<
   OwnProps,
   StateProps,
   DispatchProps
@@ -196,5 +196,5 @@ export const ActiveTabGlobalTrackComponent = explicitConnect<
   mapDispatchToProps: {
     selectActiveTabTrack,
   },
-  component: ActiveTabGlobalTrackComponentImpl,
+  component: ActiveTabGlobalTrackImpl,
 });

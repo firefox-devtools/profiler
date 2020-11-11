@@ -32,7 +32,7 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './Track.css';
 import { TrackThread } from './TrackThread';
 import { TrackScreenshots } from './TrackScreenshots';
-import { LocalTrackComponent } from './LocalTrack';
+import { LocalTrack } from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
@@ -44,8 +44,8 @@ import type {
   Pid,
   ProgressGraphData,
   TrackIndex,
-  GlobalTrack,
-  LocalTrack,
+  GlobalTrack as GlobalTrackProp,
+  LocalTrack as LocalTracks,
   InitialSelectedTrackReference,
 } from 'firefox-profiler/types';
 
@@ -60,12 +60,12 @@ type OwnProps = {|
 
 type StateProps = {|
   +trackName: string,
-  +globalTrack: GlobalTrack,
+  +globalTrack: GlobalTrackProp,
   +isSelected: boolean,
   +isHidden: boolean,
   +titleText: string | null,
   +localTrackOrder: TrackIndex[],
-  +localTracks: LocalTrack[],
+  +localTracks: LocalTracks[],
   +pid: Pid | null,
   +selectedTab: TabSlug,
   +processesWithMemoryTrack: Set<Pid>,
@@ -80,7 +80,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class GlobalTrackComponentImpl extends PureComponent<Props> {
+class GlobalTrackImpl extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
 
@@ -228,7 +228,7 @@ class GlobalTrackComponentImpl extends PureComponent<Props> {
         onChangeOrder={this._changeLocalTrackOrder}
       >
         {localTracks.map((localTrack, trackIndex) => (
-          <LocalTrackComponent
+          <LocalTrack
             key={trackIndex}
             pid={pid}
             localTrack={localTrack}
@@ -329,79 +329,77 @@ class GlobalTrackComponentImpl extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
-export const GlobalTrackComponent = explicitConnect<
-  OwnProps,
-  StateProps,
-  DispatchProps
->({
-  mapStateToProps: (state, { trackIndex }) => {
-    const globalTracks = getGlobalTracks(state);
-    const globalTrack = globalTracks[trackIndex];
-    const selectedTab = getSelectedTab(state);
+export const GlobalTrack = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: (state, { trackIndex }) => {
+      const globalTracks = getGlobalTracks(state);
+      const globalTrack = globalTracks[trackIndex];
+      const selectedTab = getSelectedTab(state);
 
-    // These get assigned based on the track type.
-    let threadIndex = null;
-    let isSelected = false;
-    let titleText = null;
+      // These get assigned based on the track type.
+      let threadIndex = null;
+      let isSelected = false;
+      let titleText = null;
 
-    let localTrackOrder = EMPTY_TRACK_ORDER;
-    let localTracks = EMPTY_LOCAL_TRACKS;
-    let pid = null;
-    let progressGraphData = null;
+      let localTrackOrder = EMPTY_TRACK_ORDER;
+      let localTracks = EMPTY_LOCAL_TRACKS;
+      let pid = null;
+      let progressGraphData = null;
 
-    // Run different selectors based on the track type.
-    switch (globalTrack.type) {
-      case 'process': {
-        // Look up the thread information for the process if it exists.
-        if (globalTrack.mainThreadIndex !== null) {
-          threadIndex = globalTrack.mainThreadIndex;
-          const selectors = getThreadSelectors(threadIndex);
-          isSelected =
-            getSelectedThreadIndexes(state).has(threadIndex) &&
-            selectedTab !== 'network-chart';
-          titleText = selectors.getThreadProcessDetails(state);
+      // Run different selectors based on the track type.
+      switch (globalTrack.type) {
+        case 'process': {
+          // Look up the thread information for the process if it exists.
+          if (globalTrack.mainThreadIndex !== null) {
+            threadIndex = globalTrack.mainThreadIndex;
+            const selectors = getThreadSelectors(threadIndex);
+            isSelected =
+              getSelectedThreadIndexes(state).has(threadIndex) &&
+              selectedTab !== 'network-chart';
+            titleText = selectors.getThreadProcessDetails(state);
+          }
+          pid = globalTrack.pid;
+          localTrackOrder = getLocalTrackOrder(state, pid);
+          localTracks = getLocalTracks(state, pid);
+          break;
         }
-        pid = globalTrack.pid;
-        localTrackOrder = getLocalTrackOrder(state, pid);
-        localTracks = getLocalTracks(state, pid);
-        break;
+        case 'screenshots':
+          break;
+        case 'visual-progress':
+          titleText = 'Visual Progress';
+          progressGraphData = getVisualProgress(state);
+          break;
+        case 'perceptual-visual-progress':
+          titleText = 'Perceptual Visual Progress';
+          progressGraphData = getPerceptualSpeedIndexProgress(state);
+          break;
+        case 'contentful-visual-progress':
+          titleText = 'Contentful Visual Progress';
+          progressGraphData = getContentfulSpeedIndexProgress(state);
+          break;
+        default:
+          throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
       }
-      case 'screenshots':
-        break;
-      case 'visual-progress':
-        titleText = 'Visual Progress';
-        progressGraphData = getVisualProgress(state);
-        break;
-      case 'perceptual-visual-progress':
-        titleText = 'Perceptual Visual Progress';
-        progressGraphData = getPerceptualSpeedIndexProgress(state);
-        break;
-      case 'contentful-visual-progress':
-        titleText = 'Contentful Visual Progress';
-        progressGraphData = getContentfulSpeedIndexProgress(state);
-        break;
-      default:
-        throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
-    }
 
-    return {
-      trackName: getGlobalTrackName(state, trackIndex),
-      titleText,
-      globalTrack,
-      isSelected,
-      localTrackOrder,
-      localTracks,
-      pid,
-      isHidden: getHiddenGlobalTracks(state).has(trackIndex),
-      selectedTab,
-      processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
-      progressGraphData,
-    };
-  },
-  mapDispatchToProps: {
-    changeRightClickedTrack,
-    changeLocalTrackOrder,
-    selectTrack,
-  },
-  component: GlobalTrackComponentImpl,
-});
+      return {
+        trackName: getGlobalTrackName(state, trackIndex),
+        titleText,
+        globalTrack,
+        isSelected,
+        localTrackOrder,
+        localTracks,
+        pid,
+        isHidden: getHiddenGlobalTracks(state).has(trackIndex),
+        selectedTab,
+        processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
+        progressGraphData,
+      };
+    },
+    mapDispatchToProps: {
+      changeRightClickedTrack,
+      changeLocalTrackOrder,
+      selectTrack,
+    },
+    component: GlobalTrackImpl,
+  }
+);

@@ -12,7 +12,7 @@ import {
   changeSelectedThreads,
   hideGlobalTrack,
 } from '../../actions/profile-view';
-import { GlobalTrackComponent } from '../../components/timeline/GlobalTrack';
+import { GlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
@@ -78,7 +78,7 @@ describe('timeline/GlobalTrack', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <GlobalTrackComponent
+        <GlobalTrack
           trackIndex={trackIndex}
           trackReference={trackReference}
           setInitialSelected={setInitialSelected}

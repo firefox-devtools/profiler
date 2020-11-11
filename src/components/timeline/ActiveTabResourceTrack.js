@@ -10,22 +10,22 @@ import { selectActiveTabTrack } from 'firefox-profiler/actions/profile-view';
 import {
   getSelectedThreadIndexes,
   getSelectedTab,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { TrackThread } from './TrackThread';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   ActiveTabTrackReference,
   TrackIndex,
-  ActiveTabResourceTrack,
+  ActiveTabResourceTrack as ResourceTrack,
   InitialSelectedTrackReference,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
-  +resourceTrack: ActiveTabResourceTrack,
+  +resourceTrack: ResourceTrack,
   +trackIndex: TrackIndex,
   +setInitialSelected: (
     el: InitialSelectedTrackReference,
@@ -48,7 +48,7 @@ type State = {|
   prevIsSelected?: boolean,
 |};
 
-class ActiveTabResourceTrackComponentImpl extends PureComponent<Props, State> {
+class ActiveTabResourceTrackImpl extends PureComponent<Props, State> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
   constructor(props: Props) {
@@ -191,7 +191,7 @@ class ActiveTabResourceTrackComponentImpl extends PureComponent<Props, State> {
   }
 }
 
-export const ActiveTabResourceTrackComponent = explicitConnect<
+export const ActiveTabResourceTrack = explicitConnect<
   OwnProps,
   StateProps,
   DispatchProps
@@ -210,5 +210,5 @@ export const ActiveTabResourceTrackComponent = explicitConnect<
   mapDispatchToProps: {
     selectActiveTabTrack,
   },
-  component: ActiveTabResourceTrackComponentImpl,
+  component: ActiveTabResourceTrackImpl,
 });

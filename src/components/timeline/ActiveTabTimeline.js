@@ -8,10 +8,10 @@ import * as React from 'react';
 import { Ruler } from './Ruler';
 import { Selection } from './Selection';
 import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
-import { ActiveTabGlobalTrackComponent } from './ActiveTabGlobalTrack';
+import { ActiveTabGlobalTrack } from './ActiveTabGlobalTrack';
 import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../selectors/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
@@ -24,7 +24,7 @@ import './ActiveTabTimeline.css';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
-  ActiveTabGlobalTrack,
+  ActiveTabGlobalTrack as ActiveTabGlobalTracks,
   InitialSelectedTrackReference,
   GlobalTrackReference,
   Milliseconds,
@@ -35,7 +35,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
   +committedRange: StartEndRange,
-  +globalTracks: ActiveTabGlobalTrack[],
+  +globalTracks: ActiveTabGlobalTracks[],
   +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
@@ -104,7 +104,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
           >
             <ol className="timelineThreadList">
               {globalTracks.map((globalTrack, trackIndex) => (
-                <ActiveTabGlobalTrackComponent
+                <ActiveTabGlobalTrack
                   key={trackIndex}
                   trackIndex={trackIndex}
                   trackReference={globalTrackReferences[trackIndex]}

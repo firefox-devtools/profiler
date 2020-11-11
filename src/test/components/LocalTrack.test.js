@@ -8,7 +8,7 @@ import type {
   TrackReference,
   Store,
   ThreadIndex,
-  LocalTrack,
+  LocalTrack as LocalTrackProp,
 } from 'firefox-profiler/types';
 
 import * as React from 'react';
@@ -19,7 +19,7 @@ import {
   changeSelectedThreads,
   hideLocalTrack,
 } from '../../actions/profile-view';
-import { LocalTrackComponent } from '../../components/timeline/LocalTrack';
+import { LocalTrack } from '../../components/timeline/LocalTrack';
 import {
   getRightClickedTrack,
   getLocalTrackFromReference,
@@ -154,7 +154,7 @@ describe('timeline/LocalTrack', function() {
 function setup(
   store: Store,
   trackReference: TrackReference,
-  localTrack: LocalTrack,
+  localTrack: LocalTrackProp,
   threadIndex: ThreadIndex
 ) {
   const { getState, dispatch } = store;
@@ -172,7 +172,7 @@ function setup(
 
   const renderResult = render(
     <Provider store={store}>
-      <LocalTrackComponent
+      <LocalTrack
         pid={PID}
         localTrack={localTrack}
         trackIndex={trackReference.trackIndex}

@@ -10,8 +10,8 @@ import { Ruler } from './Ruler';
 import { Selection } from './Selection';
 import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import {
   getPanelLayoutGeneration,
   getCommittedRange,

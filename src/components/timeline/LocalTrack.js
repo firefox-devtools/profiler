@@ -21,8 +21,8 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TrackThread } from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
 import { TrackNetwork } from './TrackNetwork';
@@ -33,14 +33,14 @@ import type {
   TrackReference,
   Pid,
   TrackIndex,
-  LocalTrack,
+  LocalTrack as LocalTrackProp,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +pid: Pid,
-  +localTrack: LocalTrack,
+  +localTrack: LocalTrackProp,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
   +setIsInitialSelectedPane: (value: boolean) => void,
@@ -60,7 +60,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class LocalTrackComponentImpl extends PureComponent<Props> {
+class LocalTrackImpl extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
     if (event.button === 2) {
       // Notify the redux store that this was right clicked.
@@ -195,11 +195,7 @@ class LocalTrackComponentImpl extends PureComponent<Props> {
   }
 }
 
-export const LocalTrackComponent = explicitConnect<
-  OwnProps,
-  StateProps,
-  DispatchProps
->({
+export const LocalTrack = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
     let titleText = null;
@@ -270,5 +266,5 @@ export const LocalTrackComponent = explicitConnect<
     changeRightClickedTrack,
     selectTrack,
   },
-  component: LocalTrackComponentImpl,
+  component: LocalTrackImpl,
 });

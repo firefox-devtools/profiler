@@ -38,12 +38,12 @@ import {
   focusCallTree,
   selectLeafCallNode,
   selectRootCallNode,
-} from '../../actions/profile-view';
-import { reportTrackThreadHeight } from '../../actions/app';
-import { hasThreadKeys } from '../../profile-logic/profile-data';
+} from 'firefox-profiler/actions/profile-view';
+import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
+import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { getTrackSelectionModifier } from '../../utils';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import './TrackThread.css';
 
 import type {
