@@ -4,18 +4,14 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
-import explicitConnect from 'firefox-profiler/utils/connect';
+import React, { PureComponent, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   getCommittedRange,
-  getPreviewSelection,
+  getIsMakingPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { getScreenshotTrackHeight } from 'firefox-profiler/selectors/app';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import {
-  withSize,
-  type SizeProps,
-} from 'firefox-profiler/components/shared/WithSize';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { createPortal } from 'react-dom';
 
@@ -25,189 +21,15 @@ import type {
   Thread,
   Marker,
   Milliseconds,
+  CssPixels,
+  Dispatch,
 } from 'firefox-profiler/types';
-
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import './TrackScreenshots.css';
-
-type OwnProps = {|
-  +threadIndex: ThreadIndex,
-  +windowId: string,
-|};
-type StateProps = {|
-  +thread: Thread,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +screenshots: Marker[],
-  +threadName: string,
-  +isMakingPreviewSelection: boolean,
-  +trackHeight: number,
-|};
-type DispatchProps = {|
-  +updatePreviewSelection: typeof updatePreviewSelection,
-|};
-type Props = {|
-  ...SizeProps,
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-|};
-type State = {|
-  offsetX: null | number,
-  pageX: null | number,
-  containerTop: null | number,
-|};
-
-class Screenshots extends PureComponent<Props, State> {
-  state = {
-    offsetX: null,
-    pageX: null,
-    containerTop: null,
-  };
-
-  findScreenshotAtMouse(offsetX: number): number | null {
-    const { width, rangeStart, rangeEnd, screenshots } = this.props;
-    const rangeLength = rangeEnd - rangeStart;
-    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
-
-    // Loop backwards to find the latest screenshot that has a time less
-    // than the current time at the mouse position.
-    for (let i = screenshots.length - 1; i >= 0; i--) {
-      const screenshotTime = screenshots[i].start;
-      if (mouseTime >= screenshotTime) {
-        return i;
-      }
-    }
-    return null;
-  }
-
-  _handleMouseLeave = () => {
-    this.setState({
-      offsetX: null,
-      pageX: null,
-      containerTop: null,
-    });
-  };
-
-  _handleMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const { top, left } = event.currentTarget.getBoundingClientRect();
-    this.setState({
-      pageX: event.pageX,
-      offsetX: event.pageX - left,
-      containerTop: top,
-    });
-  };
-
-  // This selects a screenshot when clicking on the screenshot strip. Note that
-  // we use the mouseup event so that isMakingPreviewSelection is still
-  // accurate.
-  _selectScreenshotOnClick = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const {
-      screenshots,
-      updatePreviewSelection,
-      isMakingPreviewSelection,
-    } = this.props;
-    if (isMakingPreviewSelection) {
-      // Avoid reseting the selection if the user is currently selecting one.
-      return;
-    }
-
-    const { left } = event.currentTarget.getBoundingClientRect();
-    const offsetX = event.pageX - left;
-    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-    if (screenshotIndex === null) return;
-    const { start, end } = screenshots[screenshotIndex];
-    if (end === null) return;
-    updatePreviewSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: start,
-      selectionEnd: end,
-    });
-  };
-
-  render() {
-    const {
-      screenshots,
-      thread,
-      isMakingPreviewSelection,
-      width,
-      rangeStart,
-      rangeEnd,
-      trackHeight,
-    } = this.props;
-
-    const { pageX, offsetX, containerTop } = this.state;
-    let payload: ScreenshotPayload | null = null;
-
-    if (offsetX !== null) {
-      const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-      if (screenshotIndex !== null) {
-        payload = (screenshots[screenshotIndex].data: any);
-      }
-    }
-
-    return (
-      <div
-        className="timelineTrackScreenshot"
-        style={{ height: trackHeight }}
-        onMouseLeave={this._handleMouseLeave}
-        onMouseMove={this._handleMouseMove}
-        onMouseUp={this._selectScreenshotOnClick}
-      >
-        <ScreenshotStrip
-          thread={thread}
-          width={width}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          screenshots={screenshots}
-          trackHeight={trackHeight}
-        />
-        {payload ? (
-          <HoverPreview
-            thread={thread}
-            isMakingPreviewSelection={isMakingPreviewSelection}
-            width={width}
-            pageX={pageX}
-            offsetX={offsetX}
-            containerTop={containerTop}
-            rangeEnd={rangeEnd}
-            rangeStart={rangeStart}
-            trackHeight={trackHeight}
-            payload={payload}
-          />
-        ) : null}
-      </div>
-    );
-  }
-}
+import { useDimensions } from '../shared/UseDimensions';
 
 const EMPTY_SCREENSHOTS_TRACK = [];
-
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: (state, ownProps) => {
-    const { threadIndex, windowId } = ownProps;
-    const selectors = getThreadSelectors(threadIndex);
-    const { start, end } = getCommittedRange(state);
-    const previewSelection = getPreviewSelection(state);
-    return {
-      thread: selectors.getRangeFilteredThread(state),
-      screenshots:
-        selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
-        EMPTY_SCREENSHOTS_TRACK,
-      threadName: selectors.getFriendlyThreadName(state),
-      rangeStart: start,
-      rangeEnd: end,
-      isMakingPreviewSelection:
-        previewSelection.hasSelection && previewSelection.isModifying,
-      trackHeight: getScreenshotTrackHeight(state),
-    };
-  },
-  mapDispatchToProps: {
-    updatePreviewSelection,
-  },
-  component: withSize<Props>(Screenshots),
-});
 
 type HoverPreviewProps = {|
   +thread: Thread,
@@ -298,6 +120,132 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       this._overlayElement
     );
   }
+}
+
+type Props = {|
+  +threadIndex: ThreadIndex,
+  +windowId: string,
+|};
+
+export function TimelineTrackScreenshots({ threadIndex, windowId }: Props) {
+  // Selectors
+  const selectors = getThreadSelectors(threadIndex);
+  const { start: rangeStart, end: rangeEnd } = useSelector(getCommittedRange);
+  const isMakingPreviewSelection = useSelector(getIsMakingPreviewSelection);
+  const thread = useSelector(selectors.getRangeFilteredThread);
+  const screenshotsById = useSelector(
+    selectors.getRangeFilteredScreenshotsById
+  );
+  const trackHeight = useSelector(getScreenshotTrackHeight);
+  const screenshots = screenshotsById.get(windowId) || EMPTY_SCREENSHOTS_TRACK;
+
+  // Hooks
+  const dispatch = useDispatch<Dispatch>();
+  const {
+    ref,
+    dimensions: { width },
+  } = useDimensions();
+
+  // State
+  const [pageX, setPageX] = useState<CssPixels | null>(null);
+  const [offsetX, setOffsetX] = useState<CssPixels | null>(null);
+  const [containerTop, setContainerTop] = useState<CssPixels | null>(null);
+
+  function handleMouseLeave() {
+    setPageX(null);
+    setOffsetX(null);
+    setContainerTop(null);
+  }
+
+  function handleMouseMove(event: SyntheticMouseEvent<HTMLDivElement>) {
+    const { top, left } = event.currentTarget.getBoundingClientRect();
+    setPageX(event.pageX);
+    setOffsetX(event.pageX - left);
+    setContainerTop(top);
+  }
+
+  // This selects a screenshot when clicking on the screenshot strip. Note that
+  // we use the mouseup event so that isMakingPreviewSelection is still
+  // accurate.
+  function selectScreenshotOnClick(event: SyntheticMouseEvent<HTMLDivElement>) {
+    if (isMakingPreviewSelection) {
+      // Avoid reseting the selection if the user is currently selecting one.
+      return;
+    }
+
+    const { left } = event.currentTarget.getBoundingClientRect();
+    const offsetX = event.pageX - left;
+    const screenshotIndex = findScreenshotAtMouse(offsetX);
+    if (screenshotIndex === null) return;
+    const { start, end } = screenshots[screenshotIndex];
+    if (end === null) return;
+    dispatch(
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: start,
+        selectionEnd: end,
+      })
+    );
+  }
+
+  function findScreenshotAtMouse(offsetX: number): number | null {
+    const rangeLength = rangeEnd - rangeStart;
+    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
+
+    // Loop backwards to find the latest screenshot that has a time less
+    // than the current time at the mouse position.
+    for (let i = screenshots.length - 1; i >= 0; i--) {
+      const screenshotTime = screenshots[i].start;
+      if (mouseTime >= screenshotTime) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  let payload: ScreenshotPayload | null = null;
+
+  if (offsetX !== null) {
+    const screenshotIndex = findScreenshotAtMouse(offsetX);
+    if (screenshotIndex !== null) {
+      payload = (screenshots[screenshotIndex].data: any);
+    }
+  }
+
+  return (
+    <div
+      className="timelineTrackScreenshot"
+      ref={ref}
+      style={{ height: trackHeight }}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
+      onMouseUp={selectScreenshotOnClick}
+    >
+      <ScreenshotStrip
+        thread={thread}
+        width={width}
+        rangeStart={rangeStart}
+        rangeEnd={rangeEnd}
+        screenshots={screenshots}
+        trackHeight={trackHeight}
+      />
+      {payload ? (
+        <HoverPreview
+          thread={thread}
+          isMakingPreviewSelection={isMakingPreviewSelection}
+          width={width}
+          pageX={pageX}
+          offsetX={offsetX}
+          containerTop={containerTop}
+          rangeEnd={rangeEnd}
+          rangeStart={rangeStart}
+          trackHeight={trackHeight}
+          payload={payload}
+        />
+      ) : null}
+    </div>
+  );
 }
 
 type ScreenshotStripProps = {|

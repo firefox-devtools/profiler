@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from '@testing-library/react';
 
 import { commitRange } from '../../actions/profile-view';
-import TrackScreenshots from '../../components/timeline/TrackScreenshots';
+import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
@@ -232,7 +232,7 @@ describe('timeline/TrackScreenshots', function() {
 
 function setup(
   profile: Profile = getScreenshotTrackProfile(),
-  component = <TrackScreenshots threadIndex={0} windowId="0" />
+  component = <TimelineTrackScreenshots threadIndex={0} windowId="0" />
 ) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;

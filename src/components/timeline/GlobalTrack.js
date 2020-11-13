@@ -31,7 +31,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
+import { TimelineTrackScreenshots } from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
