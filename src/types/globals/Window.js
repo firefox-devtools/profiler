@@ -34,7 +34,7 @@ declare class Window {
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
   InstallTrigger?: {
-    install: MixedObject => {},
+    install: MixedObject => void,
   };
 
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
