@@ -80,8 +80,9 @@ export const getOriginsProfileView: Selector<OriginsViewState> = state =>
 /**
  * Profile View Options
  */
-export const getProfileViewOptions: Selector<*> = state =>
-  getProfileView(state).viewOptions;
+export const getProfileViewOptions: Selector<
+  $PropertyType<ProfileViewState, 'viewOptions'>
+> = state => getProfileView(state).viewOptions;
 export const getProfileRootRange: Selector<StartEndRange> = state =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
@@ -240,7 +241,7 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  * signature of each selector is defined in the function body, and inferred in the return
  * type of the function.
  */
-function _createCounterSelectors(counterIndex: CounterIndex): * {
+function _createCounterSelectors(counterIndex: CounterIndex) {
   const getCounter: Selector<Counter> = state =>
     ensureExists(
       getProfile(state).counters,

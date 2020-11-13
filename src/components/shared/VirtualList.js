@@ -235,7 +235,7 @@ type VirtualListProps<Item> = {|
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown: (SyntheticKeyboardEvent<>) => void,
-  +onCopy: Event => void,
+  +onCopy: ClipboardEvent => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.
   +disableOverscan: boolean,
@@ -299,7 +299,7 @@ export class VirtualList<Item> extends React.PureComponent<
     this.forceUpdate();
   };
 
-  _onCopy = (event: Event) => {
+  _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._container.current) {
       this.props.onCopy(event);
     }

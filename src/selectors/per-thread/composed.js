@@ -50,7 +50,7 @@ type NeededThreadSelectors = {
  */
 export function getComposedSelectorsPerThread(
   threadSelectors: NeededThreadSelectors
-): * {
+) {
   /**
    * Visible tabs are computed based on the current state of the profile. Some
    * effort is made to not show a tab when there is no data available for it or
