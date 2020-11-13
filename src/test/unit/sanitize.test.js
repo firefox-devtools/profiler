@@ -26,7 +26,7 @@ describe('sanitizePII', function() {
   function setup(
     piiConfig,
     originalProfile = processGeckoProfile(createGeckoProfile())
-  ): * {
+  ) {
     const PIIToRemove: RemoveProfileInformation = {
       shouldRemoveThreads: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),

@@ -172,7 +172,7 @@ export function getProfileWithNiceTracks(): Profile {
   return profile;
 }
 
-export function getStoreWithMemoryTrack(pid: number = 222): * {
+export function getStoreWithMemoryTrack(pid: number = 222) {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
     Array(10)

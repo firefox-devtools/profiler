@@ -361,7 +361,7 @@ function setupSamples(
 /**
  * Setup the stack chart component with a profile.
  */
-function setup(profile: Profile, funcNames: string[] = []): * {
+function setup(profile: Profile, funcNames: string[] = []) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
 
