@@ -40,6 +40,9 @@ export function withSize<
   // they are injected by this higher order component.
   $ReadOnly<$Diff<Props, SizeProps>>
 > {
+  // An existential type in a generic is a bit tricky to remove. Perhaps this can
+  // use a hook instead.
+  // eslint-disable-next-line flowtype/no-existential-type
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _isSizeInfoDirty: boolean = false;
     state = { width: 0, height: 0 };

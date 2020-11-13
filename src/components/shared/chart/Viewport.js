@@ -1,8 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 // @flow
+
+// This is using the existential types in the generics, which would be harder to
+// remove. It might be possible to switch this took use hooks.
+/* eslint-disable flowtype/no-existential-type */
+
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
