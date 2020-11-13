@@ -91,6 +91,17 @@ module.exports = {
     // We use the version from the flowtype plugin so that flow assertions don't
     // output an error.
     'flowtype/no-unused-expressions': 'error',
+    // The Object type and Function type aren't particularly useful, and usually hide
+    // type errors. It also blocks a migration to TypeScript. Disable this rule if
+    // using the Object or Function as generic type bounds.
+    'flowtype/no-weak-types': [
+      'error',
+      {
+        any: false,
+        Object: true,
+        Function: true,
+      },
+    ],
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',
