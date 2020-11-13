@@ -17,25 +17,12 @@ import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { coerce } from '../utils/flow';
+import type { SerializableProfile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
-
-export function isProcessedProfile(profile: Object): boolean {
-  // If this profile has a .meta.preprocessedProfileVersion field,
-  // then it is definitely a preprocessed profile.
-  if ('meta' in profile && 'preprocessedProfileVersion' in profile.meta) {
-    return true;
-  }
-
-  // This could also be a pre-version 1 profile.
-  return (
-    'threads' in profile &&
-    profile.threads.length >= 1 &&
-    'stringArray' in profile.threads[0]
-  );
-}
 
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
@@ -43,11 +30,43 @@ export function isProcessedProfile(profile: Object): boolean {
  * @param {object} profile The "serialized" form of a processed profile,
  *                         i.e. stringArray instead of stringTable.
  */
-export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
+export function attemptToUpgradeProcessedProfileToCurrentVersion(
+  profile: mixed
+): SerializableProfile | null {
+  if (!profile || typeof profile !== 'object') {
+    return null;
+  }
+  const { meta } = profile;
+  if (!meta || typeof meta !== 'object') {
+    return null;
+  }
+
+  if (typeof meta.preprocessedProfileVersion !== 'number') {
+    // This is most likely not a processed profile, but it could be
+    // a pre-version 1 profile.
+    const { threads } = profile;
+    if (!threads || !Array.isArray(threads)) {
+      // There are no threads.
+      return null;
+    }
+    const [firstThread] = threads;
+    if (
+      !firstThread ||
+      typeof firstThread !== 'object' ||
+      !firstThread.stringArray
+    ) {
+      // There is no stringArray, which means this is most likely a Gecko Profile.
+      return null;
+    }
+  }
+
   const profileVersion =
-    profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
+    typeof meta.preprocessedProfileVersion === 'number'
+      ? meta.preprocessedProfileVersion
+      : UNANNOTATED_VERSION;
+
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return;
+    return coerce<MixedObject, SerializableProfile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -69,7 +88,10 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
+  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
+
+  return upgradedProfile;
 }
 
 function _archFromAbi(abi) {
