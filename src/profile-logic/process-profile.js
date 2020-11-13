@@ -1236,7 +1236,7 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
-export function processProfile(
+export function processGeckoProfile(
   rawProfile: GeckoProfile | { profile: GeckoProfile }
 ): Profile {
   // We may have been given a DevTools profile, in that case extract the Gecko Profile.
@@ -1474,7 +1474,7 @@ export async function unserializeProfileOfArbitraryFormat(
       return convertChromeProfile(profile);
     }
     // Else: Treat it as a Gecko profile and just attempt to process it.
-    return processProfile(profile);
+    return processGeckoProfile(profile);
   } catch (e) {
     throw new Error(`Unserializing the profile failed: ${e}`);
   }

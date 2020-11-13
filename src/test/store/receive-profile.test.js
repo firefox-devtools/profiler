@@ -40,7 +40,7 @@ import JSZip from 'jszip';
 import {
   makeProfileSerializable,
   serializeProfile,
-  processProfile,
+  processGeckoProfile,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
@@ -1589,7 +1589,7 @@ describe('actions/receive-profile', function() {
     it('keeps the initial rootRange as default', async function() {
       //Time sample has been set for 100000ms (100s)
       const { profile } = getProfileFromTextSamples(`
-        100000 
+        100000
         A
       `); //
       const { rootRange } = await setup(
@@ -1896,7 +1896,7 @@ describe('actions/receive-profile', function() {
       // Differently, `from-addon` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
-      const processedProfile = processProfile(geckoProfile);
+      const processedProfile = processGeckoProfile(geckoProfile);
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );

@@ -7,7 +7,7 @@ import {
   symbolicateProfile,
   applySymbolicationStep,
 } from '../../profile-logic/symbolication';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import {
   getCallNodeInfo,
   filterThreadByImplementation,
@@ -117,9 +117,8 @@ describe('data-table-utils', function() {
 });
 
 describe('process-profile', function() {
-  describe('processProfile', function() {
-    const profile = processProfile(createGeckoProfile());
-
+  describe('processGeckoProfile', function() {
+    const profile = processGeckoProfile(createGeckoProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -279,7 +278,7 @@ describe('process-profile', function() {
 
   describe('JS tracer', function() {
     it('does not have JS tracer information by default', function() {
-      const profile = processProfile(createGeckoProfile());
+      const profile = processGeckoProfile(createGeckoProfile());
       expect(profile.threads[0].jsTracer).toBe(undefined);
     });
 
@@ -310,7 +309,7 @@ describe('process-profile', function() {
       const timestampOffsetMicro = timestampOffsetMs * 1000;
 
       // Process the profile, and grab the threads we are interested in.
-      const processedProfile = processProfile(geckoProfile);
+      const processedProfile = processGeckoProfile(geckoProfile);
       const childProcessThread = ensureExists(
         processedProfile.threads.find(thread => thread.jsTracer),
         'Could not find the thread with the JS tracer information'
@@ -338,7 +337,7 @@ describe('process-profile', function() {
   describe('DevTools profiles', function() {
     it('should process correctly', function() {
       // Mock out a DevTools profile.
-      const profile = processProfile({
+      const profile = processGeckoProfile({
         label: null,
         duration: null,
         markers: null,
@@ -380,7 +379,7 @@ describe('process-profile', function() {
         ],
       };
 
-      const profile = processProfile(geckoProfile);
+      const profile = processGeckoProfile(geckoProfile);
       expect(profile.meta.extensions).toEqual({
         baseURL: [
           'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/',
@@ -396,7 +395,7 @@ describe('process-profile', function() {
       const geckoProfile = createGeckoProfile();
       delete geckoProfile.meta.extensions;
 
-      const profile = processProfile(geckoProfile);
+      const profile = processGeckoProfile(geckoProfile);
       expect(profile.meta.extensions).toEqual({
         baseURL: [],
         id: [],
@@ -409,7 +408,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
@@ -599,7 +598,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(createGeckoProfile());
+      unsymbolicatedProfile = processGeckoProfile(createGeckoProfile());
       const symbolTable = new Map();
       symbolTable.set(0, 'first symbol');
       symbolTable.set(0xf00, 'second symbol');
@@ -661,7 +660,7 @@ describe('symbolication', function() {
 });
 
 describe('filter-by-implementation', function() {
-  const profile = processProfile(createGeckoProfileWithJsTimings());
+  const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
   const defaultCategory = profile.meta.categories.findIndex(
     c => c.name === 'Other'
   );

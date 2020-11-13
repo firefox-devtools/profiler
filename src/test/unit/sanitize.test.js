@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
@@ -25,7 +25,7 @@ import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 describe('sanitizePII', function() {
   function setup(
     piiConfig,
-    originalProfile = processProfile(createGeckoProfile())
+    originalProfile = processGeckoProfile(createGeckoProfile())
   ): * {
     const PIIToRemove: RemoveProfileInformation = {
       shouldRemoveThreads: new Set(),
