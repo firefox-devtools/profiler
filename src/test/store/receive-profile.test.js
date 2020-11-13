@@ -1266,8 +1266,8 @@ describe('actions/receive-profile', function() {
       expect(view.phase).toBe('FATAL_ERROR');
 
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
 
@@ -1372,8 +1372,8 @@ describe('actions/receive-profile', function() {
       });
       expect(view.phase).toBe('FATAL_ERROR');
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
   });
@@ -1744,7 +1744,10 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(location: Object, requiredProfile: number = 1) {
+    async function setup(
+      location: $Shape<Location>,
+      requiredProfile: number = 1
+    ) {
       const profile = _getSimpleProfile();
       const geckoProfile = createGeckoProfile();
 

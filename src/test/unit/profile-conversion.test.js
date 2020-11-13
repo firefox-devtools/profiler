@@ -62,7 +62,7 @@ describe('converting Google Chrome profile', function() {
     // behavior.
     jest
       .spyOn(Image.prototype, 'addEventListener')
-      .mockImplementation((name: string, callback: Function) => {
+      .mockImplementation((name: string, callback) => {
         if (name === 'load') {
           callback();
         }
@@ -85,7 +85,7 @@ describe('converting Google Chrome profile', function() {
     // rely on the Image loading behavior.
     jest
       .spyOn(Image.prototype, 'addEventListener')
-      .mockImplementation((name: string, callback: Function) => {
+      .mockImplementation((name: string, callback) => {
         if (name === 'load') {
           callback();
         }

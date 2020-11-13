@@ -96,7 +96,7 @@ type RegExpResult = null | string[];
  * And turn it into a data table of the form
  *  `{ length: number, field1: array, field2: array }`
  */
-function _toStructOfArrays(geckoTable: Object): Object {
+function _toStructOfArrays(geckoTable: any): any {
   const result = { length: geckoTable.data.length };
   for (const fieldName in geckoTable.schema) {
     const fieldIndex = geckoTable.schema[fieldName];
@@ -571,7 +571,7 @@ function _processStackTable(
  * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
  * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: Object): Object {
+function _convertStackToCause(data: any): any {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
@@ -764,8 +764,7 @@ function _processMarkerPayload(
   // If there is a "stack" field, convert it to a "cause" field. This is
   // pre-emptively done for every single marker payload.
   //
-  // Warning: This function converts the payload into an Object type, which is
-  // about as bad as an any.
+  // Warning: This function converts the payload into an any type
   const payload = _convertStackToCause(geckoPayload);
 
   switch (payload.type) {

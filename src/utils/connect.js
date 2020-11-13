@@ -3,6 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+// Ignore for this file, which uses extensive use of generic type bounds, which
+// triggers a false positive with this rule.
+/* eslint-disable flowtype/no-weak-types */
+
 import * as React from 'react';
 import { connect } from 'react-redux';
 import type {

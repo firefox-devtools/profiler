@@ -964,7 +964,7 @@ type FetchProfileArgs = {
   url: string,
   onTemporaryError: TemporaryError => void,
   // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: Function,
+  reportError?: (...data: Array<any>) => void,
 };
 
 type ProfileOrZip = {
@@ -1056,7 +1056,7 @@ function _deduceContentType(
 async function _extractProfileOrZipFromResponse(
   url: string,
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<ProfileOrZip> {
   const contentType = _deduceContentType(
     url,
@@ -1089,7 +1089,7 @@ async function _extractProfileOrZipFromResponse(
  */
 async function _extractZipFromResponse(
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
   try {
@@ -1112,7 +1112,7 @@ async function _extractZipFromResponse(
  */
 async function _extractJsonFromResponse(
   response: Response,
-  reportError: Function,
+  reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<any> {
   try {

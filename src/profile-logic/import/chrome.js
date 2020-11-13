@@ -9,6 +9,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import {
@@ -257,7 +258,11 @@ function findEvent<T: TracingEventUnion>(
   return events ? events.find(f) : undefined;
 }
 
-function findEvents<T: Object>(
+function findEvents<
+  // False positive, generic type bounds:
+  // eslint-disable-next-line flowtype/no-weak-types
+  T: Object
+>(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
   f: T => boolean
@@ -848,7 +853,7 @@ function extractMarkers(
         );
         const { thread } = threadInfo;
         const { markers, stringTable } = thread;
-        let argData: Object | null = null;
+        let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;
         }

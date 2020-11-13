@@ -120,7 +120,7 @@ function _mutateProfileToEnsureCauseBacktraces(profile) {
 /**
  * Guess the marker categories for a profile.
  */
-function _guessMarkerCategories(profile: Object) {
+function _guessMarkerCategories(profile: any) {
   // [key, categoryName]
   const keyToCategoryName = [
     ['DOMEvent', 'DOM'],

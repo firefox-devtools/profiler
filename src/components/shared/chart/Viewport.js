@@ -177,6 +177,8 @@ const PINCH_ZOOM_FACTOR = 3;
  * by separating out the type definition.
  */
 export type WithChartViewport<
+  // False positive generic trait bounds.
+  // eslint-disable-next-line flowtype/no-weak-types
   ChartOwnProps: Object,
   // The chart component's props are given the viewport object, as well as the original
   // ChartOwnProps.

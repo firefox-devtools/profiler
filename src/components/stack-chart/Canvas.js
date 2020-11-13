@@ -34,6 +34,8 @@ import type {
   CssPixels,
   DevicePixels,
   UnitIntervalOfProfileRange,
+  MarkerIndex,
+  Marker,
 } from 'firefox-profiler/types';
 
 import type {
@@ -56,7 +58,7 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
   >,
-  +getMarker: Function,
+  +getMarker: MarkerIndex => Marker,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,

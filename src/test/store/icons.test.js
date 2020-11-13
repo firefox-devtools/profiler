@@ -25,11 +25,11 @@ describe('actions/icons', function() {
   beforeEach(() => {
     const mock = createImageMock();
     imageInstances = mock.instances;
-    (window: Object).Image = mock.Image;
+    (window: any).Image = mock.Image;
   });
 
   afterEach(() => {
-    delete (window: Object).Image;
+    delete (window: any).Image;
     imageInstances = [];
   });
 
@@ -93,7 +93,7 @@ describe('actions/icons', function() {
         expect(instance.src).toEqual(validIcons[i]);
         expect(instance.referrerPolicy).toEqual('no-referrer');
       });
-      imageInstances.forEach(instance => (instance: Object).onload());
+      imageInstances.forEach(instance => (instance: any).onload());
       await Promise.all(promises);
 
       const state = getState();
@@ -122,7 +122,7 @@ describe('actions/icons', function() {
         iconsActions.iconStartLoading(invalidIcon)
       );
       expect(imageInstances.length).toBe(1);
-      (imageInstances[0]: Object).onerror();
+      (imageInstances[0]: any).onerror();
 
       await actionPromise;
 

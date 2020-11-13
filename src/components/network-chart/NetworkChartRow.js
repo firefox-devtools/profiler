@@ -84,7 +84,7 @@ type NetworkPhaseProps = {|
   +previousName: string,
   +value: number | string,
   +duration: Milliseconds,
-  +style: Object,
+  +style: MixedObject,
 |};
 
 function NetworkPhase({

@@ -66,7 +66,7 @@ class FakeMouseEvent extends MouseEvent {
 
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: Object));
+    super(type, (mouseValues: any));
 
     Object.assign(this, {
       offsetX: offsetX || 0,
