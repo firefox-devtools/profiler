@@ -18,7 +18,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
+import { TimelineTrackScreenshots } from './TrackScreenshots';
 import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 

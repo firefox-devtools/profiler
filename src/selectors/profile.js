@@ -118,6 +118,11 @@ export const getMouseTimePosition: Selector<Milliseconds | null> = state =>
 export const getPreviewSelection: Selector<PreviewSelection> = state =>
   getProfileViewOptions(state).previewSelection;
 
+export const getIsMakingPreviewSelection: Selector<boolean> = state => {
+  const { previewSelection } = getProfileViewOptions(state);
+  return previewSelection.hasSelection && previewSelection.isModifying;
+};
+
 /**
  * This selector returns the current range, taking into account the current
  * preview selection if any.
