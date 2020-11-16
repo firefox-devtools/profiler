@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /* Removing styling from the button */
 .tabBarTabButton {
   width: 100%;
@@ -7,4 +11,81 @@
   margin: 0;
   background: none;
   font: inherit;
+}
+
+.tabBarContainer {
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between; /* This pushes the sidebar button to the right */
+  border: solid var(--grey-30);
+  border-width: 1px 0 1px;
+  background: var(--grey-10);
+}
+
+.tabBarTabWrapper {
+  display: flex;
+  min-width: 0; /* This makes the tab container actually shrinkable below min-content */
+  flex-flow: row nowrap;
+  padding: 0 0.5px;
+  margin: 0 -1px;
+  list-style: none;
+}
+
+.tabBarTab {
+  position: relative;
+  overflow: hidden;
+  width: 8em;
+  padding: 6px 4px;
+  border: solid transparent;
+  border-width: 0 1px 0 1px;
+  background-clip: padding-box;
+  cursor: default;
+  font-size: 12px;
+  text-align: center;
+  text-overflow: ellipsis;
+  transition: background-color 200ms, border-color 200ms;
+  transition-timing-function: var(--animation-timing);
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Place the top tab bar in a separate element to avoid tapered corners. */
+.tabBarTab::before {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: calc(100% + 2px);
+  height: 2px;
+  background-color: transparent;
+  content: '';
+  transition: background-color 200ms, border-color 200ms;
+  transition-timing-function: var(--animation-timing);
+}
+
+.tabBarTab.selected::before {
+  /* The selected tab is shifted down a bit, so shift this bar back up a bit */
+  top: -1px;
+  background-color: var(--blue-50);
+}
+
+.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
+  border-color: var(--grey-20);
+  background-color: var(--grey-20);
+}
+
+.tabBarTabWrapper:not(.beingReordered)
+  > .tabBarTab:not(.selected):hover::before {
+  background-color: var(--grey-40);
+}
+
+.tabBarTab.selected {
+  /* Cut off the bottom of the border for the tab line. */
+  top: 1px;
+  padding-top: 5px;
+  border-color: var(--grey-30);
+  background: #fff;
+  color: var(--blue-60);
 }

@@ -16,11 +16,7 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
-
-import {
-  markerSchemaGecko,
-  markerSchemaFrontEndOnly,
-} from '../profile-logic/marker-schema';
+import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -181,11 +177,24 @@ export const getContentfulSpeedIndexProgress: Selector<
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
 
+// Get the marker schema that comes from the Gecko profile.
+const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
+  getMeta(state).markerSchema;
+
+// Combine the marker schema from Gecko and the front-end. This allows the front-end
+// to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
-  // TODO - This will be replaced with a function to get the schema. For now
-  // trivially pass in the Gecko schema.
-  () => markerSchemaGecko,
-  schema => [...schema, ...markerSchemaFrontEndOnly]
+  getMarkerSchemaGecko,
+  geckoSchema => {
+    const frontEndSchemaNames = new Set([
+      ...markerSchemaFrontEndOnly.map(schema => schema.name),
+    ]);
+    return [
+      // Don't duplicate schema definitions that the front-end already has.
+      ...geckoSchema.filter(schema => !frontEndSchemaNames.has(schema.name)),
+      ...markerSchemaFrontEndOnly,
+    ];
+  }
 );
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(

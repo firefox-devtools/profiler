@@ -38,7 +38,7 @@ exports[`<MetaInfoPanel> matches the snapshot 1`] = `
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"
@@ -423,7 +423,7 @@ exports[`<MetaInfoPanel> with no statistics object should not make the app crash
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"

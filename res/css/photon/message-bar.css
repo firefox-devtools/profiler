@@ -7,7 +7,7 @@
   display: flex;
   min-height: 32px;
   box-sizing: border-box;
-  align-items: center;
+  flex-wrap: nowrap;
 
   /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
@@ -42,7 +42,14 @@
 /* This rule is useful only for message bars that have a close button but no
  * action button. */
 .photon-message-bar-inner-content {
+  display: flex;
+  flex-wrap: wrap;
   margin-right: 4px;
+  gap: 8px;
+}
+
+.photon-message-bar-inner-text {
+  display: flex;
 }
 
 .photon-message-bar-error {

@@ -15,7 +15,7 @@ import { render, fireEvent } from '@testing-library/react';
 
 import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots from '../../components/timeline/TrackScreenshots';
-import Timeline from '../../components/timeline';
+import { Timeline } from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
@@ -27,10 +27,12 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getPreviewSelection } from '../../selectors/profile';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
@@ -38,6 +40,8 @@ const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
+  autoMockDomRect();
+
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -72,6 +76,38 @@ describe('timeline/TrackScreenshots', function() {
       selectionStart: 0,
     };
     expect(getPreviewSelection(getState())).toEqual(expectedPreviewSelection);
+    expect(selectionOverlay()).toBeTruthy();
+  });
+
+  it('does not change the preview selection when clicking if a selection is already present', () => {
+    const { selectionOverlay, screenshotTrack, getState } = setup(
+      undefined,
+      <Timeline />
+    );
+
+    const track = screenshotTrack();
+    expect(selectionOverlay).toThrow();
+
+    // Mousedown then Mousemove will do a selection.
+    fireEvent(track, getMouseEvent('mousedown', { pageX: LEFT, pageY: TOP }));
+    fireEvent(
+      track,
+      getMouseEvent('mousemove', { pageX: LEFT + 200, pageY: TOP })
+    );
+
+    expect(selectionOverlay()).toBeTruthy();
+    const selectedPreviewSelection = getPreviewSelection(getState());
+
+    // Mouseup should keep this selection.
+    fireEvent(
+      track,
+      getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
+    );
+    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
+    expect(getPreviewSelection(getState())).toEqual({
+      ...selectedPreviewSelection,
+      isModifying: false,
+    });
     expect(selectionOverlay()).toBeTruthy();
   });
 
@@ -221,6 +257,17 @@ function setup(
       return rect;
     });
 
+  jest.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => {
+    return [
+      new DOMRect(
+        LEFT,
+        TOP,
+        LEFT + TRACK_WIDTH,
+        TOP + FULL_TRACK_SCREENSHOT_HEIGHT
+      ),
+    ];
+  });
+
   function setBoundingClientRectOffset({
     left,
     top,
@@ -253,7 +300,7 @@ function setup(
   }
 
   function screenshotClick(pageX: number) {
-    fireEvent(screenshotTrack(), getMouseEvent('click', { pageX, pageY: 0 }));
+    fireFullClick(screenshotTrack(), { pageX, pageY: TOP });
   }
 
   function screenshotTrack() {
@@ -266,7 +313,7 @@ function setup(
   function moveMouse(pageX: number) {
     fireEvent(
       screenshotTrack(),
-      getMouseEvent('mousemove', { pageX, pageY: 0 })
+      getMouseEvent('mousemove', { pageX, pageY: TOP })
     );
   }
 

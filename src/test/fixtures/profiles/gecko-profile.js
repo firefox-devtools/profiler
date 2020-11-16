@@ -90,6 +90,7 @@ export function createGeckoSubprocessProfile(
     startTime: parentProfile.meta.startTime + 1000,
     shutdownTime: null,
     categories: parentProfile.meta.categories,
+    markerSchema: [...parentProfile.meta.markerSchema],
   };
 
   const contentProcessBinary: Lib = {
@@ -205,6 +206,13 @@ export function createGeckoProfile(): GeckoProfile {
         name: 'Other',
         color: 'grey',
         subcategories: ['Other'],
+      },
+    ],
+    markerSchema: [
+      {
+        name: 'DummyForTests',
+        display: [],
+        data: [],
       },
     ],
     extensions: {

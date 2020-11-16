@@ -15,7 +15,7 @@ import type {
   VisualMetrics,
   ProfilerConfiguration,
 } from './profile';
-import type { MarkerPayload_Gecko } from './markers';
+import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
@@ -262,6 +262,7 @@ export type GeckoProfileShortMeta = {|
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
+  markerSchema: MarkerSchema[],
 |};
 
 /* This meta object is used on the top level profile object.

@@ -4,16 +4,18 @@
 
 // @flow
 import * as React from 'react';
-import Timeline from '../../components/timeline';
+import { Timeline } from '../../components/timeline';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import {
   getBoundingBox,
   fireFullClick,
+  fireFullKeyPress,
   fireFullContextMenu,
 } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
@@ -31,17 +33,7 @@ import { ensureExists } from '../../utils/flow';
 import type { Profile } from 'firefox-profiler/types';
 
 describe('Timeline multiple thread selection', function() {
-  const originalDOMRect = global.DOMRect;
-  beforeEach(() => {
-    global.DOMRect = class DOMRect {};
-  });
-  afterEach(() => {
-    if (originalDOMRect) {
-      global.DOMRect = originalDOMRect;
-    } else {
-      delete global.DOMRect;
-    }
-  });
+  autoMockDomRect();
 
   function setup() {
     const profile = getProfileWithNiceTracks();
@@ -237,6 +229,119 @@ describe('Timeline multiple thread selection', function() {
       'show [thread GeckoMain process]',
       'show [thread GeckoMain tab] SELECTED',
       '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will select a thread through enter and spacebar keypresses for global tracks', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+      key: ' ',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process] SELECTED',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(
+      getByRole('button', { name: 'Content Process PID: 222' }),
+      {
+        key: 'Enter',
+      }
+    );
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will not select a track through a random keypress for a global track', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'GeckoMain PID: 111' }), {
+      key: 'a',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+  });
+
+  it('will select a thread through enter and spacebar keypresses for local tracks', function() {
+    const { getState, getByRole } = setup();
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'Enter',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker] SELECTED',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(getByRole('button', { name: 'Style' }), {
+      key: ' ',
+    });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab]',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style] SELECTED',
+    ]);
+  });
+
+  it('will not select a track through a random keypress for local tracks', function() {
+    const { getState, getByRole } = setup();
+
+    const domWorker = getByRole('button', { name: 'DOM Worker' });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
+      '  - show [thread Style]',
+    ]);
+
+    fireFullKeyPress(domWorker, { key: 'a' });
+
+    expect(getHumanReadableTracks(getState())).toEqual([
+      'show [thread GeckoMain process]',
+      'show [thread GeckoMain tab] SELECTED',
+      '  - show [thread DOM Worker]',
       '  - show [thread Style]',
     ]);
   });
