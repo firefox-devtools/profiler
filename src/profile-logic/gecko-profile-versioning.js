@@ -18,13 +18,26 @@ import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 // Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
 
+function getProfileMeta(profile: mixed): MixedObject {
+  if (
+    profile &&
+    typeof profile === 'object' &&
+    profile.meta &&
+    typeof profile.meta === 'object'
+  ) {
+    return profile.meta;
+  }
+
+  throw new Error('Could not find the meta property on a profile.');
+}
+
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new.
  * @param {object} profile The profile in the "Gecko profile" format.
  */
-export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
-  const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
+export function upgradeGeckoProfileToCurrentVersion(json: mixed) {
+  const profileVersion = getProfileMeta(json).version || UNANNOTATED_VERSION;
   if (profileVersion === GECKO_PROFILE_VERSION) {
     return;
   }
@@ -44,11 +57,11 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](profile);
+      _upgraders[destVersion](json);
     }
   }
 
-  profile.meta.version = GECKO_PROFILE_VERSION;
+  getProfileMeta(json).version = GECKO_PROFILE_VERSION;
 }
 
 function _archFromAbi(abi) {

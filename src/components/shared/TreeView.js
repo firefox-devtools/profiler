@@ -1,8 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 // @flow
+
+// This file uses extensive use of Object generic trait bounds, which is a false
+// positive for this rule.
+/* eslint-disable flowtype/no-weak-types */
 
 import * as React from 'react';
 import classNames from 'classnames';
@@ -187,6 +190,7 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +indentWidth: CssPixels,
 |};
 
+// This is a false-positive, as it's used as a generic trait bounds.
 class TreeViewRowScrolledColumns<
   DisplayData: Object
 > extends React.PureComponent<TreeViewRowScrolledColumnsProps<DisplayData>> {
@@ -559,7 +563,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
-      const clipboardData: DataTransfer = (event: Object).clipboardData;
+      const clipboardData: DataTransfer = (event: any).clipboardData;
       clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
   };

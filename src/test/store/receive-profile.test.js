@@ -40,7 +40,7 @@ import JSZip from 'jszip';
 import {
   makeProfileSerializable,
   serializeProfile,
-  processProfile,
+  processGeckoProfile,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
@@ -1266,8 +1266,8 @@ describe('actions/receive-profile', function() {
       expect(view.phase).toBe('FATAL_ERROR');
 
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
 
@@ -1372,8 +1372,8 @@ describe('actions/receive-profile', function() {
       });
       expect(view.phase).toBe('FATAL_ERROR');
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
   });
@@ -1589,7 +1589,7 @@ describe('actions/receive-profile', function() {
     it('keeps the initial rootRange as default', async function() {
       //Time sample has been set for 100000ms (100s)
       const { profile } = getProfileFromTextSamples(`
-        100000 
+        100000
         A
       `); //
       const { rootRange } = await setup(
@@ -1744,7 +1744,10 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(location: Object, requiredProfile: number = 1) {
+    async function setup(
+      location: $Shape<Location>,
+      requiredProfile: number = 1
+    ) {
       const profile = _getSimpleProfile();
       const geckoProfile = createGeckoProfile();
 
@@ -1893,7 +1896,7 @@ describe('actions/receive-profile', function() {
       // Differently, `from-addon` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
-      const processedProfile = processProfile(geckoProfile);
+      const processedProfile = processGeckoProfile(geckoProfile);
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );

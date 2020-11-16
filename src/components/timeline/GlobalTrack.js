@@ -47,6 +47,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   InitialSelectedTrackReference,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -54,7 +55,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +style?: Object /* This is used by Reorderable */,
+  +style?: MixedObject /* This is used by Reorderable */,
   +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 

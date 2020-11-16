@@ -34,6 +34,7 @@ import type {
   Pid,
   TrackIndex,
   LocalTrack,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -42,7 +43,7 @@ type OwnProps = {|
   +pid: Pid,
   +localTrack: LocalTrack,
   +trackIndex: TrackIndex,
-  +style?: Object /* This is used by Reorderable */,
+  +style?: MixedObject /* This is used by Reorderable */,
   +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 

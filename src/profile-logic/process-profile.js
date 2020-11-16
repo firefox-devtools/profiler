@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { isChromeProfile, convertChromeProfile } from './import/chrome';
+import { attemptToConvertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
@@ -15,11 +15,8 @@ import {
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
 } from './data-structures';
-import { immutableUpdate, ensureExists } from '../utils/flow';
-import {
-  upgradeProcessedProfileToCurrentVersion,
-  isProcessedProfile,
-} from './processed-profile-versioning';
+import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
+import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
   isPerfScriptFormat,
@@ -96,7 +93,7 @@ type RegExpResult = null | string[];
  * And turn it into a data table of the form
  *  `{ length: number, field1: array, field2: array }`
  */
-function _toStructOfArrays(geckoTable: Object): Object {
+function _toStructOfArrays(geckoTable: any): any {
   const result = { length: geckoTable.data.length };
   for (const fieldName in geckoTable.schema) {
     const fieldIndex = geckoTable.schema[fieldName];
@@ -571,7 +568,7 @@ function _processStackTable(
  * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
  * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: Object): Object {
+function _convertStackToCause(data: any): any {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
@@ -764,8 +761,7 @@ function _processMarkerPayload(
   // If there is a "stack" field, convert it to a "cause" field. This is
   // pre-emptively done for every single marker payload.
   //
-  // Warning: This function converts the payload into an Object type, which is
-  // about as bad as an any.
+  // Warning: This function converts the payload into an any type
   const payload = _convertStackToCause(geckoPayload);
 
   switch (payload.type) {
@@ -1233,16 +1229,41 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
 }
 
 /**
+ * Convert an unknown profile from either the Gecko format or the DevTools format
+ * into the processed format. Throws if there is an error.
+ */
+export function processGeckoOrDevToolsProfile(json: mixed): Profile {
+  if (!json) {
+    throw new Error('The profile was empty.');
+  }
+  if (typeof json !== 'object') {
+    throw new Error('The profile was not an object');
+  }
+
+  // The profile can be embedded in an object if it's exported from the old DevTools
+  // performance panel.
+  // { profile: GeckoProfile }
+  const geckoProfile = coerce<mixed, GeckoProfile>(
+    json.profile ? json.profile : json
+  );
+
+  // Double check that there is a meta object, since this is the first time we've
+  // coerced a "mixed" object to a GeckoProfile.
+  if (!geckoProfile.meta) {
+    throw new Error(
+      'This does not appear to be a valid Gecko Profile, there is no meta field.'
+    );
+  }
+
+  return processGeckoProfile(geckoProfile);
+}
+
+/**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
-export function processProfile(
-  rawProfile: GeckoProfile | { profile: GeckoProfile }
-): Profile {
-  // We may have been given a DevTools profile, in that case extract the Gecko Profile.
-  const geckoProfile = rawProfile.profile ? rawProfile.profile : rawProfile;
-
+export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
@@ -1448,34 +1469,39 @@ function _unserializeProfile({
  * the processed profile format.
  */
 export async function unserializeProfileOfArbitraryFormat(
-  stringOrObject: string | Object
+  arbitraryFormat: mixed
 ): Promise<Profile> {
   try {
-    let profile = null;
-    if (typeof stringOrObject === 'string') {
+    let json: mixed;
+    if (typeof arbitraryFormat === 'string') {
       try {
-        profile = JSON.parse(stringOrObject);
+        json = JSON.parse(arbitraryFormat);
       } catch (e) {
         // The string is not json. It might be the output from `perf script`.
-        if (isPerfScriptFormat(stringOrObject)) {
-          profile = convertPerfScriptProfile(stringOrObject);
+        if (isPerfScriptFormat(arbitraryFormat)) {
+          json = convertPerfScriptProfile(arbitraryFormat);
         } else {
           throw e;
         }
       }
     } else {
-      profile = stringOrObject;
+      json = arbitraryFormat;
     }
 
-    if (isProcessedProfile(profile)) {
-      upgradeProcessedProfileToCurrentVersion(profile);
-      return _unserializeProfile(profile);
+    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
+      json
+    );
+    if (processedProfile) {
+      return _unserializeProfile(processedProfile);
     }
-    if (isChromeProfile(profile)) {
-      return convertChromeProfile(profile);
+
+    const processedChromeProfile = attemptToConvertChromeProfile(json);
+    if (processedChromeProfile) {
+      return processedChromeProfile;
     }
+
     // Else: Treat it as a Gecko profile and just attempt to process it.
-    return processProfile(profile);
+    return processGeckoOrDevToolsProfile(json);
   } catch (e) {
     throw new Error(`Unserializing the profile failed: ${e}`);
   }

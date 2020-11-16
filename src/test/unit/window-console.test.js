@@ -30,10 +30,10 @@ describe('console-accessible values on the window object', function() {
 
   it('logs a friendly message', function() {
     const log = console.log;
-    (console: Object).log = jest.fn();
+    (console: any).log = jest.fn();
     logFriendlyPreamble();
     expect(console.log.mock.calls.length).toEqual(2);
     expect(console.log.mock.calls).toMatchSnapshot();
-    (console: Object).log = log;
+    (console: any).log = log;
   });
 });

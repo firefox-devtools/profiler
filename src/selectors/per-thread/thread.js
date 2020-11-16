@@ -335,7 +335,7 @@ export function getThreadSelectorsPerThread(
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
-  const getProcessedEventDelays: Selector<EventDelayInfo | null> = createSelector(
+  const getProcessedEventDelaysOrNull: Selector<EventDelayInfo | null> = createSelector(
     getSamplesTable,
     ProfileSelectors.getProfileInterval,
     (samplesTable, interval) =>
@@ -343,6 +343,12 @@ export function getThreadSelectorsPerThread(
         ? null
         : ProfileData.processEventDelays(samplesTable, interval)
   );
+
+  const getProcessedEventDelays: Selector<EventDelayInfo> = state =>
+    ensureExists(
+      getProcessedEventDelaysOrNull(state),
+      'Could not get the processed event delays'
+    );
 
   return {
     getThread,

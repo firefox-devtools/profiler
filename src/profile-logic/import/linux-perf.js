@@ -4,6 +4,8 @@
 
 // @flow
 
+import type { MixedObject } from 'firefox-profiler/types';
+
 /**
  * The "perf script" format is the plain text format that is output by an
  * invocation of `perf script`, where `perf` is the Linux perf command line tool.
@@ -21,7 +23,7 @@ export function isPerfScriptFormat(profile: string): boolean {
 
 // Don't try and type this more specifically. It will be run through the Gecko upgrader
 // process.
-type GeckoProfileVersion4 = Object;
+type GeckoProfileVersion4 = MixedObject;
 
 /**
  * Convert the output from `perf script` into the gecko profile format (version 4).

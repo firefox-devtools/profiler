@@ -12,7 +12,7 @@ import copy from 'copy-to-clipboard';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -476,7 +476,7 @@ describe('ProfileCallTreeView/end-to-end', () => {
     jest.useFakeTimers();
 
     const geckoProfile = createGeckoProfile();
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const store = storeWithProfile(processedProfile);
     render(
       <Provider store={store}>

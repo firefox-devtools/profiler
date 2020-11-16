@@ -13,7 +13,7 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import {
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
@@ -42,7 +42,7 @@ import type {
 
 describe('Derive markers from Gecko phase markers', function() {
   function setupWithTestDefinedMarkers(markers) {
-    const profile = processProfile(createGeckoProfileWithMarkers(markers));
+    const profile = processGeckoProfile(createGeckoProfileWithMarkers(markers));
     profile.meta.symbolicated = true; // Avoid symbolication.
     const { getState } = storeWithProfile(profile);
     const mainGetMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -316,7 +316,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     // mock is called in one of the tests.
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.symbolicated = true; // avoid to kick off the symbolication process
     const thread = profile.threads[0]; // This is the parent process main thread
     const contentThread = profile.threads[2]; // This is the content process main thread

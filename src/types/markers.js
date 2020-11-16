@@ -148,7 +148,12 @@ export type IPCSharedData = {|
  * This utility type removes the "cause" property from a payload, and replaces it with
  * a stack. This effectively converts it from a processed payload to a Gecko payload.
  */
-export type $ReplaceCauseWithStack<T: Object> = {|
+
+export type $ReplaceCauseWithStack<
+  // False positive, generic type bounds are alright:
+  // eslint-disable-next-line flowtype/no-weak-types
+  T: Object
+> = {|
   ...$Diff<
     T,
     // Remove the cause property.
@@ -495,14 +500,14 @@ export type TextMarkerPayload = {|
 export type ChromeCompleteTraceEventPayload = {|
   type: 'CompleteTraceEvent',
   category: string,
-  data: Object | null,
+  data: MixedObject | null,
 |};
 
 // ph: 'I' in the Trace Event Format
 export type ChromeInstantTraceEventPayload = {|
   type: 'InstantTraceEvent',
   category: string,
-  data: Object | null,
+  data: MixedObject | null,
 |};
 
 // ph: 'B' | 'E' in the Trace Event Format
@@ -510,7 +515,7 @@ export type ChromeDurationTraceEventPayload = {|
   type: 'tracing',
   category: 'FromChrome',
   interval: 'start' | 'end',
-  data: Object | null,
+  data: MixedObject | null,
   cause?: CauseBacktrace,
 |};
 

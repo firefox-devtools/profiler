@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { stripIndent } from 'common-tags';
-import type { GetState, Dispatch } from 'firefox-profiler/types';
+import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from '../actions';
 
@@ -20,7 +20,7 @@ const defineProperty = Object.defineProperty;
 export function addDataToWindowObject(
   getState: GetState,
   dispatch: Dispatch,
-  target: Object = window
+  target: MixedObject = window
 ) {
   defineProperty(target, 'profile', {
     enumerable: true,
