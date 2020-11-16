@@ -32,6 +32,4 @@ export type ObjectMap<T> = {
   __proto__: null,
 };
 
-export type AnyObject = { [key: string]: any };
 export type MixedObject = { [key: string]: mixed };
-export type EmptyObject = { [key: string]: empty };

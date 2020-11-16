@@ -26,11 +26,11 @@ const UNANNOTATED_VERSION = 0;
 
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
- * Throws an exception if the profile is too new.
- * @param {object} profile The "serialized" form of a processed profile,
- *                         i.e. stringArray instead of stringTable.
+ * Throws an exception if the profile is too new. If the profile does not appear
+ * to be a processed profile, then return null. The profile provided is the
+ * "serialized" form of a processed profile, i.e. stringArray instead of stringTable.
  */
-export function attemptToUpgradeProcessedProfileToCurrentVersion(
+export function attemptToUpgradeProcessedProfileThroughMutation(
   profile: mixed
 ): SerializableProfile | null {
   if (!profile || typeof profile !== 'object') {
@@ -55,7 +55,8 @@ export function attemptToUpgradeProcessedProfileToCurrentVersion(
       typeof firstThread !== 'object' ||
       !firstThread.stringArray
     ) {
-      // There is no stringArray, which means this is most likely a Gecko Profile.
+      // Could not find a thread that contains a stringArray, which means this is
+      // most likely a Gecko Profile.
       return null;
     }
   }

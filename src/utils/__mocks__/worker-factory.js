@@ -38,7 +38,7 @@ class NodeWorker {
     this._instance.postMessage(payload, transfer);
   }
 
-  onMessage = (message: any) => {
+  onMessage = (message: mixed) => {
     if (this.onmessage) {
       this.onmessage(new MessageEvent('message', { data: message }));
     }

@@ -122,6 +122,7 @@ describe('data-table-utils', function() {
 describe('process-profile', function() {
   describe('processGeckoProfile', function() {
     const profile = processGeckoProfile(createGeckoProfile());
+
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });

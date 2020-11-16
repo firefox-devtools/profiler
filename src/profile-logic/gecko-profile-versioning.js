@@ -19,22 +19,16 @@ import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 const UNANNOTATED_VERSION = 0;
 
 function getProfileMeta(profile: mixed): MixedObject {
-  let meta = null;
-
   if (
     profile &&
     typeof profile === 'object' &&
     profile.meta &&
     typeof profile.meta === 'object'
   ) {
-    meta = profile.meta;
+    return profile.meta;
   }
 
-  if (!meta) {
-    throw new Error('Could not find the meta property on a profile.');
-  }
-
-  return meta;
+  throw new Error('Could not find the meta property on a profile.');
 }
 
 /**

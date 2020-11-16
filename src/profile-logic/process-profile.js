@@ -16,7 +16,7 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
-import { attemptToUpgradeProcessedProfileToCurrentVersion } from './processed-profile-versioning';
+import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
   isPerfScriptFormat,
@@ -1488,7 +1488,7 @@ export async function unserializeProfileOfArbitraryFormat(
       json = arbitraryFormat;
     }
 
-    const processedProfile = attemptToUpgradeProcessedProfileToCurrentVersion(
+    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
       json
     );
     if (processedProfile) {
