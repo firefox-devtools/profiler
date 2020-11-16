@@ -31,7 +31,7 @@ let userAgent;
 });
 
 describe('app/Home', function() {
-  function setup(userAgentToConfigure: string): * {
+  function setup(userAgentToConfigure: string) {
     userAgent = userAgentToConfigure;
     const renderResults = render(
       <Provider store={createStore()}>

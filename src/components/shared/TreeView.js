@@ -33,19 +33,24 @@ const PAGE_KEYS_DELTA = 15;
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
 
-export type Column = {|
+export type Column<DisplayData: Object> = {|
   +propName: string,
   +title: string,
   +tooltip?: string,
-  +component?: React.ComponentType<*>,
+  +component?: React.ComponentType<{|
+    displayData: DisplayData,
+  |}>,
 |};
 
-type TreeViewHeaderProps = {|
-  +fixedColumns: Column[],
-  +mainColumn: Column,
+type TreeViewHeaderProps<DisplayData: Object> = {|
+  +fixedColumns: Column<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
 |};
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
+const TreeViewHeader = <DisplayData: Object>({
+  fixedColumns,
+  mainColumn,
+}: TreeViewHeaderProps<DisplayData>) => {
   if (fixedColumns.length === 0 && !mainColumn.title) {
     // If there is nothing to display in the header, do not render it.
     return null;
@@ -105,7 +110,7 @@ function reactStringWithHighlightedSubstrings(
 type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
-  +columns: Column[],
+  +columns: Column<DisplayData>[],
   +index: number,
   +isSelected: boolean,
   +isRightClicked: boolean,
@@ -174,8 +179,8 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +depth: number,
-  +mainColumn: Column,
-  +appendageColumn?: Column,
+  +mainColumn: Column<DisplayData>,
+  +appendageColumn?: Column<DisplayData>,
   +index: number,
   +canBeExpanded: boolean,
   +isExpanded: boolean,
@@ -329,15 +334,15 @@ interface Tree<DisplayData: Object> {
 }
 
 type TreeViewProps<DisplayData> = {|
-  +fixedColumns: Column[],
-  +mainColumn: Column,
+  +fixedColumns: Column<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
   +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
   +rightClickedNodeId?: NodeIndex | null,
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
-  +appendageColumn?: Column,
+  +appendageColumn?: Column<DisplayData>,
   +disableOverscan?: boolean,
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
@@ -505,7 +510,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
   _toggle = (
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
-    toggleAll: * = false
+    toggleAll: boolean = false
   ) => {
     const newSet = new Set(this._expandedNodes);
     if (newExpanded) {
@@ -553,12 +558,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   };
 
-  /**
-   * Flow doesn't yet know about Clipboard events, so infer what's going on with the
-   * event.
-   * See: https://github.com/facebook/flow/issues/1856
-   */
-  _onCopy = (event: *) => {
+  _onCopy = (event: ClipboardEvent) => {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {

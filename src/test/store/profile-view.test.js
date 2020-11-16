@@ -55,6 +55,7 @@ import type {
   TrackReference,
   Milliseconds,
   BrowsingContextID,
+  Thread,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function() {
@@ -2952,7 +2953,7 @@ describe('getTimingsForSidebar', () => {
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
 describe('getFriendlyThreadName', function() {
   // Setup a profile with threads based on the given overrides.
-  function setup(threadOverrides: Array<*>) {
+  function setup(threadOverrides: Array<$Shape<Thread>>) {
     const profile = getEmptyProfile();
     for (const threadOverride of threadOverrides) {
       profile.threads.push(getEmptyThread(threadOverride));
@@ -3347,10 +3348,7 @@ describe('pages and active tab selectors', function() {
 });
 
 describe('traced timing', function() {
-  function setup(
-    { inverted }: {| inverted: boolean |},
-    textSamples: string
-  ): * {
+  function setup({ inverted }: {| inverted: boolean |}, textSamples: string) {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(
       textSamples
     );

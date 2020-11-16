@@ -14,6 +14,7 @@ import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 import { getLabelGetter } from '../../profile-logic/marker-schema';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
+import type { ThreadSelectorsPerThread } from './thread';
 import type {
   RawMarkerTable,
   ThreadIndex,
@@ -42,7 +43,7 @@ export type MarkerSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with either markers.
  */
 export function getMarkerSelectorsPerThread(
-  threadSelectors: *,
+  threadSelectors: ThreadSelectorsPerThread,
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {

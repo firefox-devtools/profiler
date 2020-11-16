@@ -50,7 +50,7 @@ export type ThreadSelectorsPerThread = $ReturnType<
 export function getThreadSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
-): * {
+) {
   const getMergedThread: Selector<Thread> = createSelector(
     ProfileSelectors.getProfile,
     profile =>

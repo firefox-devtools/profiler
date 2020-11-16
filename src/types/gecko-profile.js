@@ -38,6 +38,15 @@ export type IndexIntoGeckoStackTable = number;
 // };
 export type MarkerPhase = 0 | 1 | 2 | 3;
 
+export type GeckoMarkerTuple = [
+  IndexIntoStringTable,
+  Milliseconds | null,
+  Milliseconds | null,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko
+];
+
 export type GeckoMarkers = {
   schema: {
     name: 0,
@@ -47,16 +56,7 @@ export type GeckoMarkers = {
     category: 4,
     data: 5,
   },
-  data: Array<
-    [
-      IndexIntoStringTable,
-      Milliseconds | null,
-      Milliseconds | null,
-      MarkerPhase,
-      IndexIntoCategoryList,
-      MarkerPayload_Gecko
-    ]
-  >,
+  data: Array<GeckoMarkerTuple>,
 };
 
 /**

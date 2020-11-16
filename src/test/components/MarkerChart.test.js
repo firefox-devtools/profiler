@@ -764,7 +764,7 @@ describe('MarkerChart', function() {
 /**
  * This is a quick helper to create UserTiming markers.
  */
-function getUserTiming(name: string, startTime: number, endTime: number): * {
+function getUserTiming(name: string, startTime: number, endTime: number) {
   return [
     'UserTiming',
     startTime,

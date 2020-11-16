@@ -87,7 +87,7 @@ export const getZipFileTreeOrNull: Selector<ZipFiles.ZipFileTree | null> = creat
  * Avoid a null check, by throwing an error if trying to use zip a file when it doesn't
  * exist.
  */
-export const getZipFileTree: Selector<*> = state =>
+export const getZipFileTree: Selector<ZipFiles.ZipFileTree> = state =>
   ensureExists(
     getZipFileTreeOrNull(state),
     'Attempted to view a profile from a zip, when there is no zip file loaded.'

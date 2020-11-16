@@ -20,7 +20,10 @@ import {
   removeRootOverlayElement,
   fireFullClick,
 } from '../fixtures/utils';
-import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithJsTracerEvents,
+  type TestDefinedJsTracerEvent,
+} from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
 jest.useFakeTimers();
 
@@ -38,7 +41,7 @@ describe('StackChart', function() {
     events,
   }: {
     skipLoadingScreen: boolean,
-    events: Array<*>,
+    events: TestDefinedJsTracerEvent[],
   }) {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();

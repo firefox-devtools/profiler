@@ -262,7 +262,7 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export function getResourceTypes(): * {
+export function getResourceTypes() {
   return {
     unknown: 0,
     library: 1,

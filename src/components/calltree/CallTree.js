@@ -74,8 +74,11 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeImpl extends PureComponent<Props> {
-  _mainColumn: Column = { propName: 'name', title: '' };
-  _appendageColumn: Column = { propName: 'lib', title: '' };
+  _mainColumn: Column<CallNodeDisplayData> = { propName: 'name', title: '' };
+  _appendageColumn: Column<CallNodeDisplayData> = {
+    propName: 'lib',
+    title: '',
+  };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
@@ -84,7 +87,7 @@ class CallTreeImpl extends PureComponent<Props> {
    * appropriate labels for the call tree based on this weight.
    */
   _weightTypeToColumns = memoize(
-    (weightType: WeightType): Column[] => {
+    (weightType: WeightType): Column<CallNodeDisplayData>[] => {
       switch (weightType) {
         case 'tracing-ms':
           return [
