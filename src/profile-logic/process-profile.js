@@ -22,10 +22,6 @@ import {
 } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import {
-  isOldCleopatraFormat,
-  convertOldCleopatraProfile,
-} from './old-cleopatra-profile-format';
-import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
@@ -1471,9 +1467,6 @@ export async function unserializeProfileOfArbitraryFormat(
       profile = stringOrObject;
     }
 
-    if (isOldCleopatraFormat(profile)) {
-      profile = convertOldCleopatraProfile(profile); // outputs preprocessed profile
-    }
     if (isProcessedProfile(profile)) {
       upgradeProcessedProfileToCurrentVersion(profile);
       return _unserializeProfile(profile);
