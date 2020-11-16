@@ -515,6 +515,17 @@ export class NetworkChartRow extends React.PureComponent<
             />
           </Tooltip>
         ) : null}
+        {shouldDisplayTooltips() && this.props.isSelected ? (
+          <div className="selectedTooltipContainer">
+            <TooltipMarker
+              className="selectedTooltip"
+              markerIndex={markerIndex}
+              marker={marker}
+              threadsKey={this.props.threadsKey}
+              restrictHeightWidth={true}
+            />
+          </div>
+        ) : null}
       </div>
     );
   }
