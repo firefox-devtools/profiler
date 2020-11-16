@@ -28,8 +28,8 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
       </div>
       <div>
         
-    in ThrowingComponent
-    in ErrorBoundary
+    at ThrowingComponent (REDACTED)/src/test/components/ErrorBoundary.test.js:19:11)
+    at ErrorBoundary (REDACTED)/src/components/app/ErrorBoundary.js:28:66)
       </div>
     </div>
   </div>
