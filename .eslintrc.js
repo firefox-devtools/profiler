@@ -6,6 +6,7 @@ module.exports = {
     node: true,
   },
   parser: 'babel-eslint',
+  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
@@ -22,7 +23,6 @@ module.exports = {
     },
     sourceType: 'module',
   },
-  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   rules: {
     // Plugin rules:
     'import/no-duplicates': 'error',
@@ -69,6 +69,7 @@ module.exports = {
     // possible errors
     'array-callback-return': 'error',
     'consistent-return': 'error',
+    curly: 'error',
     'default-case': 'error',
     'dot-notation': 'error',
     eqeqeq: 'error',

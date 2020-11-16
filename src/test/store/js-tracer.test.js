@@ -30,6 +30,7 @@ describe('jsTracerFixed', function() {
       end: jsTracerFixed.end,
     };
   }
+
   it('does not modify a valid structure', function() {
     const timing = fixTiming([
       // [mozilla                  ]

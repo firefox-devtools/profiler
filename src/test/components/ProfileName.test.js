@@ -63,7 +63,7 @@ describe('ProfileName', function() {
     fireEvent.change(input, { target: { value: 'Custom name' } });
     fireEvent.blur(input);
 
-    expect(queryByText('Custom name')).toBeTruthy();
+    expect(getByText('Custom name')).toBeTruthy();
     expect(getProfileNameFromUrl(getState())).toBe('Custom name');
   });
 

@@ -596,6 +596,7 @@ describe('actions/receive-profile', function() {
 
     for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
       const desc = 'can retrieve a profile from the addon as ' + profileAs;
+
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
         await dispatch(retrieveProfileFromAddon());

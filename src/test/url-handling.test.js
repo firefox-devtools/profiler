@@ -1264,6 +1264,7 @@ describe('uploaded-recordings', function() {
 
 describe('last requested call tree summary strategy', function() {
   const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
+
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(

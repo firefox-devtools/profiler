@@ -62,6 +62,7 @@ describe('upgrading gecko profiles', function() {
     //  - samples, most marker types, nested processes
     testProfileUpgrading(require('../fixtures/upgrades/gecko-1.json'));
   });
+
   it('should upgrade gecko-2.json all the way to the current version', function() {
     // This tests:
     //  - nothing other than what gecko-1.json already tests, but it uses
@@ -89,6 +90,7 @@ describe('upgrading processed profiles', function() {
       require('../fixtures/upgrades/processed-1.json')
     );
   });
+
   it('should upgrade processed-2.json all the way to the current version', async function() {
     // This tests:
     //  - upgrading the DOMEventMarkerPayload.timeStamp field
@@ -97,6 +99,7 @@ describe('upgrading processed profiles', function() {
       require('../fixtures/upgrades/processed-2.json')
     );
   });
+
   it('should upgrade processed-3.json all the way to the current version', async function() {
     // This tests:
     //  - Upgrading pages array and page information inside markers
