@@ -45,6 +45,7 @@ import {
   IPCMarkerCorrelations,
 } from '../../../profile-logic/marker-data';
 import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
+import { markerSchemaForTests } from './marker-schema';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
@@ -294,6 +295,9 @@ export function getProfileWithMarkers(
   ...markersPerThread: TestDefinedMarkers[]
 ): Profile {
   const profile = getEmptyProfile();
+  // Provide a useful marker schema, rather than an empty one.
+  profile.meta.markerSchema = markerSchemaForTests;
+
   if (markersPerThread.length === 0) {
     throw new Error(
       'getProfileWithMarkers expected to get at least one list of markers.'
@@ -466,6 +470,8 @@ export function getProfileFromTextSamples(
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
   const profile = getEmptyProfile();
+  // Provide a useful marker schema, rather than an empty one.
+  profile.meta.markerSchema = markerSchemaForTests;
   const categories = profile.meta.categories;
 
   const funcNamesPerThread = [];
@@ -1194,6 +1200,7 @@ export function getProfileWithEventDelays(
   userEventDelay?: Milliseconds[]
 ): Profile {
   const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
   profile.threads = [getThreadWithEventDelay(userEventDelay)];
   return profile;
 }

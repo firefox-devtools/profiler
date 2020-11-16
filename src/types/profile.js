@@ -12,7 +12,7 @@ import type {
   Bytes,
 } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import type { MarkerPayload } from './markers';
+import type { MarkerPayload, MarkerSchema } from './markers';
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoRawMarkerTable = number;
@@ -725,6 +725,9 @@ export type ProfileMeta = {|
   // The configuration of the profiler at the time of recording. Optional since older
   // versions of Firefox did not include it.
   configuration?: ProfilerConfiguration,
+  // Markers are displayed in the UI according to a schema definition. See the
+  // MarkerSchema type for more information.
+  markerSchema: MarkerSchema[],
 |};
 
 /**
