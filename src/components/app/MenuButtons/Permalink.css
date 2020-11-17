@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtonsPermalinkButtonButton::before {
-  background-image: url(firefox-profiler-res/img/svg/link-dark.svg);
+  background-image: url(firefox-profiler-res/img/svg/link-dark-12.svg);
 }
 
 .menuButtonsPermalinkPanel .arrowPanelContent {
