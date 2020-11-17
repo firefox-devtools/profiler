@@ -107,8 +107,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     const uploadedStatus = this._getUploadedStatus(dataSource);
     return (
       <ButtonWithPanel
-        className="menuButtonsMetaInfoButton"
-        buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButtonButton__hasIcon menuButtonsMetaInfoButtonButton__${uploadedStatus}`}
+        buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
         label={
           uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
         }
@@ -134,7 +133,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       return (
         <button
           type="button"
-          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon menuButtonsShareButtonButton__uploading"
+          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
           onClick={abortFunction}
         >
           Cancel Upload
@@ -158,7 +157,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     return (
       <ButtonWithPanel
         buttonClassName={classNames(
-          'menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon',
+          'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
           {
             menuButtonsShareButtonError: isError,
           }
@@ -194,7 +193,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     return (
       <button
         type="button"
-        className="menuButtonsButton menuButtonsButtonButton__hasIcon menuButtonsRevertButton"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
         Revert to Original Profile

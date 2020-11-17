@@ -598,11 +598,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
 exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`] = `
 <div>
   <div
-    class="buttonWithPanel menuButtonsMetaInfoButton"
+    class="buttonWithPanel"
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButtonButton__hasIcon menuButtonsMetaInfoButtonButton__local"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
       type="button"
     >
       Local Profile
@@ -613,7 +613,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
       Upload
@@ -636,11 +636,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
 exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 1`] = `
 <div>
   <div
-    class="buttonWithPanel menuButtonsMetaInfoButton"
+    class="buttonWithPanel"
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButtonButton__hasIcon menuButtonsMetaInfoButtonButton__uploaded"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
       type="button"
     >
       Uploaded Profile
@@ -651,7 +651,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButtonButton__hasIcon"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
       Re-upload
@@ -662,7 +662,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsButtonButton__hasIcon menuButtonsPermalinkButtonButton"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
       type="button"
     >
       Permalink

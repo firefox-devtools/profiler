@@ -71,7 +71,7 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
   render() {
     return (
       <ButtonWithPanel
-        buttonClassName="menuButtonsButton menuButtonsButtonButton__hasIcon menuButtonsPermalinkButtonButton"
+        buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
         ref={this._takePermalinkButtonRef}
         label="Permalink"
         initialOpen={this.props.isNewlyPublished}

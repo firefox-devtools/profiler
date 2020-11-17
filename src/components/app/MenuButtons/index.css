@@ -28,7 +28,7 @@
 }
 
 /* Use this class if a button has an icon */
-.menuButtonsButtonButton__hasIcon::before {
+.menuButtonsButton-hasIcon::before {
   /* The icon size and width and height are defined as 12px so that we control
    * better their size.
    * Then it has 4px padding on the right side (because it's at the left of the
@@ -82,11 +82,11 @@
     right / 12px;
 }
 
-.menuButtonsMetaInfoButtonButton__uploaded::before {
+.menuButtonsMetaInfoButtonButton-uploaded::before {
   background-image: url(firefox-profiler-res/img/svg/cloud-dark-12.svg);
 }
 
-.menuButtonsMetaInfoButtonButton__local::before {
+.menuButtonsMetaInfoButtonButton-local::before {
   background-image: url(firefox-profiler-res/img/svg/cloud-off-dark-12.svg);
 }
 
