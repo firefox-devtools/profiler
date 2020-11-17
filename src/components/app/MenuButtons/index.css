@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* Use this class to implement a button in the top menu bar.
+ * This overrides most browser styles, for both links and buttons. */
 /* stylelint-disable order/properties-order */
 .menuButtonsButton {
   position: relative; /* This allows to absolutely position its children */
@@ -12,11 +14,12 @@
   border: 0;
   margin: 0;
   background: none;
-
-  /* Inherit the color rather than using the browser's */
-  color: inherit;
-  font-size: 100%;
   white-space: nowrap;
+
+  /* Inherit some properties values from the environment, rather than using the
+   * browser default for buttons or links. */
+  color: inherit;
+  font-size: inherit;
 
   /* These 2 styles are specific for links. */
   cursor: default;
@@ -49,7 +52,10 @@
   content: '';
 }
 
-/* We're using ::after for borders because ::before is used for icons. */
+/* These classes define respectively a right or a left border. We use ::after for
+ * both of them, so one element won't be able to have both a right and a left
+ * borders with this technique.
+ * We're using ::after for borders because ::before is used for icons. */
 .menuButtonsButton-hasRightBorder::after,
 .menuButtonsButton-hasLeftBorder::after {
   position: absolute;
@@ -83,6 +89,8 @@
     right / 12px;
 }
 
+/* These classes define respective states for the metainfo button. They change
+ * the icon whose generic styles are defined above. */
 .menuButtonsMetaInfoButtonButton-uploaded::before {
   background-image: url(firefox-profiler-res/img/svg/cloud-dark-12.svg);
 }
@@ -91,6 +99,7 @@
   background-image: url(firefox-profiler-res/img/svg/cloud-off-dark-12.svg);
 }
 
+/* This is the revert button, appearing after publishing a profile. */
 .menuButtonsRevertButton::before {
   background-image: url(firefox-profiler-res/img/svg/undo-dark-12.svg);
 }
