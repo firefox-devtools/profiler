@@ -212,7 +212,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
         <a
           href="/docs/"
           target="_blank"
-          className="menuButtonsButton menuButtonsLink"
+          className="menuButtonsButton menuButtonsButton-hasLeftBorder menuButtonsLink"
           title="Open the documentation in a new window"
         >
           Docs

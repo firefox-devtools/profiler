@@ -620,7 +620,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     </button>
   </div>
   <a
-    class="menuButtonsButton menuButtonsLink"
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder menuButtonsLink"
     href="/docs/"
     target="_blank"
     title="Open the documentation in a new window"
@@ -669,7 +669,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     </button>
   </div>
   <a
-    class="menuButtonsButton menuButtonsLink"
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder menuButtonsLink"
     href="/docs/"
     target="_blank"
     title="Open the documentation in a new window"

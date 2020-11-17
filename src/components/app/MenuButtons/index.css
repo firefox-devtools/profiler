@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtonsButton {
+  position: relative; /* This allows to absolutely position its children */
   display: flex;
   height: 100%;
   align-items: center;
@@ -42,22 +43,27 @@
 }
 
 .menuButtonsLink {
-  position: relative; /* This allows positioning the ::before element. */
   cursor: default;
   text-decoration: none;
 }
 
-/* We're using ::after because ::before is used for icons. Even if the docs link
- * doesn't define its icon like this yet, this is more future-proof.
- */
-.menuButtonsLink::after {
+/* We're using ::after for borders because ::before is used for icons. */
+.menuButtonsButton-hasRightBorder::after,
+.menuButtonsButton-hasLeftBorder::after {
   position: absolute;
   top: 4px;
-  left: 0;
   width: 1px;
   height: calc(100% - 8px);
   background: var(--grey-30);
   content: '';
+}
+
+.menuButtonsButton-hasLeftBorder::after {
+  left: 0;
+}
+
+.menuButtonsButton-hasRightBorder::after {
+  right: 0;
 }
 
 /* This icon is defined as a separate element, so that it can possibly be reused
