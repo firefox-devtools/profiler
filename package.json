@@ -36,7 +36,8 @@
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
     "test-alex": "alex ./docs-* *.md",
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
-    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
+    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "ts": "tsc"
   },
   "license": "MPL-2.0",
   "repository": {
@@ -44,6 +45,7 @@
     "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
+    "@types/react-redux": "^7.1.11",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
@@ -71,6 +73,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "reselect": "^4.0.0",
+    "typescript": "^4.0.5",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },

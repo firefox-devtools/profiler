@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    // Make the type checking as strict as possible.
+    "strict": true,
+    // Allow esnext syntax. Otherwise the default is ES5 only.
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    // Do not modify the output, allow eslint to do so.
+    "jsx": "preserve",
+    "noEmit": true
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "bin"
+  ]
+}
