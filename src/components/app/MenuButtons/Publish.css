@@ -6,20 +6,8 @@
   background-image: url(firefox-profiler-res/img/svg/share-dark-12.svg);
 }
 
-@keyframes uploadingAnimation {
-  25% {
-    opacity: 0.2;
-    transform: scale(0.75);
-  }
-
-  50% {
-    opacity: initial;
-    transform: initial;
-  }
-}
-
 .menuButtonsShareButtonButton__uploading::before {
-  animation: 1s infinite uploadingAnimation;
+  background-image: url(firefox-profiler-res/img/svg/sharing-animated-dark-12.svg);
 }
 
 .menuButtonsShareButtonError {
