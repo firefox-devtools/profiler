@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* stylelint-disable order/properties-order */
 .menuButtonsButton {
   position: relative; /* This allows to absolutely position its children */
   display: flex;
@@ -16,7 +17,12 @@
   color: inherit;
   font-size: 100%;
   white-space: nowrap;
+
+  /* These 2 styles are specific for links. */
+  cursor: default;
+  text-decoration: none;
 }
+/* stylelint-enable order/properties-order */
 
 .menuButtonsButton:hover {
   background-color: rgba(0, 0, 0, 0.1);
@@ -41,11 +47,6 @@
   padding-right: 4px;
   background: no-repeat left/12px;
   content: '';
-}
-
-.menuButtonsLink {
-  cursor: default;
-  text-decoration: none;
 }
 
 /* We're using ::after for borders because ::before is used for icons. */
