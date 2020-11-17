@@ -579,7 +579,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   <div
     class="photon-message-bar photon-message-bar-error"
   >
-    Uh oh, something went wrong when publishing the profile.
+    Uh oh, something went wrong when uploading the profile.
     <button
       class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"

@@ -39,7 +39,7 @@ describe('UploadedRecordingsHome', () => {
 
   it('matches a snapshot when there is no published profiles', async () => {
     const { container, findByText } = setup();
-    await findByText(/No profile has been published/);
+    await findByText(/No profile has been uploaded/);
     expect(container.firstChild).toMatchSnapshot();
   });
 

@@ -401,7 +401,7 @@ exports[`UploadedRecordingsHome matches a snapshot when there is no published pr
   <p
     class="photon-body-30"
   >
-    No profile has been published yet!
+    No profile has been uploaded yet!
   </p>
 </main>
 `;

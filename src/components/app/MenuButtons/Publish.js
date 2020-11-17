@@ -207,7 +207,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       >
         <div className="menuButtonsPublishUploadTop">
           <div className="menuButtonsPublishUploadTitle">
-            Publishing profile…
+            Uploading profile…
           </div>
           <div className="menuButtonsPublishUploadPercentage">
             {uploadProgressString}
@@ -240,7 +240,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _renderErrorPanel() {
     const { error, resetUploadState } = this.props;
     let message: string =
-      'There was an unknown error when trying to publish the profile.';
+      'There was an unknown error when trying to upload the profile.';
     if (
       error &&
       typeof error === 'object' &&
@@ -259,7 +259,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         data-testid="MenuButtonsPublish-container"
       >
         <div className="photon-message-bar photon-message-bar-error">
-          Uh oh, something went wrong when publishing the profile.
+          Uh oh, something went wrong when uploading the profile.
           <button
             className="photon-button photon-button-micro photon-message-bar-action-button"
             type="button"
