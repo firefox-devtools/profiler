@@ -205,8 +205,8 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   render() {
     return (
       <>
-        {this._renderMetaInfoButton()}
         {this._renderRevertProfile()}
+        {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
         {this._renderPermalink()}
         <a
