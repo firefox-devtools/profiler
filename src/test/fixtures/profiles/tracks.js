@@ -19,7 +19,10 @@ import type {
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck } from '../../../utils/flow';
-import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  hasThreadKeys,
+} from '../../../profile-logic/profile-data';
 import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
@@ -230,8 +233,9 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
       case 'tab': {
         // Only print the main track if we actually managed to find it.
         if (globalTrack.threadIndexes.size > 0) {
-          const selected = selectedThreadIndexes.has(
-            globalTrack.mainThreadIndex
+          const selected = hasThreadKeys(
+            selectedThreadIndexes,
+            globalTrack.threadsKey
           )
             ? ' SELECTED'
             : '';

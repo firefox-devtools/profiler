@@ -539,7 +539,7 @@ export function finalizeActiveTabProfileView(
     if (selectedThreadIndexes === null) {
       // Select the main track if there is no selected thread.
       selectedThreadIndexes = new Set([
-        activeTabTimeline.mainTrack.mainThreadIndex,
+        ...activeTabTimeline.mainTrack.threadIndexes,
       ]);
     }
 
