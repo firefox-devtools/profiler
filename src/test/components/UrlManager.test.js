@@ -15,6 +15,7 @@ import {
   getDataSource,
   getHash,
   getCurrentSearchString,
+  getTimelineTrackOrganization,
 } from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -313,5 +314,17 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
     expect(previousLocation).toEqual(window.location.href);
+  });
+
+  it('persists view query string for `from-addon` data source', async function() {
+    const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
+      '/from-addon/?view=active-tab'
+    );
+    await createUrlManager();
+    await waitUntilUrlSetupPhase('done');
+
+    // It should successfully preserve the view query string and update the
+    // timeline track organization state.
+    expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
   });
 });
