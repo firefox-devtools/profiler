@@ -95,6 +95,11 @@ async function storeJustPublishedProfileData(
   sanitizedInformation,
   prepublishedState: State
 ): Promise<void> {
+  if (process.env.NODE_ENV === 'test' && !window.indexedDB) {
+    // bailout early in tests
+    return;
+  }
+
   const zeroAt = getZeroAt(prepublishedState);
   const adjustRange = range => ({
     start: range.start - zeroAt,
@@ -292,6 +297,11 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             prePublishedState
           )
         );
+
+        // At this moment, we don't have the profile data in state anymore.
+        // viewProfile below needs to synchronously dispatch the new profile
+        // again.
+
         // Swap out the URL state, since the view profile calculates all of the default
         // settings. If we don't do this then we can go back in history to where we
         // are trying to view a profile without valid view settings.

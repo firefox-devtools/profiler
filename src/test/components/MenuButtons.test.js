@@ -6,7 +6,13 @@
 import * as React from 'react';
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -14,6 +20,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
+import { getHash, getDataSource } from 'firefox-profiler/selectors/url-state';
 
 import { ensureExists } from '../../utils/flow';
 import {
@@ -178,7 +185,7 @@ describe('app/MenuButtons', function() {
       store.dispatch(updateUrlState(newUrlState));
     };
     return {
-      store,
+      ...store,
       ...renderResult,
       getPanel,
       findPublishButton,
@@ -278,6 +285,31 @@ describe('app/MenuButtons', function() {
       } = setup(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeFalsy();
+    });
+
+    it('can publish and revert', async () => {
+      const { profile } = createSimpleProfile();
+      const {
+        getPublishButton,
+        getPanelForm,
+        clickAndRunTimers,
+        resolveUpload,
+        getState,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      fireEvent.submit(getPanelForm());
+      resolveUpload('SOME_HASH');
+
+      const revertButton = await screen.findByText(/revert/i);
+      expect(getDataSource(getState())).toBe('public');
+      expect(getHash(getState())).toBe('SOME_HASH');
+      expect(document.body).toMatchSnapshot();
+
+      fireFullClick(revertButton);
+      await waitForElementToBeRemoved(revertButton);
+
+      expect(getDataSource(getState())).toBe('from-addon');
+      expect(getHash(getState())).toBe('');
     });
 
     it('can publish, cancel, and then publish again', async () => {
