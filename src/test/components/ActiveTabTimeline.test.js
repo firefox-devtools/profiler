@@ -24,7 +24,7 @@ import {
 } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedThreads } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 describe('ActiveTabTimeline', function() {
   beforeEach(() => {
@@ -93,9 +93,9 @@ describe('ActiveTabTimeline', function() {
       if (track.type !== 'tab') {
         throw new Error('Expected a tab track.');
       }
-      const threadIndex = (track.threadIndexes.values().next().value: any);
+      const threadIndex = getFirstItemFromSet(track.threadIndexes);
 
-      if (threadIndex !== null) {
+      if (threadIndex !== undefined) {
         // The assertions are simpler if the GeckoMain tab thread is not already selected.
         dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
       }

@@ -30,7 +30,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
@@ -65,7 +65,7 @@ export function getThreadSelectorsPerThread(
   const getThread: Selector<Thread> = state =>
     threadIndexes.size === 1
       ? ProfileSelectors.getProfile(state).threads[
-          ensureExists(threadIndexes.values().next().value)
+          ensureExists(getFirstItemFromSet(threadIndexes))
         ]
       : getMergedThread(state);
   const getStringTable: Selector<UniqueStringArray> = state =>
