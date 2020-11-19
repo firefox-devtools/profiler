@@ -103,3 +103,7 @@
 .menuButtonsRevertButton::before {
   background-image: url(firefox-profiler-res/img/svg/undo-dark-12.svg);
 }
+
+.menuButtonsRevertToFullView::before {
+  background-image: url(firefox-profiler-res/img/svg/maximize-dark-12.svg);
+}

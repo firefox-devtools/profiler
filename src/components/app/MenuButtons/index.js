@@ -16,7 +16,10 @@ import {
   getProfileRootRange,
   getSymbolicationStatus,
 } from 'firefox-profiler/selectors/profile';
-import { getDataSource } from 'firefox-profiler/selectors/url-state';
+import {
+  getDataSource,
+  getTimelineTrackOrganization,
+} from 'firefox-profiler/selectors/url-state';
 import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
 
 /* Note: the order of import is important, from most general to most specific,
@@ -34,7 +37,10 @@ import {
 } from 'firefox-profiler/selectors/publish';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
+import {
+  resymbolicateProfile,
+  changeTimelineTrackOrganization,
+} from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
@@ -42,6 +48,7 @@ import type {
   DataSource,
   UploadPhase,
   SymbolicationStatus,
+  TimelineTrackOrganization,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -63,12 +70,14 @@ type StateProps = {|
   +hasPrePublishedState: boolean,
   +symbolicationStatus: SymbolicationStatus,
   +abortFunction: () => mixed,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
   +resymbolicateProfile: typeof resymbolicateProfile,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -120,6 +129,27 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
           />
         }
       />
+    );
+  }
+
+  _changeTimelineTrackOrganizationToFull = () => {
+    this.props.changeTimelineTrackOrganization({ type: 'full' });
+  };
+
+  _renderFullViewButtonForActiveTab() {
+    const { timelineTrackOrganization } = this.props;
+    if (timelineTrackOrganization.type !== 'active-tab') {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
+        onClick={this._changeTimelineTrackOrganizationToFull}
+      >
+        Full View
+      </button>
     );
   }
 
@@ -204,6 +234,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   render() {
     return (
       <>
+        {this._renderFullViewButtonForActiveTab()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -233,11 +264,13 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       hasPrePublishedState: getHasPrePublishedState(state),
       symbolicationStatus: getSymbolicationStatus(state),
       abortFunction: getAbortFunction(state),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
       resymbolicateProfile,
+      changeTimelineTrackOrganization,
     },
     component: MenuButtonsImpl,
   }
