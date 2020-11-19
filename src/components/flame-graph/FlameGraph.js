@@ -20,6 +20,7 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getSelectedThreadsKey,
   getInvertCallstack,
+  getImplementationFilter,
 } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
@@ -43,6 +44,7 @@ import type {
   IndexIntoCallNodeTable,
   TracedTiming,
   ThreadsKey,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
@@ -85,6 +87,7 @@ type StateProps = {|
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
+  +implementationFilter: ImplementationFilter,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -281,6 +284,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       samples,
       unfilteredSamples,
       tracedTiming,
+      implementationFilter,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -322,6 +326,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               categories,
               selectedCallNodeIndex,
               scrollToSelectionGeneration,
+              implementationFilter,
               callTreeSummaryStrategy,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
@@ -384,6 +389,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
+    implementationFilter: getImplementationFilter(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

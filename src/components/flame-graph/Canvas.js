@@ -32,6 +32,7 @@ import type {
   WeightType,
   SamplesLikeTable,
   TracedTiming,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 import type {
@@ -66,6 +67,7 @@ export type OwnProps = {|
   +samples: SamplesLikeTable,
   +unfilteredSamples: SamplesLikeTable,
   +tracedTiming: TracedTiming | null,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type Props = {|
@@ -163,6 +165,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       maxStackDepth,
       selectedCallNodeIndex,
       categories,
+      implementationFilter,
       viewport: {
         containerWidth,
         containerHeight,
@@ -212,9 +215,25 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
         const callNodeIndex = stackTiming.callNode[i];
         const funcIndex = callNodeTable.func[callNodeIndex];
-        const funcName = thread.stringTable.getString(
-          thread.funcTable.name[funcIndex]
-        );
+        const relevantForJS = thread.funcTable.relevantForJS[funcIndex];
+        const isJS = thread.funcTable.isJS[funcIndex];
+        const categoryIndex = callNodeTable.category[callNodeIndex];
+        const category = categories[categoryIndex];
+
+        let text;
+
+        if (implementationFilter === 'js' && !relevantForJS && !isJS) {
+          // For JS implementation filters, the frame labels aren't very
+          // interesting. Prefer the category. The tooltip will still show
+          // the full information.
+          const subCategoryIndex = callNodeTable.subcategory[callNodeIndex];
+
+          const subcategory = category.subcategories[subCategoryIndex];
+          // Don't use the subcategory if it's "Other".
+          text = subcategory === 'Other' ? category.name : subcategory;
+        } else {
+          text = thread.stringTable.getString(thread.funcTable.name[funcIndex]);
+        }
 
         const isSelected = selectedCallNodeIndex === callNodeIndex;
         const isHovered =
@@ -222,8 +241,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
 
-        const categoryIndex = callNodeTable.category[callNodeIndex];
-        const category = categories[categoryIndex];
         const colorStyles = this._mapCategoryColorNameToStyles(category.color);
 
         const background =
@@ -245,7 +262,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         const w2: CssPixels = Math.max(0, w - (x2 - x));
 
         if (w2 > textMeasurement.minWidth) {
-          const fittedText = textMeasurement.getFittedText(funcName, w2);
+          const fittedText = textMeasurement.getFittedText(text, w2);
           if (fittedText) {
             ctx.fillStyle = foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
