@@ -52,7 +52,7 @@ type State = {|
 
 export class ButtonWithPanel extends React.PureComponent<Props, State> {
   _panel: ArrowPanel | null = null;
-  _buttonRef = React.createRef<HTMLInputElement>();
+  _buttonRef = React.createRef<HTMLButtonElement>();
   _wrapperRef = React.createRef<HTMLElement>();
 
   constructor(props: Props) {
@@ -169,15 +169,16 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
         className={classNames('buttonWithPanel', className, { open })}
         ref={this._wrapperRef}
       >
-        <input
+        <button
           type="button"
           className={classNames('buttonWithPanelButton', buttonClassName)}
-          value={label}
           aria-expanded={String(open)}
           title={open ? null : title}
           onClick={this._onButtonClick}
           ref={this._buttonRef}
-        />
+        >
+          {label}
+        </button>
         <ArrowPanel
           className={panelClassName}
           onOpen={this._onPanelOpen}
