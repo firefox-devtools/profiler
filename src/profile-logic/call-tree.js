@@ -80,7 +80,6 @@ export class CallTree {
   // _children is indexed by IndexIntoCallNodeTable. Since they are
   // integers, using an array directly is faster than going through a Map.
   _children: Array<CallNodeChildren>;
-  _jsOnly: boolean;
   _interval: number;
   _isHighPrecision: boolean;
   _weightType: WeightType;
@@ -94,7 +93,6 @@ export class CallTree {
     callNodeChildCount: Uint32Array,
     rootTotalSummary: number,
     rootCount: number,
-    jsOnly: boolean,
     interval: number,
     isHighPrecision: boolean,
     weightType: WeightType,
@@ -111,7 +109,6 @@ export class CallTree {
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
     this._children = [];
-    this._jsOnly = jsOnly;
     this._interval = interval;
     this._isHighPrecision = isHighPrecision;
     this._weightType = weightType;
@@ -526,7 +523,6 @@ export function getCallTree(
       rootCount,
     } = callTreeCountsAndSummary;
 
-    const jsOnly = implementationFilter === 'js';
     // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(
       thread,
@@ -536,7 +532,6 @@ export function getCallTree(
       callNodeChildCount,
       rootTotalSummary,
       rootCount,
-      jsOnly,
       interval,
       Boolean(thread.isJsTracer),
       weightType,
