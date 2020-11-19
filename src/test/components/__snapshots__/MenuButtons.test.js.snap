@@ -38,7 +38,7 @@ exports[`<MetaInfoPanel> matches the snapshot 1`] = `
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"
@@ -423,7 +423,7 @@ exports[`<MetaInfoPanel> with no statistics object should not make the app crash
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"
@@ -608,30 +608,26 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     />
   </div>
   <div
-    class="menuButtons"
+    class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
   >
-    <div
-      class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
-    >
-      <input
-        aria-expanded="false"
-        class="buttonWithPanelButton menuButtonsButton"
-        type="button"
-        value="Publish…"
-      />
-    </div>
-    <a
-      class="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
-    >
-      Docs
-      <i
-        class="open-in-new"
-      />
-    </a>
+    <input
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton"
+      type="button"
+      value="Publish…"
+    />
   </div>
+  <a
+    class="menuButtonsButton menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
 </div>
 `;
 

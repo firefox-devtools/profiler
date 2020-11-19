@@ -16,11 +16,7 @@ import {
   IPCMarkerCorrelations,
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
-
-import {
-  markerSchemaGecko,
-  markerSchemaFrontEndOnly,
-} from '../profile-logic/marker-schema';
+import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
 
 import type {
   Profile,
@@ -84,8 +80,9 @@ export const getOriginsProfileView: Selector<OriginsViewState> = state =>
 /**
  * Profile View Options
  */
-export const getProfileViewOptions: Selector<*> = state =>
-  getProfileView(state).viewOptions;
+export const getProfileViewOptions: Selector<
+  $PropertyType<ProfileViewState, 'viewOptions'>
+> = state => getProfileView(state).viewOptions;
 export const getProfileRootRange: Selector<StartEndRange> = state =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
@@ -181,11 +178,24 @@ export const getContentfulSpeedIndexProgress: Selector<
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
 
+// Get the marker schema that comes from the Gecko profile.
+const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
+  getMeta(state).markerSchema;
+
+// Combine the marker schema from Gecko and the front-end. This allows the front-end
+// to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
-  // TODO - This will be replaced with a function to get the schema. For now
-  // trivially pass in the Gecko schema.
-  () => markerSchemaGecko,
-  schema => [...schema, ...markerSchemaFrontEndOnly]
+  getMarkerSchemaGecko,
+  geckoSchema => {
+    const frontEndSchemaNames = new Set([
+      ...markerSchemaFrontEndOnly.map(schema => schema.name),
+    ]);
+    return [
+      // Don't duplicate schema definitions that the front-end already has.
+      ...geckoSchema.filter(schema => !frontEndSchemaNames.has(schema.name)),
+      ...markerSchemaFrontEndOnly,
+    ];
+  }
 );
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
@@ -231,7 +241,7 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  * signature of each selector is defined in the function body, and inferred in the return
  * type of the function.
  */
-function _createCounterSelectors(counterIndex: CounterIndex): * {
+function _createCounterSelectors(counterIndex: CounterIndex) {
   const getCounter: Selector<Counter> = state =>
     ensureExists(
       getProfile(state).counters,

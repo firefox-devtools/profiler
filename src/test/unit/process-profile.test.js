@@ -5,7 +5,7 @@
 
 import {
   extractFuncsAndResourcesFromFrameLocations,
-  processProfile,
+  processGeckoProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
@@ -204,7 +204,7 @@ describe('gecko counters processing', function() {
 
   it('can extract the counter information correctly', function() {
     const { parentGeckoProfile, parentPid, childPid } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const counters = ensureExists(
       processedProfile.counters,
       'Expected to find counters on the processed profile'
@@ -228,7 +228,7 @@ describe('gecko counters processing', function() {
 
   it('offsets the counter timing for child processes', function() {
     const { parentGeckoProfile, parentCounter, childCounter } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedCounters = ensureExists(processedProfile.counters);
 
     const originalTime = [0, 1, 2, 3, 4, 5, 6];
@@ -291,7 +291,7 @@ describe('gecko profilerOverhead processing', function() {
 
   it('can extract the overhead information correctly', function() {
     const { parentGeckoProfile, parentPid, childPid } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const overhead = ensureExists(
       processedProfile.profilerOverhead,
       'Expected to find profilerOverhead on the processed profile'
@@ -315,7 +315,7 @@ describe('gecko profilerOverhead processing', function() {
 
   it('offsets the overhead timing for child processes', function() {
     const { parentGeckoProfile, parentOverhead, childOverhead } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedOverheads = ensureExists(processedProfile.profilerOverhead);
 
     const originalTime = [0, 1000, 2000, 3000, 4000, 5000, 6000];
@@ -339,13 +339,13 @@ describe('gecko profilerOverhead processing', function() {
 
 describe('serializeProfile', function() {
   it('should produce a parsable profile string', async function() {
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     expect(JSON.parse.bind(null, serialized)).not.toThrow();
   });
 
   it('should produce the same profile in a roundtrip', async function() {
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
     // FIXME: Uncomment this line after resolving `undefined` serialization issue
@@ -409,7 +409,7 @@ describe('js allocation processing', function() {
     expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
 
     // Process the profile and get out the new thread.
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const processedThread = processedProfile.threads[0];
 
     // Check for the existence of the allocations.
@@ -479,7 +479,7 @@ describe('native allocation processing', function() {
     expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
 
     // Process the profile and get out the new thread.
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const processedThread = processedProfile.threads[0];
 
     // Check for the existence of the allocations.

@@ -31,3 +31,5 @@ export type ObjectMap<T> = {
   // No prototype was created:
   __proto__: null,
 };
+
+export type MixedObject = { [key: string]: mixed };

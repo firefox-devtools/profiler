@@ -66,7 +66,7 @@ class FakeMouseEvent extends MouseEvent {
 
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: Object));
+    super(type, (mouseValues: any));
 
     Object.assign(this, {
       offsetX: offsetX || 0,
@@ -250,7 +250,7 @@ export function removeRootOverlayElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function createSelectChanger(renderResult: RenderResult<*>) {
+export function createSelectChanger(renderResult: RenderResult<>) {
   return function changeSelect({ from, to }: {| from: string, to: string |}) {
     // Look up the <option> with the text label.
     const option = renderResult.getByText(to);
@@ -293,8 +293,8 @@ export function fireFullClick(
   options?: FakeMouseEventInit
 ) {
   fireEvent(element, getMouseEvent('mousedown', options));
-  fireEvent(element, getMouseEvent('click', options));
   fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('click', options));
 }
 
 /**
@@ -341,8 +341,62 @@ export function fireFullContextMenu(
  * And addition Julien's review comments here:
  * https://github.com/firefox-devtools/profiler/pull/2842/commits/6be20eb6eafca56644b1d55010cc1824a1d03695#r501061693
  */
-export function fireFullKeyPress(element: HTMLElement, options?: *) {
-  fireEvent.keyDown(element, options);
-  fireEvent.keyPress(element, options);
-  fireEvent.keyUp(element, options);
+export function fireFullKeyPress(
+  element: HTMLElement,
+  options: { key: string, ... }
+) {
+  // Since this is test code, only use QWERTY layout keyboards.
+  // Note the key is always converted to lowercase here.
+  const codes: { [key: string]: number } = {
+    enter: 13,
+    escape: 27,
+    ' ': 32,
+    '?': 191,
+    a: 65,
+    b: 66,
+    c: 67,
+    d: 68,
+    e: 69,
+    f: 70,
+    g: 71,
+    h: 72,
+    i: 73,
+    j: 74,
+    k: 75,
+    l: 76,
+    m: 77,
+    n: 78,
+    o: 79,
+    p: 80,
+    q: 81,
+    r: 82,
+    s: 83,
+    t: 84,
+    u: 85,
+    v: 86,
+    w: 87,
+    x: 88,
+    y: 89,
+    z: 90,
+  };
+
+  // It's important that the codes are correctly configured here, or else the keypress
+  // event won't fire.
+  // https://github.com/testing-library/react-testing-library/issues/269#issuecomment-455854112
+  const optionsConfigured = {
+    code: codes[options.key.toLowerCase()],
+    charCode: codes[options.key.toLowerCase()],
+    ...options,
+  };
+
+  if (!optionsConfigured.code) {
+    throw new Error(
+      `An unhandled keypress key was encountered: "${options.key}", look it up here:` +
+        ` https://keycode.info/ and then add to this function.`
+    );
+  }
+
+  fireEvent.keyDown(element, optionsConfigured);
+  fireEvent.keyPress(element, optionsConfigured);
+  fireEvent.keyUp(element, optionsConfigured);
 }

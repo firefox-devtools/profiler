@@ -59,6 +59,7 @@ describe('app/DetailsContainer', function() {
 
   tabSlugs.forEach((tabSlug: TabSlug) => {
     const expected = expectedSidebar[tabSlug];
+
     it(`renders an initial view ${
       expected ? 'with' : 'without'
     } a sidebar for tab ${tabSlug}`, () => {

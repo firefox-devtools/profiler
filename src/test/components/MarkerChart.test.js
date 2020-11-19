@@ -4,7 +4,11 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  getByText as globalGetByText,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -39,6 +43,7 @@ import {
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { getPreviewSelection } from '../../selectors/profile';
 
 import type {
   UserTimingMarkerPayload,
@@ -104,6 +109,7 @@ function setupWithProfile(profile) {
     );
 
   const store = storeWithProfile(profile);
+
   store.dispatch(changeSelectedTab('marker-chart'));
 
   const renderResult = render(
@@ -361,6 +367,16 @@ describe('MarkerChart', function() {
         fireFullClick(getByText(stringOrRegexp));
       }
 
+      // Ideally we would simulate hovering on the parent before clicking the
+      // submenu, but this is a bit more work. Maybe later...
+      function clickOnSubMenuItem(parentLookup, submenuLookup) {
+        const parentItem = getByText(parentLookup);
+        // $FlowExpectError Flow thinks parentNode is a Node.
+        const parentNode: HTMLElement = parentItem.parentNode;
+        const submenu = globalGetByText(parentNode, submenuLookup);
+        fireFullClick(submenu);
+      }
+
       function findFillTextPosition(
         fillText: string
       ): {| x: number, y: number |} {
@@ -380,6 +396,7 @@ describe('MarkerChart', function() {
         getContextMenu,
         findFillTextPosition,
         clickOnMenuItem,
+        clickOnSubMenuItem,
       };
     }
 
@@ -444,6 +461,73 @@ describe('MarkerChart', function() {
         ([, argument]) => argument === 'Highlight'
       );
       expect(callsWithHighlightColor).toHaveLength(2);
+    });
+
+    it('changes selection range when clicking on submenu', () => {
+      const {
+        rightClick,
+        clickOnSubMenuItem,
+        getContextMenu,
+        findFillTextPosition,
+        getState,
+      } = setupForContextMenus();
+
+      rightClick(findFillTextPosition('UserTiming B'));
+
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+      clickOnSubMenuItem(/selection start/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 2,
+        selectionEnd: 11,
+      });
+
+      clickOnSubMenuItem(/selection start/, /From the end/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // This one doesn't work because it's disabled.
+      clickOnSubMenuItem(/selection end/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 8,
+        selectionEnd: 11,
+      });
+
+      // Reset the selection by using the other marker.
+      rightClick(findFillTextPosition('UserTiming A'));
+      clickOnSubMenuItem(/selection start/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 11,
+      });
+
+      rightClick(findFillTextPosition('UserTiming B'));
+
+      clickOnSubMenuItem(/selection end/, /From the start/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 2,
+      });
+
+      clickOnSubMenuItem(/selection end/, /From the end/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 8,
+      });
     });
   });
 
@@ -680,7 +764,7 @@ describe('MarkerChart', function() {
 /**
  * This is a quick helper to create UserTiming markers.
  */
-function getUserTiming(name: string, startTime: number, endTime: number): * {
+function getUserTiming(name: string, startTime: number, endTime: number) {
   return [
     'UserTiming',
     startTime,

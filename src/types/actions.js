@@ -165,6 +165,11 @@ type ProfileAction =
       +selectedMarker: MarkerIndex | null,
     |}
   | {|
+      +type: 'CHANGE_SELECTED_NETWORK_MARKER',
+      +threadsKey: ThreadsKey,
+      +selectedNetworkMarker: MarkerIndex | null,
+    |}
+  | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',
       +threadsKey: ThreadsKey,
       +markerIndex: MarkerIndex | null,

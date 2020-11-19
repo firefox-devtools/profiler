@@ -493,6 +493,7 @@ describe('selectors/getCombinedTimingRows', function() {
 
     return profile;
   }
+
   it('combined timings includes user and call timings', () => {
     const markerProfile = setupUserTimings();
     const stackProfile = setupSamples();

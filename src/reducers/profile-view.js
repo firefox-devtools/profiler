@@ -135,6 +135,7 @@ export const defaultThreadViewOptions = {
   selectedCallNodePath: [],
   expandedCallNodePaths: new PathSet(),
   selectedMarker: null,
+  selectedNetworkMarker: null,
 };
 
 function _getThreadViewOptions(
@@ -304,6 +305,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const { threadsKey, selectedMarker } = action;
       return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
     }
+    case 'CHANGE_SELECTED_NETWORK_MARKER': {
+      const { threadsKey, selectedNetworkMarker } = action;
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedNetworkMarker,
+      });
+    }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadsKey, transform, transformedThread } = action;
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);
@@ -445,6 +452,7 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'CHANGE_SELECTED_MARKER':
+    case 'CHANGE_SELECTED_NETWORK_MARKER':
       return state + 1;
     default:
       return state;

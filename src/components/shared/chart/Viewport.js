@@ -1,8 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 // @flow
+
+// This is using the existential types in the generics, which would be harder to
+// remove. It might be possible to switch this took use hooks.
+/* eslint-disable flowtype/no-existential-type */
+
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -177,6 +181,8 @@ const PINCH_ZOOM_FACTOR = 3;
  * by separating out the type definition.
  */
 export type WithChartViewport<
+  // False positive generic trait bounds.
+  // eslint-disable-next-line flowtype/no-weak-types
   ChartOwnProps: Object,
   // The chart component's props are given the viewport object, as well as the original
   // ChartOwnProps.

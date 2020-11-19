@@ -17,7 +17,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
@@ -307,7 +307,7 @@ describe('<MetaInfoPanel>', function() {
 
   it('matches the snapshot', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.configuration = {
       features: ['js', 'threads'],
       threads: ['GeckoMain', 'DOM Worker'],
@@ -323,7 +323,7 @@ describe('<MetaInfoPanel>', function() {
 
   it('with no statistics object should not make the app crash', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     // We are removing statistics objects from all overhead objects to test
     // the robustness of our handling code.
     if (profile.profilerOverhead) {

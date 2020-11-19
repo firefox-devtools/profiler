@@ -57,7 +57,7 @@ describe('timeline/LocalTrack', function() {
 
     it('has the correct selectors into useful parts of the component', function() {
       const { getLocalTrackLabel, getLocalTrackRow } = setupThreadTrack();
-      expect(getLocalTrackLabel().textContent).toBe('DOM Worker');
+      expect(getLocalTrackLabel()).toHaveTextContent('DOM Worker');
       expect(getLocalTrackRow()).toBeTruthy();
     });
 
@@ -117,7 +117,7 @@ describe('timeline/LocalTrack', function() {
   describe('with a network track', function() {
     it('has correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithNetworkProfile();
-      expect(getLocalTrackLabel().textContent).toBe('Network');
+      expect(getLocalTrackLabel()).toHaveTextContent('Network');
     });
 
     it('matches the snapshot of the network track', () => {
@@ -129,7 +129,7 @@ describe('timeline/LocalTrack', function() {
   describe('with a memory track', function() {
     it('correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithMemory();
-      expect(getLocalTrackLabel().textContent).toBe('Memory');
+      expect(getLocalTrackLabel()).toHaveTextContent('Memory');
     });
 
     it('matches the snapshot of the memory track', () => {
@@ -141,7 +141,7 @@ describe('timeline/LocalTrack', function() {
   describe('with an IPC track', function() {
     it('correctly renders the IPC label', function() {
       const { getLocalTrackLabel } = setupWithIPC();
-      expect(getLocalTrackLabel().textContent).toBe('IPC — Empty');
+      expect(getLocalTrackLabel()).toHaveTextContent('IPC — Empty');
     });
 
     it('matches the snapshot of the IPC track', () => {

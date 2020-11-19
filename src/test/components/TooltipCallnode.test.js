@@ -25,7 +25,7 @@ describe('TooltipCallNode', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
 
-    function renderTooltip(): * {
+    function renderTooltip() {
       // This component is not currently connected.
       return render(
         <Provider store={store}>

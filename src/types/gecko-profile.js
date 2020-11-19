@@ -15,8 +15,9 @@ import type {
   VisualMetrics,
   ProfilerConfiguration,
 } from './profile';
-import type { MarkerPayload_Gecko } from './markers';
+import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
+import type { MixedObject } from './utils';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
@@ -37,6 +38,15 @@ export type IndexIntoGeckoStackTable = number;
 // };
 export type MarkerPhase = 0 | 1 | 2 | 3;
 
+export type GeckoMarkerTuple = [
+  IndexIntoStringTable,
+  Milliseconds | null,
+  Milliseconds | null,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko
+];
+
 export type GeckoMarkers = {
   schema: {
     name: 0,
@@ -46,16 +56,7 @@ export type GeckoMarkers = {
     category: 4,
     data: 5,
   },
-  data: Array<
-    [
-      IndexIntoStringTable,
-      Milliseconds | null,
-      Milliseconds | null,
-      MarkerPhase,
-      IndexIntoCategoryList,
-      MarkerPayload_Gecko
-    ]
-  >,
+  data: Array<GeckoMarkerTuple>,
 };
 
 /**
@@ -154,7 +155,7 @@ export type GeckoFrameTable = {|
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
       // JSON info about JIT optimizations.
-      null | Object,
+      null | MixedObject,
       // The line of code
       null | number,
       // The column of code
@@ -171,7 +172,7 @@ export type GeckoFrameStruct = {|
   location: IndexIntoStringTable[],
   relevantForJS: Array<boolean>,
   implementation: Array<null | IndexIntoStringTable>,
-  optimizations: Array<null | Object>,
+  optimizations: Array<null | MixedObject>,
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
@@ -262,6 +263,7 @@ export type GeckoProfileShortMeta = {|
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
+  markerSchema: MarkerSchema[],
 |};
 
 /* This meta object is used on the top level profile object.
@@ -339,7 +341,7 @@ export type GeckoProfileWithMeta<Meta> = {|
   pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
-  tasktracer?: Object,
+  tasktracer?: MixedObject,
   processes: GeckoSubprocessProfile[],
   jsTracerDictionary?: string[],
 |};

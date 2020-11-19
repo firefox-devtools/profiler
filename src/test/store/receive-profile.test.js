@@ -40,11 +40,12 @@ import JSZip from 'jszip';
 import {
   makeProfileSerializable,
   serializeProfile,
-  processProfile,
+  processGeckoProfile,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -595,6 +596,7 @@ describe('actions/receive-profile', function() {
 
     for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
       const desc = 'can retrieve a profile from the addon as ' + profileAs;
+
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
         await dispatch(retrieveProfileFromAddon());
@@ -1264,8 +1266,8 @@ describe('actions/receive-profile', function() {
       expect(view.phase).toBe('FATAL_ERROR');
 
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
 
@@ -1370,8 +1372,8 @@ describe('actions/receive-profile', function() {
       });
       expect(view.phase).toBe('FATAL_ERROR');
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
   });
@@ -1417,7 +1419,7 @@ describe('actions/receive-profile', function() {
         urlSearch1: 'thread=0',
         urlSearch2: 'thread=0',
       }
-    ): * {
+    ) {
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
 
@@ -1427,7 +1429,7 @@ describe('actions/receive-profile', function() {
     async function setupWithShortUrl(
       profiles: SetupProfileParams,
       { urlSearch1, urlSearch2 }: SetupUrlSearchParams
-    ): * {
+    ) {
       const longUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const longUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
       const shortUrl1 = 'https://perfht.ml/FAKEBITLYHASH1';
@@ -1469,7 +1471,7 @@ describe('actions/receive-profile', function() {
       { profile1, profile2 }: SetupProfileParams,
       { url1, url2 }: SetupUrlParams,
       { skipMarkers }: SetupOptionsParams = {}
-    ): * {
+    ) {
       if (skipMarkers !== true) {
         profile1.threads.forEach(thread =>
           addMarkersToThreadWithCorrespondingSamples(thread, [
@@ -1587,7 +1589,7 @@ describe('actions/receive-profile', function() {
     it('keeps the initial rootRange as default', async function() {
       //Time sample has been set for 100000ms (100s)
       const { profile } = getProfileFromTextSamples(`
-        100000 
+        100000
         A
       `); //
       const { rootRange } = await setup(
@@ -1661,6 +1663,73 @@ describe('actions/receive-profile', function() {
       const nodeData = callTree.getNodeData(firstChild);
       expect(nodeData.self).toBe(4);
     });
+
+    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function() {
+      const store = blankStore();
+      const { resultProfile } = await setup(getSomeProfiles(), {
+        url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+      });
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
+    it('includes screenshot track of both profiles if they have screenshot markers', async function() {
+      const store = blankStore();
+      //Get profiles with one screenshot track
+      const profile1 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '0',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
   });
 
   describe('getProfilesFromRawUrl', function() {
@@ -1675,7 +1744,10 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(location: Object, requiredProfile: number = 1) {
+    async function setup(
+      location: $Shape<Location>,
+      requiredProfile: number = 1
+    ) {
       const profile = _getSimpleProfile();
       const geckoProfile = createGeckoProfile();
 
@@ -1824,7 +1896,7 @@ describe('actions/receive-profile', function() {
       // Differently, `from-addon` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
-      const processedProfile = processProfile(geckoProfile);
+      const processedProfile = processGeckoProfile(geckoProfile);
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );

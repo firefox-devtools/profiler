@@ -77,11 +77,338 @@ Object {
     },
     "interval": 1,
     "logicalCPUs": 0,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "",
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 32,
+    "preprocessedProfileVersion": 33,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -89,7 +416,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 21,
+    "version": 22,
   },
   "pages": Array [
     Object {
@@ -4030,5 +4357,6 @@ Object {
     1,
   ],
   "selectedMarker": 1,
+  "selectedNetworkMarker": null,
 }
 `;

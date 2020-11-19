@@ -4,7 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { stripIndent } from 'common-tags';
 
 import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
@@ -30,6 +31,14 @@ describe('app/ErrorBoundary', function() {
 
   it('matches the snapshot', () => {
     const { container } = setupComponent(<ThrowingComponent />);
+
+    // We need to change the textContent of the stack, so that path information
+    // isn't tied to a specific environment.
+    const stack = screen.getByText(/at ThrowingComponent/);
+    stack.textContent = stack.textContent
+      .replace(/\\/g, '/') // normalizes Windows paths
+      .replace(/\(.*\/src/g, '(REDACTED)/src'); // Removes the home directory
+
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -69,12 +78,17 @@ describe('app/ErrorBoundary', function() {
     withAnalyticsMock(() => {
       setupComponent(<ThrowingComponent />);
       expect(self.ga).toHaveBeenCalledWith('send', 'exception', {
-        exDescription: [
-          'Error: This is an error.',
-          '',
-          '    in ThrowingComponent',
-          '    in ErrorBoundary',
-        ].join('\n'),
+        exDescription: expect.stringMatching(
+          // This regexp looks a  bit scary, but all it does is avoiding
+          // matching on things that depends on the environment (like path
+          // names) and path separators (unixes use `/` but windows uses `\`).
+          new RegExp(stripIndent`
+              Error: This is an error\\.
+
+                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:19:11\\)
+                  at ErrorBoundary \\(.*[/\\\\]ErrorBoundary.js:28:66\\)
+          `)
+        ),
         exFatal: true,
       });
     });

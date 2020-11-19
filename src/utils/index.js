@@ -34,7 +34,13 @@ export class FastFillStyle {
 /**
  * Perform a simple shallow object equality check.
  */
-export function objectShallowEquals(a: Object, b: Object): boolean {
+export function objectShallowEquals<
+  // False positive, Objects are fine as generic trait bounds.
+  // eslint-disable-next-line flowtype/no-weak-types
+  A: Object,
+  // eslint-disable-next-line flowtype/no-weak-types
+  B: Object
+>(a: A, b: B): boolean {
   let aLength = 0;
   let bLength = 0;
   for (const key in a) {
@@ -94,7 +100,11 @@ export function getStartEndRangeForMarker(
  * See issue #2710 about adding "shift" behavior.
  */
 export function getTrackSelectionModifier(
-  event: MouseEvent | KeyboardEvent | SyntheticMouseEvent<>
+  event:
+    | MouseEvent
+    | KeyboardEvent
+    | SyntheticMouseEvent<>
+    | SyntheticKeyboardEvent<>
 ): 'ctrl' | 'none' {
   if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
     return 'ctrl';

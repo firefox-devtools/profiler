@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import Timeline from '../../components/timeline';
+import { Timeline } from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
@@ -330,8 +330,8 @@ describe('ActiveTabTimeline', function() {
       });
 
       it('has the correct track name', function() {
-        const { queryByText, resourcePage } = setup();
-        expect(queryByText(resourcePage.url)).toBeTruthy();
+        const { getByText, resourcePage } = setup();
+        expect(getByText(resourcePage.url)).toBeTruthy();
       });
 
       it('starts out not being selected', function() {

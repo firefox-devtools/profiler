@@ -69,7 +69,7 @@ function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
 }
 
 describe('origins timeline', function() {
-  function setup(...originThreads: TestDefinedOriginThread[]): * {
+  function setup(...originThreads: TestDefinedOriginThread[]) {
     const store = createStore();
     const profile = getProfileWithOrigins(...originThreads);
     const { dispatch } = store;

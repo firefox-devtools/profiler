@@ -12,7 +12,7 @@ import copy from 'copy-to-clipboard';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -476,7 +476,7 @@ describe('ProfileCallTreeView/end-to-end', () => {
     jest.useFakeTimers();
 
     const geckoProfile = createGeckoProfile();
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const store = storeWithProfile(processedProfile);
     render(
       <Provider store={store}>
@@ -531,8 +531,8 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('matches the snapshot for JS allocations', function() {
@@ -588,8 +588,8 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
     // After changing to native allocations, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('does not have the retained memory option', function() {
@@ -656,8 +656,8 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
     // After changing to retained allocations, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('matches the snapshot for retained allocations', function() {

@@ -1,4 +1,5 @@
 // @flow
+/* eslint-disable flowtype/no-existential-type */
 
 // This file is copied from:
 // I couldn't figure out how to get the CLI to accept the proper arguments.

@@ -262,7 +262,7 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export function getResourceTypes(): * {
+export function getResourceTypes() {
   return {
     unknown: 0,
     library: 1,
@@ -371,6 +371,7 @@ export function getEmptyProfile(): Profile {
       physicalCPUs: 0,
       logicalCPUs: 0,
       symbolicated: true,
+      markerSchema: [],
     },
     pages: [],
     threads: [],

@@ -36,6 +36,7 @@ describe('UploadedRecordingsHome', () => {
     );
     return renderResult;
   }
+
   it('matches a snapshot when there is no published profiles', async () => {
     const { container, findByText } = setup();
     await findByText(/No profile has been published/);

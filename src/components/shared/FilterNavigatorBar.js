@@ -18,7 +18,7 @@ type Props = {|
       }
     | string
   >,
-  +onPop: number => *,
+  +onPop: number => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
@@ -41,7 +41,7 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
           <CSSTransition
             key={i}
             classNames="filterNavigatorBarTransition"
-            timeout={300}
+            timeout={250}
           >
             <li
               data-index={i}

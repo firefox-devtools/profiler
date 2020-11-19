@@ -22,3 +22,8 @@
 .react-contextmenu-item:hover .timelineTrackContextMenuPid {
   color: #fff;
 }
+
+.timelineTrackContextMenu {
+  max-height: 43.5vh;
+  overflow-y: auto;
+}

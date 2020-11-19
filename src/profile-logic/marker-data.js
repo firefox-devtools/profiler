@@ -406,7 +406,7 @@ export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  threadId: number,
+  threadId: number | void,
   threadRange: StartEndRange,
   ipcCorrelations: IPCMarkerCorrelations
 ): DerivedMarkerInfo {
@@ -575,7 +575,11 @@ export function deriveMarkersFromRawMarkerTable(
         }
 
         case 'IPC': {
-          const sharedData = ipcCorrelations.get(threadId, rawMarkerIndex);
+          const sharedData = ipcCorrelations.get(
+            // Older profiles don't have a tid, but they also don't have the IPC markers.
+            threadId || 0,
+            rawMarkerIndex
+          );
           if (!sharedData) {
             // Since shared data is generated for every IPC message, this should
             // never happen unless something has gone catastrophically wrong.

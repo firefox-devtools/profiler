@@ -47,6 +47,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   InitialSelectedTrackReference,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -54,7 +55,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +style?: Object /* This is used by Reorderable */,
+  +style?: MixedObject /* This is used by Reorderable */,
   +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
@@ -92,12 +93,43 @@ class GlobalTrackComponent extends PureComponent<Props> {
     }
   };
 
-  _selectCurrentTrack = (event: MouseEvent) => {
+  /**
+   * Special care must be taken when selecting a track. This handler is registered in two
+   * places.
+   *
+   *  1. mouse up of the entire track's wrapping div.
+   *  2. keypress of the focusable button
+   *
+   * This is done to allow for two behaviors that conflict with each other. It's important
+   * when making a preview selection to not select a track on the mouse up. In order to
+   * prevent this, the mouse up handler in the preview selection component prevents further
+   * propagation.
+   *
+   * However, for accessibility reasons, we want to be able to select tracks using the
+   * keyboard. In order to still allow for this behavior, we also listen for the keypress
+   * handler on the button. We do this rather than with the onClick event, as this would
+   * get in the way of the mouse up behavior. The keypress then needs to check that it's
+   * a validation "activation" key, such as Enter of Spacebar.
+   */
+  _selectCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
     if (
       event.button === 2 ||
       (window.navigator.platform === 'MacIntel' && event.ctrlKey)
     ) {
       // This is a right click, do nothing.
+      return;
+    }
+
+    if (
+      // Is this a keypress?
+      typeof event.key === 'string' &&
+      // Only allow Spacebar and Enter, which signals the button is being pressed.
+      event.key !== ' ' &&
+      event.key !== 'Enter'
+    ) {
+      // Ignore this keypress.
       return;
     }
 
@@ -265,7 +297,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            <button type="button" className="timelineTrackNameButton">
+            <button
+              type="button"
+              className="timelineTrackNameButton"
+              onKeyUp={this._selectCurrentTrack}
+            >
               {trackName}
               {
                 // Only show the PID if:

@@ -1,0 +1,119 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.appKeyboardShortcuts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 20px;
+  animation: appKeyboardShortcutsFadeIn 0.2s;
+  background: #000a;
+}
+
+.appKeyboardShortcuts.open {
+  display: flex;
+  align-items: center;
+}
+
+.appKeyboardShortcutsBox {
+  overflow: hidden;
+  max-width: 800px;
+
+  /* appKeyboardShortcuts margin top + bottom = 40px */
+  max-height: calc(100% - 40px);
+  margin: 0 auto;
+  animation: arrowPanelAppear 0.2s cubic-bezier(0.07, 0.95, 0, 1);
+  background: #fff;
+  border-radius: 5px;
+  filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+}
+
+.appKeyboardShortcutsScroll {
+  overflow-y: scroll;
+}
+
+.appKeyboardShortcutsRow {
+  display: flex;
+  max-width: 400px;
+  margin: 7px 0px;
+}
+
+.appKeyboardShortcutsLabel {
+  flex: 1;
+  font-size: 13px;
+  padding-inline-end: 25px;
+}
+
+.appKeyboardShortcutsShortcut {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  background: rgba(222, 222, 227, 0.79);
+  border-radius: 3px;
+  box-shadow: 1px 1px rgba(0, 0, 0, 0.27);
+  color: #000;
+  margin-inline-start: 6px;
+}
+
+.appKeyboardShortcutsContent {
+  display: grid;
+  margin: 40px;
+  grid-gap: 80px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.appKeyboardShortcutsContent h2 {
+  margin: 40px 0 10px;
+}
+
+.appKeyboardShortcutsContent h2:first-child {
+  margin-top: 0;
+}
+
+.appKeyboardShortcutsHeader {
+  display: flex;
+  border-bottom: 1px solid var(--grey-30);
+  background: var(--grey-20);
+  font-size: 13px;
+}
+
+.appKeyboardShortcutsHeaderTitle {
+  flex: 1;
+  margin: 10px;
+}
+
+.appKeyboardShortcutsHeaderClose {
+  padding: 6px 6px 6px 30px;
+  border: 0;
+
+  /* Allow for the photon focus ring to fit in the space by using a 4px margin. */
+  margin: 4px;
+  background: url(../../../res/img/svg/searchfield-cancel.svg) 10px center
+    no-repeat;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.appKeyboardShortcutsHeaderClose:hover {
+  background-color: var(--grey-30);
+}
+
+.appKeyboardShortcutsNoInteract {
+  pointer-events: none;
+}
+
+@keyframes appKeyboardShortcutsFadeIn {
+  from {
+    background: #0000;
+  }
+  to {
+    background: #000a;
+  }
+}

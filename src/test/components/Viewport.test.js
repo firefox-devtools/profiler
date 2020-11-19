@@ -24,7 +24,12 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import type { Milliseconds } from 'firefox-profiler/types';
+import type {
+  Milliseconds,
+  MixedObject,
+  PreviewSelection,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
 // The following define the magic values used for the mocked bounding box of the
 // the rendered component.
@@ -616,7 +621,7 @@ function getBoundingBoxForViewport(override: $Shape<BoundingBoxOverride> = {}) {
   return rect;
 }
 
-function setup(profileOverrides: Object = {}) {
+function setup(profileOverrides: MixedObject = {}) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
 
@@ -634,6 +639,14 @@ function setup(profileOverrides: Object = {}) {
   // valid stateless component. $FlowExpectError
   const ChartWithViewport = withChartViewport(DummyChart);
 
+  type Props = {
+    previewSelection: PreviewSelection,
+    timeRange: StartEndRange,
+    maxViewportHeight?: number,
+    startsAtBottom: boolean,
+    ...
+  };
+
   // The viewport component started out as an unconnected component, but then it
   // started subscribing to the store an dispatching its own actions. This migration
   // wasn't completely done, so it still has a few pieces of state passed in through
@@ -646,7 +659,7 @@ function setup(profileOverrides: Object = {}) {
     }),
     mapDispatchToProps: {},
     // eslint-disable-next-line react/display-name
-    component: (props: Object) => (
+    component: (props: Props) => (
       <ChartWithViewport
         viewportProps={{
           previewSelection: props.previewSelection,

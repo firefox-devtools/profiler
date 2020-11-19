@@ -46,6 +46,7 @@ describe('calltree/ZipFileTree', function() {
     const { getState, dispatch } = store;
     return { ...renderResult, store, getState, dispatch };
   }
+
   it('renders a zip file tree', async () => {
     const { container } = await setup();
     expect(container.firstChild).toMatchSnapshot();
