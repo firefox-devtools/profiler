@@ -681,7 +681,12 @@ describe('filter-by-implementation', function() {
 
   it('will return the same thread if filtering to "all"', function() {
     expect(
-      filterThreadByImplementation(thread, 'combined', defaultCategory)
+      filterThreadByImplementation(
+        thread,
+        'combined',
+        profile.meta.categories,
+        defaultCategory
+      )
     ).toEqual(thread);
   });
 
@@ -689,6 +694,7 @@ describe('filter-by-implementation', function() {
     const jsOnlyThread = filterThreadByImplementation(
       thread,
       'js',
+      profile.meta.categories,
       defaultCategory
     );
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
@@ -706,6 +712,7 @@ describe('filter-by-implementation', function() {
     const cppOnlyThread = filterThreadByImplementation(
       thread,
       'cpp',
+      profile.meta.categories,
       defaultCategory
     );
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
@@ -734,6 +741,7 @@ describe('get-sample-index-closest-to-time', function() {
     const { samples } = filterThreadByImplementation(
       thread,
       'js',
+      profile.meta.categories,
       defaultCategory
     );
 

@@ -1320,7 +1320,7 @@ export function getStackType(
   funcIndex: IndexIntoFuncTable
 ): StackType {
   if (FUNC_MATCHES.cpp(thread, funcIndex)) {
-    return 'native';
+    return thread.funcTable.address[funcIndex] === -1 ? 'label' : 'native';
   } else if (FUNC_MATCHES.js(thread, funcIndex)) {
     return 'js';
   }

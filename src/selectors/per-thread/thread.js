@@ -169,6 +169,7 @@ export function getThreadSelectorsPerThread(
   const _getImplementationFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
+    ProfileSelectors.getCategories,
     ProfileSelectors.getDefaultCategory,
     ProfileData.filterThreadByImplementation
   );

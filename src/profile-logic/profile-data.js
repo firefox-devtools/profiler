@@ -927,13 +927,14 @@ export function toValidCallTreeSummaryStrategy(
 export function filterThreadByImplementation(
   thread: Thread,
   implementation: string,
+  categories: CategoryList,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { funcTable, stringTable } = thread;
+  const { funcTable, frameTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(
+      return _filterThreadByFuncAndFrame(
         thread,
         funcIndex => {
           // Return quickly if this is a JS frame.
@@ -954,24 +955,60 @@ export function filterThreadByImplementation(
         },
         defaultCategory
       );
-    case 'js':
-      return _filterThreadByFunc(
+    case 'js': {
+      // Note, -1 indexes in these cases will be fine, as it equates to "no matches".
+      const idleCategoryIndex = categories.findIndex(
+        category => category.name === 'Idle'
+      );
+      const otherCategoryIndex = categories.findIndex(
+        category => category.name === 'Other'
+      );
+
+      return _filterThreadByFuncAndFrame(
         thread,
-        funcIndex => {
-          return (
-            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
-          );
+        (funcIndex, frameIndex, prefix) => {
+          if (
+            // This is clearly a JS frame, keep it.
+            funcTable.isJS[funcIndex] ||
+            // This function is relevant for JS.
+            funcTable.relevantForJS[funcIndex]
+          ) {
+            return true;
+          }
+          const categoryIndex = frameTable.category[frameIndex];
+          if (categoryIndex !== null) {
+            // This is a label frame.
+            if (categoryIndex === idleCategoryIndex) {
+              // Idle label frames aren't interesting to
+              return false;
+            }
+            if (prefix === null && categoryIndex === otherCategoryIndex) {
+              // This is a root "Other" frame label, which isn't particularly useful.
+              return false;
+            }
+            // In general, preserve frame labels, as they will displayed with their
+            // category information.
+            return true;
+          }
+
+          // Do not keep this stack.
+          return false;
         },
         defaultCategory
       );
+    }
     default:
       return thread;
   }
 }
 
-function _filterThreadByFunc(
+function _filterThreadByFuncAndFrame(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean,
+  filter: (
+    IndexIntoFuncTable,
+    IndexIntoFrameTable,
+    prefix: IndexIntoStackTable | null
+  ) => boolean,
   defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
@@ -998,7 +1035,7 @@ function _filterThreadByFunc(
         const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
         const frameIndex = stackTable.frame[stackIndex];
         const funcIndex = frameTable.func[frameIndex];
-        if (filter(funcIndex)) {
+        if (filter(funcIndex, frameIndex, prefixNewStack)) {
           const prefixStackAndFrameIndex =
             (prefixNewStack === null ? -1 : prefixNewStack) * frameCount +
             frameIndex;
