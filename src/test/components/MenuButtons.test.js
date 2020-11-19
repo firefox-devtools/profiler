@@ -6,9 +6,9 @@
 import * as React from 'react';
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from 'firefox-profiler/actions/app';
@@ -23,7 +23,11 @@ import {
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
-import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
+
+import type { Profile } from 'firefox-profiler/types';
+
+import 'fake-indexeddb/auto';
+import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 
 // We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -43,8 +47,23 @@ jest.mock('../../utils/gz');
 import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
+import { symbolicateProfile } from 'firefox-profiler/profile-logic/symbolication';
+jest.mock('firefox-profiler/profile-logic/symbolication');
+
 // Mock hash
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
+
+// We need IndexedDB to get a SymbolStore that's necessary for symbolication
+// to even start, in some of the tests for this file.
+function resetIndexedDb() {
+  // This is the recommended way to reset the IDB state between test runs, but
+  // neither flow nor eslint like that we assign to indexedDB directly, for
+  // different reasons.
+  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
+  indexedDB = new FDBFactory();
+}
+beforeEach(resetIndexedDb);
+afterEach(resetIndexedDb);
 
 describe('app/MenuButtons', function() {
   function mockUpload() {
@@ -312,25 +331,30 @@ describe('app/MenuButtons', function() {
 });
 
 describe('<MetaInfoPanel>', function() {
-  function setup(profile: Profile, symbolicationStatus = 'DONE') {
+  function setup(profile: Profile) {
     jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
       // eslint-disable-next-line babel/no-invalid-this
       return 'toLocaleString ' + this.toUTCString();
     });
-    const resymbolicateProfile = jest.fn();
 
-    const renderResults = render(
-      <MetaInfoPanel
-        profile={profile}
-        resymbolicateProfile={resymbolicateProfile}
-        symbolicationStatus={symbolicationStatus}
-      />
+    const store = blankStore();
+
+    // Note that we dispatch this action directly instead of using viewProfile
+    // or loadProfile because we want to control tightly how symbolication is
+    // started in these tests.
+    store.dispatch({
+      type: 'PROFILE_LOADED',
+      profile,
+      pathInZipFile: null,
+      implementationFilter: null,
+      transformStacks: null,
+    });
+
+    return render(
+      <Provider store={store}>
+        <MetaInfoPanel />
+      </Provider>
     );
-
-    return {
-      resymbolicateProfile,
-      ...renderResults,
-    };
   }
 
   it('matches the snapshot', () => {
@@ -367,62 +391,51 @@ describe('<MetaInfoPanel>', function() {
   });
 
   describe('symbolication', function() {
-    type SymbolicationTestConfig = {|
+    type SymbolicationTestConfig = $ReadOnly<{|
       symbolicated: boolean,
-      symbolicationStatus: SymbolicationStatus,
-    |};
+    |}>;
 
     function setupSymbolicationTest(config: SymbolicationTestConfig) {
       const { profile } = getProfileFromTextSamples('A');
       profile.meta.symbolicated = config.symbolicated;
 
-      return setup(profile, config.symbolicationStatus);
+      return setup(profile);
     }
 
-    it('handles successfully symbolicated profiles', () => {
-      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
-        symbolicated: true,
-        symbolicationStatus: 'DONE',
-      });
+    it('handles successfully symbolicated profiles', async () => {
+      setupSymbolicationTest({ symbolicated: true });
 
-      expect(getByText('Profile is symbolicated')).toBeTruthy();
-      fireFullClick(getByText('Re-symbolicate profile'));
-      expect(resymbolicateProfile).toHaveBeenCalled();
-    });
+      expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
+      fireFullClick(screen.getByText('Re-symbolicate profile'));
 
-    it('handles the contradictory state of non-symbolicated profiles that are done', () => {
-      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
-        symbolicated: false,
-        symbolicationStatus: 'DONE',
-      });
-
-      expect(getByText('Profile is not symbolicated')).toBeTruthy();
-      fireFullClick(getByText('Symbolicate profile'));
-      expect(resymbolicateProfile).toHaveBeenCalled();
-    });
-
-    it('handles in progress symbolication', () => {
-      const { getByText, queryByText } = setupSymbolicationTest({
-        symbolicated: false,
-        symbolicationStatus: 'SYMBOLICATING',
-      });
-
-      expect(getByText('Currently symbolicating profile')).toBeTruthy();
+      expect(symbolicateProfile).toHaveBeenCalled();
+      expect(
+        screen.getByText('Attempting to re-symbolicate profile')
+      ).toBeTruthy();
       // No symbolicate button is available.
-      expect(queryByText('Symbolicate profile')).toBeFalsy();
-      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+      // After a while, we get a result
+      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
     });
 
-    it('handles in progress re-symbolication', () => {
-      const { getByText, queryByText } = setupSymbolicationTest({
-        symbolicated: true,
-        symbolicationStatus: 'SYMBOLICATING',
-      });
+    it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
+      setupSymbolicationTest({ symbolicated: false });
 
-      expect(getByText('Attempting to re-symbolicate profile')).toBeTruthy();
+      expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
+      fireFullClick(screen.getByText('Symbolicate profile'));
+      expect(symbolicateProfile).toHaveBeenCalled();
+
+      expect(screen.getByText('Currently symbolicating profile')).toBeTruthy();
       // No symbolicate button is available.
-      expect(queryByText('Symbolicate profile')).toBeFalsy();
-      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+      // After a while, we get a result
+      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
     });
   });
 
