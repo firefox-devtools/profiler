@@ -38,17 +38,13 @@
 }
 
 .profileViewer {
+  display: flex;
+  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
+  flex: 1;
   flex-flow: column nowrap;
   animation-duration: 200ms;
   animation-name: profileViewerFadeIn;
   background-color: #fff;
-}
-
-body,
-.profileViewer {
-  display: flex;
-  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
-  flex: 1;
 }
 
 .profileViewerFadeOut {
