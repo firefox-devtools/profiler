@@ -36,6 +36,7 @@ import type {
   UnitIntervalOfProfileRange,
   MarkerIndex,
   Marker,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 import type {
@@ -67,6 +68,7 @@ type OwnProps = {|
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +marginLeft: CssPixels,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type Props = $ReadOnly<{|
@@ -158,6 +160,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
       getMarker,
       marginLeft,
+      implementationFilter,
       viewport: {
         containerWidth,
         containerHeight,
@@ -303,17 +306,34 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             rowDevicePixelsHeight - oneCssPixelInDevicePixels
           );
 
-          // Look up information about this stack frame.
+          // Look up information about this call node, or marker.
           let text, category, isSelected;
           if (stackTiming.callNode) {
+            // This is a call node.
+
+            // Look up all of the information.
             const callNodeIndex = stackTiming.callNode[i];
             const funcIndex = callNodeTable.func[callNodeIndex];
             const funcNameIndex = thread.funcTable.name[funcIndex];
-            text = thread.stringTable.getString(funcNameIndex);
             const categoryIndex = callNodeTable.category[callNodeIndex];
+            const isJS = thread.funcTable.isJS[funcIndex];
+            const relevantForJS = thread.funcTable.relevantForJS[funcIndex];
             category = categories[categoryIndex];
             isSelected = selectedCallNodeIndex === callNodeIndex;
+
+            if (implementationFilter === 'js' && !relevantForJS && !isJS) {
+              // For JS implementation filters, the frame labels aren't very
+              // interesting. Prefer the category. The tooltip will still show
+              // the full information.
+              const subCategoryIndex = callNodeTable.subcategory[callNodeIndex];
+              const subcategory = category.subcategories[subCategoryIndex];
+              // Don't use the subcategory if it's "Other".
+              text = subcategory === 'Other' ? category.name : subcategory;
+            } else {
+              text = thread.stringTable.getString(funcNameIndex);
+            }
           } else {
+            // This is a marker
             const markerIndex = stackTiming.index[i];
             const markerPayload = ((getMarker(markerIndex)
               .data: any): UserTimingMarkerPayload);

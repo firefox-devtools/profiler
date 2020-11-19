@@ -22,6 +22,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowUserTimings,
   getSelectedThreadsKey,
+  getImplementationFilter,
 } from '../../selectors/url-state';
 import { getTimelineMarginLeft } from '../../selectors/app';
 import { StackChartEmptyReasons } from './StackChartEmptyReasons';
@@ -52,6 +53,7 @@ import type {
   WeightType,
   ThreadsKey,
   CssPixels,
+  ImplementationFilter,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -61,6 +63,7 @@ import './index.css';
 const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
+  +implementationFilter: ImplementationFilter,
   +thread: Thread,
   +weightType: WeightType,
   +pages: PageList | null,
@@ -158,6 +161,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       userTimings,
       weightType,
       timelineMarginLeft,
+      implementationFilter,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -202,6 +206,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
+                  implementationFilter,
                   rangeStart: timeRange.start,
                   rangeEnd: timeRange.end,
                   stackFrameHeight: STACK_FRAME_HEIGHT,
@@ -254,6 +259,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
+      implementationFilter: getImplementationFilter(state),
     };
   },
   mapDispatchToProps: {
