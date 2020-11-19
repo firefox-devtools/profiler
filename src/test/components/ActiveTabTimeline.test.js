@@ -93,12 +93,13 @@ describe('ActiveTabTimeline', function() {
       if (track.type !== 'tab') {
         throw new Error('Expected a tab track.');
       }
-      const threadIndex = getFirstItemFromSet(track.threadIndexes);
+      const threadIndex = ensureExists(
+        getFirstItemFromSet(track.threadIndexes),
+        'Expected a thread index for given active tab global track'
+      );
 
-      if (threadIndex !== undefined) {
-        // The assertions are simpler if the GeckoMain tab thread is not already selected.
-        dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
-      }
+      // The assertions are simpler if the GeckoMain tab thread is not already selected.
+      dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
       const renderResult = render(
         <Provider store={store}>
