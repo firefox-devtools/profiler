@@ -5,7 +5,10 @@
 import * as React from 'react';
 
 import { getStackType } from 'firefox-profiler/profile-logic/transforms';
-import { objectEntries } from 'firefox-profiler/utils/flow';
+import {
+  objectEntries,
+  assertExhaustiveCheck,
+} from 'firefox-profiler/utils/flow';
 import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
 import {
@@ -291,8 +294,11 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           ? 'Unsymbolicated native'
           : 'Unsymbolicated or generated JIT instructions';
         break;
+      case 'label':
+        stackTypeLabel = 'Label';
+        break;
       default:
-        throw new Error(`Unknown stack type case "${stackType}".`);
+        throw assertExhaustiveCheck(stackType, 'Unhandled StackType.');
     }
 
     return (
