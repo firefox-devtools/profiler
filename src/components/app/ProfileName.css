@@ -17,10 +17,6 @@
 .profileNameButton {
   overflow: hidden;
   padding: 0 9px;
-  border: none;
-  border-right: 1px solid var(--grey-30);
-  color: var(--grey-60);
-  font: inherit;
   font-weight: 700;
   margin-inline-end: 5px;
   text-overflow: ellipsis;

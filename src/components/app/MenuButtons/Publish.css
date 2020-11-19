@@ -2,19 +2,32 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsAbortUploadButton {
-  background-color: var(--green-70);
-  color: #fff;
+/* These two background images build on the generic styles defined in
+ * MenuButtons/index.css when using an icon. */
+.menuButtonsShareButtonButton::before {
+  background-image: url(firefox-profiler-res/img/svg/share-dark-12.svg);
 }
 
-.menuButtonsShareButtonOriginal {
-  background-color: var(--green-70);
-  color: white;
+.menuButtonsShareButtonButton-uploading::before {
+  background-image: url(firefox-profiler-res/img/svg/sharing-animated-dark-12.svg);
 }
 
 .menuButtonsShareButtonError {
   background-color: var(--red-60);
   color: white;
+}
+
+.menuButtonsShareButtonError:hover {
+  background-color: var(--red-70);
+}
+
+.buttonWithPanel.open > .menuButtonsShareButtonError,
+.menuButtonsShareButtonError:hover:active {
+  background-color: var(--red-80);
+}
+
+.menuButtonsShareButtonError::before {
+  background-image: url(firefox-profiler-res/img/svg/error.svg);
 }
 
 .menuButtonsPublishPanel {

@@ -124,7 +124,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
             display: isFocused ? 'none' : 'block',
           }}
           title={title}
-          className="profileNameButton menuButtonsButton"
+          className="profileNameButton menuButtonsButton menuButtonsButton-hasRightBorder"
           onFocus={this.handleButtonFocus}
           onClick={this.handleButtonFocus}
         >

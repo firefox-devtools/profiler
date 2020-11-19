@@ -32,6 +32,7 @@ import {
   getUploadPhase,
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 
@@ -78,13 +79,38 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     this.props.dismissNewlyPublished();
   }
 
+  _getUploadedStatus(dataSource: DataSource) {
+    switch (dataSource) {
+      case 'public':
+      case 'compare':
+      case 'from-url':
+        return 'uploaded';
+      case 'from-addon':
+      case 'from-file':
+        return 'local';
+      case 'none':
+      case 'uploaded-recordings':
+      case 'local':
+        throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
+      default:
+        throw assertExhaustiveCheck(dataSource);
+    }
+  }
+
   _renderMetaInfoButton() {
-    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    const {
+      profile,
+      symbolicationStatus,
+      resymbolicateProfile,
+      dataSource,
+    } = this.props;
+    const uploadedStatus = this._getUploadedStatus(dataSource);
     return (
       <ButtonWithPanel
-        className="menuButtonsMetaInfoButton"
-        buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton"
-        label="Profile Info"
+        buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
+        label={
+          uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
+        }
         panelClassName="metaInfoPanel"
         panelContent={
           <MetaInfoPanel
@@ -107,7 +133,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       return (
         <button
           type="button"
-          className="menuButtonsButton menuButtonsAbortUploadButton"
+          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
           onClick={abortFunction}
         >
           Cancel Upload
@@ -115,25 +141,27 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       );
     }
 
-    const isRepublish = dataSource === 'public' || dataSource === 'compare';
+    const uploadedStatus = this._getUploadedStatus(dataSource);
+    const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
-    let label = 'Publish…';
+    let label = 'Upload';
     if (isRepublish) {
-      label = 'Re-publish…';
+      label = 'Re-upload';
     }
+
     if (isError) {
-      label = 'Error publishing…';
+      label = 'Error uploading';
     }
 
     return (
       <ButtonWithPanel
-        className={classNames({
-          menuButtonsShareButton: true,
-          menuButtonsShareButtonOriginal: !isRepublish && !isError,
-          menuButtonsShareButtonError: isError,
-        })}
-        buttonClassName="menuButtonsButton"
+        buttonClassName={classNames(
+          'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
+          {
+            menuButtonsShareButtonError: isError,
+          }
+        )}
         panelClassName="menuButtonsPublishPanel"
         label={label}
         panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
@@ -165,7 +193,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
     return (
       <button
         type="button"
-        className="menuButtonsButton menuButtonsRevertButton"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
         Revert to Original Profile
@@ -176,14 +204,14 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   render() {
     return (
       <>
-        {this._renderMetaInfoButton()}
         {this._renderRevertProfile()}
+        {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
         {this._renderPermalink()}
         <a
           href="/docs/"
           target="_blank"
-          className="menuButtonsButton menuButtonsLink"
+          className="menuButtonsButton menuButtonsButton-hasLeftBorder"
           title="Open the documentation in a new window"
         >
           Docs
