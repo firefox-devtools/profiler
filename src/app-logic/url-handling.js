@@ -36,7 +36,7 @@ import type {
   TransformStacksPerThread,
 } from 'firefox-profiler/types';
 
-export const CURRENT_URL_VERSION = 5;
+export const CURRENT_URL_VERSION = 6;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -797,6 +797,29 @@ const _upgraders = {
     // implementation filter, so they also include 'relevantForJS' label frames in their
     // callNodePaths. For example,  in a call stack like this: 'C++->JS->relevantForJS->JS'
     // Previous callNodePath was 'JS,JS'. But now it has to be 'JS,relevantForJS,JS'.
+
+    /**
+     * Constructs the new JS CallNodePath from given stackIndex and returns it.
+     * This should only be used for the URL upgrader.
+     */
+    function getVersion4JSCallNodePathFromStackIndex(
+      thread: Thread,
+      stackIndex: IndexIntoStackTable
+    ): CallNodePath {
+      const { funcTable, stackTable, frameTable } = thread;
+      const callNodePath = [];
+      let nextStackIndex = stackIndex;
+      while (nextStackIndex !== null) {
+        const frameIndex = stackTable.frame[nextStackIndex];
+        const funcIndex = frameTable.func[frameIndex];
+        if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+          callNodePath.unshift(funcIndex);
+        }
+        nextStackIndex = stackTable.prefix[nextStackIndex];
+      }
+      return callNodePath;
+    }
+
     const query = processedLocation.query;
     const selectedThread: null | number =
       query.thread === undefined ? null : +query.thread;
@@ -889,6 +912,98 @@ const _upgraders = {
       .filter(Boolean)
       .join('~');
   },
+  [6]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    profile: Profile
+  ) => {
+    // 'js' implementation filter has been changed to include all label frames. See
+    // upgrader 4 for more information, as this is a very similar upgrade.
+
+    const idleCategoryIndex = profile.meta.categories.findIndex(
+      category => category.name === 'Idle'
+    );
+
+    /**
+     * Constructs the new JS CallNodePath from given stackIndex and returns it.
+     * This should only be used for the URL upgrader.
+     */
+    function getVersion6JSCallNodePathFromStackIndex(
+      thread: Thread,
+      stackIndex: IndexIntoStackTable
+    ): CallNodePath {
+      const { funcTable, stackTable, frameTable } = thread;
+      const callNodePath = [];
+      let nextStackIndex = stackIndex;
+      while (nextStackIndex !== null) {
+        const frameIndex = stackTable.frame[nextStackIndex];
+        const funcIndex = frameTable.func[frameIndex];
+        if (
+          funcTable.isJS[funcIndex] ||
+          funcTable.relevantForJS[funcIndex] ||
+          (frameTable.category[frameIndex] !== null &&
+            frameTable.category[frameIndex] !== idleCategoryIndex)
+        ) {
+          callNodePath.unshift(funcIndex);
+        }
+        nextStackIndex = stackTable.prefix[nextStackIndex];
+      }
+      return callNodePath;
+    }
+
+    const query = processedLocation.query;
+    const selectedThread: null | number =
+      query.thread === undefined ? null : +query.thread;
+
+    if (selectedThread === null || profile === undefined) {
+      return;
+    }
+
+    const transformStacksPerThread: TransformStacksPerThread = query.transforms
+      ? parseTransforms([selectedThread], query.transforms)
+      : {};
+
+    // At the time this upgrader was written, there was only one selected thread.
+    // Only upgrade the single transfrom.
+    const transforms = transformStacksPerThread[selectedThread];
+
+    if (!transforms || transforms.length === 0) {
+      // We don't have any transforms to upgrade.
+      return;
+    }
+
+    const thread = profile.threads[selectedThread];
+    for (let i = 0; i < transforms.length; i++) {
+      const transform = transforms[i];
+      if (
+        !transform.implementation ||
+        transform.implementation !== 'js' ||
+        !transform.callNodePath
+      ) {
+        // Only transforms with JS implementation filters that have callNodePaths
+        // need to be upgraded.
+        continue;
+      }
+
+      const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
+        thread,
+        transform.callNodePath
+      );
+      if (callNodeStackIndex === null) {
+        // If we can't find the stack index of given call node path, just abort.
+        continue;
+      }
+      // This property is not writable, make it an "any"
+      (transform: any).callNodePath = getVersion6JSCallNodePathFromStackIndex(
+        thread,
+        callNodeStackIndex
+      );
+    }
+
+    processedLocation.query.transforms = stringifyTransforms(
+      new Set([selectedThread]),
+      transformStacksPerThread
+    );
+  },
 };
 
 if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
@@ -944,26 +1059,6 @@ function getStackIndexFromVersion3JSCallNodePath(
     }
   }
   return null;
-}
-
-// Constructs the new JS CallNodePath from given stackIndex and returns it.
-// This should only be used for the URL upgrader.
-function getVersion4JSCallNodePathFromStackIndex(
-  thread: Thread,
-  stackIndex: IndexIntoStackTable
-): CallNodePath {
-  const { funcTable, stackTable, frameTable } = thread;
-  const callNodePath = [];
-  let nextStackIndex = stackIndex;
-  while (nextStackIndex !== null) {
-    const frameIndex = stackTable.frame[nextStackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
-      callNodePath.unshift(funcIndex);
-    }
-    nextStackIndex = stackTable.prefix[nextStackIndex];
-  }
-  return callNodePath;
 }
 
 function validateTimelineTrackOrganization(
