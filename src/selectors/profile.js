@@ -307,8 +307,18 @@ export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
       /*
        * Does this particular thread have a Preference in it?
        */
+      const preferenceName = 'PreferenceRead';
+      if (!stringTable.hasString(preferenceName)) {
+        // Let's optimize for the most frequent case where the thread doesn't
+        // have this string and bailout early before starting the expensive
+        // operation.
+        return false;
+      }
+
+      // This thread seems to have a reference with this name... but that could
+      // be a red herring.
       const indexForPreferenceString = stringTable.indexForString(
-        'PreferenceRead'
+        preferenceName
       );
       return markers.name.some(name => name === indexForPreferenceString);
     });
