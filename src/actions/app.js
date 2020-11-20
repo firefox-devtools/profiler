@@ -113,10 +113,12 @@ export function setHasZoomedViaMousewheel() {
  * This function is called when we start setting up the initial url state.
  * It takes the location and profile data, converts the location into url
  * state and then dispatches relevant actions to finalize the view.
+ * `profile` parameter can be null when the data source can't provide the profile
+ * and the url upgrader step is not needed (e.g. 'from-addon').
  */
 export function setupInitialUrlState(
   location: Location,
-  profile: Profile
+  profile: Profile | null
 ): ThunkAction<void> {
   return dispatch => {
     let urlState;
