@@ -25,6 +25,7 @@ import {
 import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
+import { yieldPaint } from '../utils/yield-paint';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
 import type {
@@ -191,6 +192,15 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
   sanitizePII
 );
 
+const getSanitizedProfileAfterPaint: Selector<
+  Promise<SanitizeProfileResult>
+> = async state => {
+  // We make sure to allow a paint operation to happen before starting a
+  // potentially heavy operation.
+  await yieldPaint();
+  return getSanitizedProfile(state);
+};
+
 /**
  * Computing the compressed data for a profile is a potentially slow operation. This
  * selector and its consumers perform that operation asynchronously. It can be called
@@ -202,8 +212,13 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
  */
 export const getSanitizedProfileData: Selector<
   Promise<Uint8Array>
-> = createSelector(getSanitizedProfile, ({ profile }) =>
-  compress(serializeProfile(profile))
+> = createSelector(
+  getSanitizedProfileAfterPaint,
+  async sanitizedProfileResultPromise => {
+    const { profile } = await sanitizedProfileResultPromise;
+    await yieldPaint();
+    return compress(serializeProfile(profile));
+  }
 );
 
 /**
