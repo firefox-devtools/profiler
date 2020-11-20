@@ -16,9 +16,11 @@ import { fireFullKeyPress } from '../fixtures/utils';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import type { TransformType } from 'firefox-profiler/types';
 
+type KeyPressOptions = { key: string, ... };
+
 type TestSetup = {|
   getTransformType: () => null | TransformType,
-  pressKey: (options: *) => void,
+  pressKey: (options: KeyPressOptions) => void,
 |};
 
 function testTransformKeyboardShortcuts(setup: () => TestSetup) {
@@ -117,7 +119,7 @@ describe('flame graph transform shortcuts', () => {
       },
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
-      pressKey: (options: *) => {
+      pressKey: (options: KeyPressOptions) => {
         const div = ensureExists(
           container.querySelector('.flameGraphContent'),
           `Couldn't find the content div with selector .flameGraphContent`
@@ -167,7 +169,7 @@ describe('CallTree transform shortcuts', () => {
       },
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
-      pressKey: (options: *) => {
+      pressKey: (options: KeyPressOptions) => {
         const treeViewBody = ensureExists(
           container.querySelector('div.treeViewBody'),
           `Couldn't find the tree view body with selector div.treeViewBody`

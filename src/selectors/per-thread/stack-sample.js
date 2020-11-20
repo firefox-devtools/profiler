@@ -51,7 +51,7 @@ export function getStackAndSampleSelectorsPerThread(
   threadSelectors: ThreadSelectorsPerThread,
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
-): * {
+) {
   /**
    * The buffers of the samples can be cleared out. This function lets us know the
    * absolute range of samples that we have collected.

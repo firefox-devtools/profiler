@@ -19,7 +19,7 @@ export class UploadAbortedError extends Error {
   name = 'UploadAbortedError';
 }
 
-export function uploadBinaryProfileData(): * {
+export function uploadBinaryProfileData() {
   const xhr = new XMLHttpRequest();
   let isAborted = false;
 

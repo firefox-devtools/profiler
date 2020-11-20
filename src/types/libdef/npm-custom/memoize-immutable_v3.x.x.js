@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+/* eslint-disable flowtype/no-weak-types */
+
 declare module 'memoize-immutable' {
   declare interface CacheInstance<K, V> {
     has(K): boolean;

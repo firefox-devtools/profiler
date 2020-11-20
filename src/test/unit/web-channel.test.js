@@ -51,7 +51,7 @@ describe('event handlers for Firefox WebChannel events', function() {
 
     // The triggerResponse doesn't allow unknown message types, so coerce it
     // into a Function to test the error path.
-    (triggerResponse: Function)({
+    (triggerResponse: any)({
       errno: 2,
       error: 'No Such Channel',
     });
@@ -73,7 +73,7 @@ describe('event handlers for Firefox WebChannel events', function() {
 
     // The triggerResponse doesn't allow unknown message types, so coerce it
     // into a Function to test the error path.
-    (triggerResponse: Function)('Invalid message');
+    (triggerResponse: any)('Invalid message');
 
     await expect(response).rejects.toEqual(
       new Error('A malformed WebChannel event was received.')

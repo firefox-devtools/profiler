@@ -6,7 +6,7 @@
 import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import {
-  processProfile,
+  processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
 } from 'firefox-profiler/profile-logic/process-profile';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
@@ -811,7 +811,7 @@ async function getProfileFromAddon(
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
-  const profile = processProfile(unpackedProfile);
+  const profile = processGeckoProfile(unpackedProfile);
   await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
@@ -964,7 +964,7 @@ type FetchProfileArgs = {
   url: string,
   onTemporaryError: TemporaryError => void,
   // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: Function,
+  reportError?: (...data: Array<any>) => void,
 };
 
 type ProfileOrZip = {
@@ -1056,7 +1056,7 @@ function _deduceContentType(
 async function _extractProfileOrZipFromResponse(
   url: string,
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<ProfileOrZip> {
   const contentType = _deduceContentType(
     url,
@@ -1089,7 +1089,7 @@ async function _extractProfileOrZipFromResponse(
  */
 async function _extractZipFromResponse(
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
   try {
@@ -1112,7 +1112,7 @@ async function _extractZipFromResponse(
  */
 async function _extractJsonFromResponse(
   response: Response,
-  reportError: Function,
+  reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<any> {
   try {
@@ -1213,7 +1213,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-function _fileReader(input: File): * {
+function _fileReader(input: File) {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of

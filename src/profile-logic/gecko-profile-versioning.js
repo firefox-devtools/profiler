@@ -18,13 +18,26 @@ import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 // Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
 
+function getProfileMeta(profile: mixed): MixedObject {
+  if (
+    profile &&
+    typeof profile === 'object' &&
+    profile.meta &&
+    typeof profile.meta === 'object'
+  ) {
+    return profile.meta;
+  }
+
+  throw new Error('Could not find the meta property on a profile.');
+}
+
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new.
  * @param {object} profile The profile in the "Gecko profile" format.
  */
-export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
-  const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
+export function upgradeGeckoProfileToCurrentVersion(json: mixed) {
+  const profileVersion = getProfileMeta(json).version || UNANNOTATED_VERSION;
   if (profileVersion === GECKO_PROFILE_VERSION) {
     return;
   }
@@ -44,11 +57,11 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](profile);
+      _upgraders[destVersion](json);
     }
   }
 
-  profile.meta.version = GECKO_PROFILE_VERSION;
+  getProfileMeta(json).version = GECKO_PROFILE_VERSION;
 }
 
 function _archFromAbi(abi) {
@@ -1089,6 +1102,216 @@ const _upgraders = {
       }
     }
     convertToVersion21Recursive(profile);
+  },
+  [22]: untypedProfile => {
+    // The marker schema, which details how to display markers was added. Back-fill
+    // any old profiles with a default schema.
+    type GeckoProfileVersion20To21 = {
+      meta: { markerSchema: mixed, ... },
+      processes: GeckoProfileVersion20To21[],
+      ...
+    };
+    const geckoProfile: GeckoProfileVersion20To21 = untypedProfile;
+
+    // Provide the primary marker schema list in the parent process.
+    geckoProfile.meta.markerSchema = [
+      {
+        name: 'GCMajor',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'GCMinor',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'GCSlice',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'CC',
+        tooltipLabel: 'Cycle Collect',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [],
+      },
+      {
+        name: 'FileIO',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'operation',
+            label: 'Operation',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'source',
+            label: 'Source',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'filename',
+            label: 'Filename',
+            format: 'file-path',
+            searchable: true,
+          },
+        ],
+      },
+      {
+        name: 'MediaSample',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'sampleStartTimeUs',
+            label: 'Sample start time',
+            format: 'microseconds',
+          },
+          {
+            key: 'sampleEndTimeUs',
+            label: 'Sample end time',
+            format: 'microseconds',
+          },
+        ],
+      },
+      {
+        name: 'Styles',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [
+          {
+            key: 'elementsTraversed',
+            label: 'Elements traversed',
+            format: 'integer',
+          },
+          {
+            key: 'elementsStyled',
+            label: 'Elements styled',
+            format: 'integer',
+          },
+          {
+            key: 'elementsMatched',
+            label: 'Elements matched',
+            format: 'integer',
+          },
+          { key: 'stylesShared', label: 'Styles shared', format: 'integer' },
+          { key: 'stylesReused', label: 'Styles reused', format: 'integer' },
+        ],
+      },
+      {
+        name: 'PreferenceRead',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          { key: 'prefName', label: 'Name', format: 'string' },
+          { key: 'prefKind', label: 'Kind', format: 'string' },
+          { key: 'prefType', label: 'Type', format: 'string' },
+          { key: 'prefValue', label: 'Value', format: 'string' },
+        ],
+      },
+      {
+        name: 'UserTiming',
+        tooltipLabel: '{marker.data.name}',
+        chartLabel: '{marker.data.name}',
+        tableLabel: '{marker.data.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          // name
+          { label: 'Marker', value: 'UserTiming' },
+          { key: 'entryType', label: 'Entry Type', format: 'string' },
+          {
+            label: 'Description',
+            value:
+              'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
+          },
+        ],
+      },
+      {
+        name: 'Text',
+        tableLabel: '{marker.name} — {marker.data.name}',
+        chartLabel: '{marker.name} — {marker.data.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [{ key: 'name', label: 'Details', format: 'string' }],
+      },
+      {
+        name: 'Log',
+        display: ['marker-table'],
+        tableLabel: '({marker.data.module}) {marker.data.name}',
+        data: [
+          { key: 'module', label: 'Module', format: 'string' },
+          { key: 'name', label: 'Name', format: 'string' },
+        ],
+      },
+      {
+        name: 'DOMEvent',
+        tooltipLabel: '{marker.data.eventType} — DOMEvent',
+        tableLabel: '{marker.data.eventType}',
+        chartLabel: '{marker.data.eventType}',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [
+          { key: 'latency', label: 'Latency', format: 'duration' },
+          // eventType is in the payload as well.
+        ],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Paint',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Navigation',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Layout',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        name: 'IPC',
+        tooltipLabel: 'IPC — {marker.data.niceDirection}',
+        tableLabel:
+          '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
+        chartLabel: '{marker.data.messageType}',
+        display: ['marker-chart', 'marker-table', 'timeline-ipc'],
+        data: [
+          { key: 'messageType', label: 'Type', format: 'string' },
+          { key: 'sync', label: 'Sync', format: 'string' },
+          { key: 'sendThreadName', label: 'From', format: 'string' },
+          { key: 'recvThreadName', label: 'To', format: 'string' },
+        ],
+      },
+      {
+        name: 'RefreshDriverTick',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
+      },
+      {
+        // The schema is mostly handled with custom logic.
+        name: 'Network',
+        display: ['marker-table'],
+        data: [],
+      },
+    ];
+
+    for (const processes of geckoProfile.processes) {
+      // We only need the marker schema in the parent process, as the front-end
+      // de-duplicates each process' schema.
+      processes.meta.markerSchema = [];
+    }
   },
 };
 /* eslint-enable no-useless-computed-key */

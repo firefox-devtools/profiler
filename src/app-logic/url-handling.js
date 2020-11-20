@@ -655,7 +655,7 @@ type ProcessedLocation = {|
 
 type ProcessedLocationBeforeUpgrade = {|
   ...ProcessedLocation,
-  query: Object,
+  query: any,
 |};
 
 export function upgradeLocationToCurrentVersion(

@@ -34,7 +34,7 @@ import { Backtrace } from 'firefox-profiler/components/shared/Backtrace';
 
 import {
   formatFromMarkerSchema,
-  getMarkerSchema,
+  getSchemaFromMarker,
 } from 'firefox-profiler/profile-logic/marker-schema';
 
 import type {
@@ -184,7 +184,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
     if (data) {
       // Add the details for the markers based on their Marker schema.
-      const schema = getMarkerSchema(markerSchemaByName, marker);
+      const schema = getSchemaFromMarker(markerSchemaByName, marker);
       if (schema) {
         for (const schemaData of schema.data) {
           // Check for a schema that is looking up and formatting a value from

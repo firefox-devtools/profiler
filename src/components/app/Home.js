@@ -195,7 +195,7 @@ function DocsButton() {
   );
 }
 
-function InstructionTransition(props: {}) {
+function InstructionTransition(props: { children: React.Node }) {
   return (
     <CSSTransition
       {...props}

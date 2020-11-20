@@ -271,14 +271,13 @@ describe('ListOfPublishedProfiles', () => {
 
     // Only this button isn't disabled, because it's the only one with the JWT information.
     const workingButton = getDeleteButtonForProfile('#012345');
-    expect(workingButton.disabled).toBe(false);
+    expect(workingButton).toBeEnabled();
 
     // All others are disabled.
     const allButtons = getAllByText('Delete');
     for (const button of allButtons) {
       if (button !== workingButton) {
-        // $FlowExpectError findAllByText returns HTMLElement, but we know these are buttons.
-        expect(button.disabled).toBe(true); // eslint-disable-line jest/no-conditional-expect
+        expect(button).toBeDisabled(); // eslint-disable-line jest/no-conditional-expect
       }
     }
 
@@ -371,7 +370,7 @@ describe('ListOfPublishedProfiles', () => {
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
-      waitForElementToBeRemoved(queryByText(/successfully/i));
+      await waitForElementToBeRemoved(queryByText(/successfully/i));
     });
 
     it('can cancel the deletion', async () => {
@@ -416,7 +415,7 @@ describe('ListOfPublishedProfiles', () => {
         container,
         getDeleteButtonForProfile,
         findByText,
-        queryByText,
+        getByText,
         getConfirmDeleteButton,
       } = setup({
         withActionButtons: true,
@@ -438,7 +437,7 @@ describe('ListOfPublishedProfiles', () => {
       // Clicking elsewhere should make the successful message disappear and a generic message appear.
       fireFullClick((window: any));
       await findByText(/no profile/i);
-      expect(queryByText(/no profile/i)).toBeTruthy();
+      expect(getByText(/no profile/i)).toBeTruthy();
     });
 
     it('can handle errors', async () => {

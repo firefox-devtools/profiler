@@ -38,7 +38,7 @@ exports[`<MetaInfoPanel> matches the snapshot 1`] = `
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"
@@ -423,7 +423,7 @@ exports[`<MetaInfoPanel> with no statistics object should not make the app crash
       >
         Profile Version:
       </span>
-      32
+      33
     </div>
     <div
       class="metaInfoRow"
@@ -579,7 +579,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   <div
     class="photon-message-bar photon-message-bar-error"
   >
-    Uh oh, something went wrong when publishing the profile.
+    Uh oh, something went wrong when uploading the profile.
     <button
       class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
@@ -598,27 +598,29 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
 exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`] = `
 <div>
   <div
-    class="buttonWithPanel menuButtonsMetaInfoButton"
+    class="buttonWithPanel"
   >
-    <input
+    <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
       type="button"
-      value="Profile Info"
-    />
+    >
+      Local Profile
+    </button>
   </div>
   <div
-    class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
+    class="buttonWithPanel"
   >
-    <input
+    <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
-      value="Publish…"
-    />
+    >
+      Upload
+    </button>
   </div>
   <a
-    class="menuButtonsButton menuButtonsLink"
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
     href="/docs/"
     target="_blank"
     title="Open the documentation in a new window"
@@ -628,6 +630,156 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="open-in-new"
     />
   </a>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 1`] = `
+<div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+      type="button"
+    >
+      Uploaded Profile
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Re-upload
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+      type="button"
+    >
+      Permalink
+    </button>
+  </div>
+  <a
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 2`] = `
+<div
+  data-testid="MenuButtonsPublish-container"
+>
+  <form
+    class="menuButtonsPublishContent"
+  >
+    <div
+      class="menuButtonsPublishIcon"
+    />
+    <h1
+      class="menuButtonsPublishTitle"
+    >
+      Re-upload Performance Profile
+    </h1>
+    <p
+      class="menuButtonsPublishInfoDescription"
+    >
+      Upload your profile and make it accessible to anyone with the link.
+       By default, your personal data is removed.
+    </p>
+    <h3>
+      Include additional data that may be identifiable
+    </h3>
+    <div
+      class="menuButtonsPublishDataChoices"
+    >
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeHiddenThreads"
+          type="checkbox"
+        />
+        Include hidden threads
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeFullTimeRange"
+          type="checkbox"
+        />
+        Include hidden time range
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeScreenshots"
+          type="checkbox"
+        />
+        Include screenshots
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeUrls"
+          type="checkbox"
+        />
+        Include resource URLs and paths
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeExtension"
+          type="checkbox"
+        />
+        Include extension information
+      </label>
+    </div>
+    <div
+      class="menuButtonsPublishButtons"
+    >
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+        type="button"
+      >
+        Compressing…
+      </button>
+      <button
+        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+        />
+        Upload
+      </button>
+    </div>
+  </form>
 </div>
 `;
 
@@ -730,7 +882,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
         />
-        Publish
+        Upload
       </button>
     </div>
   </form>
@@ -831,7 +983,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
         />
-        Publish
+        Upload
       </button>
     </div>
   </form>

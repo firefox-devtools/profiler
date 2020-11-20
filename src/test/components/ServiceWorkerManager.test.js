@@ -129,18 +129,18 @@ describe('app/ServiceWorkerManager', () => {
       // There's a new update!
       installOptions.onUpdateReady();
 
-      expect(getReloadButton().textContent).toBe('Apply and reload');
+      expect(getReloadButton()).toHaveTextContent('Apply and reload');
       expect(container.firstChild).toMatchSnapshot();
 
       // Some other tab applied the update before we had the chance.
       installOptions.onUpdated();
       expect(console.log).toHaveBeenCalled();
-      expect(getReloadButton().textContent).toBe('Reload the application');
+      expect(getReloadButton()).toHaveTextContent('Reload the application');
       expect(container.firstChild).toMatchSnapshot();
 
       // Let's hide the notice.
       fireFullClick(getCloseButton());
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       // But getting a new update should display the notice again.
       installOptions.onUpdateReady();
@@ -154,7 +154,7 @@ describe('app/ServiceWorkerManager', () => {
       fireFullClick(reloadButton);
 
       expect(serviceWorkerRuntime.applyUpdate).toHaveBeenCalled();
-      expect(reloadButton.textContent).toBe('Installing…');
+      expect(reloadButton).toHaveTextContent('Installing…');
 
       // And we should now reload automatically when the SW is fully updated.
       installOptions.onUpdated();
@@ -174,10 +174,10 @@ describe('app/ServiceWorkerManager', () => {
 
       installOptions.onUpdateReady();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       await dispatch(viewProfile(_getSimpleProfile()));
-      expect(container.firstChild).not.toBe(null);
+      expect(container).not.toBeEmptyDOMElement();
     });
 
     it(`doesn't show a notice until we're done symbolicating`, async () => {
@@ -193,10 +193,10 @@ describe('app/ServiceWorkerManager', () => {
 
       installOptions.onUpdateReady();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       dispatch(doneSymbolicating());
-      expect(container.firstChild).not.toBe(null);
+      expect(container).not.toBeEmptyDOMElement();
     });
 
     it('shows a warning notice if the SW was updated before we were ready', async () => {
@@ -218,7 +218,7 @@ describe('app/ServiceWorkerManager', () => {
 
       installOptions.onUpdateReady();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       // Some other tabs updated the SW.
       installOptions.onUpdated();
@@ -248,12 +248,12 @@ describe('app/ServiceWorkerManager', () => {
       // We don't display anything if there's an update ready.
       installOptions.onUpdateReady();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       // And we still don't if it was updated elsewhere.
       installOptions.onUpdated();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
     });
 
     it('shows a warning notice if updated before we were ready', async () => {
@@ -272,7 +272,7 @@ describe('app/ServiceWorkerManager', () => {
       // We don't display anything if there's an update ready.
       installOptions.onUpdateReady();
       expect(serviceWorkerRuntime.applyUpdate).not.toHaveBeenCalled();
-      expect(container.firstChild).toBe(null);
+      expect(container).toBeEmptyDOMElement();
 
       // But we do if it's updated from another tab.
       installOptions.onUpdated();
@@ -286,7 +286,7 @@ describe('app/ServiceWorkerManager', () => {
 
       // The notice stays if we're getting ready after that.
       await dispatch(viewProfile(_getSimpleProfile()));
-      expect(container.firstChild).not.toBe(null);
+      expect(container).not.toBeEmptyDOMElement();
     });
   });
 

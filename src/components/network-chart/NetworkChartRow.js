@@ -28,6 +28,7 @@ import type {
   Marker,
   MarkerIndex,
   NetworkPayload,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 // This regexp is used to split a pathname into a directory path and a filename.
@@ -84,7 +85,7 @@ type NetworkPhaseProps = {|
   +previousName: string,
   +value: number | string,
   +duration: Milliseconds,
-  +style: Object,
+  +style: MixedObject,
 |};
 
 function NetworkPhase({

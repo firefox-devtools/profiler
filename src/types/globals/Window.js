@@ -6,11 +6,12 @@
 import type { IDBFactory, IDBKeyRange } from '../indexeddb';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
+import type { MixedObject } from '../utils';
 
 // Because this type isn't an existing Global type, but still it's useful to
 // have it available, we define it with a $ as prfix.
 declare type $GeckoProfiler = {
-  getProfile: () => Object,
+  getProfile: () => MixedObject,
   getSymbolTable: (
     debugName: string,
     breakpadId: string
@@ -33,7 +34,7 @@ declare class Window {
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
   InstallTrigger?: {
-    install: Object => {},
+    install: MixedObject => boolean,
   };
 
   // For debugging purposes, allow tooltips to persist. This aids in inspecting

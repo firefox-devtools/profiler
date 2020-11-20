@@ -123,6 +123,7 @@ describe('getCheckedSharingOptions', function() {
       expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
   });
+
   describe('toggleCheckedSharingOptions', function() {
     it('can toggle options', function() {
       const { profile } = getProfileFromTextSamples('A');

@@ -6,6 +6,7 @@ module.exports = {
     node: true,
   },
   parser: 'babel-eslint',
+  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
@@ -22,7 +23,6 @@ module.exports = {
     },
     sourceType: 'module',
   },
-  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   rules: {
     // Plugin rules:
     'import/no-duplicates': 'error',
@@ -69,6 +69,7 @@ module.exports = {
     // possible errors
     'array-callback-return': 'error',
     'consistent-return': 'error',
+    curly: 'error',
     'default-case': 'error',
     'dot-notation': 'error',
     eqeqeq: 'error',
@@ -90,6 +91,18 @@ module.exports = {
     // We use the version from the flowtype plugin so that flow assertions don't
     // output an error.
     'flowtype/no-unused-expressions': 'error',
+    // The Object type and Function type aren't particularly useful, and usually hide
+    // type errors. It also blocks a migration to TypeScript. Disable this rule if
+    // using the Object or Function as generic type bounds.
+    'flowtype/no-weak-types': [
+      'error',
+      {
+        any: false,
+        Object: true,
+        Function: true,
+      },
+    ],
+    'flowtype/no-existential-type': 'error',
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',
