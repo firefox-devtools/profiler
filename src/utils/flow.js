@@ -4,7 +4,7 @@
 // @flow
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { TransformType } from 'firefox-profiler/types';
+import type { TransformType, Dispatch, GetState } from 'firefox-profiler/types';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally
@@ -109,6 +109,10 @@ export function coerce<A, B>(item: A): B {
   return (item: any);
 }
 
+export function toAny<A>(item: A): any {
+  return (item: any);
+}
+
 /**
  * It can be helpful to coerce one type that matches the shape of another.
  */
@@ -181,4 +185,43 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
     );
   }
   return item;
+}
+
+/**
+ * Wrap thunk actions with 0 arguments with this functions when passing it to
+ * mapDispatchToProps. This will make the function typecheck correctly by removing
+ * the "thunk" part of the action creaor.
+ *
+ * TODO - These will be useful when migrating to TypeScript.
+ */
+export function coerceThunk0<Returns>(
+  thunk: () => (dispatch: Dispatch, getState: GetState) => Returns
+): () => Returns {
+  return toAny(thunk);
+}
+
+/**
+ * Wrap thunk actions with 1 argument with this functions when passing it to
+ * mapDispatchToProps. This will make the function typecheck correctly by removing
+ * the "thunk" part of the action creaor.
+ *
+ * TODO - These will be useful when migrating to TypeScript.
+ */
+export function coerceThunk1<A1, Returns>(
+  thunk: (a1: A1) => (dispatch: Dispatch, getState: GetState) => Returns
+): (a1: A1) => Returns {
+  return toAny(thunk);
+}
+
+/**
+ * Wrap thunk actions with 2 arguments with this functions when passing it to
+ * mapDispatchToProps. This will make the function typecheck correctly by removing
+ * the "thunk" part of the action creaor.
+ *
+ * TODO - These will be useful when migrating to TypeScript.
+ */
+export function coerceThunk2<A1, A2, Returns>(
+  thunk: (a1: A1, a2: A2) => (dispatch: Dispatch, getState: GetState) => Returns
+): (a1: A1, a2: A2) => Returns {
+  return toAny(thunk);
 }
