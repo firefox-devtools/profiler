@@ -365,6 +365,27 @@ export function removeRootOverlayElement() {
   );
 }
 
+export function addScreenshotHoverlement() {
+  const div = document.createElement('div');
+  div.id = 'screenshot-hover';
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).appendChild(div);
+}
+
+export function removeScreenshotHoverElement() {
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).removeChild(
+    ensureExists(
+      document.querySelector('#screenshot-hover'),
+      'Expected to find a screenshot hover element to clean up.'
+    )
+  );
+}
+
 /**
  * You can't change <select>s by just clicking them using react-testing-library. This
  * utility makes it so that selects can be changed by the text that is in them.
