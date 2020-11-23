@@ -5,36 +5,37 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/src/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
-import { WindowTitle } from '../shared/WindowTitle';
+import { WindowTitle } from 'firefox-profiler/src/components/shared/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
 import { KeyboardShortcut } from './KeyboardShortcut';
 
-import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { Timeline } from '../timeline';
-import { getHasZipFile } from '../../selectors/zipped-profiles';
+import { returnToZipFileList } from 'firefox-profiler/src/actions/zipped-profiles';
+import { Timeline } from 'firefox-profiler/src/components/timeline';
+import { getHasZipFile } from 'firefox-profiler/src/selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
-import { invalidatePanelLayout } from '../../actions/app';
-import { getTimelineHeight } from '../../selectors/app';
+import { invalidatePanelLayout } from 'firefox-profiler/src/actions/app';
+import { getTimelineHeight } from 'firefox-profiler/src/selectors/app';
 import {
   getUploadProgress,
   getUploadPhase,
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
-} from '../../selectors/publish';
-import { getIconsWithClassNames } from '../../selectors/icons';
-import { BackgroundImageStyleDef } from '../shared/StyleDef';
+} from 'firefox-profiler/src/selectors/publish';
+
+import { getIconsWithClassNames } from 'firefox-profiler/src/selectors/icons';
+import { BackgroundImageStyleDef } from 'firefox-profiler/src/shared/StyleDef';
 import classNames from 'classnames';
-import { DebugWarning } from '../app/DebugWarning';
+import { DebugWarning } from 'firefox-profiler/src/app/DebugWarning';
 
 import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import { ConnectedProps } from 'firefox-profiler/src/utils/connet';
 
 import './ProfileViewer.css';
 
