@@ -5,31 +5,31 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import { getView, getUrlSetupPhase } from '../../selectors/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getView, getUrlSetupPhase } from 'firefox-profiler/selectors/app';
 import {
   updateUrlState,
   startFetchingProfiles,
   urlSetupDone,
   show404,
   setupInitialUrlState,
-} from '../../actions/app';
+} from 'firefox-profiler/actions/app';
 import {
   urlFromState,
   stateFromLocation,
   getIsHistoryReplaceState,
-} from '../../app-logic/url-handling';
+} from 'firefox-profiler/app-logic/url-handling';
 import {
   getProfilesFromRawUrl,
   typeof getProfilesFromRawUrl as GetProfilesFromRawUrl,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
-} from '../../utils/connect';
+} from 'firefox-profiler/utils/connect';
 import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {|

@@ -4,14 +4,13 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { getDataSource } from 'firefox-profiler/selectors/url-state';
+import { getView } from 'firefox-profiler/selectors/app';
+import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
 
-import { getDataSource } from '../../selectors/url-state';
-import { getView } from '../../selectors/app';
-import { getSymbolicationStatus } from '../../selectors/profile';
-
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type {
   DataSource,
   Phase,
