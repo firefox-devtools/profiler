@@ -966,7 +966,7 @@ export function filterThreadByImplementation(
 
       return _filterThreadByFuncAndFrame(
         thread,
-        (funcIndex, frameIndex, prefix) => {
+        (funcIndex, frameIndex) => {
           if (
             // This is clearly a JS frame, keep it.
             funcTable.isJS[funcIndex] ||
@@ -978,17 +978,38 @@ export function filterThreadByImplementation(
           const categoryIndex = frameTable.category[frameIndex];
           if (categoryIndex !== null) {
             // This is a label frame.
-            if (categoryIndex === idleCategoryIndex) {
-              // Idle label frames aren't interesting to
-              return false;
-            }
-            if (prefix === null && categoryIndex === otherCategoryIndex) {
-              // This is a root "Other" frame label, which isn't particularly useful.
-              return false;
-            }
-            // In general, preserve frame labels, as they will displayed with their
-            // category information.
-            return true;
+
+            // Idle and Other label frames and aren't interesting in the JS-context.
+            // The Idle frames appear midway through a stack, which is confusing. They also
+            // can't be filtered out with "drop function", as it would drop
+            // non-idle times.
+            //
+            // Given a (simplified) native stack from macOS:
+            //
+            // [Root (Other)------------------------------------]
+            // [GeckoNSApplication (Idle)-----------------------]
+            // [EventLoop------------------][mach_msg_trap------]
+            // [Work.js--------------------]
+            // [PresShell::DoFlush (Layout)]
+            //
+            // The JS-filtered view, with all label frames appears like this:
+            //
+            // [Other-------------------------------------------]
+            // [Idle--------------------------------------------]
+            // [Work.js--------------------]         ^
+            // [Layout---------------------]         |
+            //                                       This part is confusing, especially
+            //                                       in the flame graph.
+            //
+            // But removing the Other and Idle becomes much more interesting:
+            //
+            // [Work.js--------------------]
+            // [Layout---------------------]
+
+            return (
+              categoryIndex !== idleCategoryIndex &&
+              categoryIndex !== otherCategoryIndex
+            );
           }
 
           // Do not keep this stack.
@@ -1004,11 +1025,7 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFuncAndFrame(
   thread: Thread,
-  filter: (
-    IndexIntoFuncTable,
-    IndexIntoFrameTable,
-    prefix: IndexIntoStackTable | null
-  ) => boolean,
+  filter: (IndexIntoFuncTable, IndexIntoFrameTable) => boolean,
   defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
@@ -1035,7 +1052,7 @@ function _filterThreadByFuncAndFrame(
         const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
         const frameIndex = stackTable.frame[stackIndex];
         const funcIndex = frameTable.func[frameIndex];
-        if (filter(funcIndex, frameIndex, prefixNewStack)) {
+        if (filter(funcIndex, frameIndex)) {
           const prefixStackAndFrameIndex =
             (prefixNewStack === null ? -1 : prefixNewStack) * frameCount +
             frameIndex;
