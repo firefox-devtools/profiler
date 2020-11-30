@@ -894,7 +894,6 @@ function extractMarkers(
           markers.data.push({
             type: 'tracing',
             category: event.cat,
-            interval: event.ph === 'B' ? 'start' : 'end',
             data: argData,
           });
         } else {

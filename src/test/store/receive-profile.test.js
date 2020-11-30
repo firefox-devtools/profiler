@@ -194,12 +194,7 @@ describe('actions/receive-profile', function() {
       );
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -307,12 +302,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -338,12 +328,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));

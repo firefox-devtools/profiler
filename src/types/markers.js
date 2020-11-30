@@ -184,7 +184,6 @@ export type PaintProfilerMarkerTracing = {|
   type: 'tracing',
   category: 'Paint',
   cause?: CauseBacktrace,
-  interval: 'start' | 'end',
 |};
 
 export type ArbitraryEventTracing = {|
@@ -195,7 +194,6 @@ export type ArbitraryEventTracing = {|
 export type CcMarkerTracing = {|
   type: 'tracing',
   category: 'CC',
-  interval: 'start' | 'end',
 |};
 
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
@@ -514,7 +512,6 @@ export type ChromeInstantTraceEventPayload = {|
 export type ChromeDurationTraceEventPayload = {|
   type: 'tracing',
   category: 'FromChrome',
-  interval: 'start' | 'end',
   data: MixedObject | null,
   cause?: CauseBacktrace,
 |};
@@ -548,7 +545,6 @@ export type PrefMarkerPayload = {|
 export type NavigationMarkerPayload = {|
   type: 'tracing',
   category: 'Navigation',
-  interval: 'start' | 'end',
   eventType?: string,
   innerWindowID?: number,
 |};

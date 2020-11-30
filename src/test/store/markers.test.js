@@ -100,12 +100,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
   describe('markers that are crossing the profile start or end', function() {
     it('renders properly markers starting before profile start', function() {
       const markerTiming = getMarkerChartTimingAndBuckets([
-        [
-          'Rasterize',
-          1,
-          null,
-          { category: 'Paint', interval: 'end', type: 'tracing' },
-        ],
+        ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
       expect(markerTiming).toEqual([
         'Idle',
@@ -153,12 +148,7 @@ describe('memory markers', function() {
         ['DOMEvent', 0, null],
         ['Navigation', 1, null],
         ['Paint', 2, null],
-        [
-          'IdleForgetSkippable',
-          3,
-          4,
-          { type: 'tracing', category: 'CC', interval: 'end' },
-        ],
+        ['IdleForgetSkippable', 3, 4, { type: 'tracing', category: 'CC' }],
         ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
         ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
         ['GCSlice', 7, null, { type: 'GCSlice', timings: any }],
@@ -246,7 +236,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID,
           },
         ],
@@ -258,7 +247,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID: 111111,
           },
         ],
@@ -269,7 +257,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID,
           },
         ],
