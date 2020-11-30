@@ -9,13 +9,14 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
+  MixedObject,
 } from 'firefox-profiler/types';
 
 import {
   getEmptyProfile,
   getEmptyThread,
 } from '../../profile-logic/data-structures';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, coerce } from '../../utils/flow';
 import {
   INSTANT,
   INTERVAL,
@@ -160,33 +161,6 @@ type ScreenshotEvent = TracingEvent<{|
   args: { snapshot: string },
 |}>;
 
-export function isChromeProfile(profile: mixed): boolean {
-  if (!profile || typeof profile !== 'object') {
-    return false;
-  }
-
-  if (Array.isArray(profile)) {
-    // Chrome profiles come as a list of events.
-    const event = profile[0];
-    // Lightly check that some properties exist that are in the TracingEvent.
-    return (
-      typeof event === 'object' &&
-      event !== null &&
-      'ph' in event &&
-      'cat' in event &&
-      'args' in event
-    );
-  }
-
-  // A node.js profile is a single CpuProfileData, as opposed to a list of events.
-  return (
-    'samples' in profile &&
-    'timeDeltas' in profile &&
-    'startTime' in profile &&
-    'endTime' in profile
-  );
-}
-
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
   return {
     name: 'CpuProfile',
@@ -202,18 +176,49 @@ function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
   };
 }
 
-export function convertChromeProfile(
-  profile: CpuProfileData | TracingEventUnion[]
-): Promise<Profile> {
-  if (!Array.isArray(profile)) {
-    // Assume that this is CpuProfileData from a node profile. Wrap it
-    // in a list of TracingEvents so that the logic below can be re-used.
-    profile = [wrapCpuProfileInEvent(profile)];
+export function attemptToConvertChromeProfile(
+  json: mixed
+): Promise<Profile> | null {
+  if (!json) {
+    return null;
+  }
+
+  let events: TracingEventUnion[] | void;
+
+  if (Array.isArray(json)) {
+    // Chrome profiles come as a list of events.
+    const event: mixed = json[0];
+    // Lightly check that some properties exist that are in the TracingEvent.
+    if (
+      event &&
+      typeof event === 'object' &&
+      'ph' in event &&
+      'cat' in event &&
+      'args' in event
+    ) {
+      events = coerce<mixed[], TracingEventUnion[]>(json);
+    }
+  } else if (
+    // A node.js profile is a single CpuProfileData, as opposed to a list of events.
+    typeof json === 'object' &&
+    'samples' in json &&
+    'timeDeltas' in json &&
+    'startTime' in json &&
+    'endTime' in json
+  ) {
+    events = [];
+    events.push(
+      wrapCpuProfileInEvent(coerce<MixedObject, CpuProfileData>(json))
+    );
+  }
+
+  if (!events) {
+    return null;
   }
 
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
 
-  for (const tracingEvent of profile) {
+  for (const tracingEvent of events) {
     if (
       typeof tracingEvent !== 'object' ||
       tracingEvent === null ||
@@ -257,7 +262,11 @@ function findEvent<T: TracingEventUnion>(
   return events ? events.find(f) : undefined;
 }
 
-function findEvents<T: Object>(
+function findEvents<
+  // False positive, generic type bounds:
+  // eslint-disable-next-line flowtype/no-weak-types
+  T: Object
+>(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
   f: T => boolean
@@ -848,7 +857,7 @@ function extractMarkers(
         );
         const { thread } = threadInfo;
         const { markers, stringTable } = thread;
-        let argData: Object | null = null;
+        let argData: MixedObject | null = null;
         if (event.args && typeof event.args === 'object') {
           argData = (event.args: any).data || null;
         }
@@ -885,7 +894,6 @@ function extractMarkers(
           markers.data.push({
             type: 'tracing',
             category: event.cat,
-            interval: event.ph === 'B' ? 'start' : 'end',
             data: argData,
           });
         } else {

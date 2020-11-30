@@ -181,7 +181,7 @@ type StateProps = {|
   +thread: Thread,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
-  +eventDelays: Object,
+  +eventDelays: EventDelayInfo,
 |};
 
 type DispatchProps = {||};

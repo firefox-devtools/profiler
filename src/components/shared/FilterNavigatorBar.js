@@ -18,7 +18,7 @@ type Props = {|
       }
     | string
   >,
-  +onPop: number => *,
+  +onPop: number => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};

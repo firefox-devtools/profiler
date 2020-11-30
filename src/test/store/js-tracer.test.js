@@ -21,7 +21,7 @@ import {
 import type { Profile } from 'firefox-profiler/types';
 
 describe('jsTracerFixed', function() {
-  function fixTiming(events: *) {
+  function fixTiming(events: TestDefinedJsTracerEvent[]) {
     const profile = getProfileWithJsTracerEvents(events);
     const jsTracer = ensureExists(profile.threads[0].jsTracer);
     const jsTracerFixed = getJsTracerFixed(jsTracer);
@@ -30,6 +30,7 @@ describe('jsTracerFixed', function() {
       end: jsTracerFixed.end,
     };
   }
+
   it('does not modify a valid structure', function() {
     const timing = fixTiming([
       // [mozilla                  ]

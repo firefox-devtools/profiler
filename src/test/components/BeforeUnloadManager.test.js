@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { BeforeUnloadManager } from '../../components/app/BeforeUnloadManager';
 import { blankStore } from '../fixtures/stores';
 import { Provider } from 'react-redux';
@@ -24,8 +24,6 @@ describe('app/BeforeUnloadManager', () => {
       );
     return { dispatch, getState, createBeforeUnloadManager };
   }
-
-  afterEach(cleanup);
 
   it('Prevents default beforeunload behaviour', () => {
     const { dispatch, getState, createBeforeUnloadManager } = setup();

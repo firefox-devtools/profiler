@@ -115,9 +115,13 @@ class Screenshots extends PureComponent<Props, State> {
     const { left } = event.currentTarget.getBoundingClientRect();
     const offsetX = event.pageX - left;
     const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-    if (screenshotIndex === null) return;
+    if (screenshotIndex === null) {
+      return;
+    }
     const { start, end } = screenshots[screenshotIndex];
-    if (end === null) return;
+    if (end === null) {
+      return;
+    }
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,

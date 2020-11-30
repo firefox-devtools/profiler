@@ -333,7 +333,6 @@ export function getMarkerTableProfile() {
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
         },
       ],
       [
@@ -947,7 +946,6 @@ export function getNetworkTrackProfile() {
   const domContentLoadedBase = {
     type: 'tracing',
     category: 'Navigation',
-    interval: 'start',
     innerWindowID: innerWindowID,
   };
 
@@ -958,7 +956,6 @@ export function getNetworkTrackProfile() {
       5,
       ({
         ...loadPayloadBase,
-        interval: 'start',
       }: NavigationMarkerPayload),
     ],
     ['TTI', 6],
@@ -970,7 +967,6 @@ export function getNetworkTrackProfile() {
       7,
       ({
         ...domContentLoadedBase,
-        interval: 'start',
       }: NavigationMarkerPayload),
     ],
   ]);
@@ -1251,7 +1247,7 @@ export function getThreadWithEventDelay(
  *         - E (total: 3, self: 3)
  */
 
-export function getProfileWithJsAllocations(): * {
+export function getProfileWithJsAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -1327,7 +1323,7 @@ export function getProfileWithJsAllocations(): * {
  *       - D (total: -11, self: —)
  *         - E (total: -11, self: -11)
  */
-export function getProfileWithUnbalancedNativeAllocations(): * {
+export function getProfileWithUnbalancedNativeAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -1391,7 +1387,7 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
  *       - Gjs (total: 13, self: 13)
  */
 
-export function getProfileWithBalancedNativeAllocations(): * {
+export function getProfileWithBalancedNativeAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -1467,7 +1463,7 @@ export function getProfileWithBalancedNativeAllocations(): * {
 export function addActiveTabInformationToProfile(
   profile: Profile,
   activeBrowsingContextID?: BrowsingContextID
-): * {
+) {
   const firstTabBrowsingContextID = 1;
   const secondTabBrowsingContextID = 4;
   const parentInnerWindowIDsWithChildren = 11111111111;

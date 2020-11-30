@@ -11,13 +11,15 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+
 import { ensureExists } from '../../utils/flow';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
 import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
 
@@ -107,14 +109,15 @@ describe('app/MenuButtons', function() {
     const store = storeWithProfile(profile);
     const { resolveUpload, rejectUpload } = mockUpload();
 
-    store.dispatch({
-      type: 'UPDATE_URL_STATE',
-      newUrlState: stateFromLocation({
-        pathname: '/from-addon',
-        search: '',
-        hash: '',
-      }),
-    });
+    store.dispatch(
+      updateUrlState(
+        stateFromLocation({
+          pathname: '/from-addon',
+          search: '',
+          hash: '',
+        })
+      )
+    );
 
     const renderResult = render(
       <Provider store={store}>
@@ -129,9 +132,9 @@ describe('app/MenuButtons', function() {
       queryByText,
       findByText,
     } = renderResult;
-    const getPublishButton = () => getByText('Publish…');
-    const findPublishButton = () => findByText('Publish…');
-    const getErrorButton = () => getByText('Error publishing…');
+    const getPublishButton = () => getByText(/^(Re-upload|Upload)$/);
+    const findPublishButton = () => findByText(/^(Re-upload|Upload)$/);
+    const getErrorButton = () => getByText('Error uploading');
     const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
       ensureExists(
@@ -145,7 +148,14 @@ describe('app/MenuButtons', function() {
       fireFullClick(where);
       jest.runAllTimers();
     };
-
+    const navigateToHash = (hash: string) => {
+      const newUrlState = stateFromLocation({
+        pathname: `/public/${hash}/calltree`,
+        search: '',
+        hash: '',
+      });
+      store.dispatch(updateUrlState(newUrlState));
+    };
     return {
       store,
       ...renderResult,
@@ -159,6 +169,7 @@ describe('app/MenuButtons', function() {
       clickAndRunTimers,
       resolveUpload,
       rejectUpload,
+      navigateToHash,
     };
   }
 
@@ -207,6 +218,21 @@ describe('app/MenuButtons', function() {
     it('matches the snapshot for the opened panel for a release profile', () => {
       const { profile } = createSimpleProfile('release');
       const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', () => {
+      const { profile } = createSimpleProfile();
+      const {
+        getPanel,
+        container,
+        navigateToHash,
+        getPublishButton,
+        clickAndRunTimers,
+      } = setup(profile);
+      navigateToHash('VALID_HASH');
+      expect(container).toMatchSnapshot();
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
@@ -307,7 +333,7 @@ describe('<MetaInfoPanel>', function() {
 
   it('matches the snapshot', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.configuration = {
       features: ['js', 'threads'],
       threads: ['GeckoMain', 'DOM Worker'],
@@ -323,7 +349,7 @@ describe('<MetaInfoPanel>', function() {
 
   it('with no statistics object should not make the app crash', () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     // We are removing statistics objects from all overhead objects to test
     // the robustness of our handling code.
     if (profile.profilerOverhead) {

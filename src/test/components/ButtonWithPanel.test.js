@@ -63,7 +63,7 @@ describe('shared/ButtonWithPanel', () => {
      * not open.
      */
     it('only renders the contents when open', function() {
-      const { queryByTestId } = render(
+      const { getByTestId } = render(
         <ButtonWithPanel
           className="button"
           label="My Button"
@@ -71,7 +71,7 @@ describe('shared/ButtonWithPanel', () => {
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(queryByTestId('panel-content')).toBeTruthy();
+      expect(getByTestId('panel-content')).toBeTruthy();
     });
   });
 

@@ -8,7 +8,6 @@ Array [
       "category": "Navigation",
       "eventType": "load",
       "innerWindowID": 1,
-      "interval": "start",
       "type": "tracing",
     },
     "end": 5,
@@ -27,7 +26,6 @@ Array [
     "data": Object {
       "category": "Navigation",
       "innerWindowID": 1,
-      "interval": "start",
       "type": "tracing",
     },
     "end": 7,

@@ -5,6 +5,7 @@
 // @flow
 //
 import { STATUS_CODES } from 'http';
+import type { MixedObject } from 'firefox-profiler/types';
 
 // This is a partial implementation of the Fetch API's Response object,
 // implementing just what we need for these tests.
@@ -19,7 +20,7 @@ export class Response {
     options: {|
       status: number,
       statusText?: string,
-      headers?: {},
+      headers?: MixedObject,
     |}
   ) {
     this.status = options.status || 200;

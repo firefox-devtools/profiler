@@ -1,3 +1,5 @@
+/* eslint-disable flowtype/no-existential-type */
+/* eslint-disable flowtype/no-weak-types */
 // @flow
 // This comes from https://github.com/flow-typed/flow-typed/blob/51c898e2447e35c4fbe31ff40168cc463ef53aec/definitions/npm/jest_v26.x.x/flow_v0.104.x-/jest_v26.x.x.js
 // This was copied "manually" because our flow version is older than this, but
@@ -240,6 +242,7 @@ type DomTestingLibraryType = {
   toBeInTheDocument(): void,
   toBeVisible(): void,
   toBeEmpty(): void,
+  toBeEmptyDOMElement(): void,
   toBeDisabled(): void,
   toBeEnabled(): void,
   toBeInvalid(): void,

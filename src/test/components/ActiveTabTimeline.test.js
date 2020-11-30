@@ -330,8 +330,8 @@ describe('ActiveTabTimeline', function() {
       });
 
       it('has the correct track name', function() {
-        const { queryByText, resourcePage } = setup();
-        expect(queryByText(resourcePage.url)).toBeTruthy();
+        const { getByText, resourcePage } = setup();
+        expect(getByText(resourcePage.url)).toBeTruthy();
       });
 
       it('starts out not being selected', function() {

@@ -59,16 +59,16 @@ describe('app/KeyboardShortcut', function() {
     const clickMe = getByRole('button', { text: 'Click me' });
     clickMe.focus();
 
-    expect(document.activeElement).toBe(clickMe);
+    expect(clickMe).toHaveFocus();
 
     fireFullKeyPress(coerce<Window, HTMLElement>(window), { key: '?' });
     flushRafCalls(); // The focus is changed after react render.
 
-    expect(document.activeElement).toBe(getByRole('dialog'));
+    expect(getByRole('dialog')).toHaveFocus();
 
     fireFullKeyPress(coerce<Window, HTMLElement>(window), { key: 'Escape' });
     flushRafCalls(); // The focus is changed after react render.
 
-    expect(document.activeElement).toBe(clickMe);
+    expect(clickMe).toHaveFocus();
   });
 });

@@ -109,5 +109,5 @@ export function extractDomRectValue(
   rect: DOMRect,
   key: 'top' | 'left' | 'right' | 'bottom'
 ): number {
-  return (rect: Object)[key];
+  return (rect: any)[key];
 }
