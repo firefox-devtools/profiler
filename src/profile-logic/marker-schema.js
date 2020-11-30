@@ -80,7 +80,13 @@ export function getMarkerSchemaName(
     if (type === 'tracing' && data.category) {
       // TODO - Tracing markers have a duplicate "category" field.
       // See issue #2749
-      return data.category;
+
+      // Does a marker schema for the "category" exist?
+      return markerSchemaByName[data.category]
+        ? // If so, use the category as the schema name.
+          data.category
+        : // Otherwise default back to tracing
+          'tracing';
     }
     if (type === 'Text') {
       // Text markers are a cheap and easy way to create markers with
