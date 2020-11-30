@@ -2,3 +2,9 @@
 # and treat them like normal text.
 *.min.js binary
 *.min.css binary
+
+# Tell GitHub to treat these as generated files, which won't count towards code
+# diff counts. https://medium.com/@clarkbw/managing-generated-files-in-github-1f1989c09dfd
+*.snap                   linguist-generated=true
+yarn.lock                linguist-generated=true
+src/types/libdef/npm/*   linguist-generated=true
