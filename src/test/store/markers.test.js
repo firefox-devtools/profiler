@@ -345,7 +345,9 @@ describe('Marker schema filtering', function() {
 
     if (markerSchemaByName.RandomTracingMarker) {
       throw new Error(
-        'This test assumes that the RandomTracingMarker marker has no schema.'
+        'This test assumes that the RandomTracingMarker marker has no schema. If this ' +
+          'schema were added somewhere else, then rename RandomTracingMarker to ' +
+          'something else. '
       );
     }
 

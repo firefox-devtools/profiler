@@ -82,11 +82,11 @@ export function getMarkerSchemaName(
       // See issue #2749
 
       // Does a marker schema for the "category" exist?
-      return markerSchemaByName[data.category]
-        ? // If so, use the category as the schema name.
-          data.category
-        : // Otherwise default back to tracing
-          'tracing';
+      return markerSchemaByName[data.category] === undefined
+        ? // If not, default back to tracing
+          'tracing'
+        : // If so, use the category as the schema name.
+          data.category;
     }
     if (type === 'Text') {
       // Text markers are a cheap and easy way to create markers with
