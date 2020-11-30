@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  selectedThreadSelectors,
+  getMarkerSchemaByName,
+} from 'firefox-profiler/selectors';
 import {
   getUserTiming,
   getProfileWithMarkers,
@@ -330,10 +333,22 @@ describe('Marker schema filtering', function() {
       ['payload no schema', 0, null, { type: 'no schema marker' }],
       ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
       ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
+      // The following is a tracing marker without a schema attached, this was a
+      // regression reported in Bug 1678698.
+      // $FlowExpectError - Invalid payload by our type system.
+      ['RandomTracingMarker', 7, 8,  { type: 'tracing', category: 'RandomTracingMarker' }],
       ...getNetworkMarkers(),
     ]);
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerSchemaByName = getMarkerSchemaByName(getState());
+
+    if (markerSchemaByName.RandomTracingMarker) {
+      throw new Error(
+        'This test assumes that the RandomTracingMarker marker has no schema.'
+      );
+    }
+
     return selector(getState())
       .map(getMarker)
       .map(marker => marker.name);
@@ -348,6 +363,7 @@ describe('Marker schema filtering', function() {
       'RefreshDriverTick',
       'Load 0: https://mozilla.org',
       'UserTiming',
+      'RandomTracingMarker',
     ]);
   });
 
@@ -359,6 +375,7 @@ describe('Marker schema filtering', function() {
       'payload no schema',
       'RefreshDriverTick',
       'UserTiming',
+      'RandomTracingMarker',
     ]);
   });
 
