@@ -12,6 +12,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from 'firefox-profiler/actions/app';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
 
 import { ensureExists } from '../../utils/flow';
 import {
@@ -421,6 +423,81 @@ describe('<MetaInfoPanel>', function() {
       // No symbolicate button is available.
       expect(queryByText('Symbolicate profile')).toBeFalsy();
       expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+    });
+  });
+
+  describe('Full View Button', function() {
+    function setup() {
+      const { profile } = getProfileFromTextSamples('A');
+      const store = storeWithProfile(profile);
+
+      store.dispatch(
+        updateUrlState(
+          stateFromLocation({
+            pathname: '/from-addon',
+            search: '',
+            hash: '',
+          })
+        )
+      );
+
+      const renderResults = render(
+        <Provider store={store}>
+          <MenuButtons />
+        </Provider>
+      );
+
+      return {
+        profile,
+        ...store,
+        ...renderResults,
+      };
+    }
+
+    it('is not present when we are in the full view already', () => {
+      const { getState, queryByText } = setup();
+
+      // Make sure that we are in the full view and the button is not there.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
+      expect(queryByText('Full View')).toBeFalsy();
+    });
+
+    it('is present when we are in the active tab view', () => {
+      const { dispatch, getState, getByText, container } = setup();
+
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: null,
+        })
+      );
+
+      // Make sure that we are in the active tab view and the button is there.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
+      expect(getByText('Full View')).toBeTruthy();
+      expect(container).toMatchSnapshot();
+    });
+
+    it('switches to full view when clicked', () => {
+      const { dispatch, getState, getByText, queryByText } = setup();
+
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: null,
+        })
+      );
+
+      // Make sure that we are in the active tab view already.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
+      expect(getByText('Full View')).toBeTruthy();
+
+      // Switch to the full view by clicking on the Full View button
+      fireFullClick(getByText('Full View'));
+
+      // Make sure that we are in the full view and the button is no longer there
+      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
+      expect(queryByText('Full View')).toBeFalsy();
     });
   });
 });
