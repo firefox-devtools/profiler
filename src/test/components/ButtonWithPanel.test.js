@@ -97,6 +97,7 @@ describe('shared/ButtonWithPanel', () => {
       keyCode: 27,
       which: 27,
     });
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -113,6 +114,7 @@ describe('shared/ButtonWithPanel', () => {
     );
     fireFullClick(newDiv);
 
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
   });
 
