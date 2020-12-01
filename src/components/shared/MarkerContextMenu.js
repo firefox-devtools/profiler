@@ -38,7 +38,7 @@ import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-log
 import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 
 type OwnProps = {|

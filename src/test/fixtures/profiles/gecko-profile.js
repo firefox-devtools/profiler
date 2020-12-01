@@ -526,7 +526,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'end',
             type: 'tracing',
           },
         ],
@@ -547,7 +546,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'start',
             stack: createGeckoMarkerStack({ stackIndex: 2, time: 1 }), // (root), 0x100000f84, 0x100001a45
             type: 'tracing',
           },
@@ -560,7 +558,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'start',
             type: 'tracing',
           },
         ],
@@ -572,7 +569,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'end',
             type: 'tracing',
           },
         ],
@@ -584,7 +580,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'end',
             type: 'tracing',
           },
         ],
@@ -643,7 +638,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'start',
             stack: {
               markers: getEmptyMarkers(),
               name: 'SyncProfile',
@@ -672,7 +666,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'start',
             stack: {
               markers: getEmptyMarkers(),
               name: 'SyncProfile',
@@ -701,7 +694,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'end',
             type: 'tracing',
           },
         ],
@@ -713,7 +705,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'end',
             type: 'tracing',
           },
         ],
@@ -847,7 +838,6 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
           0, // Other
           {
             category: 'Paint',
-            interval: 'start',
             type: 'tracing',
           },
         ],

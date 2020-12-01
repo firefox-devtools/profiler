@@ -97,7 +97,6 @@ describe('TooltipMarker', function() {
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
         },
       ],
       [
@@ -285,7 +284,6 @@ describe('TooltipMarker', function() {
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
           cause: {
             tid: 111111,
             time: 17.0,
@@ -338,7 +336,6 @@ describe('TooltipMarker', function() {
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
         },
       ],
       [

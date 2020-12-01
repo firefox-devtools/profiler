@@ -151,7 +151,6 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.data.push({
     type: 'tracing',
     category: 'Paint',
-    interval: 'start',
   });
   thread2.markers.category.push(0);
   thread2.markers.name.push(

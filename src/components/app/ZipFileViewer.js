@@ -4,16 +4,16 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import { DragAndDropOverlay } from './DragAndDrop';
-import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
+import { procureInitialInterestingExpandedNodes } from 'firefox-profiler/profile-logic/zip-files';
 import {
   changeSelectedZipFile,
   changeExpandedZipFile,
   viewProfileFromZip,
   returnToZipFileList,
   showErrorForNoFileInZip,
-} from '../../actions/zipped-profiles';
+} from 'firefox-profiler/actions/zipped-profiles';
 import {
   getZipFileState,
   getZipFileTree,
@@ -22,19 +22,19 @@ import {
   getSelectedZipFileIndex,
   getExpandedZipFileIndexes,
   getZipFileErrorMessage,
-} from '../../selectors/zipped-profiles';
-import { getPathInZipFileFromUrl } from '../../selectors/url-state';
-import { TreeView } from '../shared/TreeView';
+} from 'firefox-profiler/selectors/zipped-profiles';
+import { getPathInZipFileFromUrl } from 'firefox-profiler/selectors/url-state';
+import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { ProfileViewer } from './ProfileViewer';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
 import type {
   ZipFileTable,
   ZipDisplayData,
   ZipFileTree,
   IndexIntoZipFileTable,
-} from '../../profile-logic/zip-files';
+} from 'firefox-profiler/profile-logic/zip-files';
 
 import './ZipFileViewer.css';
 
