@@ -156,11 +156,11 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     // 1. Do we move between "from-addon" and "public"?
     const movesBetweenFromAddonAndPublic =
       // from-addon -> public
-      (previousUrlState.dataSource === 'from-addon' &&
+      (['from-addon', 'unpublished'].includes(previousUrlState.dataSource) &&
         newUrlState.dataSource === 'public') ||
       // or public -> from-addon
       (previousUrlState.dataSource === 'public' &&
-        newUrlState.dataSource === 'from-addon');
+        ['from-addon', 'unpublished'].includes(newUrlState.dataSource));
 
     // 2. Do we move between 2 different hashes for a public profile
     const movesBetweenHashValues =
