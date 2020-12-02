@@ -615,6 +615,85 @@ exports[`<MetaInfoPanel> with no statistics object should not make the app crash
 </div>
 `;
 
+exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
+<body>
+  <div>
+    <button
+      class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
+      type="button"
+    >
+      Revert to Original Profile
+    </button>
+    <div
+      class="buttonWithPanel"
+    >
+      <button
+        aria-expanded="false"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+        type="button"
+      >
+        Uploaded Profile
+      </button>
+    </div>
+    <div
+      class="buttonWithPanel"
+    >
+      <button
+        aria-expanded="false"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+        type="button"
+      >
+        Re-upload
+      </button>
+    </div>
+    <div
+      class="buttonWithPanel open"
+    >
+      <button
+        aria-expanded="true"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+        type="button"
+      >
+        Permalink
+      </button>
+      <div
+        class="arrowPanelAnchor"
+      >
+        <div
+          class="arrowPanel open menuButtonsPermalinkPanel"
+        >
+          <div
+            class="arrowPanelArrow"
+          />
+          <div
+            class="arrowPanelContent"
+          >
+            <input
+              class="menuButtonsPermalinkTextField photon-input"
+              data-testid="MenuButtonsPermalink-input"
+              readonly=""
+              type="text"
+              value="https://profiler.firefox.com/"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <a
+      class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+      href="/docs/"
+      target="_blank"
+      title="Open the documentation in a new window"
+    >
+      Docs
+      <i
+        class="open-in-new"
+      />
+    </a>
+  </div>
+</body>
+`;
+
 exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
 <div
   class="menuButtonsPublishUpload"

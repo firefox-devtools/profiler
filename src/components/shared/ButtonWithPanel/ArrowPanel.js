@@ -40,7 +40,6 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
     }
 
     this.setState({ open: true });
-    this.props.onOpen();
   }
 
   close() {
@@ -51,8 +50,6 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       const openGeneration = state.openGeneration + 1;
 
       setTimeout(this._onCloseAnimationFinish(openGeneration), 400);
-
-      this.props.onClose();
 
       return { open: false, isClosing: true, openGeneration };
     });
@@ -79,6 +76,20 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       e.stopPropagation();
     }
   };
+
+  // We're calling open and close callbacks in componentDidUpdate because they
+  // often run side-effects, so we want them out of the render phase.
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (!prevState.open && this.state.open) {
+      // Opening
+      this.props.onOpen();
+    }
+
+    if (prevState.open && !this.state.open) {
+      // Closing
+      this.props.onClose();
+    }
+  }
 
   render() {
     const { className, children } = this.props;
