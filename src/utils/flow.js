@@ -182,3 +182,10 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
   }
   return item;
 }
+
+/**
+ * Returns the first item from Set in a type friendly manner.
+ */
+export function getFirstItemFromSet<T>(set: Set<T>): T | void {
+  return set.values().next().value;
+}
