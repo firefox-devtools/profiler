@@ -85,8 +85,8 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       this.props.onOpen();
     }
 
-    if (prevState.open && !this.state.open) {
-      // Closing
+    if (!this.state.open && prevState.isClosing && !this.state.isClosing) {
+      // Closing... but only after the animation.
       this.props.onClose();
     }
   }
