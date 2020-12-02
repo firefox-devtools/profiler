@@ -96,7 +96,10 @@ async function storeJustPublishedProfileData(
   prepublishedState: State
 ): Promise<void> {
   if (process.env.NODE_ENV === 'test' && !window.indexedDB) {
-    // bailout early in tests
+    // In tests where we're not especially testing this behavior, we may still
+    // want to test behavior related to publication. In that case we won't
+    // always have the indexeddb mock, so let's opt-out of the indexeddb-related
+    // behavior.
     return;
   }
 
@@ -298,9 +301,18 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
           )
         );
 
-        // At this moment, we don't have the profile data in state anymore.
+        // At this moment, we don't have the profile data in state anymore,
+        // because the action profileSanitized will reset all the state of
+        // profile-view, including the profile data. In the future we may want
+        // to fix this (for example move the profile data in another reducer, or
+        // keep the profile state when resetting the state).
+        // This still works because it also sets the "phase" state to
+        // "TRANSITIONING_FROM_STALE_PROFILE" that avoids rendering anything
+        // (see AppViewRouter).
         // viewProfile below needs to synchronously dispatch the new profile
-        // again.
+        // again so that the user doesn't see a glitch. This is still most
+        // probably a performance problem because all components are unmounted
+        // and mounted again.
 
         // Swap out the URL state, since the view profile calculates all of the default
         // settings. If we don't do this then we can go back in history to where we
