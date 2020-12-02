@@ -33,8 +33,10 @@ import { fireFullClick } from '../fixtures/utils';
 
 import type { Profile } from 'firefox-profiler/types';
 
-import 'fake-indexeddb/auto';
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
+// We need IndexedDB to get a SymbolStore that's necessary for symbolication
+// to even start, in some of the tests for this file.
+import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
+autoMockIndexedDB();
 
 // We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -59,18 +61,6 @@ jest.mock('firefox-profiler/profile-logic/symbolication');
 
 // Mock hash
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-
-// We need IndexedDB to get a SymbolStore that's necessary for symbolication
-// to even start, in some of the tests for this file.
-function resetIndexedDb() {
-  // This is the recommended way to reset the IDB state between test runs, but
-  // neither flow nor eslint like that we assign to indexedDB directly, for
-  // different reasons.
-  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
-  indexedDB = new FDBFactory();
-}
-beforeEach(resetIndexedDb);
-afterEach(resetIndexedDb);
 
 describe('app/MenuButtons', function() {
   function mockUpload() {

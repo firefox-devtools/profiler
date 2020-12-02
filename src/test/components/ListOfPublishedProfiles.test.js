@@ -23,18 +23,8 @@ import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
 import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
-import 'fake-indexeddb/auto';
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
-
-function resetIndexedDb() {
-  // This is the recommended way to reset the IDB state between test runs, but
-  // neither flow nor eslint like that we assign to indexedDB directly, for
-  // different reasons.
-  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
-  indexedDB = new FDBFactory();
-}
-beforeEach(resetIndexedDb);
-afterEach(resetIndexedDb);
+import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
+autoMockIndexedDB();
 
 const listOfProfileInformations = [
   {
