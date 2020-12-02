@@ -500,13 +500,13 @@ type Location = {
 };
 
 /**
- * Create url state from window.location.
+ * Parse the window.location string to create the UrlState.
  *
  * `profile` parameter is nullable and optional. It's nullable because data sources
  * like from-addon can't upgrade a url for a freshly captured profile. So we need
- * to skip upgrading for these sources. It's also optional for only testing purpose.
- * That way we won't have to create a profile for every time we want to create a
- * state from location. Do not use it except testing.
+ * to skip upgrading for these sources. It's also optional for both testing
+ * purposes and for places where we would like to do the upgrading without
+ * providing any profile.
  */
 export function stateFromLocation(
   location: Location,
