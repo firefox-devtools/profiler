@@ -260,7 +260,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       >
         <div className="photon-message-bar photon-message-bar-error">
           <div className="photon-message-bar-inner-text">
-          Uh oh, something went wrong when uploading the profile.
+            Uh oh, something went wrong when uploading the profile.
           </div>
           <button
             className="photon-button photon-button-micro photon-message-bar-action-button"

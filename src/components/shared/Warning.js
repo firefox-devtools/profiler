@@ -42,7 +42,7 @@ export class Warning extends PureComponent<Props, State> {
       <div className="warningMessageBarWrapper">
         <div className="photon-message-bar photon-message-bar-warning warningMessageBar">
           <div className="photon-message-bar-inner-text">
-          {message}
+            {message}
           </div>
           {actionText ? (
             <button

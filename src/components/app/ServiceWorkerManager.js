@@ -306,8 +306,8 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
           {/* We use the wrapper to horizontally center the notice */}
           <div className="photon-message-bar photon-message-bar-warning serviceworker-ready-notice">
             <div className="photon-message-bar-inner-text">
-            A new version of the application was applied before this page was
-            fully loaded. You might see malfunctions.
+              A new version of the application was applied before this page was
+              fully loaded. You might see malfunctions.
             </div>
             {this._canUpdateServiceWorker() ? this.renderButton() : null}
             <button
@@ -332,8 +332,8 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         {/* We use the wrapper to horizontally center the notice */}
         <div className="photon-message-bar serviceworker-ready-notice">
           <div className="photon-message-bar-inner-text">
-          A new version of the application has been downloaded and is ready to
-          use.
+            A new version of the application has been downloaded and is ready to
+            use.
           </div>
           {this.renderButton()}
           <button
