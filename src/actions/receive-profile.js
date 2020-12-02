@@ -935,7 +935,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
-      throw error;
+      console.error(error);
     }
   };
 }
@@ -1426,7 +1426,7 @@ export function getProfilesFromRawUrl(
         // for the process. Moreover we don't want to wait for the end of
         // symbolication and rather want to show the UI as soon as we get
         // the profile data.
-        dispatch(retrieveProfileFromAddon()).catch(() => {});
+        dispatch(retrieveProfileFromAddon());
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
