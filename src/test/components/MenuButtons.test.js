@@ -18,8 +18,12 @@ import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from 'firefox-profiler/actions/app';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import {
+  changeTimelineTrackOrganization,
+  loadProfile,
+} from 'firefox-profiler/actions/receive-profile';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
+
 import { getHash, getDataSource } from 'firefox-profiler/selectors/url-state';
 
 import { ensureExists } from '../../utils/flow';
@@ -353,7 +357,7 @@ describe('app/MenuButtons', function() {
 });
 
 describe('<MetaInfoPanel>', function() {
-  function setup(profile: Profile) {
+  async function setup(profile: Profile) {
     jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
       // eslint-disable-next-line babel/no-invalid-this
       return 'toLocaleString ' + this.toUTCString();
@@ -364,13 +368,7 @@ describe('<MetaInfoPanel>', function() {
     // Note that we dispatch this action directly instead of using viewProfile
     // or loadProfile because we want to control tightly how symbolication is
     // started in these tests.
-    store.dispatch({
-      type: 'PROFILE_LOADED',
-      profile,
-      pathInZipFile: null,
-      implementationFilter: null,
-      transformStacks: null,
-    });
+    await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
 
     return render(
       <Provider store={store}>
@@ -379,7 +377,7 @@ describe('<MetaInfoPanel>', function() {
     );
   }
 
-  it('matches the snapshot', () => {
+  it('matches the snapshot', async () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
     const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.configuration = {
@@ -389,13 +387,13 @@ describe('<MetaInfoPanel>', function() {
       duration: 20,
     };
 
-    const { container } = setup(profile);
+    const { container } = await setup(profile);
     // This component renders a fragment, so we look at the full container so
     // that we get all children.
     expect(container).toMatchSnapshot();
   });
 
-  it('with no statistics object should not make the app crash', () => {
+  it('with no statistics object should not make the app crash', async () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
     const profile = processGeckoProfile(createGeckoProfile());
     // We are removing statistics objects from all overhead objects to test
@@ -406,7 +404,7 @@ describe('<MetaInfoPanel>', function() {
       }
     }
 
-    const { container } = setup(profile);
+    const { container } = await setup(profile);
     // This component renders a fragment, so we look at the full container so
     // that we get all children.
     expect(container).toMatchSnapshot();
@@ -425,7 +423,7 @@ describe('<MetaInfoPanel>', function() {
     }
 
     it('handles successfully symbolicated profiles', async () => {
-      setupSymbolicationTest({ symbolicated: true });
+      await setupSymbolicationTest({ symbolicated: true });
 
       expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
       fireFullClick(screen.getByText('Re-symbolicate profile'));
@@ -444,7 +442,7 @@ describe('<MetaInfoPanel>', function() {
     });
 
     it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
-      setupSymbolicationTest({ symbolicated: false });
+      await setupSymbolicationTest({ symbolicated: false });
 
       expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
       fireFullClick(screen.getByText('Symbolicate profile'));
