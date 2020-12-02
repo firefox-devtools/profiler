@@ -37,7 +37,7 @@ import {
 import {
   withHistoryReplaceStateAsync,
   stateFromLocation,
-  getDataSourceFromPathParts,
+  ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
@@ -1401,7 +1401,7 @@ export function getProfilesFromRawUrl(
 > {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
-    let dataSource = getDataSourceFromPathParts(pathParts);
+    let dataSource = ensureIsValidDataSource(pathParts[0]);
     if (dataSource === 'from-file') {
       // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
       // be 'from-file' and needs to be redirected to home page.
@@ -1412,6 +1412,7 @@ export function getProfilesFromRawUrl(
     let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
+      case 'unpublished':
         shouldSetupInitialUrlState = false;
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait

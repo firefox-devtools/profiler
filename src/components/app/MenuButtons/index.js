@@ -95,6 +95,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       case 'from-url':
         return 'uploaded';
       case 'from-addon':
+      case 'unpublished':
       case 'from-file':
         return 'local';
       case 'none':
