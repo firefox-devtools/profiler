@@ -7,7 +7,11 @@ exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource show
   <div
     class="photon-message-bar serviceworker-ready-notice"
   >
-    A new version of the application has been downloaded and is ready to use.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      A new version of the application has been downloaded and is ready to use.
+    </div>
     <button
       class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
@@ -31,7 +35,11 @@ exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource show
   <div
     class="photon-message-bar serviceworker-ready-notice"
   >
-    A new version of the application has been downloaded and is ready to use.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      A new version of the application has been downloaded and is ready to use.
+    </div>
     <button
       class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
@@ -55,7 +63,11 @@ exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource show
   <div
     class="photon-message-bar serviceworker-ready-notice"
   >
-    A new version of the application has been downloaded and is ready to use.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      A new version of the application has been downloaded and is ready to use.
+    </div>
     <button
       class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
@@ -79,7 +91,11 @@ exports[`app/ServiceWorkerManager with the \`from-addon\` datasource shows a war
   <div
     class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
   >
-    A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+    </div>
     <button
       aria-label="Hide the reload notice"
       class="photon-button photon-message-bar-close-button"
@@ -97,7 +113,11 @@ exports[`app/ServiceWorkerManager with the \`public\` datasource shows a warning
   <div
     class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
   >
-    A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+    </div>
     <button
       aria-label="Hide the reload notice"
       class="photon-button photon-message-bar-close-button"
