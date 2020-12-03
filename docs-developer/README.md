@@ -22,7 +22,7 @@
  * [Processed profile format](./processed-profile-format.md)
  * [Writing a Custom Profile Importer](./custom-importer.md)
  * [Markers](./markers.md)
- * [Upgrading profiles](./upgrading-profiles.md)
+ * [Profile expiration and upgrading profiles](./upgrading-profiles.md)
  * [Potential performance data sources in Gecko](./data-sources.md)
  * [Call tree](./call-tree.md)
  * [Frames, funcs, stacks and CallNodes in C++](./call-nodes-in-cpp.md)
