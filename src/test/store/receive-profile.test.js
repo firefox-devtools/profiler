@@ -1291,7 +1291,7 @@ describe('actions/receive-profile', function() {
 
       expect(
         // Coerce into the object to access the error property.
-        (view: Object).error
+        (view: any).error
       ).toMatchSnapshot();
     });
 
