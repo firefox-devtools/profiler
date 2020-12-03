@@ -8,6 +8,10 @@
 
 import { openDB, deleteDB } from 'idb';
 import { stripIndent } from 'common-tags';
+import {
+  stateFromLocation,
+  urlFromState,
+} from 'firefox-profiler/app-logic/url-handling';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import type { DB as Database } from 'idb';
@@ -129,6 +133,11 @@ async function open(): Promise<Database> {
   return db;
 }
 
+/**
+ * This stores some profile data. The profileToken property is the primary key,
+ * so this also updates any profile data already there with the same
+ * profileToken information.
+ */
 export async function storeProfileData(
   profileData: ProfileData
 ): Promise<void> {
@@ -136,11 +145,18 @@ export async function storeProfileData(
   await db.put(OBJECTSTORE_NAME, profileData);
 }
 
+/**
+ * This returns the list of all the stored data.
+ */
 export async function listAllProfileData(): Promise<ProfileData[]> {
   const db = await open();
   return db.getAllFromIndex(OBJECTSTORE_NAME, 'publishedDate');
 }
 
+/**
+ * This returns the profile data for a specific stored token, or undefined
+ * otherwise.
+ */
 export async function retrieveProfileData(
   profileToken: string
 ): Promise<ProfileData | void> {
@@ -148,7 +164,43 @@ export async function retrieveProfileData(
   return db.get(OBJECTSTORE_NAME, profileToken);
 }
 
+/**
+ * This deletes the profile data stored with this token. This is a no-op if this
+ * token isn't in the database.
+ */
 export async function deleteProfileData(profileToken: string): Promise<void> {
   const db = await open();
   return db.delete(OBJECTSTORE_NAME, profileToken);
+}
+
+/**
+ * This changes the profile name of a stored profile data. This is a no-op if
+ * this token isn't in the database.
+ */
+export async function changeStoredProfileName(
+  profileToken: string,
+  profileName: string
+): Promise<void> {
+  const storedProfile = await retrieveProfileData(profileToken);
+  if (storedProfile && storedProfile.name !== profileName) {
+    // We need to update the name, but also the urlPath. For this we'll convert
+    // the old one to a state, and convert it back to a url string, so that
+    // there is less chance that we forget about this case if we update the
+    // state object.
+
+    // `stateFromLocation` waits for something that looks like a Location
+    // object. We use the URL object for this, but it requires a full URL, even
+    // if `stateFromLocation` doesn't need one.
+    const oldState = stateFromLocation(
+      new URL(storedProfile.urlPath, window.location.href)
+    );
+    const newUrlPath = urlFromState({ ...oldState, profileName });
+
+    const newProfileData = {
+      ...storedProfile,
+      name: profileName,
+      urlPath: newUrlPath,
+    };
+    await storeProfileData(newProfileData);
+  }
 }
