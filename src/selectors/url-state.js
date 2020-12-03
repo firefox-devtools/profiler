@@ -5,7 +5,7 @@
 // @flow
 import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
@@ -105,9 +105,7 @@ export const getSelectedThreadsKey: Selector<ThreadsKey> = state =>
  */
 export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
   ensureExists(
-    getSelectedThreadIndexes(state)
-      .values()
-      .next().value,
+    getFirstItemFromSet(getSelectedThreadIndexes(state)),
     'Expected to find at least one thread index in the selected thread indexes'
   );
 export const getTimelineType: Selector<TimelineType> = state =>

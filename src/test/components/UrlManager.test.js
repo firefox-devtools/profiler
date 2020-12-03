@@ -15,6 +15,7 @@ import {
   getDataSource,
   getHash,
   getCurrentSearchString,
+  getTimelineTrackOrganization,
 } from '../../selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -279,19 +280,13 @@ describe('UrlManager', function() {
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
 
-    // FIXME: for from-addon the history gets rewritten several times at load
-    // time: once without anything in the state, and once once the state is
-    // ready. The reason is that we don't wait for the result of the "view
-    // profile" action before setting url setup to "done". There are some
-    // reasons to this but we'll likely want to change it and fix the "reason"
-    // differently.
-    expect(window.history.length).toBe(2);
+    expect(window.history.length).toBe(1);
 
     // Now the user publishes.
     dispatch(profilePublished('SOME_HASH', null));
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_HASH');
-    expect(window.history.length).toBe(3);
+    expect(window.history.length).toBe(2);
 
     // Then wants to go back in history. This shouldn't work!
     let previousLocation = window.location.href;
@@ -302,7 +297,7 @@ describe('UrlManager', function() {
 
     // We went back, the entry number 2 has been replaced, but there are still 3
     // entries in the history.
-    expect(window.history.length).toBe(3);
+    expect(window.history.length).toBe(2);
 
     // Now let's publish again
     dispatch(profilePublished('SOME_OTHER_HASH', null));
@@ -311,7 +306,7 @@ describe('UrlManager', function() {
 
     // It's still 3 because the 3rd entry has been removed and replaced by this
     // new state (remember we were at entry number 2).
-    expect(window.history.length).toBe(3);
+    expect(window.history.length).toBe(2);
 
     // The user wants to go back, but this won't work!
     previousLocation = window.location.href;
@@ -319,5 +314,17 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('public');
     expect(getHash(getState())).toMatch('SOME_OTHER_HASH');
     expect(previousLocation).toEqual(window.location.href);
+  });
+
+  it('persists view query string for `from-addon` data source', async function() {
+    const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
+      '/from-addon/?view=active-tab'
+    );
+    await createUrlManager();
+    await waitUntilUrlSetupPhase('done');
+
+    // It should successfully preserve the view query string and update the
+    // timeline track organization state.
+    expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
   });
 });

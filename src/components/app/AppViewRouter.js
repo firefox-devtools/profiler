@@ -27,7 +27,8 @@ import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': "Couldn't retrieve the profile from the Firefox.",
+  'from-addon': "Couldn't retrieve the profile from Firefox.",
+  unpublished: "Couldn't retrieve the profile from Firefox.",
   'from-file': "Couldn't read the file or parse the profile in it.",
   local: 'Not implemented yet.',
   public: 'Could not download the profile.',
@@ -63,6 +64,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
       case 'uploaded-recordings':
         return <UploadedRecordingsHome />;
       case 'from-addon':
+      case 'unpublished':
       case 'from-file':
       case 'local':
       case 'public':

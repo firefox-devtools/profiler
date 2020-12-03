@@ -108,4 +108,6 @@ exports[`actions/receive-profile retrieveProfileFromFile will be an error to vie
 
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to decompress a zipped profile 1`] = `[Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html]`;
 
+exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse gzipped profiles 1`] = `[Error: Unserializing the profile failed: Error: This does not appear to be a valid Gecko Profile, there is no meta field.]`;
+
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse json 1`] = `[Error: Unserializing the profile failed: Error: This does not appear to be a valid Gecko Profile, there is no meta field.]`;

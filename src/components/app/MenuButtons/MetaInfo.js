@@ -4,7 +4,14 @@
 
 // @flow
 import * as React from 'react';
+
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
+import {
+  getProfile,
+  getSymbolicationStatus,
+} from 'firefox-profiler/selectors/profile';
+import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
+
 import {
   formatBytes,
   formatTimestamp,
@@ -14,23 +21,29 @@ import {
   formatPlatform,
 } from 'firefox-profiler/profile-logic/profile-metainfo';
 
-import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
-
-import { typeof resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import explicitConnect from 'firefox-profiler/utils/connect';
+
+import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MetaInfo.css';
 
-type Props = {|
-  +profile: Profile,
-  +symbolicationStatus: SymbolicationStatus,
-  +resymbolicateProfile: resymbolicateProfile,
-|};
+type StateProps = $ReadOnly<{|
+  profile: Profile,
+  symbolicationStatus: SymbolicationStatus,
+|}>;
+
+type DispatchProps = $ReadOnly<{|
+  resymbolicateProfile: typeof resymbolicateProfile,
+|}>;
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
-export class MetaInfoPanel extends React.PureComponent<Props> {
+class MetaInfoPanelImpl extends React.PureComponent<Props> {
   /**
    * This method provides information about the symbolication status, and a button
    * to re-trigger symbolication.
@@ -275,3 +288,14 @@ function _formatDate(timestamp: number): string {
   });
   return timestampDate;
 }
+
+export const MetaInfoPanel = explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
+    profile: getProfile(state),
+    symbolicationStatus: getSymbolicationStatus(state),
+  }),
+  mapDispatchToProps: {
+    resymbolicateProfile,
+  },
+  component: MetaInfoPanelImpl,
+});
