@@ -55,7 +55,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     switch (dataSource) {
       case 'from-addon':
       case 'unpublished':
-        retrieveProfileFromAddon().catch(e => console.error(e));
+        retrieveProfileFromAddon();
         break;
       case 'from-file':
         // retrieveProfileFromFile should already have been called
