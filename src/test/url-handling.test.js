@@ -452,7 +452,6 @@ describe('ctxId', function() {
     expect(globalTracks).toEqual([
       {
         type: 'tab',
-        mainThreadIndex: 0,
         threadIndexes: new Set([0]),
         threadsKey: 0,
       },
@@ -1264,6 +1263,7 @@ describe('uploaded-recordings', function() {
 
 describe('last requested call tree summary strategy', function() {
   const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
+
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(

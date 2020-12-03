@@ -16,6 +16,7 @@ describe('profile-metainfo', () => {
     Object.assign(profile.meta, metaOverride);
     return profile;
   }
+
   describe('formatProductAndVersion', () => {
     it('can format Firefox releases', () => {
       const profile = setup({

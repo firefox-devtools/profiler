@@ -16,6 +16,7 @@ import {
 import {
   assertExhaustiveCheck,
   toValidTabSlug,
+  coerce,
   ensureExists,
 } from 'firefox-profiler/utils/flow';
 import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
@@ -111,13 +112,12 @@ function getPathParts(urlState: UrlState): string[] {
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-addon':
-      return ['from-addon', urlState.selectedTab];
+    case 'unpublished':
     case 'from-file':
-      return ['from-file', urlState.selectedTab];
-    case 'local':
-      return ['local', urlState.hash, urlState.selectedTab];
+      return [dataSource, urlState.selectedTab];
     case 'public':
-      return ['public', urlState.hash, urlState.selectedTab];
+    case 'local':
+      return [dataSource, urlState.hash, urlState.selectedTab];
     case 'from-url':
       return [
         'from-url',
@@ -255,6 +255,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'public':
     case 'local':
     case 'from-addon':
+    case 'unpublished':
     case 'from-file':
     case 'from-url':
       break;
@@ -461,21 +462,30 @@ export function urlFromState(urlState: UrlState): string {
   return pathname + (qString ? '?' + qString : '');
 }
 
-export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
-  const str = pathParts[0] || 'none';
-  // With this switch, flow is able to understand that we return a valid value
-  switch (str) {
+export function ensureIsValidDataSource(
+  possibleDataSource: string | void
+): DataSource {
+  // By casting `possibleDataSource` to a DataSource beforehand, we let Flow
+  // enforce that we look at all possible values.
+  const coercedDataSource = coerce<string, DataSource>(
+    possibleDataSource || 'none'
+  );
+  switch (coercedDataSource) {
     case 'none':
     case 'from-addon':
+    case 'unpublished':
     case 'from-file':
     case 'local':
     case 'public':
     case 'from-url':
     case 'compare':
     case 'uploaded-recordings':
-      return str;
+      return coercedDataSource;
     default:
-      throw new Error(`Unexpected data source ${str}`);
+      throw assertExhaustiveCheck(
+        coercedDataSource,
+        `Unexpected data source ${coercedDataSource}`
+      );
   }
 }
 
@@ -505,7 +515,7 @@ export function stateFromLocation(
   );
 
   const pathParts = pathname.split('/').filter(d => d);
-  const dataSource = getDataSourceFromPathParts(pathParts);
+  const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
     query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
@@ -655,7 +665,7 @@ type ProcessedLocation = {|
 
 type ProcessedLocationBeforeUpgrade = {|
   ...ProcessedLocation,
-  query: Object,
+  query: any,
 |};
 
 export function upgradeLocationToCurrentVersion(

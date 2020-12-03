@@ -124,7 +124,7 @@ describe('timeline/GlobalTrack', function() {
 
   it('has the correct selectors into useful parts of the component', function() {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
-    expect(getGlobalTrackLabel().textContent).toBe('Content ProcessPID: 222');
+    expect(getGlobalTrackLabel()).toHaveTextContent('Content ProcessPID: 222');
     expect(getGlobalTrackRow()).toBeTruthy();
   });
 

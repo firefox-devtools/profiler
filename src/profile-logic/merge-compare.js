@@ -34,7 +34,7 @@ import {
   correlateIPCMarkers,
 } from './marker-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 
 import type {
   Profile,
@@ -125,7 +125,7 @@ export function mergeProfilesForDiffing(
     if (selectedThreadIndexes === null) {
       throw new Error(`No thread has been selected in profile ${i}`);
     }
-    const selectedThreadIndex = selectedThreadIndexes.values().next().value;
+    const selectedThreadIndex = getFirstItemFromSet(selectedThreadIndexes);
     if (selectedThreadIndexes.size !== 1 || selectedThreadIndex === undefined) {
       throw new Error(
         'Only one thread selection is currently supported for the comparison view.'

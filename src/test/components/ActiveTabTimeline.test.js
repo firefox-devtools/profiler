@@ -24,7 +24,7 @@ import {
 } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedThreads } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 describe('ActiveTabTimeline', function() {
   beforeEach(() => {
@@ -93,12 +93,13 @@ describe('ActiveTabTimeline', function() {
       if (track.type !== 'tab') {
         throw new Error('Expected a tab track.');
       }
-      const threadIndex = track.mainThreadIndex;
+      const threadIndex = ensureExists(
+        getFirstItemFromSet(track.threadIndexes),
+        'Expected a thread index for given active tab global track'
+      );
 
-      if (threadIndex !== null) {
-        // The assertions are simpler if the GeckoMain tab thread is not already selected.
-        dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
-      }
+      // The assertions are simpler if the GeckoMain tab thread is not already selected.
+      dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
       const renderResult = render(
         <Provider store={store}>
@@ -330,8 +331,8 @@ describe('ActiveTabTimeline', function() {
       });
 
       it('has the correct track name', function() {
-        const { queryByText, resourcePage } = setup();
-        expect(queryByText(resourcePage.url)).toBeTruthy();
+        const { getByText, resourcePage } = setup();
+        expect(getByText(resourcePage.url)).toBeTruthy();
       });
 
       it('starts out not being selected', function() {

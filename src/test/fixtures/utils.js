@@ -66,7 +66,7 @@ class FakeMouseEvent extends MouseEvent {
 
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: Object));
+    super(type, (mouseValues: any));
 
     Object.assign(this, {
       offsetX: offsetX || 0,
@@ -250,7 +250,7 @@ export function removeRootOverlayElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function createSelectChanger(renderResult: RenderResult<*>) {
+export function createSelectChanger(renderResult: RenderResult<>) {
   return function changeSelect({ from, to }: {| from: string, to: string |}) {
     // Look up the <option> with the text label.
     const option = renderResult.getByText(to);

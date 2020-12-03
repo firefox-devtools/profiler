@@ -48,8 +48,6 @@ import {
   commitRange,
 } from '../../actions/profile-view';
 
-import 'fake-indexeddb/auto';
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 import {
   retrieveProfileData,
   listAllProfileData,
@@ -57,22 +55,15 @@ import {
 
 import type { Store } from 'firefox-profiler/types';
 
+import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
+autoMockIndexedDB();
+
 // We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 jest.mock('../../profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
-
-function resetIndexedDb() {
-  // This is the recommended way to reset the IDB state between test runs, but
-  // neither flow nor eslint like that we assign to indexedDB directly, for
-  // different reasons.
-  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
-  indexedDB = new FDBFactory();
-}
-beforeEach(resetIndexedDb);
-afterEach(resetIndexedDb);
 
 describe('getCheckedSharingOptions', function() {
   describe('default filtering by channel', function() {
@@ -123,6 +114,7 @@ describe('getCheckedSharingOptions', function() {
       expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
   });
+
   describe('toggleCheckedSharingOptions', function() {
     it('can toggle options', function() {
       const { profile } = getProfileFromTextSamples('A');

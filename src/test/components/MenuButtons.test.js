@@ -6,20 +6,41 @@
 import * as React from 'react';
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+import {
+  changeTimelineTrackOrganization,
+  loadProfile,
+} from 'firefox-profiler/actions/receive-profile';
+import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
+
+import { getHash, getDataSource } from 'firefox-profiler/selectors/url-state';
+
 import { ensureExists } from '../../utils/flow';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
-import type { Profile, SymbolicationStatus } from 'firefox-profiler/types';
+
+import type { Profile } from 'firefox-profiler/types';
+
+// We need IndexedDB to get a SymbolStore that's necessary for symbolication
+// to even start, in some of the tests for this file.
+import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
+autoMockIndexedDB();
 
 // We mock profile-store but we want the real error, so that we can simulate it.
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -38,6 +59,9 @@ jest.mock('../../utils/gz');
 // Mocking shortenUrl
 import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
+
+import { symbolicateProfile } from 'firefox-profiler/profile-logic/symbolication';
+jest.mock('firefox-profiler/profile-logic/symbolication');
 
 // Mock hash
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
@@ -107,14 +131,15 @@ describe('app/MenuButtons', function() {
     const store = storeWithProfile(profile);
     const { resolveUpload, rejectUpload } = mockUpload();
 
-    store.dispatch({
-      type: 'UPDATE_URL_STATE',
-      newUrlState: stateFromLocation({
-        pathname: '/from-addon',
-        search: '',
-        hash: '',
-      }),
-    });
+    store.dispatch(
+      updateUrlState(
+        stateFromLocation({
+          pathname: '/from-addon',
+          search: '',
+          hash: '',
+        })
+      )
+    );
 
     const renderResult = render(
       <Provider store={store}>
@@ -129,9 +154,9 @@ describe('app/MenuButtons', function() {
       queryByText,
       findByText,
     } = renderResult;
-    const getPublishButton = () => getByText('Publish…');
-    const findPublishButton = () => findByText('Publish…');
-    const getErrorButton = () => getByText('Error publishing…');
+    const getPublishButton = () => getByText(/^(Re-upload|Upload)$/);
+    const findPublishButton = () => findByText(/^(Re-upload|Upload)$/);
+    const getErrorButton = () => getByText('Error uploading');
     const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
       ensureExists(
@@ -145,9 +170,16 @@ describe('app/MenuButtons', function() {
       fireFullClick(where);
       jest.runAllTimers();
     };
-
+    const navigateToHash = (hash: string) => {
+      const newUrlState = stateFromLocation({
+        pathname: `/public/${hash}/calltree`,
+        search: '',
+        hash: '',
+      });
+      store.dispatch(updateUrlState(newUrlState));
+    };
     return {
-      store,
+      ...store,
       ...renderResult,
       getPanel,
       findPublishButton,
@@ -159,6 +191,7 @@ describe('app/MenuButtons', function() {
       clickAndRunTimers,
       resolveUpload,
       rejectUpload,
+      navigateToHash,
     };
   }
 
@@ -211,6 +244,21 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
 
+    it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', () => {
+      const { profile } = createSimpleProfile();
+      const {
+        getPanel,
+        container,
+        navigateToHash,
+        getPublishButton,
+        clickAndRunTimers,
+      } = setup(profile);
+      navigateToHash('VALID_HASH');
+      expect(container).toMatchSnapshot();
+      clickAndRunTimers(getPublishButton());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
     it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
       const { profile } = createPreferenceReadProfile('release');
       const {
@@ -231,6 +279,31 @@ describe('app/MenuButtons', function() {
       } = setup(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeFalsy();
+    });
+
+    it('can publish and revert', async () => {
+      const { profile } = createSimpleProfile();
+      const {
+        getPublishButton,
+        getPanelForm,
+        clickAndRunTimers,
+        resolveUpload,
+        getState,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      fireEvent.submit(getPanelForm());
+      resolveUpload('SOME_HASH');
+
+      const revertButton = await screen.findByText(/revert/i);
+      expect(getDataSource(getState())).toBe('public');
+      expect(getHash(getState())).toBe('SOME_HASH');
+      expect(document.body).toMatchSnapshot();
+
+      fireFullClick(revertButton);
+      await waitForElementToBeRemoved(revertButton);
+
+      expect(getDataSource(getState())).toBe('from-addon');
+      expect(getHash(getState())).toBe('');
     });
 
     it('can publish, cancel, and then publish again', async () => {
@@ -284,30 +357,29 @@ describe('app/MenuButtons', function() {
 });
 
 describe('<MetaInfoPanel>', function() {
-  function setup(profile: Profile, symbolicationStatus = 'DONE') {
+  async function setup(profile: Profile) {
     jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
       // eslint-disable-next-line babel/no-invalid-this
       return 'toLocaleString ' + this.toUTCString();
     });
-    const resymbolicateProfile = jest.fn();
 
-    const renderResults = render(
-      <MetaInfoPanel
-        profile={profile}
-        resymbolicateProfile={resymbolicateProfile}
-        symbolicationStatus={symbolicationStatus}
-      />
+    const store = blankStore();
+
+    // Note that we dispatch this action directly instead of using viewProfile
+    // or loadProfile because we want to control tightly how symbolication is
+    // started in these tests.
+    await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
+
+    return render(
+      <Provider store={store}>
+        <MetaInfoPanel />
+      </Provider>
     );
-
-    return {
-      resymbolicateProfile,
-      ...renderResults,
-    };
   }
 
-  it('matches the snapshot', () => {
+  it('matches the snapshot', async () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.configuration = {
       features: ['js', 'threads'],
       threads: ['GeckoMain', 'DOM Worker'],
@@ -315,15 +387,15 @@ describe('<MetaInfoPanel>', function() {
       duration: 20,
     };
 
-    const { container } = setup(profile);
+    const { container } = await setup(profile);
     // This component renders a fragment, so we look at the full container so
     // that we get all children.
     expect(container).toMatchSnapshot();
   });
 
-  it('with no statistics object should not make the app crash', () => {
+  it('with no statistics object should not make the app crash', async () => {
     // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     // We are removing statistics objects from all overhead objects to test
     // the robustness of our handling code.
     if (profile.profilerOverhead) {
@@ -332,69 +404,133 @@ describe('<MetaInfoPanel>', function() {
       }
     }
 
-    const { container } = setup(profile);
+    const { container } = await setup(profile);
     // This component renders a fragment, so we look at the full container so
     // that we get all children.
     expect(container).toMatchSnapshot();
   });
 
   describe('symbolication', function() {
-    type SymbolicationTestConfig = {|
+    type SymbolicationTestConfig = $ReadOnly<{|
       symbolicated: boolean,
-      symbolicationStatus: SymbolicationStatus,
-    |};
+    |}>;
 
     function setupSymbolicationTest(config: SymbolicationTestConfig) {
       const { profile } = getProfileFromTextSamples('A');
       profile.meta.symbolicated = config.symbolicated;
 
-      return setup(profile, config.symbolicationStatus);
+      return setup(profile);
     }
 
-    it('handles successfully symbolicated profiles', () => {
-      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
-        symbolicated: true,
-        symbolicationStatus: 'DONE',
-      });
+    it('handles successfully symbolicated profiles', async () => {
+      await setupSymbolicationTest({ symbolicated: true });
 
-      expect(getByText('Profile is symbolicated')).toBeTruthy();
-      fireFullClick(getByText('Re-symbolicate profile'));
-      expect(resymbolicateProfile).toHaveBeenCalled();
-    });
+      expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
+      fireFullClick(screen.getByText('Re-symbolicate profile'));
 
-    it('handles the contradictory state of non-symbolicated profiles that are done', () => {
-      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
-        symbolicated: false,
-        symbolicationStatus: 'DONE',
-      });
-
-      expect(getByText('Profile is not symbolicated')).toBeTruthy();
-      fireFullClick(getByText('Symbolicate profile'));
-      expect(resymbolicateProfile).toHaveBeenCalled();
-    });
-
-    it('handles in progress symbolication', () => {
-      const { getByText, queryByText } = setupSymbolicationTest({
-        symbolicated: false,
-        symbolicationStatus: 'SYMBOLICATING',
-      });
-
-      expect(getByText('Currently symbolicating profile')).toBeTruthy();
+      expect(symbolicateProfile).toHaveBeenCalled();
+      expect(
+        screen.getByText('Attempting to re-symbolicate profile')
+      ).toBeTruthy();
       // No symbolicate button is available.
-      expect(queryByText('Symbolicate profile')).toBeFalsy();
-      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+      // After a while, we get a result
+      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
     });
 
-    it('handles in progress re-symbolication', () => {
-      const { getByText, queryByText } = setupSymbolicationTest({
-        symbolicated: true,
-        symbolicationStatus: 'SYMBOLICATING',
-      });
+    it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
+      await setupSymbolicationTest({ symbolicated: false });
 
-      expect(getByText('Attempting to re-symbolicate profile')).toBeTruthy();
+      expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
+      fireFullClick(screen.getByText('Symbolicate profile'));
+      expect(symbolicateProfile).toHaveBeenCalled();
+
+      expect(screen.getByText('Currently symbolicating profile')).toBeTruthy();
       // No symbolicate button is available.
-      expect(queryByText('Symbolicate profile')).toBeFalsy();
-      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+      // After a while, we get a result
+      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+    });
+  });
+
+  describe('Full View Button', function() {
+    function setup() {
+      const { profile } = getProfileFromTextSamples('A');
+      const store = storeWithProfile(profile);
+
+      store.dispatch(
+        updateUrlState(
+          stateFromLocation({
+            pathname: '/from-addon',
+            search: '',
+            hash: '',
+          })
+        )
+      );
+
+      const renderResults = render(
+        <Provider store={store}>
+          <MenuButtons />
+        </Provider>
+      );
+
+      return {
+        profile,
+        ...store,
+        ...renderResults,
+      };
+    }
+
+    it('is not present when we are in the full view already', () => {
+      const { getState, queryByText } = setup();
+
+      // Make sure that we are in the full view and the button is not there.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
+      expect(queryByText('Full View')).toBeFalsy();
+    });
+
+    it('is present when we are in the active tab view', () => {
+      const { dispatch, getState, getByText, container } = setup();
+
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: null,
+        })
+      );
+
+      // Make sure that we are in the active tab view and the button is there.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
+      expect(getByText('Full View')).toBeTruthy();
+      expect(container).toMatchSnapshot();
+    });
+
+    it('switches to full view when clicked', () => {
+      const { dispatch, getState, getByText, queryByText } = setup();
+
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: null,
+        })
+      );
+
+      // Make sure that we are in the active tab view already.
+      expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
+      expect(getByText('Full View')).toBeTruthy();
+
+      // Switch to the full view by clicking on the Full View button
+      fireFullClick(getByText('Full View'));
+
+      // Make sure that we are in the full view and the button is no longer there
+      expect(getTimelineTrackOrganization(getState()).type).toBe('full');
+      expect(queryByText('Full View')).toBeFalsy();
     });
   });
 });

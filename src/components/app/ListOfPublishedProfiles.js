@@ -226,7 +226,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
 
     if (!profileDataList.length) {
       return (
-        <p className="photon-body-30">No profile has been published yet!</p>
+        <p className="photon-body-30">No profile has been uploaded yet!</p>
       );
     }
 

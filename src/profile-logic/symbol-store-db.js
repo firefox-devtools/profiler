@@ -262,7 +262,9 @@ export default class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
+      'lastUsedDate'
+    );
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
@@ -288,7 +290,9 @@ export default class SymbolStoreDB {
   ): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
-    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
+      'lastUsedDate'
+    );
     const cursorReq = lastUsedDateIndex.openCursor();
     let deletedCount = 0;
     cursorReq.onsuccess = () => {

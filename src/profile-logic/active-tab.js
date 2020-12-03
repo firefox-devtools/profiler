@@ -61,6 +61,8 @@ export function computeActiveTabTracks(
   state: State
 ): ActiveTabTimeline {
   // Global tracks that are certainly global tracks.
+  // FIXME: We should revert back to full view if we failed to find a track
+  // index for the main track.
   const mainTrackIndexes = [];
   const resources = [];
   const screenshots = [];
@@ -127,9 +129,6 @@ export function computeActiveTabTracks(
   const mainTrackIndexesSet = new Set(mainTrackIndexes);
   const mainTrack: ActiveTabMainTrack = {
     type: 'tab',
-    // FIXME: We should revert back to full view if we failed to find a track
-    // index for the main track.
-    mainThreadIndex: mainTrackIndexes[0] || 0,
     threadIndexes: mainTrackIndexesSet,
     threadsKey: getThreadsKey(mainTrackIndexesSet),
   };

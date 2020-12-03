@@ -5,7 +5,7 @@
 // @flow
 import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
@@ -26,6 +26,9 @@ import type {
   StartEndRange,
   TrackIndex,
   ThreadsKey,
+  ProfileSpecificUrlState,
+  FullProfileSpecificUrlState,
+  ActiveTabSpecificProfileUrlState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -38,11 +41,11 @@ import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
  */
 export const getUrlState: Selector<UrlState> = (state): UrlState =>
   state.urlState;
-export const getProfileSpecificState: Selector<*> = state =>
+export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = state =>
   getUrlState(state).profileSpecific;
-export const getFullProfileSpecificState: Selector<*> = state =>
+export const getFullProfileSpecificState: Selector<FullProfileSpecificUrlState> = state =>
   getProfileSpecificState(state).full;
-export const getActiveTabProfileSpecificState: Selector<*> = state =>
+export const getActiveTabProfileSpecificState: Selector<ActiveTabSpecificProfileUrlState> = state =>
   getProfileSpecificState(state).activeTab;
 
 export const getDataSource: Selector<DataSource> = state =>
@@ -102,9 +105,7 @@ export const getSelectedThreadsKey: Selector<ThreadsKey> = state =>
  */
 export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
   ensureExists(
-    getSelectedThreadIndexes(state)
-      .values()
-      .next().value,
+    getFirstItemFromSet(getSelectedThreadIndexes(state)),
     'Expected to find at least one thread index in the selected thread indexes'
   );
 export const getTimelineType: Selector<TimelineType> = state =>

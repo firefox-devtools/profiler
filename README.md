@@ -7,8 +7,6 @@ The [Firefox Profiler] visualizes performance data recorded from web browsers. I
 
 ![Screenshot of the Firefox Profiler](./docs-user/images/screenshot-2019-02-05.jpg?raw=true)
 
-_This project was previously called perf.html and [Cleopatra]._
-
 ### Usage
 
 > Visit [profiler.firefox.com](https://profiler.firefox.com/) :rocket:
@@ -86,5 +84,4 @@ Some permissive software licenses request but do not require an acknowledgement 
 [Redux]:http://redux.js.org/
 [Mozilla]:https://www.mozilla.org/
 [Firefox]:https://www.mozilla.org/firefox/
-[Cleopatra]: https://github.com/mozilla/cleopatra
 [zlib]: http://www.zlib.net/

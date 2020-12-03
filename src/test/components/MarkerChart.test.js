@@ -77,7 +77,6 @@ const MARKERS: TestDefinedMarkers = [
     {
       type: 'tracing',
       category: 'Paint',
-      interval: 'end',
     },
   ],
   [
@@ -87,7 +86,6 @@ const MARKERS: TestDefinedMarkers = [
     {
       type: 'tracing',
       category: 'Paint',
-      interval: 'start',
     },
   ],
   getUserTiming('Marker B', 2, 8),
@@ -611,7 +609,6 @@ describe('MarkerChart', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID: parentInnerWindowIDsWithChildren,
           },
         ],
@@ -764,7 +761,7 @@ describe('MarkerChart', function() {
 /**
  * This is a quick helper to create UserTiming markers.
  */
-function getUserTiming(name: string, startTime: number, endTime: number): * {
+function getUserTiming(name: string, startTime: number, endTime: number) {
   return [
     'UserTiming',
     startTime,

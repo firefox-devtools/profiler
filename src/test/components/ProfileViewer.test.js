@@ -6,14 +6,19 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { ProfileViewer } from '../../components/app/ProfileViewer';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { storeWithProfile } from '../fixtures/stores';
+
+import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
+import { getTimelineHeight } from 'firefox-profiler/selectors/app';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+import { viewProfile } from 'firefox-profiler/actions/receive-profile';
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
+
+import { blankStore } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getBoundingBox } from '../fixtures/utils';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getTimelineHeight } from '../../selectors/app';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 describe('ProfileViewer', function() {
@@ -37,12 +42,23 @@ describe('ProfileViewer', function() {
       .mockImplementation(() => ctx);
   });
 
-  it('calculates the full timeline height correctly', () => {
+  function setup() {
     // WithSize uses requestAnimationFrame
     const flushRafCalls = mockRaf();
-    const store = storeWithProfile(getProfileWithNiceTracks());
 
-    render(
+    const store = blankStore();
+    store.dispatch(
+      updateUrlState(
+        stateFromLocation({
+          pathname: '/from-addon',
+          search: '',
+          hash: '',
+        })
+      )
+    );
+    store.dispatch(viewProfile(getProfileWithNiceTracks()));
+
+    const renderResult = render(
       <Provider store={store}>
         <ProfileViewer />
       </Provider>
@@ -51,7 +67,13 @@ describe('ProfileViewer', function() {
     // Flushing the requestAnimationFrame calls so we can see the actual height of tracks.
     flushRafCalls();
 
+    return { ...renderResult, ...store };
+  }
+
+  it('calculates the full timeline height correctly', () => {
+    const { getState } = setup();
+
     // Note: You should update this total height if you changed the height calculation algorithm.
-    expect(getTimelineHeight(store.getState())).toBe(1250);
+    expect(getTimelineHeight(getState())).toBe(1250);
   });
 });

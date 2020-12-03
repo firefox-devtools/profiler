@@ -6,7 +6,7 @@
 import createStore from '../../app-logic/create-store';
 import { viewProfile } from '../../actions/receive-profile';
 import { createGeckoProfileWithJsTimings } from './profiles/gecko-profile';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from './profiles/processed-profile';
 
 import type { Store, Profile } from 'firefox-profiler/types';
@@ -17,7 +17,7 @@ export function blankStore() {
 
 export function storeWithProfile(profile?: Profile): Store {
   if (!profile) {
-    profile = processProfile(createGeckoProfileWithJsTimings());
+    profile = processGeckoProfile(createGeckoProfileWithJsTimings());
     profile.meta.symbolicated = true;
   }
   const store = createStore();

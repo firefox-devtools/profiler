@@ -34,7 +34,14 @@ import type { CssPixels, StartEndRange, Milliseconds } from './units';
 export type DataSource =
   | 'none'
   | 'from-file'
+  //  This datasource is used to fetch a profile from Firefox. This used to be
+  //  handled by an addon, hence the name, but now this is all inside Firefox.
   | 'from-addon'
+  // This is an alias for 'from-addon' until we phase that one out. We
+  // introduced it when implementing the "delete profile" functionality, because
+  // `from-addon` didn't suit this use-case well. In the future we want to
+  // completely replace `from-addon` with this one.
+  | 'unpublished'
   | 'local'
   | 'public'
   | 'from-url'
@@ -163,6 +170,11 @@ type ProfileAction =
       +type: 'CHANGE_SELECTED_MARKER',
       +threadsKey: ThreadsKey,
       +selectedMarker: MarkerIndex | null,
+    |}
+  | {|
+      +type: 'CHANGE_SELECTED_NETWORK_MARKER',
+      +threadsKey: ThreadsKey,
+      +selectedNetworkMarker: MarkerIndex | null,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',

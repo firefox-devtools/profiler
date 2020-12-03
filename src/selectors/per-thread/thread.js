@@ -30,7 +30,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
@@ -50,7 +50,7 @@ export type ThreadSelectorsPerThread = $ReturnType<
 export function getThreadSelectorsPerThread(
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
-): * {
+) {
   const getMergedThread: Selector<Thread> = createSelector(
     ProfileSelectors.getProfile,
     profile =>
@@ -65,7 +65,7 @@ export function getThreadSelectorsPerThread(
   const getThread: Selector<Thread> = state =>
     threadIndexes.size === 1
       ? ProfileSelectors.getProfile(state).threads[
-          ensureExists(threadIndexes.values().next().value)
+          ensureExists(getFirstItemFromSet(threadIndexes))
         ]
       : getMergedThread(state);
   const getStringTable: Selector<UniqueStringArray> = state =>
@@ -335,7 +335,7 @@ export function getThreadSelectorsPerThread(
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
-  const getProcessedEventDelays: Selector<EventDelayInfo | null> = createSelector(
+  const getProcessedEventDelaysOrNull: Selector<EventDelayInfo | null> = createSelector(
     getSamplesTable,
     ProfileSelectors.getProfileInterval,
     (samplesTable, interval) =>
@@ -343,6 +343,12 @@ export function getThreadSelectorsPerThread(
         ? null
         : ProfileData.processEventDelays(samplesTable, interval)
   );
+
+  const getProcessedEventDelays: Selector<EventDelayInfo> = state =>
+    ensureExists(
+      getProcessedEventDelaysOrNull(state),
+      'Could not get the processed event delays'
+    );
 
   return {
     getThread,

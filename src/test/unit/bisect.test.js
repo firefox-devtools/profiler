@@ -8,6 +8,7 @@ import { bisectionLeft, bisectionRight } from '../../utils/bisect';
 
 describe('bisectionRight', function() {
   const array = [0, 1, 2, 3, 3, 3, 3, 3, 5, 6, 7, 8, 9];
+
   // The new element to be inserted into this array is referred to as x
   it('returns index of the first number greater than x', function() {
     expect(bisectionRight(array, 4)).toBe(8);
@@ -44,6 +45,7 @@ describe('bisectionRight', function() {
 
 describe('bisectionLeft', function() {
   const array = [0, 1, 2, 3, 3, 3, 3, 3, 5, 6, 7, 8, 9];
+
   it('returns index of the first number greater than x, if x does not exist in the array', function() {
     expect(bisectionLeft(array, 4)).toBe(8);
   });
@@ -56,6 +58,7 @@ describe('bisectionLeft', function() {
     expect(bisectionLeft(array, 2, 1)).toBe(2);
     expect(bisectionLeft(array, 3, 6)).toBe(6);
   });
+
   it('returns index of the first number greater than x or the first occurence of x, between low and high', function() {
     expect(bisectionLeft(array, 2, 5, 8)).toBe(5);
     expect(bisectionLeft(array, 3, 4, 6)).toBe(4);

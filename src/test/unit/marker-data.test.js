@@ -13,7 +13,7 @@ import {
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
-import { processProfile } from '../../profile-logic/process-profile';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import {
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
@@ -42,7 +42,7 @@ import type {
 
 describe('Derive markers from Gecko phase markers', function() {
   function setupWithTestDefinedMarkers(markers) {
-    const profile = processProfile(createGeckoProfileWithMarkers(markers));
+    const profile = processGeckoProfile(createGeckoProfileWithMarkers(markers));
     profile.meta.symbolicated = true; // Avoid symbolication.
     const { getState } = storeWithProfile(profile);
     const mainGetMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -316,7 +316,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     // mock is called in one of the tests.
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     profile.meta.symbolicated = true; // avoid to kick off the symbolication process
     const thread = profile.threads[0]; // This is the parent process main thread
     const contentThread = profile.threads[2]; // This is the content process main thread
@@ -390,6 +390,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'VsyncTimestamp',
     });
   });
+
   it('should create a marker', function() {
     const { markers } = setup();
     expect(markers[2]).toMatchObject({
@@ -398,6 +399,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Reflow',
     });
   });
+
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
     expect(markers.length).toEqual(18);
@@ -407,6 +409,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Reflow',
     });
   });
+
   it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
     const { markers } = setup();
     expect(markers[3]).toMatchObject({
@@ -415,6 +418,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Rasterize',
     });
   });
+
   it('should correlate the IPC markers together and fold transferStart/transferEnd markers', function() {
     const { markers, contentMarkers } = setup();
     expect(markers[14]).toMatchObject({
@@ -449,6 +453,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       data: { phase: 'endpoint' },
     });
   });
+
   it('should create a marker for the MinorGC startTime/endTime marker', function() {
     const { markers } = setup();
     expect(markers[5]).toMatchObject({
@@ -457,6 +462,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'MinorGC',
     });
   });
+
   it('should create a marker for the DOMEvent marker', function() {
     const { markers } = setup();
     expect(markers[4]).toMatchObject({
@@ -465,6 +471,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 9,
     });
   });
+
   it('should create a marker for the marker UserTiming', function() {
     const { markers } = setup();
     expect(markers[6]).toMatchObject({
@@ -473,6 +480,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 12,
     });
   });
+
   it('should handle markers without a start', function() {
     const { markers } = setup();
     expect(markers[0]).toMatchObject({
@@ -481,6 +489,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Rasterize',
     });
   });
+
   it('should handle markers without an end', function() {
     const { markers } = setup();
     expect(markers[17]).toMatchObject({
@@ -490,6 +499,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       incomplete: true,
     });
   });
+
   it('should handle nested markers correctly', function() {
     const { markers } = setup();
     expect(markers[7]).toMatchObject({
@@ -503,6 +513,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Reflow',
     });
   });
+
   it('should handle arbitrary tracing markers correctly', function() {
     const { markers } = setup();
     expect(markers[9]).toMatchObject({
@@ -645,6 +656,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       category: 0,
     });
   });
+
   it('should create a marker for the marker CompositorScreenshot', function() {
     const { markers } = setup();
     expect(markers[12]).toMatchObject({

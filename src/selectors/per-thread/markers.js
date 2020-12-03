@@ -14,6 +14,7 @@ import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 import { getLabelGetter } from '../../profile-logic/marker-schema';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
+import type { ThreadSelectorsPerThread } from './thread';
 import type {
   RawMarkerTable,
   ThreadIndex,
@@ -42,7 +43,7 @@ export type MarkerSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with either markers.
  */
 export function getMarkerSelectorsPerThread(
-  threadSelectors: *,
+  threadSelectors: ThreadSelectorsPerThread,
   threadIndexes: Set<ThreadIndex>,
   threadsKey: ThreadsKey
 ) {
@@ -584,6 +585,21 @@ export function getMarkerSelectorsPerThread(
     return getMarker(selectedMarkerIndex);
   };
 
+  const getSelectedNetworkMarkerIndex: Selector<MarkerIndex | null> = state =>
+    threadSelectors.getViewOptions(state).selectedNetworkMarker;
+
+  // Do we need this function?
+  const getSelectedNetworkMarker: Selector<Marker | null> = state => {
+    const getMarker = getMarkerGetter(state);
+    const selectedNetworkMarkerIndex = getSelectedNetworkMarkerIndex(state);
+
+    if (selectedNetworkMarkerIndex === null) {
+      return null;
+    }
+
+    return getMarker(selectedNetworkMarkerIndex);
+  };
+
   const getRightClickedMarkerIndex: Selector<null | MarkerIndex> = createSelector(
     getRightClickedMarkerInfo,
     rightClickedMarkerInfo => {
@@ -634,6 +650,8 @@ export function getMarkerSelectorsPerThread(
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
     getSelectedMarker,
+    getSelectedNetworkMarkerIndex,
+    getSelectedNetworkMarker,
     getIsNetworkChartEmptyInFullRange,
     getUserTimingMarkerIndexes,
     getUserTimingMarkerTiming,

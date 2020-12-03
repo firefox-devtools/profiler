@@ -419,7 +419,7 @@ export function selectActiveTabTrack(
     const currentlySelectedTab = getSelectedTab(getState());
     const currentlySelectedThreadIndex = getSelectedThreadIndexes(getState());
     // These get assigned based on the track type.
-    let selectedThreadIndex = null;
+    let selectedThreadIndexes;
     let selectedTab = currentlySelectedTab;
 
     switch (trackReference.type) {
@@ -433,7 +433,7 @@ export function selectActiveTabTrack(
         // Go through each type, and determine the selected slug and thread index.
         switch (globalTrack.type) {
           case 'tab': {
-            selectedThreadIndex = globalTrack.mainThreadIndex;
+            selectedThreadIndexes = new Set([...globalTrack.threadIndexes]);
             // Ensure a relevant thread-based tab is used.
             if (selectedTab === 'network-chart') {
               selectedTab = getLastVisibleThreadTabSlug(getState());
@@ -462,7 +462,7 @@ export function selectActiveTabTrack(
         switch (resourceTrack.type) {
           case 'sub-frame':
           case 'thread': {
-            selectedThreadIndex = resourceTrack.threadIndex;
+            selectedThreadIndexes = new Set([resourceTrack.threadIndex]);
             // Ensure a relevant thread-based tab is used.
             if (selectedTab === 'network-chart') {
               selectedTab = getLastVisibleThreadTabSlug(getState());
@@ -484,7 +484,9 @@ export function selectActiveTabTrack(
         );
     }
 
-    const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
+    const doesNextTrackHaveSelectedTab = getThreadSelectors(
+      selectedThreadIndexes
+    )
       .getUsefulTabs(getState())
       .includes(selectedTab);
 
@@ -496,14 +498,14 @@ export function selectActiveTabTrack(
 
     if (
       currentlySelectedTab === selectedTab &&
-      currentlySelectedThreadIndex === selectedThreadIndex
+      currentlySelectedThreadIndex === selectedThreadIndexes
     ) {
       return;
     }
 
     dispatch({
       type: 'SELECT_TRACK',
-      selectedThreadIndexes: new Set([selectedThreadIndex]),
+      selectedThreadIndexes,
       selectedTab,
     });
   };
@@ -1137,7 +1139,16 @@ export function changeSelectedMarker(
     threadsKey,
   };
 }
-
+export function changeSelectedNetworkMarker(
+  threadsKey: ThreadsKey,
+  selectedNetworkMarker: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_NETWORK_MARKER',
+    selectedNetworkMarker,
+    threadsKey,
+  };
+}
 /**
  * This action is used when the user right clicks a marker, and is especially
  * used to display its context menu.

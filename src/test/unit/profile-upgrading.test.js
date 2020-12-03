@@ -2,11 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { isOldCleopatraFormat } from '../../profile-logic/old-cleopatra-profile-format';
-import {
-  isProcessedProfile,
-  upgradeProcessedProfileToCurrentVersion,
-} from '../../profile-logic/processed-profile-versioning';
 import {
   unserializeProfileOfArbitraryFormat,
   serializeProfile,
@@ -18,74 +13,8 @@ import {
 } from '../../app-logic/constants';
 
 /* eslint-disable jest/expect-expect */
-// testProfileUpgrading and testCleopatraProfile are assertions, although eslint
-// doesn't realize it. Disable the rule.
-
-describe('upgrading old cleopatra profiles', function() {
-  const oldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
-  const ancientCleopatraProfile = require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json');
-
-  async function testCleopatraProfile(cleopatraProfile) {
-    expect(isOldCleopatraFormat(cleopatraProfile)).toBe(true);
-    const profile = await unserializeProfileOfArbitraryFormat(cleopatraProfile);
-    expect(isProcessedProfile(profile)).toBe(true);
-    // For now, just test that upgrading doesn't throw any exceptions.
-    upgradeProcessedProfileToCurrentVersion(profile);
-    expect(profile.threads.length).toBeGreaterThanOrEqual(1);
-    expect(profile.threads[0].name).toBe('GeckoMain');
-  }
-
-  it('should be able to convert the old cleopatra profile into a processed profile', async function() {
-    await testCleopatraProfile(oldCleopatraProfile);
-  });
-
-  it('should be able to convert the ancient cleopatra profile into a processed profile', async function() {
-    await testCleopatraProfile(ancientCleopatraProfile);
-  });
-
-  // Executing this only for oldCleopatraProfile because
-  // ancientCleopatraProfile doesn't have any causes for markers.
-  it('should be able to convert causes from old cleopatra profiles', async function() {
-    const profile = await unserializeProfileOfArbitraryFormat(
-      oldCleopatraProfile
-    );
-
-    const [thread] = profile.threads;
-    const { markers } = thread;
-
-    const markerWithCauseIndex = markers.data.findIndex(
-      marker =>
-        marker !== null && marker.type === 'tracing' && 'cause' in marker
-    );
-
-    if (markerWithCauseIndex < -1) {
-      throw new Error('We should have found one marker with a cause!');
-    }
-
-    const markerNameIndex = markers.name[markerWithCauseIndex];
-    expect(thread.stringTable.getString(markerNameIndex)).toEqual('Styles');
-
-    const markerWithCause = markers.data[markerWithCauseIndex];
-
-    // This makes Flow happy
-    if (
-      markerWithCause === null ||
-      markerWithCause === undefined ||
-      markerWithCause.type !== 'tracing' ||
-      !markerWithCause.cause
-    ) {
-      throw new Error('This marker should have a cause!');
-    }
-
-    // This is the stack we should get
-    expect(markerWithCause).toEqual({
-      category: 'Paint',
-      cause: { stack: 10563, time: 4195720.505958 },
-      interval: 'start',
-      type: 'tracing',
-    });
-  });
-});
+// testProfileUpgrading is an assertion, although eslint doesn't realize it. Disable
+// the rule.
 
 // Instructions for updating these tests after adding a new format version
 // ============================================================================
@@ -133,6 +62,7 @@ describe('upgrading gecko profiles', function() {
     //  - samples, most marker types, nested processes
     testProfileUpgrading(require('../fixtures/upgrades/gecko-1.json'));
   });
+
   it('should upgrade gecko-2.json all the way to the current version', function() {
     // This tests:
     //  - nothing other than what gecko-1.json already tests, but it uses
@@ -160,6 +90,7 @@ describe('upgrading processed profiles', function() {
       require('../fixtures/upgrades/processed-1.json')
     );
   });
+
   it('should upgrade processed-2.json all the way to the current version', async function() {
     // This tests:
     //  - upgrading the DOMEventMarkerPayload.timeStamp field
@@ -168,6 +99,7 @@ describe('upgrading processed profiles', function() {
       require('../fixtures/upgrades/processed-2.json')
     );
   });
+
   it('should upgrade processed-3.json all the way to the current version', async function() {
     // This tests:
     //  - Upgrading pages array and page information inside markers

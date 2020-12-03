@@ -78,8 +78,8 @@ describe('app/ProfileFilterNavigator', () => {
   });
 
   it('displays the "Full Range" text as its first element', () => {
-    const { queryByText } = setup();
-    expect(queryByText('Full Range')).toBeTruthy();
+    const { getByText } = setup();
+    expect(getByText('Full Range')).toBeTruthy();
   });
 
   it('renders the site hostname as its first element in the single tab view', () => {
@@ -94,7 +94,7 @@ describe('app/ProfileFilterNavigator', () => {
   });
 
   it('displays the site hostname as its first element in the single tab view', () => {
-    const { dispatch, queryByText } = setup();
+    const { dispatch, queryByText, getByText } = setup();
     dispatch(
       ReceiveProfile.changeTimelineTrackOrganization({
         type: 'active-tab',
@@ -103,6 +103,6 @@ describe('app/ProfileFilterNavigator', () => {
     );
     expect(queryByText('Full Range')).toBeFalsy();
     // Using regexp because searching for a partial text.
-    expect(queryByText(/developer\.mozilla\.org/)).toBeTruthy();
+    expect(getByText(/developer\.mozilla\.org/)).toBeTruthy();
   });
 });

@@ -31,7 +31,7 @@ export function assertExhaustiveCheck(
  * type information of the object. Flow will occasionally throw errors when
  * inferring what is going on with Object.assign.
  */
-export function immutableUpdate<T: Object>(object: T, ...rest: Object[]): T {
+export function immutableUpdate<T>(object: T, ...rest: any[]): T {
   return Object.assign({}, object, ...rest);
 }
 
@@ -123,7 +123,7 @@ export function coerceMatchingShape<T>(item: $Shape<T>): T {
 export function objectValues<Value, Obj: {| [string]: Value |}>(
   object: Obj
 ): Value[] {
-  return (Object.values: Function)(object);
+  return (Object.values: any)(object);
 }
 
 /**
@@ -133,7 +133,7 @@ export function objectValues<Value, Obj: {| [string]: Value |}>(
 export function objectEntries<Key, Value>(object: {
   [Key]: Value,
 }): Array<[Key, Value]> {
-  return (Object.entries: Function)(object);
+  return (Object.entries: any)(object);
 }
 
 /**
@@ -151,6 +151,8 @@ export function objectMap<Return, Key, Value>(
   return result;
 }
 
+// Generic bounds with an Object is a false positive.
+// eslint-disable-next-line flowtype/no-weak-types
 export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
   return Object.values(obj);
 }
@@ -179,4 +181,11 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
     );
   }
   return item;
+}
+
+/**
+ * Returns the first item from Set in a type friendly manner.
+ */
+export function getFirstItemFromSet<T>(set: Set<T>): T | void {
+  return set.values().next().value;
 }

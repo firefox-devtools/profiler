@@ -2,6 +2,12 @@ clone_depth: 5
 environment:
   nodejs_version: "12"
 platform: x64 # flow needs 64b platforms
+
+branches:
+  only:
+    - main
+    - production
+
 # Install scripts. (runs after repo cloning)
 install:
   # 1. Select the right node

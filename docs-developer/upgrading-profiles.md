@@ -55,12 +55,6 @@ The processed profile version is stored in the field `profile.meta.preprocessedP
 
 `processProfile` should output the latest version of the processed profile format at all times. Combined with the fact that it can treat its input as being a Gecko profile of the latest Gecko profile format version, this keeps `processProfile` uncomplicated.
 
-### The old cleopatra format
-
-The "old cleopatra format" is the profile format that was used by the cleopatra version before the big rewrite. Profiles of this format are still in the profile store, and there are links to those profiles strewn across bugzilla. We want to be able to display those profiles.
-
-We have one import path for profiles of this format, which is located in the file [old-cleopatra-profile-format.js](../src/profile-logic/old-cleopatra-profile-format.js). It outputs profiles in "processed profile format" version zero, and this output is then run through the processed profile format upgraders. This means that [old-cleopatra-profile-format.js](../src/profile-logic/old-cleopatra-profile-format.js) will not need to be touched when the processed profile format changes; the upgrader that gets added in the process will take care of things.
-
 ## Summary
 
 When the Gecko profile format changes (due to a change in Gecko):

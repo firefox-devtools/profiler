@@ -33,7 +33,7 @@ describe('shared/BlobUrlLink', () => {
       result.container.querySelector('a'),
       'Unable to find an <a>'
     );
-    expect(a.getAttribute('href')).toEqual('mockCreateObjectUrl1');
+    expect(a).toHaveAttribute('href', 'mockCreateObjectUrl1');
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(0);
     expect(a.innerHTML).toBe('This is the text');
@@ -67,7 +67,7 @@ describe('shared/BlobUrlLink', () => {
 
     expect(URL.createObjectURL).toHaveBeenCalledWith(blob1);
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(0);
-    expect(a.getAttribute('href')).toEqual('mockCreateObjectUrl1');
+    expect(a).toHaveAttribute('href', 'mockCreateObjectUrl1');
 
     result.rerender(
       <BlobUrlLink className="myClassName" blob={blob2}>
@@ -77,7 +77,7 @@ describe('shared/BlobUrlLink', () => {
 
     expect(URL.createObjectURL).toHaveBeenCalledWith(blob2);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('mockCreateObjectUrl1');
-    expect(a.getAttribute('href')).toEqual('mockCreateObjectUrl2');
+    expect(a).toHaveAttribute('href', 'mockCreateObjectUrl2');
 
     URL.createObjectURL.mockReset();
     result.unmount();

@@ -17,37 +17,57 @@ import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { coerce } from '../utils/flow';
+import type { SerializableProfile } from 'firefox-profiler/types';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
 
-export function isProcessedProfile(profile: Object): boolean {
-  // If this profile has a .meta.preprocessedProfileVersion field,
-  // then it is definitely a preprocessed profile.
-  if ('meta' in profile && 'preprocessedProfileVersion' in profile.meta) {
-    return true;
-  }
-
-  // This could also be a pre-version 1 profile.
-  return (
-    'threads' in profile &&
-    profile.threads.length >= 1 &&
-    'stringArray' in profile.threads[0]
-  );
-}
-
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
- * Throws an exception if the profile is too new.
- * @param {object} profile The "serialized" form of a processed profile,
- *                         i.e. stringArray instead of stringTable.
+ * Throws an exception if the profile is too new. If the profile does not appear
+ * to be a processed profile, then return null. The profile provided is the
+ * "serialized" form of a processed profile, i.e. stringArray instead of stringTable.
  */
-export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
+export function attemptToUpgradeProcessedProfileThroughMutation(
+  profile: mixed
+): SerializableProfile | null {
+  if (!profile || typeof profile !== 'object') {
+    return null;
+  }
+  const { meta } = profile;
+  if (!meta || typeof meta !== 'object') {
+    return null;
+  }
+
+  if (typeof meta.preprocessedProfileVersion !== 'number') {
+    // This is most likely not a processed profile, but it could be
+    // a pre-version 1 profile.
+    const { threads } = profile;
+    if (!threads || !Array.isArray(threads)) {
+      // There are no threads.
+      return null;
+    }
+    const [firstThread] = threads;
+    if (
+      !firstThread ||
+      typeof firstThread !== 'object' ||
+      !firstThread.stringArray
+    ) {
+      // Could not find a thread that contains a stringArray, which means this is
+      // most likely a Gecko Profile.
+      return null;
+    }
+  }
+
   const profileVersion =
-    profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
+    typeof meta.preprocessedProfileVersion === 'number'
+      ? meta.preprocessedProfileVersion
+      : UNANNOTATED_VERSION;
+
   if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return;
+    return coerce<MixedObject, SerializableProfile>(profile);
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
@@ -69,7 +89,10 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
+  const upgradedProfile = coerce<MixedObject, SerializableProfile>(profile);
+  upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
+
+  return upgradedProfile;
 }
 
 function _archFromAbi(abi) {
@@ -120,7 +143,7 @@ function _mutateProfileToEnsureCauseBacktraces(profile) {
 /**
  * Guess the marker categories for a profile.
  */
-function _guessMarkerCategories(profile: Object) {
+function _guessMarkerCategories(profile: any) {
   // [key, categoryName]
   const keyToCategoryName = [
     ['DOMEvent', 'DOM'],
@@ -1474,6 +1497,203 @@ const _upgraders = {
         }
       }
     }
+  },
+  [33]: profile => {
+    // The marker schema, which details how to display markers was added. Back-fill
+    // any old profiles with a default schema.
+
+    profile.meta.markerSchema = [
+      {
+        name: 'GCMajor',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'GCMinor',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'GCSlice',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [
+          // Use custom handling
+        ],
+      },
+      {
+        name: 'CC',
+        tooltipLabel: 'Cycle Collect',
+        display: ['marker-chart', 'marker-table', 'timeline-memory'],
+        data: [],
+      },
+      {
+        name: 'FileIO',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'operation',
+            label: 'Operation',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'source',
+            label: 'Source',
+            format: 'string',
+            searchable: true,
+          },
+          {
+            key: 'filename',
+            label: 'Filename',
+            format: 'file-path',
+            searchable: true,
+          },
+        ],
+      },
+      {
+        name: 'MediaSample',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          {
+            key: 'sampleStartTimeUs',
+            label: 'Sample start time',
+            format: 'microseconds',
+          },
+          {
+            key: 'sampleEndTimeUs',
+            label: 'Sample end time',
+            format: 'microseconds',
+          },
+        ],
+      },
+      {
+        name: 'Styles',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [
+          {
+            key: 'elementsTraversed',
+            label: 'Elements traversed',
+            format: 'integer',
+          },
+          {
+            key: 'elementsStyled',
+            label: 'Elements styled',
+            format: 'integer',
+          },
+          {
+            key: 'elementsMatched',
+            label: 'Elements matched',
+            format: 'integer',
+          },
+          { key: 'stylesShared', label: 'Styles shared', format: 'integer' },
+          { key: 'stylesReused', label: 'Styles reused', format: 'integer' },
+        ],
+      },
+      {
+        name: 'PreferenceRead',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          { key: 'prefName', label: 'Name', format: 'string' },
+          { key: 'prefKind', label: 'Kind', format: 'string' },
+          { key: 'prefType', label: 'Type', format: 'string' },
+          { key: 'prefValue', label: 'Value', format: 'string' },
+        ],
+      },
+      {
+        name: 'UserTiming',
+        tooltipLabel: '{marker.data.name}',
+        chartLabel: '{marker.data.name}',
+        tableLabel: '{marker.data.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [
+          // name
+          { label: 'Marker', value: 'UserTiming' },
+          { key: 'entryType', label: 'Entry Type', format: 'string' },
+          {
+            label: 'Description',
+            value:
+              'UserTiming is created using the DOM APIs performance.mark() and performance.measure().',
+          },
+        ],
+      },
+      {
+        name: 'Text',
+        tableLabel: '{marker.name} — {marker.data.name}',
+        chartLabel: '{marker.name} — {marker.data.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [{ key: 'name', label: 'Details', format: 'string' }],
+      },
+      {
+        name: 'Log',
+        display: ['marker-table'],
+        tableLabel: '({marker.data.module}) {marker.data.name}',
+        data: [
+          { key: 'module', label: 'Module', format: 'string' },
+          { key: 'name', label: 'Name', format: 'string' },
+        ],
+      },
+      {
+        name: 'DOMEvent',
+        tooltipLabel: '{marker.data.eventType} — DOMEvent',
+        tableLabel: '{marker.data.eventType}',
+        chartLabel: '{marker.data.eventType}',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [
+          { key: 'latency', label: 'Latency', format: 'duration' },
+          // eventType is in the payload as well.
+        ],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Paint',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Navigation',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        // TODO - Note that this marker is a "tracing" marker currently.
+        // See issue #2749
+        name: 'Layout',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'category', label: 'Type', format: 'string' }],
+      },
+      {
+        name: 'IPC',
+        tooltipLabel: 'IPC — {marker.data.niceDirection}',
+        tableLabel:
+          '{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}',
+        chartLabel: '{marker.data.messageType}',
+        display: ['marker-chart', 'marker-table', 'timeline-ipc'],
+        data: [
+          { key: 'messageType', label: 'Type', format: 'string' },
+          { key: 'sync', label: 'Sync', format: 'string' },
+          { key: 'sendThreadName', label: 'From', format: 'string' },
+          { key: 'recvThreadName', label: 'To', format: 'string' },
+        ],
+      },
+      {
+        name: 'RefreshDriverTick',
+        display: ['marker-chart', 'marker-table', 'timeline-overview'],
+        data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
+      },
+      {
+        // The schema is mostly handled with custom logic.
+        name: 'Network',
+        display: ['marker-table'],
+        data: [],
+      },
+    ];
   },
 };
 /* eslint-enable no-useless-computed-key */

@@ -19,7 +19,10 @@ import type {
 } from 'firefox-profiler/types';
 
 import { assertExhaustiveCheck } from '../../../utils/flow';
-import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  hasThreadKeys,
+} from '../../../profile-logic/profile-data';
 import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
@@ -151,7 +154,6 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.data.push({
     type: 'tracing',
     category: 'Paint',
-    interval: 'start',
   });
   thread2.markers.category.push(0);
   thread2.markers.name.push(
@@ -172,7 +174,7 @@ export function getProfileWithNiceTracks(): Profile {
   return profile;
 }
 
-export function getStoreWithMemoryTrack(pid: number = 222): * {
+export function getStoreWithMemoryTrack(pid: number = 222) {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
     Array(10)
@@ -231,8 +233,9 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
       case 'tab': {
         // Only print the main track if we actually managed to find it.
         if (globalTrack.threadIndexes.size > 0) {
-          const selected = selectedThreadIndexes.has(
-            globalTrack.mainThreadIndex
+          const selected = hasThreadKeys(
+            selectedThreadIndexes,
+            globalTrack.threadsKey
           )
             ? ' SELECTED'
             : '';
