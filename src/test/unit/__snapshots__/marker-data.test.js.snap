@@ -6,7 +6,6 @@ Array [
     "category": 0,
     "data": Object {
       "category": "Paint",
-      "interval": "end",
       "type": "tracing",
     },
     "end": 1,
@@ -32,7 +31,6 @@ Array [
         "tid": 1111,
         "time": 1,
       },
-      "interval": "start",
       "type": "tracing",
     },
     "end": 8,
@@ -43,7 +41,6 @@ Array [
     "category": 0,
     "data": Object {
       "category": "Paint",
-      "interval": "start",
       "type": "tracing",
     },
     "end": 5,
@@ -90,7 +87,6 @@ Array [
         "tid": 1111,
         "time": 1,
       },
-      "interval": "start",
       "type": "tracing",
     },
     "end": 18,
@@ -106,7 +102,6 @@ Array [
         "tid": 1111,
         "time": 1,
       },
-      "interval": "start",
       "type": "tracing",
     },
     "end": 15,
@@ -279,7 +274,6 @@ Array [
     "category": 0,
     "data": Object {
       "category": "Paint",
-      "interval": "start",
       "type": "tracing",
     },
     "end": 100,

@@ -37,7 +37,7 @@ import {
 import {
   withHistoryReplaceStateAsync,
   stateFromLocation,
-  getDataSourceFromPathParts,
+  ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
@@ -106,7 +106,8 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler?: $GeckoProfiler,
+    geckoProfiler: $GeckoProfiler,
+    skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
@@ -145,7 +146,8 @@ export function loadProfile(
       await dispatch(
         finalizeProfileView(
           config.geckoProfiler,
-          config.timelineTrackOrganization
+          config.timelineTrackOrganization,
+          config.skipSymbolication
         )
       );
     }
@@ -158,12 +160,19 @@ export function loadProfile(
  * view information, this function will compute the defaults. There is a decent amount of
  * complexity to making all of these decisions, which has been collected in a bunch of
  * functions in the src/profile-logic/tracks.js file.
+ *
+ * Note: skipSymbolication is used in tests only, this is enforced.
  */
 export function finalizeProfileView(
   geckoProfiler?: $GeckoProfiler,
-  timelineTrackOrganization?: TimelineTrackOrganization
+  timelineTrackOrganization?: TimelineTrackOrganization,
+  skipSymbolication?: boolean
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
+    if (skipSymbolication && process.env.NODE_ENV !== 'test') {
+      throw new Error('Please do not use skipSymbolication outside of tests');
+    }
+
     const profile = getProfileOrNull(getState());
     if (profile === null || getView(getState()).phase !== 'PROFILE_LOADED') {
       // Profile load was not successful. Do not continue.
@@ -224,7 +233,8 @@ export function finalizeProfileView(
 
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
-    if (profile.meta.symbolicated === false) {
+    // We can skip the symbolication in tests if needed.
+    if (!skipSymbolication && profile.meta.symbolicated === false) {
       const symbolStore = getSymbolStore(dispatch, geckoProfiler);
       if (symbolStore) {
         // Only symbolicate if a symbol store is available. In tests we may not
@@ -539,7 +549,7 @@ export function finalizeActiveTabProfileView(
     if (selectedThreadIndexes === null) {
       // Select the main track if there is no selected thread.
       selectedThreadIndexes = new Set([
-        activeTabTimeline.mainTrack.mainThreadIndex,
+        ...activeTabTimeline.mainTrack.threadIndexes,
       ]);
     }
 
@@ -636,6 +646,7 @@ export function viewProfile(
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     geckoProfiler: $GeckoProfiler,
+    skipSymbolication: boolean,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
@@ -1401,7 +1412,7 @@ export function getProfilesFromRawUrl(
 > {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
-    let dataSource = getDataSourceFromPathParts(pathParts);
+    let dataSource = ensureIsValidDataSource(pathParts[0]);
     if (dataSource === 'from-file') {
       // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
       // be 'from-file' and needs to be redirected to home page.
@@ -1412,6 +1423,7 @@ export function getProfilesFromRawUrl(
     let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
+      case 'unpublished':
         shouldSetupInitialUrlState = false;
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait

@@ -452,7 +452,6 @@ describe('ctxId', function() {
     expect(globalTracks).toEqual([
       {
         type: 'tab',
-        mainThreadIndex: 0,
         threadIndexes: new Set([0]),
         threadsKey: 0,
       },

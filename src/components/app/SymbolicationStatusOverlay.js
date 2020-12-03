@@ -8,11 +8,11 @@ import React, { PureComponent } from 'react';
 import {
   getProfileViewOptions,
   getSymbolicationStatus,
-} from '../../selectors/profile';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/profile';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { RequestedLib } from 'firefox-profiler/types';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './SymbolicationStatusOverlay.css';
 

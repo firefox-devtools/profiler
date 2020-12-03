@@ -17,6 +17,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': 'Importing the profile directly from Firefox...',
+  unpublished: 'Importing the profile directly from Firefox...',
   'from-file': 'Reading the file and processing the profile...',
   local: 'Not implemented yet.',
   public: 'Downloading and processing the profile...',

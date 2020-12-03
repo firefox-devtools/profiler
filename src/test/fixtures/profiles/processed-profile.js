@@ -333,7 +333,6 @@ export function getMarkerTableProfile() {
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
         },
       ],
       [
@@ -947,7 +946,6 @@ export function getNetworkTrackProfile() {
   const domContentLoadedBase = {
     type: 'tracing',
     category: 'Navigation',
-    interval: 'start',
     innerWindowID: innerWindowID,
   };
 
@@ -958,7 +956,6 @@ export function getNetworkTrackProfile() {
       5,
       ({
         ...loadPayloadBase,
-        interval: 'start',
       }: NavigationMarkerPayload),
     ],
     ['TTI', 6],
@@ -970,7 +967,6 @@ export function getNetworkTrackProfile() {
       7,
       ({
         ...domContentLoadedBase,
-        interval: 'start',
       }: NavigationMarkerPayload),
     ],
   ]);
