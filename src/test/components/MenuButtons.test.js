@@ -67,38 +67,6 @@ jest.mock('firefox-profiler/profile-logic/symbolication');
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
 
 describe('app/MenuButtons', function() {
-  function mockUpload() {
-    // Create a promise with the resolve function outside of it.
-    let resolveUpload, rejectUpload;
-    const promise = new Promise((resolve, reject) => {
-      resolveUpload = resolve;
-      rejectUpload = reject;
-    });
-
-    promise.catch(() => {
-      // Node complains if we don't handle a promise/catch, and this one may reject
-      // before it's properly handled. Catch it here so that Node doesn't complain.
-      // This won't hide problems in our code because the app code "awaits" the
-      // result of startUpload, so any rejection will be handled there.
-    });
-
-    // Flow doesn't know uploadBinaryProfileData is a jest mock.
-    (uploadBinaryProfileData: any).mockImplementation(
-      (() => ({
-        abortUpload: () => {
-          // In the real implementation, we call xhr.abort, which in turn
-          // triggers an "abort" event on the XHR object, which in turn rejects
-          // the promise with the error UploadAbortedError. So we do just that
-          // here directly, to simulate this.
-          rejectUpload(new UploadAbortedError());
-        },
-        startUpload: () => promise,
-      }): typeof uploadBinaryProfileData)
-    );
-
-    return { resolveUpload, rejectUpload };
-  }
-
   function createSimpleProfile(updateChannel = 'release') {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
@@ -129,7 +97,6 @@ describe('app/MenuButtons', function() {
     jest.useFakeTimers();
 
     const store = storeWithProfile(profile);
-    const { resolveUpload, rejectUpload } = mockUpload();
 
     store.dispatch(
       updateUrlState(
@@ -147,25 +114,6 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const {
-      container,
-      getByTestId,
-      getByText,
-      queryByText,
-      findByText,
-    } = renderResult;
-    const getPublishButton = () => getByText(/^(Re-upload|Upload)$/);
-    const findPublishButton = () => findByText(/^(Re-upload|Upload)$/);
-    const getErrorButton = () => getByText('Error uploading');
-    const getCancelButton = () => getByText('Cancel Upload');
-    const getPanelForm = () =>
-      ensureExists(
-        container.querySelector('form'),
-        'Could not find the form in the panel'
-      );
-    const queryPreferenceCheckbox = () =>
-      queryByText('Include preference values');
-    const getPanel = () => getByTestId('MenuButtonsPublish-container');
     const clickAndRunTimers = where => {
       fireFullClick(where);
       jest.runAllTimers();
@@ -181,21 +129,76 @@ describe('app/MenuButtons', function() {
     return {
       ...store,
       ...renderResult,
-      getPanel,
-      findPublishButton,
-      getPublishButton,
-      getErrorButton,
-      getCancelButton,
-      getPanelForm,
-      queryPreferenceCheckbox,
       clickAndRunTimers,
-      resolveUpload,
-      rejectUpload,
       navigateToHash,
     };
   }
 
   describe('<Publish>', function() {
+    function mockUpload() {
+      // Create a promise with the resolve function outside of it.
+      let resolveUpload, rejectUpload;
+      const promise = new Promise((resolve, reject) => {
+        resolveUpload = resolve;
+        rejectUpload = reject;
+      });
+
+      promise.catch(() => {
+        // Node complains if we don't handle a promise/catch, and this one may reject
+        // before it's properly handled. Catch it here so that Node doesn't complain.
+        // This won't hide problems in our code because the app code "awaits" the
+        // result of startUpload, so any rejection will be handled there.
+      });
+
+      // Flow doesn't know uploadBinaryProfileData is a jest mock.
+      (uploadBinaryProfileData: any).mockImplementation(
+        (() => ({
+          abortUpload: () => {
+            // In the real implementation, we call xhr.abort, which in turn
+            // triggers an "abort" event on the XHR object, which in turn rejects
+            // the promise with the error UploadAbortedError. So we do just that
+            // here directly, to simulate this.
+            rejectUpload(new UploadAbortedError());
+          },
+          startUpload: () => promise,
+        }): typeof uploadBinaryProfileData)
+      );
+
+      return { resolveUpload, rejectUpload };
+    }
+
+    function setupForPublish(profile) {
+      const { resolveUpload, rejectUpload } = mockUpload();
+
+      const setupResult = setup(profile);
+
+      const getPublishButton = () => screen.getByText(/^(Re-upload|Upload)$/);
+      const findPublishButton = () => screen.findByText(/^(Re-upload|Upload)$/);
+      const getErrorButton = () => screen.getByText('Error uploading');
+      const getCancelButton = () => screen.getByText('Cancel Upload');
+      const getPanelForm = () =>
+        ensureExists(
+          document.querySelector('form'),
+          'Could not find the form in the panel'
+        );
+      const queryPreferenceCheckbox = () =>
+        screen.queryByText('Include preference values');
+      const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
+
+      return {
+        ...setupResult,
+        getPanel,
+        findPublishButton,
+        getPublishButton,
+        getErrorButton,
+        getCancelButton,
+        getPanelForm,
+        queryPreferenceCheckbox,
+        resolveUpload,
+        rejectUpload,
+      };
+    }
+
     beforeAll(function() {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
@@ -226,20 +229,24 @@ describe('app/MenuButtons', function() {
 
     it('matches the snapshot for the closed state', () => {
       const { profile } = createSimpleProfile();
-      const { container } = setup(profile);
+      const { container } = setupForPublish(profile);
       expect(container).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a nightly profile', () => {
       const { profile } = createSimpleProfile('nightly');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
+        profile
+      );
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', () => {
       const { profile } = createSimpleProfile('release');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
+        profile
+      );
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
@@ -252,7 +259,7 @@ describe('app/MenuButtons', function() {
         navigateToHash,
         getPublishButton,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       clickAndRunTimers(getPublishButton());
@@ -265,7 +272,7 @@ describe('app/MenuButtons', function() {
         getPublishButton,
         clickAndRunTimers,
         queryPreferenceCheckbox,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeTruthy();
     });
@@ -276,7 +283,7 @@ describe('app/MenuButtons', function() {
         getPublishButton,
         clickAndRunTimers,
         queryPreferenceCheckbox,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
@@ -289,7 +296,7 @@ describe('app/MenuButtons', function() {
         clickAndRunTimers,
         resolveUpload,
         getState,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload('SOME_HASH');
@@ -315,7 +322,7 @@ describe('app/MenuButtons', function() {
         getCancelButton,
         getPanelForm,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
 
@@ -338,7 +345,7 @@ describe('app/MenuButtons', function() {
         getPanelForm,
         rejectUpload,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish(profile);
 
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
