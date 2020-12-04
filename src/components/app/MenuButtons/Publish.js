@@ -258,7 +258,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         className="menuButtonsPublishUpload"
         data-testid="MenuButtonsPublish-container"
       >
-        <div className="photon-message-bar photon-message-bar-error">
+        <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
           <div className="photon-message-bar-inner-text">
             Uh oh, something went wrong when uploading the profile.
           </div>

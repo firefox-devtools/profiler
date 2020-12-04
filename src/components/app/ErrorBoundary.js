@@ -71,7 +71,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
-            <div className="photon-message-bar photon-message-bar-error">
+            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
               <div className="photon-message-bar-inner-text">
                 {this.props.message}
               </div>
