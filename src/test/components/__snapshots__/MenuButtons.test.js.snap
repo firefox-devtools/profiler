@@ -1,50 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<MetaInfoPanel> Full View Button is present when we are in the active tab view 1`] = `
-<div>
-  <button
-    class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
-    type="button"
-  >
-    Full View
-  </button>
-  <div
-    class="buttonWithPanel"
-  >
-    <button
-      aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
-      type="button"
-    >
-      Local Profile
-    </button>
-  </div>
-  <div
-    class="buttonWithPanel"
-  >
-    <button
-      aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
-      type="button"
-    >
-      Upload
-    </button>
-  </div>
-  <a
-    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
-    href="/docs/"
-    target="_blank"
-    title="Open the documentation in a new window"
-  >
-    Docs
-    <i
-      class="open-in-new"
-    />
-  </a>
-</div>
-`;
-
-exports[`<MetaInfoPanel> matches the snapshot 1`] = `
+exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
 <div>
   <h2
     class="metaInfoSubTitle"
@@ -429,7 +385,7 @@ exports[`<MetaInfoPanel> matches the snapshot 1`] = `
 </div>
 `;
 
-exports[`<MetaInfoPanel> with no statistics object should not make the app crash 1`] = `
+exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not make the app crash 1`] = `
 <div>
   <h2
     class="metaInfoSubTitle"
@@ -1110,5 +1066,49 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       </button>
     </div>
   </form>
+</div>
+`;
+
+exports[`app/MenuButtons Full View Button is present when we are in the active tab view 1`] = `
+<div>
+  <button
+    class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
+    type="button"
+  >
+    Full View
+  </button>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
+      type="button"
+    >
+      Local Profile
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Upload
+    </button>
+  </div>
+  <a
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
 </div>
 `;

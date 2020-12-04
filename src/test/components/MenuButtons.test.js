@@ -93,11 +93,12 @@ describe('app/MenuButtons', function() {
     return { profile };
   }
 
-  function setup(profile) {
+  function setup(profile = createSimpleProfile().profile) {
     jest.useFakeTimers();
 
     const store = storeWithProfile(profile);
 
+    // We need a sensible data source for this component.
     store.dispatch(
       updateUrlState(
         stateFromLocation({
@@ -289,14 +290,13 @@ describe('app/MenuButtons', function() {
     });
 
     it('can publish and revert', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPublishButton,
         getPanelForm,
         clickAndRunTimers,
         resolveUpload,
         getState,
-      } = setupForPublish(profile);
+      } = setupForPublish();
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload('SOME_HASH');
@@ -314,7 +314,6 @@ describe('app/MenuButtons', function() {
     });
 
     it('can publish, cancel, and then publish again', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -322,7 +321,7 @@ describe('app/MenuButtons', function() {
         getCancelButton,
         getPanelForm,
         clickAndRunTimers,
-      } = setupForPublish(profile);
+      } = setupForPublish();
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
 
@@ -337,7 +336,6 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for an error', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -345,7 +343,7 @@ describe('app/MenuButtons', function() {
         getPanelForm,
         rejectUpload,
         clickAndRunTimers,
-      } = setupForPublish(profile);
+      } = setupForPublish();
 
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
@@ -361,139 +359,116 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
   });
-});
 
-describe('<MetaInfoPanel>', function() {
-  async function setup(profile: Profile) {
-    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
-      // eslint-disable-next-line babel/no-invalid-this
-      return 'toLocaleString ' + this.toUTCString();
+  describe('<MetaInfoPanel>', function() {
+    async function setup(profile: Profile) {
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
+
+      const store = blankStore();
+
+      // Note that we dispatch this action directly instead of using viewProfile
+      // or loadProfile because we want to control tightly how symbolication is
+      // started in these tests.
+      await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
+
+      return render(
+        <Provider store={store}>
+          <MetaInfoPanel />
+        </Provider>
+      );
+    }
+
+    it('matches the snapshot', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      profile.meta.configuration = {
+        features: ['js', 'threads'],
+        threads: ['GeckoMain', 'DOM Worker'],
+        capacity: Math.pow(2, 14),
+        duration: 20,
+      };
+
+      const { container } = await setup(profile);
+      // This component renders a fragment, so we look at the full container so
+      // that we get all children.
+      expect(container).toMatchSnapshot();
     });
 
-    const store = blankStore();
-
-    // Note that we dispatch this action directly instead of using viewProfile
-    // or loadProfile because we want to control tightly how symbolication is
-    // started in these tests.
-    await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
-
-    return render(
-      <Provider store={store}>
-        <MetaInfoPanel />
-      </Provider>
-    );
-  }
-
-  it('matches the snapshot', async () => {
-    // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processGeckoProfile(createGeckoProfile());
-    profile.meta.configuration = {
-      features: ['js', 'threads'],
-      threads: ['GeckoMain', 'DOM Worker'],
-      capacity: Math.pow(2, 14),
-      duration: 20,
-    };
-
-    const { container } = await setup(profile);
-    // This component renders a fragment, so we look at the full container so
-    // that we get all children.
-    expect(container).toMatchSnapshot();
-  });
-
-  it('with no statistics object should not make the app crash', async () => {
-    // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processGeckoProfile(createGeckoProfile());
-    // We are removing statistics objects from all overhead objects to test
-    // the robustness of our handling code.
-    if (profile.profilerOverhead) {
-      for (const overhead of profile.profilerOverhead) {
-        delete overhead.statistics;
+    it('with no statistics object should not make the app crash', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      // We are removing statistics objects from all overhead objects to test
+      // the robustness of our handling code.
+      if (profile.profilerOverhead) {
+        for (const overhead of profile.profilerOverhead) {
+          delete overhead.statistics;
+        }
       }
-    }
 
-    const { container } = await setup(profile);
-    // This component renders a fragment, so we look at the full container so
-    // that we get all children.
-    expect(container).toMatchSnapshot();
-  });
-
-  describe('symbolication', function() {
-    type SymbolicationTestConfig = $ReadOnly<{|
-      symbolicated: boolean,
-    |}>;
-
-    function setupSymbolicationTest(config: SymbolicationTestConfig) {
-      const { profile } = getProfileFromTextSamples('A');
-      profile.meta.symbolicated = config.symbolicated;
-
-      return setup(profile);
-    }
-
-    it('handles successfully symbolicated profiles', async () => {
-      await setupSymbolicationTest({ symbolicated: true });
-
-      expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
-      fireFullClick(screen.getByText('Re-symbolicate profile'));
-
-      expect(symbolicateProfile).toHaveBeenCalled();
-      expect(
-        screen.getByText('Attempting to re-symbolicate profile')
-      ).toBeTruthy();
-      // No symbolicate button is available.
-      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
-
-      // After a while, we get a result
-      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      const { container } = await setup(profile);
+      // This component renders a fragment, so we look at the full container so
+      // that we get all children.
+      expect(container).toMatchSnapshot();
     });
 
-    it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
-      await setupSymbolicationTest({ symbolicated: false });
+    describe('symbolication', function() {
+      type SymbolicationTestConfig = $ReadOnly<{|
+        symbolicated: boolean,
+      |}>;
 
-      expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
-      fireFullClick(screen.getByText('Symbolicate profile'));
-      expect(symbolicateProfile).toHaveBeenCalled();
+      function setupSymbolicationTest(config: SymbolicationTestConfig) {
+        const { profile } = getProfileFromTextSamples('A');
+        profile.meta.symbolicated = config.symbolicated;
 
-      expect(screen.getByText('Currently symbolicating profile')).toBeTruthy();
-      // No symbolicate button is available.
-      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+        return setup(profile);
+      }
 
-      // After a while, we get a result
-      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      it('handles successfully symbolicated profiles', async () => {
+        await setupSymbolicationTest({ symbolicated: true });
+
+        expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
+        fireFullClick(screen.getByText('Re-symbolicate profile'));
+
+        expect(symbolicateProfile).toHaveBeenCalled();
+        expect(
+          screen.getByText('Attempting to re-symbolicate profile')
+        ).toBeTruthy();
+        // No symbolicate button is available.
+        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+        // After a while, we get a result
+        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      });
+
+      it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
+        await setupSymbolicationTest({ symbolicated: false });
+
+        expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
+        fireFullClick(screen.getByText('Symbolicate profile'));
+        expect(symbolicateProfile).toHaveBeenCalled();
+
+        expect(
+          screen.getByText('Currently symbolicating profile')
+        ).toBeTruthy();
+        // No symbolicate button is available.
+        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+        // After a while, we get a result
+        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      });
     });
   });
 
   describe('Full View Button', function() {
-    function setup() {
-      const { profile } = getProfileFromTextSamples('A');
-      const store = storeWithProfile(profile);
-
-      store.dispatch(
-        updateUrlState(
-          stateFromLocation({
-            pathname: '/from-addon',
-            search: '',
-            hash: '',
-          })
-        )
-      );
-
-      const renderResults = render(
-        <Provider store={store}>
-          <MenuButtons />
-        </Provider>
-      );
-
-      return {
-        profile,
-        ...store,
-        ...renderResults,
-      };
-    }
-
     it('is not present when we are in the full view already', () => {
       const { getState, queryByText } = setup();
 
