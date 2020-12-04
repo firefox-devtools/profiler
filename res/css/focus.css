@@ -19,7 +19,8 @@ button::-moz-focus-inner {
  */
 input[type='radio']:focus,
 input[type='checkbox']:focus,
-input[type='range']:focus {
+input[type='range']:focus,
+button.photon-button-primary:focus {
   box-shadow: var(--photon-focus-shadow);
   outline: 0;
 }
