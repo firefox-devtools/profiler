@@ -8,7 +8,7 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
     class="appErrorBoundaryContents"
   >
     <div
-      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
+      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage"
     >
       <div
         class="photon-message-bar-inner-text"
