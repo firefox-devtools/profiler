@@ -5,7 +5,6 @@
 // @flow
 import * as React from 'react';
 import { MenuButtons } from '../../components/app/MenuButtons';
-import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
 import {
   render,
   fireEvent,
@@ -93,10 +92,8 @@ describe('app/MenuButtons', function() {
     return { profile };
   }
 
-  function setup(profile = createSimpleProfile().profile) {
+  function setup(store) {
     jest.useFakeTimers();
-
-    const store = storeWithProfile(profile);
 
     // We need a sensible data source for this component.
     store.dispatch(
@@ -168,10 +165,10 @@ describe('app/MenuButtons', function() {
       return { resolveUpload, rejectUpload };
     }
 
-    function setupForPublish(profile) {
+    function setupForPublish(profile = createSimpleProfile().profile) {
       const { resolveUpload, rejectUpload } = mockUpload();
 
-      const setupResult = setup(profile);
+      const setupResult = setup(storeWithProfile(profile));
 
       const getPublishButton = () => screen.getByText(/^(Re-upload|Upload)$/);
       const findPublishButton = () => screen.findByText(/^(Re-upload|Upload)$/);
@@ -361,13 +358,15 @@ describe('app/MenuButtons', function() {
   });
 
   describe('<MetaInfoPanel>', function() {
-    async function setup(profile: Profile) {
+    async function setupForMetaInfoPanel(profile: Profile) {
       jest
         .spyOn(Date.prototype, 'toLocaleString')
         .mockImplementation(function() {
           // eslint-disable-next-line babel/no-invalid-this
           return 'toLocaleString ' + this.toUTCString();
         });
+
+      jest.useFakeTimers();
 
       const store = blankStore();
 
@@ -376,11 +375,22 @@ describe('app/MenuButtons', function() {
       // started in these tests.
       await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
 
-      return render(
-        <Provider store={store}>
-          <MetaInfoPanel />
-        </Provider>
-      );
+      const setupResult = setup(store);
+      const { clickAndRunTimers } = setupResult;
+
+      function displayMetaInfoPanel() {
+        clickAndRunTimers(screen.getByText(/^(Local|Uploaded) Profile$/));
+      }
+
+      function getMetaInfoPanel() {
+        return document.querySelector('.metaInfoPanel');
+      }
+
+      return {
+        ...setupResult,
+        getMetaInfoPanel,
+        displayMetaInfoPanel,
+      };
     }
 
     it('matches the snapshot', async () => {
@@ -393,10 +403,12 @@ describe('app/MenuButtons', function() {
         duration: 20,
       };
 
-      const { container } = await setup(profile);
-      // This component renders a fragment, so we look at the full container so
-      // that we get all children.
-      expect(container).toMatchSnapshot();
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+      expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
     it('with no statistics object should not make the app crash', async () => {
@@ -410,10 +422,12 @@ describe('app/MenuButtons', function() {
         }
       }
 
-      const { container } = await setup(profile);
-      // This component renders a fragment, so we look at the full container so
-      // that we get all children.
-      expect(container).toMatchSnapshot();
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+      expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
     describe('symbolication', function() {
@@ -421,11 +435,13 @@ describe('app/MenuButtons', function() {
         symbolicated: boolean,
       |}>;
 
-      function setupSymbolicationTest(config: SymbolicationTestConfig) {
+      async function setupSymbolicationTest(config: SymbolicationTestConfig) {
         const { profile } = getProfileFromTextSamples('A');
         profile.meta.symbolicated = config.symbolicated;
 
-        return setup(profile);
+        const setupResult = await setupForMetaInfoPanel(profile);
+        setupResult.displayMetaInfoPanel();
+        return setupResult;
       }
 
       it('handles successfully symbolicated profiles', async () => {
@@ -469,8 +485,12 @@ describe('app/MenuButtons', function() {
   });
 
   describe('Full View Button', function() {
+    function setupForFullViewButton() {
+      return setup(storeWithProfile(createSimpleProfile().profile));
+    }
+
     it('is not present when we are in the full view already', () => {
-      const { getState, queryByText } = setup();
+      const { getState, queryByText } = setupForFullViewButton();
 
       // Make sure that we are in the full view and the button is not there.
       expect(getTimelineTrackOrganization(getState()).type).toBe('full');
@@ -478,7 +498,12 @@ describe('app/MenuButtons', function() {
     });
 
     it('is present when we are in the active tab view', () => {
-      const { dispatch, getState, getByText, container } = setup();
+      const {
+        dispatch,
+        getState,
+        getByText,
+        container,
+      } = setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({
@@ -494,7 +519,12 @@ describe('app/MenuButtons', function() {
     });
 
     it('switches to full view when clicked', () => {
-      const { dispatch, getState, getByText, queryByText } = setup();
+      const {
+        dispatch,
+        getState,
+        getByText,
+        queryByText,
+      } = setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({
