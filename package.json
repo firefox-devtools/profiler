@@ -44,6 +44,9 @@
     "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
+    "@fluent/bundle": "^0.16.0",
+    "@fluent/langneg": "^0.5.0",
+    "@fluent/react": "^0.13.0",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
@@ -53,6 +56,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.2.0",
     "idb": "^5.0.7",
+    "intl-pluralrules": "^1.2.2",
     "jszip": "^3.5.0",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
