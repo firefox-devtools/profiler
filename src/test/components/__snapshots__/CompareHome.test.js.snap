@@ -91,7 +91,7 @@ exports[`app/CompareHome matches the snapshot 1`] = `
       value=""
     />
     <input
-      class="compareHomeSubmitButton"
+      class="compareHomeSubmitButton photon-button photon-button-primary"
       type="submit"
       value="Retrieve profiles"
     />

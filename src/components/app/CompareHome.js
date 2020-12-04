@@ -81,7 +81,7 @@ class CompareHomeImpl extends PureComponent<Props, State> {
             value={profile2}
           />
           <input
-            className="compareHomeSubmitButton"
+            className="compareHomeSubmitButton photon-button photon-button-primary"
             type="submit"
             value="Retrieve profiles"
           />

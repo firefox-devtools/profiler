@@ -38,11 +38,9 @@
   display: flex;
   justify-content: space-between;
 
-  /* The padding compensates for the negative margin. The negative margin is
-   * there so that the left border (implemented as a box-shadow below) go
-   * outside the line. */
-  padding: 2px 0;
-  margin: -2px 0;
+  /* Ensure that the left "focus-within" border (implemented as a box-shadow below) goes
+   * outside button's focus border. */
+  padding: 1px 0;
 }
 
 .publishedProfilesLink {
@@ -61,7 +59,7 @@
 /**
  * Overcome the selector specificity of the focus by including the "a"
  */
-a.publishedProfilesLink:focus {
+.publishedProfilesLink:focus {
   border-radius: 0;
   box-shadow: var(--photon-focus-shadow);
 }
