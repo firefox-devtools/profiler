@@ -16,6 +16,7 @@ import {
 import {
   assertExhaustiveCheck,
   toValidTabSlug,
+  coerce,
   ensureExists,
 } from 'firefox-profiler/utils/flow';
 import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
@@ -111,13 +112,12 @@ function getPathParts(urlState: UrlState): string[] {
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-addon':
-      return ['from-addon', urlState.selectedTab];
+    case 'unpublished':
     case 'from-file':
-      return ['from-file', urlState.selectedTab];
-    case 'local':
-      return ['local', urlState.hash, urlState.selectedTab];
+      return [dataSource, urlState.selectedTab];
     case 'public':
-      return ['public', urlState.hash, urlState.selectedTab];
+    case 'local':
+      return [dataSource, urlState.hash, urlState.selectedTab];
     case 'from-url':
       return [
         'from-url',
@@ -255,6 +255,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'public':
     case 'local':
     case 'from-addon':
+    case 'unpublished':
     case 'from-file':
     case 'from-url':
       break;
@@ -461,21 +462,30 @@ export function urlFromState(urlState: UrlState): string {
   return pathname + (qString ? '?' + qString : '');
 }
 
-export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
-  const str = pathParts[0] || 'none';
-  // With this switch, flow is able to understand that we return a valid value
-  switch (str) {
+export function ensureIsValidDataSource(
+  possibleDataSource: string | void
+): DataSource {
+  // By casting `possibleDataSource` to a DataSource beforehand, we let Flow
+  // enforce that we look at all possible values.
+  const coercedDataSource = coerce<string, DataSource>(
+    possibleDataSource || 'none'
+  );
+  switch (coercedDataSource) {
     case 'none':
     case 'from-addon':
+    case 'unpublished':
     case 'from-file':
     case 'local':
     case 'public':
     case 'from-url':
     case 'compare':
     case 'uploaded-recordings':
-      return str;
+      return coercedDataSource;
     default:
-      throw new Error(`Unexpected data source ${str}`);
+      throw assertExhaustiveCheck(
+        coercedDataSource,
+        `Unexpected data source ${coercedDataSource}`
+      );
   }
 }
 
@@ -489,9 +499,18 @@ type Location = {
   hash: string,
 };
 
+/**
+ * Parse the window.location string to create the UrlState.
+ *
+ * `profile` parameter is nullable and optional. It's nullable because data sources
+ * like from-addon can't upgrade a url for a freshly captured profile. So we need
+ * to skip upgrading for these sources. It's also optional for both testing
+ * purposes and for places where we would like to do the upgrading without
+ * providing any profile.
+ */
 export function stateFromLocation(
   location: Location,
-  profile?: Profile
+  profile?: Profile | null
 ): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion(
     {
@@ -505,7 +524,7 @@ export function stateFromLocation(
   );
 
   const pathParts = pathname.split('/').filter(d => d);
-  const dataSource = getDataSourceFromPathParts(pathParts);
+  const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
     query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
@@ -660,10 +679,13 @@ type ProcessedLocationBeforeUpgrade = {|
 
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
-  profile?: Profile
+  profile?: Profile | null
 ): ProcessedLocation {
   const urlVersion = +processedLocation.query.v || 0;
-  if (urlVersion === CURRENT_URL_VERSION) {
+  if (profile === null || urlVersion === CURRENT_URL_VERSION) {
+    // Do not upgrade when either profile data is null or url is on the latest
+    // version already. Profile can be null only when the source could not provide
+    // that for upgrader and therefore upgrading step is not needed (e.g. 'from-addon').
     return processedLocation;
   }
 

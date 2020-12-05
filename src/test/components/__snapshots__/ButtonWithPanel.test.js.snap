@@ -44,24 +44,6 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   >
     My Button
   </button>
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 `;
 
@@ -109,24 +91,6 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
   >
     My Button
   </button>
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 `;
 

@@ -4,7 +4,10 @@
 
 html,
 body {
+  display: flex;
+  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
   height: 100%;
+  flex: 1;
   padding: 0;
   margin: 0;
 
@@ -26,37 +29,11 @@ body {
   /* background-color is defined in the HTML file to prevent flashing a white screen. */
 }
 
-body,
-.profileViewer {
-  display: flex;
-  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
-  flex: 1;
-}
-
-.profileViewer {
-  flex-flow: column nowrap;
-}
-
 :root {
   /* Photon animation curve */
   --animation-curve: cubic-bezier(0.07, 0.95, 0, 1);
 
   color: var(--grey-90);
-}
-
-.profileViewerTopBar {
-  display: flex;
-  height: 24px;
-  flex: none;
-  flex-flow: row nowrap;
-  padding: 0;
-  border-bottom: 1px solid var(--grey-30);
-  margin: 0;
-  background: var(--grey-10);
-}
-
-.profileViewerSpacer {
-  flex: 1;
 }
 
 .profileFilterNavigator {

@@ -7,9 +7,6 @@
 // Main use cases of storing profiles are tested in the publish flow
 // (test/store/publish.test.js). In this file we'll test more specific cases.
 
-import 'fake-indexeddb/auto';
-import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
-
 import {
   storeProfileData,
   listAllProfileData,
@@ -18,15 +15,8 @@ import {
   type ProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 
-function resetIndexedDb() {
-  // This is the recommended way to reset the IDB state between test runs, but
-  // neither flow nor eslint like that we assign to indexedDB directly, for
-  // different reasons.
-  /* $FlowExpectError */ /* eslint-disable-next-line no-global-assign */
-  indexedDB = new FDBFactory();
-}
-beforeEach(resetIndexedDb);
-afterEach(resetIndexedDb);
+import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
+autoMockIndexedDB();
 
 describe('published-profiles-store', function() {
   async function storeGenericProfileData(overrides: $Shape<ProfileData>) {

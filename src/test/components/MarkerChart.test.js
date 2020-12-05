@@ -77,7 +77,6 @@ const MARKERS: TestDefinedMarkers = [
     {
       type: 'tracing',
       category: 'Paint',
-      interval: 'end',
     },
   ],
   [
@@ -87,7 +86,6 @@ const MARKERS: TestDefinedMarkers = [
     {
       type: 'tracing',
       category: 'Paint',
-      interval: 'start',
     },
   ],
   getUserTiming('Marker B', 2, 8),
@@ -611,7 +609,6 @@ describe('MarkerChart', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID: parentInnerWindowIDsWithChildren,
           },
         ],

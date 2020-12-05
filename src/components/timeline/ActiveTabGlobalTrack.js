@@ -21,6 +21,7 @@ import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -165,13 +166,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     // Run different selectors based on the track type.
     switch (globalTrack.type) {
       case 'tab': {
-        // Look up the thread information for the process if it exists.
-        if (globalTrack.mainThreadIndex !== null) {
-          const threadIndex = globalTrack.mainThreadIndex;
-          isSelected =
-            getSelectedThreadIndexes(state).has(threadIndex) &&
-            selectedTab !== 'network-chart';
-        }
+        isSelected =
+          hasThreadKeys(
+            getSelectedThreadIndexes(state),
+            globalTrack.threadsKey
+          ) && selectedTab !== 'network-chart';
         resourceTracks = getActiveTabResourceTracks(state);
         break;
       }

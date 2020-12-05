@@ -53,7 +53,11 @@ import type {
 } from 'firefox-profiler/types';
 
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from '../utils/flow';
 
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
@@ -2670,7 +2674,7 @@ export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
   if (threadIndexes.size === 1) {
     // Return the ThreadIndex directly if there is only one thread.
     // We know this value exists because of the size check, even if Flow doesn't.
-    return (threadIndexes.values().next().value: any);
+    return ensureExists(getFirstItemFromSet(threadIndexes));
   }
 
   return [...threadIndexes].sort((a, b) => b - a).join(',');

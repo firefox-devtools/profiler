@@ -194,12 +194,7 @@ describe('actions/receive-profile', function() {
       );
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -307,12 +302,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -338,12 +328,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          null,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -1173,6 +1158,16 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromFile', function() {
+    beforeEach(function() {
+      if ((window: any).TextEncoder) {
+        throw new Error('A TextEncoder was already on the window object.');
+      }
+      (window: any).TextEncoder = TextEncoder;
+    });
+
+    afterEach(async function() {
+      delete (window: any).TextEncoder;
+    });
     /**
      * Bypass all of Flow's checks, and mock out the file interface.
      */
@@ -1271,16 +1266,33 @@ describe('actions/receive-profile', function() {
       ).toMatchSnapshot();
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can load gzipped json', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
+    it('can load gzipped json', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/gzip',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('will give an error when unable to parse gzipped profiles', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
+    it('will give an error when unable to parse gzipped profiles', async function() {
+      window.TextDecoder = TextDecoder;
+      const { view } = await setupTestWithFile({
+        type: 'application/gzip',
+        payload: compress('{}'),
+      });
+      expect(view.phase).toBe('FATAL_ERROR');
+
+      expect(
+        // Coerce into the object to access the error property.
+        (view: any).error
+      ).toMatchSnapshot();
     });
 
     async function setupZipTestWithProfile(

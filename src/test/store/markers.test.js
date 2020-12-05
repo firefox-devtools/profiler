@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  selectedThreadSelectors,
+  getMarkerSchemaByName,
+} from 'firefox-profiler/selectors';
 import {
   getUserTiming,
   getProfileWithMarkers,
@@ -100,12 +103,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
   describe('markers that are crossing the profile start or end', function() {
     it('renders properly markers starting before profile start', function() {
       const markerTiming = getMarkerChartTimingAndBuckets([
-        [
-          'Rasterize',
-          1,
-          null,
-          { category: 'Paint', interval: 'end', type: 'tracing' },
-        ],
+        ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
       expect(markerTiming).toEqual([
         'Idle',
@@ -153,12 +151,7 @@ describe('memory markers', function() {
         ['DOMEvent', 0, null],
         ['Navigation', 1, null],
         ['Paint', 2, null],
-        [
-          'IdleForgetSkippable',
-          3,
-          4,
-          { type: 'tracing', category: 'CC', interval: 'end' },
-        ],
+        ['IdleForgetSkippable', 3, 4, { type: 'tracing', category: 'CC' }],
         ['GCMinor', 5, null, { type: 'GCMinor', nursery: any }],
         ['GCMajor', 6, null, { type: 'GCMajor', timings: any }],
         ['GCSlice', 7, null, { type: 'GCSlice', timings: any }],
@@ -246,7 +239,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID,
           },
         ],
@@ -258,7 +250,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID: 111111,
           },
         ],
@@ -269,7 +260,6 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
           {
             type: 'tracing',
             category: 'Navigation',
-            interval: 'start',
             innerWindowID,
           },
         ],
@@ -343,10 +333,24 @@ describe('Marker schema filtering', function() {
       ['payload no schema', 0, null, { type: 'no schema marker' }],
       ['RefreshDriverTick', 0, null, { type: 'Text', name: 'RefreshDriverTick' }],
       ['UserTiming',        5, 6,    { type: 'UserTiming', name: 'name', entryType: 'mark' }],
+      // The following is a tracing marker without a schema attached, this was a
+      // regression reported in Bug 1678698.
+      // $FlowExpectError - Invalid payload by our type system.
+      ['RandomTracingMarker', 7, 8,  { type: 'tracing', category: 'RandomTracingMarker' }],
       ...getNetworkMarkers(),
     ]);
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerSchemaByName = getMarkerSchemaByName(getState());
+
+    if (markerSchemaByName.RandomTracingMarker) {
+      throw new Error(
+        'This test assumes that the RandomTracingMarker marker has no schema. If this ' +
+          'schema were added somewhere else, then rename RandomTracingMarker to ' +
+          'something else. '
+      );
+    }
+
     return selector(getState())
       .map(getMarker)
       .map(marker => marker.name);
@@ -361,6 +365,7 @@ describe('Marker schema filtering', function() {
       'RefreshDriverTick',
       'Load 0: https://mozilla.org',
       'UserTiming',
+      'RandomTracingMarker',
     ]);
   });
 
@@ -372,6 +377,7 @@ describe('Marker schema filtering', function() {
       'payload no schema',
       'RefreshDriverTick',
       'UserTiming',
+      'RandomTracingMarker',
     ]);
   });
 
