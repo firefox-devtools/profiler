@@ -306,7 +306,11 @@ export const getProfileNameWithDefault: Selector<string> = createSelector(
     }
 
     // Finally return a generic string describing the type of profile.
+    if (formattedMetaInfoString === '') {
+      return 'Untitled profile';
+    }
     return formattedMetaInfoString;
+
   }
 );
 
