@@ -11,12 +11,11 @@ import './index.css';
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
-  getProfile,
-  getProfileRootRange,
-  getSymbolicationStatus,
-} from 'firefox-profiler/selectors/profile';
-import { getDataSource } from 'firefox-profiler/selectors/url-state';
+  getDataSource,
+  getTimelineTrackOrganization,
+} from 'firefox-profiler/selectors/url-state';
 import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
 
 /* Note: the order of import is important, from most general to most specific,
@@ -33,15 +32,13 @@ import {
   getHasPrePublishedState,
 } from 'firefox-profiler/selectors/publish';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
-
-import { resymbolicateProfile } from 'firefox-profiler/actions/receive-profile';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
   StartEndRange,
-  Profile,
   DataSource,
   UploadPhase,
-  SymbolicationStatus,
+  TimelineTrackOrganization,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -55,20 +52,19 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
   +isNewlyPublished: boolean,
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
-  +symbolicationStatus: SymbolicationStatus,
   +abortFunction: () => mixed,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +resymbolicateProfile: typeof resymbolicateProfile,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -86,6 +82,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       case 'from-url':
         return 'uploaded';
       case 'from-addon':
+      case 'unpublished':
       case 'from-file':
         return 'local';
       case 'none':
@@ -98,12 +95,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   }
 
   _renderMetaInfoButton() {
-    const {
-      profile,
-      symbolicationStatus,
-      resymbolicateProfile,
-      dataSource,
-    } = this.props;
+    const { dataSource } = this.props;
     const uploadedStatus = this._getUploadedStatus(dataSource);
     return (
       <ButtonWithPanel
@@ -112,14 +104,29 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
           uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
         }
         panelClassName="metaInfoPanel"
-        panelContent={
-          <MetaInfoPanel
-            profile={profile}
-            symbolicationStatus={symbolicationStatus}
-            resymbolicateProfile={resymbolicateProfile}
-          />
-        }
+        panelContent={<MetaInfoPanel />}
       />
+    );
+  }
+
+  _changeTimelineTrackOrganizationToFull = () => {
+    this.props.changeTimelineTrackOrganization({ type: 'full' });
+  };
+
+  _renderFullViewButtonForActiveTab() {
+    const { timelineTrackOrganization } = this.props;
+    if (timelineTrackOrganization.type !== 'active-tab') {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
+        onClick={this._changeTimelineTrackOrganizationToFull}
+      >
+        Full View
+      </button>
     );
   }
 
@@ -204,6 +211,7 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
   render() {
     return (
       <>
+        {this._renderFullViewButtonForActiveTab()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -225,19 +233,18 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
 export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
     mapStateToProps: state => ({
-      profile: getProfile(state),
       rootRange: getProfileRootRange(state),
       dataSource: getDataSource(state),
       isNewlyPublished: getIsNewlyPublished(state),
       uploadPhase: getUploadPhase(state),
       hasPrePublishedState: getHasPrePublishedState(state),
-      symbolicationStatus: getSymbolicationStatus(state),
       abortFunction: getAbortFunction(state),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
-      resymbolicateProfile,
+      changeTimelineTrackOrganization,
     },
     component: MenuButtonsImpl,
   }

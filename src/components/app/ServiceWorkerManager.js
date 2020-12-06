@@ -145,6 +145,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         return false;
       case 'from-file':
       case 'from-addon':
+      case 'unpublished':
       case 'public':
       case 'from-url':
       case 'compare':
@@ -192,6 +193,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         return true;
       case 'from-file':
       case 'from-addon':
+      case 'unpublished':
         // We should not propose to reload the page for these data sources,
         // because we'd lose the data.
         return false;

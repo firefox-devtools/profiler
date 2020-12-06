@@ -23,7 +23,7 @@ import {
   type ComposedSelectorsPerThread,
 } from './composed';
 import * as ProfileSelectors from '../profile';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 import type { ThreadIndex, Selector, ThreadsKey } from 'firefox-profiler/types';
 
@@ -123,7 +123,9 @@ export const getThreadSelectorsFromThreadsKey = (
   if (threadIndexes.size === 1) {
     // We should get the single thread and use its caching mechanism.
     // We know this value exists because of the size check, even if Flow doesn't.
-    return getSingleThreadSelectors((threadIndexes.values().next().value: any));
+    return getSingleThreadSelectors(
+      ensureExists(getFirstItemFromSet(threadIndexes))
+    );
   }
 
   return _mergedThreadSelectorsMemoized(threadsKey);
