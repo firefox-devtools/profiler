@@ -1,5 +1,426 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile clicking on the button shows the confirmation 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <div
+      class="confirmDialog"
+    >
+      <h2
+        class="confirmDialogTitle"
+      >
+        Delete 
+        PROFILE
+      </h2>
+      <div
+        class="confirmDialogContent"
+      >
+        Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+      </div>
+      <div
+        class="confirmDialogButtons"
+      >
+        <input
+          class="photon-button photon-button-default"
+          type="button"
+          value="Cancel"
+        />
+        <input
+          class="photon-button photon-button-destructive"
+          type="button"
+          value="Delete"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile confirming the delete should delete on the server and in the db 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <p
+      class="profileDeleteButtonSuccess"
+    >
+      Successfully deleted uploaded data.
+    </p>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete button if we have the uploaded data and some JWT token 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="profileInfoUploadedActions"
+    >
+      <div
+        class="profileInfoUploadedDate"
+      >
+        <span
+          class="profileInfoUploadedLabel"
+        >
+          Uploaded:
+        </span>
+        toLocaleString Sat, 04 Jul 2020 11:00:00 GMT
+      </div>
+      <div
+        class="profileInfoUploadedActionsButtons"
+      >
+        <button
+          class="photon-button photon-button-default photon-button-micro"
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        33
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete button if we have the uploaded data but no JWT token 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="profileInfoUploadedActions"
+    >
+      <div
+        class="profileInfoUploadedDate"
+      >
+        <span
+          class="profileInfoUploadedLabel"
+        >
+          Uploaded:
+        </span>
+        toLocaleString Sat, 04 Jul 2020 11:00:00 GMT
+      </div>
+      <div
+        class="profileInfoUploadedActionsButtons"
+      >
+        <button
+          class="photon-button photon-button-default photon-button-micro"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        33
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the delete button if the profile is public but without uploaded data 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        33
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
 exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
 <div
   class="arrowPanel open metaInfoPanel"

@@ -13,9 +13,14 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
-import { stateFromLocation } from '../../app-logic/url-handling';
+
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
+import { processGeckoProfile } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  storeProfileData,
+  retrieveProfileData,
+} from 'firefox-profiler/app-logic/published-profiles-store';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import {
   changeTimelineTrackOrganization,
@@ -31,8 +36,8 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -42,8 +47,11 @@ import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexedd
 autoMockIndexedDB();
 
 // We mock profile-store but we want the real error, so that we can simulate it.
-import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
-jest.mock('../../profile-logic/profile-store');
+import {
+  uploadBinaryProfileData,
+  deleteProfileOnServer,
+} from 'firefox-profiler/profile-logic/profile-store';
+jest.mock('firefox-profiler/profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
@@ -428,6 +436,130 @@ describe('app/MenuButtons', function() {
       } = await setupForMetaInfoPanel(profile);
       displayMetaInfoPanel();
       expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
+
+    describe('deleting a profile', () => {
+      const FAKE_HASH = 'FAKE_HASH';
+      const FAKE_PROFILE_DATA = {
+        profileToken: FAKE_HASH,
+        jwtToken: null,
+        publishedDate: new Date('4 Jul 2020 13:00'),
+        name: 'PROFILE',
+        preset: null,
+        originHostname: 'https://mozilla.org',
+        meta: {
+          product: 'Firefox',
+          platform: 'Macintosh',
+          toolkit: 'cocoa',
+          misc: 'rv:62.0',
+          oscpu: 'Intel Mac OS X 10.12',
+        },
+        urlPath: '/public/MACOSX/marker-chart/',
+        publishedRange: { start: 2000, end: 40000 },
+      };
+
+      async function addProfileData(profileDataOverrides) {
+        const profileData = { ...FAKE_PROFILE_DATA, ...profileDataOverrides };
+        await storeProfileData(profileData);
+      }
+
+      async function setupForDeletion() {
+        const { profile } = createSimpleProfile();
+        const setupResult = await setupForMetaInfoPanel(profile);
+        const { navigateToHash, displayMetaInfoPanel } = setupResult;
+        navigateToHash(FAKE_HASH);
+        displayMetaInfoPanel();
+
+        return setupResult;
+      }
+
+      test('does not display the delete button if the profile is public but without uploaded data', async () => {
+        const { getMetaInfoPanel } = await setupForDeletion();
+        // We wait a bit using the "find" flavor of the queries because this is
+        // reached asynchronously.
+        await expect(screen.findByText('Uploaded:')).rejects.toThrow();
+        expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('displays the delete button if we have the uploaded data but no JWT token', async () => {
+        await addProfileData();
+        const { getMetaInfoPanel } = await setupForDeletion();
+        expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeDisabled();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('displays the delete button if we have the uploaded data and some JWT token', async () => {
+        await addProfileData({ jwtToken: 'FAKE_TOKEN' });
+        const { getMetaInfoPanel } = await setupForDeletion();
+        expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeEnabled();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('clicking on the button shows the confirmation', async () => {
+        await addProfileData({ jwtToken: 'FAKE_TOKEN' });
+        const { getMetaInfoPanel } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+        expect(screen.getByText(/are you sure/i)).toBeEnabled();
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeInTheDocument();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('clicking on the "cancel" button will move back to the profile information', async () => {
+        await addProfileData({ jwtToken: 'FAKE_TOKEN' });
+        await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+
+        // Canceling should move back to the previous
+        fireFullClick(screen.getByText('Cancel'));
+
+        // We're back at the profile information panel.
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+      });
+
+      test('dismissing the panel will move back to the profile information when opened again', async () => {
+        await addProfileData({ jwtToken: 'FAKE_TOKEN' });
+        const { displayMetaInfoPanel } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+
+        // Dismissing by clicking elsewhere
+        fireFullClick(ensureExists(document.body));
+        jest.runAllTimers();
+
+        // We're back at the profile information panel if we open the panel again.
+        displayMetaInfoPanel();
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+      });
+
+      test('confirming the delete should delete on the server and in the db', async () => {
+        await addProfileData({ jwtToken: 'FAKE_TOKEN' });
+        const {
+          getMetaInfoPanel,
+          displayMetaInfoPanel,
+        } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+        fireFullClick(screen.getByText('Delete'));
+        await screen.findByText(/successfully/i);
+        // This has been deleted from the server.
+        expect(deleteProfileOnServer).toHaveBeenCalledWith({
+          profileToken: FAKE_HASH,
+          jwtToken: 'FAKE_TOKEN',
+        });
+        // This has been deleted from the DB.
+        expect(await retrieveProfileData(FAKE_HASH)).toBe(null);
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+
+        // Dismissing the metainfo panel and displaying it again should show the
+        // initial panel now.
+        fireFullClick(ensureExists(document.body));
+        jest.runAllTimers();
+        displayMetaInfoPanel();
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+        expect(screen.queryByText('Uploaded:')).not.toBeInTheDocument();
+      });
     });
 
     describe('symbolication', function() {
