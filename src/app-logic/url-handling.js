@@ -499,9 +499,18 @@ type Location = {
   hash: string,
 };
 
+/**
+ * Parse the window.location string to create the UrlState.
+ *
+ * `profile` parameter is nullable and optional. It's nullable because data sources
+ * like from-addon can't upgrade a url for a freshly captured profile. So we need
+ * to skip upgrading for these sources. It's also optional for both testing
+ * purposes and for places where we would like to do the upgrading without
+ * providing any profile.
+ */
 export function stateFromLocation(
   location: Location,
-  profile?: Profile
+  profile?: Profile | null
 ): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion(
     {
@@ -670,10 +679,13 @@ type ProcessedLocationBeforeUpgrade = {|
 
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
-  profile?: Profile
+  profile?: Profile | null
 ): ProcessedLocation {
   const urlVersion = +processedLocation.query.v || 0;
-  if (urlVersion === CURRENT_URL_VERSION) {
+  if (profile === null || urlVersion === CURRENT_URL_VERSION) {
+    // Do not upgrade when either profile data is null or url is on the latest
+    // version already. Profile can be null only when the source could not provide
+    // that for upgrader and therefore upgrading step is not needed (e.g. 'from-addon').
     return processedLocation;
   }
 

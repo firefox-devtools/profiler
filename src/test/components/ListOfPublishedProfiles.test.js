@@ -10,6 +10,7 @@ import {
   render,
   getByText as globalGetByText,
   waitForElementToBeRemoved,
+  screen,
 } from '@testing-library/react';
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
@@ -17,7 +18,11 @@ import {
   storeProfileData,
   retrieveProfileData,
 } from 'firefox-profiler/app-logic/published-profiles-store';
+import { changeProfileName } from 'firefox-profiler/actions/profile-view';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { ensureExists } from 'firefox-profiler/utils/flow';
+
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { mockDate } from 'firefox-profiler/test/fixtures/mocks/date';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
@@ -529,6 +534,87 @@ describe('ListOfPublishedProfiles', () => {
       window.dispatchEvent(new Event('focus'));
       await findAllByText(/NEW-PROFILE/);
       expect(await findAllByText(/PROFILE/)).toHaveLength(4);
+    });
+  });
+
+  describe('renaming profiles', () => {
+    async function setup(initialName: string) {
+      mockDate('4 Jul 2020 15:00');
+      const templateData = listOfProfileInformations[0];
+      const profileData = {
+        ...templateData,
+        name: initialName,
+        urlPath: `${templateData.urlPath}?profileName=${encodeURIComponent(
+          initialName
+        )}`,
+      };
+      await storeProfileData(profileData);
+
+      // We use 2 different stores to simulate 2 different pages.
+      const storeWithListOfProfiles = blankStore();
+      const storeWithProfileViewer = blankStore();
+      storeWithProfileViewer.dispatch(
+        updateUrlState(
+          stateFromLocation({
+            pathname: `/public/${profileData.profileToken}/marker-chart/`,
+            search: '',
+            hash: '',
+          })
+        )
+      );
+
+      render(
+        <Provider store={storeWithListOfProfiles}>
+          <ListOfPublishedProfiles withActionButtons={false} />
+        </Provider>
+      );
+
+      async function findLinkByText(strOrRegexp): Promise<HTMLLinkElement> {
+        const element = await screen.findByRole('link', { name: strOrRegexp });
+        return element;
+      }
+
+      return {
+        storeWithListOfProfiles,
+        storeWithProfileViewer,
+        findLinkByText,
+        profileData,
+      };
+    }
+
+    function profileNameFromLinkElement(
+      profileLink: HTMLLinkElement
+    ): string | null {
+      const searchParams = new URL(profileLink.href).searchParams;
+      return searchParams.get('profileName');
+    }
+
+    it('can rename stored profiles', async () => {
+      const { storeWithProfileViewer, findLinkByText } = await setup(
+        'Initial Profile Name'
+      );
+      let profileLink = await findLinkByText(/Initial Profile Name/);
+      expect(profileNameFromLinkElement(profileLink)).toBe(
+        'Initial Profile Name'
+      );
+
+      await storeWithProfileViewer.dispatch(
+        changeProfileName('My Profile Name')
+      );
+
+      // The list will update with a focus event.
+      window.dispatchEvent(new Event('focus'));
+      profileLink = await findLinkByText(/My Profile Name/);
+      expect(profileNameFromLinkElement(profileLink)).toBe('My Profile Name');
+
+      // Now let's remove the name altogether -> the displayed information
+      // should now use the profile token prefixed with #.
+      await storeWithProfileViewer.dispatch(changeProfileName(null));
+
+      // The list will update with a focus event.
+      window.dispatchEvent(new Event('focus'));
+      profileLink = await findLinkByText(/Profile #\w/i);
+      expect(profileNameFromLinkElement(profileLink)).toBe(null);
     });
   });
 });

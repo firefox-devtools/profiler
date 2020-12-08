@@ -11,6 +11,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { getProfileNameFromUrl } from 'firefox-profiler/selectors';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
+import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 
 describe('ProfileName', function() {
   const defaultName = 'Firefox – macOS 10.14';
@@ -65,6 +66,23 @@ describe('ProfileName', function() {
 
     expect(getByText('Custom name')).toBeTruthy();
     expect(getProfileNameFromUrl(getState())).toBe('Custom name');
+  });
+
+  it('sends analytics', () => {
+    withAnalyticsMock(() => {
+      const { getByText, getByDisplayValue } = setup();
+      const button = getByText(defaultName);
+      button.click();
+      const input = getByDisplayValue(defaultName);
+      fireEvent.change(input, { target: { value: 'Custom name' } });
+      fireEvent.blur(input);
+
+      expect(self.ga).toBeCalledWith('send', {
+        eventAction: 'change profile name',
+        eventCategory: 'profile',
+        hitType: 'event',
+      });
+    });
   });
 
   it('will use a url-provided profile name', function() {

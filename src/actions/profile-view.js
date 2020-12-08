@@ -31,6 +31,7 @@ import {
   getSelectedTab,
   getHiddenLocalTracks,
   getInvertCallstack,
+  getHash,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getCallNodePathFromIndex,
@@ -66,6 +67,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
+import { changeStoredProfileName } from 'firefox-profiler/app-logic/published-profiles-store';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1362,10 +1364,25 @@ export function changeTimelineType(timelineType: TimelineType): Action {
   };
 }
 
-export function changeProfileName(profileName: string | null): Action {
-  return {
-    type: 'CHANGE_PROFILE_NAME',
-    profileName,
+export function changeProfileName(
+  profileName: string | null
+): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    dispatch({
+      type: 'CHANGE_PROFILE_NAME',
+      profileName,
+    });
+
+    if (window.indexedDB) {
+      const hash = getHash(getState());
+      await changeStoredProfileName(hash, profileName || '');
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change profile name',
+    });
   };
 }
 

@@ -175,21 +175,35 @@
     <h3 class='photon-title-20'>Photon Message Bar Generic</h3>
       <div class="row">
         <pre>
-&lt;div class="photon-message-bar"&gt;
-  This is a non-dismissable message bar.
+&lt;div class="photon-message-bar photon-message-bar-inner-content"&gt;
+  &lt;div class="photon-message-bar-inner-text"&gt;
+    This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+  &lt;/div&gt;
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
     Call to action
   &lt;/button&gt;
 &lt;/div&gt;
         </pre>
-        <div class="photon-message-bar">
-          This is a non-dismissable message bar.
+        <div class="photon-message-bar photon-message-bar-inner-content">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
           <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
             Call to action
           </button>
         </div>
-        <div class="photon-message-bar sized-to-content">
-          This is a non-dismissable message bar.
+        <div class="photon-message-bar photon-message-bar-inner-content sized-to-content">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-inner-content sized-constrained">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
           <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
             Call to action
           </button>
@@ -198,54 +212,13 @@
       <div class="row">
         <pre>
 &lt;div class="photon-message-bar"&gt;
-  This is a dismissable message bar.
-  &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
-    Call to action
-  &lt;/button&gt;
-  &lt;button class="photon-button photon-message-bar-close-button" type="button"
-    aria-label="Hide the message" title="Hide the message"&gt;
-  &lt;/button&gt;
-&lt;/div&gt;
-        </pre>
-        <div class="photon-message-bar">
-          This is a dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
-        </div>
-        <div class="photon-message-bar sized-to-content">
-          This is a dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
-        </div>
-        <div style="width: 300px;">
-          <div class="photon-message-bar">
-            <div class="photon-message-bar-inner-content"> 
-              <div class="photon-message-bar-inner-text">
-              This is a dismissable message bar.This add-on is not compatible with your version of Firefox
-              </div>
-              <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-                Call to action
-              </button>
-            </div>
-           <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-            </button>
-         </div>
-        </div>
-      </div>
-      <div class="row">
-        <pre>
-&lt;div class="photon-message-bar"&gt;
-  &lt;div class='photon-message-bar-inner-content'&gt;
-    This is a dismissable message bar.
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class="photon-message-bar-inner-text"&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
+    &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
+      Call to action
+    &lt;/button&gt;
   &lt;/div&gt;
   &lt;button class="photon-button photon-message-bar-close-button" type="button"
     aria-label="Hide the message" title="Hide the message"&gt;
@@ -253,115 +226,83 @@
 &lt;/div&gt;
         </pre>
         <div class="photon-message-bar">
-          <div class='photon-message-bar-inner-content'>
-            This is a dismissable message bar.
+          <div class="photon-message-bar-inner-content">
+            <div class="photon-message-bar-inner-text">
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+            <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+              Call to action
+            </button>
           </div>
           <button class="photon-button photon-message-bar-close-button" type="button"
             aria-label="Hide the message" title="Hide the message">
           </button>
         </div>
         <div class="photon-message-bar sized-to-content">
-          <div class='photon-message-bar-inner-content'>
-            This is a dismissable message bar.
+          <div class="photon-message-bar-inner-content">
+            <div class="photon-message-bar-inner-text">
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+            <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+              Call to action
+            </button>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar sized-constrained">
+          <div class="photon-message-bar-inner-content">
+            <div class="photon-message-bar-inner-text">
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+            <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+              Call to action
+            </button>
           </div>
           <button class="photon-button photon-message-bar-close-button" type="button"
             aria-label="Hide the message" title="Hide the message">
           </button>
         </div>
       </div>
-    </div>
-  </div>
-      <h3 class='photon-title-20'>Photon Message Bar Error</h3>
       <div class="row">
         <pre>
-&lt;div class="photon-message-bar photon-message-bar-error"&gt;
-  This is a non-dismissable message bar.
-  &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
-    Call to action
-  &lt;/button&gt;
-&lt;/div&gt;
-        </pre>
-        <div class="photon-message-bar photon-message-bar-error">
-          This is a non-dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-        </div>
-        <div class="photon-message-bar photon-message-bar-error sized-to-content">
-          This is a non-dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <pre>
-&lt;div class="photon-message-bar photon-message-bar-error"&gt;
-  This is a dismissable message bar.
-  &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
-    Call to action
-  &lt;/button&gt;
-  &lt;button class="photon-button photon-message-bar-close-button" type="button"
-    aria-label="Hide the message" title="Hide the message"&gt;
-  &lt;/button&gt;
-&lt;/div&gt;
-        </pre>
-        <div class="photon-message-bar photon-message-bar-error">
-          This is a dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
-        </div>
-        <div class="photon-message-bar photon-message-bar-error sized-to-content">
-          This is a dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
-        </div>
-        <div style="width: 300px;">
-          <div class="photon-message-bar photon-message-bar-error">
-            <div class="photon-message-bar-inner-content"> 
-              <div class="photon-message-bar-inner-text">
-              This is a dismissable message bar.This add-on is not compatible with your version of Firefox
-              </div>
-              <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-                Call to action
-              </button>
-            </div>
-           <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-            </button>
-         </div>
-        </div>
-   
-      <div class="row">
-        <pre>
-&lt;div class="photon-message-bar photon-message-bar-error"&gt;
-  &lt;div class='photon-message-bar-inner-content'&gt;
-    This is a dismissable message bar.
+&lt;div class="photon-message-bar"&gt;
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class='photon-message-bar-inner-text'&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
   &lt;/div&gt;
   &lt;button class="photon-button photon-message-bar-close-button" type="button"
     aria-label="Hide the message" title="Hide the message"&gt;
   &lt;/button&gt;
 &lt;/div&gt;
         </pre>
-        <div class="photon-message-bar photon-message-bar-error">
-          <div class='photon-message-bar-inner-content'>
-            This is a dismissable message bar.
+        <div class="photon-message-bar">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
           </div>
           <button class="photon-button photon-message-bar-close-button" type="button"
             aria-label="Hide the message" title="Hide the message">
           </button>
         </div>
-        <div class="photon-message-bar photon-message-bar-error sized-to-content">
-          <div class='photon-message-bar-inner-content'>
-            This is a dismissable message bar.
+        <div class="photon-message-bar sized-to-content">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar sized-constrained">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
           </div>
           <button class="photon-button photon-message-bar-close-button" type="button"
             aria-label="Hide the message" title="Hide the message">
@@ -371,80 +312,193 @@
     </div>
   </div>
 
-  <h3 class='photon-title-20'>Photon Message Bar Warning</h3>
-  <div class="row">
-    <pre>
-&lt;div class="photon-message-bar photon-message-bar-warning"&gt;
-  This is a non-dismissable message bar.
+    <h3 class='photon-title-20'>Photon Message Bar Error</h3>
+      <div class="row">
+        <pre>
+&lt;div class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"&gt;
+  &lt;div class="photon-message-bar-inner-text"&gt;
+    This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+  &lt;/div&gt;
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
     Call to action
   &lt;/button&gt;
 &lt;/div&gt;
-    </pre>
-    <div class="photon-message-bar photon-message-bar-warning">
-      This is a non-dismissable message bar.
-      <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-        Call to action
-      </button>
-    </div>
-    <div class="photon-message-bar photon-message-bar-warning sized-to-content">
-      This is a non-dismissable message bar.
-      <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-        Call to action
-      </button>
-    </div>
-  </div>
-  <div class="row">
-    <pre>
-&lt;div class="photon-message-bar photon-message-bar-warning"&gt;
-  This is a dismissable message bar.
-  &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
-    Call to action
-  &lt;/button&gt;
+        </pre>
+        <div class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content sized-to-content">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content sized-constrained">
+          <div class="photon-message-bar-inner-text">
+            This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <pre>
+&lt;div class="photon-message-bar photon-message-bar-error"&gt;
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class="photon-message-bar-inner-text"&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
+    &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
+      Call to action
+    &lt;/button&gt;
+  &lt;/div&gt;
   &lt;button class="photon-button photon-message-bar-close-button" type="button"
     aria-label="Hide the message" title="Hide the message"&gt;
   &lt;/button&gt;
 &lt;/div&gt;
-    </pre>
-      <div class="photon-message-bar photon-message-bar-warning">
-        This is a dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class="photon-message-bar photon-message-bar-warning sized-to-content">
-        This is a dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div style="width: 300px;">
-        <div class="photon-message-bar photon-message-bar-warning">
-          <div class="photon-message-bar-inner-content"> 
+        </pre>
+        <div class="photon-message-bar photon-message-bar-error">
+          <div class="photon-message-bar-inner-content">
             <div class="photon-message-bar-inner-text">
-            This is a dismissable message bar.This add-on is not compatible with your version of Firefox
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
             </div>
             <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
               Call to action
             </button>
           </div>
-         <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
           </button>
-       </div>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-to-content">
+          <div class="photon-message-bar-inner-content">
+            <div class="photon-message-bar-inner-text">
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+            <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+              Call to action
+            </button>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-constrained">
+          <div class="photon-message-bar-inner-content">
+            <div class="photon-message-bar-inner-text">
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+            <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+              Call to action
+            </button>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
       </div>
- </div>
+      <div class="row">
+        <pre>
+&lt;div class="photon-message-bar photon-message-bar-error"&gt;
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class='photon-message-bar-inner-text'&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button class="photon-button photon-message-bar-close-button" type="button"
+    aria-label="Hide the message" title="Hide the message"&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+        </pre>
+        <div class="photon-message-bar photon-message-bar-error">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-to-content">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-constrained">
+          <div class="photon-message-bar-inner-content">
+            <div class='photon-message-bar-inner-text'>
+              This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+            </div>
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+      
+  <h3 class='photon-title-20'>Photon Message Bar Warning</h3>
+    <div class="row">
+      <pre>
+&lt;div class="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content"&gt;
+  &lt;div class="photon-message-bar-inner-text"&gt;
+    This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+  &lt;/div&gt;
+  &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
+    Call to action
+  &lt;/button&gt;
+&lt;/div&gt;
+      </pre>
+      <div class="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content">
+        <div class="photon-message-bar-inner-text">
+          This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+        </div>
+        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+          Call to action
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content sized-to-content">
+        <div class="photon-message-bar-inner-text">
+          This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+        </div>
+        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+          Call to action
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content sized-constrained">
+        <div class="photon-message-bar-inner-text">
+          This is a non-dismissable message bar. This add-on is not compatible with your version of Firefox.
+        </div>
+        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+          Call to action
+        </button>
+      </div>
+    </div>
     <div class="row">
       <pre>
 &lt;div class="photon-message-bar photon-message-bar-warning"&gt;
-  &lt;div class='photon-message-bar-inner-content'&gt;
-    This is a dismissable message bar.
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class="photon-message-bar-inner-text"&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
+    &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
+      Call to action
+    &lt;/button&gt;
   &lt;/div&gt;
   &lt;button class="photon-button photon-message-bar-close-button" type="button"
     aria-label="Hide the message" title="Hide the message"&gt;
@@ -452,22 +506,90 @@
 &lt;/div&gt;
       </pre>
       <div class="photon-message-bar photon-message-bar-warning">
-        <div class='photon-message-bar-inner-content'>
-          This is a dismissable message bar.
+        <div class="photon-message-bar-inner-content">
+          <div class="photon-message-bar-inner-text">
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
         </div>
         <button class="photon-button photon-message-bar-close-button" type="button"
           aria-label="Hide the message" title="Hide the message">
         </button>
       </div>
       <div class="photon-message-bar photon-message-bar-warning sized-to-content">
-        <div class='photon-message-bar-inner-content'>
-          This is a dismissable message bar.
+        <div class="photon-message-bar-inner-content">
+          <div class="photon-message-bar-inner-text">
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning sized-constrained">
+        <div class="photon-message-bar-inner-content">
+          <div class="photon-message-bar-inner-text">
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
         </div>
         <button class="photon-button photon-message-bar-close-button" type="button"
           aria-label="Hide the message" title="Hide the message">
         </button>
       </div>
     </div>
+    <div class="row">
+      <pre>
+&lt;div class="photon-message-bar photon-message-bar-warning"&gt;
+  &lt;div class="photon-message-bar-inner-content"&gt;
+    &lt;div class='photon-message-bar-inner-text'&gt;
+      This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;button class="photon-button photon-message-bar-close-button" type="button"
+    aria-label="Hide the message" title="Hide the message"&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+      </pre>
+      <div class="photon-message-bar photon-message-bar-warning">
+        <div class="photon-message-bar-inner-content">
+          <div class='photon-message-bar-inner-text'>
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+        </div>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning sized-to-content">
+        <div class="photon-message-bar-inner-content">
+          <div class='photon-message-bar-inner-text'>
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+        </div>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning sized-constrained">
+        <div class="photon-message-bar-inner-content">
+          <div class='photon-message-bar-inner-text'>
+            This is a dismissable message bar. This add-on is not compatible with your version of Firefox.
+          </div>
+        </div>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+    </div>
+  </div>
 
     <h2 class="photon-title-30">Typography</h2>
     Please look only at the font sizes and weights. We don't change colors or

@@ -935,7 +935,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
-      throw error;
+      console.error(error);
     }
   };
 }
@@ -1407,9 +1407,7 @@ export function retrieveProfilesToCompare(
 // the url and processing the UrlState.
 export function getProfilesFromRawUrl(
   location: Location
-): ThunkAction<
-  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
-> {
+): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
     let dataSource = ensureIsValidDataSource(pathParts[0]);
@@ -1420,11 +1418,9 @@ export function getProfilesFromRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
-    let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
       case 'unpublished':
-        shouldSetupInitialUrlState = false;
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
@@ -1464,9 +1460,6 @@ export function getProfilesFromRawUrl(
 
     // Profile may be null only for the `from-addon` dataSource since we do
     // not `await` for retrieveProfileFromAddon function.
-    return {
-      profile: getProfileOrNull(getState()),
-      shouldSetupInitialUrlState,
-    };
+    return getProfileOrNull(getState());
   };
 }
