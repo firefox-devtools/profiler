@@ -305,9 +305,13 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         <div className="serviceworker-ready-notice-wrapper">
           {/* We use the wrapper to horizontally center the notice */}
           <div className="photon-message-bar photon-message-bar-warning serviceworker-ready-notice">
-            A new version of the application was applied before this page was
-            fully loaded. You might see malfunctions.
-            {this._canUpdateServiceWorker() ? this.renderButton() : null}
+            <div className="photon-message-bar-inner-content">
+              <div className="photon-message-bar-inner-text">
+                A new version of the application was applied before this page
+                was fully loaded. You might see malfunctions.
+              </div>
+              {this._canUpdateServiceWorker() ? this.renderButton() : null}
+            </div>
             <button
               aria-label="Hide the reload notice"
               title="Hide the reload notice"
@@ -329,9 +333,13 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       <div className="serviceworker-ready-notice-wrapper">
         {/* We use the wrapper to horizontally center the notice */}
         <div className="photon-message-bar serviceworker-ready-notice">
-          A new version of the application has been downloaded and is ready to
-          use.
-          {this.renderButton()}
+          <div className="photon-message-bar-inner-content">
+            <div className="photon-message-bar-inner-text">
+              A new version of the application has been downloaded and is ready
+              to use.
+            </div>
+            {this.renderButton()}
+          </div>
           <button
             aria-label="Hide the reload notice"
             title="Hide the reload notice"
