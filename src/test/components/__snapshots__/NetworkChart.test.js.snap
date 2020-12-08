@@ -67,7 +67,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
     class="react-contextmenu-wrapper treeViewContextMenu"
   >
     <div
-      aria-label="list"
+      aria-label="List of all network markers"
       class="treeViewBody"
       role="listbox"
       tabindex="0"
