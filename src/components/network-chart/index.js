@@ -302,7 +302,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
             <VirtualList
               className="treeViewBody"
               ariaRole="listbox"
-              ariaLabel="list"
+              ariaLabel="List of all network markers"
               ariaActiveDescendant={
                 selectedNetworkMarkerIndex !== null
                   ? `networkChartRowItem-${selectedNetworkMarkerIndex}`

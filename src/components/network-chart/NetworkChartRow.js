@@ -494,7 +494,7 @@ export class NetworkChartRow extends React.PureComponent<
         onMouseLeave={this._hoverOut}
         onMouseDown={this._onMouseDown}
         aria-selected={isSelected}
-        aria-label={`${marker.name}`}
+        aria-label={marker.name}
         role="option"
         id={`networkChartRowItem-${markerIndex}`}
       >
