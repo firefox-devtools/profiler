@@ -269,7 +269,13 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   };
 
   render() {
-    const { markerIndexes, width, timeRange, disableOverscan } = this.props;
+    const {
+      selectedNetworkMarkerIndex,
+      markerIndexes,
+      width,
+      timeRange,
+      disableOverscan,
+    } = this.props;
 
     // We want to force a full rerender whenever the width or the range changes.
     // We compute a string using these values, so that when one of the value
@@ -295,6 +301,13 @@ class NetworkChartImpl extends React.PureComponent<Props> {
           >
             <VirtualList
               className="treeViewBody"
+              ariaRole="listbox"
+              ariaLabel="list"
+              ariaActiveDescendant={
+                selectedNetworkMarkerIndex !== null
+                  ? `networkChartRowItem-${selectedNetworkMarkerIndex}`
+                  : null
+              }
               items={markerIndexes}
               renderItem={this._renderRow}
               itemHeight={ROW_HEIGHT}
