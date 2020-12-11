@@ -49,8 +49,8 @@ import {
 } from '../../actions/profile-view';
 
 import {
-  retrieveUploadedProfileInformation,
-  listAllUploadedProfileInformation,
+  retrieveUploadedProfileInformationFromDb,
+  listAllUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import type { Store } from 'firefox-profiler/types';
@@ -252,7 +252,7 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedUploadedProfileInformation = await retrieveUploadedProfileInformation(
+    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
       BARE_PROFILE_TOKEN
     );
     expect(storedUploadedProfileInformation).toMatchObject({
@@ -276,7 +276,7 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedUploadedProfileInformation = await retrieveUploadedProfileInformation(
+    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
       BARE_PROFILE_TOKEN
     );
     expect(storedUploadedProfileInformation).toMatchObject({
@@ -591,7 +591,7 @@ describe('attemptToPublish', function() {
       // The upload function doesn't wait for the data store to finish, but this
       // should still be fairly quick.
       const storedUploadedProfileInformation = await waitUntilData(() =>
-        retrieveUploadedProfileInformation(BARE_PROFILE_TOKEN)
+        retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN)
       );
       expect(storedUploadedProfileInformation).toMatchObject({
         jwtToken: JWT_TOKEN,
@@ -610,7 +610,7 @@ describe('attemptToPublish', function() {
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list.
-      expect(await listAllUploadedProfileInformation()).toEqual([
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
         storedUploadedProfileInformation,
       ]);
     });
@@ -651,7 +651,7 @@ describe('attemptToPublish', function() {
       // The upload function doesn't wait for the data store to finish, but this
       // should still be fairly quick.
       const storedUploadedProfileInformation = await waitUntilData(() =>
-        retrieveUploadedProfileInformation(BARE_PROFILE_TOKEN)
+        retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN)
       );
       expect(storedUploadedProfileInformation).toMatchObject({
         jwtToken: JWT_TOKEN,
@@ -668,7 +668,7 @@ describe('attemptToPublish', function() {
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list.
-      expect(await listAllUploadedProfileInformation()).toEqual([
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
         storedUploadedProfileInformation,
       ]);
     });
@@ -731,7 +731,7 @@ describe('attemptToPublish', function() {
       // Now let's check the data stored in the IDB is correct.
       // The second request should have been stored just fine.
       const secondRequestData = await waitUntilData(() =>
-        retrieveUploadedProfileInformation(secondBareProfileToken)
+        retrieveUploadedProfileInformationFromDb(secondBareProfileToken)
       );
       expect(secondRequestData).toMatchObject({
         jwtToken: secondJwtToken,
@@ -744,7 +744,7 @@ describe('attemptToPublish', function() {
 
       // This is the first request, it hasn't been added because the request was
       // aborted before the end.
-      const firstRequestData = await retrieveUploadedProfileInformation(
+      const firstRequestData = await retrieveUploadedProfileInformationFromDb(
         BARE_PROFILE_TOKEN
       );
       expect(firstRequestData).toBe(undefined);
@@ -752,7 +752,7 @@ describe('attemptToPublish', function() {
       // And now, checking that we can retrieve this data when retrieving the
       // full list. The second profile comes first because it was answered
       // first.
-      expect(await listAllUploadedProfileInformation()).toEqual([
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
         secondRequestData,
       ]);
     });

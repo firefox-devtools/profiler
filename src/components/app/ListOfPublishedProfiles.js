@@ -13,7 +13,7 @@ import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/Profi
 import { ProfileDeleteButton } from './ProfileDeleteButton';
 
 import {
-  listAllUploadedProfileInformation,
+  listAllUploadedProfileInformationFromDb,
   type UploadedProfileInformation,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
@@ -201,7 +201,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   };
 
   _refreshList = async () => {
-    const uploadedProfileInformationList = await listAllUploadedProfileInformation();
+    const uploadedProfileInformationList = await listAllUploadedProfileInformationFromDb();
     if (this._isMounted) {
       // It isn't ideal to use a setState here, but this is the only way.
       this.setState({

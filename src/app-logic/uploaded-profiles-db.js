@@ -142,7 +142,7 @@ async function open(): Promise<Database> {
  * so this also updates any profile data already there with the same
  * profileToken information.
  */
-export async function storeUploadedProfileInformation(
+export async function persistUploadedProfileInformationToDb(
   uploadedProfileInformation: UploadedProfileInformation
 ): Promise<void> {
   const db = await open();
@@ -152,7 +152,7 @@ export async function storeUploadedProfileInformation(
 /**
  * This returns the list of all the stored data.
  */
-export async function listAllUploadedProfileInformation(): Promise<
+export async function listAllUploadedProfileInformationFromDb(): Promise<
   UploadedProfileInformation[]
 > {
   const db = await open();
@@ -163,7 +163,7 @@ export async function listAllUploadedProfileInformation(): Promise<
  * This returns the profile data for a specific stored token, or undefined
  * otherwise.
  */
-export async function retrieveUploadedProfileInformation(
+export async function retrieveUploadedProfileInformationFromDb(
   profileToken: string
 ): Promise<UploadedProfileInformation | void> {
   const db = await open();
@@ -174,7 +174,7 @@ export async function retrieveUploadedProfileInformation(
  * This deletes the profile data stored with this token. This is a no-op if this
  * token isn't in the database.
  */
-export async function deleteUploadedProfileInformation(
+export async function deleteUploadedProfileInformationFromDb(
   profileToken: string
 ): Promise<void> {
   const db = await open();
@@ -185,11 +185,13 @@ export async function deleteUploadedProfileInformation(
  * This changes the profile name of a stored profile data. This is a no-op if
  * this token isn't in the database.
  */
-export async function changeStoredProfileName(
+export async function changeStoredProfileNameInDb(
   profileToken: string,
   profileName: string
 ): Promise<void> {
-  const storedProfile = await retrieveUploadedProfileInformation(profileToken);
+  const storedProfile = await retrieveUploadedProfileInformationFromDb(
+    profileToken
+  );
   if (storedProfile && storedProfile.name !== profileName) {
     // We need to update the name, but also the urlPath. For this we'll convert
     // the old one to a state, and convert it back to a url string, so that
@@ -209,6 +211,6 @@ export async function changeStoredProfileName(
       name: profileName,
       urlPath: newUrlPath,
     };
-    await storeUploadedProfileInformation(newUploadedProfileInformation);
+    await persistUploadedProfileInformationToDb(newUploadedProfileInformation);
   }
 }

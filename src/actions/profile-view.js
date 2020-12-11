@@ -67,7 +67,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
-import { changeStoredProfileName } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1375,7 +1375,7 @@ export function changeProfileName(
 
     if (window.indexedDB) {
       const hash = getHash(getState());
-      await changeStoredProfileName(hash, profileName || '');
+      await changeStoredProfileNameInDb(hash, profileName || '');
     }
 
     sendAnalytics({

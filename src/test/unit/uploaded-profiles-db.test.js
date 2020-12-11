@@ -8,10 +8,10 @@
 // (test/store/publish.test.js). In this file we'll test more specific cases.
 
 import {
-  storeUploadedProfileInformation,
-  listAllUploadedProfileInformation,
-  retrieveUploadedProfileInformation,
-  deleteUploadedProfileInformation,
+  persistUploadedProfileInformationToDb,
+  listAllUploadedProfileInformationFromDb,
+  retrieveUploadedProfileInformationFromDb,
+  deleteUploadedProfileInformationFromDb,
   type UploadedProfileInformation,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
@@ -36,7 +36,7 @@ describe('uploaded-profiles-db', function() {
       publishedRange: { start: 1000, end: 3000 },
     };
 
-    await storeUploadedProfileInformation({
+    await persistUploadedProfileInformationToDb({
       ...basicUploadedProfileInformation,
       ...overrides,
     });
@@ -60,11 +60,11 @@ describe('uploaded-profiles-db', function() {
   it('retrieves individual profile information', async () => {
     await setup();
 
-    expect(await retrieveUploadedProfileInformation('PROFILE-1')).toMatchObject(
-      {
-        profileToken: 'PROFILE-1',
-      }
-    );
+    expect(
+      await retrieveUploadedProfileInformationFromDb('PROFILE-1')
+    ).toMatchObject({
+      profileToken: 'PROFILE-1',
+    });
   });
 
   it('retrieves a sorted list', async () => {
@@ -72,7 +72,7 @@ describe('uploaded-profiles-db', function() {
     await setup();
 
     // 2. Retrieve the list and expect it's in the expected sorted order.
-    const listOfUploadedProfileInformation = await listAllUploadedProfileInformation();
+    const listOfUploadedProfileInformation = await listAllUploadedProfileInformationFromDb();
     expect(listOfUploadedProfileInformation).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-2' }),
       expect.objectContaining({ profileToken: 'PROFILE-3' }),
@@ -83,11 +83,11 @@ describe('uploaded-profiles-db', function() {
   it('can delete profile information', async () => {
     await setup();
 
-    await deleteUploadedProfileInformation('PROFILE-2');
-    expect(await retrieveUploadedProfileInformation('PROFILE-2')).toBe(
+    await deleteUploadedProfileInformationFromDb('PROFILE-2');
+    expect(await retrieveUploadedProfileInformationFromDb('PROFILE-2')).toBe(
       undefined
     );
-    expect(await listAllUploadedProfileInformation()).toEqual([
+    expect(await listAllUploadedProfileInformationFromDb()).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-3' }),
       expect.objectContaining({ profileToken: 'PROFILE-1' }),
     ]);
