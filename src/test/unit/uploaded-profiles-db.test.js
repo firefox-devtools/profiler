@@ -13,12 +13,12 @@ import {
   retrieveUploadedProfileInformation,
   deleteUploadedProfileInformation,
   type UploadedProfileInformation,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
 
-describe('published-profiles-store', function() {
+describe('uploaded-profiles-db', function() {
   async function storeGenericUploadedProfileInformation(
     overrides: $Shape<UploadedProfileInformation>
   ) {

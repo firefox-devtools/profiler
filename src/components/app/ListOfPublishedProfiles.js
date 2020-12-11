@@ -15,7 +15,7 @@ import { ProfileDeleteButton } from './ProfileDeleteButton';
 import {
   listAllUploadedProfileInformation,
   type UploadedProfileInformation,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';

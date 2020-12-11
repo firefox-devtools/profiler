@@ -67,7 +67,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
-import { changeStoredProfileName } from 'firefox-profiler/app-logic/published-profiles-store';
+import { changeStoredProfileName } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including

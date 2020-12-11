@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
 import { UploadedRecordingsHome } from 'firefox-profiler/components/app/UploadedRecordingsHome';
-import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/published-profiles-store';
+import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { blankStore } from '../fixtures/stores';
 import { mockDate } from '../fixtures/mocks/date';
 

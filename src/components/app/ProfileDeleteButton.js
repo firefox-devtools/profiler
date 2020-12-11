@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 
-import { deleteUploadedProfileInformation } from 'firefox-profiler/app-logic/published-profiles-store';
+import { deleteUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-store';
 
 import './ProfileDeleteButton.css';

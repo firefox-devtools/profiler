@@ -51,7 +51,7 @@ import {
 import {
   retrieveUploadedProfileInformation,
   listAllUploadedProfileInformation,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import type { Store } from 'firefox-profiler/types';
 

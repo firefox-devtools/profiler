@@ -29,7 +29,7 @@ import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
-import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/published-profiles-store';
+import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import type {
   Action,

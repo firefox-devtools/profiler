@@ -17,7 +17,7 @@ import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfP
 import {
   storeUploadedProfileInformation,
   retrieveUploadedProfileInformation,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
