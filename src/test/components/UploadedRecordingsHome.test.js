@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
 import { UploadedRecordingsHome } from 'firefox-profiler/components/app/UploadedRecordingsHome';
-import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/published-profiles-store';
 import { blankStore } from '../fixtures/stores';
 import { mockDate } from '../fixtures/mocks/date';
 
@@ -40,7 +40,7 @@ describe('UploadedRecordingsHome', () => {
     mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
 
     // 1. Add some profiles to the local indexeddb.
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken: '0123456789',
       jwtToken: 'FAKE_TOKEN',
       publishedDate: new Date('4 Jul 2020 14:00'), // "today" earlier
@@ -56,7 +56,7 @@ describe('UploadedRecordingsHome', () => {
       publishedRange: { start: 1000, end: 3000 },
     });
 
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken: 'ABCDEFGHI',
       jwtToken: null,
       publishedDate: new Date('3 Jul 2020 08:00'), // yesterday
@@ -74,7 +74,7 @@ describe('UploadedRecordingsHome', () => {
       publishedRange: { start: 1000, end: 1005 },
     });
 
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken: '123abc456',
       jwtToken: null,
       publishedDate: new Date('20 May 2018'), // ancient date
@@ -94,7 +94,7 @@ describe('UploadedRecordingsHome', () => {
       publishedRange: { start: 40000, end: 40000.1 },
     });
 
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken: 'WINDOWS',
       jwtToken: null,
       publishedDate: new Date('4 Jul 2020 13:00'),
@@ -112,7 +112,7 @@ describe('UploadedRecordingsHome', () => {
       publishedRange: { start: 2000, end: 40000 },
     });
 
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken: 'MACOSX',
       jwtToken: null,
       publishedDate: new Date('5 Jul 2020 11:00'), // This is the future!

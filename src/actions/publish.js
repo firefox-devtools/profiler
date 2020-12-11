@@ -29,7 +29,7 @@ import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
-import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { storeUploadedProfileInformation } from 'firefox-profiler/app-logic/published-profiles-store';
 
 import type {
   Action,
@@ -89,7 +89,7 @@ export function uploadFailed(error: mixed): Action {
 // to rerun in case the selectors have been invalidated.
 // Note that the returned promise won't ever be rejected, all errors are handled
 // here.
-async function storeJustPublishedProfileData(
+async function storeJustUploadedProfileInformation(
   profileToken: string,
   jwtToken: string | null,
   sanitizedInformation,
@@ -145,7 +145,7 @@ async function storeJustPublishedProfileData(
   const profileFilterPageData = getProfileFilterPageData(prepublishedState);
 
   try {
-    await storeProfileData({
+    await storeUploadedProfileInformation({
       profileToken,
       jwtToken,
       publishedDate: new Date(),
@@ -265,7 +265,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // updated, and we'll have to predict the state inside this function.
       // Note that this function is asynchronous, we don't await it on purpose.
       // We catch all errors in this function.
-      storeJustPublishedProfileData(
+      storeJustUploadedProfileInformation(
         hash,
         hashOrToken === hash ? null : hashOrToken,
         sanitizedInformation,

@@ -13,8 +13,8 @@ import { ProfileMetaInfoSummary } from 'firefox-profiler/components/shared/Profi
 import { ProfileDeleteButton } from './ProfileDeleteButton';
 
 import {
-  listAllProfileData,
-  type ProfileData,
+  listAllUploadedProfileInformation,
+  type UploadedProfileInformation,
 } from 'firefox-profiler/app-logic/published-profiles-store';
 import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 
@@ -74,7 +74,7 @@ function _formatRange(range: StartEndRange): string {
 
 type PublishedProfileProps = {|
   +onProfileDelete: () => void,
-  +profileData: ProfileData,
+  +uploadedProfileInformation: UploadedProfileInformation,
   +nowTimestamp: Milliseconds,
   +withActionButtons: boolean,
 |};
@@ -107,19 +107,26 @@ class PublishedProfile extends React.PureComponent<
   };
 
   render() {
-    const { profileData, nowTimestamp, withActionButtons } = this.props;
+    const {
+      uploadedProfileInformation,
+      nowTimestamp,
+      withActionButtons,
+    } = this.props;
     const { confirmDialogIsOpen } = this.state;
 
-    let { urlPath } = profileData;
+    let { urlPath } = uploadedProfileInformation;
     if (!urlPath.startsWith('/')) {
       urlPath = '/' + urlPath;
     }
-    const slicedProfileToken = profileData.profileToken.slice(0, 6);
-    const profileName = profileData.name
-      ? profileData.name
+    const slicedProfileToken = uploadedProfileInformation.profileToken.slice(
+      0,
+      6
+    );
+    const profileName = uploadedProfileInformation.name
+      ? uploadedProfileInformation.name
       : `Profile #${slicedProfileToken}`;
-    const smallProfileName = profileData.name
-      ? profileData.name
+    const smallProfileName = uploadedProfileInformation.name
+      ? uploadedProfileInformation.name
       : '#' + slicedProfileToken;
 
     return (
@@ -134,25 +141,28 @@ class PublishedProfile extends React.PureComponent<
           title={`Click here to load profile ${smallProfileName}`}
         >
           <div className="publishedProfilesDate">
-            {_formatDate(profileData.publishedDate, nowTimestamp)}
+            {_formatDate(
+              uploadedProfileInformation.publishedDate,
+              nowTimestamp
+            )}
           </div>
           <div className="publishedProfilesInfo">
             <div className="publishedProfilesName">
               <strong>{profileName}</strong> (
-              {_formatRange(profileData.publishedRange)})
+              {_formatRange(uploadedProfileInformation.publishedRange)})
             </div>
-            <ProfileMetaInfoSummary meta={profileData.meta} />
+            <ProfileMetaInfoSummary meta={uploadedProfileInformation.meta} />
           </div>
         </a>
         {withActionButtons ? (
           <div className="publishedProfilesActionButtons">
-            {profileData.jwtToken ? (
+            {uploadedProfileInformation.jwtToken ? (
               <ProfileDeleteButton
                 buttonClassName="publishedProfilesDeleteButton"
                 profileName={profileName}
                 smallProfileName={smallProfileName}
-                jwtToken={profileData.jwtToken}
-                profileToken={profileData.profileToken}
+                jwtToken={uploadedProfileInformation.jwtToken}
+                profileToken={uploadedProfileInformation.profileToken}
                 onOpenConfirmDialog={this.onOpenConfirmDialog}
                 onCloseConfirmDialog={this.onCloseConfirmDialog}
                 onCloseSuccessMessage={this.onCloseSuccessMessage}
@@ -180,23 +190,23 @@ type Props = {|
 |};
 
 type State = {|
-  profileDataList: null | ProfileData[],
+  uploadedProfileInformationList: null | UploadedProfileInformation[],
 |};
 
 export class ListOfPublishedProfiles extends PureComponent<Props, State> {
   _isMounted = false;
 
   state = {
-    profileDataList: null,
+    uploadedProfileInformationList: null,
   };
 
   _refreshList = async () => {
-    const profileDataList = await listAllProfileData();
+    const uploadedProfileInformationList = await listAllUploadedProfileInformation();
     if (this._isMounted) {
       // It isn't ideal to use a setState here, but this is the only way.
       this.setState({
         // We want to display the list with the most recent uploaded profile first.
-        profileDataList: profileDataList.reverse(),
+        uploadedProfileInformationList: uploadedProfileInformationList.reverse(),
       });
     }
   };
@@ -218,24 +228,25 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
 
   render() {
     const { limit, withActionButtons } = this.props;
-    const { profileDataList } = this.state;
+    const { uploadedProfileInformationList } = this.state;
 
-    if (!profileDataList) {
+    if (!uploadedProfileInformationList) {
       return null;
     }
 
-    if (!profileDataList.length) {
+    if (!uploadedProfileInformationList.length) {
       return (
         <p className="photon-body-30">No profile has been uploaded yet!</p>
       );
     }
 
-    const reducedProfileDataList = limit
-      ? profileDataList.slice(0, limit)
-      : profileDataList;
+    const reducedUploadedProfileInformationList = limit
+      ? uploadedProfileInformationList.slice(0, limit)
+      : uploadedProfileInformationList;
 
     const profilesRestCount =
-      profileDataList.length - reducedProfileDataList.length;
+      uploadedProfileInformationList.length -
+      reducedUploadedProfileInformationList.length;
 
     let profileRestLabel;
     if (profilesRestCount > 0) {
@@ -244,7 +255,7 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
       );
     } else {
       profileRestLabel =
-        profileDataList.length > 1 ? (
+        uploadedProfileInformationList.length > 1 ? (
           <>Manage these recordings</>
         ) : (
           <>Manage this recording</>
@@ -256,15 +267,17 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     return (
       <>
         <ul className="publishedProfilesList">
-          {reducedProfileDataList.map(profileData => (
-            <PublishedProfile
-              onProfileDelete={this.onProfileDelete}
-              key={profileData.profileToken}
-              profileData={profileData}
-              nowTimestamp={nowTimestamp}
-              withActionButtons={withActionButtons}
-            />
-          ))}
+          {reducedUploadedProfileInformationList.map(
+            uploadedProfileInformation => (
+              <PublishedProfile
+                onProfileDelete={this.onProfileDelete}
+                key={uploadedProfileInformation.profileToken}
+                uploadedProfileInformation={uploadedProfileInformation}
+                nowTimestamp={nowTimestamp}
+                withActionButtons={withActionButtons}
+              />
+            )
+          )}
         </ul>
         {withActionButtons ? null : (
           <p>
