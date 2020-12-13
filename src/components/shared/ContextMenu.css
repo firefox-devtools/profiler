@@ -39,7 +39,7 @@
   white-space: nowrap;
 }
 
-.react-contextmenu-item.react-contextmenu-item--active,
+
 .react-contextmenu-item:hover,
 .react-contextmenu-item--selected {
   border-color: var(--blue-60);
