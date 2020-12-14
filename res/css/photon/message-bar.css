@@ -28,7 +28,6 @@
 
 .photon-message-bar-action-button {
   flex: none;
-  margin: 0 8px;
 }
 
 .photon-message-bar-close-button {
@@ -39,17 +38,16 @@
   background: url(../../img/svg/close-dark.svg) no-repeat center / 16px 16px;
 }
 
-/* This rule is useful only for message bars that have a close button but no
- * action button. */
 .photon-message-bar-inner-content {
   display: flex;
   flex-wrap: wrap;
-  margin-right: 4px;
+  padding-right: 8px;
   gap: 8px;
 }
 
 .photon-message-bar-inner-text {
   display: flex;
+  align-items: center;
 }
 
 .photon-message-bar-error {

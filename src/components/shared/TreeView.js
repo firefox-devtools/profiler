@@ -724,7 +724,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
             // This attribute exposes the current active child element,
             // while keeping focus on the parent (call tree).
             ariaActiveDescendant={
-              selectedNodeId ? `treeViewRow-${selectedNodeId}` : null
+              selectedNodeId !== null ? `treeViewRow-${selectedNodeId}` : null
             }
             items={this._visibleRows}
             renderItem={this._renderRow}

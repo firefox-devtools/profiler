@@ -67,7 +67,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
     class="react-contextmenu-wrapper treeViewContextMenu"
   >
     <div
+      aria-label="List of all network markers"
       class="treeViewBody"
+      role="listbox"
       tabindex="0"
     >
       <div
@@ -85,7 +87,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             class="treeViewBodyInner treeViewBodyInner0InnerChunk"
           >
             <div
+              aria-label="Load 0: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html"
+              id="networkChartRowItem-0"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -120,7 +126,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 1: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html odd"
+              id="networkChartRowItem-1"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -155,7 +165,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 2: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html"
+              id="networkChartRowItem-2"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -190,7 +204,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 3: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html odd"
+              id="networkChartRowItem-3"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -225,7 +243,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 4: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html"
+              id="networkChartRowItem-4"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -260,7 +282,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 5: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html odd"
+              id="networkChartRowItem-5"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -295,7 +321,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 6: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html"
+              id="networkChartRowItem-6"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -330,7 +360,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 7: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html odd"
+              id="networkChartRowItem-7"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -365,7 +399,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 8: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html"
+              id="networkChartRowItem-8"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
@@ -400,7 +438,11 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               </div>
             </div>
             <div
+              aria-label="Load 9: https://mozilla.org/"
+              aria-selected="false"
               class="networkChartRowItem network-color-html odd"
+              id="networkChartRowItem-9"
+              role="option"
             >
               <div
                 class="networkChartRowItemLabel"
