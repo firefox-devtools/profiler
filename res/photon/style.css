@@ -13,6 +13,10 @@ html {
   margin: 3em 0;
 }
 
+.row:hover {
+  border-color: var(--blue-60);
+}
+
 .row pre {
   display: block;
   margin: 2em 0;
@@ -33,5 +37,9 @@ html {
 }
 
 .sized-to-content {
-  width: max-content;
+  max-width: max-content;
+}
+
+.sized-constrained {
+  max-width: 300px;
 }
