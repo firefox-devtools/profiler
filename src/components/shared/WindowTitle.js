@@ -47,8 +47,11 @@ class WindowTitleImpl extends PureComponent<Props> {
     if (profileNameFromUrl) {
       document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
     } else {
-      let title =
-        formattedMetaInfoString + SEPARATOR + _formatDateTime(meta.startTime);
+      let title = '';
+      if (formattedMetaInfoString) {
+        title += formattedMetaInfoString + SEPARATOR;
+      }
+      title += _formatDateTime(meta.startTime);
       if (dataSource === 'public') {
         title += ` (${dataSource})`;
       }
