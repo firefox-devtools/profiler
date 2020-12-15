@@ -14,6 +14,7 @@ import type {
   TrackReference,
   TimelineType,
   CheckedSharingOptions,
+  Localization,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange, CssPixels, Milliseconds } from './units';
@@ -283,6 +284,14 @@ export type UrlState = {|
   +profileSpecific: ProfileSpecificUrlState,
 |};
 
+/**
+ * Localization State
+ */
+export type L10nState = {|
+  +isL10nFetching: boolean,
+  +localization: Localization,
+|};
+
 export type IconState = Set<string>;
 
 export type State = {|
@@ -292,6 +301,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
+  +l10n: L10nState,
 |};
 
 export type IconWithClassName = {|
