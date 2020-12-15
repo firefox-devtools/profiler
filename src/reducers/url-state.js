@@ -397,12 +397,16 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
   }
 };
 
+// If you update this reducer, please don't forget to update the profileName
+// reducer below as well.
 const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
     // Update the URL the moment the zip file is starting to be
     // processed, not when it is viewed. The processing is async.
     case 'PROCESS_PROFILE_FROM_ZIP_FILE':
       return action.pathInZipFile ? action.pathInZipFile : null;
+    case 'PROFILE_PUBLISHED': // Removes the file information when publishing.
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'RETURN_TO_ZIP_FILE_LIST':
       return null;
     default:
@@ -412,6 +416,8 @@ const pathInZipFile: Reducer<string | null> = (state = null, action) => {
 
 const profileName: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'CHANGE_PROFILE_NAME':
       return action.profileName;
     default:

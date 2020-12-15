@@ -337,6 +337,7 @@ type UrlStateAction =
   | {|
       +type: 'PROFILE_PUBLISHED',
       +hash: string,
+      +profileName: string,
       +prePublishedState: State | null,
     |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
@@ -407,6 +408,7 @@ type UrlStateAction =
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+      +profileName: string,
       +prePublishedState: State | null,
     |}
   | {|
