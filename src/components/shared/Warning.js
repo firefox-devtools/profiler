@@ -41,18 +41,20 @@ export class Warning extends PureComponent<Props, State> {
     return (
       <div className="warningMessageBarWrapper">
         <div className="photon-message-bar photon-message-bar-warning warningMessageBar">
-          {message}
-          {actionText ? (
-            <button
-              className="photon-button photon-button-micro photon-message-bar-action-button"
-              type="button"
-              title={actionTitle}
-              aria-label={actionTitle}
-              onClick={actionOnClick}
-            >
-              {actionText}
-            </button>
-          ) : null}
+          <div className="photon-message-bar-inner-content">
+            <div className="photon-message-bar-inner-text">{message}</div>
+            {actionText ? (
+              <button
+                className="photon-button photon-button-micro photon-message-bar-action-button"
+                type="button"
+                title={actionTitle}
+                aria-label={actionTitle}
+                onClick={actionOnClick}
+              >
+                {actionText}
+              </button>
+            ) : null}
+          </div>
           <button
             className="photon-button photon-message-bar-close-button"
             type="button"

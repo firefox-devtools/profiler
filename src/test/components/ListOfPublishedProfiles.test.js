@@ -15,9 +15,9 @@ import {
 
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 import {
-  storeProfileData,
-  retrieveProfileData,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+  persistUploadedProfileInformationToDb,
+  retrieveUploadedProfileInformationFromDb,
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
@@ -121,7 +121,7 @@ const listOfProfileInformations = [
 
 async function storeProfileInformations(listOfProfileInformations) {
   for (const profileInfo of listOfProfileInformations) {
-    await storeProfileData(profileInfo);
+    await persistUploadedProfileInformationToDb(profileInfo);
   }
 }
 
@@ -361,7 +361,9 @@ describe('ListOfPublishedProfiles', () => {
       // Click on the confirm button
       fireFullClick(getConfirmDeleteButton());
       await findByText(/successfully/i);
-      expect(await retrieveProfileData(profileToken)).toBe(undefined);
+      expect(await retrieveUploadedProfileInformationFromDb(profileToken)).toBe(
+        undefined
+      );
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
@@ -394,9 +396,9 @@ describe('ListOfPublishedProfiles', () => {
       fireFullClick(getCancelDeleteButton());
       jest.runAllTimers(); // Closing the panel involves a timeout too.
       expect(queryByText(/are you sure/i)).toBe(null);
-      expect(await retrieveProfileData(profileToken)).toEqual(
-        listOfProfileInformations[0]
-      );
+      expect(
+        await retrieveUploadedProfileInformationFromDb(profileToken)
+      ).toEqual(listOfProfileInformations[0]);
     });
 
     it('renders a generic message when the final profile on the list has been deleted', async () => {
@@ -472,9 +474,9 @@ describe('ListOfPublishedProfiles', () => {
         expect.stringMatching(/when we tried to delete a profile/),
         expect.any(Error)
       );
-      expect(await retrieveProfileData(profileToken)).toEqual(
-        listOfProfileInformations[0]
-      );
+      expect(
+        await retrieveUploadedProfileInformationFromDb(profileToken)
+      ).toEqual(listOfProfileInformations[0]);
     });
   });
 
@@ -483,7 +485,7 @@ describe('ListOfPublishedProfiles', () => {
       // Add 3 examples, all with the same name.
       // mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
 
-      const exampleProfileData = {
+      const exampleUploadedProfileInformation = {
         profileToken: 'MACOSX',
         jwtToken: null,
         publishedDate: new Date('4 Jul 2020 13:00'),
@@ -501,16 +503,16 @@ describe('ListOfPublishedProfiles', () => {
         publishedRange: { start: 2000, end: 40000 },
       };
 
-      await storeProfileData({
-        ...exampleProfileData,
+      await persistUploadedProfileInformationToDb({
+        ...exampleUploadedProfileInformation,
         profileToken: 'PROFILE-1',
       });
-      await storeProfileData({
-        ...exampleProfileData,
+      await persistUploadedProfileInformationToDb({
+        ...exampleUploadedProfileInformation,
         profileToken: 'PROFILE-2',
       });
-      await storeProfileData({
-        ...exampleProfileData,
+      await persistUploadedProfileInformationToDb({
+        ...exampleUploadedProfileInformation,
         profileToken: 'PROFILE-3',
       });
 
@@ -518,8 +520,8 @@ describe('ListOfPublishedProfiles', () => {
       expect(await findAllByText(/PROFILE/)).toHaveLength(3);
 
       // Add one more.
-      await storeProfileData({
-        ...exampleProfileData,
+      await persistUploadedProfileInformationToDb({
+        ...exampleUploadedProfileInformation,
         profileToken: 'PROFILE-4',
         name: 'NEW-PROFILE', // Adding with a new name so that we can look it up.
       });
@@ -541,14 +543,14 @@ describe('ListOfPublishedProfiles', () => {
     async function setup(initialName: string) {
       mockDate('4 Jul 2020 15:00');
       const templateData = listOfProfileInformations[0];
-      const profileData = {
+      const uploadedProfileInformation = {
         ...templateData,
         name: initialName,
         urlPath: `${templateData.urlPath}?profileName=${encodeURIComponent(
           initialName
         )}`,
       };
-      await storeProfileData(profileData);
+      await persistUploadedProfileInformationToDb(uploadedProfileInformation);
 
       // We use 2 different stores to simulate 2 different pages.
       const storeWithListOfProfiles = blankStore();
@@ -556,7 +558,7 @@ describe('ListOfPublishedProfiles', () => {
       storeWithProfileViewer.dispatch(
         updateUrlState(
           stateFromLocation({
-            pathname: `/public/${profileData.profileToken}/marker-chart/`,
+            pathname: `/public/${uploadedProfileInformation.profileToken}/marker-chart/`,
             search: '',
             hash: '',
           })
@@ -578,7 +580,7 @@ describe('ListOfPublishedProfiles', () => {
         storeWithListOfProfiles,
         storeWithProfileViewer,
         findLinkByText,
-        profileData,
+        uploadedProfileInformation,
       };
     }
 

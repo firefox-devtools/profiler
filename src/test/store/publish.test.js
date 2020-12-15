@@ -31,6 +31,7 @@ import {
   getSelectedTab,
   getDataSource,
   getProfileNameWithDefault,
+  getPathInZipFileFromUrl,
   getHash,
   getTransformStack,
 } from '../../selectors/url-state';
@@ -49,9 +50,9 @@ import {
 } from '../../actions/profile-view';
 
 import {
-  retrieveProfileData,
-  listAllProfileData,
-} from 'firefox-profiler/app-logic/published-profiles-store';
+  retrieveUploadedProfileInformationFromDb,
+  listAllUploadedProfileInformationFromDb,
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -252,8 +253,10 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
-    expect(storedProfileData).toMatchObject({
+    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
+      BARE_PROFILE_TOKEN
+    );
+    expect(storedUploadedProfileInformation).toMatchObject({
       jwtToken: JWT_TOKEN,
       profileToken: BARE_PROFILE_TOKEN,
       publishedRange: { start: 0, end: 1 },
@@ -274,8 +277,10 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedProfileData = await retrieveProfileData(BARE_PROFILE_TOKEN);
-    expect(storedProfileData).toMatchObject({
+    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
+      BARE_PROFILE_TOKEN
+    );
+    expect(storedUploadedProfileInformation).toMatchObject({
       jwtToken: null,
       profileToken: BARE_PROFILE_TOKEN,
     });
@@ -500,6 +505,7 @@ describe('attemptToPublish', function() {
       // Check that the initial state makes sense for viewing a zip file.
       expect(getHasZipFile(getState())).toEqual(true);
       expect(getDataSource(getState())).toEqual('from-file');
+      expect(getProfileNameWithDefault(getState())).toEqual('profile1.json');
 
       // Upload the profile.
       const publishAttempt = dispatch(attemptToPublish());
@@ -530,6 +536,7 @@ describe('attemptToPublish', function() {
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
+      expect(getPathInZipFileFromUrl(getState())).toEqual(null);
       expect(getProfileNameWithDefault(getState())).toEqual('profile1.json');
 
       // Revert the profile.
@@ -586,10 +593,10 @@ describe('attemptToPublish', function() {
 
       // The upload function doesn't wait for the data store to finish, but this
       // should still be fairly quick.
-      const storedProfileData = await waitUntilData(() =>
-        retrieveProfileData(BARE_PROFILE_TOKEN)
+      const storedUploadedProfileInformation = await waitUntilData(() =>
+        retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN)
       );
-      expect(storedProfileData).toMatchObject({
+      expect(storedUploadedProfileInformation).toMatchObject({
         jwtToken: JWT_TOKEN,
         profileToken: BARE_PROFILE_TOKEN,
         publishedRange: { start: 2, end: 4 },
@@ -606,7 +613,9 @@ describe('attemptToPublish', function() {
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list.
-      expect(await listAllProfileData()).toEqual([storedProfileData]);
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
+        storedUploadedProfileInformation,
+      ]);
     });
 
     it('stores properly sanitized profiles', async () => {
@@ -644,10 +653,10 @@ describe('attemptToPublish', function() {
 
       // The upload function doesn't wait for the data store to finish, but this
       // should still be fairly quick.
-      const storedProfileData = await waitUntilData(() =>
-        retrieveProfileData(BARE_PROFILE_TOKEN)
+      const storedUploadedProfileInformation = await waitUntilData(() =>
+        retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN)
       );
-      expect(storedProfileData).toMatchObject({
+      expect(storedUploadedProfileInformation).toMatchObject({
         jwtToken: JWT_TOKEN,
         profileToken: BARE_PROFILE_TOKEN,
         // The "old" range is still kept in IDB, because that's what we want to
@@ -662,7 +671,9 @@ describe('attemptToPublish', function() {
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list.
-      expect(await listAllProfileData()).toEqual([storedProfileData]);
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
+        storedUploadedProfileInformation,
+      ]);
     });
 
     it('stores the information for the right upload when the user aborts and uploads again', async () => {
@@ -723,7 +734,7 @@ describe('attemptToPublish', function() {
       // Now let's check the data stored in the IDB is correct.
       // The second request should have been stored just fine.
       const secondRequestData = await waitUntilData(() =>
-        retrieveProfileData(secondBareProfileToken)
+        retrieveUploadedProfileInformationFromDb(secondBareProfileToken)
       );
       expect(secondRequestData).toMatchObject({
         jwtToken: secondJwtToken,
@@ -736,13 +747,17 @@ describe('attemptToPublish', function() {
 
       // This is the first request, it hasn't been added because the request was
       // aborted before the end.
-      const firstRequestData = await retrieveProfileData(BARE_PROFILE_TOKEN);
+      const firstRequestData = await retrieveUploadedProfileInformationFromDb(
+        BARE_PROFILE_TOKEN
+      );
       expect(firstRequestData).toBe(undefined);
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list. The second profile comes first because it was answered
       // first.
-      expect(await listAllProfileData()).toEqual([secondRequestData]);
+      expect(await listAllUploadedProfileInformationFromDb()).toEqual([
+        secondRequestData,
+      ]);
     });
   });
 });

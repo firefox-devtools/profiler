@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 
-import { deleteProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { deleteUploadedProfileInformationFromDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-store';
 
 import './ProfileDeleteButton.css';
@@ -128,7 +128,7 @@ class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
         );
       }
       await deleteProfileOnServer({ profileToken, jwtToken });
-      await deleteProfileData(profileToken);
+      await deleteUploadedProfileInformationFromDb(profileToken);
       this.setState({ status: 'deleted' });
       this.props.onProfileDeleted();
     } catch (e) {

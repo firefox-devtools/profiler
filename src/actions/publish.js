@@ -29,7 +29,7 @@ import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
-import { storeProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 import type {
   Action,
@@ -89,7 +89,7 @@ export function uploadFailed(error: mixed): Action {
 // to rerun in case the selectors have been invalidated.
 // Note that the returned promise won't ever be rejected, all errors are handled
 // here.
-async function storeJustPublishedProfileData(
+async function persistJustUploadedProfileInformationToDb(
   profileToken: string,
   jwtToken: string | null,
   sanitizedInformation,
@@ -108,6 +108,10 @@ async function storeJustPublishedProfileData(
     start: range.start - zeroAt,
     end: range.end - zeroAt,
   });
+
+  // We'll persist any computed profileName, because we may lose it otherwise
+  // (This is the case with zip files).
+  const profileName = getProfileNameForStorage(prepublishedState);
 
   // The url predictor returns the URL that would be serialized out of the state
   // resulting of the actions passed in argument.
@@ -131,13 +135,14 @@ async function storeJustPublishedProfileData(
         profileToken,
         committedRanges,
         oldThreadIndexToNew,
+        profileName,
         null /* prepublished State */
       )
     );
   } else {
     // Predicts the URL we'll have after the process is finished.
     predictedUrl = urlPredictor(
-      profilePublished(profileToken, null /* prepublished State */)
+      profilePublished(profileToken, profileName, null /* prepublished State */)
     );
   }
 
@@ -145,11 +150,11 @@ async function storeJustPublishedProfileData(
   const profileFilterPageData = getProfileFilterPageData(prepublishedState);
 
   try {
-    await storeProfileData({
+    await persistUploadedProfileInformationToDb({
       profileToken,
       jwtToken,
       publishedDate: new Date(),
-      name: getProfileNameForStorage(prepublishedState),
+      name: profileName,
       originHostname: profileFilterPageData
         ? profileFilterPageData.hostname
         : null,
@@ -221,6 +226,10 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // Grab the original pre-published state, so that we can revert back to it if needed.
       const prePublishedState = getState();
 
+      // We'll persist any computed profileName in the URL, because we may lose
+      // it otherwise (This is the case with zip files).
+      const profileName = getProfileNameForStorage(prePublishedState);
+
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
       const uploadGeneration = getUploadGeneration(prePublishedState);
@@ -265,7 +274,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // updated, and we'll have to predict the state inside this function.
       // Note that this function is asynchronous, we don't await it on purpose.
       // We catch all errors in this function.
-      storeJustPublishedProfileData(
+      persistJustUploadedProfileInformationToDb(
         hash,
         hashOrToken === hash ? null : hashOrToken,
         sanitizedInformation,
@@ -297,6 +306,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             hash,
             committedRanges,
             oldThreadIndexToNew,
+            profileName,
             prePublishedState
           )
         );
@@ -330,6 +340,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         dispatch(
           profilePublished(
             hash,
+            profileName,
             // Only include the pre-published state if we want to be able to revert
             // the profile. If we are viewing from-addon, then it's only a single
             // profile.
@@ -380,6 +391,7 @@ export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  profileName: string,
   prePublishedState: State | null
 ): Action {
   return {
@@ -387,6 +399,7 @@ export function profileSanitized(
     hash,
     committedRanges,
     oldThreadIndexToNew,
+    profileName,
     prePublishedState,
   };
 }
@@ -396,6 +409,7 @@ export function profileSanitized(
  */
 export function profilePublished(
   hash: string,
+  profileName: string,
   // If we're publishing from a URL or Zip file, then offer to revert to the previous
   // state.
   prePublishedState: State | null
@@ -403,6 +417,7 @@ export function profilePublished(
   return {
     type: 'PROFILE_PUBLISHED',
     hash,
+    profileName,
     prePublishedState,
   };
 }

@@ -14,6 +14,7 @@ module.exports = {
     'prettier',
     'prettier/flowtype',
     'prettier/react',
+    'prettier/prettier', // This works with the prettier plugin, remove this when removing it
   ],
   parserOptions: {
     ecmaVersion: '2017',
