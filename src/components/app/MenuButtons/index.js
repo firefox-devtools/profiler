@@ -211,6 +211,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       }
 
       case 'profile-deleted':
+        // Note that <ProfileDeletePanel> can also render <ProfileDeleteSuccess>
+        // in some situations. However it's not suitable for this case, because
+        // we still have to pass jwtToken / profileToken, and we don't have
+        // these values anymore when we're in this state.
         return <ProfileDeleteSuccess />;
 
       default:

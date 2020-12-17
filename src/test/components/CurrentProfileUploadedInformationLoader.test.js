@@ -51,6 +51,12 @@ describe('app/CurrentProfileUploadedInformationLoader', () => {
 
   // eslint-disable-next-line jest/expect-expect
   it('bails out if there is no indexedDB object', async () => {
+    // In tests we don't always have the indexeddb object for simplicity.
+    // Because this component is used high in the component tree it may be
+    // inserted in tests that don't want to test this behavior. Therefore the
+    // component will bail out if the indexedDB object is missing. This test
+    // tests for this behavior.
+
     window.indexedDB = undefined;
     const { nextTick } = setup();
 
