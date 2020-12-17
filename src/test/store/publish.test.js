@@ -750,7 +750,7 @@ describe('attemptToPublish', function() {
       const firstRequestData = await retrieveUploadedProfileInformationFromDb(
         BARE_PROFILE_TOKEN
       );
-      expect(firstRequestData).toBe(undefined);
+      expect(firstRequestData).toBe(null);
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list. The second profile comes first because it was answered

@@ -45,3 +45,7 @@
   display: flex;
   gap: 8px;
 }
+
+.confirmDialogButtons > .photon-button {
+  flex: auto;
+}

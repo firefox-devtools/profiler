@@ -165,9 +165,15 @@ export async function listAllUploadedProfileInformationFromDb(): Promise<
  */
 export async function retrieveUploadedProfileInformationFromDb(
   profileToken: string
-): Promise<UploadedProfileInformation | void> {
+): Promise<UploadedProfileInformation | null> {
+  if (!profileToken) {
+    // If this is the empty string, let's skip the lookup.
+    return null;
+  }
+
   const db = await open();
-  return db.get(OBJECTSTORE_NAME, profileToken);
+  const result = await db.get(OBJECTSTORE_NAME, profileToken);
+  return result || null;
 }
 
 /**

@@ -28,7 +28,12 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State } from './state';
+import type {
+  UrlState,
+  UploadState,
+  State,
+  UploadedProfileInformation,
+} from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
 export type DataSource =
@@ -422,6 +427,9 @@ type UrlStateAction =
   | {|
       +type: 'TOGGLE_RESOURCES_PANEL',
       +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
+      +type: 'PROFILE_REMOTELY_DELETED',
     |};
 
 type IconsAction =
@@ -484,6 +492,11 @@ type DragAndDropAction =
       +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
     |};
 
+type CurrentProfileUploadedInformationAction = {|
+  +type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
+  +uploadedProfileInformation: UploadedProfileInformation | null,
+|};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -492,4 +505,5 @@ export type Action =
   | UrlStateAction
   | IconsAction
   | PublishAction
-  | DragAndDropAction;
+  | DragAndDropAction
+  | CurrentProfileUploadedInformationAction;

@@ -362,7 +362,7 @@ describe('ListOfPublishedProfiles', () => {
       fireFullClick(getConfirmDeleteButton());
       await findByText(/successfully/i);
       expect(await retrieveUploadedProfileInformationFromDb(profileToken)).toBe(
-        undefined
+        null
       );
 
       // Clicking elsewhere should make the successful message disappear.
