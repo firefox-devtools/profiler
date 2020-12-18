@@ -13,9 +13,13 @@
  * functionality is used.
  */
 
+type AsyncString = (key: 'string') => Promise<string>;
+type AsyncUint8Array = (key: 'uint8array') => Promise<Uint8Array>;
+type AsyncArrayBuffer = (key: 'arraybuffer') => Promise<ArrayBuffer>;
+
 declare module 'jszip' {
   declare type JSZipFile = {
-    async: (key: 'string') => Promise<string>,
+    async: AsyncString & AsyncUint8Array & AsyncArrayBuffer,
     name: string, // The absolute path of the file.
     dir: boolean, // true if this is a directory.
     date: any, // The last modification date.

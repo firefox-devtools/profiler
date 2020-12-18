@@ -76,6 +76,7 @@ import {
   assertExhaustiveCheck,
   ensureExists,
 } from 'firefox-profiler/utils/flow';
+import { processInstrumentsProfile } from 'firefox-profiler/profile-logic/import/instruments';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -1288,10 +1289,33 @@ export function retrieveProfileFromFile(
           {
             const buffer = await fileReader(file).asArrayBuffer();
             const zip = await JSZip.loadAsync(buffer);
-            await dispatch(receiveZipFile(zip));
+            const profile = await processInstrumentsProfile(file, zip);
+            if (profile) {
+              await withHistoryReplaceStateAsync(async () => {
+                await dispatch(viewProfile(profile));
+              });
+            } else {
+              await dispatch(receiveZipFile(zip));
+            }
           }
           break;
         default: {
+          if (
+            // Check if this is most likely a directory.
+            file.size === 0 &&
+            file.type === '' &&
+            // Instrument directories end in .trace
+            file.name.endsWith('.trace')
+          ) {
+            // Throw an error before attempting to use the fileReader, which would error
+            // on this case anyway.
+            throw new Error(
+              'This appears to be an instruments trace directory. Loading files via ' +
+                'directory is not supported. Please zip the entire directory into a ' +
+                'single file and try again.'
+            );
+          }
+
           // Plain uncompressed profile files can have file names with uncommon
           // extensions (eg .profile). So we can't rely on the mime type to
           // decide how to handle them. We'll try to parse them as a plain JSON
