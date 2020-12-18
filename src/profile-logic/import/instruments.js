@@ -30,42 +30,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import JSZip, { type JSZipFile } from 'jszip';
+import {
+  ensureExists,
+  objectValues,
+  getFirstItemFromMap,
+} from 'firefox-profiler/utils/flow';
+import type { ObjectMap, Profile } from 'firefox-profiler/types';
+
 // This file contains methods to import data from OS X Instruments.app
 // https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/index.html
 
-function parseTSV<T>(contents: string): T[] {
-  const lines = contents.split('\n').map(l => l.split('\t'))
+// TODO - importFromInstrumentsDeepCopy
+// function parseTSV<T>(contents: string): T[] {
+//   const lines = contents.split('\n').map(l => l.split('\t'));
 
-  const headerLine = lines.shift()
-  if (!headerLine) return []
+//   const headerLine = lines.shift();
+//   if (!headerLine) {
+//     return [];
+//   }
 
-  const indexToField = new Map<number, string>()
-  for (let i = 0; i < headerLine.length; i++) {
-    indexToField.set(i, headerLine[i])
-  }
+//   const indexToField = new Map<number, string>();
+//   for (let i = 0; i < headerLine.length; i++) {
+//     indexToField.set(i, headerLine[i]);
+//   }
 
-  const ret: T[] = []
-  for (let line of lines) {
-    const row = {} as T
-    for (let i = 0; i < line.length; i++) {
-      ;(row as any)[indexToField.get(i)!] = line[i]
-    }
-    ret.push(row)
-  }
-  return ret
-}
-
-interface PastedTimeProfileRow {
-  Weight?: string
-  'Source Path'?: string
-  'Symbol Name'?: string
-}
-
-interface PastedAllocationsProfileRow {
-  'Bytes Used'?: string
-  'Source Path'?: string
-  'Symbol Name'?: string
-}
+//   const ret: T[] = [];
+//   for (const line of lines) {
+//     const row = {};
+//     for (let i = 0; i < line.length; i++) {
+//       row[ensureExists(indexToField.get(i))] = line[i];
+//     }
+//     ret.push(coerce<any, T>(row));
+//   }
+//   return ret;
+// }
+//
+// type PastedTimeProfileRow = {
+//   Weight?: string,
+//   'Source Path'?: string,
+//   'Symbol Name'?: string,
+// };
+//
+// type PastedAllocationsProfileRow = {
+//   'Bytes Used'?: string,
+//   'Source Path'?: string,
+//   'Symbol Name'?: string,
+// };
 
 type FrameInfo = {
   key: string | number,
@@ -85,108 +96,124 @@ type FrameInfo = {
   col?: number,
 };
 
-interface FrameInfoWithWeight extends FrameInfo {
-  endValue: number;
-}
+// TODO - importFromInstrumentsDeepCopy
+// interface FrameInfoWithWeight extends FrameInfo {
+//   endValue: number;
+// }
 
-function getWeight(deepCopyRow: any): number {
-  if ('Bytes Used' in deepCopyRow) {
-    const bytesUsedString = deepCopyRow['Bytes Used']
-    const parts = /\s*(\d+(?:[.]\d+)?) (\w+)\s+(?:\d+(?:[.]\d+))%/.exec(bytesUsedString)
-    if (!parts) return 0
-    const value = parseInt(parts[1], 10)
-    const units = parts[2]
+// TODO - importFromInstrumentsDeepCopy
+// function getWeight(deepCopyRow: any): number {
+//   if ('Bytes Used' in deepCopyRow) {
+//     const bytesUsedString = deepCopyRow['Bytes Used'];
+//     const parts = /\s*(\d+(?:[.]\d+)?) (\w+)\s+(?:\d+(?:[.]\d+))%/.exec(
+//       bytesUsedString
+//     );
+//     if (!parts) {
+//       return 0;
+//     }
+//     const value = parseInt(parts[1], 10);
+//     const units = parts[2];
 
-    switch (units) {
-      case 'Bytes':
-        return value
-      case 'KB':
-        return 1024 * value
-      case 'MB':
-        return 1024 * 1024 * value
-      case 'GB':
-        return 1024 * 1024 * 1024 * value
-    }
-    throw new Error(`Unrecognized units ${units}`)
-  }
+//     switch (units) {
+//       case 'Bytes':
+//         return value;
+//       case 'KB':
+//         return 1024 * value;
+//       case 'MB':
+//         return 1024 * 1024 * value;
+//       case 'GB':
+//         return 1024 * 1024 * 1024 * value;
+//       default:
+//         throw new Error(`Unrecognized units ${units}`);
+//     }
+//   }
 
-  if ('Weight' in deepCopyRow || 'Running Time' in deepCopyRow) {
-    const weightString = deepCopyRow['Weight'] || deepCopyRow['Running Time']
-    const parts = /\s*(\d+(?:[.]\d+)?) ?(\w+)\s+(?:\d+(?:[.]\d+))%/.exec(weightString)
-    if (!parts) return 0
-    const value = parseInt(parts[1], 10)
-    const units = parts[2]
+//   if ('Weight' in deepCopyRow || 'Running Time' in deepCopyRow) {
+//     const weightString = deepCopyRow.Weight || deepCopyRow['Running Time'];
+//     const parts = /\s*(\d+(?:[.]\d+)?) ?(\w+)\s+(?:\d+(?:[.]\d+))%/.exec(
+//       weightString
+//     );
+//     if (!parts) {
+//       return 0;
+//     }
+//     const value = parseInt(parts[1], 10);
+//     const units = parts[2];
 
-    switch (units) {
-      case 'ms':
-        return value
-      case 's':
-        return 1000 * value
-      case 'min':
-        return 1000 * value
-    }
-    throw new Error(`Unrecognized units ${units}`)
-  }
+//     switch (units) {
+//       case 'ms':
+//         return value;
+//       case 's':
+//         return 1000 * value;
+//       case 'min':
+//         return 1000 * value;
+//       default:
+//         throw new Error(`Unrecognized units ${units}`);
+//     }
+//   }
 
-  return -1
-}
+//   return -1;
+// }
 
+// TODO - This is currently not migrated.
 // Import from a deep copy made of a profile
-export function importFromInstrumentsDeepCopy(contents: string): Profile {
-  debugger
-  const profile = new CallTreeProfileBuilder()
-  const rows = parseTSV<PastedTimeProfileRow | PastedAllocationsProfileRow>(contents)
+// export function importFromInstrumentsDeepCopy(contents: string): Profile {
+//   const profile = new CallTreeProfileBuilder();
+//   const rows = parseTSV<PastedTimeProfileRow | PastedAllocationsProfileRow>(
+//     contents
+//   );
 
-  const stack: FrameInfoWithWeight[] = []
-  let cumulativeValue: number = 0
+//   const stack: FrameInfoWithWeight[] = [];
+//   let cumulativeValue: number = 0;
 
-  for (let row of rows) {
-    const symbolName = row['Symbol Name']
-    if (!symbolName) continue
-    const trimmedSymbolName = symbolName.trim()
-    let stackDepth = symbolName.length - trimmedSymbolName.length
+//   for (const row of rows) {
+//     const symbolName = row['Symbol Name'];
+//     if (!symbolName) {
+//       continue;
+//     }
+//     const trimmedSymbolName = symbolName.trim();
+//     const stackDepth = symbolName.length - trimmedSymbolName.length;
 
-    if (stack.length - stackDepth < 0) {
-      throw new Error('Invalid format')
-    }
+//     if (stack.length - stackDepth < 0) {
+//       throw new Error('Invalid format');
+//     }
 
-    let framesToLeave: FrameInfoWithWeight[] = []
+//     const framesToLeave: FrameInfoWithWeight[] = [];
 
-    while (stackDepth < stack.length) {
-      const stackTop = stack.pop()!
-      framesToLeave.push(stackTop)
-    }
+//     while (stackDepth < stack.length) {
+//       const stackTop = ensureExists(stack.pop());
+//       framesToLeave.push(stackTop);
+//     }
 
-    for (let frameToLeave of framesToLeave) {
-      cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue)
-      profile.leaveFrame(frameToLeave, cumulativeValue)
-    }
+//     for (const frameToLeave of framesToLeave) {
+//       cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue);
+//       profile.leaveFrame(frameToLeave, cumulativeValue);
+//     }
 
-    const newFrameInfo: FrameInfoWithWeight = {
-      key: `${row['Source Path'] || ''}:${trimmedSymbolName}`,
-      name: trimmedSymbolName,
-      file: row['Source Path'],
-      endValue: cumulativeValue + getWeight(row),
-    }
+//     const newFrameInfo: FrameInfoWithWeight = {
+//       key: `${row['Source Path'] || ''}:${trimmedSymbolName}`,
+//       name: trimmedSymbolName,
+//       file: row['Source Path'],
+//       endValue: cumulativeValue + getWeight(row),
+//     };
 
-    profile.enterFrame(newFrameInfo, cumulativeValue)
-    stack.push(newFrameInfo)
-  }
+//     profile.enterFrame(newFrameInfo, cumulativeValue);
+//     stack.push(newFrameInfo);
+//   }
 
-  while (stack.length > 0) {
-    const frameToLeave = stack.pop()!
-    cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue)
-    profile.leaveFrame(frameToLeave, cumulativeValue)
-  }
+//   while (stack.length > 0) {
+//     const frameToLeave = ensureExists(stack.pop());
+//     cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue);
+//     profile.leaveFrame(frameToLeave, cumulativeValue);
+//   }
 
-  if ('Bytes Used' in rows[0]) {
-    profile.setValueFormatter(new ByteFormatter())
-  } else if ('Weight' in rows[0] || 'Running Time' in rows[0]) {
-    profile.setValueFormatter(new TimeFormatter('milliseconds'))
-  }
+//   if ('Bytes Used' in rows[0]) {
+//     profile.setValueFormatter(new ByteFormatter());
+//   } else if ('Weight' in rows[0] || 'Running Time' in rows[0]) {
+//     profile.setValueFormatter(new TimeFormatter('milliseconds'));
+//   }
 
-  return profile.build()
-}
+//   return profile.build();
+// }
 
 interface TraceDirectoryTree {
   name: string
