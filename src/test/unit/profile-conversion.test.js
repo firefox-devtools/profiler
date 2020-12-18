@@ -9,6 +9,15 @@ import type {
   TracingEventUnion,
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
+import { retrieveProfileFromFile } from 'firefox-profiler/actions/receive-profile';
+import { blankStore } from '../fixtures/stores';
+import {
+  getProfileOrNull,
+  getProfile,
+  getView,
+} from 'firefox-profiler/selectors';
+import { waitUntilState } from '../fixtures/utils';
+import { mockFile, mockFileReader } from '../fixtures/mocks/file';
 
 describe('converting Linux perf profile', function() {
   it('should import a perf profile', async function() {
@@ -136,5 +145,52 @@ describe('converting Google Chrome profile', function() {
     }
 
     expect(profile).toMatchSnapshot();
+  });
+});
+
+describe('converting MacOS instruments', function() {
+  it('should import a zipped profile', async function() {
+    const fs = require('fs');
+    const file = mockFile({
+      type: 'application/zip',
+      payload: fs.readFileSync(
+        'src/test/fixtures/upgrades/test.instruments.zip'
+      ),
+    });
+
+    const store = blankStore();
+    const { dispatch, getState } = store;
+
+    expect(getView(getState())).toEqual({ phase: 'INITIALIZING' });
+
+    const profileLoadingComplete = new Promise((resolve, reject) => {
+      store.subscribe(() => {
+        const view = getView(getState());
+        switch (view.phase) {
+          case 'INITIALIZING':
+          case 'DATA_LOADED':
+            // Wait patiently.
+            break;
+          case 'FATAL_ERROR':
+            // There was an error loading the profile
+            reject(view.error);
+            break;
+          case 'PROFILE_LOADED':
+            resolve();
+            break;
+          default:
+            console.error(view);
+            reject(new Error('Unexpected view'));
+        }
+      });
+    });
+
+    dispatch(retrieveProfileFromFile(file, mockFileReader));
+
+    await profileLoadingComplete;
+    await waitUntilState(store, state => Boolean(getProfileOrNull(state)));
+    const profile = getProfile(getState());
+
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
   });
 });

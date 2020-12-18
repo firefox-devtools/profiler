@@ -49,6 +49,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
+import { mockFile, mockFileReader } from '../fixtures/mocks/file';
 
 import { compress } from '../../utils/gz';
 
@@ -1168,27 +1169,6 @@ describe('actions/receive-profile', function() {
     afterEach(async function() {
       delete (window: any).TextEncoder;
     });
-    /**
-     * Bypass all of Flow's checks, and mock out the file interface.
-     */
-    function mockFile({ type, payload }): File {
-      const file = {
-        type,
-        _payload: payload,
-      };
-      return (file: any);
-    }
-
-    /**
-     * Bypass all of Flow's checks, and mock out the file reader.
-     */
-    function mockFileReader(mockFile: File) {
-      const payload = (mockFile: any)._payload;
-      return {
-        asText: () => Promise.resolve((payload: string)),
-        asArrayBuffer: () => Promise.resolve((payload: ArrayBuffer)),
-      };
-    }
 
     async function setupTestWithFile(mockFileOptions) {
       const file = mockFile(mockFileOptions);

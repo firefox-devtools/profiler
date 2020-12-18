@@ -37,6 +37,7 @@ import {
   getFirstItemFromMap,
 } from 'firefox-profiler/utils/flow';
 import type { ObjectMap, Profile } from 'firefox-profiler/types';
+import { getEmptyProfile, getEmptyThread } from '../data-structures';
 
 // This file contains methods to import data from OS X Instruments.app
 // https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/index.html
@@ -530,8 +531,13 @@ export async function processInstrumentsProfile(
     profiles.push(...group.profiles);
   }
 
-  // $FlowFixMe - This is the original signature for speedscope.
-  return { name: file.name, indexToView, profiles };
+  // TODO - Actually import a profile.
+  // return { name: file.name, indexToView, profiles };
+
+  // This is just enough to not error when loading a profile.
+  const profile = getEmptyProfile();
+  profile.threads.push(getEmptyThread());
+  return profile;
 }
 
 interface ProfileGroup {
