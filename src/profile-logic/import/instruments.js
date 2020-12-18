@@ -309,8 +309,8 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
       continue;
     }
     const bulkstore = new BinReader(
-      await readAsArrayBuffer(getOrThrow(storedir.files, 'bulkstore')),
-    )
+      await getOrThrow(storedir.files, 'bulkstore').async('arraybuffer')
+    );
     // Ignore the first 3 words
     bulkstore.readUint32();
     bulkstore.readUint32();
@@ -364,8 +364,12 @@ async function getIntegerArrays(
 
   // This table contains the memory addresses of stack frames
 
-  const indexreader = new BinReader(await readAsArrayBuffer(integeruniquerindex))
-  const datareader = new BinReader(await readAsArrayBuffer(integeruniquerdata))
+  const indexreader = new BinReader(
+    await integeruniquerindex.async('arraybuffer')
+  );
+  const datareader = new BinReader(
+    await integeruniquerdata.async('arraybuffer')
+  );
 
   // Header we don't care about
   indexreader.seek(32);
@@ -414,11 +418,14 @@ type FormTemplateData = {
   runs: FormTemplateRunData[],
 };
 
+type SymbolsByPid = Map<number, { symbols: SymbolInfo[] }>;
+
 async function readFormTemplate(
   tree: TraceDirectoryTree
 ): Promise<FormTemplateData> {
   const formTemplate = getOrThrow(tree.files, 'form.template');
-  const archive = readInstrumentsKeyedArchive(await readAsArrayBuffer(formTemplate));
+  const formTemplateData = await formTemplate.async('uint8array');
+  const archive = readInstrumentsKeyedArchive(formTemplateData);
 
   const version = archive['com.apple.xray.owner.template.version'];
   let selectedRunNumber = 1;
@@ -431,36 +438,42 @@ async function readFormTemplate(
   if ('stubInfoByUUID' in archive) {
     instrument = Array.from(archive.stubInfoByUUID.keys())[0];
   }
-  const allRunData = archive['com.apple.xray.run.data']
+  const allRunData = archive['com.apple.xray.run.data'];
 
-  const runs: FormTemplateRunData[] = []
-  for (let runNumber of allRunData.runNumbers) {
-    const runData = getOrThrow<number, Map<any, any>>(allRunData.runData, runNumber)
+  const runs: FormTemplateRunData[] = [];
+  for (const runNumber of allRunData.runNumbers) {
+    const runData = getOrThrow<number, Map<any, any>>(
+      allRunData.runData,
+      runNumber
+    );
 
-    const symbolsByPid = getOrThrow<string, Map<number, {symbols: SymbolInfo[]}>>(
-      runData,
-      'symbolsByPid',
-    )
+    const symbolsByPid: SymbolsByPid | void = runData.get('symbolsByPid');
 
-    const addressToFrameMap = new Map<number, FrameInfo>()
-
-    // TODO(jlfwong): Deal with profiles with conflicting addresses?
-    for (let symbols of symbolsByPid.values()) {
-      for (let symbol of symbols.symbols) {
-        if (!symbol) continue
-        const {sourcePath, symbolName, addressToLine} = symbol
-        for (let address of addressToLine.keys()) {
-          getOrInsert(addressToFrameMap, address, () => {
-            const name = symbolName || `0x${zeroPad(address.toString(16), 16)}`
-            const frame: FrameInfo = {
-              key: `${sourcePath}:${name}`,
-              name: name,
-            }
-            if (sourcePath) {
-              frame.file = sourcePath
-            }
-            return frame
-          })
+    // Build a frame map if the symbols are there.
+    const addressToFrameMap = new Map<number, FrameInfo>();
+    if (symbolsByPid) {
+      // TODO(jlfwong): Deal with profiles with conflicting addresses?
+      for (const symbols of symbolsByPid.values()) {
+        for (const symbol of symbols.symbols) {
+          if (!symbol) {
+            continue;
+          }
+          const { sourcePath, symbolName, addressToLine } = symbol;
+          for (const address of addressToLine.keys()) {
+            getOrInsert(addressToFrameMap, address, () => {
+              const name =
+                symbolName || `0x${zeroPad(address.toString(16), 16)}`;
+              const key: string = `${sourcePath || 'null'}:${name}`;
+              const frame: FrameInfo = {
+                key,
+                name: name,
+              };
+              if (sourcePath) {
+                frame.file = sourcePath;
+              }
+              return frame;
+            });
+          }
         }
       }
 
@@ -476,45 +489,49 @@ async function readFormTemplate(
     instrument,
     selectedRunNumber,
     runs,
-  }
+  };
 }
 
 // Import from a .trace file saved from Mac Instruments.app
-export async function importFromInstrumentsTrace(
-  entry: FileSystemDirectoryEntry,
-): Promise<ProfileGroup> {
-  debugger
-  const tree = await extractDirectoryTree(entry)
-
-  const {version, runs, instrument, selectedRunNumber} = await readFormTemplate(tree)
+export async function processInstrumentsProfile(
+  file: File,
+  zip: JSZip
+): Promise<Profile | null> {
+  const tree = await extractDirectoryTree(zip);
+  const formTemplate = await readFormTemplate(tree);
+  if (!formTemplate) {
+    return null;
+  }
+  const { version, runs, instrument, selectedRunNumber } = formTemplate;
   if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
     throw new Error(
-      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`,
-    )
+      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`
+    );
   }
-  console.log('version: ', version)
-  console.log(`Importing time profile`)
+  console.log('version: ', version);
+  console.log(`Importing time profile`);
 
-  const profiles: Profile[] = []
-  let indexToView = 0
+  const profiles: Profile[] = [];
+  let indexToView: number = 0;
 
-  for (let run of runs) {
-    const {addressToFrameMap, number} = run
+  for (const run of runs) {
+    const { addressToFrameMap, number } = run;
     const group = await importRunFromInstrumentsTrace({
-      fileName: entry.name,
+      fileName: file.name,
       tree,
       addressToFrameMap,
       runNumber: number,
-    })
+    });
 
     if (run.number === selectedRunNumber) {
-      indexToView = profiles.length + group.indexToView
+      indexToView = profiles.length + group.indexToView;
     }
 
-    profiles.push(...group.profiles)
+    profiles.push(...group.profiles);
   }
 
-  return {name: entry.name, indexToView, profiles}
+  // $FlowFixMe - This is the original signature for speedscope.
+  return { name: file.name, indexToView, profiles };
 }
 
 interface ProfileGroup {
@@ -559,6 +576,12 @@ export async function importRunFromInstrumentsTrace(args: {
         samples,
       })
     ),
+  };
+}
+
+class StackListProfileBuilder {
+  constructor(..._args: any[]) {
+    throw new Error('Speedscope StackListProfileBuilder is not imported.');
   }
 }
 
@@ -575,8 +598,17 @@ export function importThreadFromInstrumentsTrace(args: {
   const backtraceIDtoStack = new Map<number, FrameInfo[]>();
   samples = samples.filter(s => s.threadID === threadID);
 
-  const profile = new StackListProfileBuilder(lastOf(samples)!.timestamp)
-  profile.setName(`${fileName} - thread ${threadID}`)
+  // TODO - The following parts of this function need to be implemented.
+  // eslint-disable-next-line no-constant-condition
+  if (true) {
+    const profile: any = {};
+    return profile;
+  }
+
+  const profile = new StackListProfileBuilder(
+    ensureExists(lastOf(samples)).timestamp
+  );
+  profile.setName(`${fileName} - thread ${threadID}`);
 
   function appendRecursive(k: number, stack: FrameInfo[]) {
     const frame = addressToFrameMap.get(k);
@@ -631,9 +663,8 @@ export function importThreadFromInstrumentsTrace(args: {
   return profile.build();
 }
 
-export function readInstrumentsKeyedArchive(buffer: ArrayBuffer): any {
-  const byteArray = new Uint8Array(buffer)
-  const parsedPlist = parseBinaryPlist(byteArray)
+export function readInstrumentsKeyedArchive(byteArray: Uint8Array) {
+  const parsedPlist = parseBinaryPlist(byteArray);
   const data = expandKeyedArchive(parsedPlist, ($classname, object) => {
     switch ($classname) {
       case 'NSTextStorage':
@@ -650,6 +681,8 @@ export function readInstrumentsKeyedArchive(buffer: ArrayBuffer): any {
         for (let i = 3; ; i += 2) {
           const address = object['$' + i];
           const line = object['$' + (i + 1)];
+          // Disabled since this is imported code, and it's a behavior change to rewrite it.
+          // eslint-disable-next-line eqeqeq
           if (address == null || line == null) {
             break;
           }
@@ -711,6 +744,7 @@ export function readInstrumentsKeyedArchive(buffer: ArrayBuffer): any {
 ////////////////////////////////////////////////////////////////////////////////
 
 export function decodeUTF8(bytes: Uint8Array): string {
+  // eslint-disable-next-line prefer-spread
   let text = String.fromCharCode.apply(String, Array.from(bytes));
   if (text.slice(-1) === '\0') {
     text = text.slice(0, -1);
@@ -902,15 +936,18 @@ function paternMatchObjectiveC(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-export class UID {
-  constructor(public index: number) {}
+class UID {
+  index: number;
+  constructor(index: number) {
+    this.index = index;
+  }
 }
 
 function parseBinaryPlist(bytes: Uint8Array): any {
   const text = 'bplist00';
   for (let i = 0; i < 8; i++) {
     if (bytes[i] !== text.charCodeAt(i)) {
-      throw new Error('File is not a binary plist')
+      throw new Error('File is not a binary plist');
     }
   }
   return new BinaryPlistParser(
@@ -1188,20 +1225,6 @@ class TimeFormatter implements ValueFormatter {
   }
 }
 
-class ByteFormatter implements ValueFormatter {
-  unit: FileFormat.ValueUnit = 'bytes'
-
-  format(v: number) {
-    if (v < 1024) return `${v.toFixed(0)} B`
-    v /= 1024
-    if (v < 1024) return `${v.toFixed(2)} KB`
-    v /= 1024
-    if (v < 1024) return `${v.toFixed(2)} MB`
-    v /= 1024
-    return `${v.toFixed(2)} GB`
-  }
-}
-
 function zeroPad(s: string, width: number) {
   return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
@@ -1231,32 +1254,71 @@ function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   return value;
 }
 
-async function extractDirectoryTree(entry: FileSystemDirectoryEntry): Promise<TraceDirectoryTree> {
-  const node: TraceDirectoryTree = {
-    name: entry.name,
+async function extractDirectoryTree(zip: JSZip): Promise<TraceDirectoryTree> {
+  const tree: TraceDirectoryTree = {
+    name: '',
     files: new Map(),
     subdirectories: new Map(),
-  }
+  };
 
-  const children = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-    entry.createReader().readEntries((entries: any[]) => {
-      resolve(entries)
-    }, reject)
-  })
+  for (const file of objectValues(zip.files)) {
+    const parts = file.name
+      // Split the directory into parts.
+      .split('/')
+      // Filter out any trailing empty strings. This can happen when a '/' is at the end
+      // of a path.
+      .filter(part => part !== '');
 
-  for (let child of children) {
-    if (child.isDirectory) {
-      const subtree = await extractDirectoryTree(child as FileSystemDirectoryEntry)
-      node.subdirectories.set(subtree.name, subtree)
-    } else {
-      const file = await new Promise<File>((resolve, reject) => {
-        ;(child as FileSystemFileEntry).file(resolve, reject)
-      })
-      node.files.set(file.name, file)
+    let fileName = null;
+    if (!file.dir) {
+      fileName = parts.pop();
+    }
+
+    if (parts[0] === '__MACOSX') {
+      // When zipping on macOS, some OS-only files are hidden away in this folder,
+      // but the contents match the original directory structure. Remove that folder
+      // name so the original files will match up.
+      //
+      // ├── Launch_inv_list.trace
+      // │   └── Trace1.Run
+      // │   └── ...
+      // ├── __MACOSX
+      // │   └── Launch_inv_list.trace
+      // │       └── form.template
+      parts.shift();
+    }
+
+    let node = tree;
+    for (const part of parts) {
+      node = getOrInsert(node.subdirectories, part, () => ({
+        name: part,
+        files: new Map(),
+        subdirectories: new Map(),
+      }));
+    }
+
+    if (fileName !== null) {
+      node.files.set(fileName, file);
     }
   }
 
-  return node
+  if (tree.subdirectories.size === 1) {
+    const subtree = ensureExists(getFirstItemFromMap(tree.subdirectories));
+    if (subtree.name.endsWith('.trace')) {
+      // This assumes the .trace folder is the root of the zip
+      // ├── Launch_inv_list.trace
+      // │   └── Trace1.Run
+      // │   └── form.template
+      // │   └── ...
+      return subtree;
+    }
+  }
+
+  // This assumes the directory contents of a .trace folder are zipped.
+  // ├── Trace1.Run
+  // ├── form.template
+  // ├── ...
+  return tree;
 }
 
 function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
