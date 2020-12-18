@@ -4,8 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import { MenuButtons } from '../../components/app/MenuButtons';
-import { MetaInfoPanel } from '../../components/app/MenuButtons/MetaInfo';
+import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
+import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import {
   render,
   fireEvent,
@@ -14,9 +14,14 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { TextEncoder } from 'util';
-import { stateFromLocation } from '../../app-logic/url-handling';
+
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
+import { processGeckoProfile } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  persistUploadedProfileInformationToDb,
+  retrieveUploadedProfileInformationFromDb,
+} from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import {
   changeTimelineTrackOrganization,
@@ -32,8 +37,8 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { fireFullClick } from '../fixtures/utils';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -43,8 +48,11 @@ import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexedd
 autoMockIndexedDB();
 
 // We mock profile-store but we want the real error, so that we can simulate it.
-import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
-jest.mock('../../profile-logic/profile-store');
+import {
+  uploadBinaryProfileData,
+  deleteProfileOnServer,
+} from 'firefox-profiler/profile-logic/profile-store';
+jest.mock('firefox-profiler/profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
@@ -67,38 +75,6 @@ jest.mock('firefox-profiler/profile-logic/symbolication');
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
 
 describe('app/MenuButtons', function() {
-  function mockUpload() {
-    // Create a promise with the resolve function outside of it.
-    let resolveUpload, rejectUpload;
-    const promise = new Promise((resolve, reject) => {
-      resolveUpload = resolve;
-      rejectUpload = reject;
-    });
-
-    promise.catch(() => {
-      // Node complains if we don't handle a promise/catch, and this one may reject
-      // before it's properly handled. Catch it here so that Node doesn't complain.
-      // This won't hide problems in our code because the app code "awaits" the
-      // result of startUpload, so any rejection will be handled there.
-    });
-
-    // Flow doesn't know uploadBinaryProfileData is a jest mock.
-    (uploadBinaryProfileData: any).mockImplementation(
-      (() => ({
-        abortUpload: () => {
-          // In the real implementation, we call xhr.abort, which in turn
-          // triggers an "abort" event on the XHR object, which in turn rejects
-          // the promise with the error UploadAbortedError. So we do just that
-          // here directly, to simulate this.
-          rejectUpload(new UploadAbortedError());
-        },
-        startUpload: () => promise,
-      }): typeof uploadBinaryProfileData)
-    );
-
-    return { resolveUpload, rejectUpload };
-  }
-
   function createSimpleProfile(updateChannel = 'release') {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
@@ -125,12 +101,10 @@ describe('app/MenuButtons', function() {
     return { profile };
   }
 
-  function setup(profile) {
+  function setup(store) {
     jest.useFakeTimers();
 
-    const store = storeWithProfile(profile);
-    const { resolveUpload, rejectUpload } = mockUpload();
-
+    // We need a sensible data source for this component.
     store.dispatch(
       updateUrlState(
         stateFromLocation({
@@ -143,29 +117,13 @@ describe('app/MenuButtons', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <MenuButtons />
+        <>
+          <CurrentProfileUploadedInformationLoader />
+          <MenuButtons />
+        </>
       </Provider>
     );
 
-    const {
-      container,
-      getByTestId,
-      getByText,
-      queryByText,
-      findByText,
-    } = renderResult;
-    const getPublishButton = () => getByText(/^(Re-upload|Upload)$/);
-    const findPublishButton = () => findByText(/^(Re-upload|Upload)$/);
-    const getErrorButton = () => getByText('Error uploading');
-    const getCancelButton = () => getByText('Cancel Upload');
-    const getPanelForm = () =>
-      ensureExists(
-        container.querySelector('form'),
-        'Could not find the form in the panel'
-      );
-    const queryPreferenceCheckbox = () =>
-      queryByText('Include preference values');
-    const getPanel = () => getByTestId('MenuButtonsPublish-container');
     const clickAndRunTimers = where => {
       fireFullClick(where);
       jest.runAllTimers();
@@ -181,21 +139,76 @@ describe('app/MenuButtons', function() {
     return {
       ...store,
       ...renderResult,
-      getPanel,
-      findPublishButton,
-      getPublishButton,
-      getErrorButton,
-      getCancelButton,
-      getPanelForm,
-      queryPreferenceCheckbox,
       clickAndRunTimers,
-      resolveUpload,
-      rejectUpload,
       navigateToHash,
     };
   }
 
   describe('<Publish>', function() {
+    function mockUpload() {
+      // Create a promise with the resolve function outside of it.
+      let resolveUpload, rejectUpload;
+      const promise = new Promise((resolve, reject) => {
+        resolveUpload = resolve;
+        rejectUpload = reject;
+      });
+
+      promise.catch(() => {
+        // Node complains if we don't handle a promise/catch, and this one may reject
+        // before it's properly handled. Catch it here so that Node doesn't complain.
+        // This won't hide problems in our code because the app code "awaits" the
+        // result of startUpload, so any rejection will be handled there.
+      });
+
+      // Flow doesn't know uploadBinaryProfileData is a jest mock.
+      (uploadBinaryProfileData: any).mockImplementation(
+        (() => ({
+          abortUpload: () => {
+            // In the real implementation, we call xhr.abort, which in turn
+            // triggers an "abort" event on the XHR object, which in turn rejects
+            // the promise with the error UploadAbortedError. So we do just that
+            // here directly, to simulate this.
+            rejectUpload(new UploadAbortedError());
+          },
+          startUpload: () => promise,
+        }): typeof uploadBinaryProfileData)
+      );
+
+      return { resolveUpload, rejectUpload };
+    }
+
+    function setupForPublish(profile = createSimpleProfile().profile) {
+      const { resolveUpload, rejectUpload } = mockUpload();
+
+      const setupResult = setup(storeWithProfile(profile));
+
+      const getPublishButton = () => screen.getByText(/^(Re-upload|Upload)$/);
+      const findPublishButton = () => screen.findByText(/^(Re-upload|Upload)$/);
+      const getErrorButton = () => screen.getByText('Error uploading');
+      const getCancelButton = () => screen.getByText('Cancel Upload');
+      const getPanelForm = () =>
+        ensureExists(
+          document.querySelector('form'),
+          'Could not find the form in the panel'
+        );
+      const queryPreferenceCheckbox = () =>
+        screen.queryByText('Include preference values');
+      const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
+
+      return {
+        ...setupResult,
+        getPanel,
+        findPublishButton,
+        getPublishButton,
+        getErrorButton,
+        getCancelButton,
+        getPanelForm,
+        queryPreferenceCheckbox,
+        resolveUpload,
+        rejectUpload,
+      };
+    }
+
     beforeAll(function() {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
@@ -226,20 +239,24 @@ describe('app/MenuButtons', function() {
 
     it('matches the snapshot for the closed state', () => {
       const { profile } = createSimpleProfile();
-      const { container } = setup(profile);
+      const { container } = setupForPublish(profile);
       expect(container).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a nightly profile', () => {
       const { profile } = createSimpleProfile('nightly');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
+        profile
+      );
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', () => {
       const { profile } = createSimpleProfile('release');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
+        profile
+      );
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
@@ -252,7 +269,7 @@ describe('app/MenuButtons', function() {
         navigateToHash,
         getPublishButton,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       clickAndRunTimers(getPublishButton());
@@ -265,7 +282,7 @@ describe('app/MenuButtons', function() {
         getPublishButton,
         clickAndRunTimers,
         queryPreferenceCheckbox,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeTruthy();
     });
@@ -276,20 +293,19 @@ describe('app/MenuButtons', function() {
         getPublishButton,
         clickAndRunTimers,
         queryPreferenceCheckbox,
-      } = setup(profile);
+      } = setupForPublish(profile);
       clickAndRunTimers(getPublishButton());
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
 
     it('can publish and revert', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPublishButton,
         getPanelForm,
         clickAndRunTimers,
         resolveUpload,
         getState,
-      } = setup(profile);
+      } = setupForPublish();
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload('SOME_HASH');
@@ -307,7 +323,6 @@ describe('app/MenuButtons', function() {
     });
 
     it('can publish, cancel, and then publish again', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -315,7 +330,7 @@ describe('app/MenuButtons', function() {
         getCancelButton,
         getPanelForm,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish();
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
 
@@ -330,7 +345,6 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for an error', async () => {
-      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -338,7 +352,7 @@ describe('app/MenuButtons', function() {
         getPanelForm,
         rejectUpload,
         clickAndRunTimers,
-      } = setup(profile);
+      } = setupForPublish();
 
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
@@ -354,141 +368,272 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
   });
-});
 
-describe('<MetaInfoPanel>', function() {
-  async function setup(profile: Profile) {
-    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
-      // eslint-disable-next-line babel/no-invalid-this
-      return 'toLocaleString ' + this.toUTCString();
-    });
+  describe('<MetaInfoPanel>', function() {
+    async function setupForMetaInfoPanel(profile: Profile) {
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
 
-    const store = blankStore();
+      jest.useFakeTimers();
 
-    // Note that we dispatch this action directly instead of using viewProfile
-    // or loadProfile because we want to control tightly how symbolication is
-    // started in these tests.
-    await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
+      const store = blankStore();
 
-    return render(
-      <Provider store={store}>
-        <MetaInfoPanel />
-      </Provider>
-    );
-  }
+      // Note that we dispatch this action directly instead of using viewProfile
+      // or loadProfile because we want to control tightly how symbolication is
+      // started in these tests.
+      await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
 
-  it('matches the snapshot', async () => {
-    // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processGeckoProfile(createGeckoProfile());
-    profile.meta.configuration = {
-      features: ['js', 'threads'],
-      threads: ['GeckoMain', 'DOM Worker'],
-      capacity: Math.pow(2, 14),
-      duration: 20,
-    };
+      const setupResult = setup(store);
+      const { clickAndRunTimers } = setupResult;
 
-    const { container } = await setup(profile);
-    // This component renders a fragment, so we look at the full container so
-    // that we get all children.
-    expect(container).toMatchSnapshot();
-  });
-
-  it('with no statistics object should not make the app crash', async () => {
-    // Using gecko profile because it has metadata and profilerOverhead data in it.
-    const profile = processGeckoProfile(createGeckoProfile());
-    // We are removing statistics objects from all overhead objects to test
-    // the robustness of our handling code.
-    if (profile.profilerOverhead) {
-      for (const overhead of profile.profilerOverhead) {
-        delete overhead.statistics;
+      function displayMetaInfoPanel() {
+        clickAndRunTimers(screen.getByText(/^(Local|Uploaded) Profile$/));
       }
+
+      function getMetaInfoPanel() {
+        return document.querySelector('.metaInfoPanel');
+      }
+
+      return {
+        ...setupResult,
+        getMetaInfoPanel,
+        displayMetaInfoPanel,
+      };
     }
 
-    const { container } = await setup(profile);
-    // This component renders a fragment, so we look at the full container so
-    // that we get all children.
-    expect(container).toMatchSnapshot();
-  });
+    it('matches the snapshot', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      profile.meta.configuration = {
+        features: ['js', 'threads'],
+        threads: ['GeckoMain', 'DOM Worker'],
+        capacity: Math.pow(2, 14),
+        duration: 20,
+      };
 
-  describe('symbolication', function() {
-    type SymbolicationTestConfig = $ReadOnly<{|
-      symbolicated: boolean,
-    |}>;
-
-    function setupSymbolicationTest(config: SymbolicationTestConfig) {
-      const { profile } = getProfileFromTextSamples('A');
-      profile.meta.symbolicated = config.symbolicated;
-
-      return setup(profile);
-    }
-
-    it('handles successfully symbolicated profiles', async () => {
-      await setupSymbolicationTest({ symbolicated: true });
-
-      expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
-      fireFullClick(screen.getByText('Re-symbolicate profile'));
-
-      expect(symbolicateProfile).toHaveBeenCalled();
-      expect(
-        screen.getByText('Attempting to re-symbolicate profile')
-      ).toBeTruthy();
-      // No symbolicate button is available.
-      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
-
-      // After a while, we get a result
-      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+      expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
-    it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
-      await setupSymbolicationTest({ symbolicated: false });
+    it('with no statistics object should not make the app crash', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      // We are removing statistics objects from all overhead objects to test
+      // the robustness of our handling code.
+      if (profile.profilerOverhead) {
+        for (const overhead of profile.profilerOverhead) {
+          delete overhead.statistics;
+        }
+      }
 
-      expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
-      fireFullClick(screen.getByText('Symbolicate profile'));
-      expect(symbolicateProfile).toHaveBeenCalled();
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+      expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
 
-      expect(screen.getByText('Currently symbolicating profile')).toBeTruthy();
-      // No symbolicate button is available.
-      expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-      expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+    describe('deleting a profile', () => {
+      const FAKE_HASH = 'FAKE_HASH';
+      const FAKE_PROFILE_DATA = {
+        profileToken: FAKE_HASH,
+        jwtToken: null,
+        publishedDate: new Date('4 Jul 2020 13:00 GMT'),
+        name: 'PROFILE',
+        preset: null,
+        originHostname: 'https://mozilla.org',
+        meta: {
+          product: 'Firefox',
+          platform: 'Macintosh',
+          toolkit: 'cocoa',
+          misc: 'rv:62.0',
+          oscpu: 'Intel Mac OS X 10.12',
+        },
+        urlPath: '/public/MACOSX/marker-chart/',
+        publishedRange: { start: 2000, end: 40000 },
+      };
 
-      // After a while, we get a result
-      expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-      expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      async function addUploadedProfileInformation(
+        uploadedProfileInformationOverrides
+      ) {
+        const uploadedProfileInformation = {
+          ...FAKE_PROFILE_DATA,
+          ...uploadedProfileInformationOverrides,
+        };
+        await persistUploadedProfileInformationToDb(uploadedProfileInformation);
+      }
+
+      async function setupForDeletion() {
+        const { profile } = createSimpleProfile();
+        const setupResult = await setupForMetaInfoPanel(profile);
+        const { navigateToHash, displayMetaInfoPanel } = setupResult;
+        navigateToHash(FAKE_HASH);
+        displayMetaInfoPanel();
+
+        return setupResult;
+      }
+
+      test('does not display the delete button if the profile is public but without uploaded data', async () => {
+        const { getMetaInfoPanel } = await setupForDeletion();
+        // We wait a bit using the "find" flavor of the queries because this is
+        // reached asynchronously.
+        await expect(screen.findByText('Uploaded:')).rejects.toThrow();
+        expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('displays the delete button if we have the uploaded data but no JWT token', async () => {
+        await addUploadedProfileInformation();
+        const { getMetaInfoPanel } = await setupForDeletion();
+        expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeDisabled();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('displays the delete button if we have the uploaded data and some JWT token', async () => {
+        await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
+        const { getMetaInfoPanel } = await setupForDeletion();
+        expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeEnabled();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('clicking on the button shows the confirmation', async () => {
+        await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
+        const { getMetaInfoPanel } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+        expect(screen.getByText(/are you sure/i)).toBeEnabled();
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
+        expect(screen.getByText('Delete')).toBeInTheDocument();
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+      });
+
+      test('clicking on the "cancel" button will move back to the profile information', async () => {
+        await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
+        await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+
+        // Canceling should move back to the previous
+        fireFullClick(screen.getByText('Cancel'));
+
+        // We're back at the profile information panel.
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+      });
+
+      test('dismissing the panel will move back to the profile information when opened again', async () => {
+        await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
+        const { displayMetaInfoPanel } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+
+        // Dismissing by clicking elsewhere
+        fireFullClick(ensureExists(document.body));
+        jest.runAllTimers();
+
+        // We're back at the profile information panel if we open the panel again.
+        displayMetaInfoPanel();
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+      });
+
+      test('confirming the delete should delete on the server and in the db', async () => {
+        await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
+        const {
+          getMetaInfoPanel,
+          displayMetaInfoPanel,
+        } = await setupForDeletion();
+        fireFullClick(await screen.findByText('Delete'));
+        fireFullClick(screen.getByText('Delete'));
+        await screen.findByText(/successfully/i);
+        // This has been deleted from the server.
+        expect(deleteProfileOnServer).toHaveBeenCalledWith({
+          profileToken: FAKE_HASH,
+          jwtToken: 'FAKE_TOKEN',
+        });
+        // This has been deleted from the DB.
+        expect(await retrieveUploadedProfileInformationFromDb(FAKE_HASH)).toBe(
+          null
+        );
+        expect(getMetaInfoPanel()).toMatchSnapshot();
+
+        // Dismissing the metainfo panel and displaying it again should show the
+        // initial panel now.
+        fireFullClick(ensureExists(document.body));
+        jest.runAllTimers();
+        displayMetaInfoPanel();
+        expect(screen.getByText('Profile Information')).toBeInTheDocument();
+        expect(screen.queryByText('Uploaded:')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('symbolication', function() {
+      type SymbolicationTestConfig = $ReadOnly<{|
+        symbolicated: boolean,
+      |}>;
+
+      async function setupSymbolicationTest(config: SymbolicationTestConfig) {
+        const { profile } = getProfileFromTextSamples('A');
+        profile.meta.symbolicated = config.symbolicated;
+
+        const setupResult = await setupForMetaInfoPanel(profile);
+        setupResult.displayMetaInfoPanel();
+        return setupResult;
+      }
+
+      it('handles successfully symbolicated profiles', async () => {
+        await setupSymbolicationTest({ symbolicated: true });
+
+        expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
+        fireFullClick(screen.getByText('Re-symbolicate profile'));
+
+        expect(symbolicateProfile).toHaveBeenCalled();
+        expect(
+          screen.getByText('Attempting to re-symbolicate profile')
+        ).toBeTruthy();
+        // No symbolicate button is available.
+        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+        // After a while, we get a result
+        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      });
+
+      it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
+        await setupSymbolicationTest({ symbolicated: false });
+
+        expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
+        fireFullClick(screen.getByText('Symbolicate profile'));
+        expect(symbolicateProfile).toHaveBeenCalled();
+
+        expect(
+          screen.getByText('Currently symbolicating profile')
+        ).toBeTruthy();
+        // No symbolicate button is available.
+        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
+        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+
+        // After a while, we get a result
+        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
+        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+      });
     });
   });
 
   describe('Full View Button', function() {
-    function setup() {
-      const { profile } = getProfileFromTextSamples('A');
-      const store = storeWithProfile(profile);
-
-      store.dispatch(
-        updateUrlState(
-          stateFromLocation({
-            pathname: '/from-addon',
-            search: '',
-            hash: '',
-          })
-        )
-      );
-
-      const renderResults = render(
-        <Provider store={store}>
-          <MenuButtons />
-        </Provider>
-      );
-
-      return {
-        profile,
-        ...store,
-        ...renderResults,
-      };
+    function setupForFullViewButton() {
+      return setup(storeWithProfile(createSimpleProfile().profile));
     }
 
     it('is not present when we are in the full view already', () => {
-      const { getState, queryByText } = setup();
+      const { getState, queryByText } = setupForFullViewButton();
 
       // Make sure that we are in the full view and the button is not there.
       expect(getTimelineTrackOrganization(getState()).type).toBe('full');
@@ -496,7 +641,12 @@ describe('<MetaInfoPanel>', function() {
     });
 
     it('is present when we are in the active tab view', () => {
-      const { dispatch, getState, getByText, container } = setup();
+      const {
+        dispatch,
+        getState,
+        getByText,
+        container,
+      } = setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({
@@ -512,7 +662,12 @@ describe('<MetaInfoPanel>', function() {
     });
 
     it('switches to full view when clicked', () => {
-      const { dispatch, getState, getByText, queryByText } = setup();
+      const {
+        dispatch,
+        getState,
+        getByText,
+        queryByText,
+      } = setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({

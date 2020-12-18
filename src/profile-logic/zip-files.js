@@ -238,3 +238,31 @@ export function procureInitialInterestingExpandedNodes(
 
   return expansions;
 }
+
+// This function extracts a profile name from the path of a file inside a zip.
+export function getProfileNameFromZipPath(path: string): string {
+  // This regular expression keeps only the 2 last parts of a path.
+  // Here are some examples:
+  //   profile1.json -> profile1.json
+  //   directory/profile1.json -> directory/profile1.json
+  //   very/deep/directory/structure/profile1.json -> structure/profile1.json
+  //
+  // The logic for this regexp is that we match "not slash characters"
+  // between slash characters. Also there may be no directory path so the
+  // first element is optional.
+  //
+  //                           --- a non capturing group
+  //                           |  --- several "no slash" characters
+  //                           |  |   --- 1 "slash" character
+  //                           |  |   |  --- this first group is optional
+  //                           |  |   |  | --- several "no slash" characters again
+  //                           |  |   |  | |   --- all this at the end of the string
+  //                           v  v   v  v v   v
+  const directoryAndPathRe = /(?:[^/]+\/)?[^/]+$/;
+  const matchResult = directoryAndPathRe.exec(path);
+  if (matchResult !== null) {
+    return matchResult[0];
+  }
+
+  return '';
+}

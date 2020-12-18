@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 
-import { deleteProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
+import { deleteUploadedProfileInformationFromDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import { deleteProfileOnServer } from 'firefox-profiler/profile-logic/profile-store';
 
 import './ProfileDeleteButton.css';
@@ -114,7 +114,7 @@ type PanelState = {|
   +error: Error | null,
 |};
 
-class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
+export class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
   state = { error: null, status: 'idle' };
 
   onConfirmDeletion = async () => {
@@ -128,7 +128,7 @@ class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
         );
       }
       await deleteProfileOnServer({ profileToken, jwtToken });
-      await deleteProfileData(profileToken);
+      await deleteUploadedProfileInformationFromDb(profileToken);
       this.setState({ status: 'deleted' });
       this.props.onProfileDeleted();
     } catch (e) {
@@ -172,11 +172,7 @@ class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
     const { status } = this.state;
 
     if (status === 'deleted') {
-      return (
-        <p className="profileDeleteButtonSuccess">
-          Successfully deleted uploaded data.
-        </p>
-      );
+      return <ProfileDeleteSuccess />;
     }
 
     return (
@@ -206,4 +202,12 @@ class ProfileDeletePanel extends PureComponent<PanelProps, PanelState> {
       </div>
     );
   }
+}
+
+export function ProfileDeleteSuccess(_props: {||}) {
+  return (
+    <p className="profileDeleteButtonSuccess">
+      Successfully deleted uploaded data.
+    </p>
+  );
 }

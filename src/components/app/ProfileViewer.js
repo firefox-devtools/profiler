@@ -10,6 +10,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { DetailsContainer } from './DetailsContainer';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
+import { CurrentProfileUploadedInformationLoader } from './CurrentProfileUploadedInformationLoader';
 import { WindowTitle } from 'firefox-profiler/components/shared/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
@@ -141,6 +142,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
           <DebugWarning />
+          <CurrentProfileUploadedInformationLoader />
         </div>
       </KeyboardShortcut>
     );

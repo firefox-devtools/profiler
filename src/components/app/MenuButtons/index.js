@@ -16,7 +16,10 @@ import {
   getDataSource,
   getTimelineTrackOrganization,
 } from 'firefox-profiler/selectors/url-state';
-import { getIsNewlyPublished } from 'firefox-profiler/selectors/app';
+import {
+  getIsNewlyPublished,
+  getCurrentProfileUploadedInformation,
+} from 'firefox-profiler/selectors/app';
 
 /* Note: the order of import is important, from most general to most specific,
  * so that the CSS rules are in the correct order. */
@@ -24,8 +27,16 @@ import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPa
 import { MetaInfoPanel } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
 import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
 import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
+import {
+  ProfileDeletePanel,
+  ProfileDeleteSuccess,
+} from 'firefox-profiler/components/app/ProfileDeleteButton';
 import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
-import { dismissNewlyPublished } from 'firefox-profiler/actions/app';
+import {
+  dismissNewlyPublished,
+  profileRemotelyDeleted,
+} from 'firefox-profiler/actions/app';
+
 import {
   getAbortFunction,
   getUploadPhase,
@@ -39,6 +50,7 @@ import type {
   DataSource,
   UploadPhase,
   TimelineTrackOrganization,
+  UploadedProfileInformation,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -59,17 +71,24 @@ type StateProps = {|
   +hasPrePublishedState: boolean,
   +abortFunction: () => mixed,
   +timelineTrackOrganization: TimelineTrackOrganization,
+  +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
   +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
+  +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type State = $ReadOnly<{|
+  metaInfoPanelState: 'initial' | 'delete-confirmation' | 'profile-deleted',
+|}>;
 
-class MenuButtonsImpl extends React.PureComponent<Props> {
+class MenuButtonsImpl extends React.PureComponent<Props, State> {
+  state = { metaInfoPanelState: 'initial' };
+
   componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
@@ -84,13 +103,122 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
       case 'from-addon':
       case 'unpublished':
       case 'from-file':
+      case 'local':
         return 'local';
       case 'none':
       case 'uploaded-recordings':
-      case 'local':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
       default:
         throw assertExhaustiveCheck(dataSource);
+    }
+  }
+
+  _deleteThisProfileOnServer = () => {
+    this.setState({
+      metaInfoPanelState: 'delete-confirmation',
+    });
+  };
+
+  _onProfileDeleted = () => {
+    this.props.profileRemotelyDeleted();
+    this.setState({
+      metaInfoPanelState: 'profile-deleted',
+    });
+  };
+
+  _resetMetaInfoState = () => {
+    this.setState({
+      metaInfoPanelState: 'initial',
+    });
+  };
+
+  _renderUploadedProfileActions(
+    currentProfileUploadedInformation: UploadedProfileInformation
+  ) {
+    return (
+      <div className="profileInfoUploadedActions">
+        <div className="profileInfoUploadedDate">
+          <span className="profileInfoUploadedLabel">Uploaded:</span>
+          {_formatDate(currentProfileUploadedInformation.publishedDate)}
+        </div>
+        <div className="profileInfoUploadedActionsButtons">
+          <button
+            type="button"
+            className="photon-button photon-button-default photon-button-micro"
+            onClick={this._deleteThisProfileOnServer}
+            title={
+              currentProfileUploadedInformation.jwtToken === null
+                ? 'This profile cannot be deleted because we lack the authorization information.'
+                : null
+            }
+            disabled={currentProfileUploadedInformation.jwtToken === null}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  _renderMetaInfoPanel() {
+    const { currentProfileUploadedInformation } = this.props;
+    const { metaInfoPanelState } = this.state;
+    switch (metaInfoPanelState) {
+      case 'initial': {
+        return (
+          <>
+            <h2 className="metaInfoSubTitle">Profile Information</h2>
+            {currentProfileUploadedInformation
+              ? this._renderUploadedProfileActions(
+                  currentProfileUploadedInformation
+                )
+              : null}
+            <MetaInfoPanel />
+          </>
+        );
+      }
+
+      case 'delete-confirmation': {
+        if (!currentProfileUploadedInformation) {
+          throw new Error(
+            `We're in the state "delete-confirmation" but there's no stored data for this profile, this should not happen.`
+          );
+        }
+
+        const {
+          name,
+          profileToken,
+          jwtToken,
+        } = currentProfileUploadedInformation;
+
+        if (!jwtToken) {
+          throw new Error(
+            `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
+          );
+        }
+
+        const slicedProfileToken = profileToken.slice(0, 6);
+        const profileName = name ? name : `Profile #${slicedProfileToken}`;
+        return (
+          <ProfileDeletePanel
+            profileName={profileName}
+            profileToken={profileToken}
+            jwtToken={jwtToken}
+            onProfileDeleted={this._onProfileDeleted}
+            onProfileDeleteCanceled={this._resetMetaInfoState}
+          />
+        );
+      }
+
+      case 'profile-deleted':
+        // Note that <ProfileDeletePanel> can also render <ProfileDeleteSuccess>
+        // in some situations. However it's not suitable for this case, because
+        // we still have to pass jwtToken / profileToken, and we don't have
+        // these values anymore when we're in this state.
+        return <ProfileDeleteSuccess />;
+
+      default:
+        throw assertExhaustiveCheck(metaInfoPanelState);
     }
   }
 
@@ -103,8 +231,9 @@ class MenuButtonsImpl extends React.PureComponent<Props> {
         label={
           uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
         }
+        onPanelClose={this._resetMetaInfoState}
         panelClassName="metaInfoPanel"
-        panelContent={<MetaInfoPanel />}
+        panelContent={this._renderMetaInfoPanel()}
       />
     );
   }
@@ -240,12 +369,28 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       hasPrePublishedState: getHasPrePublishedState(state),
       abortFunction: getAbortFunction(state),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
+      currentProfileUploadedInformation: getCurrentProfileUploadedInformation(
+        state
+      ),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
       changeTimelineTrackOrganization,
+      profileRemotelyDeleted,
     },
     component: MenuButtonsImpl,
   }
 );
+
+function _formatDate(date: Date): string {
+  const timestampDate = date.toLocaleString(undefined, {
+    month: 'short',
+    year: 'numeric',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+  return timestampDate;
+}

@@ -9,6 +9,7 @@ import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
+import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 
 import type {
   ThreadIndex,
@@ -276,10 +277,7 @@ export const getFileNameInZipFilePath: Selector<string | null> = createSelector(
   getPathInZipFileFromUrl,
   pathInZipFile => {
     if (pathInZipFile) {
-      const matchResult = pathInZipFile.match(/(?:[^/]+\/)?[^/]+$/);
-      if (matchResult !== null) {
-        return matchResult[0];
-      }
+      return getProfileNameFromZipPath(pathInZipFile);
     }
     return null;
   }
@@ -306,6 +304,9 @@ export const getProfileNameWithDefault: Selector<string> = createSelector(
     }
 
     // Finally return a generic string describing the type of profile.
+    if (formattedMetaInfoString === '') {
+      return 'Untitled profile';
+    }
     return formattedMetaInfoString;
   }
 );
