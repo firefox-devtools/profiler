@@ -1203,24 +1203,32 @@ class ByteFormatter implements ValueFormatter {
 }
 
 function zeroPad(s: string, width: number) {
-  return new Array(Math.max(width - s.length, 0) + 1).join('0') + s
+  return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
 
 function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
-  if (!map.has(k)) map.set(k, fallback(k))
-  return map.get(k)!
+  let value = map.get(k);
+  if (value === undefined) {
+    value = fallback(k);
+    map.set(k, value);
+  }
+  return value;
 }
 
 function getOrElse<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
-  if (!map.has(k)) return fallback(k)
-  return map.get(k)!
+  const value = map.get(k);
+  if (value === undefined) {
+    return fallback(k);
+  }
+  return value;
 }
 
 function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
-  if (!map.has(k)) {
-    throw new Error(`Expected key ${k}`)
+  const value = map.get(k);
+  if (value === undefined) {
+    throw new Error(`Expected key ${String(k)}`);
   }
-  return map.get(k)!
+  return value;
 }
 
 async function extractDirectoryTree(entry: FileSystemDirectoryEntry): Promise<TraceDirectoryTree> {
@@ -1253,9 +1261,12 @@ async function extractDirectoryTree(entry: FileSystemDirectoryEntry): Promise<Tr
 
 function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
   function comparator(a: T, b: T) {
-    const keyA = key(a)
-    const keyB = key(b)
-    return keyA < keyB ? -1 : keyA > keyB ? 1 : 0
+    const keyA = key(a);
+    const keyB = key(b);
+    // Disabled eslint rule as this is imported from speedscope.
+
+    // $FlowFixMe - Cannot compare  number to string
+    return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
   }
   ts.sort(comparator);
 }
