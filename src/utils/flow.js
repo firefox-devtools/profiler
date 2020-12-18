@@ -189,3 +189,10 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
 export function getFirstItemFromSet<T>(set: Set<T>): T | void {
   return set.values().next().value;
 }
+
+/**
+ * Returns the first item from Map in a type friendly manner.
+ */
+export function getFirstItemFromMap<K, T>(map: Map<K, T>): T | void {
+  return map.values().next().value;
+}
