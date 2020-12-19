@@ -34,8 +34,15 @@ import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
+import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 export type Reducer<T> = (T | void, Action) => T;
+
+// This type is defined in uploaded-profiles-db.js because it is very tied to
+// the data stored in our local IndexedDB, and we don't want to change it
+// lightly, without changing the DB code.
+// We reexport this type here mostly for easier access.
+export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
@@ -180,6 +187,7 @@ export type AppState = {|
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
+  +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 export type UploadPhase =

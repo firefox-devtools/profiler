@@ -17,7 +17,11 @@ import { ensureExists } from 'firefox-profiler/utils/flow';
 import type { DB as Database } from 'idb';
 import type { StartEndRange } from 'firefox-profiler/types';
 
-export type ProfileData = {|
+// This type is closely tied to the IndexedDB operation. Indeed it represents
+// the data we store and retrieve in the local DB. That's especially why it's
+// defined in this file, close to the DB operations. Indeed we don't want that
+// this type evolves without implementing a migration step for the stored data.
+export type UploadedProfileInformation = {|
   +profileToken: string, // This is the primary key.
   +jwtToken: string | null,
   +publishedDate: Date, // This key is indexed as well, to provide automatic sorting.
@@ -138,17 +142,19 @@ async function open(): Promise<Database> {
  * so this also updates any profile data already there with the same
  * profileToken information.
  */
-export async function storeProfileData(
-  profileData: ProfileData
+export async function persistUploadedProfileInformationToDb(
+  uploadedProfileInformation: UploadedProfileInformation
 ): Promise<void> {
   const db = await open();
-  await db.put(OBJECTSTORE_NAME, profileData);
+  await db.put(OBJECTSTORE_NAME, uploadedProfileInformation);
 }
 
 /**
  * This returns the list of all the stored data.
  */
-export async function listAllProfileData(): Promise<ProfileData[]> {
+export async function listAllUploadedProfileInformationFromDb(): Promise<
+  UploadedProfileInformation[]
+> {
   const db = await open();
   return db.getAllFromIndex(OBJECTSTORE_NAME, 'publishedDate');
 }
@@ -157,18 +163,26 @@ export async function listAllProfileData(): Promise<ProfileData[]> {
  * This returns the profile data for a specific stored token, or undefined
  * otherwise.
  */
-export async function retrieveProfileData(
+export async function retrieveUploadedProfileInformationFromDb(
   profileToken: string
-): Promise<ProfileData | void> {
+): Promise<UploadedProfileInformation | null> {
+  if (!profileToken) {
+    // If this is the empty string, let's skip the lookup.
+    return null;
+  }
+
   const db = await open();
-  return db.get(OBJECTSTORE_NAME, profileToken);
+  const result = await db.get(OBJECTSTORE_NAME, profileToken);
+  return result || null;
 }
 
 /**
  * This deletes the profile data stored with this token. This is a no-op if this
  * token isn't in the database.
  */
-export async function deleteProfileData(profileToken: string): Promise<void> {
+export async function deleteUploadedProfileInformationFromDb(
+  profileToken: string
+): Promise<void> {
   const db = await open();
   return db.delete(OBJECTSTORE_NAME, profileToken);
 }
@@ -177,11 +191,13 @@ export async function deleteProfileData(profileToken: string): Promise<void> {
  * This changes the profile name of a stored profile data. This is a no-op if
  * this token isn't in the database.
  */
-export async function changeStoredProfileName(
+export async function changeStoredProfileNameInDb(
   profileToken: string,
   profileName: string
 ): Promise<void> {
-  const storedProfile = await retrieveProfileData(profileToken);
+  const storedProfile = await retrieveUploadedProfileInformationFromDb(
+    profileToken
+  );
   if (storedProfile && storedProfile.name !== profileName) {
     // We need to update the name, but also the urlPath. For this we'll convert
     // the old one to a state, and convert it back to a url string, so that
@@ -196,11 +212,11 @@ export async function changeStoredProfileName(
     );
     const newUrlPath = urlFromState({ ...oldState, profileName });
 
-    const newProfileData = {
+    const newUploadedProfileInformation = {
       ...storedProfile,
       name: profileName,
       urlPath: newUrlPath,
     };
-    await storeProfileData(newProfileData);
+    await persistUploadedProfileInformationToDb(newUploadedProfileInformation);
   }
 }

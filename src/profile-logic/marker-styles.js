@@ -147,6 +147,15 @@ const markerStyles: { +[styleName: string]: MarkerStyle } = {
     borderRight: colors.RED_50,
     squareCorners: true,
   },
+  // BHR markers are displayed in the timeline only if jank markers are
+  // unavailable. Let's style them like Jank markers.
+  'BHR-detected hang': {
+    ...defaultStyle,
+    background: 'hsl(347, 100%, 60%)',
+    borderLeft: colors.RED_50,
+    borderRight: colors.RED_50,
+    squareCorners: true,
+  },
   // Memory:
   GCMajor: {
     ...gcStyle,

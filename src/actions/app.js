@@ -40,6 +40,7 @@ import type {
   Action,
   ThunkAction,
   UrlState,
+  UploadedProfileInformation,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
@@ -294,4 +295,22 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
 
     return true;
   };
+}
+
+/**
+ * This caches the profile data in the local state for synchronous access.
+ */
+export function setCurrentProfileUploadedInformation(
+  uploadedProfileInformation: UploadedProfileInformation | null
+): Action {
+  return {
+    type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
+    uploadedProfileInformation,
+  };
+}
+
+export function profileRemotelyDeleted(): Action {
+  // Ideally we should store the current profile data in a local indexeddb, and
+  // set the URL to /local/<indexeddb-key>.
+  return { type: 'PROFILE_REMOTELY_DELETED' };
 }
