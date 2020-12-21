@@ -43,185 +43,13 @@ import type {
   Address,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
+  Tid,
+  Pid,
 } from 'firefox-profiler/types';
 import { getEmptyProfile, getEmptyThread } from '../data-structures';
 
 // This file contains methods to import data from OS X Instruments.app
 // https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/InstrumentsUserGuide/index.html
-
-// TODO - importFromInstrumentsDeepCopy
-// function parseTSV<T>(contents: string): T[] {
-//   const lines = contents.split('\n').map(l => l.split('\t'));
-
-//   const headerLine = lines.shift();
-//   if (!headerLine) {
-//     return [];
-//   }
-
-//   const indexToField = new Map<number, string>();
-//   for (let i = 0; i < headerLine.length; i++) {
-//     indexToField.set(i, headerLine[i]);
-//   }
-
-//   const ret: T[] = [];
-//   for (const line of lines) {
-//     const row = {};
-//     for (let i = 0; i < line.length; i++) {
-//       row[ensureExists(indexToField.get(i))] = line[i];
-//     }
-//     ret.push(coerce<any, T>(row));
-//   }
-//   return ret;
-// }
-//
-// type PastedTimeProfileRow = {
-//   Weight?: string,
-//   'Source Path'?: string,
-//   'Symbol Name'?: string,
-// };
-//
-// type PastedAllocationsProfileRow = {
-//   'Bytes Used'?: string,
-//   'Source Path'?: string,
-//   'Symbol Name'?: string,
-// };
-
-type FrameInfo = {
-  key: string | number,
-
-  // Name of the frame. May be a method name, e.g.
-  // "ActiveRecord##to_hash"
-  name: string,
-
-  // File path of the code corresponding to this
-  // call stack frame.
-  file?: string,
-
-  // Line in the given file where this frame occurs
-  line?: number,
-
-  // Column in the file
-  col?: number,
-};
-
-// TODO - importFromInstrumentsDeepCopy
-// interface FrameInfoWithWeight extends FrameInfo {
-//   endValue: number;
-// }
-
-// TODO - importFromInstrumentsDeepCopy
-// function getWeight(deepCopyRow: any): number {
-//   if ('Bytes Used' in deepCopyRow) {
-//     const bytesUsedString = deepCopyRow['Bytes Used'];
-//     const parts = /\s*(\d+(?:[.]\d+)?) (\w+)\s+(?:\d+(?:[.]\d+))%/.exec(
-//       bytesUsedString
-//     );
-//     if (!parts) {
-//       return 0;
-//     }
-//     const value = parseInt(parts[1], 10);
-//     const units = parts[2];
-
-//     switch (units) {
-//       case 'Bytes':
-//         return value;
-//       case 'KB':
-//         return 1024 * value;
-//       case 'MB':
-//         return 1024 * 1024 * value;
-//       case 'GB':
-//         return 1024 * 1024 * 1024 * value;
-//       default:
-//         throw new Error(`Unrecognized units ${units}`);
-//     }
-//   }
-
-//   if ('Weight' in deepCopyRow || 'Running Time' in deepCopyRow) {
-//     const weightString = deepCopyRow.Weight || deepCopyRow['Running Time'];
-//     const parts = /\s*(\d+(?:[.]\d+)?) ?(\w+)\s+(?:\d+(?:[.]\d+))%/.exec(
-//       weightString
-//     );
-//     if (!parts) {
-//       return 0;
-//     }
-//     const value = parseInt(parts[1], 10);
-//     const units = parts[2];
-
-//     switch (units) {
-//       case 'ms':
-//         return value;
-//       case 's':
-//         return 1000 * value;
-//       case 'min':
-//         return 1000 * value;
-//       default:
-//         throw new Error(`Unrecognized units ${units}`);
-//     }
-//   }
-
-//   return -1;
-// }
-
-// TODO - This is currently not migrated.
-// Import from a deep copy made of a profile
-// export function importFromInstrumentsDeepCopy(contents: string): Profile {
-//   const profile = new CallTreeProfileBuilder();
-//   const rows = parseTSV<PastedTimeProfileRow | PastedAllocationsProfileRow>(
-//     contents
-//   );
-
-//   const stack: FrameInfoWithWeight[] = [];
-//   let cumulativeValue: number = 0;
-
-//   for (const row of rows) {
-//     const symbolName = row['Symbol Name'];
-//     if (!symbolName) {
-//       continue;
-//     }
-//     const trimmedSymbolName = symbolName.trim();
-//     const stackDepth = symbolName.length - trimmedSymbolName.length;
-
-//     if (stack.length - stackDepth < 0) {
-//       throw new Error('Invalid format');
-//     }
-
-//     const framesToLeave: FrameInfoWithWeight[] = [];
-
-//     while (stackDepth < stack.length) {
-//       const stackTop = ensureExists(stack.pop());
-//       framesToLeave.push(stackTop);
-//     }
-
-//     for (const frameToLeave of framesToLeave) {
-//       cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue);
-//       profile.leaveFrame(frameToLeave, cumulativeValue);
-//     }
-
-//     const newFrameInfo: FrameInfoWithWeight = {
-//       key: `${row['Source Path'] || ''}:${trimmedSymbolName}`,
-//       name: trimmedSymbolName,
-//       file: row['Source Path'],
-//       endValue: cumulativeValue + getWeight(row),
-//     };
-
-//     profile.enterFrame(newFrameInfo, cumulativeValue);
-//     stack.push(newFrameInfo);
-//   }
-
-//   while (stack.length > 0) {
-//     const frameToLeave = ensureExists(stack.pop());
-//     cumulativeValue = Math.max(cumulativeValue, frameToLeave.endValue);
-//     profile.leaveFrame(frameToLeave, cumulativeValue);
-//   }
-
-//   if ('Bytes Used' in rows[0]) {
-//     profile.setValueFormatter(new ByteFormatter());
-//   } else if ('Weight' in rows[0] || 'Running Time' in rows[0]) {
-//     profile.setValueFormatter(new TimeFormatter('milliseconds'));
-//   }
-
-//   return profile.build();
-// }
 
 interface TraceDirectoryTree {
   name: string;
@@ -299,10 +127,13 @@ class BinReader {
   }
 }
 
+type IndexIntoSomeThreadStructure = number;
+type IndexIntoArrays = number;
+
 interface Sample {
   timestamp: number;
-  threadID: number;
-  backtraceID: number;
+  threadId: IndexIntoSomeThreadStructure;
+  backtraceId: IndexIntoArrays;
 }
 
 async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
@@ -337,11 +168,14 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
         break;
       }
 
-      const threadID = bulkstore.readUint32();
+      // TODO(Greg) - I think this is wrong. In the example in the test this comes out
+      // as the value 4. I suspect we actually need an index into the threadSerialNumbers.
+      // In the example code, this value would be 0x00, which is hard to deduce.
+      const threadId = bulkstore.readUint32();
 
       bulkstore.skip(bytesPerEntry - 6 - 4 - 4);
-      const backtraceID = bulkstore.readUint32();
-      samples.push({ timestamp, threadID, backtraceID });
+      const backtraceId = bulkstore.readUint32();
+      samples.push({ timestamp, threadId, backtraceId });
     }
     return samples;
   }
@@ -414,24 +248,11 @@ type SymbolInfo = {|
   addressToLine: Map<Address, number>,
 |};
 
-type FormTemplateRunData = {|
-  number: number,
-  thread: Thread,
-  addressToFrameIndex: Map<Address, IndexIntoFrameTable>,
-|};
+type SymbolsByPid = Map<Pid, { symbols: SymbolInfo[] }>;
 
-type FormTemplateData = {|
-  version: number,
-  selectedRunNumber: number,
-  instrument: string,
-  runs: FormTemplateRunData[],
-|};
-
-type SymbolsByPid = Map<number, { symbols: SymbolInfo[] }>;
-
-async function readFormTemplate(
+async function convertInstrumentsProfile(
   tree: TraceDirectoryTree
-): Promise<FormTemplateData> {
+): Promise<Profile> {
   const formTemplate = getOrThrow(tree.files, 'form.template');
   const formTemplateData = await formTemplate.async('uint8array');
   const archive = readInstrumentsKeyedArchive(formTemplateData);
@@ -449,90 +270,255 @@ async function readFormTemplate(
   }
   const allRunData = archive['com.apple.xray.run.data'];
 
-  const runs: FormTemplateRunData[] = [];
+  const profile = getEmptyProfile();
+  const otherCategory = profile.meta.categories.findIndex(
+    category => category.name === 'Other'
+  );
+  if (otherCategory === -1) {
+    throw new Error('Could not find the Other category.');
+  }
+  const otherSubCategory = profile.meta.categories[
+    otherCategory
+  ].subcategories.indexOf('Other');
+  if (otherSubCategory === -1) {
+    throw new Error('Could not find the Other subcategory.');
+  }
+
   for (const runNumber of allRunData.runNumbers) {
     const runData = getOrThrow<number, Map<any, any>>(
       allRunData.runData,
       runNumber
     );
 
-    const symbolsByPid: SymbolsByPid | void = runData.get('symbolsByPid');
-    const symbolToFuncIndex = new Map<string, IndexIntoFuncTable>();
-    // Build a frame map if the symbols are there.
-    const addressToFrameIndex = new Map<Address, IndexIntoFrameTable>();
-    const thread = getEmptyThread();
-    const { frameTable, stringTable, funcTable } = thread;
+    const core = getCoreDirForRun(tree, runNumber);
+    const samples = await getRawSampleList(core);
+    const arrays = await getIntegerArrays(samples, core);
 
-    // eslint-disable-next-line no-inner-declarations
-    function getFuncIndex(
-      sourcePath: string | null,
-      symbolName: string | null,
-      address: Address
-    ): IndexIntoFuncTable {
-      if (sourcePath === null) {
-        sourcePath = '';
-      }
-      if (symbolName === null) {
-        symbolName = `0x${zeroPad(address.toString(16), 16)}`;
-      }
-      let funcIndex = symbolToFuncIndex.get(`${sourcePath}:${symbolName}`);
+    // This is easier to type as an Object.
+    const runDataObj: RunData = mapToObject(
+      runData,
+      // Keep the following as Map types:
+      new Set([
+        'symbolsByPid',
+        'mach_time_info',
+        'threadsByTID',
+        'threadSerialNumbers',
+      ])
+    );
 
-      if (funcIndex === undefined) {
-        funcTable.name.push(stringTable.indexForString(symbolName));
-        funcTable.isJS.push(false);
-        funcTable.relevantForJS.push(false);
-        // TODO - Is this information here?
-        funcTable.resource.push(-1);
-        funcTable.fileName.push(
-          sourcePath ? stringTable.indexForString(sourcePath) : null
-        );
-        funcIndex = funcTable.length++;
-      }
-      return funcIndex;
-    }
+    console.log(
+      'The runData object has all of the interesting data for the Instruments importer',
+      runDataObj
+    );
+    console.log(
+      'TODO - `threadsByTID` has the relevant thread information.',
+      runDataObj.threadsByTID
+    );
+    console.log(
+      'TODO - `threadSerialNumbers` I believe has the serialized thread ' +
+        'information, which is stored in the sample information. Unfortunately, ' +
+        'single-threaded data will always have a value of 0 for the index, which is ' +
+        'hard to deduce from the sample data.',
+      runDataObj.threadSerialNumbers
+    );
 
-    if (symbolsByPid) {
-      for (const symbols of symbolsByPid.values()) {
-        for (const symbol of symbols.symbols) {
-          if (!symbol) {
-            continue;
-          }
-          const { sourcePath, symbolName, addressToLine } = symbol;
+    const symbolsByPid: SymbolsByPid = ensureExists(
+      runData.get('symbolsByPid'),
+      'Expected to find symbols information in the instruments profile, but none was found.'
+    );
 
-          for (const [address, line] of addressToLine.entries()) {
-            const frameIndex = addressToFrameIndex.get(address);
-            if (frameIndex === undefined) {
-              const funcIndex = getFuncIndex(sourcePath, symbolName, address);
-
-              frameTable.address.push(address);
-              frameTable.category.push(null);
-              frameTable.subcategory.push(null);
-
-              frameTable.func.push(funcIndex);
-              frameTable.innerWindowID.push(null);
-              frameTable.implementation.push(null);
-              frameTable.line.push(line);
-              frameTable.column.push(null);
-              frameTable.length++;
-            }
-          }
+    // TODO(Greg) - The symbols are provided by PID, however, I don't have a way to map
+    // back to the true thread index. This is somewhat broken from the speedscope
+    // implementation. There is a risk that different PIDs share different addresses,
+    // and the symbolication can get messed up. The fix here is to figure out the correct
+    // thread offset in the sample. See the other TODO(Greg) notes.
+    const addressToSymbol: Map<Address, SymbolInfo> = new Map();
+    for (const { symbols } of symbolsByPid.values()) {
+      for (const symbol of symbols) {
+        for (const address of symbol.addressToLine.keys()) {
+          addressToSymbol.set(address, symbol);
         }
       }
+    }
 
-      runs.push({
-        number: runNumber,
-        thread,
-        addressToFrameIndex,
-      });
+    /* TODO
+    for (const { tid, process } of runDataObj.threadsByTID.values()) {
+      for (const { timestamp, threadId, backtraceId } of samples) {
+        // The threadId is wrong. In the test data its value is 4. I suspect the sample
+        // includes an index into the threadSerialNumbers. It would be good to record
+        // a multi-threaded profile, and deduce where this information is in the sample.
+
+        // TODO - Match the samples here.
+      }
+    }
+    */
+
+    const samplesByThreadId: Map<
+      IndexIntoSomeThreadStructure,
+      Sample[]
+    > = new Map();
+    for (const sample of samples) {
+      let samples = samplesByThreadId.get(sample.threadId);
+      if (!samples) {
+        samples = [];
+        samplesByThreadId.set(sample.threadId, samples);
+      }
+      samples.push(sample);
+    }
+
+    for (const samples of samplesByThreadId.values()) {
+      const symbolToFuncIndex = new Map<string, IndexIntoFuncTable>();
+      const thread = getEmptyThread();
+      profile.threads.push(thread);
+      const {
+        frameTable,
+        stringTable,
+        stackTable,
+        funcTable,
+        samples: samplesTable,
+      } = thread;
+
+      // eslint-disable-next-line no-inner-declarations
+      function getFuncIndex(
+        address: Address,
+        symbol?: SymbolInfo
+      ): IndexIntoFuncTable {
+        const sourcePath: string =
+          symbol && symbol.sourcePath ? symbol.sourcePath : '';
+
+        const symbolName: string =
+          symbol && symbol.symbolName
+            ? symbol.symbolName
+            : `0x${zeroPad(address.toString(16), 16)}`;
+        const key = `${sourcePath}:${symbolName}`;
+        let funcIndex = symbolToFuncIndex.get(key);
+        if (funcIndex === undefined) {
+          funcTable.name.push(stringTable.indexForString(symbolName));
+          funcTable.isJS.push(false);
+          funcTable.relevantForJS.push(false);
+          // TODO - Is this information here?
+          funcTable.resource.push(-1);
+          funcTable.fileName.push(
+            sourcePath ? stringTable.indexForString(sourcePath) : null
+          );
+          funcIndex = funcTable.length++;
+          symbolToFuncIndex.set(key, funcIndex);
+        }
+        return funcIndex;
+      }
+
+      for (const sample of samples) {
+        const symbols: Array<void | SymbolInfo> = [];
+        const addresses: Address[] = [];
+        const idsOrAddresses: Array<Address | IndexIntoArrays> = [
+          sample.backtraceId,
+        ];
+
+        // Walk from tip to root of the stack. The stack is composed of lists of different
+        // addresses. An id here represents an index into the the integer arrays. For
+        // some reason this information is split across different sections of the integers
+        // array. Reconstruct the linear list from the tree data structure.
+        //
+        // Example:
+        //
+        // id
+        // ├── id
+        // │   ├── Address (tip)
+        // │   ├── Address
+        // │   └── Address
+        // ├── id
+        // │   ├── Address
+        // │   ├── Address
+        // │   ├── Address
+        // │   └── Address
+        // └── id
+        //     ├── id
+        //     │   ├── Address
+        //     │   └── Address
+        //     └── id
+        //         ├── Address
+        //         ├── Address
+        //         └── Address (root)
+        while (idsOrAddresses.length > 0) {
+          const idOrAddress = idsOrAddresses.pop();
+          if (idOrAddress in arrays) {
+            // This is an index into array.
+            const nextIdsOrAddresses = arrays[idOrAddress];
+
+            // Add the next ids or addresses to the list to consider, but in reverse
+            // order that they are listed.
+            for (let i = 0; i < nextIdsOrAddresses.length; i++) {
+              idsOrAddresses.push(
+                nextIdsOrAddresses[nextIdsOrAddresses.length - i - 1]
+              );
+            }
+          } else {
+            // This is an address;
+            const address = idOrAddress;
+            symbols.push(addressToSymbol.get(address));
+            addresses.push(address);
+          }
+        }
+
+        // Convert the stack to the processed profile version.
+        let stackIndex = -1;
+        let prefix = null;
+        while (symbols.length > 0) {
+          debugger;
+          const symbol = symbols.pop();
+          const address = addresses.pop();
+          const funcIndex = getFuncIndex(address, symbol);
+          let frameIndex;
+          for (
+            // Increase the stackIndex by one. For the first run, this will end up
+            // being a stackIndex of 0. For the consecutive runs, it will be the next
+            // stack index.
+            stackIndex++;
+            stackIndex < stackTable.length;
+            stackIndex++
+          ) {
+            frameIndex = stackTable.frame[stackIndex];
+            if (
+              frameTable.func[frameIndex] === funcIndex &&
+              stackTable.prefix[stackIndex] === prefix
+            ) {
+              break;
+            }
+          }
+          if (stackIndex === stackTable.length) {
+            const line = symbol ? symbol.addressToLine.get(address) : null;
+
+            frameTable.address.push(address);
+            frameTable.category.push(otherCategory);
+            frameTable.subcategory.push(otherSubCategory);
+            frameTable.func.push(funcIndex);
+            frameTable.innerWindowID.push(null);
+            frameTable.implementation.push(null);
+            frameTable.line.push(line === undefined ? null : line);
+            frameTable.column.push(null);
+            frameIndex = frameTable.length;
+            frameTable.length++;
+
+            stackTable.frame.push(frameIndex);
+            stackTable.category.push(otherCategory);
+            stackTable.category.push(otherSubCategory);
+            stackTable.prefix.push(prefix);
+            // The stack index already points to this spot.
+            stackTable.length++;
+          }
+
+          prefix = stackIndex;
+        }
+
+        // Insert the sample.
+        samplesTable.time.push(sample.timestamp);
+        samplesTable.stack.push(stackIndex);
+        samplesTable.length++;
+      }
     }
   }
 
-  return {
-    version,
-    instrument,
-    selectedRunNumber,
-    runs,
-  };
+  return profile;
 }
 
 // Import from a .trace file saved from Mac Instruments.app
@@ -541,165 +527,7 @@ export async function processInstrumentsProfile(
   zip: JSZip
 ): Promise<Profile | null> {
   const tree = await extractDirectoryTree(zip);
-  const formTemplate: FormTemplateData = await readFormTemplate(tree);
-  if (!formTemplate) {
-    return null;
-  }
-  const { runs, instrument, selectedRunNumber } = formTemplate;
-  if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
-    throw new Error(
-      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`
-    );
-  }
-
-  const profile: Profile = getEmptyProfile();
-  let indexToView: number = 0;
-
-  for (const run of runs) {
-    const { addressToFrameIndex, thread, number } = run;
-    await importRunFromInstrumentsTrace(
-      profile,
-      file.name,
-      tree,
-      addressToFrameIndex,
-      number
-    );
-
-    if (run.number === selectedRunNumber) {
-      indexToView = profiles.length + group.indexToView;
-    }
-
-    profiles.push(...group.profiles);
-  }
-
-  // TODO - Actually import a profile.
-  // return { name: file.name, indexToView, profiles };
-
-  // This is just enough to not error when loading a profile.
-  const profile = getEmptyProfile();
-  profile.threads.push(getEmptyThread());
-  return profile;
-}
-
-interface ProfileGroup {
-  name: string;
-  indexToView: number;
-  profiles: Profile[];
-}
-
-export async function importRunFromInstrumentsTrace(
-  profile: Profile,
-  fileName: string,
-  tree: TraceDirectoryTree,
-  addressToFrameMap: Map<number, FrameInfo>,
-  runNumber: number
-): Promise<ProfileGroup> {
-  const core = getCoreDirForRun(tree, runNumber);
-  const samples = await getRawSampleList(core);
-  const arrays = await getIntegerArrays(samples, core);
-
-  // We'll try to guess which thread is the main thread by assuming
-  // it's the one with the most samples.
-  const sampleCountByThreadID = new Map<number, number>();
-  for (const sample of samples) {
-    sampleCountByThreadID.set(
-      sample.threadID,
-      getOrElse(sampleCountByThreadID, sample.threadID, () => 0) + 1
-    );
-  }
-  const counts = Array.from(sampleCountByThreadID.entries());
-  sortBy(counts, c => -c[1]);
-  const threadIDs = counts.map(c => c[0]);
-
-  profile.threads = threadIDs.map(threadID =>
-    importThreadFromInstrumentsTrace({
-      threadID,
-      fileName,
-      arrays,
-      addressToFrameMap,
-      samples,
-    })
-  );
-
-  return {
-    name: fileName,
-    indexToView: 0,
-    profile,
-  };
-}
-
-export function importThreadFromInstrumentsTrace(args: {
-  fileName: string,
-  addressToFrameMap: Map<number, FrameInfo>,
-  threadID: number,
-  arrays: number[][],
-  samples: Sample[],
-}): Thread {
-  const { addressToFrameMap, arrays, threadID, samples } = args;
-
-  const thread = getEmptyThread();
-  thread.tid = threadID;
-  thread.pid = threadID;
-
-  function appendRecursive(backtraceID: number, stack: FrameInfo[]) {
-    const frame = addressToFrameMap.get(backtraceID);
-    if (frame) {
-      stack.push(frame);
-    } else if (backtraceID in arrays) {
-      for (const addr of arrays[backtraceID]) {
-        appendRecursive(addr, stack);
-      }
-    } else {
-      const rawAddressFrame: FrameInfo = {
-        key: backtraceID,
-        name: `0x${zeroPad(backtraceID.toString(16), 16)}`,
-      };
-      addressToFrameMap.set(backtraceID, rawAddressFrame);
-      stack.push(rawAddressFrame);
-    }
-  }
-
-  const samplesForThisThread = samples.filter(s => s.threadID === threadID);
-  const backtraceIDtoStack = new Map<number, FrameInfo[]>();
-
-  for (const { timestamp, backtraceID } of samplesForThisThread) {
-    const stack = backtraceIDtoStack.get(backtraceID);
-    if (stack === undefined) {
-      const stack: FrameInfo[] = [];
-      appendRecursive(backtraceID, stack);
-      stack.reverse();
-      return stack;
-    }
-
-    thread.samples.length++;
-    thread.samples.time.push(sample.timestamp);
-    thread.samples.stack.push(null);
-  }
-
-  return thread;
-
-  let lastTimestamp: null | number = null;
-  for (const sample of samples) {
-    if (lastTimestamp === null) {
-      // The first sample is sometimes fairly late in the profile for some reason.
-      // We'll just say nothing was known to be on the stack in that time.
-      profile.appendSampleWithWeight([], sample.timestamp);
-      lastTimestamp = sample.timestamp;
-    }
-
-    if (sample.timestamp < lastTimestamp) {
-      throw new Error('Timestamps out of order!');
-    }
-
-    profile.appendSampleWithWeight(
-      stackForSample,
-      sample.timestamp - lastTimestamp
-    );
-    lastTimestamp = sample.timestamp;
-  }
-
-  profile.setValueFormatter(new TimeFormatter('nanoseconds'));
-  return profile.build();
+  return convertInstrumentsProfile(tree);
 }
 
 export function readInstrumentsKeyedArchive(byteArray: Uint8Array) {
@@ -713,7 +541,6 @@ export function readInstrumentsKeyedArchive(byteArray: Uint8Array) {
         return null;
 
       case 'PFTSymbolData': {
-        console.log(`!!! object`, object);
         const ret = Object.create(null);
         ret.symbolName = object.$0;
         ret.sourcePath = object.$1;
@@ -774,6 +601,40 @@ export function readInstrumentsKeyedArchive(byteArray: Uint8Array) {
         ret.name = object.$1;
         return ret;
       }
+
+      case 'XRThread': {
+        // Without any of this manipulation, the data looks like this:
+        // {
+        //   $class: {
+        //     $classname: 'XRThread',
+        //     $classes: ['XRThread', 'NSObject'],
+        //   },
+        //   $0: Tid, // 63045358
+        //   $1: {
+        //     $class: {
+        //       $classname: 'XRBacktraceTypeAdapter',
+        //       $classes: ['XRBacktraceTypeAdapter', 'NSObject'],
+        //     },
+        //   },
+        //   $2: null,
+        //   $3: [],
+        //   $4: {
+        //     deviceIdentifier: 'E9A531DB-182F-5246-8FFF-605E33A88AD6'
+        //     documentUUID: '1E5A5900-FF1A-43A9-9250-1C372500A3E9'
+        //     overrideName: 'Main Thread  0x3c1feee'
+        //     execIconName: 'device.E9A531DB-182F-5246-8FFF-605E33A88AD6.simple'
+        //     coreValueSignature: 1
+        //     execName: 'simple'
+        //     pid: 26200
+        //   },
+        //   $5: 0,
+        // }
+        const ret = Object.create(null);
+        ret.tid = object.$0;
+        ret.process = object.$4;
+        return ret;
+      }
+
       default:
         return object;
     }
@@ -1209,62 +1070,6 @@ class BinaryPlistParser {
   }
 }
 
-type ValueUnit =
-  | 'none'
-  | 'nanoseconds'
-  | 'microseconds'
-  | 'milliseconds'
-  | 'seconds'
-  | 'bytes';
-
-interface ValueFormatter {
-  unit: ValueUnit;
-  format(v: number): string;
-}
-
-class TimeFormatter implements ValueFormatter {
-  multiplier: number;
-  unit: ValueUnit;
-
-  constructor(unit: ValueUnit) {
-    if (unit === 'nanoseconds') {
-      this.multiplier = 1e-9;
-    } else if (unit === 'microseconds') {
-      this.multiplier = 1e-6;
-    } else if (unit === 'milliseconds') {
-      this.multiplier = 1e-3;
-    } else {
-      this.multiplier = 1;
-    }
-
-    this.unit = unit;
-  }
-
-  formatUnsigned(v: number) {
-    const s = v * this.multiplier;
-
-    if (s / 60 >= 1) {
-      const minutes = Math.floor(s / 60);
-      const seconds = Math.floor(s - minutes * 60).toString();
-      return `${minutes}:${zeroPad(seconds, 2)}`;
-    }
-    if (s / 1 >= 1) {
-      return `${s.toFixed(2)}s`;
-    }
-    if (s / 1e-3 >= 1) {
-      return `${(s / 1e-3).toFixed(2)}ms`;
-    }
-    if (s / 1e-6 >= 1) {
-      return `${(s / 1e-6).toFixed(2)}µs`;
-    }
-    return `${(s / 1e-9).toFixed(2)}ns`;
-  }
-
-  format(v: number) {
-    return `${v < 0 ? '-' : ''}${this.formatUnsigned(Math.abs(v))}`;
-  }
-}
-
 function zeroPad(s: string, width: number) {
   return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
@@ -1274,14 +1079,6 @@ function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
   if (value === undefined) {
     value = fallback(k);
     map.set(k, value);
-  }
-  return value;
-}
-
-function getOrElse<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
-  const value = map.get(k);
-  if (value === undefined) {
-    return fallback(k);
   }
   return value;
 }
@@ -1361,18 +1158,191 @@ async function extractDirectoryTree(zip: JSZip): Promise<TraceDirectoryTree> {
   return tree;
 }
 
-function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
-  function comparator(a: T, b: T) {
-    const keyA = key(a);
-    const keyB = key(b);
-    // Disabled eslint rule as this is imported from speedscope.
+/**
+ * Recursively convert a Map data structure into an object. This makes it easier
+ * to type the result of the instrument data.
+ */
+function mapToObject(
+  mixed: any,
+  keyAllowList = new Set(),
+  prevKey: string = ''
+): any {
+  if (mixed instanceof Map) {
+    // This is a map, see if it needs to be converted to an object.
 
-    // $FlowFixMe - Cannot compare  number to string
-    return keyA < keyB ? -1 : keyA > keyB ? 1 : 0;
+    const map: Map<any, any> = mixed;
+    if (keyAllowList.has(prevKey)) {
+      // Don't convert this into an object, but do recurse into its child members.
+      const newMap = new Map();
+      for (const [key, value] of map) {
+        newMap.set(key, mapToObject(value, keyAllowList, key));
+      }
+      return newMap;
+    }
+
+    // Convert the map into an Object.
+    const object: any = {};
+    for (const [key, value] of map) {
+      object[key] = mapToObject(value, keyAllowList, key);
+    }
+    return object;
   }
-  ts.sort(comparator);
+
+  // If this is an array, recurse into the members.
+  if (Array.isArray(mixed)) {
+    return mixed.map(v => mapToObject(v, keyAllowList));
+  }
+
+  // If this is an object already, recurse into its members.
+  if (mixed && typeof mixed === 'object') {
+    const object = {};
+    for (const [key2, value2] of Object.entries(mixed)) {
+      object[key2] = mapToObject(value2, keyAllowList);
+    }
+    return object;
+  }
+
+  // This is a plain value, just return it.
+  return mixed;
 }
 
-function lastOf<T>(ts: T[]): T | null {
-  return ts[ts.length - 1] || null;
-}
+type SymbolsByPid2 = Map<
+  Pid,
+  {
+    threadNames: string[], // [ 'Main Thread  0x3c1feee' ],
+    symbols: Array<{
+      symbolName: string, // 'szone_malloc_should_clear',
+      sourcePath: string | null, // '/Users/jlfwong/code/speedscope/sample/cpp/simple.cpp',
+      addressToLine: Map<Address, number>,
+    }>,
+  }
+>;
+
+type UnparsedClass<T: string> = {
+  $classname: T,
+  $classes: mixed,
+};
+
+type RunData = {
+  symbolsByPid: SymbolsByPid2,
+  // Map {
+  //   'E9A531DB-182F-5246-8FFF-605E33A88AD6' => [ 2829117936992677, 1, 1 ]
+  // },
+  mach_time_info: Map<string, [number, number, number]>,
+  recordingOptions: {
+    windowLimit: number, // 0,
+    timeLimit: number, // 43200000000000,
+    supportsWindowedMode: boolean,
+    supportsImmediateMode: boolean,
+    $class: UnparsedClass<'XRRecordingOptions'>,
+    recordingMode: 1,
+    supportsDeferredMode: true,
+  },
+  serialThreadNumbers: { '0': 0x3c1feee },
+  osVersion: {
+    ProductBuildVersion: '16A323',
+    ProductCopyright: '1983-2016 Apple Inc.',
+    ProductVersion: '10.12',
+    ProductName: 'Mac OS X',
+    ProductUserVisibleVersion: '10.12',
+  },
+  numberOfCpus: number,
+  log: mixed[],
+  processDatas: [
+    {
+      specifiedEnvironment: {},
+      _processProperties: mixed,
+      imageData: [Uint8Array],
+      _execname: '/Users/jlfwong/code/speedscope/sample/cpp/simple',
+      _pid: 26200,
+      bundleIdentifier: '/Users/jlfwong/code/speedscope/sample/cpp/simple',
+      specifiedType: 0,
+      _args: '',
+      _launchControlProperties: mixed,
+      deviceTemplateData: mixed,
+    },
+    {
+      specifiedEnvironment: {},
+      _execname: 'kernel_task',
+      _pid: 0,
+      processID: 0,
+      specifiedType: 0,
+      _launchControlProperties: {},
+      imageData: [Uint8Array],
+      deviceTemplateData: mixed,
+    }
+  ],
+  // [ { number: 0, name: 'E9A531DB-182F-5246-8FFF-605E33A88AD6' }, ... ]
+  allCores: Array<{ number: 0, name: string }>,
+  // [
+  //   "Target Name: Jamie's Macbook Pro",
+  //   'Target Model: MacBook Pro',
+  //   'Target macOS: 10.12 (16A323)',
+  //   '',
+  //   'Start Time: May 8, 2018, 10:10:57 PM',
+  //   'End Time: May 8, 2018, 10:11:01 PM',
+  //   'Duration: 4 seconds',
+  //   '',
+  //   'Instruments: 8.3.3 (8E3004b)'
+  // ]
+  recordingInfoSummary: string[],
+  inspectionTime: number, // 4113218783
+  target: {
+    specifiedEnvironment: {},
+    _processProperties: { plist: mixed[] },
+    imageData: Uint8Array,
+    _execname: '/Users/jlfwong/code/speedscope/sample/cpp/simple',
+    _pid: 26200,
+    bundleIdentifier: '/Users/jlfwong/code/speedscope/sample/cpp/simple',
+    specifiedType: 0,
+    _args: '',
+    _launchControlProperties: {
+      XRDeviceFileChooserWorkingDirectory: '',
+      DisableTALAutomaticTermination: false,
+      iODestinationKey: 0,
+    },
+    deviceTemplateData: {
+      _deviceHostName: "Jamie's Macbook Pro",
+      _deviceVersion: '16A323',
+      _deviceIdentifier: 'E9A531DB-182F-5246-8FFF-605E33A88AD6',
+      _productVersion: '10.12',
+      _modelName: 'MacBook Pro',
+      _xrdeviceClassName: 'XRLocalDevice',
+      _rawDeviceDisplayName: "Jamie's Macbook Pro",
+      _productType: 'MacBookPro11,3',
+      _deviceDisplayName: "Jamie's Macbook Pro",
+      _modelUTI: 'com.apple.macbookpro-15-retina-display',
+      _deviceDescription: 'Jamies-Macbook-Pro',
+      _deviceSmallRepresentationIcon: [Uint8Array],
+    },
+  },
+  architecture: {
+    $class: {
+      $classname: 'XRArchitecture',
+      $classes: ['XRArchitecture', 'NSObject'],
+    },
+    $0: 16777223,
+    $1: 3,
+  },
+  threadSerialNumbers: Map<Pid, number>,
+  // ['Target: simple', 'Recording Mode: Immediate', 'Time Limit: 12 hours', '']
+  recordingSettingsSummary: string[],
+  threadSerialMax: number,
+  startTime: number, // 1525842657580993300
+  runningTime: number, // 4113218784
+  threadsByTID: Map<
+    Tid,
+    {
+      tid: Tid, // 0x03c1feee,
+      process: {
+        deviceIdentifier: string, // 'E9A531DB-182F-5246-8FFF-605E33A88AD6'
+        documentUUID: string, // '1E5A5900-FF1A-43A9-9250-1C372500A3E9'
+        overrideName: string, // 'Main Thread  0x3c1feee'
+        execIconName: string, // 'device.E9A531DB-182F-5246-8FFF-605E33A88AD6.simple'
+        coreValueSignature: number, // 1
+        execName: string, // 'simple'
+        pid: Pid, // 0x6658,
+      },
+    }
+  >,
+};
