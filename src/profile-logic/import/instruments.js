@@ -36,7 +36,14 @@ import {
   objectValues,
   getFirstItemFromMap,
 } from 'firefox-profiler/utils/flow';
-import type { ObjectMap, Profile } from 'firefox-profiler/types';
+import type {
+  ObjectMap,
+  Profile,
+  Thread,
+  Address,
+  IndexIntoFrameTable,
+  IndexIntoFuncTable,
+} from 'firefox-profiler/types';
 import { getEmptyProfile, getEmptyThread } from '../data-structures';
 
 // This file contains methods to import data from OS X Instruments.app
@@ -86,7 +93,7 @@ type FrameInfo = {
   // "ActiveRecord##to_hash"
   name: string,
 
-  // JSZipFile path of the code corresponding to this
+  // File path of the code corresponding to this
   // call stack frame.
   file?: string,
 
@@ -401,23 +408,24 @@ async function getIntegerArrays(
   return arrays;
 }
 
-type SymbolInfo = {
+type SymbolInfo = {|
   symbolName: string | null,
   sourcePath: string | null,
-  addressToLine: Map<number, number>,
-};
+  addressToLine: Map<Address, number>,
+|};
 
-type FormTemplateRunData = {
+type FormTemplateRunData = {|
   number: number,
-  addressToFrameMap: Map<number, FrameInfo>,
-};
+  thread: Thread,
+  addressToFrameIndex: Map<Address, IndexIntoFrameTable>,
+|};
 
-type FormTemplateData = {
+type FormTemplateData = {|
   version: number,
   selectedRunNumber: number,
   instrument: string,
   runs: FormTemplateRunData[],
-};
+|};
 
 type SymbolsByPid = Map<number, { symbols: SymbolInfo[] }>;
 
@@ -449,38 +457,72 @@ async function readFormTemplate(
     );
 
     const symbolsByPid: SymbolsByPid | void = runData.get('symbolsByPid');
-
+    const symbolToFuncIndex = new Map<string, IndexIntoFuncTable>();
     // Build a frame map if the symbols are there.
-    const addressToFrameMap = new Map<number, FrameInfo>();
+    const addressToFrameIndex = new Map<Address, IndexIntoFrameTable>();
+    const thread = getEmptyThread();
+    const { frameTable, stringTable, funcTable } = thread;
+
+    // eslint-disable-next-line no-inner-declarations
+    function getFuncIndex(
+      sourcePath: string | null,
+      symbolName: string | null,
+      address: Address
+    ): IndexIntoFuncTable {
+      if (sourcePath === null) {
+        sourcePath = '';
+      }
+      if (symbolName === null) {
+        symbolName = `0x${zeroPad(address.toString(16), 16)}`;
+      }
+      let funcIndex = symbolToFuncIndex.get(`${sourcePath}:${symbolName}`);
+
+      if (funcIndex === undefined) {
+        funcTable.name.push(stringTable.indexForString(symbolName));
+        funcTable.isJS.push(false);
+        funcTable.relevantForJS.push(false);
+        // TODO - Is this information here?
+        funcTable.resource.push(-1);
+        funcTable.fileName.push(
+          sourcePath ? stringTable.indexForString(sourcePath) : null
+        );
+        funcIndex = funcTable.length++;
+      }
+      return funcIndex;
+    }
+
     if (symbolsByPid) {
-      // TODO(jlfwong): Deal with profiles with conflicting addresses?
       for (const symbols of symbolsByPid.values()) {
         for (const symbol of symbols.symbols) {
           if (!symbol) {
             continue;
           }
           const { sourcePath, symbolName, addressToLine } = symbol;
-          for (const address of addressToLine.keys()) {
-            getOrInsert(addressToFrameMap, address, () => {
-              const name =
-                symbolName || `0x${zeroPad(address.toString(16), 16)}`;
-              const key: string = `${sourcePath || 'null'}:${name}`;
-              const frame: FrameInfo = {
-                key,
-                name: name,
-              };
-              if (sourcePath) {
-                frame.file = sourcePath;
-              }
-              return frame;
-            });
+
+          for (const [address, line] of addressToLine.entries()) {
+            const frameIndex = addressToFrameIndex.get(address);
+            if (frameIndex === undefined) {
+              const funcIndex = getFuncIndex(sourcePath, symbolName, address);
+
+              frameTable.address.push(address);
+              frameTable.category.push(null);
+              frameTable.subcategory.push(null);
+
+              frameTable.func.push(funcIndex);
+              frameTable.innerWindowID.push(null);
+              frameTable.implementation.push(null);
+              frameTable.line.push(line);
+              frameTable.column.push(null);
+              frameTable.length++;
+            }
           }
         }
       }
 
       runs.push({
         number: runNumber,
-        addressToFrameMap,
+        thread,
+        addressToFrameIndex,
       });
     }
   }
@@ -499,30 +541,29 @@ export async function processInstrumentsProfile(
   zip: JSZip
 ): Promise<Profile | null> {
   const tree = await extractDirectoryTree(zip);
-  const formTemplate = await readFormTemplate(tree);
+  const formTemplate: FormTemplateData = await readFormTemplate(tree);
   if (!formTemplate) {
     return null;
   }
-  const { version, runs, instrument, selectedRunNumber } = formTemplate;
+  const { runs, instrument, selectedRunNumber } = formTemplate;
   if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
     throw new Error(
       `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`
     );
   }
-  console.log('version: ', version);
-  console.log(`Importing time profile`);
 
-  const profiles: Profile[] = [];
+  const profile: Profile = getEmptyProfile();
   let indexToView: number = 0;
 
   for (const run of runs) {
-    const { addressToFrameMap, number } = run;
-    const group = await importRunFromInstrumentsTrace({
-      fileName: file.name,
+    const { addressToFrameIndex, thread, number } = run;
+    await importRunFromInstrumentsTrace(
+      profile,
+      file.name,
       tree,
-      addressToFrameMap,
-      runNumber: number,
-    });
+      addressToFrameIndex,
+      number
+    );
 
     if (run.number === selectedRunNumber) {
       indexToView = profiles.length + group.indexToView;
@@ -546,13 +587,13 @@ interface ProfileGroup {
   profiles: Profile[];
 }
 
-export async function importRunFromInstrumentsTrace(args: {
+export async function importRunFromInstrumentsTrace(
+  profile: Profile,
   fileName: string,
   tree: TraceDirectoryTree,
   addressToFrameMap: Map<number, FrameInfo>,
-  runNumber: number,
-}): Promise<ProfileGroup> {
-  const { fileName, tree, addressToFrameMap, runNumber } = args;
+  runNumber: number
+): Promise<ProfileGroup> {
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
   const arrays = await getIntegerArrays(samples, core);
@@ -570,25 +611,21 @@ export async function importRunFromInstrumentsTrace(args: {
   sortBy(counts, c => -c[1]);
   const threadIDs = counts.map(c => c[0]);
 
+  profile.threads = threadIDs.map(threadID =>
+    importThreadFromInstrumentsTrace({
+      threadID,
+      fileName,
+      arrays,
+      addressToFrameMap,
+      samples,
+    })
+  );
+
   return {
     name: fileName,
     indexToView: 0,
-    profiles: threadIDs.map(threadID =>
-      importThreadFromInstrumentsTrace({
-        threadID,
-        fileName,
-        arrays,
-        addressToFrameMap,
-        samples,
-      })
-    ),
+    profile,
   };
-}
-
-class StackListProfileBuilder {
-  constructor(..._args: any[]) {
-    throw new Error('Speedscope StackListProfileBuilder is not imported.');
-  }
 }
 
 export function importThreadFromInstrumentsTrace(args: {
@@ -597,56 +634,52 @@ export function importThreadFromInstrumentsTrace(args: {
   threadID: number,
   arrays: number[][],
   samples: Sample[],
-}): Profile {
-  const { fileName, addressToFrameMap, arrays, threadID } = args;
-  let { samples } = args;
+}): Thread {
+  const { addressToFrameMap, arrays, threadID, samples } = args;
 
-  const backtraceIDtoStack = new Map<number, FrameInfo[]>();
-  samples = samples.filter(s => s.threadID === threadID);
+  const thread = getEmptyThread();
+  thread.tid = threadID;
+  thread.pid = threadID;
 
-  // TODO - The following parts of this function need to be implemented.
-  // eslint-disable-next-line no-constant-condition
-  if (true) {
-    const profile: any = {};
-    return profile;
-  }
-
-  const profile = new StackListProfileBuilder(
-    ensureExists(lastOf(samples)).timestamp
-  );
-  profile.setName(`${fileName} - thread ${threadID}`);
-
-  function appendRecursive(k: number, stack: FrameInfo[]) {
-    const frame = addressToFrameMap.get(k);
+  function appendRecursive(backtraceID: number, stack: FrameInfo[]) {
+    const frame = addressToFrameMap.get(backtraceID);
     if (frame) {
       stack.push(frame);
-    } else if (k in arrays) {
-      for (const addr of arrays[k]) {
+    } else if (backtraceID in arrays) {
+      for (const addr of arrays[backtraceID]) {
         appendRecursive(addr, stack);
       }
     } else {
       const rawAddressFrame: FrameInfo = {
-        key: k,
-        name: `0x${zeroPad(k.toString(16), 16)}`,
+        key: backtraceID,
+        name: `0x${zeroPad(backtraceID.toString(16), 16)}`,
       };
-      addressToFrameMap.set(k, rawAddressFrame);
+      addressToFrameMap.set(backtraceID, rawAddressFrame);
       stack.push(rawAddressFrame);
     }
   }
 
+  const samplesForThisThread = samples.filter(s => s.threadID === threadID);
+  const backtraceIDtoStack = new Map<number, FrameInfo[]>();
+
+  for (const { timestamp, backtraceID } of samplesForThisThread) {
+    const stack = backtraceIDtoStack.get(backtraceID);
+    if (stack === undefined) {
+      const stack: FrameInfo[] = [];
+      appendRecursive(backtraceID, stack);
+      stack.reverse();
+      return stack;
+    }
+
+    thread.samples.length++;
+    thread.samples.time.push(sample.timestamp);
+    thread.samples.stack.push(null);
+  }
+
+  return thread;
+
   let lastTimestamp: null | number = null;
   for (const sample of samples) {
-    const stackForSample = getOrInsert(
-      backtraceIDtoStack,
-      sample.backtraceID,
-      id => {
-        const stack: FrameInfo[] = [];
-        appendRecursive(id, stack);
-        stack.reverse();
-        return stack;
-      }
-    );
-
     if (lastTimestamp === null) {
       // The first sample is sometimes fairly late in the profile for some reason.
       // We'll just say nothing was known to be on the stack in that time.
@@ -680,6 +713,7 @@ export function readInstrumentsKeyedArchive(byteArray: Uint8Array) {
         return null;
 
       case 'PFTSymbolData': {
+        console.log(`!!! object`, object);
         const ret = Object.create(null);
         ret.symbolName = object.$0;
         ret.sourcePath = object.$1;

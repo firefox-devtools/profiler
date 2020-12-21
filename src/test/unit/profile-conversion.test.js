@@ -149,7 +149,7 @@ describe('converting Google Chrome profile', function() {
 });
 
 describe('converting MacOS instruments', function() {
-  it('should import a zipped profile', async function() {
+  it.only('should import a zipped profile', async function() {
     const fs = require('fs');
     const file = mockFile({
       type: 'application/zip',
