@@ -241,15 +241,18 @@ type PopupAddonInstallPhase =
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
-  | 'other-browser';
+  | 'other-browser'
+  // Firefox on android:
+  | 'firefox-android';
 
 class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   constructor(props: HomeProps) {
     super(props);
     // Start by suggesting that we install the add-on.
     let popupAddonInstallPhase = 'other-browser';
-
-    if (_isFirefox()) {
+    if (_isAndroid()) {
+      popupAddonInstallPhase = 'firefox-android';
+    } else if (_isFirefox()) {
       if (window.isGeckoProfilerAddonInstalled) {
         popupAddonInstallPhase = 'addon-installed';
       } else {
@@ -311,6 +314,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
         return this._renderEnablePopupInstructions();
       case 'other-browser':
         return this._renderOtherBrowserInstructions();
+      case 'firefox-android':
+        return this._renderFirefoxAndroidInstructions();
       default:
         throw assertExhaustiveCheck(
           popupAddonInstallPhase,
@@ -468,6 +473,38 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
+  _renderFirefoxAndroidInstructions() {
+    return (
+      <InstructionTransition key={0}>
+        <div
+          className="homeInstructions"
+          data-testid="home-other-browser-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
+            <DocsButton />
+            <h2>How to view and record profiles</h2>
+            <p>
+              Recording performance profiles requires{' '}
+              <a href="https://www.mozilla.org/en-US/firefox/new/">
+                Firefox for Desktop
+              </a>
+              . However, existing profiles can be viewed in any modern browser.
+            </p>
+          </div>
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
+
   _renderShortcuts() {
     return (
       <div>
@@ -540,6 +577,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
 function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
+}
+
+function _isAndroid(): boolean {
+  return Boolean.apply(navigator.userAgent.match(/Android\b/));
 }
 
 export const Home = explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
