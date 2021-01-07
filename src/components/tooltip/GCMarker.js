@@ -149,7 +149,8 @@ export function getGCMinorDetails(
             details.push(
               <TooltipDetail
                 label="Proportion of nursery-allocated strings that were deduplicated"
-                key="GCMinor-strings deduped">
+                key="GCMinor-strings_deduped"
+              >
                 {formatValueTotal(
                   nursery.strings_deduplicated,
                   nursery.strings_deduplicated + nursery.strings_tenured,
