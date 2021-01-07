@@ -2180,6 +2180,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
+      Proportion of nursery-allocated strings that were deduplicated
+      :
+    </div>
+    1,234 / 11.2K (11%)
+    <div
+      class="tooltipLabel"
+    >
       Phase ClearNursery
       :
     </div>

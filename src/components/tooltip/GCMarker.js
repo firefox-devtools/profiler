@@ -145,6 +145,20 @@ export function getGCMinorDetails(
               </TooltipDetail>
             );
           }
+          if (nursery.strings_tenured && nursery.strings_deduplicated) {
+            details.push(
+              <TooltipDetail
+                label="Proportion of nursery-allocated strings that were deduplicated"
+                key="GCMinor-strings_deduped"
+              >
+                {formatValueTotal(
+                  nursery.strings_deduplicated,
+                  nursery.strings_deduplicated + nursery.strings_tenured,
+                  formatSI
+                )}
+              </TooltipDetail>
+            );
+          }
         }
         if (nursery.chunk_alloc_us) {
           details.push(
