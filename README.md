@@ -66,15 +66,13 @@ For more detailed information on getting started contributing. We have plenty of
 
 ### Discussion
 
-Say hello on Matrix in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)][matrix].
+Say hello on Matrix in the [*Firefox Profiler* channel][matrix].
 
 ### License
 
-[MPL v2](./LICENSE)
+[MPL v2](./LICENSE) is designed to encourage contributors to share modifications they make to the code, while still allowing them to combine the code with code under other licenses (open or proprietary) with minimal restrictions.
 
-Some permissive software licenses request but do not require an acknowledgement of the use of their software. We are very grateful to the following people and projects for their contributions to this product:
-
-* The [zlib] compression library (Jean-loup Gailly, Mark Adler and team)
+We are very grateful to the the **zlib compression library (Jean-loup Gailly, Mark Adler and team)** for their contribution to the project.
 
 [matrix]: https://chat.mozilla.org/#/room/#profiler:mozilla.org
 <!-- chat.mozilla.org's "real" server is mozilla.modular.im. -->
