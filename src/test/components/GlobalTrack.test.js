@@ -137,7 +137,7 @@ describe('timeline/GlobalTrack', function() {
     } = setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
+    expect(getGlobalTrackRow()).not.toHaveClass('selected');
   });
 
   it('can select a thread by clicking the label', () => {
@@ -150,7 +150,7 @@ describe('timeline/GlobalTrack', function() {
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     fireFullClick(getGlobalTrackLabel());
     expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
-    expect(getGlobalTrackRow().classList.contains('selected')).toBe(true);
+    expect(getGlobalTrackRow()).toHaveClass('selected');
   });
 
   it('can right click a thread', () => {
