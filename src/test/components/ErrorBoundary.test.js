@@ -61,17 +61,13 @@ describe('app/ErrorBoundary', function() {
     const { getByText, getByTestId } = setupComponent(<ThrowingComponent />);
 
     // The technical error isn't visible yet.
-    expect(
-      getByTestId('error-technical-details').classList.contains('hide')
-    ).toBe(true);
+    expect(getByTestId('error-technical-details')).toHaveClass('hide');
 
     // Click the button to expand the details.
     fireFullClick(getByText('View full error details'));
 
     // The technical error now exists.
-    expect(
-      getByTestId('error-technical-details').classList.contains('hide')
-    ).toBe(false);
+    expect(getByTestId('error-technical-details')).not.toHaveClass('hide');
   });
 
   it('reports errors to the analytics', () => {

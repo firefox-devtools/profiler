@@ -70,7 +70,7 @@ describe('timeline/LocalTrack', function() {
       } = setupThreadTrack();
       expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      expect(getLocalTrackRow().classList.contains('selected')).toBe(false);
+      expect(getLocalTrackRow()).not.toHaveClass('selected');
     });
 
     it('can select a thread by clicking the label', () => {
@@ -83,7 +83,7 @@ describe('timeline/LocalTrack', function() {
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       fireFullClick(getLocalTrackLabel());
       expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
-      expect(getLocalTrackRow().classList.contains('selected')).toBe(true);
+      expect(getLocalTrackRow()).toHaveClass('selected');
     });
 
     it('can right click a thread', () => {
