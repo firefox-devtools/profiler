@@ -6,7 +6,6 @@
 import { createSelector } from 'reselect';
 
 import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
-import { getTimelineTrackOrganization } from '../url-state';
 
 import type {
   Selector,
@@ -60,13 +59,7 @@ export function getComposedSelectorsPerThread(
     threadSelectors.getThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
-    getTimelineTrackOrganization,
-    (
-      { processType },
-      isNetworkChartEmpty,
-      jsTracerTable,
-      timelineTrackOrganization
-    ) => {
+    ({ processType }, isNetworkChartEmpty, jsTracerTable) => {
       if (processType === 'comparison') {
         // For a diffing tracks, we display only the calltree tab for now, because
         // other views make no or not much sense.
@@ -74,13 +67,8 @@ export function getComposedSelectorsPerThread(
       }
 
       let visibleTabs = tabSlugs;
-      if (
-        isNetworkChartEmpty ||
-        timelineTrackOrganization.type === 'active-tab'
-      ) {
-        // We either don't show the network chart if it's empty or we don't show it
-        // for now when we are in single tab mode. This is because we don't know
-        // which network request belongs to which page currently.
+      if (isNetworkChartEmpty) {
+        // Don't show the network chart if it's empty.
         visibleTabs = visibleTabs.filter(
           tabSlug => tabSlug !== 'network-chart'
         );
