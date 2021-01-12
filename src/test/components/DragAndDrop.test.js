@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
@@ -14,6 +14,10 @@ import {
   DragAndDrop,
   DragAndDropOverlay,
 } from '../../components/app/DragAndDrop';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { serializeProfile } from '../../profile-logic/process-profile';
+
+import type { Profile } from 'firefox-profiler/types';
 
 describe('app/DragAndDrop', () => {
   it('matches the snapshot with default overlay', () => {
@@ -41,12 +45,6 @@ describe('app/DragAndDrop', () => {
   });
 
   it('responds to dragging', () => {
-    // It would be better if we could check that when dropping
-    // something on the area we'd get a call to
-    // `retrieveProfileFromFile`, but jsdom is not supporting
-    // `dataTransfer`. We should improve this test when that support
-    // is added:
-    // https://github.com/firefox-devtools/profiler/issues/2366
     const { container } = render(
       <Provider store={createStore()}>
         <DragAndDrop>Target area here</DragAndDrop>
@@ -61,4 +59,29 @@ describe('app/DragAndDrop', () => {
     fireEvent.dragExit(dragAndDrop);
     expect(overlay.classList).not.toContain('dragging');
   });
+
+  it('receives profile on file drop', async () => {
+    const { container } = render(
+      <Provider store={createStore()}>
+        <DragAndDrop>Target area here</DragAndDrop>
+      </Provider>
+    );
+    const [dragAndDrop] = container.children;
+
+    const profile = serializeProfile(_getSimpleProfile());
+    const file = new File([profile], 'profile.json', {
+      type: 'application/json',
+    });
+    const files = [file];
+
+    fireEvent.drop(dragAndDrop, { dataTransfer: { files } });
+    await waitFor(() => expect('PROFILE_LOADED').toBeTruthy());
+  });
 });
+
+/**
+ * This profile will have a single sample, and a single thread.
+ */
+function _getSimpleProfile(): Profile {
+  return getProfileFromTextSamples('A').profile;
+}
