@@ -112,6 +112,8 @@ describe('TooltipMarker', function() {
             cells_allocated_nursery: 26578,
             cells_allocated_tenured: 12172,
             cells_tenured: 15853,
+            strings_tenured: 10000,
+            strings_deduplicated: 1234,
             cur_capacity: 16776832,
             phase_times: {
               CancelIonCompilations: 0,

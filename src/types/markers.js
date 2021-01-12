@@ -332,6 +332,14 @@ export type GCMinorCompletedData = {|
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1473213)
   cells_tenured?: number,
 
+  // The number of strings that were tenured, not counting deduplicated
+  // strings (since https://bugzilla.mozilla.org/show_bug.cgi?id=1507379).
+  strings_tenured?: number,
+
+  // The number of strings that were deduplicated during tenuring
+  // (since https://bugzilla.mozilla.org/show_bug.cgi?id=1658866).
+  strings_deduplicated?: number,
+
   // The numbers of cells allocated since the previous minor GC.
   // These were added in
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1473213 and are only

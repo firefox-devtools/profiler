@@ -36,6 +36,24 @@ describe('ProfileName', function() {
     return { ...store, ...renderResult };
   }
 
+  function nullProfile() {
+    const { profile } = getProfileFromTextSamples('A');
+    Object.assign(profile.meta, {
+      oscpu: '',
+      platform: '',
+      toolkit: '',
+      product: '',
+    });
+
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <ProfileName />
+      </Provider>
+    );
+    return { ...store, ...renderResult };
+  }
+
   it('matches the snapshot', function() {
     const { container } = setup();
     expect(container).toMatchSnapshot();
@@ -89,5 +107,11 @@ describe('ProfileName', function() {
     const { getByText } = setup('Custom name from URL');
 
     expect(getByText('Custom name from URL')).toBeTruthy();
+  });
+
+  it('shows UnitledProfile when profile has no name', () => {
+    const { getByText } = nullProfile();
+
+    expect(getByText('Untitled profile')).toBeTruthy();
   });
 });

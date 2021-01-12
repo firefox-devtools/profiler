@@ -11,13 +11,12 @@ import {
   changeSelectedZipFile,
   changeExpandedZipFile,
   viewProfileFromZip,
+  viewProfileFromPathInZipFile,
   returnToZipFileList,
-  showErrorForNoFileInZip,
 } from 'firefox-profiler/actions/zipped-profiles';
 import {
   getZipFileState,
   getZipFileTree,
-  getZipFileTable,
   getZipFileMaxDepth,
   getSelectedZipFileIndex,
   getExpandedZipFileIndexes,
@@ -30,7 +29,6 @@ import { ProfileViewer } from './ProfileViewer';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { ZipFileState } from 'firefox-profiler/types';
 import type {
-  ZipFileTable,
   ZipDisplayData,
   ZipFileTree,
   IndexIntoZipFileTable,
@@ -42,7 +40,6 @@ type StateProps = {|
   +zipFileState: ZipFileState,
   +pathInZipFile: string | null,
   +zipFileTree: ZipFileTree,
-  +zipFileTable: ZipFileTable,
   +zipFileMaxDepth: number,
   +selectedZipFileIndex: IndexIntoZipFileTable | null,
   // In practice this should never contain null, but needs to support the
@@ -55,8 +52,8 @@ type DispatchProps = {|
   +changeSelectedZipFile: typeof changeSelectedZipFile,
   +changeExpandedZipFile: typeof changeExpandedZipFile,
   +viewProfileFromZip: typeof viewProfileFromZip,
+  +viewProfileFromPathInZipFile: typeof viewProfileFromPathInZipFile,
   +returnToZipFileList: typeof returnToZipFileList,
-  +showErrorForNoFileInZip: typeof showErrorForNoFileInZip,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -167,10 +164,8 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     const {
       pathInZipFile,
       zipFileState,
-      viewProfileFromZip,
-      zipFileTable,
+      viewProfileFromPathInZipFile,
       returnToZipFileList,
-      showErrorForNoFileInZip,
     } = this.props;
     if (pathInZipFile !== zipFileState.pathInZipFile) {
       // The UrlState and ZipFileState are out of sync, they need to be
@@ -183,12 +178,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       } else {
         // The UrlState was updated to view a zip file, but we haven't
         // started doing that.
-        const zipFileIndex = zipFileTable.path.indexOf(pathInZipFile);
-        if (zipFileIndex === -1) {
-          showErrorForNoFileInZip(pathInZipFile);
-        } else {
-          viewProfileFromZip(zipFileIndex);
-        }
+        viewProfileFromPathInZipFile(pathInZipFile);
       }
     }
     if (
@@ -343,16 +333,9 @@ export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
         'The zipFileTree should exist if the ZipFileViewer is mounted.'
       );
     }
-    const zipFileTable = getZipFileTable(state);
-    if (zipFileTable === null) {
-      throw new Error(
-        'The zipFileTable should exist if the ZipFileViewer is mounted.'
-      );
-    }
     return {
       zipFileState: getZipFileState(state),
       pathInZipFile: getPathInZipFileFromUrl(state),
-      zipFileTable: zipFileTable,
       zipFileTree,
       zipFileMaxDepth: getZipFileMaxDepth(state),
       selectedZipFileIndex: getSelectedZipFileIndex(state),
@@ -364,8 +347,8 @@ export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedZipFile,
     changeExpandedZipFile,
     viewProfileFromZip,
+    viewProfileFromPathInZipFile,
     returnToZipFileList,
-    showErrorForNoFileInZip,
   },
   component: ZipFileViewerImpl,
 });
