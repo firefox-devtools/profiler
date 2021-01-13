@@ -11,3 +11,55 @@
 .markerContextMenu .react-contextmenu-item:hover > strong {
   color: #fff;
 }
+
+/* Here are all icons for the marker context menu. */
+.markerContextMenuIconSetSelectionFromMarker {
+  background-image: url(firefox-profiler-res/img/svg/set-selection-from-marker.svg);
+}
+
+.markerContextMenuIconStartSelectionHere, /* <- for dot markers */
+.markerContextMenuIconStartSelectionAtMarkerStart /* <- for interval markers */
+ {
+  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-start.svg);
+}
+
+.markerContextMenuIconStartSelectionAtMarkerEnd {
+  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-end.svg);
+}
+
+.markerContextMenuIconEndSelectionAtMarkerStart {
+  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-start.svg);
+}
+
+.markerContextMenuIconEndSelectionHere, /* <- for dot markers */
+.markerContextMenuIconEndSelectionAtMarkerEnd /* <- for interval markers */
+ {
+  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-end.svg);
+}
+
+.markerContextMenuIconCopyDescription {
+  background-image: url(firefox-profiler-res/img/svg/copy-dark.svg);
+}
+
+.markerContextMenuIconCopyStack {
+  background-image: url(firefox-profiler-res/img/svg/copy-marker-stack.svg);
+}
+
+.markerContextMenuIconCopyUrl {
+  background-image: url(firefox-profiler-res/img/svg/globe-dark.svg);
+}
+
+.markerContextMenuIconCopyPayload {
+  background-image: url(firefox-profiler-res/img/svg/copy-marker-payload.svg);
+}
+
+.react-contextmenu-item--selected .markerContextMenuIconCopyDescription,
+.react-contextmenu-item:hover .markerContextMenuIconCopyDescription,
+.react-contextmenu-item--selected .markerContextMenuIconCopyUrl,
+.react-contextmenu-item:hover .markerContextMenuIconCopyUrl,
+.react-contextmenu-item--selected .markerContextMenuIconCopyStack,
+.react-contextmenu-item:hover .markerContextMenuIconCopyStack,
+.react-contextmenu-item--selected .markerContextMenuIconCopyPayload,
+.react-contextmenu-item:hover .markerContextMenuIconCopyPayload {
+  filter: invert(1);
+}

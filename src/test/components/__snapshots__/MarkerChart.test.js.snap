@@ -47,6 +47,9 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconSetSelectionFromMarker"
+    />
     Set selection from marker’s duration
   </div>
   <div
@@ -58,10 +61,17 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
-    Start selection at marker’s 
-    <strong>
-      start
-    </strong>
+    <span
+      class="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Start selection at marker’s 
+      <strong>
+        start
+      </strong>
+    </div>
   </div>
   <div
     aria-disabled="false"
@@ -69,35 +79,17 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
-    Start selection at marker’s 
-    <strong>
-      end
-    </strong>
-  </div>
-  <div
-    class="react-contextmenu-separator"
-  />
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    End selection at marker’s 
-    <strong>
-      start
-    </strong>
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    End selection at marker’s 
-    <strong>
-      end
-    </strong>
+    <span
+      class="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Start selection at marker’s 
+      <strong>
+        end
+      </strong>
+    </div>
   </div>
   <div
     class="react-contextmenu-separator"
@@ -108,6 +100,48 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      End selection at marker’s 
+      <strong>
+        start
+      </strong>
+    </div>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      End selection at marker’s 
+      <strong>
+        end
+      </strong>
+    </div>
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconCopyDescription"
+    />
     Copy description
   </div>
   <div
@@ -116,6 +150,9 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconCopyPayload"
+    />
     Copy full payload
   </div>
 </nav>
