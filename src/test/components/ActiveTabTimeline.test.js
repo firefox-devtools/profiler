@@ -145,7 +145,7 @@ describe('ActiveTabTimeline', function() {
     it('starts out not being selected', function() {
       const { getState, getGlobalTrackRow, threadIndex } = setup();
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
+      expect(getGlobalTrackRow()).not.toHaveClass('selected');
     });
 
     it('can select a thread by clicking the row', () => {

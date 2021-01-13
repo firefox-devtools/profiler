@@ -80,6 +80,6 @@ describe('<Permalink>', function() {
       queryInput(),
       'Unable to find the permalink input text field'
     );
-    expect(input).toHaveAttribute('value', shortUrl);
+    expect(input).toHaveValue(shortUrl);
   });
 });

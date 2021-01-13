@@ -60,7 +60,7 @@ describe('FlameGraph', function() {
   it('renders a message instead of the graph when call stack is inverted', () => {
     const { getByText, dispatch } = setupFlameGraph();
     dispatch(changeInvertCallstack(true));
-    expect(getByText(/The Flame Graph is not available/)).toBeDefined();
+    expect(getByText(/The Flame Graph is not available/)).toBeInTheDocument();
   });
 
   it('switches back to uninverted mode when clicking the button', () => {
