@@ -316,7 +316,12 @@ describe('UrlManager', function() {
     expect(previousLocation).toEqual(window.location.href);
   });
 
-  it('persists view query string for `from-addon` data source', async function() {
+  it('persists view query string for `from-addon` data source ', async function() {
+    // This setup function doesn't add any profile to the state, so that's why
+    // it logs an error that says we don't have innerWindowID in this profile.
+    // We can safely ignore that part because we don't test this part of the
+    // codebase here. We only care about the timeline track organization.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
       '/from-addon/?view=active-tab'
     );
