@@ -66,7 +66,7 @@ For more detailed information on getting started contributing. We have plenty of
 
 ### Discussion
 
-Say hello on Matrix in the [*Firefox Profiler* channel][matrix].
+Say hello on Matrix in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)][matrix].
 
 ### License
 
