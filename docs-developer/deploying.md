@@ -39,3 +39,8 @@ sh bin/revert-last-deployment.sh
 
 When you're ready with a fix landed on `main`, you can push a new version to the
 `production` branch as described in the first part.
+
+## Mozilla internal contacts
+
+You can find the Mozilla contacts about our deployment in [this Mozilla-only
+document](https://docs.google.com/document/d/16YRafdIbk4aFgu4EZjMEjX4F6jIcUJQsazW9AORNvfY/edit).
