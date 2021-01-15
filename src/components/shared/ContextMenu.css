@@ -117,3 +117,15 @@
   /* Invert the colors of the checkmark when selected */
   border-color: #fff;
 }
+
+/* Use a span with this class to add an icon to an item. */
+.react-contextmenu-icon {
+  position: relative;
+  top: 2px;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: center no-repeat;
+  margin-inline-end: 8px;
+  pointer-events: auto;
+}

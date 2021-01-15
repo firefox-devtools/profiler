@@ -2,7 +2,7 @@
 
 exports[`calltree/CallNodeContextMenu basic rendering renders a full context menu when open, with many nav items 1`] = `
 <nav
-  class="react-contextmenu"
+  class="react-contextmenu callNodeContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -21,7 +21,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
+          class="react-contextmenu-icon callNodeContextMenuIconMerge"
         />
         Merge function
       </div>
@@ -44,7 +44,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
+          class="react-contextmenu-icon callNodeContextMenuIconMerge"
         />
         Merge node only
       </div>
@@ -67,7 +67,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
+          class="react-contextmenu-icon callNodeContextMenuIconFocus"
         />
         Focus on function
       </div>
@@ -90,7 +90,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
+          class="react-contextmenu-icon callNodeContextMenuIconFocus"
         />
         Focus on subtree only
       </div>
@@ -113,7 +113,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+          class="react-contextmenu-icon callNodeContextMenuIconCollapse"
         />
         Collapse function
       </div>
@@ -136,7 +136,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+          class="react-contextmenu-icon callNodeContextMenuIconCollapse"
         />
         Collapse
         <span
@@ -164,7 +164,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+          class="react-contextmenu-icon callNodeContextMenuIconCollapse"
         />
         Collapse direct recursion
       </div>
@@ -187,7 +187,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
         class="callNodeContextMenuWithKeyText"
       >
         <span
-          class="callNodeContextMenuIcon callNodeContextMenuIconDrop"
+          class="react-contextmenu-icon callNodeContextMenuIconDrop"
         />
         Drop samples with this function
       </div>

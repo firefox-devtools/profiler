@@ -1,34 +1,26 @@
-.callNodeContextMenuIcon {
-  position: relative;
-  top: 2px;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-inline-end: 8px;
-  pointer-events: auto;
-}
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.react-contextmenu-item--selected > .callNodeContextMenuIcon,
-.react-contextmenu-item:hover .callNodeContextMenuIcon,
-.react-contextmenu-item:active .callNodeContextMenuIcon {
+.callNodeContextMenu .react-contextmenu-item--selected .react-contextmenu-icon,
+.callNodeContextMenu .react-contextmenu-item:hover .react-contextmenu-icon {
   filter: invert(1);
 }
 
 .callNodeContextMenuIconMerge {
-  background: url(../../../res/img/svg/merge-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/merge-icon.svg);
 }
 
 .callNodeContextMenuIconCollapse {
-  background: url(../../../res/img/svg/collapse-icon.svg) center center
-    no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/collapse-icon.svg);
 }
 
 .callNodeContextMenuIconFocus {
-  background: url(../../../res/img/svg/focus-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/focus-icon.svg);
 }
 
 .callNodeContextMenuIconDrop {
-  background: url(../../../res/img/svg/drop-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/drop-icon.svg);
 }
 
 .callNodeContextMenuLabel {
@@ -38,8 +30,7 @@
 }
 
 .react-contextmenu-item--selected > .callNodeContextMenuLabel,
-.react-contextmenu-item:hover .callNodeContextMenuLabel,
-.react-contextmenu-item:active .callNodeContextMenuLabel {
+.react-contextmenu-item:hover .callNodeContextMenuLabel {
   color: #fff;
 }
 

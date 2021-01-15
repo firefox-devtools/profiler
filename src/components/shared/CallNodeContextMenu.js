@@ -607,6 +607,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return (
       <ContextMenu
         id="CallNodeContextMenu"
+        className="callNodeContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
       >
@@ -674,7 +675,7 @@ function TransformMenuItem(props: {|
       <div className="callNodeContextMenuWithKey" title={props.title}>
         <div className="callNodeContextMenuWithKeyText">
           <span
-            className={`callNodeContextMenuIcon callNodeContextMenuIcon${props.icon}`}
+            className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
           />
           {props.children}
         </div>
