@@ -303,7 +303,9 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         >
           Set selection from duration
         </MenuItem>
-        <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
+        <MenuItem onClick={this.copyMarkerDescription}>
+          Copy description
+        </MenuItem>
         {data && data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}

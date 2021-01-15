@@ -117,7 +117,7 @@ describe('MarkerTable', function() {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
-      fireFullClick(getByText('Copy'));
+      fireFullClick(getByText('Copy description'));
       expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(str));
     }
 

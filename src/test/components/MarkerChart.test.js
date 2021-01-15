@@ -410,7 +410,7 @@ describe('MarkerChart', function() {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnMenuItem('Copy');
+      clickOnMenuItem('Copy description');
       expect(copy).toHaveBeenLastCalledWith('UserTiming A');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
@@ -433,7 +433,7 @@ describe('MarkerChart', function() {
       jest.runAllTimers();
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
-      clickOnMenuItem('Copy');
+      clickOnMenuItem('Copy description');
       expect(copy).toHaveBeenLastCalledWith('UserTiming B');
     });
 

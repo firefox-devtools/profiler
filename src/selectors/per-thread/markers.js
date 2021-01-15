@@ -12,7 +12,6 @@ import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 import { getLabelGetter } from '../../profile-logic/marker-schema';
-import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { ThreadSelectorsPerThread } from './thread';
 import type {
@@ -452,28 +451,12 @@ export function getMarkerSelectorsPerThread(
 
   /**
    * This selector is used by the generic marker context menu to decide what to copy.
+   * Currently we want to copy the same thing that is displayed as a description
+   * in the marker table.
    */
   const getMarkerLabelToCopyGetter: Selector<
     (MarkerIndex) => string
-  > = state => {
-    const tabSlug = UrlState.getSelectedTab(state);
-    switch (tabSlug) {
-      case 'marker-chart':
-        return _getMarkerChartLabelGetter(state);
-      case 'marker-table':
-        return getMarkerTableLabelGetter(state);
-      case 'network-chart':
-      case 'calltree':
-      case 'flame-graph':
-      case 'stack-chart':
-      case 'js-tracer':
-        // Some of these may not actually happen, but all TabSlugs are included
-        // for completeness.
-        return getMarkerTooltipLabelGetter(state);
-      default:
-        throw assertExhaustiveCheck(tabSlug, 'Unhandled TabSlug type');
-    }
-  };
+  > = getMarkerTableLabelGetter;
 
   /**
    * This organizes the result of the previous selector in rows to be nicely
