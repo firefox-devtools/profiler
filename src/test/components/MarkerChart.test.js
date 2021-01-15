@@ -4,11 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import {
-  render,
-  fireEvent,
-  getByText as globalGetByText,
-} from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -314,7 +310,7 @@ describe('MarkerChart', function() {
         flushDrawLog,
         fireMouseEvent,
         container,
-        getByText,
+        getByRole,
       } = setupResult;
 
       dispatch(changeSelectedTab('marker-chart'));
@@ -362,17 +358,8 @@ describe('MarkerChart', function() {
       }
 
       function clickOnMenuItem(stringOrRegexp) {
-        fireFullClick(getByText(stringOrRegexp));
-      }
-
-      // Ideally we would simulate hovering on the parent before clicking the
-      // submenu, but this is a bit more work. Maybe later...
-      function clickOnSubMenuItem(parentLookup, submenuLookup) {
-        const parentItem = getByText(parentLookup);
-        // $FlowExpectError Flow thinks parentNode is a Node.
-        const parentNode: HTMLElement = parentItem.parentNode;
-        const submenu = globalGetByText(parentNode, submenuLookup);
-        fireFullClick(submenu);
+        const menuItem = getByRole('menuitem', { name: stringOrRegexp });
+        fireFullClick(menuItem);
       }
 
       function findFillTextPosition(
@@ -394,7 +381,6 @@ describe('MarkerChart', function() {
         getContextMenu,
         findFillTextPosition,
         clickOnMenuItem,
-        clickOnSubMenuItem,
       };
     }
 
@@ -465,7 +451,7 @@ describe('MarkerChart', function() {
     it('changes selection range when clicking on submenu', () => {
       const {
         rightClick,
-        clickOnSubMenuItem,
+        clickOnMenuItem,
         getContextMenu,
         findFillTextPosition,
         getState,
@@ -475,7 +461,7 @@ describe('MarkerChart', function() {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnSubMenuItem(/selection start/, /From the start/);
+      clickOnMenuItem(/start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
@@ -483,7 +469,7 @@ describe('MarkerChart', function() {
         selectionEnd: 11,
       });
 
-      clickOnSubMenuItem(/selection start/, /From the end/);
+      clickOnMenuItem(/start.*end/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
@@ -492,7 +478,7 @@ describe('MarkerChart', function() {
       });
 
       // This one doesn't work because it's disabled.
-      clickOnSubMenuItem(/selection end/, /From the start/);
+      clickOnMenuItem(/end.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
@@ -502,7 +488,7 @@ describe('MarkerChart', function() {
 
       // Reset the selection by using the other marker.
       rightClick(findFillTextPosition('UserTiming A'));
-      clickOnSubMenuItem(/selection start/, /From the start/);
+      clickOnMenuItem(/start.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
@@ -512,7 +498,7 @@ describe('MarkerChart', function() {
 
       rightClick(findFillTextPosition('UserTiming B'));
 
-      clickOnSubMenuItem(/selection end/, /From the start/);
+      clickOnMenuItem(/end.*start/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
@@ -520,12 +506,40 @@ describe('MarkerChart', function() {
         selectionEnd: 2,
       });
 
-      clickOnSubMenuItem(/selection end/, /From the end/);
+      clickOnMenuItem(/end.*end/i);
       expect(getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 0,
         selectionEnd: 8,
+      });
+    });
+
+    it('changes selection range using the full marker duration', () => {
+      const {
+        rightClick,
+        clickOnMenuItem,
+        findFillTextPosition,
+        getState,
+      } = setupForContextMenus();
+
+      // Now we're testing the selection using the full marker's duration.
+      rightClick(findFillTextPosition('UserTiming B'));
+      clickOnMenuItem(/duration/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 2,
+        selectionEnd: 8,
+      });
+
+      rightClick(findFillTextPosition('UserTiming A'));
+      clickOnMenuItem(/duration/);
+      expect(getPreviewSelection(getState())).toEqual({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 0,
+        selectionEnd: 10,
       });
     });
   });

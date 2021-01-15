@@ -36,91 +36,72 @@ exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have b
 
 exports[`MarkerChart context menus displays when right clicking on a marker 1`] = `
 <nav
-  class="react-contextmenu react-contextmenu--visible"
+  class="react-contextmenu markerContextMenu react-contextmenu--visible"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
 >
-  <nav
-    aria-haspopup="true"
-    class="react-contextmenu-item react-contextmenu-submenu"
-    role="menuitem"
-    style="position: relative;"
-    tabindex="-1"
-  >
-    <div
-      class="react-contextmenu-item"
-    >
-      Set selection start
-    </div>
-    <nav
-      class="react-contextmenu"
-      role="menu"
-      style="position: absolute; transition: opacity 1ms; top: 0px; left: 100%;"
-      tabindex="-1"
-    >
-      <div
-        aria-disabled="false"
-        class="react-contextmenu-item"
-        role="menuitem"
-        tabindex="-1"
-      >
-        From the start of this marker
-      </div>
-      <div
-        aria-disabled="false"
-        class="react-contextmenu-item"
-        role="menuitem"
-        tabindex="-1"
-      >
-        From the end of this marker
-      </div>
-    </nav>
-  </nav>
-  <nav
-    aria-haspopup="true"
-    class="react-contextmenu-item react-contextmenu-submenu"
-    role="menuitem"
-    style="position: relative;"
-    tabindex="-1"
-  >
-    <div
-      class="react-contextmenu-item"
-    >
-      Set selection end
-    </div>
-    <nav
-      class="react-contextmenu"
-      role="menu"
-      style="position: absolute; transition: opacity 1ms; top: 0px; left: 100%;"
-      tabindex="-1"
-    >
-      <div
-        aria-disabled="false"
-        class="react-contextmenu-item"
-        role="menuitem"
-        tabindex="-1"
-      >
-        From the start of this marker
-      </div>
-      <div
-        aria-disabled="false"
-        class="react-contextmenu-item"
-        role="menuitem"
-        tabindex="-1"
-      >
-        From the end of this marker
-      </div>
-    </nav>
-  </nav>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
   >
-    Set selection from duration
+    Set selection from marker’s duration
   </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Start selection at marker’s 
+    <strong>
+      start
+    </strong>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Start selection at marker’s 
+    <strong>
+      end
+    </strong>
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    End selection at marker’s 
+    <strong>
+      start
+    </strong>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    End selection at marker’s 
+    <strong>
+      end
+    </strong>
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
@@ -135,7 +116,7 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
     role="menuitem"
     tabindex="-1"
   >
-    Copy marker JSON
+    Copy full payload
   </div>
 </nav>
 `;
