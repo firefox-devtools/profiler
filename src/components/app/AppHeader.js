@@ -13,6 +13,7 @@ import * as React from 'react';
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
 
 import './AppHeader.css';
+import { Localized } from '@fluent/react';
 
 export class AppHeader extends React.PureComponent<{||}> {
   render() {
@@ -20,13 +21,17 @@ export class AppHeader extends React.PureComponent<{||}> {
       <header>
         <h1 className="appHeader">
           <span className="appHeaderSlogan">
-            <InnerNavigationLink dataSource="none" className="appHeaderLink">
-              Firefox Profiler
-            </InnerNavigationLink>
-            <span className="appHeaderSubtext">
-              {' '}
-              &mdash; Web app for Firefox performance analysis
-            </span>
+            <Localized id="AppHeader--app-header-slogan ">
+              <InnerNavigationLink dataSource="none" className="appHeaderLink">
+                Firefox Profiler
+              </InnerNavigationLink>
+            </Localized>
+            <Localized id="AppHeader--app-header-subtext">
+              <span className="appHeaderSubtext">
+                {' '}
+                &mdash; Web app for Firefox performance analysis
+              </span>
+            </Localized>
           </span>
           <a
             className="appHeaderGithubIcon"

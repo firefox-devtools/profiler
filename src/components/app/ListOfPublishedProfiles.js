@@ -21,6 +21,7 @@ import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
+import { Localized } from '@fluent/react';
 
 // This component displays all published profile, and makes it possible to load
 // them by clicking on them, or delete them.
@@ -236,7 +237,9 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
 
     if (!uploadedProfileInformationList.length) {
       return (
-        <p className="photon-body-30">No profile has been uploaded yet!</p>
+        <Localized id="ListOfPublishedProfiles--uploaded-profile-information-list-empty ">
+          <p className="photon-body-30">No profile has been uploaded yet!</p>
+        </Localized>
       );
     }
 
@@ -254,12 +257,17 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
         <>See and manage all your recordings ({profilesRestCount} more)</>
       );
     } else {
-      profileRestLabel =
-        uploadedProfileInformationList.length > 1 ? (
-          <>Manage these recordings</>
-        ) : (
-          <>Manage this recording</>
-        );
+      profileRestLabel = (
+        <Localized
+          id="ListOfPublishedProfiles--uploaded-profile-information-label"
+          vars={{
+            uploadedProfileInformationListLength:
+              uploadedProfileInformationList.length,
+          }}
+        >
+          {'{ $ uploadedProfileInformationListLength } Manage these recordings'}
+        </Localized>
+      );
     }
 
     const nowTimestamp = Date.now();
