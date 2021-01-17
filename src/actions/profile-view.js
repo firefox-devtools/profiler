@@ -629,6 +629,23 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
 }
 
 /**
+ * This action shows all tracks
+ */
+export function showAllTracks(): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'show all tracks',
+    });
+
+    dispatch({
+      type: 'SHOW_ALL_TRACKS',
+    });
+  };
+}
+
+/**
  * This action shows a specific global track.
  */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
