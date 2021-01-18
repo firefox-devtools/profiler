@@ -533,7 +533,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               resource into a single collapsed call node.
             `}
           >
-            Collapse
+            Collapse{' '}
             <span className="callNodeContextMenuLabel">{nameForResource}</span>
           </TransformMenuItem>
         ) : null}
@@ -671,16 +671,16 @@ function TransformMenuItem(props: {|
   +title: string,
 |}) {
   return (
-    <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
-      <div className="callNodeContextMenuWithKey" title={props.title}>
-        <div className="callNodeContextMenuWithKeyText">
-          <span
-            className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
-          />
-          {props.children}
-        </div>
-        <kbd>{props.shortcut}</kbd>
-      </div>
+    <MenuItem
+      onClick={props.onClick}
+      data={{ type: props.transform }}
+      attributes={{ title: props.title }}
+    >
+      <span
+        className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
+      />
+      <div className="react-contextmenu-item-content">{props.children}</div>
+      <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
     </MenuItem>
   );
 }

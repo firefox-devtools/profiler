@@ -31,7 +31,9 @@
 }
 
 .react-contextmenu-item:not(.react-contextmenu-submenu) {
+  display: flex;
   overflow: hidden;
+  align-items: center;
   padding: 2px 12px;
   cursor: default;
   line-height: 1.5;
@@ -118,11 +120,14 @@
   border-color: #fff;
 }
 
+/* Use this wrapper for a content that needs to take the available space or if
+ * it contains other HTML elements (eg <strong>) */
+.react-contextmenu-item-content {
+  flex: auto;
+}
+
 /* Use a span with this class to add an icon to an item. */
 .react-contextmenu-icon {
-  position: relative;
-  top: 2px;
-  display: inline-block;
   width: 16px;
   height: 16px;
   background: center no-repeat;

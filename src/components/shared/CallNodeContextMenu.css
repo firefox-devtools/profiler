@@ -26,7 +26,6 @@
 .callNodeContextMenuLabel {
   color: #555;
   font-weight: bold;
-  margin-inline: 2px;
 }
 
 .react-contextmenu-item--selected > .callNodeContextMenuLabel,
@@ -34,18 +33,7 @@
   color: #fff;
 }
 
-.callNodeContextMenuWithKey {
-  display: flex;
-}
-
-.callNodeContextMenuWithKey > div {
-  /* Vertically align the text with the icon */
-  display: flex;
-  flex: 1;
-}
-
-.callNodeContextMenuWithKey > kbd {
-  display: inline-block;
+.callNodeContextMenuShortcut {
   padding: 0 5px;
 
   /* This color is based off of photon grey, but adjusted to have a nice visual look
