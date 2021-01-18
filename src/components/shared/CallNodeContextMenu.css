@@ -23,16 +23,6 @@
   background-image: url(firefox-profiler-res/img/svg/drop-icon.svg);
 }
 
-.callNodeContextMenuLabel {
-  color: #555;
-  font-weight: bold;
-}
-
-.react-contextmenu-item--selected > .callNodeContextMenuLabel,
-.react-contextmenu-item:hover .callNodeContextMenuLabel {
-  color: #fff;
-}
-
 .callNodeContextMenuShortcut {
   padding: 0 5px;
 

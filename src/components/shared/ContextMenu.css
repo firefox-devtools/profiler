@@ -134,3 +134,13 @@
   margin-inline-end: 8px;
   pointer-events: auto;
 }
+
+/* Soften a bit the style of highlighted words */
+.react-contextmenu-item > strong {
+  color: #38383d;
+}
+
+.react-contextmenu-item--selected > strong,
+.react-contextmenu-item:hover > strong {
+  color: #fff;
+}

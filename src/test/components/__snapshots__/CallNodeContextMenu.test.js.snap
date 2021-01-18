@@ -125,13 +125,10 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     <div
       class="react-contextmenu-item-content"
     >
-      Collapse
-       
-      <span
-        class="callNodeContextMenuLabel"
-      >
+      Collapse 
+      <strong>
         XUL
-      </span>
+      </strong>
     </div>
     <kbd
       class="callNodeContextMenuShortcut"

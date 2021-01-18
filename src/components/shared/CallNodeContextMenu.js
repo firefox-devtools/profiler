@@ -533,8 +533,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               resource into a single collapsed call node.
             `}
           >
-            Collapse{' '}
-            <span className="callNodeContextMenuLabel">{nameForResource}</span>
+            Collapse <strong>{nameForResource}</strong>
           </TransformMenuItem>
         ) : null}
 
