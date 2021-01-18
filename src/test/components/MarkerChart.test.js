@@ -409,6 +409,7 @@ describe('MarkerChart', function() {
       rightClick(findFillTextPosition('UserTiming A'));
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toMatchSnapshot();
 
       clickOnMenuItem('Copy description');
       expect(copy).toHaveBeenLastCalledWith('UserTiming A');

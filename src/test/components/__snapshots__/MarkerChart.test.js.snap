@@ -34,6 +34,112 @@ exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have b
 </div>
 `;
 
+exports[`MarkerChart context menus displays when right clicking on a marker 1`] = `
+<nav
+  class="react-contextmenu react-contextmenu--visible"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <nav
+    aria-haspopup="true"
+    class="react-contextmenu-item react-contextmenu-submenu"
+    role="menuitem"
+    style="position: relative;"
+    tabindex="-1"
+  >
+    <div
+      class="react-contextmenu-item"
+    >
+      Set selection start
+    </div>
+    <nav
+      class="react-contextmenu"
+      role="menu"
+      style="position: absolute; transition: opacity 1ms; top: 0px; left: 100%;"
+      tabindex="-1"
+    >
+      <div
+        aria-disabled="false"
+        class="react-contextmenu-item"
+        role="menuitem"
+        tabindex="-1"
+      >
+        From the start of this marker
+      </div>
+      <div
+        aria-disabled="false"
+        class="react-contextmenu-item"
+        role="menuitem"
+        tabindex="-1"
+      >
+        From the end of this marker
+      </div>
+    </nav>
+  </nav>
+  <nav
+    aria-haspopup="true"
+    class="react-contextmenu-item react-contextmenu-submenu"
+    role="menuitem"
+    style="position: relative;"
+    tabindex="-1"
+  >
+    <div
+      class="react-contextmenu-item"
+    >
+      Set selection end
+    </div>
+    <nav
+      class="react-contextmenu"
+      role="menu"
+      style="position: absolute; transition: opacity 1ms; top: 0px; left: 100%;"
+      tabindex="-1"
+    >
+      <div
+        aria-disabled="false"
+        class="react-contextmenu-item"
+        role="menuitem"
+        tabindex="-1"
+      >
+        From the start of this marker
+      </div>
+      <div
+        aria-disabled="false"
+        class="react-contextmenu-item"
+        role="menuitem"
+        tabindex="-1"
+      >
+        From the end of this marker
+      </div>
+    </nav>
+  </nav>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Set selection from duration
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Copy description
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Copy marker JSON
+  </div>
+</nav>
+`;
+
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [
