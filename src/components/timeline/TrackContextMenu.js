@@ -528,10 +528,16 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (rightClickedTrack !== null) {
       return null;
     }
+    const hiddenLocalTracksCount = [
+      ...this.props.hiddenLocalTracksByPid.values(),
+    ].reduce((total, set) => total + set.size, 0);
+    const isDisabled =
+      hiddenLocalTracksCount + this.props.hiddenGlobalTracks.size === 0;
+
     return (
       <React.Fragment>
-        <MenuItem onClick={this._showAllTracks}>
-          `Show all tracks`
+        <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
+          Show all tracks
         </MenuItem>
         <div className="react-contextmenu-separator" />
       </React.Fragment>
