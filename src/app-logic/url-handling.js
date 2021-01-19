@@ -163,6 +163,7 @@ type BaseQuery = {|
   profiles: string[],
   profileName: string,
   view: string,
+  implementation: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -172,7 +173,6 @@ type CallTreeQuery = {|
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
-  implementation: string,
   ctSummary: string,
 |};
 
@@ -191,7 +191,6 @@ type StackChartQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   showUserTimings: null | void,
-  implementation: string,
   ctSummary: string,
 |};
 
@@ -364,6 +363,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
+    implementation:
+      urlState.profileSpecific.implementation === 'combined'
+        ? undefined
+        : urlState.profileSpecific.implementation,
   }: BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
@@ -388,10 +391,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
-      query.implementation =
-        urlState.profileSpecific.implementation === 'combined'
-          ? undefined
-          : urlState.profileSpecific.implementation;
       if (selectedThreads !== null) {
         query.transforms =
           stringifyTransforms(

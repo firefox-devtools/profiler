@@ -986,7 +986,7 @@ declare var describe: {
    * @param {table} table of Test
    */
   each(
-    ...table: Array<Array<mixed> | mixed> | [Array<string>, string]
+    table: Array<Array<mixed> | mixed>
   ): (
     name: JestTestName,
     fn?: (...args: Array<any>) => ?Promise<mixed>,
@@ -1023,7 +1023,7 @@ declare var it: {
       timeout?: number
     ): void,
     each(
-      ...table: Array<Array<mixed> | mixed> | [Array<string>, string]
+      table: Array<Array<mixed> | mixed>
     ): (
       name: JestTestName,
       fn?: (...args: Array<any>) => ?Promise<mixed>,
@@ -1066,7 +1066,7 @@ declare var it: {
    * @param {table} table of Test
    */
   each(
-    ...table: Array<Array<mixed> | mixed> | [Array<string>, string]
+    table: Array<Array<mixed> | mixed>
   ): (
     name: JestTestName,
     fn?: (...args: Array<any>) => ?Promise<mixed>,

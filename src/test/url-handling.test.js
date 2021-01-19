@@ -8,6 +8,7 @@ import { oneLineTrim } from 'common-tags';
 import * as urlStateSelectors from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
+  changeImplementationFilter,
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
@@ -681,6 +682,75 @@ describe('committed ranges', function() {
       expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 1000 },
       ]);
+    });
+  });
+});
+
+describe('implementation', function() {
+  function setup(settings, profile) {
+    const store = _getStoreWithURL(settings, profile);
+
+    function getQueryString() {
+      const urlState = urlStateSelectors.getUrlState(store.getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      return queryString;
+    }
+
+    return {
+      ...store,
+      getQueryString,
+    };
+  }
+
+  describe('serializing', () => {
+    it('skips the value "combined"', () => {
+      const { dispatch, getQueryString } = setup();
+
+      expect(getQueryString()).not.toContain('implementation=');
+
+      dispatch(changeImplementationFilter('combined'));
+      expect(getQueryString()).not.toContain('implementation=');
+    });
+
+    it.each(['js', 'cpp'])(
+      'can serialize the value "%s"',
+      implementationFilter => {
+        const { getQueryString, dispatch } = setup();
+        dispatch(changeImplementationFilter(implementationFilter));
+        expect(getQueryString()).toContain(
+          `implementation=${implementationFilter}`
+        );
+      }
+    );
+  });
+
+  describe('parsing', () => {
+    it('deserializes when there is no implementation value', () => {
+      const { getState } = setup();
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
+    });
+
+    it.each(['js', 'cpp'])(
+      'deserializes known value %s',
+      implementationFilter => {
+        const { getState } = setup({
+          search: `?implementation=${implementationFilter}`,
+        });
+        expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+          implementationFilter
+        );
+      }
+    );
+
+    it('deserializes unknown values', () => {
+      const { getState } = setup({
+        search: '?implementation=foobar',
+      });
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
     });
   });
 });
