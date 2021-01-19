@@ -102,7 +102,19 @@ adb shell am start -n org.mozilla.geckoview_example/.App \
 
 ### Startup profiling Fenix
 
-Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file. The filename depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix`.
+Fenix has a [different way](https://firefox-source-docs.mozilla.org/mobile/android/geckoview/consumer/automation.html#reading-configuration-from-a-file) to specify environment variables: it uses a yaml file.
+
+The easiest way to set up startup profiling is to run the `<fenix-repo>/tools/setup-startup-profiling.py` script. For example:
+```bash
+./tools/setup-startup-profiling.py activate nightly  # To activate startup profiling on nightly.
+./tools/setup-startup-profiling.py deactivate beta  # To deactivate startup profiling on beta.
+```
+
+If the app is uninstalled or the device is restarted, the `activate` command may need to be re-run. The script is hard-coded to use a default configuration file with default profiling arguments. If you wish to change these arguments or use a non-standard app ID, modify the script locally or read below.
+
+#### Manual configuration
+
+The filename of the YAML file mentioned above depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix`.
 
  1. Create a file with the name `org.mozilla.fenix-geckoview-config.yaml` on your desktop machine and content of the following form:
 
