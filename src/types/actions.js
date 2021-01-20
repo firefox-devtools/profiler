@@ -208,6 +208,9 @@ type ProfileAction =
       +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
+      +type: 'SHOW_ALL_TRACKS',
+    |}
+  | {|
       +type: 'SHOW_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
     |}

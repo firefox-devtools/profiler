@@ -8,6 +8,7 @@ import { ContextMenu, MenuItem } from 'react-contextmenu';
 import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
+  showAllTracks,
   showGlobalTrack,
   isolateProcess,
   isolateLocalTrack,
@@ -64,6 +65,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +hideGlobalTrack: typeof hideGlobalTrack,
+  +showAllTracks: typeof showAllTracks,
   +showGlobalTrack: typeof showGlobalTrack,
   +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
@@ -76,6 +78,11 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class TimelineTrackContextMenu extends PureComponent<Props> {
+  _showAllTracks = (): void => {
+    const { showAllTracks } = this.props;
+    showAllTracks();
+  };
+
   _toggleGlobalTrackVisibility = (
     _,
     data: { trackIndex: TrackIndex }
@@ -516,6 +523,27 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  renderShowAllTracks() {
+    const { rightClickedTrack } = this.props;
+    if (rightClickedTrack !== null) {
+      return null;
+    }
+    const hiddenLocalTracksCount = [
+      ...this.props.hiddenLocalTracksByPid.values(),
+    ].reduce((total, set) => total + set.size, 0);
+    const isDisabled =
+      hiddenLocalTracksCount + this.props.hiddenGlobalTracks.size === 0;
+
+    return (
+      <React.Fragment>
+        <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
+          Show all tracks
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
+      </React.Fragment>
+    );
+  }
+
   render() {
     const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
@@ -523,6 +551,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
     const hideTrack = this.renderHideTrack();
+    const showAllTracksMenu = this.renderShowAllTracks();
     const separator =
       isolateProcessMainThread ||
       isolateProcess ||
@@ -540,6 +569,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           // The menu items header items to isolate tracks may or may not be
           // visible depending on the current state.
         }
+        {showAllTracksMenu}
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
@@ -607,6 +637,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     hideGlobalTrack,
+    showAllTracks,
     showGlobalTrack,
     isolateProcess,
     isolateLocalTrack,
