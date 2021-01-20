@@ -11,7 +11,7 @@ import { DetailsContainer } from './DetailsContainer';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from './CurrentProfileUploadedInformationLoader';
-import { WindowTitle } from 'firefox-profiler/components/shared/WindowTitle';
+import { WindowTitle } from 'firefox-profiler/components/app/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
