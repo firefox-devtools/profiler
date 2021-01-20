@@ -13,7 +13,7 @@ import {
   getEmptyProfile,
   getEmptyThread,
 } from '../../profile-logic/data-structures';
-import { storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { changeProfileName, setDataSource } from '../../actions/profile-view';
 
 describe('WindowTitle', () => {
@@ -98,9 +98,7 @@ describe('WindowTitle', () => {
   });
 
   it('shows the correct title for uploaded recordings', () => {
-    const profile = getEmptyProfile();
-    profile.threads.push(getEmptyThread());
-    const store = storeWithProfile(profile);
+    const store = blankStore();
     store.dispatch(setDataSource('uploaded-recordings'));
     render(
       <Provider store={store}>
@@ -109,5 +107,21 @@ describe('WindowTitle', () => {
     );
 
     expect(document.title).toBe('Uploaded Recordings – Firefox Profiler');
+  });
+
+  it('shows the correct title for the compare view', () => {
+    // In this test we check that the title updates when navigating in the app.
+    const store = blankStore();
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Firefox Profiler');
+
+    store.dispatch(setDataSource('compare'));
+
+    expect(document.title).toBe('Compare Profiles – Firefox Profiler');
   });
 });

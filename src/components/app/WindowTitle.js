@@ -7,13 +7,16 @@
 
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 
 import {
   getProfileNameFromUrl,
   getDataSource,
   getFileNameInZipFilePath,
-  getProfile,
+  getProfileOrNull,
   getFormattedMetaInfoString,
 } from 'firefox-profiler/selectors';
 
@@ -21,10 +24,10 @@ import type { Profile, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
-  +profile: Profile,
+  +profile: Profile | null,
   +profileNameFromUrl: string | null,
   +fileNameInZipFilePath: string | null,
-  +formattedMetaInfoString: string,
+  +formattedMetaInfoString: string | null,
   +dataSource: DataSource,
 |};
 
@@ -44,7 +47,6 @@ class WindowTitleImpl extends PureComponent<Props> {
       fileNameInZipFilePath,
       dataSource,
     } = this.props;
-    const { meta } = profile;
 
     switch (dataSource) {
       case 'none':
@@ -65,6 +67,10 @@ class WindowTitleImpl extends PureComponent<Props> {
         if (profileNameFromUrl) {
           document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
         } else {
+          const { meta } = ensureExists(
+            profile,
+            'Expected the profile to exist.'
+          );
           let title = '';
           if (formattedMetaInfoString) {
             title += formattedMetaInfoString + SEPARATOR;
@@ -116,7 +122,7 @@ export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
     profileNameFromUrl: getProfileNameFromUrl(state),
     fileNameInZipFilePath: getFileNameInZipFilePath(state),
     formattedMetaInfoString: getFormattedMetaInfoString(state),
-    profile: getProfile(state),
+    profile: getProfileOrNull(state),
     dataSource: getDataSource(state),
   }),
   component: WindowTitleImpl,
