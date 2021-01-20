@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-// @ts-check
 
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
