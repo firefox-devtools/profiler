@@ -26,6 +26,7 @@ import {
   getTimelineTrackOrganization,
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDelta,
+  getSampleUnits,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -62,6 +63,7 @@ import type {
   State,
   TimelineTrackOrganization,
   ThreadsKey,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -96,6 +98,7 @@ type StateProps = {|
   +selectedThreadIndexes: Set<ThreadIndex>,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
+  +sampleUnits: ?SampleUnits,
 |};
 
 type DispatchProps = {|
@@ -204,6 +207,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       trackName,
       enableCPUUsage,
       maxThreadCPUDelta,
+      sampleUnits,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -271,6 +275,7 @@ class TimelineTrackThread extends PureComponent<Props> {
               treeOrderSampleComparator={treeOrderSampleComparator}
               enableCPUUsage={enableCPUUsage}
               maxThreadCPUDelta={maxThreadCPUDelta}
+              sampleUnits={sampleUnits}
             />
             <ThreadSampleGraph
               className="threadSampleGraph"
@@ -400,6 +405,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       selectedThreadIndexes,
       enableCPUUsage,
       maxThreadCPUDelta: getMaxThreadCPUDelta(state),
+      sampleUnits: getSampleUnits(state),
     };
   },
   mapDispatchToProps: {
