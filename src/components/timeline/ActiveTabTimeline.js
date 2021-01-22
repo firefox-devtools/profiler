@@ -5,10 +5,10 @@
 // @flow
 
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import ActiveTabTimelineGlobalTrack from './ActiveTabGlobalTrack';
+import { TimelineRuler } from './Ruler';
+import { TimelineSelection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
+import { TimelineActiveTabGlobalTrack } from './ActiveTabGlobalTrack';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getPanelLayoutGeneration } from 'firefox-profiler/selectors/app';
@@ -51,7 +51,7 @@ type State = {|
   forceLayoutGeneration: number,
 |};
 
-class ActiveTabTimeline extends React.PureComponent<Props, State> {
+class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
     forceLayoutGeneration: 0,
@@ -104,7 +104,7 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
           >
             <ol className="timelineThreadList">
               {globalTracks.map((globalTrack, trackIndex) => (
-                <ActiveTabTimelineGlobalTrack
+                <TimelineActiveTabGlobalTrack
                   key={trackIndex}
                   trackIndex={trackIndex}
                   trackReference={globalTrackReferences[trackIndex]}
@@ -119,7 +119,7 @@ class ActiveTabTimeline extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const ActiveTabTimeline = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     globalTracks: getActiveTabGlobalTracks(state),
     globalTrackReferences: getActiveTabGlobalTrackReferences(state),
@@ -127,5 +127,5 @@ export default explicitConnect<{||}, StateProps, {||}>({
     zeroAt: getZeroAt(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
   }),
-  component: withSize<Props>(ActiveTabTimeline),
+  component: withSize<Props>(ActiveTabTimelineImpl),
 });

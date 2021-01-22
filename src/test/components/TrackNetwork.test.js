@@ -8,7 +8,8 @@ import { Provider } from 'react-redux';
 import { getByTestId, fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import TrackNetwork from '../../components/timeline/TrackNetwork';
+
+import { TrackNetwork } from '../../components/timeline/TrackNetwork';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,

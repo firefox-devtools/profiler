@@ -17,9 +17,9 @@ import {
   getActiveTabResourceTracks,
 } from 'firefox-profiler/selectors/profile';
 import './Track.css';
-import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
-import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
+import { TimelineTrackThread } from './TrackThread';
+import { TimelineTrackScreenshots } from './TrackScreenshots';
+import { TimelineActiveTabResourcesPanel } from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -105,7 +105,7 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     }
 
     return (
-      <ActiveTabResourcesPanel
+      <TimelineActiveTabResourcesPanel
         resourceTracks={resourceTracks}
         setInitialSelected={setInitialSelected}
       />
@@ -153,7 +153,11 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
 // Provide an empty list, so that strict equality checks work for component updates.
 const EMPTY_RESOURCE_TRACKS = [];
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineActiveTabGlobalTrack = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getActiveTabGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];

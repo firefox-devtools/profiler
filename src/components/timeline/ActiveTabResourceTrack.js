@@ -12,7 +12,7 @@ import {
   getSelectedTab,
 } from 'firefox-profiler/selectors/url-state';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import TrackThread from './TrackThread';
+import { TimelineTrackThread } from './TrackThread';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
@@ -94,7 +94,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
       case 'sub-frame':
       case 'thread':
         return (
-          <TrackThread
+          <TimelineTrackThread
             threadsKey={resourceTrack.threadIndex}
             trackType={isOpen ? 'expanded' : 'condensed'}
             trackName={resourceTrack.name}
@@ -191,7 +191,11 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineActiveTabResourceTrack = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { resourceTrack }) => {
     const threadIndex = resourceTrack.threadIndex;
     const selectedThreadIndexes = getSelectedThreadIndexes(state);

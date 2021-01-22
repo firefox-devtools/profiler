@@ -17,7 +17,7 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
-import TrackThread from '../../components/timeline/TrackThread';
+import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -67,7 +67,7 @@ describe('ThreadActivityGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread
+        <TimelineTrackThread
           threadsKey={0}
           trackType="expanded"
           trackName="Test Track"

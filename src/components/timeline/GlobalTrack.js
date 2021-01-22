@@ -30,9 +30,9 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './Track.css';
-import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
-import TimelineLocalTrack from './LocalTrack';
+import { TimelineTrackThread } from './TrackThread';
+import { TimelineTrackScreenshots } from './TrackScreenshots';
+import { TimelineLocalTrack } from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
@@ -332,7 +332,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineGlobalTrack = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];

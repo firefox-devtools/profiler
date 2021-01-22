@@ -7,9 +7,9 @@
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
-import FullTimeline from 'firefox-profiler/components/timeline/FullTimeline';
-import ActiveTabTimeline from 'firefox-profiler/components/timeline/ActiveTabTimeline';
-import OriginsTimelineView from 'firefox-profiler/components/timeline/OriginsTimeline';
+import { FullTimeline } from 'firefox-profiler/components/timeline/FullTimeline';
+import { ActiveTabTimeline } from 'firefox-profiler/components/timeline/ActiveTabTimeline';
+import { TimelineOrigins } from 'firefox-profiler/components/timeline/OriginsTimeline';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -30,7 +30,7 @@ class TimelineImpl extends React.PureComponent<Props> {
       case 'active-tab':
         return <ActiveTabTimeline />;
       case 'origins':
-        return <OriginsTimelineView />;
+        return <TimelineOrigins />;
       default:
         throw assertExhaustiveCheck(
           timelineTrackOrganization,
