@@ -11,6 +11,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
 import { ServiceWorkerManager } from './ServiceWorkerManager';
+import { WindowTitle } from './WindowTitle';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -34,6 +35,7 @@ export class Root extends PureComponent<RootProps> {
               <ProfileLoader />
               <AppViewRouter />
               <FooterLinks />
+              <WindowTitle />
             </UrlManager>
           </DragAndDrop>
         </Provider>
