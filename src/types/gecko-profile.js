@@ -98,15 +98,25 @@ export type GeckoSamples = {|
         stack: 0,
         time: 1,
         eventDelay: 2,
+        threadCPUDelta?: 3,
       |},
   data: Array<
-    [
-      null | IndexIntoGeckoStackTable,
-      Milliseconds, // since profile.meta.startTime
-      // milliseconds since the last event was processed in this
-      // thread's event loop at the time that the sample was taken
-      Milliseconds
-    ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds
+      ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds,
+        // CPU usage value of the current thread.
+        number | null
+      ]
   >,
 |};
 
@@ -115,6 +125,12 @@ export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and is only optional because older profile
+  // versions may not have it. No upgrader was written for this change because
+  // it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -123,6 +139,12 @@ export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   eventDelay: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and is only optional because older profile
+  // versions may not have it. No upgrader was written for this change because
+  // it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
