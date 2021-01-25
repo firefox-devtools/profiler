@@ -14,6 +14,7 @@ import type {
   ProfilerOverheadStats,
   VisualMetrics,
   ProfilerConfiguration,
+  SampleUnits,
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
@@ -329,6 +330,10 @@ export type GeckoProfileFullMeta = {|
   visualMetrics?: VisualMetrics,
   // Optional because older Firefox versions may not have the data.
   configuration?: ProfilerConfiguration,
+  // Units of samples table values.
+  // The sampleUnits property landed in Firefox 86, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  sampleUnits?: SampleUnits,
 |};
 
 export type GeckoProfileWithMeta<Meta> = {|

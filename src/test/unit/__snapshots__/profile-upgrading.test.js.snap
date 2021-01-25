@@ -408,6 +408,7 @@ Object {
     "preprocessedProfileVersion": 33,
     "processType": 0,
     "product": "Firefox",
+    "sampleUnits": undefined,
     "sourceURL": undefined,
     "stackwalk": 1,
     "startTime": 2574592839.818,
