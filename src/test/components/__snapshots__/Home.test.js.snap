@@ -29,7 +29,9 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
       <span
         class="homeSectionDocsIcon"
       />
-      Documentation
+      <span>
+        Documentation
+      </span>
     </a>
     <p>
       Enable the profiler menu button to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
@@ -116,20 +118,16 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             <span
               class="homeSectionDocsIcon"
             />
-            Documentation
+            <span>
+              Documentation
+            </span>
           </a>
           <h2>
             How to view and record profiles
           </h2>
           <p>
-            Recording performance profiles requires
-             
-            <a
-              href="https://www.mozilla.org/en-US/firefox/new/"
-            >
-              Firefox
-            </a>
-            . However, existing profiles can be viewed in any modern browser.
+            Recording performance profiles requires &lt;a&gt;Firefox&lt;/a&gt;. 
+                However, existing profiles can be viewed in any modern browser.
           </p>
         </div>
       </div>
@@ -177,8 +175,9 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          <span>
+             You can also compare recordings.
+          </span>
           <a
             href="/compare/"
           >
@@ -300,7 +299,9 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             <span
               class="homeSectionDocsIcon"
             />
-            Documentation
+            <span>
+              Documentation
+            </span>
           </a>
           <p>
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
@@ -351,8 +352,9 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          <span>
+             You can also compare recordings.
+          </span>
           <a
             href="/compare/"
           >
@@ -463,7 +465,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             <span
               class="homeSectionDocsIcon"
             />
-            Documentation
+            <span>
+              Documentation
+            </span>
           </a>
           <p>
             To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
@@ -548,8 +552,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          <span>
+             You can also compare recordings.
+          </span>
           <a
             href="/compare/"
           >
@@ -600,7 +605,9 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
       <span
         class="homeSectionDocsIcon"
       />
-      Documentation
+      <span>
+        Documentation
+      </span>
     </a>
     <p>
       To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
