@@ -25,6 +25,12 @@ jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
   ListOfPublishedProfiles: 'list-of-published-profiles',
 }));
 
+// AppLocalizationProvider calls a async function in componentDidMount()
+// The tests related to it are in separate file.
+jest.mock('../../components/app/AppLocalizationProvider', () => ({
+  AppLocalizationProvider: ({ children }) => children,
+}));
+
 describe('Root with history', function() {
   type TestConfig = {|
     profileHash?: string,

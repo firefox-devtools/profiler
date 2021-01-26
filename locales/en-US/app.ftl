@@ -5,3 +5,4 @@
 # Please sort alphabetically by (module name, component name). For each module,
 # keep strings in order of appearance.
 
+intro = Web app for Firefox performance analysis

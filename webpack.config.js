@@ -58,6 +58,10 @@ const config = {
         test: /\.svg$/,
         loader: 'file-loader',
       },
+      {
+        test: /\.ftl$/,
+        loader: 'file-loader',
+      },
     ],
   },
   node: {

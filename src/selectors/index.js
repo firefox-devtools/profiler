@@ -18,7 +18,7 @@ import * as urlState from './url-state';
 import * as icons from './icons';
 import * as publish from './publish';
 import * as zippedProfiles from './zipped-profiles';
-
+import * as l10n from './l10n';
 const _selectorsForConsole = {
   app,
   profile,
@@ -27,6 +27,7 @@ const _selectorsForConsole = {
   publish,
   zippedProfiles,
   selectedThread,
+  l10n,
 };
 
 // Exports require explicit typing. Deduce the type with typeof.

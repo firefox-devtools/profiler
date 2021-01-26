@@ -6,24 +6,28 @@
 
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 
 import {
   getProfileNameFromUrl,
   getDataSource,
   getFileNameInZipFilePath,
-  getProfile,
+  getProfileOrNull,
   getFormattedMetaInfoString,
 } from 'firefox-profiler/selectors';
 
-import type { Profile } from 'firefox-profiler/types';
+import type { Profile, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
-  +profile: Profile,
+  +profile: Profile | null,
   +profileNameFromUrl: string | null,
   +fileNameInZipFilePath: string | null,
-  +formattedMetaInfoString: string,
-  +dataSource: string,
+  +formattedMetaInfoString: string | null,
+  +dataSource: DataSource,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -42,28 +46,51 @@ class WindowTitleImpl extends PureComponent<Props> {
       fileNameInZipFilePath,
       dataSource,
     } = this.props;
-    const { meta } = profile;
 
-    if (profileNameFromUrl) {
-      document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
-    } else {
-      let title = '';
-      if (formattedMetaInfoString) {
-        title += formattedMetaInfoString + SEPARATOR;
-      }
-      title += _formatDateTime(meta.startTime);
-      if (dataSource === 'public') {
-        title += ` (${dataSource})`;
-      }
+    switch (dataSource) {
+      case 'none':
+        document.title = PRODUCT;
+        break;
+      case 'uploaded-recordings':
+        document.title = 'Uploaded Recordings' + SEPARATOR + PRODUCT;
+        break;
+      case 'compare':
+        document.title = 'Compare Profiles' + SEPARATOR + PRODUCT;
+        break;
+      case 'public':
+      case 'local':
+      case 'unpublished':
+      case 'from-addon':
+      case 'from-file':
+      case 'from-url':
+        if (profileNameFromUrl) {
+          document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
+        } else {
+          const { meta } = ensureExists(
+            profile,
+            'Expected the profile to exist.'
+          );
+          let title = '';
+          if (formattedMetaInfoString) {
+            title += formattedMetaInfoString + SEPARATOR;
+          }
+          title += _formatDateTime(meta.startTime);
+          if (dataSource === 'public') {
+            title += ` (${dataSource})`;
+          }
 
-      title += SEPARATOR + PRODUCT;
+          title += SEPARATOR + PRODUCT;
 
-      // Prepend the name of the file if from a zip file.
-      if (fileNameInZipFilePath) {
-        title = fileNameInZipFilePath + SEPARATOR + title;
-      }
+          // Prepend the name of the file if from a zip file.
+          if (fileNameInZipFilePath) {
+            title = fileNameInZipFilePath + SEPARATOR + title;
+          }
 
-      document.title = title;
+          document.title = title;
+        }
+        break;
+      default:
+        throw assertExhaustiveCheck(dataSource);
     }
   }
 
@@ -94,7 +121,7 @@ export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
     profileNameFromUrl: getProfileNameFromUrl(state),
     fileNameInZipFilePath: getFileNameInZipFilePath(state),
     formattedMetaInfoString: getFormattedMetaInfoString(state),
-    profile: getProfile(state),
+    profile: getProfileOrNull(state),
     dataSource: getDataSource(state),
   }),
   component: WindowTitleImpl,

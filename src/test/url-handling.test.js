@@ -5,9 +5,10 @@
 // @flow
 
 import { oneLineTrim } from 'common-tags';
-import * as urlStateReducers from '../selectors/url-state';
+import * as urlStateSelectors from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
+  changeImplementationFilter,
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
@@ -133,7 +134,7 @@ describe('selectedThread', function() {
 
   it('selects the right thread when receiving a profile from web', function() {
     const { getState } = setup(1);
-    expect(urlStateReducers.getSelectedThreadIndexes(getState())).toEqual(
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([1])
     );
   });
@@ -142,7 +143,7 @@ describe('selectedThread', function() {
     const { getState } = setup(100);
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndexes(getState())).toEqual(
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([2])
     );
   });
@@ -186,14 +187,14 @@ describe('url handling tracks', function() {
 
     it('will not accept invalid tracks in the thread order', function() {
       const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
-      expect(urlStateReducers.getGlobalTrackOrder(getState())).toEqual([1, 0]);
+      expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([1, 0]);
     });
 
     it('will not accept invalid hidden threads', function() {
       const { getState } = initWithSearchParams(
         '?hiddenGlobalTracks=0-8-2-a&thread=1'
       );
-      expect(urlStateReducers.getHiddenGlobalTracks(getState())).toEqual(
+      expect(urlStateSelectors.getHiddenGlobalTracks(getState())).toEqual(
         new Set([0])
       );
     });
@@ -291,18 +292,18 @@ describe('url handling tracks', function() {
 describe('search strings', function() {
   it('properly handles the call tree search string stacks with 1 item', function() {
     const { getState } = _getStoreWithURL({ search: '?search=string' });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+    expect(urlStateSelectors.getCurrentSearchString(getState())).toBe('string');
+    expect(urlStateSelectors.getSearchStrings(getState())).toEqual(['string']);
   });
 
   it('properly handles the call tree search string stacks with several items', function() {
     const { getState } = _getStoreWithURL({
       search: '?search=string,foo,%20bar',
     });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe(
+    expect(urlStateSelectors.getCurrentSearchString(getState())).toBe(
       'string,foo, bar'
     );
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+    expect(urlStateSelectors.getSearchStrings(getState())).toEqual([
       'string',
       'foo',
       'bar',
@@ -313,19 +314,19 @@ describe('search strings', function() {
     const { getState } = _getStoreWithURL({
       search: '?markerSearch=otherString',
     });
-    expect(urlStateReducers.getMarkersSearchString(getState())).toBe(
+    expect(urlStateSelectors.getMarkersSearchString(getState())).toBe(
       'otherString'
     );
   });
 
   it('properly handles showUserTimings strings', function() {
     const { getState } = _getStoreWithURL({ search: '' });
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('defaults to not showing user timings', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('serializes the call tree search strings in the URL', function() {
@@ -337,7 +338,7 @@ describe('search strings', function() {
 
     ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(
         `search=${encodeURIComponent(callTreeSearchString)}`
@@ -354,7 +355,7 @@ describe('search strings', function() {
 
     ['marker-chart', 'marker-table'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(`markerSearch=${markerSearchString}`);
     });
@@ -367,7 +368,7 @@ describe('search strings', function() {
 
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`networkSearch=${networkSearchString}`);
   });
@@ -379,7 +380,7 @@ describe('profileName', function() {
     const profileName = 'Good Profile';
 
     dispatch(changeProfileName(profileName));
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(
       `profileName=${encodeURIComponent(profileName)}`
@@ -390,14 +391,14 @@ describe('profileName', function() {
     const { getState } = _getStoreWithURL({
       search: '?profileName=XXX',
     });
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
-    expect(urlStateReducers.getProfileNameWithDefault(getState())).toBe('XXX');
+    expect(urlStateSelectors.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe('XXX');
   });
 
   it('provides default values for when no profile name is given', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe(null);
-    expect(urlStateReducers.getProfileNameWithDefault(getState())).toBe(
+    expect(urlStateSelectors.getProfileNameFromUrl(getState())).toBe(null);
+    expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe(
       'Firefox'
     );
   });
@@ -411,7 +412,7 @@ describe('ctxId', function() {
     dispatch(
       changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
     );
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`ctxId=${browsingContextID}`);
   });
@@ -420,7 +421,7 @@ describe('ctxId', function() {
     const { getState } = _getStoreWithURL({
       search: '?ctxId=123&view=active-tab',
     });
-    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
       browsingContextID: 123,
     });
@@ -428,7 +429,7 @@ describe('ctxId', function() {
 
   it('returns the full view when ctxId is not specified', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'full',
     });
   });
@@ -474,7 +475,7 @@ describe('ctxId', function() {
     });
 
     const newUrl = new URL(
-      urlFromState(urlStateReducers.getUrlState(getState())),
+      urlFromState(urlStateSelectors.getUrlState(getState())),
       'https://profiler.firefox.com'
     );
     // The url states that are relevant to full view should be stripped out.
@@ -489,7 +490,7 @@ describe('ctxId', function() {
     });
 
     expect(getView(getState()).phase).toEqual('DATA_LOADED');
-    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
       browsingContextID: null,
     });
@@ -500,7 +501,7 @@ describe('committed ranges', function() {
   describe('serialization', () => {
     it('serializes when there is no range', () => {
       const { getState } = _getStoreWithURL();
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).not.toContain(`range=`);
     });
@@ -509,7 +510,7 @@ describe('committed ranges', function() {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1514.587845, 25300));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(`range=1514m23786`); // 1.514s + 23786ms
     });
@@ -518,7 +519,7 @@ describe('committed ranges', function() {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1510.58, 1519.59));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(`range=1510m10`); // 1.510s + 10ms
     });
@@ -527,7 +528,7 @@ describe('committed ranges', function() {
       const { getState, dispatch } = _getStoreWithURL();
 
       dispatch(commitRange(1514, 1514));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       // In the following regexp we want to especially assert that the duration
       // isn't 0. That's why there's this negative look-ahead assertion.
@@ -541,7 +542,7 @@ describe('committed ranges', function() {
 
       dispatch(commitRange(1514.587845, 25300));
       dispatch(commitRange(1800, 1800.1));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
 
       // 1- 1.5145s + 23786ms
@@ -552,7 +553,7 @@ describe('committed ranges', function() {
     it('serializes when there is a small range', () => {
       const { getState, dispatch } = _getStoreWithURL();
       dispatch(commitRange(1000.08, 1000.09));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(`range=1000080u10`); // 1s and 80µs + 10µs
     });
@@ -560,7 +561,7 @@ describe('committed ranges', function() {
     it('serializes when there is a very small range', () => {
       const { getState, dispatch } = _getStoreWithURL();
       dispatch(commitRange(1000.00008, 1000.0001));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       expect(queryString).toContain(`range=1000000080n20`); // 1s and 80ns + 20ns
     });
@@ -569,14 +570,14 @@ describe('committed ranges', function() {
   describe('parsing', () => {
     it('deserializes when there is no range', () => {
       const { getState } = _getStoreWithURL();
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([]);
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
     });
 
     it('deserializes when there is 1 range', () => {
       const { getState } = _getStoreWithURL({
         search: '?range=1600m5000',
       });
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 1600, end: 6600 },
       ]);
     });
@@ -585,7 +586,7 @@ describe('committed ranges', function() {
       const { getState } = _getStoreWithURL({
         search: '?range=1600m5000~2245m24',
       });
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 1600, end: 6600 },
         { start: 2245, end: 2269 },
       ]);
@@ -595,7 +596,7 @@ describe('committed ranges', function() {
       const { getState } = _getStoreWithURL({
         search: '?range=1678900u100',
       });
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 1678.9, end: 1679 },
       ]);
     });
@@ -605,7 +606,7 @@ describe('committed ranges', function() {
         search: '?range=1678123900n100',
       });
 
-      const [committedRange] = urlStateReducers.getAllCommittedRanges(
+      const [committedRange] = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRange.start).toBeCloseTo(1678.1239);
@@ -617,7 +618,7 @@ describe('committed ranges', function() {
       const { getState } = _getStoreWithURL({
         search: '?range=invalid~2245m24',
       });
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 2245, end: 2269 },
       ]);
       expect(console.error).toHaveBeenCalled();
@@ -632,7 +633,7 @@ describe('committed ranges', function() {
 
       ranges.forEach(({ start, end }) => dispatch(commitRange(start, end)));
 
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
       return queryString;
     }
@@ -652,7 +653,7 @@ describe('committed ranges', function() {
         { start: 1800.00008, end: 1800.0001 },
       ]);
 
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 1514, end: 25300 },
         { start: 1800, end: 1800.1 },
         { start: 1800.00008, end: 1800.0001 },
@@ -662,7 +663,7 @@ describe('committed ranges', function() {
     it('will round values near the threshold', () => {
       const { getState } = setup([{ start: 50000, end: 50009.9 }]);
 
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 50000, end: 50010 },
       ]);
     });
@@ -670,7 +671,7 @@ describe('committed ranges', function() {
     it('supports negative start values', () => {
       const { getState } = setup([{ start: -1000, end: 1000 }]);
 
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: -1000, end: 1000 },
       ]);
     });
@@ -678,9 +679,78 @@ describe('committed ranges', function() {
     it('supports zero start values', () => {
       const { getState } = setup([{ start: 0, end: 1000 }]);
 
-      expect(urlStateReducers.getAllCommittedRanges(getState())).toEqual([
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 1000 },
       ]);
+    });
+  });
+});
+
+describe('implementation', function() {
+  function setup(settings, profile) {
+    const store = _getStoreWithURL(settings, profile);
+
+    function getQueryString() {
+      const urlState = urlStateSelectors.getUrlState(store.getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      return queryString;
+    }
+
+    return {
+      ...store,
+      getQueryString,
+    };
+  }
+
+  describe('serializing', () => {
+    it('skips the value "combined"', () => {
+      const { dispatch, getQueryString } = setup();
+
+      expect(getQueryString()).not.toContain('implementation=');
+
+      dispatch(changeImplementationFilter('combined'));
+      expect(getQueryString()).not.toContain('implementation=');
+    });
+
+    it.each(['js', 'cpp'])(
+      'can serialize the value "%s"',
+      implementationFilter => {
+        const { getQueryString, dispatch } = setup();
+        dispatch(changeImplementationFilter(implementationFilter));
+        expect(getQueryString()).toContain(
+          `implementation=${implementationFilter}`
+        );
+      }
+    );
+  });
+
+  describe('parsing', () => {
+    it('deserializes when there is no implementation value', () => {
+      const { getState } = setup();
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
+    });
+
+    it.each(['js', 'cpp'])(
+      'deserializes known value %s',
+      implementationFilter => {
+        const { getState } = setup({
+          search: `?implementation=${implementationFilter}`,
+        });
+        expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+          implementationFilter
+        );
+      }
+    );
+
+    it('deserializes unknown values', () => {
+      const { getState } = setup({
+        search: '?implementation=foobar',
+      });
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
     });
   });
 });
@@ -733,7 +803,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
         v: 1,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
+      expect(urlStateSelectors.getSelectedTab(getState())).toBe('stack-chart');
     });
 
     it('switches to the marker-table when given a markers tab', function() {
@@ -741,7 +811,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
         v: false,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
+      expect(urlStateSelectors.getSelectedTab(getState())).toBe('marker-table');
     });
   });
 
@@ -752,7 +822,7 @@ describe('url upgrading', function() {
         search: '?hidePlatformDetails',
         v: 2,
       });
-      expect(urlStateReducers.getImplementationFilter(getState())).toBe('js');
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe('js');
     });
   });
 
@@ -1018,7 +1088,7 @@ describe('url upgrading', function() {
       const { getState } = _getStoreWithURL({
         v: 4,
       });
-      const committedRanges = urlStateReducers.getAllCommittedRanges(
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRanges).toEqual([]);
@@ -1030,7 +1100,7 @@ describe('url upgrading', function() {
         v: 4,
       });
 
-      const committedRanges = urlStateReducers.getAllCommittedRanges(
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
@@ -1042,7 +1112,7 @@ describe('url upgrading', function() {
         v: 4,
       });
 
-      const committedRanges = urlStateReducers.getAllCommittedRanges(
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRanges).toEqual([
@@ -1057,7 +1127,7 @@ describe('url upgrading', function() {
         v: 4,
       });
 
-      const committedRanges = urlStateReducers.getAllCommittedRanges(
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRanges).toEqual([{ start: 0, end: 278 }]);
@@ -1072,7 +1142,7 @@ describe('url upgrading', function() {
         v: 4,
       });
 
-      const committedRanges = urlStateReducers.getAllCommittedRanges(
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
         getState()
       );
       expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
@@ -1094,7 +1164,7 @@ describe('url upgrading', function() {
     // state of the application, so we won't have 'markers' as result.
     // We should change this to something more meaningful when we have eg
     // converters that reuse query names.
-    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
+    expect(urlStateSelectors.getSelectedTab(getState())).not.toBe(
       'marker-table'
     );
   });
@@ -1171,7 +1241,7 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`transforms=${transformString}`);
   });
@@ -1208,7 +1278,7 @@ describe('compare', function() {
       /* no profile */ null
     );
 
-    expect(urlStateReducers.getProfilesToCompare(store.getState())).toEqual([
+    expect(urlStateSelectors.getProfilesToCompare(store.getState())).toEqual([
       url1,
       url2,
     ]);
@@ -1221,13 +1291,13 @@ describe('compare', function() {
     );
 
     const initialUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(initialUrl).toEqual('/compare/');
 
     store.dispatch(changeProfilesToCompare([url1, url2]));
     const resultingUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
@@ -1241,7 +1311,7 @@ describe('uploaded-recordings', function() {
       /* no profile */ null
     );
 
-    expect(urlStateReducers.getDataSource(store.getState())).toEqual(
+    expect(urlStateSelectors.getDataSource(store.getState())).toEqual(
       'uploaded-recordings'
     );
   });
@@ -1249,20 +1319,20 @@ describe('uploaded-recordings', function() {
   it('serializes uploaded-recordings URLs', () => {
     const store = _getStoreWithURL({ pathname: '/' }, /* no profile */ null);
     const initialUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(initialUrl).toEqual('/');
 
     store.dispatch(setDataSource('uploaded-recordings'));
     const resultingUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(resultingUrl).toEqual('/uploaded-recordings/');
   });
 });
 
 describe('last requested call tree summary strategy', function() {
-  const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
+  const { getLastSelectedCallTreeSummaryStrategy } = urlStateSelectors;
 
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
