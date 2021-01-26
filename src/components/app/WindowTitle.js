@@ -6,10 +6,7 @@
 
 import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-} from 'firefox-profiler/utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import {
   getProfileNameFromUrl,
@@ -17,6 +14,7 @@ import {
   getFileNameInZipFilePath,
   getProfileOrNull,
   getFormattedMetaInfoString,
+  getZipFileState,
 } from 'firefox-profiler/selectors';
 
 import type { Profile, DataSource } from 'firefox-profiler/types';
@@ -28,6 +26,7 @@ type StateProps = {|
   +fileNameInZipFilePath: string | null,
   +formattedMetaInfoString: string | null,
   +dataSource: DataSource,
+  +listingZipFile: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -44,6 +43,7 @@ class WindowTitleImpl extends PureComponent<Props> {
       profileNameFromUrl,
       formattedMetaInfoString,
       fileNameInZipFilePath,
+      listingZipFile,
       dataSource,
     } = this.props;
 
@@ -65,11 +65,8 @@ class WindowTitleImpl extends PureComponent<Props> {
       case 'from-url':
         if (profileNameFromUrl) {
           document.title = profileNameFromUrl + SEPARATOR + PRODUCT;
-        } else {
-          const { meta } = ensureExists(
-            profile,
-            'Expected the profile to exist.'
-          );
+        } else if (profile) {
+          const { meta } = profile;
           let title = '';
           if (formattedMetaInfoString) {
             title += formattedMetaInfoString + SEPARATOR;
@@ -87,6 +84,16 @@ class WindowTitleImpl extends PureComponent<Props> {
           }
 
           document.title = title;
+        } else if (listingZipFile) {
+          /* We're looking at the zip file contents. */
+          document.title = 'Zip File Contents' + SEPARATOR + PRODUCT;
+        } else {
+          /* There's no profile yet, but we're not looking at a zip file.
+           * Let's use a sensible default, but do not throw because we forgot a
+           * case.
+           * In the future we may want to check other cases, eg when in loading
+           * phase, but it's not worth it at the moment. */
+          document.title = PRODUCT;
         }
         break;
       default:
@@ -123,6 +130,7 @@ export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
     formattedMetaInfoString: getFormattedMetaInfoString(state),
     profile: getProfileOrNull(state),
     dataSource: getDataSource(state),
+    listingZipFile: getZipFileState(state).phase === 'LIST_FILES_IN_ZIP_FILE',
   }),
   component: WindowTitleImpl,
 });
