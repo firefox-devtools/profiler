@@ -6,7 +6,6 @@
 import * as React from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { DragAndDropOverlay } from './DragAndDrop';
-import { procureInitialInterestingExpandedNodes } from 'firefox-profiler/profile-logic/zip-files';
 import {
   changeSelectedZipFile,
   changeExpandedZipFile,
@@ -133,9 +132,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       changeExpandedZipFile,
     } = this.props;
     if (expandedZipFileIndexes.length === 0 && zipFileTree) {
-      changeExpandedZipFile(
-        procureInitialInterestingExpandedNodes(zipFileTree)
-      );
+      changeExpandedZipFile([...zipFileTree.getAllDescendants(null)]);
     }
   }
 
