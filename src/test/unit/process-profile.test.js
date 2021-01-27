@@ -496,3 +496,37 @@ describe('native allocation processing', function() {
     expect(nativeAllocations.stack).toEqual([11, 13, null]);
   });
 });
+
+describe('gecko samples table processing', function() {
+  it('properly converts all the fields in the schema', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoSamples = geckoProfile.threads[0].samples;
+
+    // Check if the gecko sample schema is correct.
+    expect(geckoSamples.schema).toEqual({
+      stack: 0,
+      time: 1,
+      eventDelay: 2,
+      threadCPUDelta: 3,
+    });
+
+    // Process the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedSamples = processedProfile.threads[0].samples;
+
+    // Check the processed samples length.
+    expect(processedSamples.length).toBe(geckoSamples.data.length);
+
+    // Check the processed profile samples array to see if we properly processed
+    // the sample fields.
+    for (const fieldName in geckoSamples.schema) {
+      const fieldIndex = geckoSamples.schema[fieldName];
+
+      for (let i = 0; i < processedSamples.length; i++) {
+        expect(processedSamples[fieldName][i]).toBe(
+          geckoSamples.data[i][fieldIndex]
+        );
+      }
+    }
+  });
+});
