@@ -530,3 +530,17 @@ describe('gecko samples table processing', function() {
     }
   });
 });
+
+describe('profile meta processing', function() {
+  it('keeps the sampleUnits object successfully', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    // Checking if it keeps the sampleUnits object.
+    expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
+  });
+});

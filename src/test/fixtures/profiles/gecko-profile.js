@@ -236,6 +236,11 @@ export function createGeckoProfile(): GeckoProfile {
         ],
       ],
     },
+    sampleUnits: {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'ns',
+    },
   };
 
   const [
