@@ -469,7 +469,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       schema: {
         stack: 0,
         time: 1,
-        responsiveness: 2,
+        eventDelay: 2,
       },
       data: [
         [1, 0, 0], // (root), 0x100000f84
