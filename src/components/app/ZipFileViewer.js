@@ -134,8 +134,8 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
     } = this.props;
     if (expandedZipFileIndexes.length === 0 && zipFileTree) {
       changeExpandedZipFile(
-        procureInitialInterestingExpandedNodes(zipFileTree)
-      );
+        [...zipFileTree.getAllDescendants(null)]
+      )
     }
   }
 
