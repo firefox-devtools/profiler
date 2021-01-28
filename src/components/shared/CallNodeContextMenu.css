@@ -2,6 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* Most of the CSS logic to be able to add icons is part of the more generic
+ * file ContextMenu.css that is applied for all context menus. Especially the
+ * CSS class `react-contextmenu-icon` is used in addition to these more specific
+ * classes, and that's where other properties for backgrounds are specified.
+ */
+
+/* All the icons we use in the call node's context menu are nicer if we use this
+ * filter when in the selected state. */
 .callNodeContextMenu .react-contextmenu-item--selected .react-contextmenu-icon,
 .callNodeContextMenu .react-contextmenu-item:hover .react-contextmenu-icon {
   filter: invert(1);
