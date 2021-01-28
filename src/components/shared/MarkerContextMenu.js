@@ -327,7 +327,7 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         {data && data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>
             <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
-            Copy attached stack
+            Copy call stack
           </MenuItem>
         ) : null}
         {data && data.type === 'Network' ? (
