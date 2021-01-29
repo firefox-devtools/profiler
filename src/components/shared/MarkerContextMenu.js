@@ -4,7 +4,7 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { MenuItem, SubMenu } from 'react-contextmenu';
+import { MenuItem } from 'react-contextmenu';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -40,6 +40,8 @@ import {
   getFuncNamesAndOriginsForPath,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
+
+import './MarkerContextMenu.css';
 
 type OwnProps = {|
   +rightClickedMarkerInfo: RightClickedMarkerInfo,
@@ -258,59 +260,86 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
     return (
       <ContextMenu
         id="MarkerContextMenu"
+        className="markerContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
       >
-        {this._isZeroDurationMarker(marker) ? (
-          <>
-            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
-              Set selection start time here
-            </MenuItem>
-            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
-              Set selection end time here
-            </MenuItem>
-          </>
-        ) : (
-          <>
-            <SubMenu title="Set selection start">
-              <MenuItem onClick={this.setStartRangeFromMarkerStart}>
-                From the start of this marker
-              </MenuItem>
-              <MenuItem
-                onClick={this.setStartRangeFromMarkerEnd}
-                disabled={markerEnd > selectionEnd}
-              >
-                From the end of this marker
-              </MenuItem>
-            </SubMenu>
-            <SubMenu title="Set selection end">
-              <MenuItem
-                onClick={this.setEndRangeFromMarkerStart}
-                disabled={selectionStart > markerStart}
-              >
-                From the start of this marker
-              </MenuItem>
-              <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
-                From the end of this marker
-              </MenuItem>
-            </SubMenu>
-          </>
-        )}
-
         <MenuItem
           onClick={this.setRangeByDuration}
           disabled={this._isZeroDurationMarker(marker)}
         >
-          Set selection from duration
+          <span className="react-contextmenu-icon markerContextMenuIconSetSelectionFromMarker" />
+          Set selection from marker’s duration
         </MenuItem>
-        <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
+        <div className="react-contextmenu-separator" />
+        {this._isZeroDurationMarker(marker) ? (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionHere" />
+              Start selection here
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionHere" />
+              End selection here
+            </MenuItem>
+          </>
+        ) : (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart" />
+              <div className="react-contextmenu-item-content">
+                Start selection at marker’s <strong>start</strong>
+              </div>
+            </MenuItem>
+            <MenuItem
+              onClick={this.setStartRangeFromMarkerEnd}
+              disabled={markerEnd > selectionEnd}
+            >
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd" />
+              <div className="react-contextmenu-item-content">
+                Start selection at marker’s <strong>end</strong>
+              </div>
+            </MenuItem>
+            <div className="react-contextmenu-separator" />
+            <MenuItem
+              onClick={this.setEndRangeFromMarkerStart}
+              disabled={selectionStart > markerStart}
+            >
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart" />
+              <div className="react-contextmenu-item-content">
+                End selection at marker’s <strong>start</strong>
+              </div>
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd" />
+              <div className="react-contextmenu-item-content">
+                End selection at marker’s <strong>end</strong>
+              </div>
+            </MenuItem>
+          </>
+        )}
+
+        <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.copyMarkerDescription}>
+          <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
+          Copy description
+        </MenuItem>
         {data && data.cause ? (
-          <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
+          <MenuItem onClick={this.copyMarkerCause}>
+            <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
+            Copy call stack
+          </MenuItem>
         ) : null}
         {data && data.type === 'Network' ? (
-          <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
+          <MenuItem onClick={this.copyUrl}>
+            <span className="react-contextmenu-icon markerContextMenuIconCopyUrl" />
+            Copy URL
+          </MenuItem>
         ) : null}
-        <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
+        <MenuItem onClick={this.copyMarkerJSON}>
+          <span className="react-contextmenu-icon markerContextMenuIconCopyPayload" />
+          Copy full payload
+        </MenuItem>
       </ContextMenu>
     );
   }

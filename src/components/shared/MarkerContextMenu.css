@@ -1,0 +1,64 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* Most of the CSS logic to be able to add icons is part of the more generic
+ * file ContextMenu.css that is applied for all context menus. Especially the
+ * CSS class `react-contextmenu-icon` is used in addition to these more specific
+ * classes, and that's where other properties for backgrounds are specified.
+ */
+
+/* Here are all icons for the marker context menu. */
+.markerContextMenuIconSetSelectionFromMarker {
+  background-image: url(firefox-profiler-res/img/svg/set-selection-from-marker.svg);
+}
+
+.markerContextMenuIconStartSelectionHere, /* <- for dot markers */
+.markerContextMenuIconStartSelectionAtMarkerStart /* <- for interval markers */
+ {
+  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-start.svg);
+}
+
+.markerContextMenuIconStartSelectionAtMarkerEnd {
+  background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-end.svg);
+}
+
+.markerContextMenuIconEndSelectionAtMarkerStart {
+  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-start.svg);
+}
+
+.markerContextMenuIconEndSelectionHere, /* <- for dot markers */
+.markerContextMenuIconEndSelectionAtMarkerEnd /* <- for interval markers */
+ {
+  background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-end.svg);
+}
+
+.markerContextMenuIconCopyDescription {
+  background-image: url(firefox-profiler-res/img/svg/copy-dark.svg);
+}
+
+.markerContextMenuIconCopyStack {
+  background-image: url(firefox-profiler-res/img/svg/copy-marker-stack.svg);
+}
+
+.markerContextMenuIconCopyUrl {
+  background-image: url(firefox-profiler-res/img/svg/globe-dark.svg);
+}
+
+.markerContextMenuIconCopyPayload {
+  background-image: url(firefox-profiler-res/img/svg/copy-marker-payload.svg);
+}
+
+/* These icons don't look nice when selected, unless if we invert them. However
+ * the other icons look better without the filter, so we don't change them in
+ * this state. */
+.react-contextmenu-item--selected .markerContextMenuIconCopyDescription,
+.react-contextmenu-item:hover .markerContextMenuIconCopyDescription,
+.react-contextmenu-item--selected .markerContextMenuIconCopyUrl,
+.react-contextmenu-item:hover .markerContextMenuIconCopyUrl,
+.react-contextmenu-item--selected .markerContextMenuIconCopyStack,
+.react-contextmenu-item:hover .markerContextMenuIconCopyStack,
+.react-contextmenu-item--selected .markerContextMenuIconCopyPayload,
+.react-contextmenu-item:hover .markerContextMenuIconCopyPayload {
+  filter: invert(1);
+}
