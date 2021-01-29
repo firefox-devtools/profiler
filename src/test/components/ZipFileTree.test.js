@@ -25,6 +25,7 @@ describe('calltree/ZipFileTree', function() {
       'foo/bar/profile1.json',
       'foo/profile2.json',
       'baz/profile3.json',
+      'boat/ship/new/anything/explore/yes/profile4.json',
     ]);
 
     // Some child components render to canvas.
