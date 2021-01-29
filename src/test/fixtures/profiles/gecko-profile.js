@@ -236,6 +236,11 @@ export function createGeckoProfile(): GeckoProfile {
         ],
       ],
     },
+    sampleUnits: {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'ns',
+    },
   };
 
   const [
@@ -469,16 +474,17 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       schema: {
         stack: 0,
         time: 1,
-        responsiveness: 2,
+        eventDelay: 2,
+        threadCPUDelta: 3,
       },
       data: [
-        [1, 0, 0], // (root), 0x100000f84
-        [2, 1, 0], // (root), 0x100000f84, 0x100001a45
-        [2, 2, 0], // (root), 0x100000f84, 0x100001a45
-        [3, 3, 0], // (root), 0x100000f84, Startup::XRE_Main
-        [0, 4, 0], // (root)
-        [1, 5, 0], // (root), 0x100000f84
-        [4, 6, 0], // (root), 0x100000f84, frobnicate
+        [1, 0, 0, 2], // (root), 0x100000f84
+        [2, 1, 0, 1], // (root), 0x100000f84, 0x100001a45
+        [2, 2, 0, 3], // (root), 0x100000f84, 0x100001a45
+        [3, 3, 0, 6], // (root), 0x100000f84, Startup::XRE_Main
+        [0, 4, 0, 7], // (root)
+        [1, 5, 0, 3], // (root), 0x100000f84
+        [4, 6, 0, 1], // (root), 0x100000f84, frobnicate
       ],
     },
     stackTable: {

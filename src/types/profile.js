@@ -165,6 +165,12 @@ export type SamplesTable = {|
   // See the WeightType type for more information.
   weight: null | number[],
   weightType: WeightType,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -625,6 +631,15 @@ export type VisualMetrics = {|
   VisualComplete99: number,
 |};
 
+// Object that holds the units of samples table values. Some of the values can be
+// different depending on the platform, e.g. threadCPUDelta.
+// See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
+export type SampleUnits = {|
+  +time: 'ms',
+  +eventDelay: 'ms',
+  +threadCPUDelta: 'ns' | 'µs' | 'variable CPU cycles',
+|};
+
 /**
  * Meta information associated for the entire profile.
  */
@@ -728,6 +743,10 @@ export type ProfileMeta = {|
   // Markers are displayed in the UI according to a schema definition. See the
   // MarkerSchema type for more information.
   markerSchema: MarkerSchema[],
+  // Units of samples table values.
+  // The sampleUnits property landed in Firefox 86, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  sampleUnits?: SampleUnits,
 |};
 
 /**

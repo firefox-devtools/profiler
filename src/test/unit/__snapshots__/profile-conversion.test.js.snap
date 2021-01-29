@@ -58520,6 +58520,7 @@ Object {
     "preprocessedProfileVersion": 33,
     "processType": 0,
     "product": "Firefox",
+    "sampleUnits": undefined,
     "sourceURL": undefined,
     "stackwalk": 1,
     "startTime": 2574592839.818,
@@ -58760,6 +58761,7 @@ Object {
           7,
           8,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592839.818,
           2574592839.836,
@@ -58978,6 +58980,7 @@ Object {
           2,
           2,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592843.0039997,
           2574592843.027,
@@ -59156,6 +59159,7 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592868.3659997,
           2574592868.39,
@@ -59523,6 +59527,7 @@ Object {
           8,
           13,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592869.355,
           2574592869.37,
@@ -59785,6 +59790,7 @@ Object {
           2,
           4,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592877.46,
           2574592877.474,
@@ -60034,6 +60040,7 @@ Object {
           7,
           8,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592878.268,
           2574592878.282,
@@ -60230,6 +60237,7 @@ Object {
           1,
           0,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592938.803,
           2574592938.827,
@@ -60402,6 +60410,7 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.456,
           2574592945.4709997,
@@ -60580,6 +60589,7 @@ Object {
           2,
           3,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.7780004,
           2574592945.79,
@@ -60762,6 +60772,7 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592946.053,
           2574592946.069,
@@ -60957,6 +60968,7 @@ Object {
           10,
           10,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.093,
           2574592948.128,
@@ -61662,6 +61674,7 @@ Object {
           33,
           32,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.301,
           2574592948.32,
@@ -62515,6 +62528,7 @@ Object {
           33,
           32,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3170004,
           2574592948.3269997,
@@ -63368,6 +63382,7 @@ Object {
           33,
           34,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.38,
           2574592948.391,
@@ -64225,6 +64240,7 @@ Object {
           33,
           34,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3989997,
           2574592948.4100003,
@@ -64872,6 +64888,7 @@ Object {
         "stack": Array [
           19,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592949.428,
         ],
@@ -65430,6 +65447,7 @@ Object {
     "preprocessedProfileVersion": 33,
     "processType": 0,
     "product": "Firefox",
+    "sampleUnits": undefined,
     "sourceURL": undefined,
     "stackwalk": 1,
     "startTime": 115539936.601,
@@ -69308,6 +69326,7 @@ Object {
           228,
           239,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539936.601,
           115539937.60000001,
@@ -72295,6 +72314,7 @@ Object {
           117,
           118,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539940.357,
           115539950.627,
@@ -74240,6 +74260,7 @@ Object {
           247,
           228,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539940.968,
           115539941.97299999,
@@ -77712,6 +77733,7 @@ Object {
           114,
           123,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539941.97299999,
           115539942.972,
@@ -80658,6 +80680,7 @@ Object {
           113,
           123,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539943.532,
           115539965.027,
@@ -82209,6 +82232,7 @@ Object {
           34,
           40,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539949.733,
           115539978.622,
@@ -83361,6 +83385,7 @@ Object {
           66,
           64,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539955.137,
           115539995.02,
@@ -84304,6 +84329,7 @@ Object {
           24,
           27,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539962.603,
           115539978.53199999,
@@ -84862,6 +84888,7 @@ Object {
         "stack": Array [
           16,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539979.039,
         ],
@@ -85319,6 +85346,7 @@ Object {
         "stack": Array [
           14,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539980.896,
         ],
@@ -85749,6 +85777,7 @@ Object {
           9,
           13,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115539987.888,
           115540164.55,
@@ -86537,6 +86566,7 @@ Object {
           46,
           50,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           115540246.64,
           115540269.9,
