@@ -112,6 +112,8 @@ The easiest way to set up startup profiling is to run the `<fenix-repo>/tools/se
 
 If the app is uninstalled or the device is restarted, the `activate` command may need to be re-run. The script is hard-coded to use a default configuration file with default profiling arguments. If you wish to change these arguments or use a non-standard app ID, modify the script locally or read below.
 
+If you don't want to check out [the fenix repository](https://github.com/mozilla-mobile/fenix/), you should be able to download [the script standalone](https://raw.githubusercontent.com/mozilla-mobile/fenix/master/tools/setup-startup-profiling.py) and execute it.
+
 #### Manual configuration
 
 The filename of the YAML file mentioned above depends on the bundle ID of your Fenix app. The instructions below assume you want to profile the Fenix Nightly app, with the bundle ID `org.mozilla.fenix`.
