@@ -678,9 +678,7 @@ describe('TooltipMarker', function() {
     `);
 
     // Add another thread with the thread Id we are going to refer from the marker.
-    profile.threads[1] = getEmptyThread();
-    profile.threads[1].name = 'Renderer';
-    profile.threads[1].tid = threadId;
+    profile.threads.push(getEmptyThread({ name: 'Renderer', tid: threadId }));
 
     addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
       [

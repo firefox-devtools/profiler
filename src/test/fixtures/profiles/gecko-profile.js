@@ -209,13 +209,7 @@ export function createGeckoProfile(): GeckoProfile {
         subcategories: ['Other'],
       },
     ],
-    markerSchema: [
-      {
-        name: 'DummyForTests',
-        display: [],
-        data: [],
-      },
-    ],
+    markerSchema: [],
     extensions: {
       schema: { id: 0, name: 1, baseURL: 2 },
       data: [

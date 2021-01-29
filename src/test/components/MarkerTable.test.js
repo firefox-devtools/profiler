@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { stripIndent } from 'common-tags';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
@@ -16,11 +17,13 @@ import {
   changeMarkersSearchString,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
+import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getProfileWithMarkers,
+  getProfileFromTextSamples,
   getMarkerTableProfile,
+  addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import {
   getBoundingBox,
@@ -28,16 +31,14 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 
+import type { CauseBacktrace } from 'firefox-profiler/types';
+
 describe('MarkerTable', function() {
-  function setup(markers) {
+  function setup(profile = getMarkerTableProfile()) {
     // Set an arbitrary size that will not kick in any virtualization behavior.
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(2000, 1000));
-
-    const profile = markers
-      ? getProfileWithMarkers(markers)
-      : getMarkerTableProfile();
 
     const store = storeWithProfile(profile);
     const renderResult = render(
@@ -147,9 +148,55 @@ describe('MarkerTable', function() {
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
   });
 
+  it("can copy a marker's cause using the context menu", () => {
+    jest.useFakeTimers();
+
+    // This is a tid we'll reuse later.
+    const tid = 4444;
+
+    // Just a simple profile with 1 thread and a nice stack.
+    const {
+      profile,
+      funcNamesDictPerThread: [{ E }],
+    } = getProfileFromTextSamples(`
+      A[lib:libxul.so]
+      B[lib:libxul.so]
+      C[lib:libxul.so]
+      D[lib:libxul.so]
+      E[lib:libxul.so]
+    `);
+    profile.threads[0].name = 'Main Thread';
+
+    // Add another thread with a known tid that we'll reuse in the marker's cause.
+    profile.threads.push(getEmptyThread({ name: 'Another Thread', tid }));
+    // Add the reflow marker to the first thread.
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      getReflowMarker(3, 100, {
+        tid: tid,
+        // We're cheating a bit here: E is a funcIndex, but because of how
+        // getProfileFromTextSamples works internally, this will be the right
+        // stackIndex too.
+        stack: E,
+        time: 1,
+      }),
+    ]);
+
+    const { getByText } = setup(profile);
+    fireFullContextMenu(getByText(/Reflow/));
+    fireFullClick(getByText('Copy call stack'));
+    expect(copy).toHaveBeenLastCalledWith(stripIndent`
+      A [libxul.so]
+      B [libxul.so]
+      C [libxul.so]
+      D [libxul.so]
+      E [libxul.so]
+    `);
+  });
+
   describe('EmptyReasons', () => {
     it('shows reasons when a profile has no non-network markers', () => {
-      const { container } = setup([]);
+      const { profile } = getProfileFromTextSamples('A'); // Just a simple profile without any marker.
+      const { container } = setup(profile);
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
@@ -160,3 +207,20 @@ describe('MarkerTable', function() {
     });
   });
 });
+
+function getReflowMarker(
+  startTime: number,
+  endTime: number,
+  cause?: CauseBacktrace
+) {
+  return [
+    'Reflow',
+    startTime,
+    endTime,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      cause,
+    },
+  ];
+}

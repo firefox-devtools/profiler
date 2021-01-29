@@ -682,12 +682,7 @@ describe('filterRawMarkerTableToRange', () => {
   |};
 
   function setup({ start, end, markers }: TestConfig) {
-    const thread = getThreadWithRawMarkers(
-      markers.map(({ data, ...rest }) => ({
-        ...rest,
-        data: data ? ({ type: 'DummyForTests', ...data }: any) : null,
-      }))
-    );
+    const thread = getThreadWithRawMarkers(markers);
 
     const derivedMarkerInfo = getTestFriendlyDerivedMarkerInfo(thread);
     const rawMarkerTable = filterRawMarkerTableToRange(
