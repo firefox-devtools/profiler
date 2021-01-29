@@ -21,6 +21,8 @@ import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
   GeckoThread,
+  IndexIntoGeckoStackTable,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function() {
@@ -510,12 +512,44 @@ describe('gecko samples table processing', function() {
       threadCPUDelta: 3,
     });
 
+    // Add some values to the samples table so we can have hardcoded tests.
+    const hardcodedTime: Milliseconds[] = [1, 2];
+    const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [5, 4];
+    const hardcodedEventDelay: Milliseconds[] = [0, 1];
+    const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
+    const hardcodedSamplesTable = [
+      [
+        hardcodedStack[0],
+        hardcodedTime[0],
+        hardcodedEventDelay[0],
+        hardcodedThreadCPUDelta[0],
+      ],
+      [
+        hardcodedStack[1],
+        hardcodedTime[1],
+        hardcodedEventDelay[1],
+        hardcodedThreadCPUDelta[1],
+      ],
+    ];
+
+    geckoSamples.data = [...hardcodedSamplesTable, ...geckoSamples.data];
+
     // Process the profile.
     const processedProfile = processGeckoProfile(geckoProfile);
     const processedSamples = processedProfile.threads[0].samples;
 
     // Check the processed samples length.
     expect(processedSamples.length).toBe(geckoSamples.data.length);
+
+    // Let's check the hardcoded values here.
+    expect(processedSamples.stack.slice(0, 2)).toEqual(hardcodedStack);
+    expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
+    expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
+      hardcodedEventDelay
+    );
+    expect(ensureExists(processedSamples.threadCPUDelta).slice(0, 2)).toEqual(
+      hardcodedThreadCPUDelta
+    );
 
     // Check the processed profile samples array to see if we properly processed
     // the sample fields.

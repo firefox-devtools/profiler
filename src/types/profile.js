@@ -167,9 +167,9 @@ export type SamplesTable = {|
   weightType: WeightType,
   // CPU usage value of the current thread. Its values are null only if the back-end
   // fails to get the CPU usage from operating system.
-  // It's landed in Firefox 86, and is only optional because older profile
-  // versions may not have it. No upgrader was written for this change because
-  // it's a completely new data source.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
   threadCPUDelta?: Array<number | null>,
   length: number,
 |};
