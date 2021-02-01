@@ -21,6 +21,8 @@ import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
   GeckoThread,
+  IndexIntoGeckoStackTable,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function() {
@@ -494,5 +496,85 @@ describe('native allocation processing', function() {
     expect(nativeAllocations.time).toEqual([0, 1, 2]);
     expect(nativeAllocations.weight).toEqual([3, 5, 7]);
     expect(nativeAllocations.stack).toEqual([11, 13, null]);
+  });
+});
+
+describe('gecko samples table processing', function() {
+  it('properly converts all the fields in the schema', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoSamples = geckoProfile.threads[0].samples;
+
+    // Check if the gecko sample schema is correct.
+    expect(geckoSamples.schema).toEqual({
+      stack: 0,
+      time: 1,
+      eventDelay: 2,
+      threadCPUDelta: 3,
+    });
+
+    // Add some values to the samples table so we can have hardcoded tests.
+    const hardcodedTime: Milliseconds[] = [1, 2];
+    const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [5, 4];
+    const hardcodedEventDelay: Milliseconds[] = [0, 1];
+    const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
+    const hardcodedSamplesTable = [
+      [
+        hardcodedStack[0],
+        hardcodedTime[0],
+        hardcodedEventDelay[0],
+        hardcodedThreadCPUDelta[0],
+      ],
+      [
+        hardcodedStack[1],
+        hardcodedTime[1],
+        hardcodedEventDelay[1],
+        hardcodedThreadCPUDelta[1],
+      ],
+    ];
+
+    geckoSamples.data = [...hardcodedSamplesTable, ...geckoSamples.data];
+
+    // Process the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedSamples = processedProfile.threads[0].samples;
+
+    // Check the processed samples length.
+    expect(processedSamples.length).toBe(geckoSamples.data.length);
+
+    // Let's check the hardcoded values here.
+    expect(processedSamples.stack.slice(0, 2)).toEqual(hardcodedStack);
+    expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
+    expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
+      hardcodedEventDelay
+    );
+    expect(ensureExists(processedSamples.threadCPUDelta).slice(0, 2)).toEqual(
+      hardcodedThreadCPUDelta
+    );
+
+    // Check the processed profile samples array to see if we properly processed
+    // the sample fields.
+    for (const fieldName in geckoSamples.schema) {
+      const fieldIndex = geckoSamples.schema[fieldName];
+
+      for (let i = 0; i < processedSamples.length; i++) {
+        expect(processedSamples[fieldName][i]).toBe(
+          geckoSamples.data[i][fieldIndex]
+        );
+      }
+    }
+  });
+});
+
+describe('profile meta processing', function() {
+  it('keeps the sampleUnits object successfully', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    // Checking if it keeps the sampleUnits object.
+    expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
   });
 });

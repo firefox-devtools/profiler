@@ -11,6 +11,8 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
 import { ServiceWorkerManager } from './ServiceWorkerManager';
+import { WindowTitle } from './WindowTitle';
+import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 
 import type { Store } from 'firefox-profiler/types';
 
@@ -28,14 +30,17 @@ export class Root extends PureComponent<RootProps> {
     return (
       <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
         <Provider store={store}>
-          <DragAndDrop>
-            <UrlManager>
-              <ServiceWorkerManager />
-              <ProfileLoader />
-              <AppViewRouter />
-              <FooterLinks />
-            </UrlManager>
-          </DragAndDrop>
+          <AppLocalizationProvider>
+            <DragAndDrop>
+              <UrlManager>
+                <ServiceWorkerManager />
+                <ProfileLoader />
+                <AppViewRouter />
+                <FooterLinks />
+                <WindowTitle />
+              </UrlManager>
+            </DragAndDrop>
+          </AppLocalizationProvider>
         </Provider>
       </ErrorBoundary>
     );

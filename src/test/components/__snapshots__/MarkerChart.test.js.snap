@@ -34,6 +34,130 @@ exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have b
 </div>
 `;
 
+exports[`MarkerChart context menus displays when right clicking on a marker 1`] = `
+<nav
+  class="react-contextmenu markerContextMenu react-contextmenu--visible"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconSetSelectionFromMarker"
+    />
+    Set selection from marker’s duration
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Start selection at marker’s 
+      <strong>
+        start
+      </strong>
+    </div>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Start selection at marker’s 
+      <strong>
+        end
+      </strong>
+    </div>
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      End selection at marker’s 
+      <strong>
+        start
+      </strong>
+    </div>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      End selection at marker’s 
+      <strong>
+        end
+      </strong>
+    </div>
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconCopyDescription"
+    />
+    Copy description
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    <span
+      class="react-contextmenu-icon markerContextMenuIconCopyPayload"
+    />
+    Copy full payload
+  </div>
+</nav>
+`;
+
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [

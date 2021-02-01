@@ -596,10 +596,6 @@ export type LongTaskMarkerPayload = {|
   category: 'LongTask',
 |};
 
-export type DummyForTestsMarkerPayload = {|
-  type: 'DummyForTests',
-|};
-
 export type JsAllocationPayload_Gecko = {|
   type: 'JS allocation',
   className: string,
@@ -687,7 +683,6 @@ export type MarkerPayload =
   | LongTaskMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
-  | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
   | PrefMarkerPayload
   | IPCMarkerPayload
@@ -708,7 +703,6 @@ export type MarkerPayload_Gecko =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
-  | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
   | CcMarkerTracing

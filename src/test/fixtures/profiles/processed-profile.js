@@ -91,32 +91,6 @@ export type TestDefinedJsTracerEvent = [
   Milliseconds
 ];
 
-/**
- * This function ensures that the mock payloads are converted correctly to real payloads
- * that match the MarkerPayload typing. Specifically it adds the 'DummyForTests' type
- * to { startTime, endTime } payloads. Doing this means that it's cleaner to create
- * dummy test-defined markers, since we don't have to add a `type` to the payload.
- */
-function _refineMockPayload(
-  payload: MarkerPayload | MockPayload
-): MarkerPayload {
-  if (
-    // Check for a MockPayload.
-    payload !== null &&
-    Object.keys(payload).length === 2 &&
-    typeof payload.startTime === 'number' &&
-    typeof payload.endTime === 'number'
-  ) {
-    return {
-      type: 'DummyForTests',
-    };
-  }
-  // There is no way to refine the payload type to just the { startTime, endTime }
-  // mock marker. So check for those conditions above, and coerce the final result
-  // into a MarkerPayload using the function signature.
-  return (payload: any);
-}
-
 export function addRawMarkersToThread(
   thread: Thread,
   markers: TestDefinedRawMarker[]
@@ -131,7 +105,7 @@ export function addRawMarkersToThread(
     markersTable.phase.push(phase);
     markersTable.startTime.push(startTime);
     markersTable.endTime.push(endTime);
-    markersTable.data.push(data ? _refineMockPayload(data) : null);
+    markersTable.data.push(data || null);
     markersTable.category.push(category || 0);
     markersTable.length++;
   }
@@ -143,16 +117,16 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
+  const allTimes = new Set();
 
   markers.forEach(tuple => {
     const name = tuple[0];
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
     const maybeEndTime = (tuple: any)[2] || null;
-    const maybeData = (tuple: any)[3] || null;
+    const payload: MarkerPayload = (tuple: any)[3] || null;
 
     markersTable.name.push(stringTable.indexForString(name));
-    const payload = _refineMockPayload(maybeData);
     if (maybeEndTime === null) {
       markersTable.phase.push(INSTANT);
       markersTable.startTime.push(startTime);
@@ -161,11 +135,62 @@ export function addMarkersToThreadWithCorrespondingSamples(
       markersTable.phase.push(INTERVAL);
       markersTable.startTime.push(startTime);
       markersTable.endTime.push(maybeEndTime);
+      allTimes.add(maybeEndTime);
     }
+    allTimes.add(startTime);
     markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;
   });
+
+  // When the profile contains at least 1 sample, we use only the samples to
+  // control the initial range. Because of that we need to add samples so that
+  // the range includes these markers. Note that when a thread has no sample,
+  // then the markers are used to compute the initial range.
+  const { samples } = thread;
+  if (samples.length) {
+    const firstMarkerTime = Math.min(...allTimes);
+    const lastMarkerTime = Math.max(...allTimes);
+
+    // The first marker time should be added if there's no sample before this time.
+    const shouldAddFirstMarkerTime = samples.time[0] > firstMarkerTime;
+
+    // The last marker time should be added if there's no sample after this time,
+    // but only if it's different than the other time.
+    const shouldAddLastMarkerTime =
+      samples.time[samples.length - 1] < lastMarkerTime &&
+      firstMarkerTime !== lastMarkerTime;
+
+    if (shouldAddFirstMarkerTime) {
+      samples.time.unshift(firstMarkerTime);
+      samples.stack.unshift(null);
+      if (samples.responsiveness) {
+        samples.responsiveness.unshift(null);
+      }
+      if (samples.eventDelay) {
+        samples.eventDelay.unshift(null);
+      }
+      if (samples.weight) {
+        samples.weight.unshift(samples.weight[0]);
+      }
+      samples.length++;
+    }
+
+    if (shouldAddLastMarkerTime) {
+      samples.time.push(lastMarkerTime);
+      samples.stack.push(null);
+      if (samples.responsiveness) {
+        samples.responsiveness.push(null);
+      }
+      if (samples.eventDelay) {
+        samples.eventDelay.push(null);
+      }
+      if (samples.weight) {
+        samples.weight.push(samples.weight[0]);
+      }
+      samples.length++;
+    }
+  }
 }
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {

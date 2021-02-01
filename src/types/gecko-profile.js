@@ -14,6 +14,7 @@ import type {
   ProfilerOverheadStats,
   VisualMetrics,
   ProfilerConfiguration,
+  SampleUnits,
 } from './profile';
 import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
@@ -97,15 +98,26 @@ export type GeckoSamples = {|
         stack: 0,
         time: 1,
         eventDelay: 2,
+        threadCPUDelta?: 3,
       |},
   data: Array<
-    [
-      null | IndexIntoGeckoStackTable,
-      Milliseconds, // since profile.meta.startTime
-      // milliseconds since the last event was processed in this
-      // thread's event loop at the time that the sample was taken
-      Milliseconds
-    ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds
+      ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds,
+        // CPU usage value of the current thread.
+        // It's present only when the CPU Utilization feature is enabled in Firefox.
+        number | null
+      ]
   >,
 |};
 
@@ -114,6 +126,12 @@ export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -122,6 +140,12 @@ export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   eventDelay: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -329,6 +353,10 @@ export type GeckoProfileFullMeta = {|
   visualMetrics?: VisualMetrics,
   // Optional because older Firefox versions may not have the data.
   configuration?: ProfilerConfiguration,
+  // Units of samples table values.
+  // The sampleUnits property landed in Firefox 86, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  sampleUnits?: SampleUnits,
 |};
 
 export type GeckoProfileWithMeta<Meta> = {|

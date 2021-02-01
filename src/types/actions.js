@@ -4,6 +4,7 @@
 
 // @flow
 import { CallTree } from '../profile-logic/call-tree';
+import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
 import type {
   Profile,
@@ -137,6 +138,8 @@ export type RightClickedMarkerInfo = {|
   +markerIndex: MarkerIndex,
 |};
 
+export type Localization = ReactLocalization;
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
@@ -206,6 +209,9 @@ type ProfileAction =
       +type: 'HIDE_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
       +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
+      +type: 'SHOW_ALL_TRACKS',
     |}
   | {|
       +type: 'SHOW_GLOBAL_TRACK',
@@ -497,6 +503,10 @@ type CurrentProfileUploadedInformationAction = {|
   +uploadedProfileInformation: UploadedProfileInformation | null,
 |};
 
+type L10nAction =
+  | {| +type: 'REQUEST_L10N' |}
+  | {| +type: 'RECEIVE_L10N', +localization: Localization |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -506,4 +516,5 @@ export type Action =
   | IconsAction
   | PublishAction
   | DragAndDropAction
-  | CurrentProfileUploadedInformationAction;
+  | CurrentProfileUploadedInformationAction
+  | L10nAction;

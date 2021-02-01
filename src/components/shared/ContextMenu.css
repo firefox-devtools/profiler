@@ -31,7 +31,9 @@
 }
 
 .react-contextmenu-item:not(.react-contextmenu-submenu) {
+  display: flex;
   overflow: hidden;
+  align-items: center;
   padding: 2px 12px;
   cursor: default;
   line-height: 1.5;
@@ -116,4 +118,29 @@
 .react-contextmenu-item:hover.checked:not(.react-contextmenu-item--disabled)::before {
   /* Invert the colors of the checkmark when selected */
   border-color: #fff;
+}
+
+/* Use this wrapper for a content that needs to take the available space or if
+ * it contains other HTML elements (eg <strong>) */
+.react-contextmenu-item-content {
+  flex: auto;
+}
+
+/* Use a span with this class to add an icon to an item. */
+.react-contextmenu-icon {
+  width: 16px;
+  height: 16px;
+  background: center no-repeat;
+  margin-inline-end: 8px;
+  pointer-events: auto;
+}
+
+/* Soften a bit the style of highlighted words */
+.react-contextmenu-item > strong {
+  color: #38383d;
+}
+
+.react-contextmenu-item--selected > strong,
+.react-contextmenu-item:hover > strong {
+  color: #fff;
 }

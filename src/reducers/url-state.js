@@ -330,6 +330,8 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.add(action.trackIndex);
       return hiddenGlobalTracks;
     }
+    case 'SHOW_ALL_TRACKS':
+      return new Set();
     case 'SHOW_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);
       hiddenGlobalTracks.delete(action.trackIndex);
@@ -356,6 +358,13 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       const hiddenLocalTracks = new Set(hiddenLocalTracksByPid.get(action.pid));
       hiddenLocalTracks.add(action.trackIndex);
       hiddenLocalTracksByPid.set(action.pid, hiddenLocalTracks);
+      return hiddenLocalTracksByPid;
+    }
+    case 'SHOW_ALL_TRACKS': {
+      const hiddenLocalTracksByPid = new Map(state);
+      for (const key of hiddenLocalTracksByPid) {
+        hiddenLocalTracksByPid.set(key[0], new Set());
+      }
       return hiddenLocalTracksByPid;
     }
     case 'SHOW_LOCAL_TRACK': {

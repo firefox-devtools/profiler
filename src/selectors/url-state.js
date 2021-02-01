@@ -261,13 +261,14 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
 /**
  * Get a short formatted string that represents the meta info of the current profile.
  */
-export const getFormattedMetaInfoString: Selector<string> = state => {
+export const getFormattedMetaInfoString: Selector<string | null> = state => {
   // Avoid circular dependencies by selected the profile meta manually.
-  const { meta } = ensureExists(
-    state.profileView.profile,
-    'Expected the profile to exist.'
-  );
-  return formatMetaInfoString(meta);
+  const { profile } = state.profileView;
+  if (!profile) {
+    return null;
+  }
+
+  return formatMetaInfoString(profile.meta);
 };
 
 /**
@@ -304,7 +305,7 @@ export const getProfileNameWithDefault: Selector<string> = createSelector(
     }
 
     // Finally return a generic string describing the type of profile.
-    if (formattedMetaInfoString === '') {
+    if (!formattedMetaInfoString) {
       return 'Untitled profile';
     }
     return formattedMetaInfoString;

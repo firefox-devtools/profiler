@@ -1250,6 +1250,13 @@ export function filterThreadSamplesToRange(
     );
   }
 
+  if (samples.threadCPUDelta) {
+    newSamples.threadCPUDelta = samples.threadCPUDelta.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
   const newThread: Thread = {
     ...thread,
     samples: newSamples,

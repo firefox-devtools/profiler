@@ -1,60 +1,37 @@
-.callNodeContextMenuIcon {
-  position: relative;
-  top: 2px;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-inline-end: 8px;
-  pointer-events: auto;
-}
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.react-contextmenu-item--selected > .callNodeContextMenuIcon,
-.react-contextmenu-item:hover .callNodeContextMenuIcon,
-.react-contextmenu-item:active .callNodeContextMenuIcon {
+/* Most of the CSS logic to be able to add icons is part of the more generic
+ * file ContextMenu.css that is applied for all context menus. Especially the
+ * CSS class `react-contextmenu-icon` is used in addition to these more specific
+ * classes, and that's where other properties for backgrounds are specified.
+ */
+
+/* All the icons we use in the call node's context menu are nicer if we use this
+ * filter when in the selected state. */
+.callNodeContextMenu .react-contextmenu-item--selected .react-contextmenu-icon,
+.callNodeContextMenu .react-contextmenu-item:hover .react-contextmenu-icon {
   filter: invert(1);
 }
 
 .callNodeContextMenuIconMerge {
-  background: url(../../../res/img/svg/merge-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/merge-icon.svg);
 }
 
 .callNodeContextMenuIconCollapse {
-  background: url(../../../res/img/svg/collapse-icon.svg) center center
-    no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/collapse-icon.svg);
 }
 
 .callNodeContextMenuIconFocus {
-  background: url(../../../res/img/svg/focus-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/focus-icon.svg);
 }
 
 .callNodeContextMenuIconDrop {
-  background: url(../../../res/img/svg/drop-icon.svg) center center no-repeat;
+  background-image: url(firefox-profiler-res/img/svg/drop-icon.svg);
 }
 
-.callNodeContextMenuLabel {
-  color: #555;
-  font-weight: bold;
-  margin-inline: 2px;
-}
-
-.react-contextmenu-item--selected > .callNodeContextMenuLabel,
-.react-contextmenu-item:hover .callNodeContextMenuLabel,
-.react-contextmenu-item:active .callNodeContextMenuLabel {
-  color: #fff;
-}
-
-.callNodeContextMenuWithKey {
-  display: flex;
-}
-
-.callNodeContextMenuWithKey > div {
-  /* Vertically align the text with the icon */
-  display: flex;
-  flex: 1;
-}
-
-.callNodeContextMenuWithKey > kbd {
-  display: inline-block;
+.callNodeContextMenuShortcut {
   padding: 0 5px;
 
   /* This color is based off of photon grey, but adjusted to have a nice visual look
