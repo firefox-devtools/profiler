@@ -27,16 +27,18 @@ export class ProfileRootMessage extends React.PureComponent<Props> {
     return (
       <div className="rootMessageContainer">
         <div className="rootMessage">
-          <Localized id="profileRootMessage--title">
+          <Localized id="ProfileRootMessage--title">
             <h1 className="rootMessageTitle">Firefox Profiler</h1>
           </Localized>
           <div className="rootMessageText">{message}</div>
           {additionalMessage ? (
             <div className="rootMessageAdditional">
               {this.toParagraphs(additionalMessage)}
-              <Localized id="profileRootMessage--additional">
-                <a href="/">Back to home</a>
-              </Localized>
+              <a href="/">
+                <Localized id="ProfileRootMessage--additional">
+                  Back to home
+                </Localized>
+              </a>
             </div>
           ) : null}
           {showLoader ? (

@@ -17,11 +17,13 @@ exports[`app/CompareHome matches the snapshot 1`] = `
         >
           Firefox Profiler
         </a>
+         
+        –
+         
         <span
           class="appHeaderSubtext"
         >
-           
-          — Web app for Firefox performance analysis
+          Web app for Firefox performance analysis
         </span>
       </span>
       <a

@@ -17,11 +17,13 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         >
           Firefox Profiler
         </a>
+         
+        –
+         
         <span
           class="appHeaderSubtext"
         >
-           
-          — Web app for Firefox performance analysis
+          Web app for Firefox performance analysis
         </span>
       </span>
       <a
@@ -363,11 +365,13 @@ exports[`UploadedRecordingsHome matches a snapshot when there is no published pr
         >
           Firefox Profiler
         </a>
+         
+        –
+         
         <span
           class="appHeaderSubtext"
         >
-           
-          — Web app for Firefox performance analysis
+          Web app for Firefox performance analysis
         </span>
       </span>
       <a

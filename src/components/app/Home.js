@@ -30,6 +30,7 @@ import type {
   ConnectedProps,
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
+
 import { Localized } from '@fluent/react';
 import './Home.css';
 
@@ -114,17 +115,17 @@ class ActionButtons extends React.PureComponent<
     return (
       <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
-          <Localized id="Home--upload-from-file-input-button">
-            <label className="homeSectionButton">
-              <input
-                className="homeSectionUploadFromFileInput"
-                type="file"
-                ref={this._takeInputRef}
-                onChange={this._uploadProfileFromFile}
-              />
+          <label className="homeSectionButton">
+            <input
+              className="homeSectionUploadFromFileInput"
+              type="file"
+              ref={this._takeInputRef}
+              onChange={this._uploadProfileFromFile}
+            />
+            <Localized id="Home--upload-from-file-input-button">
               Load a profile from file
-            </label>
-          </Localized>
+            </Localized>
+          </label>
           <Localized id="Home--upload-from-url-button">
             <button
               type="button"
@@ -180,11 +181,16 @@ class LoadFromUrl extends React.PureComponent<
           onChange={this.handleChange}
           autoFocus
         />
-        <input
-          type="submit"
-          className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
-          value="Load"
-        />
+        <Localized
+          id="Home--load-from-url-submit-button"
+          attrs={{ value: true }}
+        >
+          <input
+            type="submit"
+            className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
+            value="Load"
+          />
+        </Localized>
       </form>
     );
   }
@@ -194,9 +200,7 @@ function DocsButton() {
   return (
     <a href="/docs/" className="homeSectionButton">
       <span className="homeSectionDocsIcon" />
-      <Localized id="Home--documentation-button">
-        <span>Documentation</span>
-      </Localized>
+      <Localized id="Home--documentation-button">Documentation</Localized>
     </a>
   );
 }
@@ -429,7 +433,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {/* Right column: instructions */}
           <div>
             <DocsButton />
-            <Localized id="Home--record-instructions">
+            <Localized
+              id="Home--record-instructions"
+              elems={{
+                kbd: <kbd />,
+              }}
+            >
               <p>
                 To start profiling, click on the profiling button, or use the
                 keyboard shortcuts. The icon is blue when a profile is
@@ -473,8 +482,10 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               }}
             >
               <p>
-                {`Recording performance profiles requires <a>Firefox</a>. 
-                However, existing profiles can be viewed in any modern browser.`}
+                Recording performance profiles requires{' '}
+                <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
+                . However, existing profiles can be viewed in any modern
+                browser.
               </p>
             </Localized>
           </div>
@@ -488,10 +499,16 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     return (
       <div>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start profiling
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>{' '}
+          <Localized id="Home--record-instructions-start-stop">
+            Stop and start profiling
+          </Localized>
         </p>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load profile
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>{' '}
+          <Localized id="Home--record-instructions-capture-load">
+            Capture and load profile
+          </Localized>
         </p>
       </div>
     );
@@ -507,7 +524,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {specialMessage ? (
             <div className="homeSpecialMessage">{specialMessage}</div>
           ) : null}
-          <Localized id="Home--special-message">
+          <Localized id="Home--profiler-motto">
             <p>
               Capture a performance profile. Analyze it. Share it. Make the web
               faster.
@@ -520,7 +537,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             {/* Grid container: homeAdditionalContent */}
             <h2 className="homeAdditionalContentTitle protocol-display-xs">
               {/* Title: full width */}
-              Load existing profiles
+              <Localized id="Home--additional-content-title">
+                Load existing profiles
+              </Localized>
             </h2>
             <section className="homeActions">
               {/* Actions: left column */}
@@ -538,21 +557,30 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
                 retrieveProfileFromFile={this.props.retrieveProfileFromFile}
                 triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
               />
-              <p>
-                <Localized id="Home--compare-recordings-info">
-                  <span> You can also compare recordings.</span>
-                </Localized>
-                <Localized id="Home--compare-recordings-info-link">
+
+              <Localized
+                id="Home--compare-recordings-info"
+                elems={{
+                  a: (
+                    // $FlowExpectError Flow doesn't know about this fluent rule for react component.
+                    <InnerNavigationLink dataSource="compare"></InnerNavigationLink>
+                  ),
+                }}
+              >
+                <p>
+                  You can also compare recordings.{' '}
                   <InnerNavigationLink dataSource="compare">
                     Open the comparing interface.
                   </InnerNavigationLink>
-                </Localized>
-              </p>
+                </p>
+              </Localized>
             </section>
             <section>
               {/* Recent recordings: right column */}
               <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
-                Recent uploaded recordings
+                <Localized id="Home--recent-uploaded-recordings-title">
+                  Recent uploaded recordings
+                </Localized>
               </h2>
               <ListOfPublishedProfiles limit={3} withActionButtons={false} />
             </section>

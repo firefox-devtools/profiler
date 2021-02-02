@@ -136,25 +136,31 @@ class PublishedProfile extends React.PureComponent<
           publishedProfilesListItem_ConfirmDialogIsOpen: confirmDialogIsOpen,
         })}
       >
-        <a
-          className="publishedProfilesLink"
-          href={urlPath}
-          title={`Click here to load profile ${smallProfileName}`}
+        <Localized
+          id="ListOfPublishedProfiles--publishedProfilesLink"
+          attrs={{ title: true }}
+          vars={{ smallProfileName: smallProfileName }}
         >
-          <div className="publishedProfilesDate">
-            {_formatDate(
-              uploadedProfileInformation.publishedDate,
-              nowTimestamp
-            )}
-          </div>
-          <div className="publishedProfilesInfo">
-            <div className="publishedProfilesName">
-              <strong>{profileName}</strong> (
-              {_formatRange(uploadedProfileInformation.publishedRange)})
+          <a
+            className="publishedProfilesLink"
+            href={urlPath}
+            title={`Click here to load profile ${smallProfileName}`}
+          >
+            <div className="publishedProfilesDate">
+              {_formatDate(
+                uploadedProfileInformation.publishedDate,
+                nowTimestamp
+              )}
             </div>
-            <ProfileMetaInfoSummary meta={uploadedProfileInformation.meta} />
-          </div>
-        </a>
+            <div className="publishedProfilesInfo">
+              <div className="publishedProfilesName">
+                <strong>{profileName}</strong> (
+                {_formatRange(uploadedProfileInformation.publishedRange)})
+              </div>
+              <ProfileMetaInfoSummary meta={uploadedProfileInformation.meta} />
+            </div>
+          </a>
+        </Localized>
         {withActionButtons ? (
           <div className="publishedProfilesActionButtons">
             {uploadedProfileInformation.jwtToken ? (
@@ -237,9 +243,11 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
 
     if (!uploadedProfileInformationList.length) {
       return (
-        <Localized id="ListOfPublishedProfiles--uploaded-profile-information-list-empty ">
-          <p className="photon-body-30">No profile has been uploaded yet!</p>
-        </Localized>
+        <p className="photon-body-30">
+          <Localized id="ListOfPublishedProfiles--uploaded-profile-information-list-empty">
+            No profile has been uploaded yet!
+          </Localized>
+        </p>
       );
     }
 
@@ -254,18 +262,22 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     let profileRestLabel;
     if (profilesRestCount > 0) {
       profileRestLabel = (
-        <>See and manage all your recordings ({profilesRestCount} more)</>
+        <Localized
+          id="ListOfPublishedProfiles--uploaded-profile-information-label"
+          vars={{ profilesRestCount: profilesRestCount }}
+        >
+          <>See and manage all your recordings ({profilesRestCount} more)</>
+        </Localized>
       );
     } else {
       profileRestLabel = (
         <Localized
-          id="ListOfPublishedProfiles--uploaded-profile-information-label"
+          id="ListOfPublishedProfiles--uploaded-profile-information-list"
           vars={{
-            uploadedProfileInformationListLength:
-              uploadedProfileInformationList.length,
+            uploadedProfileCount: uploadedProfileInformationList.length,
           }}
         >
-          {'{ $ uploadedProfileInformationListLength } Manage these recordings'}
+          <>Manage this recording</>
         </Localized>
       );
     }
