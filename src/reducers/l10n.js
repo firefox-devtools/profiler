@@ -3,16 +3,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Reducer, L10nState } from 'firefox-profiler/types';
+import type {
+  Reducer,
+  L10nState,
+  L10nFetchingPhase,
+} from 'firefox-profiler/types';
 import { ReactLocalization } from '@fluent/react';
 import { combineReducers } from 'redux';
 
-const isL10nFetching: Reducer<boolean> = (state = false, action) => {
+const l10nFetchingPhase: Reducer<L10nFetchingPhase> = (
+  state = 'not-fetching',
+  action
+) => {
   switch (action.type) {
     case 'REQUEST_L10N':
-      return true;
+      return 'fetching-ftl';
     case 'RECEIVE_L10N':
-      return false;
+      return 'done-fetching';
     default:
       return state;
   }
@@ -31,7 +38,7 @@ const localization: Reducer<ReactLocalization> = (
 };
 
 const l10nReducer: Reducer<L10nState> = combineReducers({
-  isL10nFetching,
+  l10nFetchingPhase,
   localization,
 });
 
