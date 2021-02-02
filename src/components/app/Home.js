@@ -250,14 +250,14 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     super(props);
     // Start by suggesting that we install the add-on.
     let popupAddonInstallPhase = 'other-browser';
-  
+
     if (_isFirefox()) {
       if (window.isGeckoProfilerAddonInstalled) {
         popupAddonInstallPhase = 'addon-installed';
       } else {
         popupAddonInstallPhase = 'suggest-install-addon';
       }
-     
+
       // Query the browser to see if the menu button is available.
       queryIsMenuButtonEnabled().then(
         isMenuButtonEnabled => {
@@ -272,8 +272,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           // that we're talking to an older version of the browser.
         }
       );
-    }  if(_isAndroid()){
-         popupAddonInstallPhase = 'firefox-android';
+    }
+    if (_isAndroid()) {
+      popupAddonInstallPhase = 'firefox-android';
     }
 
     this.state = {
@@ -474,8 +475,8 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   }
   _renderFirefoxAndroidInstructions() {
-        return (
-          <InstructionTransition key={0}>
+    return (
+      <InstructionTransition key={0}>
         <div
           className="homeInstructions"
           data-testid="home-other-browser-instructions"
