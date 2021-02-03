@@ -561,7 +561,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               </p>
             </section>
             <section>
-              {/* Recent recordings: right column */}
+              {/*Recent recordings: right column */}
               <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
                 Recent uploaded recordings
               </h2>
