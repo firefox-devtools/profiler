@@ -19,6 +19,7 @@ export class ContextMenu extends PureComponent<Props> {
   };
 
   _mouseDownHandler(event: MouseEvent): void {
+    // This prevents from stealing the focus from where it was.
     event.preventDefault();
   }
 

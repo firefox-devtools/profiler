@@ -826,6 +826,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
+    threadCPUDelta: geckoSamples.threadCPUDelta,
     weightType: 'samples',
     weight: null,
     length: geckoSamples.length,
@@ -1376,6 +1377,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     symbolicated: !!geckoProfile.meta.presymbolicated,
     updateChannel: geckoProfile.meta.updateChannel,
     markerSchema: processMarkerSchema(geckoProfile),
+    sampleUnits: geckoProfile.meta.sampleUnits,
   };
 
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(

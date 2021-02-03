@@ -12,9 +12,15 @@ import { WindowTitle } from 'firefox-profiler/components/app/WindowTitle';
 import {
   getEmptyProfile,
   getEmptyThread,
-} from '../../profile-logic/data-structures';
+} from 'firefox-profiler/profile-logic/data-structures';
+import {
+  changeProfileName,
+  setDataSource,
+} from 'firefox-profiler/actions/profile-view';
+import * as ZippedProfilesActions from 'firefox-profiler/actions/zipped-profiles';
+
 import { storeWithProfile, blankStore } from '../fixtures/stores';
-import { changeProfileName, setDataSource } from '../../actions/profile-view';
+import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 
 describe('WindowTitle', () => {
   it('shows basic window title', () => {
@@ -123,5 +129,45 @@ describe('WindowTitle', () => {
     store.dispatch(setDataSource('compare'));
 
     expect(document.title).toBe('Compare Profiles – Firefox Profiler');
+  });
+
+  it("shows a title when a profile isn't loaded yet", () => {
+    const store = blankStore();
+    store.dispatch(setDataSource('from-url'));
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Firefox Profiler');
+  });
+
+  it('shows the file name when viewing a file from a zip file', async () => {
+    const { store } = await storeWithZipFile([
+      'foo/bar/profile1.json',
+      'foo/profile2.json',
+      'baz/profile3.json',
+    ]);
+
+    store.dispatch(setDataSource('from-url'));
+
+    render(
+      <Provider store={store}>
+        <WindowTitle />
+      </Provider>
+    );
+
+    expect(document.title).toBe('Zip File Contents – Firefox Profiler');
+
+    await store.dispatch(
+      ZippedProfilesActions.viewProfileFromPathInZipFile(
+        'foo/bar/profile1.json'
+      )
+    );
+
+    expect(document.title).toBe(
+      'bar/profile1.json – Firefox – 1/1/1970, 12:00:00 AM UTC – Firefox Profiler'
+    );
   });
 });

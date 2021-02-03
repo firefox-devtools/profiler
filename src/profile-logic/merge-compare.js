@@ -769,6 +769,7 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay.push(null);
       newSamples.time.push(samples1.time[i]);
+      // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
       // base profile.
       newWeight.push(-interval1);

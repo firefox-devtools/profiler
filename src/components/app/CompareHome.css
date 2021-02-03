@@ -22,6 +22,7 @@
 }
 
 .compareHomeSubmitButton {
+  font-size: inherit; /* override the photon style to make it nicer with the rest of the form. */
   grid-column-start: span 2;
 }
 

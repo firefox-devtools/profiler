@@ -231,8 +231,8 @@ describe('TimelineMarkers', function() {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnMenuItem('Copy');
-      expect(copy).toHaveBeenLastCalledWith('mousedown — DOMEvent');
+      clickOnMenuItem('Copy description');
+      expect(copy).toHaveBeenLastCalledWith('mousedown');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();
@@ -259,7 +259,7 @@ describe('TimelineMarkers', function() {
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      clickOnMenuItem('Copy');
+      clickOnMenuItem('Copy description');
       expect(copy).toHaveBeenLastCalledWith('Navigation');
 
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
