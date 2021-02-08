@@ -141,6 +141,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
   };
 
+  _toggleTrackTypeVisibility = (_, data: { type: String }): void => {
+    console.log('Hiding all tracks of type ', data.type);
+  };
+
   _isolateProcess = () => {
     const { isolateProcess, rightClickedTrack } = this.props;
     if (rightClickedTrack === null) {
@@ -523,6 +527,41 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  renderHideTrackByType() {
+    const { rightClickedTrack, localTracksByPid, globalTracks } = this.props;
+    if (rightClickedTrack === null) {
+      return null;
+    }
+
+    const ALLOWED_TYPES = [
+      'screenshot',
+      'memory',
+      'network',
+      'ipc',
+      'event-delay',
+    ];
+
+    const track =
+      (localTracksByPid.get(rightClickedTrack.pid) &&
+        localTracksByPid.get(rightClickedTrack.pid)[0]) ||
+      globalTracks.find(t => t.pid === rightClickedTrack.pid);
+    const type = track.type;
+
+    if (ALLOWED_TYPES.includes(type)) {
+      return (
+        <MenuItem
+          key={rightClickedTrack.pid}
+          preventClose={false}
+          data={{ type }}
+          onClick={this._toggleTrackTypeVisibility}
+        >
+          Hide all {type} type tracks
+        </MenuItem>
+      );
+    }
+    return null;
+  }
+
   renderShowAllTracks() {
     const { rightClickedTrack } = this.props;
     if (rightClickedTrack !== null) {
@@ -546,7 +585,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   render() {
     const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
+
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
+    const hideTrackByType = this.renderHideTrackByType();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
@@ -554,6 +595,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const showAllTracksMenu = this.renderShowAllTracks();
     const separator =
       isolateProcessMainThread ||
+      hideTrackByType ||
       isolateProcess ||
       isolateLocalTrack ||
       isolateScreenshot ? (
@@ -571,6 +613,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         }
         {showAllTracksMenu}
         {isolateProcessMainThread}
+        {hideTrackByType}
         {isolateProcess}
         {isolateLocalTrack}
         {isolateScreenshot}
