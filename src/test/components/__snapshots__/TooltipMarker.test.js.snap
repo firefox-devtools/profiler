@@ -2138,14 +2138,14 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Bytes evicted
+      Bytes tenured
       :
     </div>
     1.30MB / 1.97MB (66%)
     <div
       class="tooltipLabel"
     >
-      Cells evicted
+      Cells tenured
       :
     </div>
     15.9K / 26.6K (60%)
@@ -2180,7 +2180,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Proportion of nursery-allocated strings that were deduplicated
+      Strings deduplicated when tenuring
       :
     </div>
     1,234 / 11.2K (11%)
