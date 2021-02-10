@@ -54,7 +54,7 @@ export function getGCMinorDetails(
           <TooltipDetail label="Reason" key="GCMinor-Reason">
             {nursery.reason}
           </TooltipDetail>,
-          <TooltipDetail label="Bytes evicted" key="GCMinor-Bytes evicted">
+          <TooltipDetail label="Bytes tenured" key="GCMinor-Bytes tenured">
             {formatValueTotal(
               nursery.bytes_tenured,
               nursery.bytes_used,
@@ -64,7 +64,7 @@ export function getGCMinorDetails(
         );
         if (nursery.cells_tenured && nursery.cells_allocated_nursery) {
           details.push(
-            <TooltipDetail label="Cells evicted" key="GCMinor-Cells evicted">
+            <TooltipDetail label="Cells tenured" key="GCMinor-Cells tenured">
               {formatValueTotal(
                 nursery.cells_tenured,
                 nursery.cells_allocated_nursery,
@@ -148,7 +148,7 @@ export function getGCMinorDetails(
           if (nursery.strings_tenured && nursery.strings_deduplicated) {
             details.push(
               <TooltipDetail
-                label="Proportion of nursery-allocated strings that were deduplicated"
+                label="Strings deduplicated when tenuring"
                 key="GCMinor-strings_deduped"
               >
                 {formatValueTotal(
