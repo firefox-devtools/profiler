@@ -171,6 +171,23 @@ process: \\"tab\\" (222)"
           </canvas>
         </div>
         <div
+          class="threadSampleGraph"
+        >
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="400"
+            width="400"
+          >
+            <h2>
+              Stack Graph for 
+              DOM Worker
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
+        <div
           class="timelineEmptyThreadIndicator"
         />
       </div>

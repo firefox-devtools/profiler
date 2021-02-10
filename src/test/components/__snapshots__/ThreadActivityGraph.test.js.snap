@@ -2521,6 +2521,94 @@ Array [
     "set fillStyle",
     Object {},
   ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    15,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    25,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    45,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    55,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    65,
+    0,
+    10,
+    10,
+  ],
 ]
 `;
 
@@ -2554,6 +2642,23 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
       </h2>
       <p>
         This graph shows a visual chart of thread activity.
+      </p>
+    </canvas>
+  </div>
+  <div
+    class="threadSampleGraph"
+  >
+    <canvas
+      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+      height="10"
+      width="80"
+    >
+      <h2>
+        Stack Graph for 
+        Test Track
+      </h2>
+      <p>
+        This graph charts the stack height of each sample.
       </p>
     </canvas>
   </div>
