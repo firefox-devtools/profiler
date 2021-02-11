@@ -226,6 +226,12 @@ const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
+    case 'VIEW_FULL_PROFILE':
+      // Don't override the timeline type that was provided in the url if it's null.
+      if (action.timelineType !== null) {
+        return action.timelineType;
+      }
+      return state;
     default:
       return state;
   }

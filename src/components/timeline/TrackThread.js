@@ -345,6 +345,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     )
       ? selectors.getSelectedCallNodeIndex(state)
       : null;
+    const timelineType = getTimelineType(state);
+
     return {
       invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
@@ -357,7 +359,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
       categories: getCategories(state),
-      timelineType: getTimelineType(state),
+      timelineType,
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(

@@ -24,6 +24,7 @@ import {
   getGlobalTrackOrder,
   getTimelineType,
   getPanelLayoutGeneration,
+  getIsCPUUtilizationProvided,
 } from 'firefox-profiler/selectors';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -69,6 +70,7 @@ type StateProps = {|
   +hiddenTrackCount: HiddenTrackCount,
   +activeBrowsingContextID: BrowsingContextID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
+  +isCPUUtilizationProvided: boolean,
 |};
 
 type DispatchProps = {|
@@ -90,17 +92,36 @@ type State = {|
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
   +changeTimelineType: typeof changeTimelineType,
+  +isCPUUtilizationProvided: boolean,
 |}> {
   _changeToCategories = () => this.props.changeTimelineType('category');
+  _changeToCPUCategories = () => {
+    if (this.props.isCPUUtilizationProvided) {
+      // A simple check to see if we have the CPU utilization before switching to it.
+      this.props.changeTimelineType('cpu-category');
+    }
+  };
   _changeToStacks = () => this.props.changeTimelineType('stack');
 
   render() {
-    const { timelineType } = this.props;
+    const { timelineType, isCPUUtilizationProvided } = this.props;
 
     return (
       <form>
         <div className="timelineSettingsToggle">
           Graph type:{' '}
+          {isCPUUtilizationProvided ? (
+            <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
+              <input
+                type="radio"
+                name="timelineSettingsToggle"
+                className="photon-radio photon-radio-micro timelineSettingsToggleInput"
+                checked={timelineType === 'cpu-category'}
+                onChange={this._changeToCPUCategories}
+              />
+              Categories with CPU
+            </label>
+          ) : null}
           <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
@@ -241,6 +262,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
       activeBrowsingContextID,
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
+      isCPUUtilizationProvided,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -257,6 +279,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
           <TimelineSettingsGraphType
             timelineType={timelineType}
             changeTimelineType={changeTimelineType}
+            isCPUUtilizationProvided={isCPUUtilizationProvided}
           />
           <TimelineSettingsHiddenTracks
             hiddenTrackCount={hiddenTrackCount}
@@ -324,6 +347,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     hiddenTrackCount: getHiddenTrackCount(state),
     activeBrowsingContextID: getActiveBrowsingContextID(state),
     timelineTrackOrganization: getTimelineTrackOrganization(state),
+    isCPUUtilizationProvided: getIsCPUUtilizationProvided(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
