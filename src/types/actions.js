@@ -274,6 +274,9 @@ type ProfileAction =
       +type: 'ENABLE_EVENT_DELAY_TRACKS',
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |}
+  | {|
+      +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |};
 
 type ReceiveProfileAction =

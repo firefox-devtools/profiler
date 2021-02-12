@@ -13,6 +13,7 @@ import {
   type SizeProps,
 } from 'firefox-profiler/components/shared/WithSize';
 import { ThreadStackGraph } from 'firefox-profiler/components/shared/thread/StackGraph';
+import { ThreadCPUGraph } from 'firefox-profiler/components/shared/thread/CPUGraph';
 import { ThreadSampleGraph } from 'firefox-profiler/components/shared/thread/SampleGraph';
 import { ThreadActivityGraph } from 'firefox-profiler/components/shared/thread/ActivityGraph';
 
@@ -27,6 +28,7 @@ import {
   getThreadSelectorsFromThreadsKey,
   getMaxThreadCPUDelta,
   getSampleUnits,
+  getIsExperimentalCPUGraphsEnabled,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -97,6 +99,7 @@ type StateProps = {|
   +timelineTrackOrganization: TimelineTrackOrganization,
   +selectedThreadIndexes: Set<ThreadIndex>,
   +enableCPUUsage: boolean,
+  +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDelta: number,
   +sampleUnits: ?SampleUnits,
 |};
@@ -208,6 +211,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       enableCPUUsage,
       maxThreadCPUDelta,
       sampleUnits,
+      isExperimentalCPUGraphsEnabled,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -290,6 +294,23 @@ class TimelineTrackThread extends PureComponent<Props> {
               categories={categories}
               onSampleClick={this._onSampleClick}
             />
+            {isExperimentalCPUGraphsEnabled &&
+            fullThread.samples.threadCPUDelta !== undefined ? (
+              <ThreadCPUGraph
+                className="threadCPUGraph"
+                trackName={trackName}
+                interval={interval}
+                thread={filteredThread}
+                tabFilteredThread={tabFilteredThread}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                callNodeInfo={callNodeInfo}
+                selectedCallNodeIndex={selectedCallNodeIndex}
+                categories={categories}
+                onSampleClick={this._onSampleClick}
+                maxThreadCPUDelta={maxThreadCPUDelta}
+              />
+            ) : null}
           </>
         ) : (
           <ThreadStackGraph
@@ -404,6 +425,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       timelineTrackOrganization: getTimelineTrackOrganization(state),
       selectedThreadIndexes,
       enableCPUUsage,
+      isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       maxThreadCPUDelta: getMaxThreadCPUDelta(state),
       sampleUnits: getSampleUnits(state),
     };

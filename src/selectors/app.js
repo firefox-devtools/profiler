@@ -73,6 +73,8 @@ export const getExperimental: Selector<ExperimentalFlags> = state =>
   getApp(state).experimental;
 export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
   getExperimental(state).eventDelayTracks;
+export const getIsExperimentalCPUGraphsEnabled: Selector<boolean> = state =>
+  getExperimental(state).cpuGraphs;
 
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;
