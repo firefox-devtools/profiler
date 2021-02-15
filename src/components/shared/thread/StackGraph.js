@@ -10,7 +10,7 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
   getSamplesSelectedStates,
-  getSampleIndexClosestToTime,
+  getSampleIndexClosestToStartTime,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
@@ -220,7 +220,7 @@ export class ThreadStackGraph extends PureComponent<Props> {
       const x = event.pageX - r.left;
       const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
-      const sampleIndex = getSampleIndexClosestToTime(
+      const sampleIndex = getSampleIndexClosestToStartTime(
         thread.samples,
         time,
         interval
