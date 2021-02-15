@@ -10,11 +10,12 @@ import { timeCode } from 'firefox-profiler/utils/time-code';
 import {
   getSampleIndexToCallNodeIndex,
   getSamplesSelectedStates,
-  getSampleIndexClosestToTime,
+  getSampleIndexClosestToCenteredTime,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
-import './StackGraph.css';
+
+import './SampleGraph.css';
 
 import type {
   Thread,
@@ -39,8 +40,6 @@ type Props = {|
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
   ) => void,
-  // Decide which way the stacks grow up from the floor, or down from the ceiling.
-  +stacksGrowFromCeiling?: boolean,
   +trackName: string,
 |};
 
@@ -79,7 +78,6 @@ export class ThreadSampleGraph extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       categories,
-      stacksGrowFromCeiling,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -116,13 +114,13 @@ export class ThreadSampleGraph extends PureComponent<Props> {
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = canvas.width / rangeLength;
-    const yPixelsPerDepth = canvas.height / maxDepth;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
     const drawnIntervalWidth = Math.max(
       0.8,
       trueIntervalPixelWidth * multiplier
     );
+    const drawnSampleWidth = Math.min(drawnIntervalWidth, 10);
 
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
@@ -138,18 +136,9 @@ export class ThreadSampleGraph extends PureComponent<Props> {
     );
 
     // Do one pass over the samples array to gather the samples we want to draw.
-    const regularSamples = {
-      height: [],
-      xPos: [],
-    };
-    const idleSamples = {
-      height: [],
-      xPos: [],
-    };
-    const highlightedSamples = {
-      height: [],
-      xPos: [],
-    };
+    const regularSamples = [];
+    const idleSamples = [];
+    const highlightedSamples = [];
     // Enforce a minimum distance so that we don't draw more than 4 samples per
     // pixel.
     const minGapMs = 0.25 / xPixelsPerMs;
@@ -163,8 +152,8 @@ export class ThreadSampleGraph extends PureComponent<Props> {
       if (callNodeIndex === null) {
         continue;
       }
-      const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
-      const xPos = (sampleTime - range[0]) * xPixelsPerMs;
+      const xPos =
+        (sampleTime - range[0]) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
       if (
         samplesSelectedStates !== null &&
@@ -184,22 +173,16 @@ export class ThreadSampleGraph extends PureComponent<Props> {
           samplesBucket = regularSamples;
         }
       }
-      samplesBucket.height.push(height);
-      samplesBucket.xPos.push(xPos);
+      samplesBucket.push(xPos);
       nextMinTime = sampleTime + minGapMs;
     }
 
-    type SamplesBucket = {
-      height: number[],
-      xPos: number[],
-    };
-    function drawSamples(samplesBucket: SamplesBucket, color: string) {
-      ctx.fillStyle = color;
-      for (let i = 0; i < samplesBucket.height.length; i++) {
-        const height = samplesBucket.height[i];
-        const startY = stacksGrowFromCeiling ? 0 : canvas.height - height;
-        const xPos = samplesBucket.xPos[i];
-        ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+    function drawSamples(samplePositions: number[], color: string) {
+      for (let i = 0; i < samplePositions.length; i++) {
+        ctx.fillStyle = color;
+        const startY = 0;
+        const xPos = samplePositions[i];
+        ctx.fillRect(xPos, startY, drawnSampleWidth, canvas.height);
       }
     }
 
@@ -214,16 +197,15 @@ export class ThreadSampleGraph extends PureComponent<Props> {
   _onMouseUp = (event: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd, thread, interval } = this.props;
+      const { rangeStart, rangeEnd, thread } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = event.pageX - r.left;
       const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
-      const sampleIndex = getSampleIndexClosestToTime(
+      const sampleIndex = getSampleIndexClosestToCenteredTime(
         thread.samples,
-        time,
-        interval
+        time
       );
 
       if (thread.samples.stack[sampleIndex] === null) {
