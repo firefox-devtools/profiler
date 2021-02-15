@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
+<div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-purple"
+      />
+      Layout
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsRefreshDriver::AddStyleFlushObserver
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::GeckoRestyleManager::PostRestyleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::GeckoRestyleManager::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::PresShell::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsDocument::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::dom::Element::RemoveStates
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::EventStateManager::UpdateAncestorState
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::EventStateManager::SetContentState
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::EventStateManager::NotifyMouseOut
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::EventStateManager::GenerateMouseEnterExit
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::EventStateManager::PreHandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::PresShell::HandleEventInternal
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::PresShell::HandlePositionedEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      mozilla::PresShell::HandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsViewManager::DispatchEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsView::HandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsChildView::DispatchEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      ChildViewMouseTracker::MouseMoved
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsAppShell::Run
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      nsAppStartup::Run
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    …
+  </ul>
+</div>
+`;
+
+exports[`SampleTooltipContents renders the sample with µs CPU usage information properly 1`] = `
+<div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-yellow"
+      />
+      JavaScript
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      CPU Usage:
+    </div>
+    <div>
+      40% (400 µs over 1,000μs)
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      Ejs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      F
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      Cjs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      B
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      A
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+  </ul>
+</div>
+`;
