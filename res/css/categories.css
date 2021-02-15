@@ -41,6 +41,18 @@
   background-color: var(--blue-60);
 }
 
+.category-color-red {
+  background-color: var(--red-60);
+}
+
+.category-color-lightred {
+  background-color: var(--red-70);
+}
+
+.category-color-darkgray {
+  background-color: var(--grey-40);
+}
+
 .category-color-brown {
   background-color: var(--magenta-60);
 }

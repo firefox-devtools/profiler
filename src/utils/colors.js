@@ -163,6 +163,27 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedTextColor: '#fff',
         gravity: 8,
       };
+    case 'red':
+      return {
+        selectedFillStyle: RED_60,
+        unselectedFillStyle: RED_60 + '60',
+        selectedTextColor: '#fff',
+        gravity: 1,
+      };
+    case 'lightred':
+      return {
+        selectedFillStyle: RED_70 + '60',
+        unselectedFillStyle: RED_70 + '30',
+        selectedTextColor: '#000',
+        gravity: 1,
+      };
+    case 'darkgray':
+      return {
+        selectedFillStyle: GREY_40,
+        unselectedFillStyle: GREY_40 + '60',
+        selectedTextColor: '#000',
+        gravity: 10,
+      };
     default:
       console.error(
         `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
