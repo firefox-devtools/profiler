@@ -66,6 +66,7 @@ import type {
   $ReturnType,
   MarkerSchema,
   MarkerSchemaByName,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
@@ -181,6 +182,11 @@ export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state 
 // Get the marker schema that comes from the Gecko profile.
 const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
   getMeta(state).markerSchema;
+
+// Get the samples table units. They can be different depending on their platform.
+// See SampleUnits type definition for more information.
+export const getSampleUnits: Selector<?SampleUnits> = state =>
+  getMeta(state).sampleUnits;
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.

@@ -64,6 +64,8 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
+  SampleUnits,
+  ThreadCPUDeltaUnit,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2758,4 +2760,154 @@ export function hasThreadKeys(
     }
   }
   return true;
+}
+
+/**
+ * Process the CPU delta values of that thread. It will throw an error if it
+ * fails to find threadCPUDelta array.
+ * It does two different processing:
+ *
+ * 1. For the threadCPUDelta values with timing units, it limits these values
+ * to the interval. This is mostly a bug on macOS platform (with µs values)
+ * because we could only detect these values in that platform so far. But to be
+ * safe, we are also doing this processing for Linux platform (ns values).
+ * 2. We are checking for null values and converting them to non-null values if
+ * there are any by getting the closest threadCPUDelta value.
+ */
+export function processThreadCPUDelta(
+  thread: Thread,
+  sampleUnits: SampleUnits
+): Thread {
+  const { samples } = thread;
+  const { threadCPUDelta } = samples;
+
+  if (!threadCPUDelta) {
+    throw new Error(
+      "processThreadCPUDelta should not be called for the profiles that dosn't include threadCPUDelta."
+    );
+  }
+  // A helper function to shallow clone the thread with different threadCPUDelta values.
+  function _newThreadWithNewThreadCPUDelta(
+    threadCPUDelta: Array<number | null> | void
+  ): Thread {
+    const newSamples = {
+      ...samples,
+      threadCPUDelta,
+    };
+
+    const newThread = {
+      ...thread,
+      samples: newSamples,
+    };
+
+    return newThread;
+  }
+  // Check to see the CPU delta numbers are all null and if they are, remove
+  // this array completely. For example on JVM threads, all the threadCPUDelta
+  // values will be null and therefore it will fail to paint the activity graph.
+  // Instead we should remove the whole array. This call will be quick for most
+  // of the cases because we usually have values at least in the second sample.
+  const hasCPUDeltaValues = threadCPUDelta.some(val => val !== null);
+  if (!hasCPUDeltaValues) {
+    // Remove the threadCPUDelta array and return the new thread.
+    return _newThreadWithNewThreadCPUDelta(undefined);
+  }
+
+  const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
+
+  for (let i = 0; i < samples.length; i++) {
+    const nullableThreadCPUDelta: number | null = threadCPUDelta[i];
+    let nonNullThreadCPUDelta: number;
+
+    if (nullableThreadCPUDelta === null) {
+      // Ideally there shouldn't be any null values but that can happen if the
+      // back-end fails to get the CPU usage numbers from the operation system.
+      // In that case, try to find the closest number and use it to mitigate the
+      // weird graph renderings.
+      nonNullThreadCPUDelta = findClosestNonNullValueToIdx(threadCPUDelta, i);
+    } else {
+      nonNullThreadCPUDelta = nullableThreadCPUDelta;
+    }
+
+    const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
+    switch (threadCPUDeltaUnit) {
+      // Check if the threadCPUDelta is more than the interval time and limit
+      // that number to the interval if it's bigger than that. This is mostly
+      // either a bug on the back-end or a bug on the operation system level.
+      // This happens mostly with µs values which is coming from macOS. We can
+      // remove that processing once we are sure that these numbers are reliable
+      // and this issue doesn't occur.
+      case 'µs':
+      case 'ns': {
+        const intervalUs =
+          (samples.time[i] - samples.time[i - 1]) *
+          cpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+        if (nonNullThreadCPUDelta > intervalUs) {
+          newThreadCPUDelta[i] = intervalUs;
+          continue;
+        } else {
+          newThreadCPUDelta[i] = nonNullThreadCPUDelta;
+        }
+        break;
+      }
+      case 'variable CPU cycles':
+        newThreadCPUDelta[i] = nonNullThreadCPUDelta;
+        break;
+      default:
+        throw assertExhaustiveCheck(
+          threadCPUDeltaUnit,
+          'Unhandled threadCPUDelta unit in the processing.'
+        );
+    }
+  }
+
+  return _newThreadWithNewThreadCPUDelta(newThreadCPUDelta);
+}
+
+/**
+ * A helper function that is used to convert ms time units to threadCPUDelta units.
+ */
+function cpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
+  switch (unit) {
+    case 'µs':
+      // ms to µs multiplier
+      return 1000;
+    case 'ns':
+      // ms to ns multiplier
+      return 1000000;
+    case 'variable CPU cycles':
+      // We can't convert the CPU cycle unit to any time units
+      throw new Error('Unhandled threadCPUDelta unit for time multiplier.');
+    default:
+      throw assertExhaustiveCheck(
+        unit,
+        'Unhandled threadCPUDelta unit in the processing.'
+      );
+  }
+}
+
+/**
+ * A helper function that finds the closest non-null item in an element to an index.
+ * This is useful for finding the non-null threadCPUDelta number to a sample.
+ */
+function findClosestNonNullValueToIdx(
+  array: Array<number | null>,
+  idx: number,
+  distance: number = 1
+): number {
+  if (idx + distance < array.length) {
+    const itemAfter = array[idx + distance];
+    if (itemAfter !== null) {
+      return itemAfter;
+    }
+  }
+
+  if (idx - distance >= 0) {
+    const itemBefore = array[idx - distance];
+    if (itemBefore !== null) {
+      return itemBefore;
+    }
+  }
+
+  return findClosestNonNullValueToIdx(array, idx, ++distance);
 }

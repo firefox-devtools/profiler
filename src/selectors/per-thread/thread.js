@@ -95,16 +95,28 @@ export function getThreadSelectorsPerThread(
    * interactions. The transforms are order dependendent.
    *
    * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
-   * 2. Tab - New samples table with only samples that belongs to the active tab.
-   * 3. Range - New samples table with only samples in the committed range.
-   * 4. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 5. Implementation - Modify stacks and samples to only show a single implementation.
-   * 6. Search - Exclude samples that don't include some text in the stack.
-   * 7. Preview - Only include samples that are within a user's preview range selection.
+   * 2. CPU - New samples table with processed threadCPUDelta values.
+   * 3. Tab - New samples table with only samples that belongs to the active tab.
+   * 4. Range - New samples table with only samples in the committed range.
+   * 5. Transform - Apply the transform stack that modifies the stacks and samples.
+   * 6. Implementation - Modify stacks and samples to only show a single implementation.
+   * 7. Search - Exclude samples that don't include some text in the stack.
+   * 8. Preview - Only include samples that are within a user's preview range selection.
    */
 
-  const getTabFilteredThread: Selector<Thread> = createSelector(
+  const getCPUProcessedThread: Selector<Thread> = createSelector(
     getThread,
+    ProfileSelectors.getSampleUnits,
+    (thread, sampleUnits) =>
+      thread.samples === null ||
+      thread.samples.threadCPUDelta === undefined ||
+      !sampleUnits
+        ? thread
+        : ProfileData.processThreadCPUDelta(thread, sampleUnits)
+  );
+
+  const getTabFilteredThread: Selector<Thread> = createSelector(
+    getCPUProcessedThread,
     ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
@@ -122,7 +134,7 @@ export function getThreadSelectorsPerThread(
    * load time(during viewProfile).
    */
   const getActiveTabFilteredThread: Selector<Thread> = createSelector(
-    getThread,
+    getCPUProcessedThread,
     ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
@@ -374,6 +386,7 @@ export function getThreadSelectorsPerThread(
     getHasJsAllocations,
     getHasNativeAllocations,
     getCanShowRetainedMemory,
+    getCPUProcessedThread,
     getTabFilteredThread,
     getActiveTabFilteredThread,
     getProcessedEventDelays,
