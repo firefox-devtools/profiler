@@ -15,6 +15,7 @@ import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getTimelineType } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import TrackThread from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -126,6 +127,31 @@ describe('ThreadActivityGraph', function() {
 
   it('matches the 2d canvas draw snapshot', () => {
     const { ctx } = setup();
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('matches the 2d canvas draw snapshot with CPU values', () => {
+    const profile = getSamplesProfile();
+    profile.meta.interval = 1;
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'variable CPU cycles',
+    };
+    profile.threads[0].samples.threadCPUDelta = [
+      null,
+      400,
+      1000,
+      500,
+      100,
+      200,
+      800,
+      300,
+    ];
+
+    const { ctx, getState } = setup(profile);
+    // If there are CPU values, it should be automatically defaulted to this view.
+    expect(getTimelineType(getState())).toBe('cpu-category');
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
