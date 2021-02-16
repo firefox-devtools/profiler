@@ -13,6 +13,7 @@ import {
   type SizeProps,
 } from 'firefox-profiler/components/shared/WithSize';
 import { ThreadStackGraph } from 'firefox-profiler/components/shared/thread/StackGraph';
+import { ThreadSampleGraph } from 'firefox-profiler/components/shared/thread/SampleGraph';
 import { ThreadActivityGraph } from 'firefox-profiler/components/shared/thread/ActivityGraph';
 
 import {
@@ -256,20 +257,35 @@ class TimelineTrackThread extends PureComponent<Props> {
         ) : null}
         {(timelineType === 'category' || timelineType === 'cpu-category') &&
         !filteredThread.isJsTracer ? (
-          <ThreadActivityGraph
-            className="threadActivityGraph"
-            trackName={trackName}
-            interval={interval}
-            fullThread={fullThread}
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            onSampleClick={this._onSampleClick}
-            categories={categories}
-            samplesSelectedStates={samplesSelectedStates}
-            treeOrderSampleComparator={treeOrderSampleComparator}
-            enableCPUUsage={enableCPUUsage}
-            maxThreadCPUDelta={maxThreadCPUDelta}
-          />
+          <>
+            <ThreadActivityGraph
+              className="threadActivityGraph"
+              trackName={trackName}
+              interval={interval}
+              fullThread={fullThread}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              onSampleClick={this._onSampleClick}
+              categories={categories}
+              samplesSelectedStates={samplesSelectedStates}
+              treeOrderSampleComparator={treeOrderSampleComparator}
+              enableCPUUsage={enableCPUUsage}
+              maxThreadCPUDelta={maxThreadCPUDelta}
+            />
+            <ThreadSampleGraph
+              className="threadSampleGraph"
+              trackName={trackName}
+              interval={interval}
+              thread={filteredThread}
+              tabFilteredThread={tabFilteredThread}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              callNodeInfo={callNodeInfo}
+              selectedCallNodeIndex={selectedCallNodeIndex}
+              categories={categories}
+              onSampleClick={this._onSampleClick}
+            />
+          </>
         ) : (
           <ThreadStackGraph
             className="threadStackGraph"
