@@ -24,6 +24,7 @@ import {
   getInvertCallstack,
   getTimelineTrackOrganization,
   getThreadSelectorsFromThreadsKey,
+  getMaxThreadCPUDelta,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -92,6 +93,8 @@ type StateProps = {|
   ) => number,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +selectedThreadIndexes: Set<ThreadIndex>,
+  +enableCPUUsage: boolean,
+  +maxThreadCPUDelta: number,
 |};
 
 type DispatchProps = {|
@@ -198,6 +201,8 @@ class TimelineTrackThread extends PureComponent<Props> {
       trackType,
       timelineTrackOrganization,
       trackName,
+      enableCPUUsage,
+      maxThreadCPUDelta,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -249,7 +254,8 @@ class TimelineTrackThread extends PureComponent<Props> {
             ) : null}
           </>
         ) : null}
-        {timelineType === 'category' && !filteredThread.isJsTracer ? (
+        {(timelineType === 'category' || timelineType === 'cpu-category') &&
+        !filteredThread.isJsTracer ? (
           <ThreadActivityGraph
             className="threadActivityGraph"
             trackName={trackName}
@@ -261,6 +267,8 @@ class TimelineTrackThread extends PureComponent<Props> {
             categories={categories}
             samplesSelectedStates={samplesSelectedStates}
             treeOrderSampleComparator={treeOrderSampleComparator}
+            enableCPUUsage={enableCPUUsage}
+            maxThreadCPUDelta={maxThreadCPUDelta}
           />
         ) : (
           <ThreadStackGraph
@@ -345,12 +353,16 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     )
       ? selectors.getSelectedCallNodeIndex(state)
       : null;
+    const fullThread = selectors.getRangeFilteredThread(state);
     const timelineType = getTimelineType(state);
+    const enableCPUUsage =
+      timelineType === 'cpu-category' &&
+      fullThread.samples.threadCPUDelta !== undefined;
 
     return {
       invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
-      fullThread: selectors.getRangeFilteredThread(state),
+      fullThread,
       tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex,
@@ -370,6 +382,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       ),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
       selectedThreadIndexes,
+      enableCPUUsage,
+      maxThreadCPUDelta: getMaxThreadCPUDelta(state),
     };
   },
   mapDispatchToProps: {

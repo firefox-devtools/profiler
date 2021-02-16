@@ -2763,6 +2763,37 @@ export function hasThreadKeys(
 }
 
 /**
+ * Compute the max CPU delta value for that thread. It computes the max value
+ * after the threadCPUDelta processing.
+ */
+export function computeMaxThreadCPUDelta(
+  threads: Thread[],
+  interval: Milliseconds
+): number {
+  let maxThreadCPUDelta = 0;
+
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const { time, threadCPUDelta } = threads[threadIndex].samples;
+
+    if (!threadCPUDelta) {
+      // Don't have any ThreadCPU values.
+      continue;
+    }
+
+    // First element of CPU delta is always null because back-end doesn't know
+    // the delta since there is no previous sample.
+    for (let i = 1; i < threadCPUDelta.length; i++) {
+      const cpuDelta = threadCPUDelta[i] || 0;
+      const realInterval = (time[i] - time[i - 1]) / interval;
+      const currentCPUPerInterval = cpuDelta / realInterval;
+      maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerInterval);
+    }
+  }
+
+  return maxThreadCPUDelta;
+}
+
+/**
  * Process the CPU delta values of that thread. It will throw an error if it
  * fails to find threadCPUDelta array.
  * It does two different processing:

@@ -42,6 +42,8 @@ export type Props = {|
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
+  +enableCPUUsage: boolean,
+  +maxThreadCPUDelta: number,
 |};
 
 type State = {
@@ -148,6 +150,8 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
       rangeEnd,
       samplesSelectedStates,
       treeOrderSampleComparator,
+      maxThreadCPUDelta,
+      enableCPUUsage,
     } = this.props;
     const { hoveredSample, mouseX, mouseY } = this.state;
     return (
@@ -172,6 +176,8 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
           onMouseUp={this._onMouseUp}
+          enableCPUUsage={enableCPUUsage}
+          maxThreadCPUDelta={maxThreadCPUDelta}
         />
         {hoveredSample === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
