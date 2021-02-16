@@ -11,6 +11,20 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from '../utils/flow';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
+import { timeCode } from '../utils/time-code';
+import { hashPath } from '../utils/path';
 
 import type {
   Profile,
@@ -51,17 +65,6 @@ import type {
   EventDelayInfo,
   ThreadsKey,
 } from 'firefox-profiler/types';
-
-import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-  getFirstItemFromSet,
-} from '../utils/flow';
-
-import { timeCode } from '../utils/time-code';
-import { hashPath } from '../utils/path';
-
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
@@ -781,22 +784,44 @@ function _getTimeRangeForThread(
     // We need to look at those because it can be a marker only profile(no-sampling mode).
     // Finding start and end times sadly requires looping through all markers :(
     for (let i = 0; i < markers.length; i++) {
-      const startTime = markers.startTime[i];
-      const endTime = markers.endTime[i];
+      const maybeStartTime = markers.startTime[i];
+      const maybeEndTime = markers.endTime[i];
+      const markerPhase = markers.phase[i];
       // The resulting range needs to adjust BOTH the start and end of the range, as
       // each marker type could adjust the total range beyond the current bounds.
       // Note the use of Math.min and Math.max are different for the start and end
       // of the markers.
 
-      if (startTime !== null) {
-        // This is either an Instant, IntervalStart, or Interval marker.
-        result.start = Math.min(result.start, startTime);
-        result.end = Math.max(result.end, startTime + interval);
-      }
-      if (endTime !== null) {
-        // This is either an Interval or IntervalEnd marker.
-        result.start = Math.min(result.start, endTime);
-        result.end = Math.max(result.end, endTime + interval);
+      switch (markerPhase) {
+        case INSTANT:
+        case INTERVAL_START: {
+          const startTime = ensureExists(maybeStartTime);
+
+          result.start = Math.min(result.start, startTime);
+          result.end = Math.max(result.end, startTime + interval);
+          break;
+        }
+        case INTERVAL_END: {
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, endTime);
+          result.end = Math.max(result.end, endTime + interval);
+          break;
+        }
+        case INTERVAL: {
+          const startTime = ensureExists(maybeStartTime);
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, startTime, endTime);
+          result.end = Math.max(
+            result.end,
+            startTime + interval,
+            endTime + interval
+          );
+          break;
+        }
+        default:
+          throw new Error('Unhandled marker phase type.');
       }
     }
   }
