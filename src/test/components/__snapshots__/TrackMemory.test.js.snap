@@ -27,7 +27,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     <span
       class="timelineTrackMemoryTooltipNumber"
     >
-      2.0B
+      2B
     </span>
      memory range in graph
   </div>

@@ -150,7 +150,8 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
             <>
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">Buffer Capacity:</span>
-                {formatBytes(configuration.capacity)}
+                {/* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
+                formatBytes(configuration.capacity * 8, 0)}
               </div>
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">Buffer Duration:</span>

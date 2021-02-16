@@ -477,7 +477,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Buffer Capacity:
         </span>
-        16.0KB
+        1GB
       </div>
       <div
         class="metaInfoRow"
