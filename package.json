@@ -57,7 +57,7 @@
     "gecko-profiler-demangle": "^0.2.0",
     "idb": "^6.0.0",
     "intl-pluralrules": "^1.2.2",
-    "jszip": "^3.5.0",
+    "jszip": "^3.6.0",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
     "namedtuplemap": "^1.0.0",
