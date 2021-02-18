@@ -411,7 +411,9 @@ describe('app/MenuButtons', function() {
       profile.meta.configuration = {
         features: ['js', 'threads'],
         threads: ['GeckoMain', 'DOM Worker'],
-        capacity: Math.pow(2, 14),
+        // The capacity is expressed in entries, where 1 entry == 8 bytes.
+        // 128M entries is 1GB.
+        capacity: 128 * 1024 * 1024,
         duration: 20,
       };
 
@@ -420,6 +422,15 @@ describe('app/MenuButtons', function() {
         getMetaInfoPanel,
       } = await setupForMetaInfoPanel(profile);
       displayMetaInfoPanel();
+      const renderedCapacity = ensureExists(
+        screen.getByText(/Buffer Capacity/).nextSibling
+      );
+
+      /* This rule needs to be disabled because `renderedCapacity` is a text
+       * code, and this triggers
+       * https://github.com/testing-library/jest-dom/issues/306 */
+      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      expect(renderedCapacity.textContent).toBe('1GB');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 

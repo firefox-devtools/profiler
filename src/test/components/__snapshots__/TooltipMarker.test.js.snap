@@ -2057,10 +2057,17 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Phase minor_gc.mark_roots.mark_stack
+      Phase mark (self-time)
       :
     </div>
-    1.5ms
+    29ms
+    <div
+      class="tooltipLabel"
+    >
+      Phase minor_gc (self-time)
+      :
+    </div>
+    202ms
     <div
       class="tooltipLabel"
     >
@@ -2071,10 +2078,10 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Phase sweep.sweep_compartments.sweep_jit_data
+      Phase sweep.sweep_compartments.sweep_types (self-time)
       :
     </div>
-    1.2ms
+    9.4ms
     <div
       class="tooltipLabel"
     >
@@ -2082,13 +2089,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
       :
     </div>
     12ms
-    <div
-      class="tooltipLabel"
-    >
-      Phase sweep.sweep_mark.sweep_mark_weak
-      :
-    </div>
-    4.1ms
     <div
       class="tooltipLabel"
     >
@@ -2138,14 +2138,14 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Bytes evicted
+      Bytes tenured
       :
     </div>
     1.30MB / 1.97MB (66%)
     <div
       class="tooltipLabel"
     >
-      Cells evicted
+      Cells tenured
       :
     </div>
     15.9K / 26.6K (60%)
@@ -2180,7 +2180,7 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
     <div
       class="tooltipLabel"
     >
-      Proportion of nursery-allocated strings that were deduplicated
+      Strings deduplicated when tenuring
       :
     </div>
     1,234 / 11.2K (11%)
@@ -2286,6 +2286,13 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
       :
     </div>
     1
+    <div
+      class="tooltipLabel"
+    >
+      Phase mark
+      :
+    </div>
+    10ms
     <div
       class="tooltipLabel"
     >
