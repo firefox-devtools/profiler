@@ -51,8 +51,8 @@ export function setupLocalization(
       defaultLocale: DEFAULT_LOCALE,
     });
 
-    const fetchedMessages = await Promise.all(languages.map(fetchMessages));
-    const bundles = lazilyParsedBundles(fetchedMessages);
+    const fetchedMessages = await fetchMessages(languages[0]);
+    const bundles = lazilyParsedBundles([fetchedMessages]);
     const localization = new ReactLocalization(bundles);
     dispatch(receiveL10n(localization));
   };

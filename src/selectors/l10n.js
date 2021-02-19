@@ -4,10 +4,15 @@
 
 // @flow
 
-import type { Selector, L10nState, Localization } from 'firefox-profiler/types';
+import type {
+  Selector,
+  L10nState,
+  Localization,
+  L10nFetchingPhase,
+} from 'firefox-profiler/types';
 
 export const getL10nState: Selector<L10nState> = state => state.l10n;
-export const getIsL10nFetching: Selector<boolean> = state =>
-  getL10nState(state).isL10nFetching;
+export const getL10nFetchingPhase: Selector<L10nFetchingPhase> = state =>
+  getL10nState(state).l10nFetchingPhase;
 export const getLocalization: Selector<Localization> = state =>
   getL10nState(state).localization;
