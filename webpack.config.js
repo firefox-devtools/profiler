@@ -65,8 +65,10 @@ const config = {
     ],
   },
   node: {
+    Buffer: false,
     process: false,
   },
+
   plugins: [
     new CircularDependencyPlugin({
       // exclude node_modules
