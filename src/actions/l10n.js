@@ -40,7 +40,8 @@ export function receiveL10n(localization: Localization): Action {
  * later it dispacthes the translations and updates the state
  */
 export function setupLocalization(
-  locales: Array<string>
+  locales: Array<string>,
+  pseudoStrategy?: string
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(requestL10n());
@@ -52,7 +53,7 @@ export function setupLocalization(
     });
 
     const fetchedMessages = await fetchMessages(languages[0]);
-    const bundles = lazilyParsedBundles([fetchedMessages]);
+    const bundles = lazilyParsedBundles([fetchedMessages], pseudoStrategy);
     const localization = new ReactLocalization(bundles);
     dispatch(receiveL10n(localization));
   };

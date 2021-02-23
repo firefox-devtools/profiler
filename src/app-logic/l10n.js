@@ -5,6 +5,7 @@
 // @flow
 
 import { FluentBundle, FluentResource } from '@fluent/bundle';
+import { PSEUDO_STRATEGIES } from 'firefox-profiler/utils/l10n-pseudo';
 
 export const AVAILABLE_LOCALES: Array<string> = ['en-US'];
 export const DEFAULT_LOCALE = 'en-US';
@@ -25,11 +26,17 @@ export async function fetchMessages(locale: string): Promise<[string, string]> {
  * preferences.
  */
 export function* lazilyParsedBundles(
-  fetchedMessages: Array<[string, string]>
+  fetchedMessages: Array<[string, string]>,
+  pseudoStrategy?: 'accented' | 'bidi'
 ): Generator<FluentBundle, void, void> {
+  const transform = pseudoStrategy
+    ? PSEUDO_STRATEGIES[pseudoStrategy]
+    : undefined;
   for (const [locale, messages] of fetchedMessages) {
     const resource = new FluentResource(messages);
-    const bundle = new FluentBundle(locale);
+    const bundle = new FluentBundle(locale, {
+      transform,
+    });
     bundle.addResource(resource);
     yield bundle;
   }
