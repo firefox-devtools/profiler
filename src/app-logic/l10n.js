@@ -5,6 +5,7 @@
 // @flow
 
 import { FluentBundle, FluentResource } from '@fluent/bundle';
+import engFtlFile from '../../locales/en-US/app.ftl';
 
 export const AVAILABLE_LOCALES: Array<string> = ['en-US'];
 export const DEFAULT_LOCALE = 'en-US';
@@ -14,7 +15,10 @@ export const DEFAULT_LOCALE = 'en-US';
  * Returns the locale and the ftl string grouped as an Array.
  */
 export async function fetchMessages(locale: string): Promise<[string, string]> {
-  const response = await fetch(`/locales/${locale}/app.ftl`);
+  const response =
+    locale === DEFAULT_LOCALE
+      ? await fetch(engFtlFile)
+      : await fetch(`/locales/${locale}/app.ftl`);
   const messages = await response.text();
   return [locale, messages];
 }
