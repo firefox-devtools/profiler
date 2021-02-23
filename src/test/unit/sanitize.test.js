@@ -437,16 +437,28 @@ describe('sanitizePII', function() {
             },
           },
         ],
+        [
+          'FileIO',
+          5,
+          6,
+          {
+            type: 'FileIO',
+            source: 'PoisonIOInterposer',
+            operation: 'fsync',
+          },
+        ],
       ])
     );
     expect(sanitizedProfile.threads.length).toEqual(1);
     const thread = sanitizedProfile.threads[0];
-    expect(thread.markers.length).toEqual(2);
+    expect(thread.markers.length).toEqual(3);
 
     const marker1 = thread.markers.data[0];
     const marker2 = thread.markers.data[1];
+    // Note: the 3rd marker has no filename property, to check that we know how
+    // to handle this case, but otherwise we do no check on it.
 
-    // Marker filename fields should be there.
+    // Marker filename fields should be there in the 2 first markers.
     if (!marker1 || !marker1.filename || !marker2 || !marker2.filename) {
       throw new Error('Failed to find filename property in the payload');
     }
