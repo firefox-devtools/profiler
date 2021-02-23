@@ -15,7 +15,11 @@ import {
   getDirection,
 } from 'firefox-profiler/selectors/l10n';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
-import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
+import {
+  requestL10n,
+  receiveL10n,
+  setupLocalization,
+} from 'firefox-profiler/actions/l10n';
 import { ReactLocalization, Localized } from '@fluent/react';
 import { coerceMatchingShape } from '../../utils/flow';
 
@@ -94,7 +98,7 @@ describe('AppLocalizationProvider', () => {
   });
 
   it('fetches the en-US FTL strings and renders them', async () => {
-    const { store, translatedText } = setup();
+    const { store, dispatch, translatedText } = setup();
     const { findByText } = render(
       <Provider store={store}>
         <AppLocalizationProvider>
@@ -106,5 +110,22 @@ describe('AppLocalizationProvider', () => {
     );
 
     expect(await findByText(translatedText)).toBeTruthy();
+    expect(document.documentElement).toHaveAttribute('lang', 'en-US');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('ltr');
+
+    // Now we're testing the LTR pseudo-localization.
+    dispatch(setupLocalization(navigator.languages, 'accented'));
+    expect(await findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'en-US');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('ltr');
+
+    // And now the RTL pseudo-localization.
+    dispatch(setupLocalization(navigator.languages, 'bidi'));
+    expect(await findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute('lang', 'en-US');
+    // $FlowExpectError Our version of flow doesn't know about document.dir
+    expect(document.dir).toBe('rtl');
   });
 });
