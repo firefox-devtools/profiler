@@ -295,6 +295,8 @@ export type L10nFetchingPhase =
 export type L10nState = {|
   +l10nFetchingPhase: L10nFetchingPhase,
   +localization: Localization,
+  +primaryLocale: string | null,
+  +direction: 'ltr' | 'rtl',
 |};
 
 export type IconState = Set<string>;

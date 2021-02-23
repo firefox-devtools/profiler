@@ -108,3 +108,8 @@ export const PSEUDO_STRATEGIES = {
   accented: transformString.bind(null, ACCENTED_MAP, true, '', ''),
   bidi: transformString.bind(null, FLIPPED_MAP, false, '\u202e', '\u202c'),
 };
+
+export const PSEUDO_STRATEGIES_DIRECTION = {
+  accented: 'ltr',
+  bidi: 'rtl',
+};

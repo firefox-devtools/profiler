@@ -11,6 +11,8 @@ import { Provider } from 'react-redux';
 import {
   getL10nFetchingPhase,
   getLocalization,
+  getPrimaryLocale,
+  getDirection,
 } from 'firefox-profiler/selectors/l10n';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import { requestL10n, receiveL10n } from 'firefox-profiler/actions/l10n';
@@ -69,9 +71,11 @@ describe('AppLocalizationProvider', () => {
     ];
     const bundles = lazilyParsedBundles([resource]);
     const testLocalization = new ReactLocalization(bundles);
-    dispatch(receiveL10n(testLocalization));
+    dispatch(receiveL10n(testLocalization, 'en-US', 'ltr'));
     expect(getL10nFetchingPhase(getState())).toBe('done-fetching');
     expect(getLocalization(getState())).toEqual(testLocalization);
+    expect(getPrimaryLocale(getState())).toEqual('en-US');
+    expect(getDirection(getState())).toEqual('ltr');
   });
 
   it('renders its children', async () => {
