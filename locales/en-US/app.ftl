@@ -24,28 +24,29 @@ FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
 
-Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make the web faster.
-Home--documentation-button = Documentation
-Home--instructions-title = How to view and record profiles
-Home--instructions-content = 
-    Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
-    However, existing profiles can be viewed in any modern browser.
-
-Home--additional-content-title = Load existing profiles
-Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--upload-from-file-input-button = Load a profile from file
 Home--upload-from-url-button = Load a profile from a URL
-Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
-Home--recent-uploaded-recordings-title = Recent uploaded recordings
-Home--record-instructions = 
+Home--load-from-url-submit-button =
+    .value = Load
+
+Home--documentation-button = Documentation
+Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording. 
     Hit <kbd>Capture Profile</kbd> to load the data into profiler.firefox.com.
 
+Home--instructions-title = How to view and record profiles
+Home--instructions-content =
+    Recording performance profiles requires <a>{ -firefox-brand-name }</a>.
+    However, existing profiles can be viewed in any modern browser.
+
 Home--record-instructions-start-stop = Stop and start profiling
 Home--record-instructions-capture-load = Capture and load profile
-Home--load-from-url-submit-button =
-    .value = Load
+Home--profiler-motto = Capture a performance profile. Analyze it. Share it. Make the web faster.
+Home--additional-content-title = Load existing profiles
+Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
+Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
+Home--recent-uploaded-recordings-title = Recent uploaded recordings
 
 # This string is used on the tooltip of the published profile links.
 # Variables:
@@ -63,7 +64,7 @@ ListOfPublishedProfiles--uploaded-profile-information-label = See and manage all
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
-ListOfPublishedProfiles--uploaded-profile-information-list = 
+ListOfPublishedProfiles--uploaded-profile-information-list =
     { $uploadedProfileCount ->
         [one] Manage this recording
        *[other] Manage these recordings
