@@ -82,7 +82,6 @@
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.14",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-flow": "^7.13.13",
     "@babel/preset-react": "^7.13.13",

@@ -8,11 +8,19 @@
     ["@babel/preset-flow", { all: true }]
   ],
   plugins: [
-    // Without `loose`, the transformation uses `Object.defineProperty` which
-    // obeys the spec more, but we get a bundle that's 8kB larger. That was the
-    // default in babel v6.
-    ["@babel/plugin-proposal-class-properties", { loose: true }],
-    ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
+    // Though `@babel/plugin-proposal-class-properties` is already included
+    // in `@babel/preset-env`, we include it specifically to be able to set
+    // `loose` mode on it, without enabling it for all the plugins included
+    // in `@babel/preset-env`.
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        // Without `loose`, the transformation uses `Object.defineProperty` which
+        // obeys the spec more, but we get a bundle that's 8kB larger. That was the
+        // default in babel v6.
+        "loose": true
+      }
+    ],
     ["module-resolver", {
       "alias": {
         "firefox-profiler": "./src"
