@@ -11,20 +11,20 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
-import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-  getFirstItemFromSet,
-} from '../utils/flow';
 import {
   INSTANT,
   INTERVAL,
   INTERVAL_START,
   INTERVAL_END,
 } from 'firefox-profiler/app-logic/constants';
-import { timeCode } from '../utils/time-code';
-import { hashPath } from '../utils/path';
+import { timeCode } from 'firefox-profiler/utils/time-code';
+import { hashPath } from 'firefox-profiler/utils/path';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/flow';
 
 import type {
   Profile,
@@ -65,7 +65,7 @@ import type {
   EventDelayInfo,
   ThreadsKey,
 } from 'firefox-profiler/types';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
