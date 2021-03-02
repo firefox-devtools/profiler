@@ -263,7 +263,6 @@ class TreeViewRowScrolledColumns<
           odd: index % 2 !== 0,
           isSelected,
           isRightClicked,
-          dim: displayData.isFrameLabel,
         })}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
@@ -288,15 +287,26 @@ class TreeViewRowScrolledColumns<
           } ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
           onClick={this._onToggleClick}
         />
+        {/* The category square is out of the treeview column element because we
+            reduce the opacity for that element in some cases (with the "dim"
+            class).
+          */
+        displayData.categoryColor && displayData.categoryName ? (
+          <span
+            className={`colored-square category-color-${displayData.categoryColor}`}
+            title={displayData.categoryName}
+          />
+        ) : null}
         <span
-          className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
+          className={classNames(
+            'treeViewRowColumn',
+            'treeViewMainColumn',
+            mainColumn.propName,
+            {
+              dim: displayData.isFrameLabel,
+            }
+          )}
         >
-          {displayData.categoryColor && displayData.categoryName ? (
-            <span
-              className={`colored-square category-color-${displayData.categoryColor}`}
-              title={displayData.categoryName}
-            />
-          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (
