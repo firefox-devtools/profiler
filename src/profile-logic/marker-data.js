@@ -138,7 +138,7 @@ export function getSearchFilteredMarkerIndexes(
       if (data.type === 'FileIO') {
         const { filename, operation, source, threadId } = data;
         if (
-          searchRegExp.test(filename) ||
+          searchRegExp.test(filename || '') ||
           searchRegExp.test(operation) ||
           searchRegExp.test(source) ||
           (threadId !== undefined && searchRegExp.test(threadId.toString()))
@@ -1149,6 +1149,10 @@ export function removePrefMarkerPreferenceValues(
 export function sanitizeFileIOMarkerFilenamePath(
   payload: FileIoPayload
 ): FileIoPayload {
+  if (!payload.filename) {
+    return payload;
+  }
+
   return {
     ...payload,
     filename: removeFilePath(payload.filename),
