@@ -58,11 +58,13 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           >
             Firefox Profiler
           </a>
+           
+          –
+           
           <span
             class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for Firefox performance analysis
           </span>
         </span>
         <a
@@ -231,11 +233,13 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           >
             Firefox Profiler
           </a>
+           
+          –
+           
           <span
             class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for Firefox performance analysis
           </span>
         </span>
         <a
@@ -405,11 +409,13 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           >
             Firefox Profiler
           </a>
+           
+          –
+           
           <span
             class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for Firefox performance analysis
           </span>
         </span>
         <a
@@ -485,7 +491,8 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               <kbd>
                 1
               </kbd>
-               Stop and start profiling
+               
+              Stop and start profiling
             </p>
             <p>
               <kbd>
@@ -499,7 +506,8 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               <kbd>
                 2
               </kbd>
-               Capture and load profile
+               
+              Capture and load profile
             </p>
           </div>
         </div>
@@ -622,7 +630,8 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
         <kbd>
           1
         </kbd>
-         Stop and start profiling
+         
+        Stop and start profiling
       </p>
       <p>
         <kbd>
@@ -636,7 +645,8 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
         <kbd>
           2
         </kbd>
-         Capture and load profile
+         
+        Capture and load profile
       </p>
     </div>
   </div>
