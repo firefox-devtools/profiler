@@ -37,9 +37,29 @@ const localization: Reducer<ReactLocalization> = (
   }
 };
 
+const primaryLocale: Reducer<string | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'RECEIVE_L10N':
+      return action.primaryLocale;
+    default:
+      return state;
+  }
+};
+
+const direction: Reducer<'ltr' | 'rtl'> = (state = 'ltr', action) => {
+  switch (action.type) {
+    case 'RECEIVE_L10N':
+      return action.direction;
+    default:
+      return state;
+  }
+};
+
 const l10nReducer: Reducer<L10nState> = combineReducers({
   l10nFetchingPhase,
   localization,
+  primaryLocale,
+  direction,
 });
 
 export default l10nReducer;
