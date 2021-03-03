@@ -56,15 +56,13 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             class="appHeaderLink"
             href="/"
           >
-            Firefox Profiler
+            ⁨Firefox Profiler⁩
           </a>
-           
-          –
-           
+           — 
           <span
             class="appHeaderSubtext"
           >
-            Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
@@ -124,14 +122,14 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             How to view and record profiles
           </h2>
           <p>
-            Recording performance profiles requires
-             
+            Recording performance profiles requires 
             <a
               href="https://www.mozilla.org/en-US/firefox/new/"
             >
-              Firefox
+              ⁨Firefox⁩
             </a>
-            . However, existing profiles can be viewed in any modern browser.
+            .
+However, existing profiles can be viewed in any modern browser.
           </p>
         </div>
       </div>
@@ -179,8 +177,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          You can also compare recordings. 
           <a
             href="/compare/"
           >
@@ -231,15 +228,13 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             class="appHeaderLink"
             href="/"
           >
-            Firefox Profiler
+            ⁨Firefox Profiler⁩
           </a>
-           
-          –
-           
+           — 
           <span
             class="appHeaderSubtext"
           >
-            Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
@@ -355,8 +350,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          You can also compare recordings. 
           <a
             href="/compare/"
           >
@@ -407,15 +401,13 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             class="appHeaderLink"
             href="/"
           >
-            Firefox Profiler
+            ⁨Firefox Profiler⁩
           </a>
-           
-          –
-           
+           — 
           <span
             class="appHeaderSubtext"
           >
-            Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
@@ -472,7 +464,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             Documentation
           </a>
           <p>
-            To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
+            To start profiling, click on the profiling button, or use the
+keyboard shortcuts. The icon is blue when a profile is recording. 
+Hit 
             <kbd>
               Capture Profile
             </kbd>
@@ -556,8 +550,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </div>
         </div>
         <p>
-          You can also compare recordings.
-           
+          You can also compare recordings. 
           <a
             href="/compare/"
           >
@@ -611,7 +604,9 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
       Documentation
     </a>
     <p>
-      To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
+      To start profiling, click on the profiling button, or use the
+keyboard shortcuts. The icon is blue when a profile is recording. 
+Hit 
       <kbd>
         Capture Profile
       </kbd>
