@@ -72,3 +72,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
+
+## UploadedRecordingsHome
+
+UploadedRecordingsHome--title = Uploaded Recordings
