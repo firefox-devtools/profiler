@@ -50,10 +50,16 @@ export function removeTemplateInformation(functionName: string) {
   // templates can't occur before the name of a function, so this is certainly
   // an HTML tag like <script>.
   for (let i = 1; i < functionName.length; i++) {
-    // We also don't want to extract template-like information that start after
-    // a space, as that won't likely be a real template information and
-    // probably rather an HTML tag name.
-    if (functionName[i] === '<' && functionName[i - 1] !== ' ') {
+    // We also don't want to extract template-like information with these
+    // characteristics:
+    // - that start after a space, as that won't likely be a real template
+    //   information and probably rather an HTML tag name.
+    // - that start after a dot, as that will likely be a java initializer
+    if (
+      functionName[i] === '<' &&
+      functionName[i - 1] !== ' ' &&
+      functionName[i - 1] !== '.'
+    ) {
       if (depth === 0) {
         // Template information begins, save segment
         result += functionName.substr(start, i - start);

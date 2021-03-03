@@ -65,6 +65,13 @@ describe('remove-template-information', function() {
     fixture = 'starting handling <script>';
     expect(removeTemplateInformation(fixture)).toEqual(fixture);
   });
+
+  it('should not remove java initializer functions', function() {
+    // See issue https://github.com/firefox-devtools/profiler/issues/3199
+    const fixture =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity.<init>';
+    expect(removeTemplateInformation(fixture)).toEqual(fixture);
+  });
 });
 
 describe('get-function-name', function() {
