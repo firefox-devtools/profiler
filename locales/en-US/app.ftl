@@ -51,8 +51,11 @@ Home--recent-uploaded-recordings-title = Recent uploaded recordings
 # This string is used on the tooltip of the published profile links.
 # Variables:
 #   $smallProfileName (String) - Shortened name for the published Profile.
-ListOfPublishedProfiles--publishedProfilesLink =
+ListOfPublishedProfiles--published-profiles-link =
     .title = Click here to load profile { $smallProfileName }
+
+ListOfPublishedProfiles--published-profiles-delete-button = Delete
+    .title = This profile cannot be deleted because we lack the authorization information.
 
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = No profile has been uploaded yet!
 
