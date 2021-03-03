@@ -8,13 +8,14 @@ import * as React from 'react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TimelineMarkersOverview,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';

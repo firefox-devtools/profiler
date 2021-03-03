@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { stripIndent } from 'common-tags';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { fireFullClick } from '../fixtures/utils';

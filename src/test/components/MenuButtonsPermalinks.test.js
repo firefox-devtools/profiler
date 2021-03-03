@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { MenuButtons } from '../../components/app/MenuButtons';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { MenuButtons } from '../../components/app/MenuButtons';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';

@@ -4,16 +4,17 @@
 
 // @flow
 import * as React from 'react';
-import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
-import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import {
-  render,
   fireEvent,
   waitFor,
   screen,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
+import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import { TextEncoder } from 'util';
 
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';

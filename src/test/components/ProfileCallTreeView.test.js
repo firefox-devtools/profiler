@@ -5,10 +5,11 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';

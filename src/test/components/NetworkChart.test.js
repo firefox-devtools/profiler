@@ -4,12 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeNetworkSearchString,
   commitRange,

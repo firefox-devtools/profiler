@@ -4,11 +4,13 @@
 // @flow
 
 import * as React from 'react';
+import { fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileName } from '../../components/app/ProfileName';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { render, fireEvent } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import { getProfileNameFromUrl } from 'firefox-profiler/selectors';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';

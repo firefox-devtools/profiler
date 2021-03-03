@@ -7,12 +7,12 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import {
-  render,
   getByText as globalGetByText,
   waitForElementToBeRemoved,
   screen,
 } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 import {
   persistUploadedProfileInformationToDb,

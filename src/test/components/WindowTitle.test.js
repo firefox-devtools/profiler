@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { WindowTitle } from 'firefox-profiler/components/app/WindowTitle';
 import {
   getEmptyProfile,
