@@ -72,6 +72,16 @@ describe('remove-template-information', function() {
       'mozilla.components.support.locale.LocaleAwareAppCompatActivity.<init>';
     expect(removeTemplateInformation(fixture)).toEqual(fixture);
   });
+
+  it('should remove template information that contains "false positive" templates', function() {
+    // This is a theoretical issue that we never encountered in the wild, but
+    // this is theoretically possible, so let's test it.
+    const fixture =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity<TemplateInformation.<init>>';
+    const expected =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity';
+    expect(removeTemplateInformation(fixture)).toEqual(expected);
+  });
 });
 
 describe('get-function-name', function() {
