@@ -22,6 +22,12 @@ import {
   getUserTiming,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from '../../app-logic/constants';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**
@@ -567,6 +573,76 @@ describe('selectors/getThreadRange', function() {
     expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
       start: 10,
       end: 21,
+    });
+  });
+
+  it('should use proper marker start/end times depending on the phase', function() {
+    // Gecko outputs "0" for the unused values.
+    const profile = getProfileWithMarkers([
+      ['Instant', 10, 0], // Only starTime should be taken into account.
+      ['IntervalStart', 15, 0], // Only starTime should be taken into account.
+      ['IntervalEnd', 0, 10], // Only endTime should be taken into account.
+      ['Interval', 10, 20], // Both start and endTime should be taken into account.
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [
+      INSTANT,
+      INTERVAL_START,
+      INTERVAL_END,
+      INTERVAL,
+    ];
+
+    const { getState } = storeWithProfile(profile);
+
+    // Even though we have markers with 0 start and end time, it should only take
+    // Interval marker start/end time into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 10,
+      end: 21,
+    });
+  });
+
+  it('should use the Interval marker start time even if it is zero', function() {
+    // Gecko outputs "0" for the unused values.
+    // Both start and endTime should be taken into account for Interval.
+    const profile = getProfileWithMarkers([
+      ['Interval', 10, 20],
+      ['Interval', 0, 15],
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [INTERVAL, INTERVAL];
+
+    const { getState } = storeWithProfile(profile);
+
+    // It take both Interval marker start/end times into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 21,
+    });
+  });
+
+  it('should use the Instant marker start time even if it is zero', function() {
+    // Gecko outputs "0" for the unused values.
+    // Both startTime should be taken into account for Instant.
+    const profile = getProfileWithMarkers([
+      ['Instant', 0, null],
+      ['Interval', 10, 15],
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [INSTANT, INTERVAL];
+
+    const { getState } = storeWithProfile(profile);
+
+    // It take both Interval marker start/end times into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 16,
     });
   });
 
