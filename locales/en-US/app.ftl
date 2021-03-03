@@ -14,15 +14,32 @@
 -firefox-brand-name = Firefox
 -profiler-brand-name = Firefox Profiler
 
-##
+## AppHeader
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app for { -firefox-brand-name } performance analysis</subheader>
 AppHeader--github-icon =
     .title = Go to our git repository (this opens in a new window)
 
+## CompareHome
+
+CompareHome--instruction-title = Enter the profile URLs that you’d like to compare
+CompareHome--instruction-content =
+    The tool will extract the data from the selected track and range for
+    each profile, and put them both on the same view to make them easy to
+    compare.
+
+CompareHome--form-label-profile1 = Profile 1:
+CompareHome--form-label-profile2 = Profile 2:
+CompareHome--submit-button =
+    .value = Retrieve profiles
+
+## FooterLinks
+
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
+
+## Home
 
 Home--upload-from-file-input-button = Load a profile from file
 Home--upload-from-url-button = Load a profile from a URL
@@ -32,7 +49,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Documentation
 Home--record-instructions =
     To start profiling, click on the profiling button, or use the
-    keyboard shortcuts. The icon is blue when a profile is recording. 
+    keyboard shortcuts. The icon is blue when a profile is recording.
     Hit <kbd>Capture Profile</kbd> to load the data into profiler.firefox.com.
 
 Home--instructions-title = How to view and record profiles
@@ -47,6 +64,8 @@ Home--additional-content-title = Load existing profiles
 Home--additional-content-content = You can <strong>drag and drop</strong> a profile file here to load it, or:
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--recent-uploaded-recordings-title = Recent uploaded recordings
+
+## ListOfPublishedProfiles
 
 # This string is used on the tooltip of the published profile links.
 # Variables:
@@ -72,6 +91,8 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
         [one] Manage this recording
        *[other] Manage these recordings
     }
+
+## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
