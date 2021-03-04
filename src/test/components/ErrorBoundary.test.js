@@ -85,7 +85,7 @@ describe('app/ErrorBoundary', function() {
 
                   at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:20:11\\)
                   at ErrorBoundary \\(.*[/\\\\]ErrorBoundary.js:28:66\\)
-                  at LocalizationProvider \\(.*[/\\\\]@fluent/react/index.js:.*\\)
+                  at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
           `)
         ),
         exFatal: true,

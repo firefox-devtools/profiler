@@ -615,7 +615,8 @@ describe('ListOfPublishedProfiles', () => {
 
       // The list will update with a focus event.
       window.dispatchEvent(new Event('focus'));
-      profileLink = await findLinkByText(/Profile #\w/i);
+      // Fluent adds invisible isolate character so the '.?' is to support that
+      profileLink = await findLinkByText(/Profile .?#\w/i);
       expect(profileNameFromLinkElement(profileLink)).toBe(null);
     });
   });
