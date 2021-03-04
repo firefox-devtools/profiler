@@ -505,7 +505,12 @@ type CurrentProfileUploadedInformationAction = {|
 
 type L10nAction =
   | {| +type: 'REQUEST_L10N' |}
-  | {| +type: 'RECEIVE_L10N', +localization: Localization |};
+  | {|
+      +type: 'RECEIVE_L10N',
+      +localization: Localization,
+      +primaryLocale: string,
+      +direction: 'ltr' | 'rtl',
+    |};
 
 export type Action =
   | ProfileAction

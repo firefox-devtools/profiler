@@ -12,7 +12,8 @@ import {
   DEFAULT_LOCALE,
   fetchMessages,
   lazilyParsedBundles,
-} from '../app-logic/l10n';
+  getLocaleDirection,
+} from 'firefox-profiler/app-logic/l10n';
 
 /**
  * Notify that translations for the UI are being fetched.
@@ -26,10 +27,16 @@ export function requestL10n(): Action {
 /**
  * Receive translations for a locale.
  */
-export function receiveL10n(localization: Localization): Action {
+export function receiveL10n(
+  localization: Localization,
+  primaryLocale: string,
+  direction: 'ltr' | 'rtl'
+): Action {
   return {
     type: 'RECEIVE_L10N',
     localization: localization,
+    primaryLocale,
+    direction,
   };
 }
 
@@ -40,7 +47,8 @@ export function receiveL10n(localization: Localization): Action {
  * later it dispacthes the translations and updates the state
  */
 export function setupLocalization(
-  locales: Array<string>
+  locales: Array<string>,
+  pseudoStrategy?: 'accented' | 'bidi'
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(requestL10n());
@@ -51,9 +59,13 @@ export function setupLocalization(
       defaultLocale: DEFAULT_LOCALE,
     });
 
-    const fetchedMessages = await Promise.all(languages.map(fetchMessages));
-    const bundles = lazilyParsedBundles(fetchedMessages);
+    // It's important to note that `languages` is the result of the negotiation,
+    // and can be different than `locales`.
+    const primaryLocale = languages[0];
+    const fetchedMessages = await fetchMessages(primaryLocale);
+    const bundles = lazilyParsedBundles([fetchedMessages], pseudoStrategy);
     const localization = new ReactLocalization(bundles);
-    dispatch(receiveL10n(localization));
+    const direction = getLocaleDirection(primaryLocale, pseudoStrategy);
+    dispatch(receiveL10n(localization, primaryLocale, direction));
   };
 }

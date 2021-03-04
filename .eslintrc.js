@@ -11,10 +11,9 @@ module.exports = {
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:flowtype/recommended',
-    'prettier',
-    'prettier/flowtype',
-    'prettier/react',
-    'prettier/prettier', // This works with the prettier plugin, remove this when removing it
+    // This works with the prettier plugin, this needs to be at the end always.
+    // Replace it with the "prettier" config if we remove the plugin.
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: '2017',
@@ -29,7 +28,6 @@ module.exports = {
     'import/no-duplicates': 'error',
     'import/no-unresolved': 'error',
     'import/named': 'error',
-    'prettier/prettier': 'error',
     'react/button-has-type': 'error',
     'react/no-access-state-in-setstate': 'error',
     'react/no-danger': 'error',

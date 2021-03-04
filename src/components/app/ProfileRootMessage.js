@@ -4,6 +4,7 @@
 
 // @flow
 
+import { Localized } from '@fluent/react';
 import * as React from 'react';
 
 import './ProfileRootMessage.css';
@@ -26,12 +27,18 @@ export class ProfileRootMessage extends React.PureComponent<Props> {
     return (
       <div className="rootMessageContainer">
         <div className="rootMessage">
-          <h1 className="rootMessageTitle">Firefox Profiler</h1>
+          <Localized id="ProfileRootMessage--title">
+            <h1 className="rootMessageTitle">Firefox Profiler</h1>
+          </Localized>
           <div className="rootMessageText">{message}</div>
           {additionalMessage ? (
             <div className="rootMessageAdditional">
               {this.toParagraphs(additionalMessage)}
-              <a href="/">Back to home</a>
+              <a href="/">
+                <Localized id="ProfileRootMessage--additional">
+                  Back to home
+                </Localized>
+              </a>
             </div>
           ) : null}
           {showLoader ? (

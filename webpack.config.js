@@ -58,10 +58,6 @@ const config = {
         test: /\.svg$/,
         loader: 'file-loader',
       },
-      {
-        test: /\.ftl$/,
-        loader: 'file-loader',
-      },
     ],
   },
   node: {
@@ -92,6 +88,7 @@ const config = {
         { from: 'res/zee-worker.js' },
         { from: 'res/before-load.js' },
         { from: 'res/contribute.json' },
+        { from: 'locales', to: 'locales' },
       ],
     }),
   ],

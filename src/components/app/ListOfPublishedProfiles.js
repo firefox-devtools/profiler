@@ -21,6 +21,7 @@ import { formatSeconds } from 'firefox-profiler/utils/format-numbers';
 import type { Milliseconds, StartEndRange } from 'firefox-profiler/types/units';
 
 import './ListOfPublishedProfiles.css';
+import { Localized } from '@fluent/react';
 
 // This component displays all published profile, and makes it possible to load
 // them by clicking on them, or delete them.
@@ -135,25 +136,31 @@ class PublishedProfile extends React.PureComponent<
           publishedProfilesListItem_ConfirmDialogIsOpen: confirmDialogIsOpen,
         })}
       >
-        <a
-          className="publishedProfilesLink"
-          href={urlPath}
-          title={`Click here to load profile ${smallProfileName}`}
+        <Localized
+          id="ListOfPublishedProfiles--publishedProfilesLink"
+          attrs={{ title: true }}
+          vars={{ smallProfileName: smallProfileName }}
         >
-          <div className="publishedProfilesDate">
-            {_formatDate(
-              uploadedProfileInformation.publishedDate,
-              nowTimestamp
-            )}
-          </div>
-          <div className="publishedProfilesInfo">
-            <div className="publishedProfilesName">
-              <strong>{profileName}</strong> (
-              {_formatRange(uploadedProfileInformation.publishedRange)})
+          <a
+            className="publishedProfilesLink"
+            href={urlPath}
+            title={`Click here to load profile ${smallProfileName}`}
+          >
+            <div className="publishedProfilesDate">
+              {_formatDate(
+                uploadedProfileInformation.publishedDate,
+                nowTimestamp
+              )}
             </div>
-            <ProfileMetaInfoSummary meta={uploadedProfileInformation.meta} />
-          </div>
-        </a>
+            <div className="publishedProfilesInfo">
+              <div className="publishedProfilesName">
+                <strong>{profileName}</strong> (
+                {_formatRange(uploadedProfileInformation.publishedRange)})
+              </div>
+              <ProfileMetaInfoSummary meta={uploadedProfileInformation.meta} />
+            </div>
+          </a>
+        </Localized>
         {withActionButtons ? (
           <div className="publishedProfilesActionButtons">
             {uploadedProfileInformation.jwtToken ? (
@@ -236,7 +243,11 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
 
     if (!uploadedProfileInformationList.length) {
       return (
-        <p className="photon-body-30">No profile has been uploaded yet!</p>
+        <p className="photon-body-30">
+          <Localized id="ListOfPublishedProfiles--uploaded-profile-information-list-empty">
+            No profile has been uploaded yet!
+          </Localized>
+        </p>
       );
     }
 
@@ -251,15 +262,24 @@ export class ListOfPublishedProfiles extends PureComponent<Props, State> {
     let profileRestLabel;
     if (profilesRestCount > 0) {
       profileRestLabel = (
-        <>See and manage all your recordings ({profilesRestCount} more)</>
+        <Localized
+          id="ListOfPublishedProfiles--uploaded-profile-information-label"
+          vars={{ profilesRestCount: profilesRestCount }}
+        >
+          <>See and manage all your recordings ({profilesRestCount} more)</>
+        </Localized>
       );
     } else {
-      profileRestLabel =
-        uploadedProfileInformationList.length > 1 ? (
-          <>Manage these recordings</>
-        ) : (
+      profileRestLabel = (
+        <Localized
+          id="ListOfPublishedProfiles--uploaded-profile-information-list"
+          vars={{
+            uploadedProfileCount: uploadedProfileInformationList.length,
+          }}
+        >
           <>Manage this recording</>
-        );
+        </Localized>
+      );
     }
 
     const nowTimestamp = Date.now();

@@ -672,7 +672,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
     <a
       href="/uploaded-recordings/"
     >
-      Manage these recordings
+      Manage this recording
     </a>
   </p>
 </div>
