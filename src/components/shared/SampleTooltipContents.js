@@ -105,7 +105,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     const categoryIndex = stackTable.category[stackIndex];
     const subcategoryIndex = stackTable.subcategory[stackIndex];
     const categoryColor = categories[categoryIndex].color;
-    // Get thread CPU usage if it presents in the profile.
+    // Get thread CPU usage if it's present in the profile.
     let cpuUsageText = null;
     if (sampleIndex !== 0 && samples.threadCPUDelta && sampleUnits) {
       const cpuUsage = samples.threadCPUDelta[sampleIndex];

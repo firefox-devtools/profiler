@@ -24,7 +24,7 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
     return (
       sampleUnits !== undefined &&
       // Currently checking the features array for 'cpu' feature should be enough,
-      // but in the future we may remove that feature and enable it perminantly.
+      // but in the future we may remove that feature and enable it permanently.
       // Therefore we are also checking the samples table to see if we have CPU
       // delta values.
       ((meta.configuration && meta.configuration.features.includes('cpu')) ||
@@ -34,14 +34,14 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
 );
 
 /**
- * The derived markers are needed for profile sanitization, but they are also
- * needed for each thread. This means that we can't use the createSelector
- * mechanism to properly memoize the component, because getThreadSelectors
- * requires the whole state and that makes it impossible to memoize with
- * createSelector. We need access to the full state and to the individual
- * threads. This function therefore implements some simple memoization behavior
- * on the current list of threads. See getDerivedMarkerInfoForAllThreads for a
- * similar situation.
+ * All threads with processed CPU are needed for max CPU value computation, but
+ * they are also needed for each thread. This means that we can't use the
+ * createSelector mechanism to properly memoize the component, because
+ * getThreadSelectors requires the whole state and that makes it impossible to
+ * memoize with createSelector. We need access to the full state and to the
+ * individual threads. This function therefore implements some simple memoization
+ * behavior on the current list of threads. See getDerivedMarkerInfoForAllThreads
+ * for a similar situation.
  */
 let _threads = null;
 let _cpuProcessedThreads = null;
@@ -49,6 +49,8 @@ function getCPUProcessedThreads(state: State): Thread[] {
   const threads = getThreads(state);
 
   if (_threads !== threads || _cpuProcessedThreads === null) {
+    // Storing the threads makes it possible to invalidate the memoized value at
+    // the right moment.
     _threads = threads;
     _cpuProcessedThreads = threads.map((thread, threadIndex) =>
       getThreadSelectors(threadIndex).getCPUProcessedThread(state)

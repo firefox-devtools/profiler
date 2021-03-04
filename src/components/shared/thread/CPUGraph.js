@@ -68,6 +68,9 @@ export class ThreadCPUGraph extends PureComponent<Props> {
       onSampleClick,
     } = this.props;
 
+    // Making the CPU graph a histogram graph instead of a line graph here,
+    // because making this histogram graph helps us see the real sample
+    // positions better and helps us see the gaps between the samples.
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}

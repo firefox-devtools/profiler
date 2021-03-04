@@ -304,7 +304,7 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
  * they are usually for power users and not so meaningful for average users.
  * There is no UI that triggers this action in the profiler interface. Instead,
  * users have to enable this from the developer console by writing this line:
- * `experimental.enableExperimentalCPUGraphs()`
+ * `experimental.enableCPUGraphs()`
  */
 export function enableExperimentalCPUGraphs(): ThunkAction<boolean> {
   return (dispatch, getState) => {

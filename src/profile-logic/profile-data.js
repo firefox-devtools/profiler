@@ -2776,7 +2776,8 @@ export function computeMaxThreadCPUDelta(
     const { time, threadCPUDelta } = threads[threadIndex].samples;
 
     if (!threadCPUDelta) {
-      // Don't have any ThreadCPU values.
+      // The thread have any ThreadCPUDelta values. Older profiles don't have
+      // this information.
       continue;
     }
 
@@ -2784,6 +2785,7 @@ export function computeMaxThreadCPUDelta(
     // the delta since there is no previous sample.
     for (let i = 1; i < threadCPUDelta.length; i++) {
       const cpuDelta = threadCPUDelta[i] || 0;
+      // Interval is not always steady depending on the overhead.
       const realInterval = (time[i] - time[i - 1]) / interval;
       const currentCPUPerInterval = cpuDelta / realInterval;
       maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerInterval);
@@ -2814,7 +2816,7 @@ export function processThreadCPUDelta(
 
   if (!threadCPUDelta) {
     throw new Error(
-      "processThreadCPUDelta should not be called for the profiles that dosn't include threadCPUDelta."
+      "processThreadCPUDelta should not be called for the profiles that don't include threadCPUDelta."
     );
   }
   // A helper function to shallow clone the thread with different threadCPUDelta values.
