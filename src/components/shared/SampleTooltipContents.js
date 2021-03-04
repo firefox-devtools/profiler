@@ -20,6 +20,7 @@ import type {
   Thread,
   SampleUnits,
   Milliseconds,
+  ThreadCPUDeltaUnit,
 } from 'firefox-profiler/types';
 
 type Props = {|
@@ -54,7 +55,10 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
         return maxThreadCPUDelta;
       case 'µs':
       case 'ns': {
-        return unit === 'µs' ? realInterval * 1000 : realInterval * 1000000;
+        if (unit === 'µs') {
+          return realInterval * 1000;
+        }
+        return realInterval * 1000000;
       }
       default:
         throw new Error('Unexpected threadCPUDelta unit found');
@@ -73,7 +77,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     let cpuSpikeText;
     switch (unit) {
       case 'variable CPU cycles':
-        cpuUsageRatio = cpuUsage / (realInterval / interval) / maxCPU;
+        cpuUsageRatio = (cpuUsage * interval) / realInterval / maxCPU;
         // We don't have a way to detect spikes for CPU cycles.
         cpuSpikeText = '';
         break;
@@ -89,24 +93,22 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     return `${formatPercent(cpuUsageRatio)}${cpuSpikeText}`;
   }
 
-  _getCPUUsageString(cpuUsage: number, cpuDeltaUnit: string): string {
-    const cpuUsageUs = cpuDeltaUnit === 'ns' ? cpuUsage * 1000 : cpuUsage;
+  _getCPUUsageString(
+    cpuUsage: number,
+    cpuDeltaUnit: ThreadCPUDeltaUnit
+  ): string {
+    // It's either µs for timing platforms or 'variable CPU cycles' for Windows.
+    const adjustedCPU = cpuDeltaUnit === 'ns' ? cpuUsage / 1000 : cpuUsage;
     const cpuUsageUnit = cpuDeltaUnit === 'ns' ? 'µs' : cpuDeltaUnit;
-    return `${formatNumber(cpuUsageUs, 2, 3)} ${cpuUsageUnit}`;
+    return `${formatNumber(adjustedCPU, 2, 3)} ${cpuUsageUnit}`;
   }
 
-  render() {
-    const { sampleIndex, fullThread, categories, sampleUnits } = this.props;
-    const { samples, stackTable } = fullThread;
-    const stackIndex = samples.stack[sampleIndex];
-    if (stackIndex === null) {
-      return 'No stack information';
-    }
-    const categoryIndex = stackTable.category[stackIndex];
-    const subcategoryIndex = stackTable.subcategory[stackIndex];
-    const categoryColor = categories[categoryIndex].color;
-    // Get thread CPU usage if it's present in the profile.
-    let cpuUsageText = null;
+  // Get thread CPU usage if it's present in the profile.
+  _maybeRenderCpuUsage() {
+    const { sampleIndex, fullThread, sampleUnits } = this.props;
+    const { samples } = fullThread;
+    let cpuUsageContent = null;
+
     if (sampleIndex !== 0 && samples.threadCPUDelta && sampleUnits) {
       const cpuUsage = samples.threadCPUDelta[sampleIndex];
       if (cpuUsage !== null) {
@@ -120,11 +122,33 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
           cpuUsage,
           sampleUnits.threadCPUDelta
         );
-        cpuUsageText = `${percentageText} (${cpuUsageString} over ${formatMicroseconds(
+
+        const cpuUsageAndPercentage = `${percentageText} (${cpuUsageString} over ${formatMicroseconds(
           realIntervalUs
         )})`;
+
+        cpuUsageContent = (
+          <div className="tooltipDetails">
+            <div className="tooltipLabel">CPU Usage:</div>
+            <div>{cpuUsageAndPercentage}</div>
+          </div>
+        );
       }
     }
+
+    return cpuUsageContent;
+  }
+
+  render() {
+    const { sampleIndex, fullThread, categories } = this.props;
+    const { samples, stackTable } = fullThread;
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      return 'No stack information';
+    }
+    const categoryIndex = stackTable.category[stackIndex];
+    const subcategoryIndex = stackTable.subcategory[stackIndex];
+    const categoryColor = categories[categoryIndex].color;
 
     return (
       <>
@@ -137,12 +161,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
             {getCategoryPairLabel(categories, categoryIndex, subcategoryIndex)}
           </div>
         </div>
-        {cpuUsageText !== null ? (
-          <div className="tooltipDetails">
-            <div className="tooltipLabel">CPU Usage:</div>
-            <div>{cpuUsageText}</div>
-          </div>
-        ) : null}
+        {this._maybeRenderCpuUsage()}
         <div className="tooltipDetails">
           <div className="tooltipLabel">Stack:</div>
         </div>
