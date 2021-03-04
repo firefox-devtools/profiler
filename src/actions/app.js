@@ -33,6 +33,7 @@ import {
   initializeLocalTrackOrderByPid,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getIsCPUUtilizationProvided } from 'firefox-profiler/selectors/cpu';
 
 import type {
   Profile,
@@ -314,10 +315,7 @@ export function enableExperimentalCPUGraphs(): ThunkAction<boolean> {
       return false;
     }
 
-    if (
-      selectedThreadSelectors.getSamplesTable(getState()).threadCPUDelta ===
-      undefined
-    ) {
+    if (!getIsCPUUtilizationProvided(getState())) {
       // Return early if the profile doesn't have threadCPUDelta values.
       console.error(oneLine`
         Tried to enable the CPU graph tracks, but this profile does
