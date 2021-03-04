@@ -15,10 +15,24 @@ function customRender(children: React$Element<any>, ...args: any) {
   const bundles = lazilyParsedBundles([['en-US', messages]]);
   const localization = new ReactLocalization(bundles);
 
-  return render(
+  const renderResult = render(
     <LocalizationProvider l10n={localization}>{children}</LocalizationProvider>,
     ...args
   );
+
+  // Rerender function should also wrap the children with the LocalizationProvider.
+  const rerender = (children: React$Element<any>, ...args: any) =>
+    renderResult.rerender(
+      <LocalizationProvider l10n={localization}>
+        {children}
+      </LocalizationProvider>,
+      ...args
+    );
+
+  return ({
+    ...renderResult,
+    rerender,
+  }: typeof renderResult);
 }
 
 // Reexport everything
