@@ -33,7 +33,7 @@ export type HeightFunctionParams = {|
   +callNodeTable: CallNodeTable,
   +callNodeIndex: number,
   +yPixelsPerHeight: number,
-  +interval: number,
+  +interval: Milliseconds,
 |};
 
 type Props = {|

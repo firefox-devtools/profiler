@@ -19,6 +19,7 @@ import type {
   CategoryList,
   Thread,
   SampleUnits,
+  Milliseconds,
 } from 'firefox-profiler/types';
 
 type Props = {|
@@ -27,7 +28,7 @@ type Props = {|
   +fullThread: Thread,
   +sampleUnits: ?SampleUnits,
   +maxThreadCPUDelta: number,
-  +interval: number,
+  +interval: Milliseconds,
 |};
 
 /**
@@ -44,7 +45,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     return samples.time[index] - samples.time[index - 1];
   }
 
-  _getMaxCPU(realInterval: number): number {
+  _getMaxCPU(realInterval: Milliseconds): number {
     const { sampleUnits, maxThreadCPUDelta } = this.props;
 
     const unit = ensureExists(sampleUnits).threadCPUDelta;
@@ -60,7 +61,10 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     }
   }
 
-  _getCPUPercentageString(cpuUsage: number, realInterval: number): string {
+  _getCPUPercentageString(
+    cpuUsage: number,
+    realInterval: Milliseconds
+  ): string {
     const { sampleUnits, interval } = this.props;
     const unit = ensureExists(sampleUnits).threadCPUDelta;
     const maxCPU = this._getMaxCPU(realInterval);
