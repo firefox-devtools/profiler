@@ -137,7 +137,7 @@ class PublishedProfile extends React.PureComponent<
         })}
       >
         <Localized
-          id="ListOfPublishedProfiles--publishedProfilesLink"
+          id="ListOfPublishedProfiles--published-profiles-link"
           attrs={{ title: true }}
           vars={{ smallProfileName: smallProfileName }}
         >
@@ -175,14 +175,19 @@ class PublishedProfile extends React.PureComponent<
                 onCloseSuccessMessage={this.onCloseSuccessMessage}
               />
             ) : (
-              <button
-                className="publishedProfilesDeleteButton photon-button photon-button-default"
-                type="button"
-                title="This profile cannot be deleted because we lack the authorization information."
-                disabled
+              <Localized
+                id="ListOfPublishedProfiles--published-profiles-delete-button"
+                attrs={{ title: true }}
               >
-                Delete
-              </button>
+                <button
+                  className="publishedProfilesDeleteButton photon-button photon-button-default"
+                  type="button"
+                  title="This profile cannot be deleted because we lack the authorization information."
+                  disabled
+                >
+                  Delete
+                </button>
+              </Localized>
             )}
           </div>
         ) : null}
