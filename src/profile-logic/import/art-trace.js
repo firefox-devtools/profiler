@@ -18,6 +18,51 @@
 // The parsing code below was written with help from these resources:
 // https://stuff.mit.edu/afs/sipb/project/android/docs/tools/debugging/debugging-tracing.html
 // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/perflib/src/main/java/com/android/tools/perflib/vmtrace/VmTraceParser.java
+//
+// The output will be an object of the Gecko profile format of a fixed old version.
+// It will then go through the profile upgrading pipeline. This means that this
+// importer does not need to be updated when the profile format changes.
+
+// The type definitions below are very coarse and just enough to catch the
+// biggest mistakes.
+type GeckoThreadVersion11 = {
+  tid: number,
+  pid: number,
+  name: string,
+  registerTime: number,
+  unregisterTime: number | null,
+  // eslint-disable-next-line flowtype/no-weak-types
+  markers: Object,
+  // eslint-disable-next-line flowtype/no-weak-types
+  samples: Object,
+  // eslint-disable-next-line flowtype/no-weak-types
+  frameTable: Object,
+  // eslint-disable-next-line flowtype/no-weak-types
+  stackTable: Object,
+  stringTable: string[],
+};
+type GeckoProfileVersion11 = {
+  meta: {
+    version: 11,
+    interval: number,
+    processType: 0,
+    product: string,
+    pid?: string,
+    stackwalk: 1,
+    startTime: number,
+    shutdownTime: null,
+    presymbolicated: true,
+    // eslint-disable-next-line flowtype/no-weak-types
+    categories: Object[],
+  },
+  // eslint-disable-next-line flowtype/no-weak-types
+  libs: Object[],
+  threads: GeckoThreadVersion11[],
+  // eslint-disable-next-line flowtype/no-weak-types
+  processes: Object[],
+  // eslint-disable-next-line flowtype/no-weak-types
+  pausedRanges: Object[],
+};
 
 // From VmTraceParser.java:
 const TRACE_MAGIC = 0x574f4c53; // 'SLOW'
@@ -828,7 +873,7 @@ class ThreadBuilder {
     }
   }
 
-  finish() {
+  finish(): GeckoThreadVersion11 {
     if (this._nextSampleTimestamp !== null) {
       this._samples.data.push([this._currentStack, this._nextSampleTimestamp]);
     }
@@ -846,10 +891,6 @@ class ThreadBuilder {
     };
   }
 }
-
-// Don't try and type this more specifically. It will be run through the Gecko upgrader
-// process.
-type GeckoProfileVersion11 = Object;
 
 export function isArtTraceFormat(traceBuffer: ArrayBuffer) {
   return detectArtTraceFormat(traceBuffer) !== 'unrecognized';
