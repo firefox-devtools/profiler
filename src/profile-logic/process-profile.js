@@ -1494,7 +1494,7 @@ export async function unserializeProfileOfArbitraryFormat(
         } catch (e) {
           console.error('Source exception:', e);
           throw new Error(
-            'The profile is not the Android trace format and could not be parsed as a UTF-8 string.'
+            'The profile array buffer could not be parsed as a UTF-8 string.'
           );
         }
       }

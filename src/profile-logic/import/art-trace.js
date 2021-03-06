@@ -464,14 +464,21 @@ function parseStreamingFormat(reader) {
 }
 
 function parseArtTrace(buffer: ArrayBuffer): ArtTrace {
-  const reader = new ByteReader(new Uint8Array(buffer));
-  switch (detectArtTraceFormat(buffer)) {
-    case 'regular':
-      return parseRegularFormat(reader);
-    case 'streaming':
-      return parseStreamingFormat(reader);
-    default:
-      throw new Error('Not an android trace');
+  try {
+    const reader = new ByteReader(new Uint8Array(buffer));
+    switch (detectArtTraceFormat(buffer)) {
+      case 'regular':
+        return parseRegularFormat(reader);
+      case 'streaming':
+        return parseStreamingFormat(reader);
+      default:
+        throw new Error('Not an ART trace');
+    }
+  } catch (e) {
+    console.error('Source exception:', e);
+    throw new Error(
+      `Could not parse the profile array buffer as an ART trace: ${e}`
+    );
   }
 }
 
