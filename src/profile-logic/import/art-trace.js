@@ -165,6 +165,13 @@ type ArtTraceThread = {|
   threadName: string,
 |};
 
+export type ArtTraceMethod = {|
+  methodId: number,
+  className: string,
+  methodName: string,
+  signature: string,
+|};
+
 type ArtTrace = {|
   summaryDetails: {
     clock: string,
@@ -172,12 +179,7 @@ type ArtTrace = {|
   },
   startTimeInUsecSinceBoot: number,
   threads: ArtTraceThread[],
-  methods: {|
-    methodId: number,
-    className: string,
-    methodName: string,
-    signature: string,
-  |}[],
+  methods: ArtTraceMethod[],
   methodActions: {|
     tid: number,
     methodId: number,
@@ -573,6 +575,76 @@ function procureSamplingInterval(trace) {
   return avg;
 }
 
+export type SpecialCategoryInfo = {
+  prefixes: string[],
+  name: string,
+};
+
+// Make a category for a frequently-encountered bag of code that is not covered
+// by the other categories in the category list.
+// In practice, for profiles obtained from Fenix, we want this to return a
+// "Mozilla" category for methods on "org.mozilla.*" or "mozilla.*" classes.
+// This is probably a bit overengineered. But on the plus side, it should work
+// for non-mozilla code, too.
+export function getSpecialCategory(
+  methods: ArtTraceMethod[]
+): SpecialCategoryInfo | void {
+  function getSignificantNamespaceSegment(className) {
+    // Cut off leading "org." or "com.". Those are boring.
+    const s =
+      className.startsWith('org.') || className.startsWith('com.')
+        ? className.substring(4)
+        : className;
+
+    // Return the first segment of the remainder.
+    const firstPeriodPos = s.indexOf('.');
+    if (firstPeriodPos === -1) {
+      return s;
+    }
+    return s.substring(0, firstPeriodPos);
+  }
+
+  const significantSegmentCounter = new Map();
+  for (let i = 0; i < methods.length; i++) {
+    const significantSegment = getSignificantNamespaceSegment(
+      methods[i].className
+    );
+    switch (significantSegment) {
+      case 'android':
+      case 'java':
+      case 'sun':
+      case 'kotlin':
+      case 'androidx':
+      case 'kotlinx':
+        // These are covered by existing categories and not "special".
+        break;
+      default: {
+        const count = significantSegmentCounter.get(significantSegment) || 0;
+        significantSegmentCounter.set(significantSegment, count + 1);
+      }
+    }
+  }
+  const significantSegmentCounts = Array.from(
+    significantSegmentCounter.entries()
+  );
+  if (significantSegmentCounts.length === 0) {
+    return undefined;
+  }
+  // Find the most used "significant segment" by sorting and taking the first element.
+  significantSegmentCounts.sort(([_s1, c1], [_s2, c2]) => c2 - c1);
+  const [specialSegment] = significantSegmentCounts[0];
+  // In the Fenix profiles I've tested with, specialSegment is now "mozilla".
+
+  return {
+    prefixes: [
+      `${specialSegment}.`,
+      `com.${specialSegment}.`,
+      `org.${specialSegment}.`,
+    ],
+    name: specialSegment[0].toUpperCase() + specialSegment.slice(1), // mozilla -> Mozilla
+  };
+}
+
 class CategoryInfo {
   idleCategory = 0;
   otherCategory = 1;
@@ -617,78 +689,15 @@ class CategoryInfo {
     },
   ];
 
-  _specialCategoryInfo;
+  _specialCategoryInfo: SpecialCategoryInfo | void;
 
   constructor(methods) {
-    this._specialCategoryInfo = this.getSpecialCategory(methods);
+    this._specialCategoryInfo = getSpecialCategory(methods);
     if (this._specialCategoryInfo) {
       this.categories[
         this.specialCategory
       ].name = this._specialCategoryInfo.name;
     }
-  }
-
-  // Make a category for a frequently-encountered bag of code that is not covered
-  // by the other categories in the category list.
-  // In practice, for profiles obtained from Fenix, we want this to return a
-  // "Mozilla" category for methods on "org.mozilla.*" or "mozilla.*" classes.
-  // This is probably a bit overengineered. But on the plus side, it should work
-  // for non-mozilla code, too.
-  getSpecialCategory(methods) {
-    function getSignificantNamespaceSegment(className) {
-      // Cut off leading "org." or "com.". Those are boring.
-      const s =
-        className.startsWith('org.') || className.startsWith('com.')
-          ? className.substring(4)
-          : className;
-
-      // Return the first segment of the remainder.
-      const firstPeriodPos = s.indexOf('.');
-      if (firstPeriodPos === -1) {
-        return s;
-      }
-      return s.substring(0, firstPeriodPos);
-    }
-
-    const significantSegmentCounter = new Map();
-    for (let i = 0; i < methods.length; i++) {
-      const significantSegment = getSignificantNamespaceSegment(
-        methods[i].className
-      );
-      switch (significantSegment) {
-        case 'android':
-        case 'java':
-        case 'sun':
-        case 'kotlin':
-        case 'androidx':
-        case 'kotlinx':
-          // These are covered by existing categories and not "special".
-          break;
-        default: {
-          const count = significantSegmentCounter.get(significantSegment) || 0;
-          significantSegmentCounter.set(significantSegment, count + 1);
-        }
-      }
-    }
-    const significantSegmentCounts = Array.from(
-      significantSegmentCounter.entries()
-    );
-    if (significantSegmentCounts.length === 0) {
-      return undefined;
-    }
-    // Find the most used "significant segment" by sorting and taking the first element.
-    significantSegmentCounts.sort(([_s1, c1], [_s2, c2]) => c2 - c1);
-    const [specialSegment] = significantSegmentCounts[0];
-    // In the Fenix profiles I've tested with, specialSegment is now "mozilla".
-
-    return {
-      prefixes: [
-        `${specialSegment}.`,
-        `com.${specialSegment}.`,
-        `org.${specialSegment}.`,
-      ],
-      name: specialSegment[0].toUpperCase() + specialSegment.slice(1), // mozilla -> Mozilla
-    };
   }
 
   inferJavaCategory(name) {
