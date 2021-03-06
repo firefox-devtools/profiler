@@ -41,6 +41,10 @@ type GeckoThreadVersion11 = {
   stackTable: Object,
   stringTable: string[],
 };
+type GeckoCategoryVersion11 = {
+  name: string,
+  color: string,
+};
 type GeckoProfileVersion11 = {
   meta: {
     version: 11,
@@ -52,8 +56,7 @@ type GeckoProfileVersion11 = {
     startTime: number,
     shutdownTime: null,
     presymbolicated: true,
-    // eslint-disable-next-line flowtype/no-weak-types
-    categories: Object[],
+    categories: GeckoCategoryVersion11[],
   },
   // eslint-disable-next-line flowtype/no-weak-types
   libs: Object[],
@@ -645,7 +648,7 @@ export function getSpecialCategory(
   };
 }
 
-class CategoryInfo {
+export class CategoryInfo {
   idleCategory = 0;
   otherCategory = 1;
   blockingCategory = 2;
@@ -654,7 +657,7 @@ class CategoryInfo {
   kotlinCategory = 5;
   androidxCategory = 6;
   specialCategory = 7;
-  categories = [
+  categories: GeckoCategoryVersion11[] = [
     {
       name: 'Idle',
       color: 'transparent',
@@ -691,7 +694,7 @@ class CategoryInfo {
 
   _specialCategoryInfo: SpecialCategoryInfo | void;
 
-  constructor(methods) {
+  constructor(methods: ArtTraceMethod[]) {
     this._specialCategoryInfo = getSpecialCategory(methods);
     if (this._specialCategoryInfo) {
       this.categories[
@@ -700,7 +703,7 @@ class CategoryInfo {
     }
   }
 
-  inferJavaCategory(name) {
+  inferJavaCategory(name: string): number {
     if (name === 'android.os.MessageQueue.nativePollOnce') {
       return this.idleCategory;
     }
