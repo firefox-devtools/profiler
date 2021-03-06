@@ -2,6 +2,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OfflinePlugin = require('offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
@@ -12,107 +13,49 @@ const es6modulePaths = es6modules.map(module => {
   return path.join(__dirname, 'node_modules', module);
 });
 
-const config = {
-  resolve: {
-    alias: {
-      // Note: the alias for firefox-profiler is defined at the Babel level, so
-      // that Jest can profit from it too.
-      'firefox-profiler-res': path.resolve(__dirname, 'res'),
-    },
-  },
-  devtool: 'source-map',
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        loaders: ['babel-loader'],
-        include: includes.concat(es6modulePaths),
-      },
-      {
-        test: /\.json$/,
-        loaders: ['json-loader'],
-        include: includes,
-      },
-      {
-        test: /\.css?$/,
-        loaders: [
-          'style-loader',
-          { loader: 'css-loader', options: { importLoaders: 1 } },
-          'postcss-loader',
-        ],
-        include: [
-          ...includes,
-          path.join(__dirname, 'node_modules', 'photon-colors'),
-          path.join(__dirname, 'node_modules', 'react-splitter-layout'),
-        ],
-      },
-      {
-        test: /\.jpg$/,
-        loader: 'file-loader',
-      },
-      {
-        test: /\.png$/,
-        loader: 'file-loader',
-      },
-      {
-        test: /\.svg$/,
-        loader: 'file-loader',
-      },
-      {
-        test: /\.ftl$/,
-        loader: 'file-loader',
-      },
-    ],
-  },
-  node: {
-    Buffer: false,
-    process: false,
-  },
+let mode = 'development';
+let target = 'web';
 
-  plugins: [
-    new CircularDependencyPlugin({
-      // exclude node_modules
-      exclude: /node_modules/,
-      // add errors to webpack instead of warnings
-      failOnError: true,
-      // set the current working directory for displaying module paths
-      cwd: process.cwd(),
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Firefox Profiler',
-      template: 'res/index.html',
-      favicon: 'res/img/favicon.png',
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'res/_headers' },
-        { from: 'res/_redirects' },
-        { from: 'docs-user', to: 'docs' },
-        { from: 'res/zee-worker.js' },
-        { from: 'res/before-load.js' },
-        { from: 'res/contribute.json' },
-      ],
-    }),
-  ],
-  entry: ['./src/index'],
-  output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
-    publicPath: '/',
-  },
-};
+const plugins = [
+  new CircularDependencyPlugin({
+    // exclude node_modules
+    exclude: /node_modules/,
+    // add errors to webpack instead of warnings
+    failOnError: true,
+    // set the current working directory for displaying module paths
+    cwd: process.cwd(),
+  }),
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+  }),
+  new HtmlWebpackPlugin({
+    title: 'Firefox Profiler',
+    template: 'res/index.html',
+    favicon: 'res/img/favicon.png',
+  }),
+  new CopyWebpackPlugin({
+    patterns: [
+      { from: 'res/_headers' },
+      { from: 'res/_redirects' },
+      { from: 'docs-user', to: 'docs' },
+      { from: 'res/zee-worker.js' },
+      { from: 'res/before-load.js' },
+      { from: 'res/contribute.json' },
+    ],
+  }),
+  new MiniCssExtractPlugin(),
+];
 
 if (process.env.NODE_ENV === 'development') {
-  config.mode = 'development';
+  // eslint-disable-next-line no-unused-vars
+  mode = 'development';
+  target = 'browserslist';
 }
 
 if (process.env.NODE_ENV === 'production') {
   config.mode = 'production';
-
+  // eslint-disable-next-line no-unused-vars
+  target = 'browserslist';
   config.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
@@ -164,5 +107,95 @@ if (process.env.NODE_ENV === 'production') {
     })
   );
 }
+
+const config = {
+  resolve: {
+    fallback: {
+      Buffer: false,
+      process: false,
+    },
+    alias: {
+      // Note: the alias for firefox-profiler is defined at the Babel level, so
+      // that Jest can profit from it too.
+      'firefox-profiler-res': path.resolve(__dirname, 'res'),
+    },
+  },
+  plugins: plugins,
+  devtool: 'source-map',
+  devServer: {
+    //Hot Reloading
+    contentBase: './dist',
+    hot: true,
+  },
+  mode: mode,
+  entry: ['./src/index'],
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: '[hash].bundle.js',
+    chunkFilename: '[id].[hash].bundle.js',
+    publicPath: '/',
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules)/,
+        use: {
+          loader: 'babel-loader',
+        },
+        include: includes.concat(es6modulePaths),
+      },
+      {
+        test: /\.json$/,
+        use: {
+          loader: 'json-loader',
+        },
+        include: includes,
+      },
+      {
+        test: /\.css?$/i,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            // This is required for asset imports in CSS, such as url()
+            options: { publicPath: '' },
+          },
+          'css-loader',
+          'postcss-loader',
+        ],
+        // loader: [
+        //   'style-loader',
+        //   { loader: 'css-loader', options: { importLoaders: 1 } },
+        //   'postcss-loader',
+        // ],
+        include: [
+          ...includes,
+          path.join(__dirname, 'node_modules', 'photon-colors'),
+          path.join(__dirname, 'node_modules', 'react-splitter-layout'),
+        ],
+      },
+      {
+        test: /\.jpg$/,
+        loader: 'file-loader',
+      },
+      {
+        test: /\.png$/,
+        loader: 'file-loader',
+      },
+      {
+        test: /\.svg$/,
+        loader: 'file-loader',
+      },
+      {
+        test: /\.ftl$/,
+        loader: 'file-loader',
+      },
+    ],
+  },
+  // node: {
+  //   Buffer: false,
+  //   process: false,
+  // },
+};
 
 module.exports = config;
