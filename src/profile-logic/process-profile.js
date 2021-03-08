@@ -22,6 +22,7 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
+import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
@@ -1469,26 +1470,48 @@ function _unserializeProfile({
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
+ * The profile can be in the form of an array buffer or of a string or of a JSON
+ * object, .
+ * The following profile formats are supported for the various input types:
+ *  - Processed profile: input can be ArrayBuffer or string or JSON object
+ *  - Gecko profile: input can be ArrayBuffer or string or JSON object
+ *  - Devtools profile: input can be ArrayBuffer or string or JSON object
+ *  - Chrome profile: input can be ArrayBuffer or string or JSON object
+ *  - `perf script` profile: input can be ArrayBuffer or string
+ *  - ART trace: input must be ArrayBuffer
  */
 export async function unserializeProfileOfArbitraryFormat(
   arbitraryFormat: mixed
 ): Promise<Profile> {
   try {
-    let json: mixed;
-    if (typeof arbitraryFormat === 'string') {
-      try {
-        json = JSON.parse(arbitraryFormat);
-      } catch (e) {
-        // The string is not json. It might be the output from `perf script`.
-        if (isPerfScriptFormat(arbitraryFormat)) {
-          json = convertPerfScriptProfile(arbitraryFormat);
-        } else {
-          throw e;
+    if (arbitraryFormat instanceof ArrayBuffer) {
+      if (isArtTraceFormat(arbitraryFormat)) {
+        arbitraryFormat = convertArtTraceProfile(arbitraryFormat);
+      } else {
+        try {
+          const textDecoder = new TextDecoder('utf-8', { fatal: true });
+          arbitraryFormat = await textDecoder.decode(arbitraryFormat);
+        } catch (e) {
+          console.error('Source exception:', e);
+          throw new Error(
+            'The profile array buffer could not be parsed as a UTF-8 string.'
+          );
         }
       }
-    } else {
-      json = arbitraryFormat;
     }
+
+    if (typeof arbitraryFormat === 'string') {
+      // The profile could be JSON or the output from `perf script`. Try `perf script` first.
+      if (isPerfScriptFormat(arbitraryFormat)) {
+        arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
+      } else {
+        // Try parsing as JSON.
+        arbitraryFormat = JSON.parse(arbitraryFormat);
+      }
+    }
+
+    // At this point, we expect arbitraryFormat to contain a JSON object of some profile format.
+    const json = arbitraryFormat;
 
     const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
       json
@@ -1505,6 +1528,7 @@ export async function unserializeProfileOfArbitraryFormat(
     // Else: Treat it as a Gecko profile and just attempt to process it.
     return processGeckoOrDevToolsProfile(json);
   } catch (e) {
+    console.error('UnserializationError:', e);
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }

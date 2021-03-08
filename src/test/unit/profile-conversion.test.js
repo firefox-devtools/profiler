@@ -10,6 +10,19 @@ import type {
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
 
+import { TextDecoder } from 'util';
+
+beforeAll(function() {
+  if ((window: any).TextDecoder) {
+    throw new Error('A TextDecoder was already on the window object.');
+  }
+  (window: any).TextDecoder = TextDecoder;
+});
+
+afterAll(async function() {
+  delete (window: any).TextDecoder;
+});
+
 describe('converting Linux perf profile', function() {
   it('should import a perf profile', async function() {
     let version = -1;
@@ -135,6 +148,36 @@ describe('converting Google Chrome profile', function() {
       throw new Error('Unable to parse the profile.');
     }
 
+    expect(profile).toMatchSnapshot();
+  });
+});
+
+describe('converting ART trace', function() {
+  it('successfully imports a non-streaming ART trace', async function() {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/art-trace-regular.trace.gz'
+    );
+    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
+    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a streaming ART trace', async function() {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/art-trace-streaming.trace.gz'
+    );
+    const arrayBuffer = zlib.gunzipSync(buffer).buffer;
+    const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
     expect(profile).toMatchSnapshot();
   });
 });
