@@ -9,6 +9,7 @@ import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPa
 import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
 
 import './Permalink.css';
+import { Localized } from '@fluent/react';
 
 type Props = {|
   +isNewlyPublished: boolean,
@@ -70,25 +71,27 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <ButtonWithPanel
-        buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
-        ref={this._takePermalinkButtonRef}
-        label="Permalink"
-        initialOpen={this.props.isNewlyPublished}
-        onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
-        onPanelClose={this._onPermalinkPanelClose}
-        panelClassName="menuButtonsPermalinkPanel"
-        panelContent={
-          <input
-            data-testid="MenuButtonsPermalink-input"
-            type="text"
-            className="menuButtonsPermalinkTextField photon-input"
-            value={this.state.shortUrl}
-            readOnly="readOnly"
-            ref={this._takePermalinkTextFieldRef}
-          />
-        }
-      />
+      <Localized id="MenuButtons--permalink--button" attrs={{ label: true }}>
+        <ButtonWithPanel
+          buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+          ref={this._takePermalinkButtonRef}
+          label="Permalink"
+          initialOpen={this.props.isNewlyPublished}
+          onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
+          onPanelClose={this._onPermalinkPanelClose}
+          panelClassName="menuButtonsPermalinkPanel"
+          panelContent={
+            <input
+              data-testid="MenuButtonsPermalink-input"
+              type="text"
+              className="menuButtonsPermalinkTextField photon-input"
+              value={this.state.shortUrl}
+              readOnly="readOnly"
+              ref={this._takePermalinkTextFieldRef}
+            />
+          }
+        />
+      </Localized>
     );
   }
 }

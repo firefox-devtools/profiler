@@ -13,6 +13,7 @@
 
 -firefox-brand-name = Firefox
 -profiler-brand-name = Firefox Profiler
+-firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
 
@@ -101,6 +102,144 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
         [one] Manage this recording
        *[other] Manage these recordings
     }
+
+## MenuButtons Folder
+
+MenuButtons--index--profile-info-uploaded-label = Uploaded:
+MenuButtons--index--profile-info-uploaded-actions = Delete
+MenuButtons--index--meta-info-subtitle = Profile Information
+MenuButtons--index--meta-info-button-uploaded-profile =
+    .label = Uploaded Profile
+
+MenuButtons--index--meta-info-button-local-profile =
+    .label = Local Profile
+
+MenuButtons--index--full-view = Full View
+MenuButtons--index--cancel-upload = Cancel Upload
+MenuButtons--index--share-upload =
+    .label = Upload
+
+MenuButtons--index--share-re-upload =
+    .label = Re-upload
+
+MenuButtons--index--share-error-uploading =
+    .label = Error uploading
+
+MenuButtons--index--revert = Revert to Original Profile
+MenuButtons--index--docs = Docs
+
+MenuButtons--metaInfo--symbols = Symbols:
+MenuButtons--metaInfo--profile-symbolicated = Profile is symbolicated
+MenuButtons--metaInfo--profile-not-symbolicated = Profile is not symbolicated
+MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
+MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
+MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
+MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
+MenuButtons--metaInfo--cpu = CPU:
+
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } physical core
+       *[other] { $physicalCPUs } physical cores
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } logical core
+       *[other] { $logicalCPUs } logical cores
+    }
+
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } physical core
+       *[other] { $physicalCPUs } physical cores
+    }
+
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } logical core
+       *[other] { $logicalCPUs } logical cores
+    }
+
+MenuButtons--metaInfo--recording-started = Recording started:
+MenuButtons--metaInfo--interval = Interval:
+MenuButtons--metaInfo--profile-version = Profile Version:
+MenuButtons--metaInfo--buffer-capacity = Buffer Capacity:
+MenuButtons--metaInfo--buffer-duration = Buffer Duration:
+
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } second
+       *[other] { $configurationDuration } seconds
+    }
+
+MenuButtons--metaInfo--buffer-duration-unlimited = Unlimited
+MenuButtons--metaInfo--application = Application
+MenuButtons--metaInfo--name-and-version = Name and version:
+MenuButtons--metaInfo--update-channel = Update Channel:
+MenuButtons--metaInfo--build-id = Build ID:
+MenuButtons--metaInfo--build-type = Build Type:
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
+MenuButtons--metaInfo--platform = Platform
+
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = OS:
+
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Visual Metrics
+MenuButtons--metaInfo--speed-index = Speed Index:
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual Speed Index:
+MenuButtons--metaInfo--contentful-speed-Index = Contentful Speed Index:
+MenuButtons--metaInfo-renderRowOfList-label-features = Features:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threads Filter:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions:
+
+MenuButtons--metaOverheadStatistics-subtitle = Profiler Overhead
+MenuButtons--metaOverheadStatistics-mean = Mean
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Cleaning
+MenuButtons--metaOverheadStatistics-statkeys-counter = Counter
+MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
+MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
+
+MenuButtons--permalink--button =
+    .label = Permalink
+
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Include hidden threads
+MenuButtons--publish--renderCheckbox-label-hidden-time = Include hidden time range
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Include screenshots
+MenuButtons--publish--renderCheckbox-label-resource = Include resource URLs and paths
+MenuButtons--publish--renderCheckbox-label-extension = Include extension information
+MenuButtons--publish--renderCheckbox-label-preference = Include preference values
+MenuButtons--publish--reupload-performance-profile = Re-upload Performance Profile
+MenuButtons--publish--share-performance-profile = Share Performance Profile
+MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
+MenuButtons--publish--info-description-default = By default, your personal data is removed.
+MenuButtons--publish--info-description-firefox-nightly = This profile is from { -firefox-nightly-brand-name }, so by default all information is included.
+MenuButtons--publish--include-additional-data = Include additional data that may be identifiable
+MenuButtons--publish--button-upload = Upload
+MenuButtons--publish--upload-title = Uploading profile…
+MenuButtons--publish--cancel-upload = Cancel Upload
+MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
+MenuButtons--publish--message-try-again = Try again
+MenuButtons--publish--download = Download
+MenuButtons--publish--compressing = Compressing…
 
 ## ProfileRootMessage
 

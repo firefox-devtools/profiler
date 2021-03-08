@@ -43,6 +43,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import './Publish.css';
+import { Localized } from '@fluent/react';
 
 type OwnProps = {|
   +isRepublish?: boolean,
@@ -87,7 +88,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       this.props.toggleCheckedSharingOptions('includePreferenceValues'),
   };
 
-  _renderCheckbox(slug: $Keys<CheckedSharingOptions>, label: string) {
+  _renderCheckbox(slug: $Keys<CheckedSharingOptions>, labelL10nId: string) {
     const { checkedSharingOptions } = this.props;
     const toggle = this._toggles[slug];
     return (
@@ -99,7 +100,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           onChange={toggle}
           checked={checkedSharingOptions[slug]}
         />
-        {label}
+        <Localized id={labelL10nId} />
       </label>
     );
   }
@@ -120,39 +121,62 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
           <div className="menuButtonsPublishIcon" />
           <h1 className="menuButtonsPublishTitle">
-            {isRepublish
-              ? 'Re-upload Performance Profile'
-              : 'Share Performance Profile'}
+            {isRepublish ? (
+              <Localized id="MenuButtons--publish--reupload-performance-profile">
+                Re-upload Performance Profile
+              </Localized>
+            ) : (
+              <Localized id="MenuButtons--publish--share-performance-profile">
+                Share Performance Profile
+              </Localized>
+            )}
           </h1>
           <p className="menuButtonsPublishInfoDescription">
-            Upload your profile and make it accessible to anyone with the link.
-            {shouldSanitizeByDefault
-              ? ' By default, your personal data is removed.'
-              : ' This profile is from Firefox Nightly, so by default all information is included.'}
+            <Localized id="MenuButtons--publish--info-description">
+              Upload your profile and make it accessible to anyone with the
+              link.
+            </Localized>{' '}
+            {shouldSanitizeByDefault ? (
+              <Localized id="MenuButtons--publish--info-description-default">
+                By default, your personal data is removed.
+              </Localized>
+            ) : (
+              <Localized id="MenuButtons--publish--info-description-firefox-nightly">
+                This profile is from Firefox Nightly, so by default all
+                information is included.
+              </Localized>
+            )}
           </p>
-          <h3>Include additional data that may be identifiable</h3>
+          <h3>
+            <Localized id="MenuButtons--publish--include-additional-data">
+              Include additional data that may be identifiable
+            </Localized>
+          </h3>
           <div className="menuButtonsPublishDataChoices">
             {this._renderCheckbox(
               'includeHiddenThreads',
-              'Include hidden threads'
+              'MenuButtons--publish--renderCheckbox-label-hidden-threads'
             )}
             {this._renderCheckbox(
               'includeFullTimeRange',
-              'Include hidden time range'
+              'MenuButtons--publish--renderCheckbox-label-hidden-time'
             )}
-            {this._renderCheckbox('includeScreenshots', 'Include screenshots')}
+            {this._renderCheckbox(
+              'includeScreenshots',
+              'MenuButtons--publish--renderCheckbox-label-include-screenshots'
+            )}
             {this._renderCheckbox(
               'includeUrls',
-              'Include resource URLs and paths'
+              'MenuButtons--publish--renderCheckbox-label-resource'
             )}
             {this._renderCheckbox(
               'includeExtension',
-              'Include extension information'
+              'MenuButtons--publish--renderCheckbox-label-extension'
             )}
             {shouldShowPreferenceOption
               ? this._renderCheckbox(
                   'includePreferenceValues',
-                  'Include preference values'
+                  'MenuButtons--publish--renderCheckbox-label-preference'
                 )
               : null}
           </div>
@@ -167,7 +191,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               className="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
             >
               <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload" />
-              Upload
+              <Localized id="MenuButtons--publish--button-upload">
+                Upload
+              </Localized>
             </button>
           </div>
         </form>
@@ -207,7 +233,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       >
         <div className="menuButtonsPublishUploadTop">
           <div className="menuButtonsPublishUploadTitle">
-            Uploading profile…
+            <Localized id="MenuButtons--publish--upload-title">
+              Uploading profile…
+            </Localized>
           </div>
           <div className="menuButtonsPublishUploadPercentage">
             {uploadProgressString}
@@ -230,7 +258,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
             className="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
             onClick={abortFunction}
           >
-            Cancel Upload
+            <Localized id="MenuButtons--publish--cancel-upload">
+              Cancel Upload
+            </Localized>
           </button>
         </div>
       </div>
@@ -260,14 +290,18 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       >
         <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
           <div className="photon-message-bar-inner-text">
-            Uh oh, something went wrong when uploading the profile.
+            <Localized id="MenuButtons--publish--message-something-went-wrong">
+              Uh oh, something went wrong when uploading the profile.
+            </Localized>
           </div>
           <button
             className="photon-button photon-button-micro photon-message-bar-action-button"
             type="button"
             onClick={resetUploadState}
           >
-            Try again
+            <Localized id="MenuButtons--publish--message-try-again">
+              Try again
+            </Localized>
           </button>
         </div>
         <div className="menuButtonsPublishError">{message}</div>
@@ -453,7 +487,8 @@ class DownloadButton extends React.PureComponent<
           className={className}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
-          Download <DownloadSize downloadSizePromise={downloadSizePromise} />
+          <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
+          <DownloadSize downloadSizePromise={downloadSizePromise} />
         </BlobUrlLink>
       );
     }
@@ -463,7 +498,9 @@ class DownloadButton extends React.PureComponent<
         type="button"
         className={classNames(className, 'menuButtonsPublishButtonDisabled')}
       >
-        Compressing…
+        <Localized id="MenuButtons--publish--compressing">
+          Compressing…
+        </Localized>
       </button>
     );
   }
