@@ -47,6 +47,16 @@ Home--load-from-url-submit-button =
     .value = Load
 
 Home--documentation-button = Documentation
+Home--menu-button = Enable { -profiler-brand-name } Menu Button
+Home--menu-button-instructions =
+    Enable the profiler menu button to start recording a performance
+    profile in { -firefox-brand-name }, then analyze it and share it with profiler.firefox.com.
+
+Home--addon-button = Install add-on
+Home--addon-button-instructions =
+    Install the Gecko Profiler Add-on to start recording a performance
+    profile in { -firefox-brand-name }, then analyze it and share it with profiler.firefox.com.
+
 Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
