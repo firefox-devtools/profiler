@@ -127,7 +127,7 @@ describe('app/Home', function() {
     });
     await findByTestId('home-enable-popup-instructions');
 
-    fireFullClick(getByText('Enable Profiler Menu Button'));
+    fireFullClick(getByText('Enable \u2068Firefox Profiler\u2069 Menu Button'));
 
     // Respond back from the browser that the menu button was enabled.
     triggerResponse({

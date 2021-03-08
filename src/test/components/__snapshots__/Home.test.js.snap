@@ -20,7 +20,7 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
       >
         +
       </span>
-      Enable Profiler Menu Button
+      Enable ⁨Firefox Profiler⁩ Menu Button
     </button>
     <a
       class="homeSectionButton"
@@ -32,7 +32,8 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
       Documentation
     </a>
     <p>
-      Enable the profiler menu button to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
+      Enable the profiler menu button to start recording a performance
+profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
     </p>
   </div>
 </div>
@@ -302,7 +303,8 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             Documentation
           </a>
           <p>
-            Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
+            Install the Gecko Profiler Add-on to start recording a performance
+profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
           </p>
         </div>
       </div>
@@ -465,7 +467,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </a>
           <p>
             To start profiling, click on the profiling button, or use the
-keyboard shortcuts. The icon is blue when a profile is recording. 
+keyboard shortcuts. The icon is blue when a profile is recording.
 Hit 
             <kbd>
               Capture Profile
@@ -605,7 +607,7 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
     </a>
     <p>
       To start profiling, click on the profiling button, or use the
-keyboard shortcuts. The icon is blue when a profile is recording. 
+keyboard shortcuts. The icon is blue when a profile is recording.
 Hit 
       <kbd>
         Capture Profile
