@@ -272,6 +272,15 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## ProfileDeleteButton
+
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Delete
+    .title = Click here to delete the profile { $smallProfileName }
+
 ## ProfileLoaderAnimation
 
 ProfileLoaderAnimation--loading-message-from-addon =
