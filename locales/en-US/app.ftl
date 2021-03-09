@@ -249,6 +249,32 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## ProfileLoaderAnimation
+
+ProfileLoaderAnimation--loading-message-from-addon =
+    .message = Importing the profile directly from { -firefox-brand-name }…
+
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importing the profile directly from { -firefox-brand-name }…
+
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Reading the file and processing the profile…
+
+ProfileLoaderAnimation--loading-message-local =
+    .message = Not implemented yet.
+
+ProfileLoaderAnimation--loading-message-public =
+    .message = Downloading and processing the profile…
+
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Downloading and processing the profile…
+
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Reading and processing profiles…
+
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = View not found
+
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
