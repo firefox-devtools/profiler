@@ -21,6 +21,29 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Go to our git repository (this opens in a new window)
 
+## AppViewRouter
+
+AppViewRouter--error-message-from-addon =
+    .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
+
+AppViewRouter--error-message-unpublished =
+    .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
+
+AppViewRouter--error-message-from-file =
+    .message = Couldn’t read the file or parse the profile in it.
+
+AppViewRouter--error-message-local =
+    .message = Not implemented yet.
+
+AppViewRouter--error-message-public =
+    .message = Could not download the profile.
+
+AppViewRouter--error-message-from-url =
+    .message = Could not download the profile.
+
+AppViewRouter--route-not-found--home =
+    .specialMessage = The URL you tried to reach was not recognized.
+
 ## CompareHome
 
 CompareHome--instruction-title = Enter the profile URLs that you’d like to compare
