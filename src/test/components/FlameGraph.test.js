@@ -4,12 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent, within } from '@testing-library/react';
+import { fireEvent, within } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 

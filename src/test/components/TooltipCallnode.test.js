@@ -5,8 +5,9 @@
 // @flow
 import React from 'react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
-import { render } from '@testing-library/react';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithUnbalancedNativeAllocations,

@@ -4,13 +4,14 @@
 
 // @flow
 import * as React from 'react';
+import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import { JsTracer } from '../../components/js-tracer';
-import { render } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';

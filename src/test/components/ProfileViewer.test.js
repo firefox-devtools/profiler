@@ -6,9 +6,9 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import { updateUrlState } from 'firefox-profiler/actions/app';

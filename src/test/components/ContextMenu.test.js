@@ -4,7 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ContextMenu } from '../../components/shared/ContextMenu';
 
 describe('ContextMenu', function() {

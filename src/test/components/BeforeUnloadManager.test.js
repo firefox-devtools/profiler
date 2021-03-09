@@ -4,10 +4,12 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { BeforeUnloadManager } from '../../components/app/BeforeUnloadManager';
 import { blankStore } from '../fixtures/stores';
-import { Provider } from 'react-redux';
 import { uploadStarted } from 'firefox-profiler/actions/publish';
 import { getUploadPhase } from '../../selectors/publish';
 

@@ -7,12 +7,12 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import {
-  render,
   getByText as globalGetByText,
   waitForElementToBeRemoved,
   screen,
 } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ListOfPublishedProfiles } from 'firefox-profiler/components/app/ListOfPublishedProfiles';
 import {
   persistUploadedProfileInformationToDb,
@@ -615,7 +615,8 @@ describe('ListOfPublishedProfiles', () => {
 
       // The list will update with a focus event.
       window.dispatchEvent(new Event('focus'));
-      profileLink = await findLinkByText(/Profile #\w/i);
+      // Fluent adds invisible isolate character so the '.?' is to support that
+      profileLink = await findLinkByText(/Profile .?#\w/i);
       expect(profileNameFromLinkElement(profileLink)).toBe(null);
     });
   });

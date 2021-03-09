@@ -4,8 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import createStore from 'firefox-profiler/app-logic/create-store';
 import { KeyboardShortcut } from 'firefox-profiler/components/app/KeyboardShortcut';
 import { fireFullKeyPress } from 'firefox-profiler/test/fixtures/utils';

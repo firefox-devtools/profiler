@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { stripIndent } from 'common-tags';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { fireFullClick } from '../fixtures/utils';
@@ -37,7 +38,8 @@ describe('app/ErrorBoundary', function() {
     const stack = screen.getByText(/at ThrowingComponent/);
     stack.textContent = stack.textContent
       .replace(/\\/g, '/') // normalizes Windows paths
-      .replace(/\(.*\/src/g, '(REDACTED)/src'); // Removes the home directory
+      .replace(/\(.*\/src/g, '(REDACTED)/src') // Removes the home directory
+      .replace(/\(.*\/node_modules/g, '(REDACTED)/node_modules'); // Removes the home directory
 
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -81,8 +83,9 @@ describe('app/ErrorBoundary', function() {
           new RegExp(stripIndent`
               Error: This is an error\\.
 
-                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:19:11\\)
+                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:20:11\\)
                   at ErrorBoundary \\(.*[/\\\\]ErrorBoundary.js:28:66\\)
+                  at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
           `)
         ),
         exFatal: true,

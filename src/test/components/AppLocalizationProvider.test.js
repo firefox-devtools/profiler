@@ -4,23 +4,25 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
-import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
-import { blankStore } from '../fixtures/stores';
 import { Provider } from 'react-redux';
+import { ReactLocalization, Localized } from '@fluent/react';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
+import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 import {
   getL10nFetchingPhase,
   getLocalization,
   getPrimaryLocale,
   getDirection,
 } from 'firefox-profiler/selectors/l10n';
-import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import {
   requestL10n,
   receiveL10n,
   setupLocalization,
 } from 'firefox-profiler/actions/l10n';
-import { ReactLocalization, Localized } from '@fluent/react';
+
+import { blankStore } from '../fixtures/stores';
 import { coerceMatchingShape } from '../../utils/flow';
 
 describe('AppLocalizationProvider', () => {

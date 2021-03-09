@@ -32,8 +32,9 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
       </div>
       <div>
         
-    at ThrowingComponent (REDACTED)/src/test/components/ErrorBoundary.test.js:19:11)
+    at ThrowingComponent (REDACTED)/src/test/components/ErrorBoundary.test.js:20:11)
     at ErrorBoundary (REDACTED)/src/components/app/ErrorBoundary.js:28:66)
+    at LocalizationProvider (REDACTED)/node_modules/@fluent/react/index.js:96:26)
       </div>
     </div>
   </div>

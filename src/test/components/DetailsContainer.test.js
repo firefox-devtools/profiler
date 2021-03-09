@@ -5,8 +5,8 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { DetailsContainer } from '../../components/app/DetailsContainer';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
