@@ -103,4 +103,40 @@ describe('SampleTooltipContents', function() {
 
     expect(container).toMatchSnapshot();
   });
+
+  it('renders the sample with ns CPU usage information properly', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A    A    A              A
+      B    B    B              B
+      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+      D    F    I[cat:Idle]
+      Ejs  Ejs
+    `);
+    // Let's put some values for CPU usage.
+    addCpuUsageValues(profile, [null, 600000, 1000000, 500000], 'ns');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    const { container } = setup(profile, hoveredSampleIndex);
+
+    expect(container).toMatchSnapshot();
+  });
+
+  it('renders the sample with "variable CPU cycles" CPU usage information properly', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A    A    A              A
+      B    B    B              B
+      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+      D    F    I[cat:Idle]
+      Ejs  Ejs
+    `);
+    // Let's put some values for CPU usage.
+    addCpuUsageValues(profile, [null, 800, 1000, 500], 'variable CPU cycles');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    const { container } = setup(profile, hoveredSampleIndex);
+
+    expect(container).toMatchSnapshot();
+  });
 });
