@@ -2016,9 +2016,21 @@ export function getSampleIndexClosestToCenteredTime(
   // Check the distance between the provided time and the center of the bisected sample
   // and its predecessor.
   const previousIndex = index - 1;
+  let distanceToThis;
+  let distanceToLast;
 
-  const distanceToThis = samples.time[index] - time;
-  const distanceToLast = time - samples.time[previousIndex];
+  if (samples.weight) {
+    const samplesWeight = samples.weight;
+    const weight = Math.abs(samplesWeight[index]);
+    const previousWeight = Math.abs(samplesWeight[previousIndex]);
+
+    distanceToThis = samples.time[index] + weight / 2 - time;
+    distanceToLast = time - (samples.time[previousIndex] + previousWeight / 2);
+  } else {
+    distanceToThis = samples.time[index] - time;
+    distanceToLast = time - samples.time[previousIndex];
+  }
+
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
