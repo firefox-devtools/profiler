@@ -95,12 +95,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
   +isCPUUtilizationProvided: boolean,
 |}> {
   _changeToCategories = () => this.props.changeTimelineType('category');
-  _changeToCPUCategories = () => {
-    if (this.props.isCPUUtilizationProvided) {
-      // A simple check to see if we have the CPU utilization before switching to it.
-      this.props.changeTimelineType('cpu-category');
-    }
-  };
+  _changeToCPUCategories = () => this.props.changeTimelineType('cpu-category');
   _changeToStacks = () => this.props.changeTimelineType('stack');
 
   render() {

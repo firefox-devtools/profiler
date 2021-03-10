@@ -254,9 +254,8 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
  */
 const cpuGraphs: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
-    case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS': {
+    case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
       return true;
-    }
     default:
       return state;
   }

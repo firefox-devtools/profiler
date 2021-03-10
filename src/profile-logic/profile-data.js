@@ -2847,6 +2847,7 @@ export function processThreadCPUDelta(
 
     return newThread;
   }
+
   // Check to see the CPU delta numbers are all null and if they are, remove
   // this array completely. For example on JVM threads, all the threadCPUDelta
   // values will be null and therefore it will fail to paint the activity graph.
@@ -2889,7 +2890,6 @@ export function processThreadCPUDelta(
           cpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
         if (nonNullThreadCPUDelta > intervalUs) {
           newThreadCPUDelta[i] = intervalUs;
-          continue;
         } else {
           newThreadCPUDelta[i] = nonNullThreadCPUDelta;
         }

@@ -8,9 +8,9 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { ensureExists } from '../../utils/flow';
-import TrackThread from '../../components/timeline/TrackThread';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import TrackThread from 'firefox-profiler/components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -25,7 +25,7 @@ import type {
 
 // Mocking the ActivityGraph because we don't want to see the content/draw log
 // of it in these tests. It has its own tests.
-jest.mock('../../components/shared/thread/ActivityGraph', () => ({
+jest.mock('firefox-profiler/components/shared/thread/ActivityGraph', () => ({
   ThreadActivityGraph: 'thread-activity-graph',
 }));
 
@@ -55,7 +55,6 @@ describe('SampleGraph', function() {
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
-    const threadIndex = 0;
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
@@ -111,7 +110,6 @@ describe('SampleGraph', function() {
       profile,
       thread,
       store,
-      threadIndex,
       sampleGraphCanvas,
       clickSampleGraph,
       getCallNodePath,
