@@ -16,7 +16,10 @@ import {
   getProfileInterval,
 } from 'firefox-profiler/selectors';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addCpuUsageValues,
+} from '../fixtures/profiles/processed-profile';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -92,17 +95,12 @@ describe('SampleTooltipContents', function() {
       Ejs  Ejs
     `);
     // Let's put some values for CPU usage.
-    profile.meta.interval = 1;
-    profile.meta.sampleUnits = {
-      time: 'ms',
-      eventDelay: 'ms',
-      threadCPUDelta: 'µs',
-    };
-    profile.threads[0].samples.threadCPUDelta = [null, 400, 1000, 500];
+    addCpuUsageValues(profile, [null, 400, 1000, 500], 'µs');
+
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-
     const { container } = setup(profile, hoveredSampleIndex);
+
     expect(container).toMatchSnapshot();
   });
 });

@@ -1618,3 +1618,21 @@ export function getThreadWithThreadCPUDelta(
 
   return thread;
 }
+
+/**
+ * Adds the necessary CPU usage values to the given profile.
+ */
+export function addCpuUsageValues(
+  profile: Profile,
+  threadCPUDelta: Array<number | null>,
+  threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  interval: Milliseconds = 1
+) {
+  profile.meta.interval = interval;
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: threadCPUDeltaUnit,
+  };
+  profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
+}
