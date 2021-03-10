@@ -27,6 +27,17 @@ import type {
   CallNodeTable,
 } from 'firefox-profiler/types';
 
+/**
+ * Parameters for the height function of the HeightGraph component.
+ * Shared HeightGraph component gets a `heightFunc` as a prop and executes this
+ * function for each sample to determine the height of the given sample in the graph.
+ * Therefore, each height per sample is determined by the parent component. This
+ * helps us reuse the same height graph component with different values.
+ *
+ * These parameters are exposed because the parent component needs them to find
+ * out the height of the sample with different logics. These parameters are added
+ * on an as-needed basis.
+ */
 export type HeightFunctionParams = {|
   +samples: SamplesTable,
   +sampleIndex: number,
