@@ -101,7 +101,7 @@ type StateProps = {|
   +enableCPUUsage: boolean,
   +isExperimentalCPUGraphsEnabled: boolean,
   +maxThreadCPUDelta: number,
-  +sampleUnits: ?SampleUnits,
+  +sampleUnits: SampleUnits | void,
 |};
 
 type DispatchProps = {|

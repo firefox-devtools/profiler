@@ -27,7 +27,7 @@ type Props = {|
   +sampleIndex: IndexIntoSamplesTable,
   +categories: CategoryList,
   +fullThread: Thread,
-  +sampleUnits: ?SampleUnits,
+  +sampleUnits: SampleUnits | void,
   +maxThreadCPUDelta: number,
   +interval: Milliseconds,
 |};

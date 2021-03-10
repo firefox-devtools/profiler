@@ -45,7 +45,7 @@ export type Props = {|
   ) => number,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
-  +sampleUnits: ?SampleUnits,
+  +sampleUnits: SampleUnits | void,
 |};
 
 type State = {

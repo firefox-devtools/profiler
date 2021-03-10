@@ -185,7 +185,7 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
 
 // Get the samples table units. They can be different depending on their platform.
 // See SampleUnits type definition for more information.
-export const getSampleUnits: Selector<?SampleUnits> = state =>
+export const getSampleUnits: Selector<SampleUnits | void> = state =>
   getMeta(state).sampleUnits;
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
