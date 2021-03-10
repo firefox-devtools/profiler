@@ -2860,6 +2860,9 @@ export function processThreadCPUDelta(
   }
 
   const newThreadCPUDelta: Array<number | null> = new Array(samples.length);
+  const cpuDeltaTimeUnitMultiplier = getCpuDeltaTimeUnitMultiplier(
+    sampleUnits.threadCPUDelta
+  );
 
   for (let i = 0; i < samples.length; i++) {
     const nullableThreadCPUDelta: number | null = threadCPUDelta[i];
@@ -2886,8 +2889,7 @@ export function processThreadCPUDelta(
       case 'µs':
       case 'ns': {
         const intervalUs =
-          (samples.time[i] - samples.time[i - 1]) *
-          cpuDeltaTimeUnitMultiplier(threadCPUDeltaUnit);
+          (samples.time[i] - samples.time[i - 1]) * cpuDeltaTimeUnitMultiplier;
         if (nonNullThreadCPUDelta > intervalUs) {
           newThreadCPUDelta[i] = intervalUs;
         } else {
@@ -2911,8 +2913,9 @@ export function processThreadCPUDelta(
 
 /**
  * A helper function that is used to convert ms time units to threadCPUDelta units.
+ * Returns 1 for 'variable CPU cycles' as it's not a time unit.
  */
-function cpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
+function getCpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
   switch (unit) {
     case 'µs':
       // ms to µs multiplier
@@ -2922,7 +2925,7 @@ function cpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
       return 1000000;
     case 'variable CPU cycles':
       // We can't convert the CPU cycle unit to any time units
-      throw new Error('Unhandled threadCPUDelta unit for time multiplier.');
+      return 1;
     default:
       throw assertExhaustiveCheck(
         unit,
