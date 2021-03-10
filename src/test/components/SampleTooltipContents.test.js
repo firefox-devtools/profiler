@@ -34,7 +34,7 @@ describe('SampleTooltipContents', function() {
     const maxThreadCPUDelta = getMaxThreadCPUDelta(state);
     const interval = getProfileInterval(state);
 
-    const renderResult = render(
+    render(
       <Provider store={store}>
         <SampleTooltipContents
           sampleIndex={hoveredSampleIndex}
@@ -46,10 +46,6 @@ describe('SampleTooltipContents', function() {
         />
       </Provider>
     );
-
-    return {
-      ...renderResult,
-    };
   }
 
   it('renders the sample tooltip properly', () => {
@@ -82,8 +78,8 @@ describe('SampleTooltipContents', function() {
     // There is only one sample in the profile
     const hoveredSampleIndex = 0;
 
-    const { container } = setup(profile, hoveredSampleIndex);
-    expect(container).toMatchSnapshot();
+    setup(profile, hoveredSampleIndex);
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders the sample with µs CPU usage information properly', () => {
@@ -99,9 +95,9 @@ describe('SampleTooltipContents', function() {
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    const { container } = setup(profile, hoveredSampleIndex);
+    setup(profile, hoveredSampleIndex);
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders the sample with ns CPU usage information properly', () => {
@@ -117,9 +113,9 @@ describe('SampleTooltipContents', function() {
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    const { container } = setup(profile, hoveredSampleIndex);
+    setup(profile, hoveredSampleIndex);
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders the sample with "variable CPU cycles" CPU usage information properly', () => {
@@ -135,8 +131,8 @@ describe('SampleTooltipContents', function() {
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    const { container } = setup(profile, hoveredSampleIndex);
+    setup(profile, hoveredSampleIndex);
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

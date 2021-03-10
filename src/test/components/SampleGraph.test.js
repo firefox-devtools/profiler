@@ -75,13 +75,12 @@ describe('SampleGraph', function() {
         />
       </Provider>
     );
-    const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
 
     const sampleGraphCanvas = ensureExists(
-      container.querySelector('.threadSampleGraphCanvas'),
+      document.querySelector('.threadSampleGraphCanvas'),
       `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
     );
     const thread = profile.threads[0];
