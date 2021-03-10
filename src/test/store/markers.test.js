@@ -376,6 +376,7 @@ describe('Marker schema filtering', function() {
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
+      // Notice: no network markers!
       'UserTiming',
       'RandomTracingMarker',
     ]);
