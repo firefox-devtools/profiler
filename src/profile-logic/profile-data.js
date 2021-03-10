@@ -2865,18 +2865,11 @@ export function processThreadCPUDelta(
   );
 
   for (let i = 0; i < samples.length; i++) {
-    const nullableThreadCPUDelta: number | null = threadCPUDelta[i];
-    let nonNullThreadCPUDelta: number;
-
-    if (nullableThreadCPUDelta === null) {
-      // Ideally there shouldn't be any null values but that can happen if the
-      // back-end fails to get the CPU usage numbers from the operation system.
-      // In that case, try to find the closest number and use it to mitigate the
-      // weird graph renderings.
-      nonNullThreadCPUDelta = findClosestNonNullValueToIdx(threadCPUDelta, i);
-    } else {
-      nonNullThreadCPUDelta = nullableThreadCPUDelta;
-    }
+    // Ideally there shouldn't be any null values but that can happen if the
+    // back-end fails to get the CPU usage numbers from the operation system.
+    // In that case, try to find the closest number and use it to mitigate the
+    // weird graph renderings.
+    const threadCPUDeltaValue = findClosestNonNullValueToIdx(threadCPUDelta, i);
 
     const threadCPUDeltaUnit = sampleUnits.threadCPUDelta;
     switch (threadCPUDeltaUnit) {
@@ -2890,15 +2883,15 @@ export function processThreadCPUDelta(
       case 'ns': {
         const intervalUs =
           (samples.time[i] - samples.time[i - 1]) * cpuDeltaTimeUnitMultiplier;
-        if (nonNullThreadCPUDelta > intervalUs) {
+        if (threadCPUDeltaValue > intervalUs) {
           newThreadCPUDelta[i] = intervalUs;
         } else {
-          newThreadCPUDelta[i] = nonNullThreadCPUDelta;
+          newThreadCPUDelta[i] = threadCPUDeltaValue;
         }
         break;
       }
       case 'variable CPU cycles':
-        newThreadCPUDelta[i] = nonNullThreadCPUDelta;
+        newThreadCPUDelta[i] = threadCPUDeltaValue;
         break;
       default:
         throw assertExhaustiveCheck(
@@ -2941,8 +2934,12 @@ function getCpuDeltaTimeUnitMultiplier(unit: ThreadCPUDeltaUnit): number {
 function findClosestNonNullValueToIdx(
   array: Array<number | null>,
   idx: number,
-  distance: number = 1
+  distance: number = 0
 ): number {
+  if (distance >= array.length) {
+    throw new Error('Expected the distance to be less than the array length.');
+  }
+
   if (idx + distance < array.length) {
     const itemAfter = array[idx + distance];
     if (itemAfter !== null) {
