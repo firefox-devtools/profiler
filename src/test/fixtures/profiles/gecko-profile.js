@@ -787,7 +787,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
                   time: 1,
                   responsiveness: 2,
                 },
-                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45 / Time: 1
               },
             },
           },

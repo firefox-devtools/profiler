@@ -583,3 +583,172 @@ describe('Marker schema filtering', function() {
     ).toEqual(['RefreshDriverTick']);
   });
 });
+
+describe('profile upgrading and markers', () => {
+  it('upgrades cause timestamps from the processed version 33', async () => {
+    // This is a profile purposefully stuck at version 33.
+    const profile = {
+      meta: {
+        interval: 1,
+        startTime: 0,
+        abi: '',
+        misc: '',
+        oscpu: '',
+        platform: '',
+        processType: 0,
+        extensions: {
+          id: [],
+          name: [],
+          baseURL: [],
+          length: 0,
+        },
+        categories: [
+          {
+            name: 'Idle',
+            color: 'transparent',
+            subcategories: ['Other'],
+          },
+          {
+            name: 'Other',
+            color: 'grey',
+            subcategories: ['Other'],
+          },
+        ],
+        product: 'Firefox',
+        stackwalk: 0,
+        toolkit: '',
+        version: 21,
+        // This is the version right before the marker's cause timestamp update
+        preprocessedProfileVersion: 33,
+        appBuildID: '',
+        sourceURL: '',
+        physicalCPUs: 0,
+        logicalCPUs: 0,
+        symbolicated: true,
+      },
+      pages: [],
+      threads: [
+        {
+          processType: 'default',
+          // We want specifically a value > 0 for this test. The main thread in
+          // the parent process should have 0 usually, but for content processes
+          // this is a non-zero value.
+          processStartupTime: 1000,
+          processShutdownTime: null,
+          registerTime: 0,
+          unregisterTime: null,
+          pausedRanges: [],
+          name: 'Empty',
+          pid: 0,
+          tid: 0,
+          samples: {
+            weightType: 'samples',
+            weight: null,
+            eventDelay: [],
+            stack: [],
+            time: [],
+            length: 0,
+          },
+          markers: {
+            name: [0, 1, 2, 3],
+            startTime: [0, 1, 2, 5],
+            endTime: [null, null, null, 6],
+            phase: [0, 0, 0, 1],
+            category: [0, 0, 0, 0],
+            data: [
+              // One marker without data
+              null,
+              // One marker without cause
+              {
+                type: 'UserTiming',
+                name: 'name',
+                entryType: 'mark',
+              },
+              // One marker with a cause that was already processed in previous versions.
+              {
+                type: 'tracing',
+                category: 'RandomTracingMarker',
+                cause: {
+                  tid: 1111,
+                  time: 1001, // This was already processed
+                  stack: 0, // (root)
+                },
+              },
+              // One marker with a cause that wasn't already processed in
+              // previous versions.
+              {
+                type: 'FileIO',
+                source: 'PoisionOIInterposer',
+                filename: '/foo/bar/',
+                operation: 'create/open',
+                cause: {
+                  tid: 1111,
+                  time: 10, // This wasn't already processed
+                  stack: 0, // (root)
+                },
+              },
+            ],
+            length: 4,
+          },
+          stackTable: {
+            frame: [0], // (root)
+            prefix: [null],
+            category: [0],
+            subcategory: [0],
+            length: 1,
+          },
+          frameTable: {
+            address: [-1],
+            category: [0],
+            subcategory: [0],
+            func: [0], // (root)
+            innerWindowID: [null],
+            implementation: [null],
+            line: [null],
+            column: [null],
+            optimizations: [null],
+            length: 1,
+          },
+          stringArray: [
+            'no payload',
+            'UserTiming',
+            'RandomTracingMarker',
+            'FileIO',
+            '(root)',
+          ],
+          libs: [],
+          funcTable: {
+            address: [-1],
+            isJS: [true],
+            relevantForJS: [false],
+            name: [4], // (root)
+            resource: [-1],
+            fileName: [null],
+            lineNumber: [null],
+            columnNumber: [null],
+            length: 1,
+          },
+          resourceTable: {
+            lib: [],
+            name: [],
+            host: [],
+            type: [],
+            length: 0,
+          },
+        },
+      ],
+    };
+
+    const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
+    const { getState } = storeWithProfile(upgradedProfile);
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const derivedMarkers = selectedThreadSelectors
+      .getFullMarkerListIndexes(getState())
+      .map(getMarker);
+    // $FlowExpectError ignore Flow errors for simplicity.
+    expect(derivedMarkers[2].data.cause.time).toEqual(1001); // This hasn't changed, as expected.
+    // $FlowExpectError
+    expect(derivedMarkers[3].data.cause.time).toEqual(1010); // This changed, as expected.
+  });
+});
