@@ -21,6 +21,7 @@ import {
   getCallNodeIndexFromPath,
   getTreeOrderComparator,
   getSamplesSelectedStates,
+  extractProfileFilterPageData,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -895,5 +896,82 @@ describe('getSamplesSelectedStates', function() {
     expect(comparator(4, 4)).toBe(0);
     expect(comparator(0, 2)).toBeLessThan(0);
     expect(comparator(2, 0)).toBeGreaterThan(0);
+  });
+});
+
+describe('extractProfileFilterPageData', function() {
+  const innerWindowIds = {
+    mozilla: 1,
+    aboutBlank: 2,
+    profiler: 3,
+    exampleSubFrame: 4,
+  };
+  // This is the `profile.pages` array.
+  const pages = [
+    {
+      tabID: 1111,
+      innerWindowID: innerWindowIds.mozilla,
+      url: 'https://www.mozilla.org',
+      embedderInnerWindowID: 0,
+    },
+    {
+      tabID: 2222,
+      innerWindowID: innerWindowIds.aboutBlank,
+      url: 'about:blank',
+      embedderInnerWindowID: 0,
+    },
+    {
+      tabID: 2222,
+      innerWindowID: innerWindowIds.profiler,
+      url: 'https://profiler.firefox.com/public/xyz',
+      embedderInnerWindowID: 0,
+    },
+    {
+      tabID: 2222,
+      innerWindowID: innerWindowIds.exampleSubFrame,
+      url: 'https://example.com/subframe',
+      // This is a subframe of the page above.
+      embedderInnerWindowID: innerWindowIds.profiler,
+    },
+  ];
+
+  it('extracts the page data when there is only one relevant page', function() {
+    // Adding only the https://www.mozilla.org page.
+    const relevantPages = new Set([innerWindowIds.mozilla]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+    expect(pageData).toEqual({
+      origin: 'https://www.mozilla.org',
+      hostname: 'www.mozilla.org',
+      favicon: 'https://www.mozilla.org/favicon.ico',
+    });
+  });
+
+  it('extracts the page data when there are multiple relevant page', function() {
+    const relevantPages = new Set([
+      innerWindowIds.profiler,
+      innerWindowIds.exampleSubFrame,
+    ]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+    expect(pageData).toEqual({
+      origin: 'https://profiler.firefox.com',
+      hostname: 'profiler.firefox.com',
+      favicon: 'https://profiler.firefox.com/favicon.ico',
+    });
+  });
+
+  it('extracts the page data when there are multiple relevant page with about:blank', function() {
+    const relevantPages = new Set([
+      innerWindowIds.aboutBlank,
+      innerWindowIds.profiler,
+    ]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+    expect(pageData).toEqual({
+      origin: 'https://profiler.firefox.com',
+      hostname: 'profiler.firefox.com',
+      favicon: 'https://profiler.firefox.com/favicon.ico',
+    });
   });
 });
