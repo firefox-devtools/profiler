@@ -48,8 +48,8 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex] || 0;
     const realInterval =
       (samples.time[sampleIndex] - samples.time[sampleIndex - 1]) / interval;
-    const currentCPUPerInterval = cpuDelta / realInterval;
-    return currentCPUPerInterval * yPixelsPerHeight;
+    const currentCPUPerMs = cpuDelta / realInterval;
+    return currentCPUPerMs * yPixelsPerHeight;
   }
 
   render() {

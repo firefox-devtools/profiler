@@ -34,14 +34,11 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
 );
 
 /**
- * All threads with processed CPU are needed for max CPU value computation, but
- * they are also needed for each thread. This means that we can't use the
- * createSelector mechanism to properly memoize the component, because
- * getThreadSelectors requires the whole state and that makes it impossible to
- * memoize with createSelector. We need access to the full state and to the
- * individual threads. This function therefore implements some simple memoization
- * behavior on the current list of threads. See getDerivedMarkerInfoForAllThreads
- * for a similar situation.
+ * This function returns the list of all threads after the CPU values have been
+ * processed. This uses a selector from the per-thread selectors. Because we'll
+ * use this selector for every thread, and also need the full state for this call,
+ * we can't use the simple memoization from `createSelector`, and instead we
+ * need to implement our own simple memoization.
  */
 let _threads = null;
 let _cpuProcessedThreads = null;

@@ -54,12 +54,9 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       case 'variable CPU cycles':
         return maxThreadCPUDelta;
       case 'µs':
-      case 'ns': {
-        if (unit === 'µs') {
-          return realInterval * 1000;
-        }
+        return realInterval * 1000;
+      case 'ns':
         return realInterval * 1000000;
-      }
       default:
         throw new Error('Unexpected threadCPUDelta unit found');
     }
@@ -109,31 +106,34 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     const { samples } = fullThread;
     let cpuUsageContent = null;
 
-    if (sampleIndex !== 0 && samples.threadCPUDelta && sampleUnits) {
-      const cpuUsage = samples.threadCPUDelta[sampleIndex];
-      if (cpuUsage !== null) {
-        const realIntervalMs = this._getRealInterval();
-        const realIntervalUs = realIntervalMs * 1000;
-        const percentageText = this._getCPUPercentageString(
-          cpuUsage,
-          realIntervalMs
-        );
-        const cpuUsageString = this._getCPUUsageString(
-          cpuUsage,
-          sampleUnits.threadCPUDelta
-        );
+    if (sampleIndex === 0 || !samples.threadCPUDelta || !sampleUnits) {
+      // We have no CPU usage information.
+      return null;
+    }
 
-        const cpuUsageAndPercentage = `${percentageText} (${cpuUsageString} over ${formatMicroseconds(
-          realIntervalUs
-        )})`;
+    const cpuUsage = samples.threadCPUDelta[sampleIndex];
+    if (cpuUsage !== null) {
+      const realIntervalMs = this._getRealInterval();
+      const realIntervalUs = realIntervalMs * 1000;
+      const percentageText = this._getCPUPercentageString(
+        cpuUsage,
+        realIntervalMs
+      );
+      const cpuUsageString = this._getCPUUsageString(
+        cpuUsage,
+        sampleUnits.threadCPUDelta
+      );
 
-        cpuUsageContent = (
-          <div className="tooltipDetails">
-            <div className="tooltipLabel">CPU Usage:</div>
-            <div>{cpuUsageAndPercentage}</div>
-          </div>
-        );
-      }
+      const cpuUsageAndPercentage = `${percentageText} (${cpuUsageString} over ${formatMicroseconds(
+        realIntervalUs
+      )})`;
+
+      cpuUsageContent = (
+        <div className="tooltipDetails">
+          <div className="tooltipLabel">CPU Usage:</div>
+          <div>{cpuUsageAndPercentage}</div>
+        </div>
+      );
     }
 
     return cpuUsageContent;

@@ -38,11 +38,11 @@ const GRAPH_HEIGHT = 10;
 describe('CPUGraph', function() {
   function getSamplesProfile() {
     const profile = getProfileFromTextSamples(`
-      A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]   A[cat:DOM]    A[cat:DOM]
-      B           B                B             B             B             B            B             B
-      C           C                H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other] H[cat:Other]  C
-      D           F[cat:Graphics]  I             I             I             I            I             F[cat:Graphics]
-      E           G                                                                                     G
+      A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]
+      B           B                B             B             B             B             B             B
+      C           C                H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other]  C
+      D           F[cat:Graphics]  I             I             I             I             I             F[cat:Graphics]
+      E           G                                                                                      G
     `).profile;
 
     // Adding CPU usage values, so we can see the CPU graph properly.
@@ -73,7 +73,7 @@ describe('CPUGraph', function() {
     // Enable the CPU Graph
     dispatch(enableExperimentalCPUGraphs());
 
-    const renderResult = render(
+    render(
       <Provider store={store}>
         <TrackThread
           threadsKey={0}
@@ -92,7 +92,6 @@ describe('CPUGraph', function() {
     );
 
     return {
-      ...renderResult,
       cpuGraphCanvas,
       ctx,
     };

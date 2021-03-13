@@ -42,11 +42,11 @@ function getSamplesPixelPosition(
 describe('ThreadActivityGraph', function() {
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
-      A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]   A[cat:DOM]    A[cat:DOM]
-      B           B                B             B             B             B            B             B
-      C           C                H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other] H[cat:Other]  C
-      D           F[cat:Graphics]  I             I             I             I            I             F[cat:Graphics]
-      E           G                                                                                     G
+      A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]
+      B           B                B             B             B             B             B             B
+      C           C                H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other]  H[cat:Other]  C
+      D           F[cat:Graphics]  I             I             I             I             I             F[cat:Graphics]
+      E           G                                                                                      G
     `).profile;
   }
 

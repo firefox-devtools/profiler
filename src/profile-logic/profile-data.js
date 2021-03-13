@@ -2785,7 +2785,8 @@ export function computeMaxThreadCPUDelta(
   let maxThreadCPUDelta = 0;
 
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
-    const { time, threadCPUDelta } = threads[threadIndex].samples;
+    const { samples } = threads[threadIndex];
+    const { time, threadCPUDelta } = samples;
 
     if (!threadCPUDelta) {
       // The thread have any ThreadCPUDelta values. Older profiles don't have
@@ -2795,12 +2796,12 @@ export function computeMaxThreadCPUDelta(
 
     // First element of CPU delta is always null because back-end doesn't know
     // the delta since there is no previous sample.
-    for (let i = 1; i < threadCPUDelta.length; i++) {
+    for (let i = 1; i < samples.length; i++) {
       const cpuDelta = threadCPUDelta[i] || 0;
       // Interval is not always steady depending on the overhead.
       const realInterval = (time[i] - time[i - 1]) / interval;
-      const currentCPUPerInterval = cpuDelta / realInterval;
-      maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerInterval);
+      const currentCPUPerMs = cpuDelta / realInterval;
+      maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerMs);
     }
   }
 
