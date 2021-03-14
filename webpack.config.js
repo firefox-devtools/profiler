@@ -33,6 +33,26 @@ const config = {
         test: /\.wasm$/,
         type: 'webassembly/sync',
       },
+      {
+        test: /\.js/,
+        include: /@fluent[\\/]bundle[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js/,
+        include: /@fluent[\\/]langneg[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js/,
+        include: /@fluent[\\/]react[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js/,
+        include: /@fluent[\\/]sequence[\\/]esm/,
+        type: 'javascript/auto',
+      },
 
       // {
       //   test: /\.js/,
