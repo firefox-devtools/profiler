@@ -105,9 +105,6 @@ const config = {
       },
     ],
   },
-  // node: {
-  //   process: false,
-  // },
   plugins: [
     new CircularDependencyPlugin({
       // exclude node_modules
