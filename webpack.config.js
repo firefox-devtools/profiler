@@ -22,11 +22,17 @@ const config = {
       'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
   },
+  experiments: {
+    syncWebAssembly: true,
+  },
   devtool: 'source-map',
   mode: mode,
   module: {
     rules: [
-
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/sync',
+      },
 
       // {
       //   test: /\.js/,
