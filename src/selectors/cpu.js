@@ -12,7 +12,7 @@ import {
   getMeta,
 } from './profile';
 import { getThreadSelectors } from './per-thread';
-import { computeMaxThreadCPUDelta } from 'firefox-profiler/profile-logic/profile-data';
+import { computeMaxThreadCPUDelta } from 'firefox-profiler/profile-logic/cpu';
 
 import type { Selector, State, Thread } from 'firefox-profiler/types';
 

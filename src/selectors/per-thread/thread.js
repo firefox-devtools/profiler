@@ -11,6 +11,7 @@ import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
+import * as Cpu from '../../profile-logic/cpu';
 
 import type {
   Thread,
@@ -112,7 +113,7 @@ export function getThreadSelectorsPerThread(
       thread.samples.threadCPUDelta === undefined ||
       !sampleUnits
         ? thread
-        : ProfileData.processThreadCPUDelta(thread, sampleUnits)
+        : Cpu.processThreadCPUDelta(thread, sampleUnits)
   );
 
   const getTabFilteredThread: Selector<Thread> = createSelector(
