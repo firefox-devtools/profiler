@@ -34,35 +34,38 @@ const config = {
         type: 'webassembly/sync',
       },
       {
-        test: /\.js/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: /@fluent[\\/]bundle[\\/]esm/,
         type: 'javascript/auto',
       },
       {
-        test: /\.js/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: /@fluent[\\/]langneg[\\/]esm/,
         type: 'javascript/auto',
       },
       {
-        test: /\.js/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: /@fluent[\\/]react[\\/]esm/,
         type: 'javascript/auto',
       },
       {
-        test: /\.js/,
+        test: /\.(js|jsx|ts|tsx)$/,
+        include: /@fluent[\\/]vendor[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.(js|jsx|ts|tsx)$/,
         include: /@fluent[\\/]sequence[\\/]esm/,
         type: 'javascript/auto',
       },
-
-      // {
-      //   test: /\.js/,
-      //   include: /@react-localization[\\/]bundle[\\/]esm/,
-      //   type: 'javascript/auto',
-      // },
+      {
+        test: /\.(js|jsx|ts|tsx)$/,
+        include: /@fluent[\\/]react[\\/]vendor/,
+        type: 'javascript/auto',
+      },
       {
         test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
-
         use: {
           loader: 'babel-loader',
         },
