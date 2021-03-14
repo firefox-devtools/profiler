@@ -37,13 +37,15 @@ type Props = {|
 |};
 
 export class ThreadStackGraph extends PureComponent<Props> {
-  _heightFunction({
-    callNodeTable,
+  _heightFunction = ({
     callNodeIndex,
     yPixelsPerHeight,
-  }: HeightFunctionParams): number {
+  }: HeightFunctionParams): number => {
+    const { callNodeInfo } = this.props;
+    const { callNodeTable } = callNodeInfo;
+
     return callNodeTable.depth[callNodeIndex] * yPixelsPerHeight;
-  }
+  };
 
   render() {
     const {

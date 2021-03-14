@@ -23,8 +23,6 @@ import type {
   Milliseconds,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  SamplesTable,
-  CallNodeTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -39,12 +37,9 @@ import type {
  * on an as-needed basis.
  */
 export type HeightFunctionParams = {|
-  +samples: SamplesTable,
   +sampleIndex: number,
-  +callNodeTable: CallNodeTable,
   +callNodeIndex: number,
   +yPixelsPerHeight: number,
-  +interval: Milliseconds,
 |};
 
 type Props = {|
@@ -185,12 +180,9 @@ export class ThreadHeightGraph extends PureComponent<Props> {
       }
 
       const height = heightFunc({
-        samples: thread.samples,
         sampleIndex: i,
-        callNodeTable,
         callNodeIndex,
         yPixelsPerHeight,
-        interval,
       });
 
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;

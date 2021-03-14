@@ -39,18 +39,19 @@ type Props = {|
 |};
 
 export class ThreadCPUGraph extends PureComponent<Props> {
-  _heightFunction({
-    samples,
+  _heightFunction = ({
     sampleIndex,
     yPixelsPerHeight,
-    interval,
-  }: HeightFunctionParams): number {
+  }: HeightFunctionParams): number => {
+    const { interval, thread } = this.props;
+    const { samples } = thread;
+
     const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex] || 0;
     const realInterval =
       (samples.time[sampleIndex] - samples.time[sampleIndex - 1]) / interval;
     const currentCPUPerMs = cpuDelta / realInterval;
     return currentCPUPerMs * yPixelsPerHeight;
-  }
+  };
 
   render() {
     const {
