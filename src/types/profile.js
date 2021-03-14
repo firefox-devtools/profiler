@@ -13,6 +13,8 @@ import type {
 } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload, MarkerSchema } from './markers';
+import type { MarkerPhase } from './gecko-profile';
+
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoRawMarkerTable = number;
@@ -254,7 +256,7 @@ export type RawMarkerTable = {|
   name: IndexIntoStringTable[],
   startTime: Array<number | null>,
   endTime: Array<number | null>,
-  phase: number[],
+  phase: MarkerPhase[],
   category: IndexIntoCategoryList[],
   length: number,
 |};

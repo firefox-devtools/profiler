@@ -5,8 +5,8 @@
 // @flow
 
 import React from 'react';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   addRootOverlayElement,
   removeRootOverlayElement,

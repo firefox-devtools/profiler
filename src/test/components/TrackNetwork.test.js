@@ -5,8 +5,9 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, getByTestId, fireEvent } from '@testing-library/react';
+import { getByTestId, fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import TrackNetwork from '../../components/timeline/TrackNetwork';
 import {
   TRACK_NETWORK_ROW_HEIGHT,

@@ -5,8 +5,9 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import { getCurrentProfileUploadedInformation } from 'firefox-profiler/selectors/app';
 import { updateUrlState } from 'firefox-profiler/actions/app';

@@ -173,7 +173,7 @@
   color: black;
 }
 
-.treeViewRow.dim > .treeViewMainColumn {
+.treeViewMainColumn.dim {
   opacity: 0.7;
 }
 

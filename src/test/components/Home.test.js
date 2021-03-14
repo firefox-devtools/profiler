@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { Home } from '../../components/app/Home';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { Home } from '../../components/app/Home';
 import createStore from '../../app-logic/create-store';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 import { fireFullClick } from '../fixtures/utils';
@@ -126,7 +127,7 @@ describe('app/Home', function() {
     });
     await findByTestId('home-enable-popup-instructions');
 
-    fireFullClick(getByText('Enable Profiler Menu Button'));
+    fireFullClick(getByText('Enable \u2068Firefox Profiler\u2069 Menu Button'));
 
     // Respond back from the browser that the menu button was enabled.
     triggerResponse({

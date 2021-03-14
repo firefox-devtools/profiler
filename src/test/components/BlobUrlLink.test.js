@@ -4,7 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { BlobUrlLink } from '../../components/shared/BlobUrlLink';
 import { ensureExists } from '../../utils/flow';
 

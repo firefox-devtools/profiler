@@ -4,6 +4,7 @@
 
 // @flow
 
+import { Localized } from '@fluent/react';
 import React, { PureComponent } from 'react';
 import { AppHeader } from './AppHeader';
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
@@ -18,7 +19,11 @@ export class UploadedRecordingsHome extends PureComponent<{||}> {
     return (
       <main className="uploadedRecordingsHome">
         <AppHeader />
-        <h2 className="photon-title-30">Uploaded Recordings</h2>
+        <h2 className="photon-title-30">
+          <Localized id="UploadedRecordingsHome--title">
+            Uploaded Recordings
+          </Localized>
+        </h2>
         <ListOfPublishedProfiles withActionButtons={true} />
       </main>
     );

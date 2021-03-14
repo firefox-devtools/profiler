@@ -6,8 +6,8 @@
 import * as React from 'react';
 import { ZipFileViewer } from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 

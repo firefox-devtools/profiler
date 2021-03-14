@@ -12,16 +12,10 @@ const es6modules = ['pretty-bytes'];
 const es6modulePaths = es6modules.map(module => {
   return path.join(__dirname, 'node_modules', module);
 });
-
-// let mode = 'development';
-// let target = 'web';
+const mode = 'development';
+let target = 'web';
 const config = {
   resolve: {
-    fallback: {
-      Buffer: false,
-      process: false,
-    },
-    // extensions: ['.js', '.jsx'],
     alias: {
       // Note: the alias for firefox-profiler is defined at the Babel level, so
       // that Jest can profit from it too.
@@ -29,20 +23,18 @@ const config = {
     },
   },
   devtool: 'source-map',
-  experiments: {
-    asyncWebAssembly: true,
-  },
-  devServer: {
-    //Hot Reloading
-    contentBase: './dist',
-    hot: true,
-  },
-  // mode: mode,
-
+  mode: mode,
   module: {
     rules: [
+
+
+      // {
+      //   test: /\.js/,
+      //   include: /@react-localization[\\/]bundle[\\/]esm/,
+      //   type: 'javascript/auto',
+      // },
       {
-        test: '/.js$|jsx/',
+        test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
 
         use: {
@@ -97,9 +89,9 @@ const config = {
       },
     ],
   },
-  node: {
-    process: false,
-  },
+  // node: {
+  //   process: false,
+  // },
   plugins: [
     new CircularDependencyPlugin({
       // exclude node_modules
@@ -132,7 +124,7 @@ const config = {
   entry: ['./src/index'],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[fullhash].bundle.js',
+    filename: '[hash].bundle.js',
     chunkLoading: false,
     wasmLoading: false,
     chunkFilename: '[id].[fullhash].bundle.js',
@@ -141,15 +133,13 @@ const config = {
 };
 
 if (process.env.NODE_ENV === 'development') {
-  // eslint-disable-next-line no-unused-vars
   config.mode = 'development';
-  // target = 'browserslist';
+  target = 'browserslist';
 }
 
 if (process.env.NODE_ENV === 'production') {
+  target = 'browserlist';
   config.mode = 'production';
-  // eslint-disable-next-line no-unused-vars
-  // target = 'browserslist';
   config.plugins.push(
     new OfflinePlugin({
       relativePaths: false,

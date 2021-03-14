@@ -4,19 +4,20 @@
 
 // @flow
 import * as React from 'react';
+import { Provider } from 'react-redux';
+import copy from 'copy-to-clipboard';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { render } from '@testing-library/react';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
   setContextMenuVisibility,
 } from '../../actions/profile-view';
-import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
-import copy from 'copy-to-clipboard';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('calltree/CallNodeContextMenu', function() {

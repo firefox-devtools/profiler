@@ -4,6 +4,7 @@
 
 // @flow
 export * from './app';
+export * from './l10n';
 export * from './per-thread';
 export * from './profile';
 export * from './url-state';

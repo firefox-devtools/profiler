@@ -11,7 +11,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
       <a
         class="publishedProfilesLink"
         href="/public/MACOSX/marker-chart/"
-        title="Click here to load profile MacOS X profile"
+        title="Click here to load profile ⁨MacOS X profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -56,7 +56,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
       <a
         class="publishedProfilesLink"
         href="/public/0123456789/"
-        title="Click here to load profile #012345"
+        title="Click here to load profile ⁨#012345⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -99,7 +99,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
       <a
         class="publishedProfilesLink"
         href="/public/WINDOWS/marker-chart/"
-        title="Click here to load profile Another good profile"
+        title="Click here to load profile ⁨Another good profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -143,9 +143,7 @@ exports[`ListOfPublishedProfiles limits the number of rendered profiles with the
     <a
       href="/uploaded-recordings/"
     >
-      See and manage all your recordings (
-      2
-       more)
+      See and manage all your recordings (⁨2⁩ more)
     </a>
   </p>
 </div>
@@ -244,7 +242,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
       <a
         class="publishedProfilesLink"
         href="/public/MACOSX/marker-chart/"
-        title="Click here to load profile MacOS X profile"
+        title="Click here to load profile ⁨MacOS X profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -301,7 +299,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
       <a
         class="publishedProfilesLink"
         href="/public/0123456789/"
-        title="Click here to load profile #012345"
+        title="Click here to load profile ⁨#012345⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -360,7 +358,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
       <a
         class="publishedProfilesLink"
         href="/public/WINDOWS/marker-chart/"
-        title="Click here to load profile Another good profile"
+        title="Click here to load profile ⁨Another good profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -417,7 +415,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
       <a
         class="publishedProfilesLink"
         href="/public/ABCDEFGHI/"
-        title="Click here to load profile Layout profile"
+        title="Click here to load profile ⁨Layout profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -474,7 +472,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
       <a
         class="publishedProfilesLink"
         href="/public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
-        title="Click here to load profile #123abc"
+        title="Click here to load profile ⁨#123abc⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -540,7 +538,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
       <a
         class="publishedProfilesLink"
         href="/public/0123456789/"
-        title="Click here to load profile #012345"
+        title="Click here to load profile ⁨#012345⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -583,7 +581,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
       <a
         class="publishedProfilesLink"
         href="/public/ABCDEFGHI/"
-        title="Click here to load profile Layout profile"
+        title="Click here to load profile ⁨Layout profile⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -628,7 +626,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
       <a
         class="publishedProfilesLink"
         href="/public/123abc456/calltree/?globalTrackOrder=0-1-2-3-4-5-6-7-8-9-10&hiddenGlobalTracks=1-2-3-4-5-6-7-8-9&localTrackOrderByPid=32027-1-2-0~12629-0~12149-0~11755-0~11945-0~12533-0~11798-0~11862-0~12083-0~12118-0~12298-0-1~&search=bla&thread=11&v=5"
-        title="Click here to load profile #123abc"
+        title="Click here to load profile ⁨#123abc⁩"
       >
         <div
           class="publishedProfilesDate"
@@ -689,7 +687,7 @@ exports[`ListOfPublishedProfiles still displays the link to all recordings when 
       <a
         class="publishedProfilesLink"
         href="/public/0123456789/"
-        title="Click here to load profile #012345"
+        title="Click here to load profile ⁨#012345⁩"
       >
         <div
           class="publishedProfilesDate"
