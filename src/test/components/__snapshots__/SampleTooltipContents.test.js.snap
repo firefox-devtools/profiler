@@ -223,7 +223,7 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
         CPU Usage:
       </div>
       <div>
-        80% (800 variable CPU cycles over 1,000μs)
+        89% (800 variable CPU cycles over 1,000μs)
       </div>
     </div>
     <div

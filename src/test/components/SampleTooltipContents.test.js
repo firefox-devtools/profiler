@@ -7,7 +7,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import {
   getCategories,
   getThreadSelectorsFromThreadsKey,
@@ -15,6 +15,7 @@ import {
   getSampleUnits,
   getProfileInterval,
 } from 'firefox-profiler/selectors';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileFromTextSamples,
@@ -97,6 +98,10 @@ describe('SampleTooltipContents', function() {
     const hoveredSampleIndex = 1;
     setup(profile, hoveredSampleIndex);
 
+    const cpuUsage = ensureExists(
+      screen.getByText(/CPU Usage/).nextElementSibling
+    );
+    expect(cpuUsage).toHaveTextContent('40% (400 µs over 1,000μs)');
     expect(document.body).toMatchSnapshot();
   });
 
@@ -115,6 +120,10 @@ describe('SampleTooltipContents', function() {
     const hoveredSampleIndex = 1;
     setup(profile, hoveredSampleIndex);
 
+    const cpuUsage = ensureExists(
+      screen.getByText(/CPU Usage/).nextElementSibling
+    );
+    expect(cpuUsage).toHaveTextContent('60% (600 µs over 1,000μs)');
     expect(document.body).toMatchSnapshot();
   });
 
@@ -127,12 +136,18 @@ describe('SampleTooltipContents', function() {
       Ejs  Ejs
     `);
     // Let's put some values for CPU usage.
-    addCpuUsageValues(profile, [null, 800, 1000, 500], 'variable CPU cycles');
+    addCpuUsageValues(profile, [null, 800, 900, 500], 'variable CPU cycles');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
     setup(profile, hoveredSampleIndex);
 
+    const cpuUsage = ensureExists(
+      screen.getByText(/CPU Usage/).nextElementSibling
+    );
+    expect(cpuUsage).toHaveTextContent(
+      '89% (800 variable CPU cycles over 1,000μs)'
+    );
     expect(document.body).toMatchSnapshot();
   });
 });
