@@ -30,40 +30,6 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.wasm$/,
-        type: 'webassembly/sync',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]bundle[\\/]esm/,
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]langneg[\\/]esm/,
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]react[\\/]esm/,
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]vendor[\\/]esm/,
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]sequence[\\/]esm/,
-        type: 'javascript/auto',
-      },
-      {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: /@fluent[\\/]react[\\/]vendor/,
-        type: 'javascript/auto',
-      },
-      {
         test: /\.(js|jsx|ts|tsx)$/,
         exclude: /node_modules/,
         use: {
@@ -80,20 +46,7 @@ const config = {
       },
       {
         test: /\.css?$/i,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            // This is required for asset imports in CSS, such as url()
-            options: { publicPath: '' },
-          },
-          'css-loader',
-          'postcss-loader',
-        ],
-        // loader: [
-        //   'style-loader',
-        //   { loader: 'css-loader', options: { importLoaders: 1 } },
-        //   'postcss-loader',
-        // ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
         include: [
           ...includes,
           path.join(__dirname, 'node_modules', 'photon-colors'),
@@ -115,6 +68,40 @@ const config = {
       {
         test: /\.ftl$/,
         loader: 'file-loader',
+      },
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/sync',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]bundle[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]langneg[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]react[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]vendor[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]sequence[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]react[\\/]vendor/,
+        type: 'javascript/auto',
       },
     ],
   },

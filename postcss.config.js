@@ -3,5 +3,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @noflow
 module.exports = {
-  plugins: ['postcss-preset-env'],
+  plugins: [require('postcss-preset-env')],
 };
