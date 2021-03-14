@@ -153,9 +153,9 @@ const config = {
   entry: ['./src/index'],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkLoading: false,
-    wasmLoading: false,
+    filename: '[fullhash].bundle.js',
+    // chunkLoading: false,
+    // wasmLoading: false,
     chunkFilename: '[id].[fullhash].bundle.js',
     publicPath: '/',
   },
@@ -167,8 +167,9 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  target = 'browserlist';
   config.mode = 'production';
+  // eslint-disable-next-line no-unused-vars
+  target = 'browserlist';
   config.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
