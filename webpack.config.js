@@ -98,14 +98,8 @@ const config = {
     ],
   },
   node: {
-
-    { from: 'res/zee-worker.js' },
-    { from: 'res/before-load.js' },
-    { from: 'res/contribute.json' },
-    { from: 'locales', to: 'locales' },
-
+    process: false,
   },
-  
   plugins: [
     new CircularDependencyPlugin({
       // exclude node_modules
