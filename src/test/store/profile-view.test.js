@@ -3672,3 +3672,20 @@ describe('mouseTimePosition', function() {
     expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBe(1000);
   });
 });
+
+describe('timeline type', function() {
+  it('should default to the category view', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+  });
+
+  it('should use the stack height view when using an imported profile', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    delete profile.meta.categories;
+
+    // Load the store after mutating the profile.
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('stack');
+  });
+});
