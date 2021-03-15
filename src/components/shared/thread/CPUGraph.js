@@ -6,6 +6,7 @@
 import React, { PureComponent } from 'react';
 
 import { ThreadHeightGraph } from './HeightGraph';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import type {
   Thread,
@@ -34,17 +35,22 @@ type Props = {|
   // Decide which way the stacks grow up from the floor, or down from the ceiling.
   +stacksGrowFromCeiling?: boolean,
   +trackName: string,
+  +maxThreadCPUDelta: number,
 |};
 
-export class ThreadStackGraph extends PureComponent<Props> {
+export class ThreadCPUGraph extends PureComponent<Props> {
   _heightFunction = ({
-    callNodeIndex,
+    sampleIndex,
     yPixelsPerHeight,
   }: HeightFunctionParams): number => {
-    const { callNodeInfo } = this.props;
-    const { callNodeTable } = callNodeInfo;
+    const { interval, thread } = this.props;
+    const { samples } = thread;
 
-    return callNodeTable.depth[callNodeIndex] * yPixelsPerHeight;
+    const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex] || 0;
+    const intervalFactor =
+      (samples.time[sampleIndex] - samples.time[sampleIndex - 1]) / interval;
+    const currentCPUPerInterval = cpuDelta / intervalFactor;
+    return currentCPUPerInterval * yPixelsPerHeight;
   };
 
   render() {
@@ -59,21 +65,17 @@ export class ThreadStackGraph extends PureComponent<Props> {
       selectedCallNodeIndex,
       categories,
       trackName,
+      maxThreadCPUDelta,
       onSampleClick,
     } = this.props;
-    const { callNodeTable } = callNodeInfo;
 
-    let maxDepth = 0;
-    for (let i = 0; i < callNodeTable.depth.length; i++) {
-      if (callNodeTable.depth[i] > maxDepth) {
-        maxDepth = callNodeTable.depth[i];
-      }
-    }
-
+    // Making the CPU graph a histogram graph instead of a line graph here,
+    // because making this histogram graph helps us see the real sample
+    // positions better and helps us see the gaps between the samples.
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={maxDepth}
+        maxValue={maxThreadCPUDelta}
         className={className}
         trackName={trackName}
         interval={interval}

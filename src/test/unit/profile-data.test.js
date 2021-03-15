@@ -15,7 +15,7 @@ import {
   getCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
-  getSampleIndexClosestToTime,
+  getSampleIndexClosestToStartTime,
   convertStackToCallNodePath,
   getSampleIndexToCallNodeIndex,
   getCallNodeIndexFromPath,
@@ -738,12 +738,12 @@ describe('get-sample-index-closest-to-time', function() {
     );
 
     const interval = profile.meta.interval;
-    expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
-    expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
+    expect(getSampleIndexClosestToStartTime(samples, 0, interval)).toBe(0);
+    expect(getSampleIndexClosestToStartTime(samples, 0.9, interval)).toBe(0);
+    expect(getSampleIndexClosestToStartTime(samples, 1.1, interval)).toBe(1);
+    expect(getSampleIndexClosestToStartTime(samples, 1.5, interval)).toBe(1);
+    expect(getSampleIndexClosestToStartTime(samples, 9.9, interval)).toBe(9);
+    expect(getSampleIndexClosestToStartTime(samples, 100, interval)).toBe(9);
   });
 });
 

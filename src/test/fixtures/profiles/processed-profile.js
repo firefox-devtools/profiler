@@ -39,6 +39,7 @@ import type {
   UserTimingMarkerPayload,
   Milliseconds,
   MarkerPhase,
+  ThreadCPUDeltaUnit,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -1572,4 +1573,66 @@ export function addActiveTabInformationToProfile(
     fistTabInnerWindowIDs,
     secondTabInnerWindowIDs,
   };
+}
+
+/**
+ * Creates a profile that includes a thread with threadCPUDelta values.
+ */
+export function getProfileWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  unit: ThreadCPUDeltaUnit = 'ns',
+  interval: Milliseconds = 1
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+  profile.threads = [getThreadWithThreadCPUDelta(userThreadCPUDelta, interval)];
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: unit,
+  };
+
+  return profile;
+}
+
+/**
+ * Creates a thread with threadCPUDelta values.
+ */
+export function getThreadWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  interval: Milliseconds = 1
+): Thread {
+  const thread = getEmptyThread();
+  const samplesLength = userThreadCPUDelta ? userThreadCPUDelta.length : 10;
+
+  // Re-construct the samples table with new threadCPUDelta values.
+  thread.samples = {
+    threadCPUDelta: userThreadCPUDelta,
+    eventDelay: Array(samplesLength).fill(null),
+    stack: Array(samplesLength).fill(null),
+    time: Array.from({ length: samplesLength }, (_, i) => i * interval),
+    weight: null,
+    weightType: 'samples',
+    length: samplesLength,
+  };
+
+  return thread;
+}
+
+/**
+ * Adds the necessary CPU usage values to the given profile.
+ */
+export function addCpuUsageValues(
+  profile: Profile,
+  threadCPUDelta: Array<number | null>,
+  threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  interval: Milliseconds = 1
+) {
+  profile.meta.interval = interval;
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: threadCPUDeltaUnit,
+  };
+  profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
 }

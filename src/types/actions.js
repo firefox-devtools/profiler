@@ -54,7 +54,7 @@ export type DataSource =
   | 'compare'
   | 'uploaded-recordings';
 
-export type TimelineType = 'stack' | 'category';
+export type TimelineType = 'stack' | 'category' | 'cpu-category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
@@ -274,6 +274,9 @@ type ProfileAction =
       +type: 'ENABLE_EVENT_DELAY_TRACKS',
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |}
+  | {|
+      +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |};
 
 type ReceiveProfileAction =
@@ -309,6 +312,7 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +timelineType: TimelineType | null,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',

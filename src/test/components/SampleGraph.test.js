@@ -4,28 +4,30 @@
 
 // @flow
 
+import * as React from 'react';
+import { Provider } from 'react-redux';
+import { render } from '@testing-library/react';
+
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import TrackThread from 'firefox-profiler/components/timeline/TrackThread';
+import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { storeWithProfile } from '../fixtures/stores';
+import { getBoundingBox, fireFullClick } from '../fixtures/utils';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+
 import type {
   Profile,
   IndexIntoSamplesTable,
   CssPixels,
 } from 'firefox-profiler/types';
 
-import * as React from 'react';
-import { Provider } from 'react-redux';
-
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getTimelineType } from '../../selectors/url-state';
-import { ensureExists } from '../../utils/flow';
-import TrackThread from '../../components/timeline/TrackThread';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, fireFullClick } from '../fixtures/utils';
-
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-
-import { commitRange } from '../../actions/profile-view';
+// Mocking the ActivityGraph because we don't want to see the content/draw log
+// of it in these tests. It has its own tests.
+jest.mock('firefox-profiler/components/shared/thread/ActivityGraph', () => ({
+  ThreadActivityGraph: 'thread-activity-graph',
+}));
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -39,7 +41,7 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
 }
 
-describe('ThreadActivityGraph', function() {
+describe('SampleGraph', function() {
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]
@@ -53,7 +55,6 @@ describe('ThreadActivityGraph', function() {
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
-    const threadIndex = 0;
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
@@ -74,25 +75,21 @@ describe('ThreadActivityGraph', function() {
         />
       </Provider>
     );
-    const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
 
-    const activityGraphCanvas = ensureExists(
-      container.querySelector('.threadActivityGraphCanvas'),
-      `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
+    const sampleGraphCanvas = ensureExists(
+      document.querySelector('.threadSampleGraphCanvas'),
+      `Couldn't find the sample graph canvas, with selector .threadSampleGraphCanvas`
     );
     const thread = profile.threads[0];
 
-    // Perform a click on the activity graph.
-    function clickActivityGraph(
-      index: IndexIntoSamplesTable,
-      graphHeightPercentage: number
-    ) {
-      fireFullClick(activityGraphCanvas, {
+    // Perform a click on the sample graph.
+    function clickSampleGraph(index: IndexIntoSamplesTable) {
+      fireFullClick(sampleGraphCanvas, {
         pageX: getSamplesPixelPosition(index),
-        pageY: GRAPH_HEIGHT * graphHeightPercentage,
+        pageY: GRAPH_HEIGHT / 2,
       });
     }
 
@@ -112,17 +109,16 @@ describe('ThreadActivityGraph', function() {
       profile,
       thread,
       store,
-      threadIndex,
-      activityGraphCanvas,
-      clickActivityGraph,
+      sampleGraphCanvas,
+      clickSampleGraph,
       getCallNodePath,
       ctx,
     };
   }
 
   it('matches the component snapshot', () => {
-    const { container } = setup();
-    expect(container.firstChild).toMatchSnapshot();
+    const { sampleGraphCanvas } = setup();
+    expect(sampleGraphCanvas).toMatchSnapshot();
   });
 
   it('matches the 2d canvas draw snapshot', () => {
@@ -130,62 +126,23 @@ describe('ThreadActivityGraph', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
-  it('matches the 2d canvas draw snapshot with CPU values', () => {
-    const profile = getSamplesProfile();
-    profile.meta.interval = 1;
-    profile.meta.sampleUnits = {
-      time: 'ms',
-      eventDelay: 'ms',
-      threadCPUDelta: 'variable CPU cycles',
-    };
-    profile.threads[0].samples.threadCPUDelta = [
-      null,
-      400,
-      1000,
-      500,
-      100,
-      200,
-      800,
-      300,
-    ];
-
-    const { ctx, getState } = setup(profile);
-    // If there are CPU values, it should be automatically defaulted to this view.
-    expect(getTimelineType(getState())).toBe('cpu-category');
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
-  });
-
   /**
-   * The ThreadActivityGraph is not a connected component. It's easiest to test it
-   * as once it's connected to the Redux store in the SelectedActivityGraph.
+   * The ThreadSampleGraph is not a connected component. It's easiest to test it
+   * as once it's connected to the Redux store in the TrackThread.
    */
-  describe('ThreadActivityGraph', function() {
+  describe('ThreadSampleGraph', function() {
     it('selects the full call node path when clicked', function() {
-      const { clickActivityGraph, getCallNodePath } = setup();
+      const { clickSampleGraph, getCallNodePath } = setup();
 
       // The full call node at this sample is:
       //  A -> B -> C -> F -> G
-      clickActivityGraph(1, 0.2);
+      clickSampleGraph(1);
       expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
 
       // The full call node at this sample is:
       //  A -> B -> H -> I
-      clickActivityGraph(1, 0.8);
+      clickSampleGraph(2);
       expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
-    });
-
-    it('will redraw even when there are no samples in range', function() {
-      const { dispatch, ctx } = setup();
-      ctx.__flushDrawLog();
-
-      // Commit a thin range which contains no samples
-      dispatch(commitRange(0.5, 0.6));
-      const drawCalls = ctx.__flushDrawLog();
-      // We use the presence of 'globalCompositeOperation' to know
-      // whether the canvas was redrawn or not.
-      expect(drawCalls.map(([fn]) => fn)).toContain(
-        'set globalCompositeOperation'
-      );
     });
   });
 });

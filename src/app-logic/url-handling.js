@@ -34,6 +34,7 @@ import type {
   CallNodePath,
   ThreadIndex,
   TransformStacksPerThread,
+  TimelineType,
 } from 'firefox-profiler/types';
 
 export const CURRENT_URL_VERSION = 5;
@@ -314,10 +315,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
       }
 
-      if (urlState.profileSpecific.full.timelineType === 'stack') {
+      if (
+        urlState.profileSpecific.full.timelineType === 'stack' ||
+        urlState.profileSpecific.full.timelineType === 'cpu-category'
+      ) {
         // The default is the category view, so only add it to the URL if it's the
-        // stack view.
-        baseQuery.timelineType = 'stack';
+        // stack or cpu-category view.
+        baseQuery.timelineType = urlState.profileSpecific.full.timelineType;
       }
 
       let localTrackOrderByPid = '';
@@ -593,7 +597,7 @@ export function stateFromLocation(
         localTrackOrderByPid: query.localTrackOrderByPid
           ? parseLocalTrackOrder(query.localTrackOrderByPid)
           : new Map(),
-        timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
+        timelineType: validateTimelineType(query.timelineType),
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map(index => Number(index))
           : null,
@@ -984,5 +988,25 @@ function validateTimelineTrackOrganization(
       (timelineTrackOrganization: empty);
 
       return { type: 'full' };
+  }
+}
+
+/**
+ * Validate the timeline type and fall back to the category type if it's not
+ * provided or something else is provided for some reason.
+ */
+function validateTimelineType(type: ?string): TimelineType {
+  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
+  // go through each option.
+  const timelineType: TimelineType = (type: any);
+  switch (timelineType) {
+    case 'stack':
+    case 'cpu-category':
+    case 'category':
+      return timelineType;
+    default:
+      // Type assert we've checked everything:
+      (timelineType: empty);
+      return 'category';
   }
 }
