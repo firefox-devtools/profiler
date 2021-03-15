@@ -86,6 +86,7 @@ export type Pid = number | string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
+  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -658,8 +659,11 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform.
-  categories: CategoryList,
+  // The list of categories as provided by the platform. The categories are present for
+  // all Firefox profiles, but imported profiles may not include any category support.
+  // The front-end will provide a default list of categories, but the saved profile
+  // will not include them.
+  categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,
   // This value represents a boolean, but for some reason is written out as an int value.
