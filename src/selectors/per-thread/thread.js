@@ -246,7 +246,14 @@ export function getThreadSelectorsPerThread(
     (thread, lastSelectedCallTreeSummaryStrategy) => {
       switch (lastSelectedCallTreeSummaryStrategy) {
         case 'timing':
-          // Timing is valid everywhere.
+          if (
+            thread.samples.length === 0 &&
+            thread.nativeAllocations &&
+            thread.nativeAllocations.length > 0
+          ) {
+            // This is a profile with no samples, but with native allocations available.
+            return 'native-allocations';
+          }
           break;
         case 'js-allocations':
           if (!thread.jsAllocations) {
