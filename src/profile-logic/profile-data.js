@@ -1787,18 +1787,25 @@ export function convertStackToCallNodePath(
  * If no samples are found, 0 is returned.
  */
 export function computeCallNodeMaxDepth(
-  thread: Thread,
+  samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo
 ): number {
-  if (
-    thread.samples.length === 0 ||
-    callNodeInfo.callNodeTable.depth.length === 0
-  ) {
+  if (samples.length === 0 || callNodeInfo.callNodeTable.depth.length === 0) {
     return 0;
   }
 
+  // Compute the depth on a per-sample basis. This is done since the callNodeInfo is
+  // computed for the filtered thread, but a samples-like table can use the preview
+  // filtered thread, which involves a subset of the total call nodes.
   let max = 0;
-  for (const depth of callNodeInfo.callNodeTable.depth) {
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    const depth = callNodeTable.depth[callNodeIndex];
     max = Math.max(max, depth);
   }
 

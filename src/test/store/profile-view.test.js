@@ -1828,9 +1828,18 @@ describe('snapshots of selectors/profile', function() {
     ).toMatchSnapshot();
   });
 
-  it('matches the last stored run of selectedThreadSelector.getCallNodeMaxDepth', function() {
+  it('matches the last stored run of selectedThreadSelector.getFilteredCallNodeMaxDepth', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getCallNodeMaxDepth(getState())).toEqual(4);
+    expect(
+      selectedThreadSelectors.getFilteredCallNodeMaxDepth(getState())
+    ).toEqual(4);
+  });
+
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredCallNodeMaxDepth', function() {
+    const { getState } = setupStore();
+    expect(
+      selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(getState())
+    ).toEqual(4);
   });
 
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {

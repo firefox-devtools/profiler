@@ -334,7 +334,9 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
+    callNodeMaxDepth: selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+      state
+    ),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
   }),
   mapDispatchToProps: {
