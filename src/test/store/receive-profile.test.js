@@ -7,6 +7,7 @@ import type { Profile } from 'firefox-profiler/types';
 
 import { oneLineTrim } from 'common-tags';
 
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getEmptyProfile,
   getEmptyThread,
@@ -154,8 +155,14 @@ describe('actions/receive-profile', function() {
       );
 
       const [idleThread, workThread] = profile.threads;
-      const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({
+      const idleCategoryIndex = ensureExists(
+        profile.meta.categories,
+        'Expected to find categories'
+      ).length;
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).push({
         name: 'Idle',
         color: '#fff',
         subcategories: ['Other'],

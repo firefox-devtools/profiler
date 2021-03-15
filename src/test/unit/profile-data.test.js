@@ -413,9 +413,10 @@ describe('process-profile', function() {
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
     const profile = processGeckoProfile(createGeckoProfile());
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -462,7 +463,10 @@ describe('profile-data', function() {
       meta,
       threads: [thread],
     } = getCallNodeProfile();
-    const defaultCategory = meta.categories.findIndex(c => c.name === 'Other');
+    const defaultCategory = ensureExists(
+      meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -665,9 +669,10 @@ describe('symbolication', function() {
 
 describe('filter-by-implementation', function() {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
-  const defaultCategory = profile.meta.categories.findIndex(
-    c => c.name === 'Other'
-  );
+  const defaultCategory = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex(c => c.name === 'Other');
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -727,9 +732,10 @@ describe('get-sample-index-closest-to-time', function() {
         .fill('A')
         .join('  ')
     );
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const thread = profile.threads[0];
     const { samples } = filterThreadByImplementation(
       thread,

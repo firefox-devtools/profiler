@@ -49,7 +49,10 @@ describe('CallTreeSidebar', function() {
       funcNamesDictPerThread: [{ C, D }],
     } = result;
     const layout = ensureExists(
-      profile.meta.categories.find(category => category.name === 'Layout'),
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).find(category => category.name === 'Layout'),
       'Could not find Layout category.'
     );
     const [{ frameTable, stackTable }] = profile.threads;
