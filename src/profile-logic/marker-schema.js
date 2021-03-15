@@ -61,6 +61,14 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
       { key: 'recvThreadName', label: 'To', format: 'string' },
     ],
   },
+  {
+    // The network markers are mostly handled with custom logic. But the
+    // `display` property is used to decide where to display these markers, and
+    // we need it to hide them from the marker chart.
+    name: 'Network',
+    display: ['marker-table'],
+    data: [],
+  },
 ];
 
 /**
