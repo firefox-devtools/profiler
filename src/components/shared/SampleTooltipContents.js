@@ -46,50 +46,36 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     return samples.time[index] - samples.time[index - 1];
   }
 
-  _getMaxCPU(realInterval: Milliseconds): number {
-    const { sampleUnits, maxThreadCPUDelta } = this.props;
-
-    const unit = ensureExists(sampleUnits).threadCPUDelta;
-    switch (unit) {
-      case 'variable CPU cycles':
-        return maxThreadCPUDelta;
-      case 'µs':
-        return realInterval * 1000;
-      case 'ns':
-        return realInterval * 1000000;
-      default:
-        throw new Error('Unexpected threadCPUDelta unit found');
-    }
-  }
-
   _getCPUPercentageString(
     cpuUsage: number,
     realInterval: Milliseconds
   ): string {
-    const { sampleUnits, interval } = this.props;
+    const { sampleUnits, interval, maxThreadCPUDelta } = this.props;
     const unit = ensureExists(sampleUnits).threadCPUDelta;
-    const maxCPU = this._getMaxCPU(realInterval);
 
     let cpuUsageRatio;
     let cpuSpikeText;
     switch (unit) {
       case 'variable CPU cycles': {
         // Here, we are finding the interval factor so we can find the CPU usage
-        // per ms. This is similar to how we compute the max CPU. In the code
-        // below `cpuUsage / intervalFactor` is the CPU per ms. This makes us
-        // see the real percentage that we see in the activity graph. Otherwise,
-        // the percentage here and in the activity graph could be very different.
+        // per interval. This is similar to how we compute the max CPU.
+        // cpuPerInterval makes us see the real percentage that we see in the
+        // activity graph. Otherwise, the percentage here and in the activity
+        // graph could be very different.
         const intervalFactor = realInterval / interval;
-        cpuUsageRatio = cpuUsage / intervalFactor / maxCPU;
+        const cpuPerInterval = cpuUsage / intervalFactor;
+        cpuUsageRatio = cpuPerInterval / maxThreadCPUDelta;
         // We don't have a way to detect spikes for CPU cycles.
         cpuSpikeText = '';
         break;
       }
       case 'µs':
-      case 'ns':
+      case 'ns': {
+        const maxCPU = realInterval * (unit === 'µs' ? 1000 : 1000000);
         cpuUsageRatio = cpuUsage / maxCPU;
         cpuSpikeText = cpuUsageRatio > 1 ? ', capped at 100%' : '';
         break;
+      }
       default:
         throw new Error('Unexpected threadCPUDelta unit found');
     }
