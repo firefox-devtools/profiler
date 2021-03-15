@@ -467,6 +467,7 @@ async function processTracingEvents(
 ): Promise<Profile> {
   const profile = getEmptyProfile();
   profile.meta.product = 'Chrome Trace';
+  profile.meta.importedFrom = 'Chrome Trace';
 
   // Choose 500us as a somewhat reasonable sampling interval. When converting
   // the chrome profile, this function samples the chrome profile, and generates
