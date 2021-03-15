@@ -73,11 +73,18 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     let cpuUsageRatio;
     let cpuSpikeText;
     switch (unit) {
-      case 'variable CPU cycles':
-        cpuUsageRatio = (cpuUsage * interval) / realInterval / maxCPU;
+      case 'variable CPU cycles': {
+        // Here, we are finding the interval factor so we can find the CPU usage
+        // per ms. This is similar to how we compute the max CPU. In the code
+        // below `cpuUsage / intervalFactor` is the CPU per ms. This makes us
+        // see the real percentage that we see in the activity graph. Otherwise,
+        // the percentage here and in the activity graph could be very different.
+        const intervalFactor = realInterval / interval;
+        cpuUsageRatio = cpuUsage / intervalFactor / maxCPU;
         // We don't have a way to detect spikes for CPU cycles.
         cpuSpikeText = '';
         break;
+      }
       case 'µs':
       case 'ns':
         cpuUsageRatio = cpuUsage / maxCPU;
