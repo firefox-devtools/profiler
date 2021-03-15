@@ -38,9 +38,9 @@ export function computeMaxThreadCPUDelta(
     for (let i = 1; i < samples.length; i++) {
       const cpuDelta = threadCPUDelta[i] || 0;
       // Interval is not always steady depending on the overhead.
-      const realInterval = (time[i] - time[i - 1]) / interval;
-      const currentCPUPerMs = cpuDelta / realInterval;
-      maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerMs);
+      const intervalFactor = (time[i] - time[i - 1]) / interval;
+      const currentCPUPerInterval = cpuDelta / intervalFactor;
+      maxThreadCPUDelta = Math.max(maxThreadCPUDelta, currentCPUPerInterval);
     }
   }
 
