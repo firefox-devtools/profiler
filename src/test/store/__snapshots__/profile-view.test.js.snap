@@ -396,13 +396,6 @@ Object {
         ],
         "name": "RefreshDriverTick",
       },
-      Object {
-        "data": Array [],
-        "display": Array [
-          "marker-table",
-        ],
-        "name": "Network",
-      },
     ],
     "misc": "",
     "oscpu": "",

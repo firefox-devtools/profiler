@@ -1301,6 +1301,9 @@ const _upgraders = {
       },
       {
         // The schema is mostly handled with custom logic.
+        // Note that profiles coming from recent Gecko engines won't have this.
+        // Having this here was a mistake when implementing the upgrader, but
+        // now that it's here we keep it to reduce confusion.
         name: 'Network',
         display: ['marker-table'],
         data: [],
