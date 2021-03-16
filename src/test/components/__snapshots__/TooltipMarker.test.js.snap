@@ -2834,11 +2834,6 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
     <div
       class="tooltipDetailsBackTrace"
     >
-      <h2
-        class="tooltipBackTraceTitle"
-      >
-        Triggered -3,000,000ns ago, at:
-      </h2>
       <ul
         class="backtrace"
       >
