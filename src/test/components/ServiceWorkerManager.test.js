@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';

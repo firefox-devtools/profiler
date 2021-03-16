@@ -84,7 +84,7 @@ exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
     class="threadStackGraph"
   >
     <canvas
-      class="threadStackGraphCanvas threadStackGraphCanvas"
+      class="threadStackGraphCanvas threadHeightGraphCanvas"
       height="50"
       width="400"
     >

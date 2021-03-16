@@ -6,12 +6,13 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
 import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
 import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
-import { render } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';

@@ -11,8 +11,9 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';

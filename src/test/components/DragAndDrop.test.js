@@ -5,8 +5,10 @@
 // @flow
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import createStore from '../../app-logic/create-store';
 import {
   DragAndDrop,

@@ -4,7 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';

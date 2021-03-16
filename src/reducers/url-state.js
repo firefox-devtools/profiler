@@ -226,6 +226,14 @@ const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
+    case 'VIEW_FULL_PROFILE':
+      // The timelineType can be set at loadtime from a URL value.
+      // If it's not set from a URL value we provide a default value from this action.
+      // When it's null we don't want to override the value that was set already.
+      if (action.timelineType !== null) {
+        return action.timelineType;
+      }
+      return state;
     default:
       return state;
   }

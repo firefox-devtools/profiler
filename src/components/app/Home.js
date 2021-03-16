@@ -364,13 +364,17 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               onClick={this._enableMenuButton}
             >
               <span className="homeSectionPlus">+</span>
-              Enable Profiler Menu Button
+              <Localized id="Home--menu-button">
+                Enable Profiler Menu Button
+              </Localized>
             </button>
             <DocsButton />
             <p>
-              Enable the profiler menu button to start recording a performance
-              profile in Firefox, then analyze it and share it with
-              profiler.firefox.com.
+              <Localized id="Home--menu-button-instructions">
+                Enable the profiler menu button to start recording a performance
+                profile in Firefox, then analyze it and share it with
+                profiler.firefox.com.
+              </Localized>
             </p>
           </div>
           {/* end of grid container */}
@@ -401,13 +405,15 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               xpiUrl={ADDON_URL}
             >
               <span className="homeSectionPlus">+</span>
-              Install add-on
+              <Localized id="Home--addon-button">Install add-on</Localized>
             </InstallButton>
             <DocsButton />
             <p>
-              Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with
-              profiler.firefox.com.
+              <Localized id="Home--addon-button-instructions">
+                Install the Gecko Profiler Add-on to start recording a
+                performance profile in Firefox, then analyze it and share it
+                with profiler.firefox.com.
+              </Localized>
             </p>
           </div>
           {/* end of grid container */}

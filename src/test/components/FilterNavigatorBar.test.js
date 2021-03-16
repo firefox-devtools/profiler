@@ -4,9 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNavigator';
 import * as ProfileView from '../../actions/profile-view';
 import * as ReceiveProfile from '../../actions/receive-profile';

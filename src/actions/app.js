@@ -14,6 +14,7 @@ import {
 import {
   getTrackThreadHeights,
   getIsEventDelayTracksEnabled,
+  getIsExperimentalCPUGraphsEnabled,
 } from 'firefox-profiler/selectors/app';
 import {
   getActiveTabMainTrack,
@@ -32,6 +33,7 @@ import {
   initializeLocalTrackOrderByPid,
 } from 'firefox-profiler/profile-logic/tracks';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getIsCPUUtilizationProvided } from 'firefox-profiler/selectors/cpu';
 
 import type {
   Profile,
@@ -291,6 +293,39 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
       type: 'ENABLE_EVENT_DELAY_TRACKS',
       localTracksByPid,
       localTrackOrderByPid,
+    });
+
+    return true;
+  };
+}
+
+/*
+ * This action enables the CPU graph tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for average users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableCPUGraphs()`
+ */
+export function enableExperimentalCPUGraphs(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsExperimentalCPUGraphsEnabled(getState())) {
+      console.error(
+        'Tried to enable the CPU graph tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    if (!getIsCPUUtilizationProvided(getState())) {
+      // Return early if the profile doesn't have threadCPUDelta values.
+      console.error(oneLine`
+        Tried to enable the CPU graph tracks, but this profile does
+        not have threadCPUDelta values. It is likely an older profile.
+      `);
+      return false;
+    }
+
+    dispatch({
+      type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     });
 
     return true;

@@ -1954,7 +1954,7 @@ export function getMapStackUpdater(
   };
 }
 
-export function getSampleIndexClosestToTime(
+export function getSampleIndexClosestToStartTime(
   samples: SamplesTable,
   time: number,
   interval: Milliseconds
@@ -1985,6 +1985,50 @@ export function getSampleIndexClosestToTime(
   const distanceToThis = samples.time[index] + weight / 2 - time;
   const distanceToLast =
     time - (samples.time[previousIndex] + previousWeight / 2);
+  return distanceToThis < distanceToLast ? index : index - 1;
+}
+
+/*
+ * Returns the sample index that is closest to *adjusted* sample time. This is a
+ * very similar function to getSampleIndexClosestToStartTime. The difference is that
+ * the other function uses the raw time values, on the other hand, this function
+ * uses the adjusted time. In this context, adjusted time means that `time` array
+ * represent the "center" of the sample, and raw values represent the "start" of
+ * the sample.
+ */
+export function getSampleIndexClosestToCenteredTime(
+  samples: SamplesTable,
+  time: number
+): IndexIntoSamplesTable {
+  // Bisect to find the index of the first sample after the provided time.
+  const index = bisectionRight(samples.time, time);
+
+  if (index === 0) {
+    return 0;
+  }
+
+  if (index === samples.length) {
+    return samples.length - 1;
+  }
+
+  // Check the distance between the provided time and the center of the bisected sample
+  // and its predecessor.
+  const previousIndex = index - 1;
+  let distanceToThis;
+  let distanceToLast;
+
+  if (samples.weight) {
+    const samplesWeight = samples.weight;
+    const weight = Math.abs(samplesWeight[index]);
+    const previousWeight = Math.abs(samplesWeight[previousIndex]);
+
+    distanceToThis = samples.time[index] + weight / 2 - time;
+    distanceToLast = time - (samples.time[previousIndex] + previousWeight / 2);
+  } else {
+    distanceToThis = samples.time[index] - time;
+    distanceToLast = time - samples.time[previousIndex];
+  }
+
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
