@@ -334,7 +334,10 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    callNodeMaxDepth: selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
+    // Use the filtered call node max depth, rather than the preview filtered call node
+    // max depth so that the width of the TreeView component is stable across preview
+    // selections.
+    callNodeMaxDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(
       state
     ),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
