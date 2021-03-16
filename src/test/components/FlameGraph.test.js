@@ -187,6 +187,24 @@ describe('FlameGraph', function() {
       ).toBeTruthy();
     });
 
+    it('shows reasons when samples are not in the preview range', () => {
+      const { dispatch } = setupFlameGraph();
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 5,
+          selectionEnd: 10,
+        })
+      );
+
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
+    });
+
     it('shows reasons when samples have been completely filtered out', function() {
       const { dispatch } = setupFlameGraph();
       dispatch(changeImplementationFilter('js'));
