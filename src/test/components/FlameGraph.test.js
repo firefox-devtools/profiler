@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { fireEvent, within } from '@testing-library/react';
+import { fireEvent, within, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
@@ -34,6 +34,7 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
   commitRange,
+  updatePreviewSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -160,7 +161,7 @@ describe('FlameGraph', function() {
   });
 
   describe('EmptyReasons', () => {
-    it('shows reasons when a profile has no samples', () => {
+    it('matches the snapshot when a profile has no samples', () => {
       const profile = getEmptyProfile();
       const thread = getEmptyThread();
       thread.name = 'Empty Thread';
@@ -178,16 +179,22 @@ describe('FlameGraph', function() {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
-    it('shows reasons when samples are out of range', () => {
-      const { dispatch, container } = setupFlameGraph();
+    it('shows reasons when samples are not in the committed range', () => {
+      const { dispatch } = setupFlameGraph();
       dispatch(commitRange(5, 10));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText('Broaden the selected range to view samples.')
+      ).toBeTruthy();
     });
 
     it('shows reasons when samples have been completely filtered out', function() {
-      const { dispatch, container } = setupFlameGraph();
+      const { dispatch } = setupFlameGraph();
       dispatch(changeImplementationFilter('js'));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
     });
   });
 });
