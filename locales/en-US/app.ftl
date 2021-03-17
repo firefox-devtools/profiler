@@ -83,7 +83,7 @@ Home--recent-uploaded-recordings-title = Recent uploaded recordings
 ListOfPublishedProfiles--published-profiles-link =
     .title = Click here to load profile { $smallProfileName }
 
-ListOfPublishedProfiles--published-profiles-delete-button = Delete
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Delete
     .title = This profile cannot be deleted because we lack the authorization information.
 
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = No profile has been uploaded yet!

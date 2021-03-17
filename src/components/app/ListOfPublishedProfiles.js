@@ -176,7 +176,7 @@ class PublishedProfile extends React.PureComponent<
               />
             ) : (
               <Localized
-                id="ListOfPublishedProfiles--published-profiles-delete-button"
+                id="ListOfPublishedProfiles--published-profiles-delete-button-disabled"
                 attrs={{ title: true }}
               >
                 <button
