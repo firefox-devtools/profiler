@@ -1698,5 +1698,28 @@ const _upgraders = {
       },
     ];
   },
+  [34]: profile => {
+    // We were incrementing timestamps for marker' causes only for a few marker
+    // types: 'tracing' and 'Styles'.
+    // See https://github.com/firefox-devtools/profiler/issues/3030
+    // We can also note that DOMEvents were converted from "tracing" to their
+    // own types, but they don't have a "cause" so we don't need to look after
+    // them. They were the only ones being converted so far, we're lucky.
+    for (const thread of profile.threads) {
+      const delta = thread.processStartupTime;
+      const { markers } = thread;
+
+      for (const data of markers.data) {
+        if (
+          data &&
+          data.type !== 'tracing' &&
+          data.type !== 'Styles' &&
+          data.cause
+        ) {
+          data.cause.time += delta;
+        }
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */
