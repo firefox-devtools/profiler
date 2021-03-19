@@ -500,6 +500,7 @@ export type UserTimingMarkerPayload = {|
 export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
+  cause?: CauseBacktrace,
 |};
 
 // ph: 'X' in the Trace Event Format
@@ -697,7 +698,6 @@ export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | NetworkPayload
   | UserTimingMarkerPayload
-  | TextMarkerPayload
   | LogMarkerPayload
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -719,5 +719,6 @@ export type MarkerPayload_Gecko =
   | $ReplaceCauseWithStack<FileIoPayload>
   | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
   | $ReplaceCauseWithStack<StyleMarkerPayload>
+  | $ReplaceCauseWithStack<TextMarkerPayload>
   // Payloads can be null.
   | null;

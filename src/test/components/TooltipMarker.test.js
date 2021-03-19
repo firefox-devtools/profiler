@@ -433,6 +433,19 @@ describe('TooltipMarker', function() {
           sampleEndTimeUs: 3632674500,
         },
       ],
+      [
+        'RefreshObserver',
+        122,
+        126,
+        {
+          type: 'Text',
+          name: 'Scrollbar fade animation [Style]',
+          cause: {
+            time: 125, // This time is later than the marker's start time
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
