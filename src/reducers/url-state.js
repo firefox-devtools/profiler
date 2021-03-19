@@ -456,7 +456,7 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
     case 'VIEW_ACTIVE_TAB_PROFILE':
       return {
         type: 'active-tab',
-        browsingContextID: action.browsingContextID,
+        tabID: action.tabID,
       };
     case 'VIEW_ORIGINS_PROFILE':
       return { type: 'origins' };

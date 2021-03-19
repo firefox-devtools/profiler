@@ -228,7 +228,7 @@ describe('selectors/getUserTimingMarkerTiming', function() {
 });
 
 describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 2;
 
   function setup(ctxId, markers: ?Array<any>) {
@@ -270,7 +270,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     );
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
@@ -280,7 +280,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       threads: [],
       features: [],
       capacity: 1000000,
-      activeBrowsingContextID: browsingContextID,
+      activeTabID: tabID,
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
@@ -288,7 +288,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID,
+          tabID,
         })
       );
     }

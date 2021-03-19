@@ -64,7 +64,7 @@ Object {
       },
     ],
     "configuration": Object {
-      "activeBrowsingContextID": 123123,
+      "activeTabID": 123123,
       "capacity": 1000000,
       "features": Array [],
       "threads": Array [],
@@ -413,7 +413,7 @@ Object {
   },
   "pages": Array [
     Object {
-      "browsingContextID": 123123,
+      "tabID": 123123,
       "embedderInnerWindowID": 0,
       "innerWindowID": 2,
       "url": "https://developer.mozilla.org/en-US/",

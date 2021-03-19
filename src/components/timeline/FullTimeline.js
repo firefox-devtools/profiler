@@ -19,7 +19,7 @@ import {
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
-  getActiveBrowsingContextID,
+  getActiveTabID,
   getTimelineTrackOrganization,
   getGlobalTrackOrder,
   getTimelineType,
@@ -45,7 +45,7 @@ import {
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
-  BrowsingContextID,
+  TabID,
   TrackIndex,
   GlobalTrack,
   InitialSelectedTrackReference,
@@ -68,7 +68,7 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
   +hiddenTrackCount: HiddenTrackCount,
-  +activeBrowsingContextID: BrowsingContextID | null,
+  +activeTabID: TabID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +isCPUUtilizationProvided: boolean,
 |};
@@ -181,7 +181,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 }
 
 class TimelineSettingsActiveTabView extends React.PureComponent<{|
-  +activeBrowsingContextID: BrowsingContextID | null,
+  +activeTabID: TabID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |}> {
@@ -189,15 +189,12 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
     const {
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
-      activeBrowsingContextID,
+      activeTabID,
     } = this.props;
-    if (
-      timelineTrackOrganization.type === 'full' &&
-      activeBrowsingContextID !== null
-    ) {
+    if (timelineTrackOrganization.type === 'full' && activeTabID !== null) {
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: activeBrowsingContextID,
+        tabID: activeTabID,
       });
     } else {
       changeTimelineTrackOrganization({ type: 'full' });
@@ -205,8 +202,8 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   };
 
   render() {
-    const { activeBrowsingContextID, timelineTrackOrganization } = this.props;
-    if (activeBrowsingContextID === null) {
+    const { activeTabID, timelineTrackOrganization } = this.props;
+    if (activeTabID === null) {
       return null;
     }
 
@@ -254,7 +251,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       hiddenTrackCount,
       changeTimelineType,
       changeRightClickedTrack,
-      activeBrowsingContextID,
+      activeTabID,
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
       isCPUUtilizationProvided,
@@ -287,7 +284,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
           {/* eslint-disable-next-line no-constant-condition */}
           {true ? null : (
             <TimelineSettingsActiveTabView
-              activeBrowsingContextID={activeBrowsingContextID}
+              activeTabID={activeTabID}
               timelineTrackOrganization={timelineTrackOrganization}
               changeTimelineTrackOrganization={changeTimelineTrackOrganization}
             />
@@ -340,7 +337,7 @@ export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     timelineType: getTimelineType(state),
     hiddenTrackCount: getHiddenTrackCount(state),
-    activeBrowsingContextID: getActiveBrowsingContextID(state),
+    activeTabID: getActiveTabID(state),
     timelineTrackOrganization: getTimelineTrackOrganization(state),
     isCPUUtilizationProvided: getIsCPUUtilizationProvided(state),
   }),

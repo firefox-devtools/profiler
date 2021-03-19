@@ -608,14 +608,14 @@ describe('MarkerChart', function() {
       // Setup the profile data for active tab.
       const {
         profile,
-        firstTabBrowsingContextID,
+        firstTabTabID,
         parentInnerWindowIDsWithChildren,
       } = addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
       profile.meta.configuration = {
         threads: [],
         features: [],
         capacity: 1000000,
-        activeBrowsingContextID: firstTabBrowsingContextID,
+        activeTabID: firstTabTabID,
       };
       addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
         [
@@ -646,7 +646,7 @@ describe('MarkerChart', function() {
       setupResult.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: firstTabBrowsingContextID,
+          tabID: firstTabTabID,
         })
       );
 

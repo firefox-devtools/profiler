@@ -29,7 +29,7 @@ import type {
   Profile,
   Thread,
   IndexIntoStackTable,
-  BrowsingContextID,
+  TabID,
   TrackIndex,
   CallNodePath,
   ThreadIndex,
@@ -147,7 +147,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
-  ctxId: BrowsingContextID | void,
+  ctxId: TabID | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -274,7 +274,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'active-tab':
       view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.browsingContextID;
+      ctxId = timelineTrackOrganization.tabID;
       break;
     case 'origins':
       view = timelineTrackOrganization.type;
@@ -550,9 +550,9 @@ export function stateFromLocation(
 
   const transforms = parseTransforms(selectedThreadsList, query.transforms);
 
-  let browsingContextId = null;
+  let tabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    browsingContextId = Number(query.ctxId);
+    tabID = Number(query.ctxId);
   }
 
   return {
@@ -565,7 +565,7 @@ export function stateFromLocation(
     profileName: query.profileName,
     timelineTrackOrganization: validateTimelineTrackOrganization(
       query.view,
-      browsingContextId
+      tabID
     ),
     profileSpecific: {
       implementation,
@@ -971,7 +971,7 @@ function getVersion4JSCallNodePathFromStackIndex(
 
 function validateTimelineTrackOrganization(
   type: ?string,
-  browsingContextID: number | null
+  tabID: number | null
 ): TimelineTrackOrganization {
   // Pretend this is a TimelineTrackOrganization so that we can exhaustively
   // go through each option.
@@ -980,7 +980,7 @@ function validateTimelineTrackOrganization(
     case 'full':
       return { type: 'full' };
     case 'active-tab':
-      return { type: 'active-tab', browsingContextID };
+      return { type: 'active-tab', tabID };
     case 'origins':
       return { type: 'origins' };
     default:
