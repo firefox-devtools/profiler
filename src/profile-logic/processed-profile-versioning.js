@@ -1721,5 +1721,25 @@ const _upgraders = {
       }
     }
   },
+  [35]: profile => {
+    // The browsingContextID inside the pages array and activeBrowsingContextID
+    // have been renamed to tabID and activeTabID.
+    if (
+      profile.meta.configuration &&
+      profile.meta.configuration.activeBrowsingContextID
+    ) {
+      profile.meta.configuration.activeTabID =
+        profile.meta.configuration.activeBrowsingContextID;
+      delete profile.meta.configuration.activeBrowsingContextID;
+    }
+
+    if (profile.pages && profile.pages.length > 0) {
+      for (const page of profile.pages) {
+        // Directly copy the value of browsingContextID to tabID.
+        page.tabID = page.browsingContextID;
+        delete page.browsingContextID;
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -1316,5 +1316,32 @@ const _upgraders = {
       processes.meta.markerSchema = [];
     }
   },
+  [23]: profile => {
+    // The browsingContextID inside the pages array and activeBrowsingContextID
+    // have been renamed to tabID and activeTabID.
+    function convertToVersion23Recursive(p) {
+      if (
+        profile.meta.configuration &&
+        profile.meta.configuration.activeBrowsingContextID
+      ) {
+        profile.meta.configuration.activeTabID =
+          profile.meta.configuration.activeBrowsingContextID;
+        delete profile.meta.configuration.activeBrowsingContextID;
+      }
+
+      if (p.pages && p.pages.length > 0) {
+        for (const page of p.pages) {
+          // Directly copy the value of browsingContextID to tabID.
+          page.tabID = page.browsingContextID;
+          delete page.browsingContextID;
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion23Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion23Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */
