@@ -84,12 +84,6 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getCallNodeMaxDepth: Selector<number> = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
-  );
-
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
     (threadViewOptions): CallNodePath => threadViewOptions.selectedCallNodePath
@@ -214,16 +208,34 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getFilteredThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallTreeSummaryStrategy,
     CallTree.extractSamplesLikeTable
   );
 
-  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    threadSelectors.getThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
+  const getFilteredCallNodeMaxDepth: Selector<number> = createSelector(
+    getFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileData.computeCallNodeMaxDepth
+  );
+
+  const getPreviewFilteredCallNodeMaxDepth: Selector<number> = createSelector(
+    getPreviewFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileData.computeCallNodeMaxDepth
   );
 
   /**
@@ -233,12 +245,13 @@ export function getStackAndSampleSelectorsPerThread(
    * defaults to samples, which the Gecko Profiler outputs by default.
    */
   const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
-    getSamplesForCallTree,
+    // The weight type is not changed by the filtering done on the profile.
+    getUnfilteredSamplesForCallTree,
     samples => samples.weightType || 'samples'
   );
 
   const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> = createSelector(
-    getSamplesForCallTree,
+    getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -257,7 +270,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    getSamplesForCallTree,
+    getFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -267,15 +280,9 @@ export function getStackAndSampleSelectorsPerThread(
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
-    getCallNodeMaxDepth,
+    getFilteredCallNodeMaxDepth,
     ProfileSelectors.getProfileInterval,
     StackTiming.getStackTimingByDepth
-  );
-
-  const getCallNodeMaxDepthForFlameGraph: Selector<number> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
-    getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
   );
 
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> = createSelector(
@@ -307,9 +314,9 @@ export function getStackAndSampleSelectorsPerThread(
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
     getCallNodeInfo,
-    getCallNodeMaxDepth,
-    getSamplesForCallTree,
     getUnfilteredSamplesForCallTree,
+    getFilteredSamplesForCallTree,
+    getPreviewFilteredSamplesForCallTree,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -320,7 +327,8 @@ export function getStackAndSampleSelectorsPerThread(
     getCallTree,
     getTracedTiming,
     getStackTimingByDepth,
-    getCallNodeMaxDepthForFlameGraph,
+    getFilteredCallNodeMaxDepth,
+    getPreviewFilteredCallNodeMaxDepth,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
   };
