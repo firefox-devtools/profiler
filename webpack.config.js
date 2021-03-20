@@ -124,12 +124,13 @@ const config = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'res/_headers' },
-        { from: 'res/_redirects' },
-        { from: 'docs-user', to: 'docs' },
+        // { from: 'res/_headers' },
+        // { from: 'res/_redirects' },
+        // { from: 'docs-user', to: 'docs' },
         { from: 'res/zee-worker.js' },
         { from: 'res/before-load.js' },
         { from: 'res/contribute.json' },
+        { from: 'locales', to: 'locales' },
       ],
     }),
     new MiniCssExtractPlugin(),
