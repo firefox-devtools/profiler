@@ -176,7 +176,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         return (
           <>
             <h2 className="metaInfoSubTitle">
-              <Localized id="MenuButtons--index--meta-info-subtitle">
+              <Localized id="MenuButtons--index--metaInfo-subtitle">
                 Profile Information
               </Localized>
             </h2>
@@ -239,8 +239,8 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     const uploadedStatus = this._getUploadedStatus(dataSource);
     const labelL10nId =
       uploadedStatus === 'uploaded'
-        ? 'MenuButtons--index--meta-info-button-uploaded-profile'
-        : 'MenuButtons--index--meta-info-button-local-profile';
+        ? 'MenuButtons--index--metaInfo-button-uploaded-profile'
+        : 'MenuButtons--index--metaInfo-button-local-profile';
 
     return (
       <Localized id={labelL10nId} attrs={{ label: true }}>

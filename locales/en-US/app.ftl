@@ -103,15 +103,12 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
-## MenuButtons Folder
+## These strings are used for the buttons at the top of the profile viewer.
 
-MenuButtons--index--profile-info-uploaded-label = Uploaded:
-MenuButtons--index--profile-info-uploaded-actions = Delete
-MenuButtons--index--meta-info-subtitle = Profile Information
-MenuButtons--index--meta-info-button-uploaded-profile =
+MenuButtons--index--metaInfo-button-uploaded-profile =
     .label = Uploaded Profile
 
-MenuButtons--index--meta-info-button-local-profile =
+MenuButtons--index--metaInfo-button-local-profile =
     .label = Local Profile
 
 MenuButtons--index--full-view = Full View
@@ -128,6 +125,15 @@ MenuButtons--index--share-error-uploading =
 MenuButtons--index--revert = Revert to Original Profile
 MenuButtons--index--docs = Docs
 
+MenuButtons--permalink--button =
+    .label = Permalink
+
+## These strings are used in the panel containing the meta information about
+## the current profile.
+
+MenuButtons--index--profile-info-uploaded-label = Uploaded:
+MenuButtons--index--profile-info-uploaded-actions = Delete
+MenuButtons--index--metaInfo-subtitle = Profile Information
 MenuButtons--metaInfo--symbols = Symbols:
 MenuButtons--metaInfo--profile-symbolicated = Profile is symbolicated
 MenuButtons--metaInfo--profile-not-symbolicated = Profile is not symbolicated
@@ -137,7 +143,8 @@ MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate p
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
 MenuButtons--metaInfo--cpu = CPU:
 
-# Buffer Duration in Seconds in Meta Info Panel
+# This string is used when we have the information about both physical and
+# logical CPU cores.
 # Variable:
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
@@ -149,7 +156,8 @@ MenuButtons--metaInfo--physical-and-logical-cpu =
        *[other] { $logicalCPUs } logical cores
     }
 
-# Buffer Duration in Seconds in Meta Info Panel
+# This string is used when we only have the information about the number of
+# physical CPU cores.
 # Variable:
 #   $physicalCPUs (Number) - Number of Physical CPU Cores
 MenuButtons--metaInfo--physical-cpu =
@@ -158,7 +166,8 @@ MenuButtons--metaInfo--physical-cpu =
        *[other] { $physicalCPUs } physical cores
     }
 
-# Buffer Duration in Seconds in Meta Info Panel
+# This string is used when we only have the information only the number of
+# logical CPU cores.
 # Variable:
 #   $logicalCPUs (Number) - Number of logical CPU Cores
 MenuButtons--metaInfo--logical-cpu =
@@ -218,8 +227,7 @@ MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
 
-MenuButtons--permalink--button =
-    .label = Permalink
+## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Include hidden threads
 MenuButtons--publish--renderCheckbox-label-hidden-time = Include hidden time range
