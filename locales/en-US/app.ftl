@@ -23,9 +23,6 @@ AppHeader--github-icon =
 
 ## AppViewRouter
 
-AppViewRouter--error-message-from-addon =
-    .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
-
 AppViewRouter--error-message-unpublished =
     .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
 
@@ -282,9 +279,6 @@ ProfileDeleteButton--delete-button =
     .title = Click here to delete the profile { $smallProfileName }
 
 ## ProfileLoaderAnimation
-
-ProfileLoaderAnimation--loading-message-from-addon =
-    .message = Importing the profile directly from { -firefox-brand-name }…
 
 ProfileLoaderAnimation--loading-message-unpublished =
     .message = Importing the profile directly from { -firefox-brand-name }…
