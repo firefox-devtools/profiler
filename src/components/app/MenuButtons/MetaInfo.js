@@ -59,7 +59,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
           <>
             <div className="metaInfoRow">
               <span className="metaInfoLabel">
-                <Localized id="MenuButtons--metaInfo--label">
+                <Localized id="MenuButtons--metaInfo--symbols">
                   Symbols:
                 </Localized>
               </span>
