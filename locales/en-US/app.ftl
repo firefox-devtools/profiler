@@ -21,6 +21,26 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Go to our git repository (this opens in a new window)
 
+## AppViewRouter
+
+AppViewRouter--error-message-unpublished =
+    .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
+
+AppViewRouter--error-message-from-file =
+    .message = Couldn’t read the file or parse the profile in it.
+
+AppViewRouter--error-message-local =
+    .message = Not implemented yet.
+
+AppViewRouter--error-message-public =
+    .message = Could not download the profile.
+
+AppViewRouter--error-message-from-url =
+    .message = Could not download the profile.
+
+AppViewRouter--route-not-found--home =
+    .specialMessage = The URL you tried to reach was not recognized.
+
 ## CompareHome
 
 CompareHome--instruction-title = Enter the profile URLs that you’d like to compare
@@ -248,6 +268,38 @@ MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong
 MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
+
+## ProfileDeleteButton
+
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Delete
+    .title = Click here to delete the profile { $smallProfileName }
+
+## ProfileLoaderAnimation
+
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importing the profile directly from { -firefox-brand-name }…
+
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Reading the file and processing the profile…
+
+ProfileLoaderAnimation--loading-message-local =
+    .message = Not implemented yet.
+
+ProfileLoaderAnimation--loading-message-public =
+    .message = Downloading and processing the profile…
+
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Downloading and processing the profile…
+
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Reading and processing profiles…
+
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = View not found
 
 ## ProfileRootMessage
 

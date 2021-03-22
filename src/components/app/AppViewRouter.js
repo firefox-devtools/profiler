@@ -25,15 +25,16 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { Localized } from '@fluent/react';
 
-const ERROR_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': "Couldn't retrieve the profile from Firefox.",
-  unpublished: "Couldn't retrieve the profile from Firefox.",
-  'from-file': "Couldn't read the file or parse the profile in it.",
-  local: 'Not implemented yet.',
-  public: 'Could not download the profile.',
-  'from-url': 'Could not download the profile.',
-  compare: 'Could not retrieve the profile',
+const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
+  'from-addon': 'AppViewRouter--error-message-unpublished',
+  unpublished: 'AppViewRouter--error-message-unpublished',
+  'from-file': 'AppViewRouter--error-message-from-file',
+  local: 'AppViewRouter--error-message-local',
+  public: 'AppViewRouter--error-message-public',
+  'from-url': 'AppViewRouter--error-message-from-url',
+  compare: 'AppViewRouter--error-message-compare',
 });
 
 type AppViewRouterStateProps = {|
@@ -81,7 +82,8 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =
-          ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
+          ERROR_MESSAGES_L10N_ID[dataSource] ||
+          'AppViewRouter--error-message-public';
         let additionalMessage = null;
         if (view.error) {
           console.error(view.error);
@@ -91,11 +93,13 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         }
 
         return (
-          <ProfileRootMessage
-            message={message}
-            additionalMessage={additionalMessage}
-            showLoader={false}
-          />
+          <Localized id={message} attrs={{ message: true }}>
+            <ProfileRootMessage
+              message={message}
+              additionalMessage={additionalMessage}
+              showLoader={false}
+            />
+          </Localized>
         );
       }
       case 'DATA_LOADED':
@@ -111,7 +115,12 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         // should be 'ROUTE_NOT_FOUND' or 'PROFILE_LOADED'.
         (phase: 'ROUTE_NOT_FOUND');
         return (
-          <Home specialMessage="The URL you came in on was not recognized." />
+          <Localized
+            id="AppViewRouter--route-not-found--home"
+            attrs={{ specialMessage: true }}
+          >
+            <Home specialMessage="The URL you tried to reach was not recognized." />
+          </Localized>
         );
     }
   }
