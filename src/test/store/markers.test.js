@@ -96,7 +96,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       ) {
         throw new Error('Expected to find marker timing, but found a string');
       }
-      expect(category).toEqual('Idle');
+      expect(category).toEqual('Other');
       expect(markerTimingA.name).toBe('Marker Name A');
       expect(markerTimingB.name).toBe('Marker Name B');
     });
@@ -108,7 +108,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
       expect(markerTiming).toEqual([
-        'Idle',
+        'Other',
         {
           name: 'Rasterize',
           // First sample is captured at time 1, so this incomplete
@@ -117,7 +117,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
           end: [1],
           index: [0],
           label: [''],
-          bucket: 'Idle',
+          bucket: 'Other',
           length: 1,
         },
       ]);

@@ -72,12 +72,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -92,12 +92,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -116,11 +116,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -132,11 +132,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -214,12 +214,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -234,12 +234,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -258,11 +258,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -274,11 +274,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -3314,12 +3314,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -3334,12 +3334,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -3358,11 +3358,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -3374,11 +3374,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -3456,12 +3456,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -3476,12 +3476,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -3500,11 +3500,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -3516,11 +3516,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -5416,12 +5416,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -5436,12 +5436,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -5460,11 +5460,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -5476,11 +5476,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -5558,12 +5558,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -5578,12 +5578,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -5602,11 +5602,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -5618,11 +5618,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
