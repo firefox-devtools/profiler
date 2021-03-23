@@ -134,4 +134,4 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   }
 }
 
-export default OverflowEdgeIndicator;
+export { OverflowEdgeIndicator };

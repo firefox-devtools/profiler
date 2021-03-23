@@ -17,7 +17,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
+import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
 import type {
   CounterIndex,

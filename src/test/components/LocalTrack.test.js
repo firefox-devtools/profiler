@@ -19,7 +19,7 @@ import {
   changeSelectedThreads,
   hideLocalTrack,
 } from '../../actions/profile-view';
-import TimelineLocalTrack from '../../components/timeline/LocalTrack';
+import { TimelineLocalTrack } from '../../components/timeline/LocalTrack';
 import {
   getRightClickedTrack,
   getLocalTrackFromReference,

@@ -13,7 +13,7 @@ import {
   changeSelectedThreads,
   changeRightClickedTrack,
 } from '../../actions/profile-view';
-import TrackContextMenu from '../../components/timeline/TrackContextMenu';
+import { TimelineTrackContextMenu } from '../../components/timeline/TrackContextMenu';
 import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
 import {
   getHiddenGlobalTracks,
@@ -46,7 +46,7 @@ describe('timeline/TrackContextMenu', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackContextMenu />
+        <TimelineTrackContextMenu />
       </Provider>
     );
 

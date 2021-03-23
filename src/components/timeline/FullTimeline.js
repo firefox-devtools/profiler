@@ -6,10 +6,10 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
-import TimelineGlobalTrack from './GlobalTrack';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import { TimelineGlobalTrack } from './GlobalTrack';
+import { TimelineRuler } from './Ruler';
+import { TimelineSelection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -31,7 +31,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
-import TimelineTrackContextMenu from './TrackContextMenu';
+import { TimelineTrackContextMenu } from './TrackContextMenu';
 
 import './index.css';
 
@@ -227,7 +227,7 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   }
 }
 
-class FullTimeline extends React.PureComponent<Props, State> {
+class FullTimelineImpl extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
   };
@@ -330,7 +330,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -350,5 +350,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedTrack,
     changeTimelineTrackOrganization,
   },
-  component: withSize<Props>(FullTimeline),
+  component: withSize<Props>(FullTimelineImpl),
 });

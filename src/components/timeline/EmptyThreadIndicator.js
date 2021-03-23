@@ -37,7 +37,7 @@ type Props = {|
  * samples (most likely due to the circular buffer dropping data), and finally when the
  * thread was shut down.
  */
-class EmptyThreadIndicator extends PureComponent<Props> {
+class EmptyThreadIndicatorImpl extends PureComponent<Props> {
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
 
@@ -148,4 +148,4 @@ export function getIndicatorPositions(
   return { startup, shutdown, emptyBufferStart };
 }
 
-export default withSize<Props>(EmptyThreadIndicator);
+export const EmptyThreadIndicator = withSize<Props>(EmptyThreadIndicatorImpl);
