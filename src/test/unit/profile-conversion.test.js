@@ -69,6 +69,21 @@ describe('converting Linux perf profile', function() {
   });
 });
 
+describe('converting dhat profiles', function() {
+  it('should import a dhat profile', async function() {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync('src/test/fixtures/upgrades/dhat.json.gz');
+    const decompressedArrayBuffer = zlib.gunzipSync(buffer);
+    const text = decompressedArrayBuffer.toString('utf8');
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    expect(profile).toMatchSnapshot();
+  });
+});
+
 describe('converting Google Chrome profile', function() {
   it('successfully imports a chunked profile (one that uses Profile + ProfileChunk trace events)', async function() {
     // Mock out image loading behavior as the screenshots rely on the Image loading
