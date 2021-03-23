@@ -22,11 +22,13 @@
 }
 
 .category-color-orange {
-  background-color: var(--orange-50);
+  /* Non-photon color to not conflict with yellow. */
+  background-color: #ff5000;
 }
 
 .category-color-yellow {
-  background-color: var(--yellow-50);
+  /* Non-photon color for improved contrast. */
+  background-color: #e7ae1d;
 }
 
 .category-color-lightblue {

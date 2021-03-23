@@ -86,6 +86,8 @@ type ColorStyles = {|
  * be changed without considering the values coming from Gecko, and from old profiles
  * that already have their category colors saved into the profile.
  *
+ * Generally these try to use Photon colors, but some are tweaked to improve contrast
+ *
  * Category color names come from:
  * https://searchfox.org/mozilla-central/rev/9193635dca8cfdcb68f114306194ffc860456044/js/public/ProfilingCategory.h#33
  */
@@ -103,76 +105,78 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
         selectedFillStyle: PURPLE_70,
         // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
         // the end defines the transparency #RRGGBBAA.
-        unselectedFillStyle: PURPLE_70 + '60',
+        unselectedFillStyle: PURPLE_70 + '70',
         selectedTextColor: '#fff',
         gravity: 5,
       };
     case 'green':
       return {
         selectedFillStyle: GREEN_60,
-        unselectedFillStyle: GREEN_60 + '60',
+        unselectedFillStyle: GREEN_60 + '70',
         selectedTextColor: '#fff',
         gravity: 4,
       };
     case 'orange':
       return {
-        selectedFillStyle: ORANGE_50,
-        unselectedFillStyle: ORANGE_50 + '60',
+        // Photon orange is too close to the custom yellow.
+        selectedFillStyle: '#ff5000',
+        unselectedFillStyle: '#ff5000a0',
         selectedTextColor: '#fff',
         gravity: 2,
       };
     case 'yellow':
       return {
-        selectedFillStyle: YELLOW_50,
-        unselectedFillStyle: YELLOW_50 + '60',
+        // Photon yellow is too light.
+        selectedFillStyle: '#e7ae1d',
+        unselectedFillStyle: '#efc457',
         selectedTextColor: '#000',
         gravity: 6,
       };
     case 'lightblue':
       return {
         selectedFillStyle: BLUE_40,
-        unselectedFillStyle: BLUE_40 + '60',
+        unselectedFillStyle: BLUE_40 + '70',
         selectedTextColor: '#000',
         gravity: 1,
       };
     case 'grey':
       return {
         selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
+        unselectedFillStyle: GREY_30 + '90',
         selectedTextColor: '#000',
         gravity: 9,
       };
     case 'blue':
       return {
         selectedFillStyle: BLUE_60,
-        unselectedFillStyle: BLUE_60 + '60',
+        unselectedFillStyle: BLUE_60 + '70',
         selectedTextColor: '#fff',
         gravity: 3,
       };
     case 'brown':
       return {
         selectedFillStyle: MAGENTA_60,
-        unselectedFillStyle: MAGENTA_60 + '60',
+        unselectedFillStyle: MAGENTA_60 + '70',
         selectedTextColor: '#fff',
         gravity: 7,
       };
     case 'lightgreen':
       return {
         selectedFillStyle: GREEN_50,
-        unselectedFillStyle: GREEN_50 + '60',
+        unselectedFillStyle: GREEN_50 + '70',
         selectedTextColor: '#fff',
         gravity: 8,
       };
     case 'red':
       return {
         selectedFillStyle: RED_60,
-        unselectedFillStyle: RED_60 + '60',
+        unselectedFillStyle: RED_60 + '70',
         selectedTextColor: '#fff',
         gravity: 1,
       };
     case 'lightred':
       return {
-        selectedFillStyle: RED_70 + '60',
+        selectedFillStyle: RED_70 + '70',
         unselectedFillStyle: RED_70 + '30',
         selectedTextColor: '#000',
         gravity: 1,
@@ -180,7 +184,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
     case 'darkgray':
       return {
         selectedFillStyle: GREY_40,
-        unselectedFillStyle: GREY_40 + '60',
+        unselectedFillStyle: GREY_40 + '70',
         selectedTextColor: '#000',
         gravity: 10,
       };
@@ -190,7 +194,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       );
       return {
         selectedFillStyle: GREY_30,
-        unselectedFillStyle: GREY_30 + '60',
+        unselectedFillStyle: GREY_30 + '70',
         selectedTextColor: '#000',
         gravity: 9,
       };
@@ -207,7 +211,7 @@ export function mapCategoryColorNameToStackChartStyles(
   if (colorName === 'transparent') {
     return {
       selectedFillStyle: GREY_30,
-      unselectedFillStyle: GREY_20 + '60',
+      unselectedFillStyle: GREY_20 + '70',
       selectedTextColor: '#000',
       gravity: 8,
     };
