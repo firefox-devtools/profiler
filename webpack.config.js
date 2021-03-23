@@ -2,6 +2,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OfflinePlugin = require('offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
@@ -11,7 +12,8 @@ const es6modules = ['pretty-bytes'];
 const es6modulePaths = es6modules.map(module => {
   return path.join(__dirname, 'node_modules', module);
 });
-
+const mode = 'development';
+let target = 'web';
 const config = {
   resolve: {
     alias: {
@@ -20,26 +22,31 @@ const config = {
       'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
   },
+  experiments: {
+    syncWebAssembly: true,
+  },
   devtool: 'source-map',
+  mode: mode,
   module: {
     rules: [
       {
-        test: /\.js$/,
-        loaders: ['babel-loader'],
+        test: /\.(js|jsx|ts|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+        },
         include: includes.concat(es6modulePaths),
       },
       {
         test: /\.json$/,
-        loaders: ['json-loader'],
+        use: {
+          loader: 'json-loader',
+        },
         include: includes,
       },
       {
-        test: /\.css?$/,
-        loaders: [
-          'style-loader',
-          { loader: 'css-loader', options: { importLoaders: 1 } },
-          'postcss-loader',
-        ],
+        test: /\.css?$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
         include: [
           ...includes,
           path.join(__dirname, 'node_modules', 'photon-colors'),
@@ -58,10 +65,45 @@ const config = {
         test: /\.svg$/,
         loader: 'file-loader',
       },
+      {
+        test: /\.ftl$/,
+        loader: 'file-loader',
+      },
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/sync',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]bundle[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]langneg[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]react[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]vendor[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]sequence[\\/]esm/,
+        type: 'javascript/auto',
+      },
+      {
+        test: /\.js$/,
+        include: /@fluent[\\/]react[\\/]vendor/,
+        type: 'javascript/auto',
+      },
     ],
-  },
-  node: {
-    process: false,
   },
   plugins: [
     new CircularDependencyPlugin({
@@ -91,23 +133,28 @@ const config = {
         { from: 'locales', to: 'locales' },
       ],
     }),
+    new MiniCssExtractPlugin(),
   ],
   entry: ['./src/index'],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
+    filename: '[fullhash].bundle.js',
+    // chunkLoading: false,
+    // wasmLoading: false,
+    chunkFilename: '[id].[fullhash].bundle.js',
     publicPath: '/',
   },
 };
 
 if (process.env.NODE_ENV === 'development') {
   config.mode = 'development';
+  target = 'browserslist';
 }
 
 if (process.env.NODE_ENV === 'production') {
   config.mode = 'production';
-
+  // eslint-disable-next-line no-unused-vars
+  target = 'browserlist';
   config.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
@@ -159,5 +206,4 @@ if (process.env.NODE_ENV === 'production') {
     })
   );
 }
-
 module.exports = config;
