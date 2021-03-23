@@ -188,7 +188,11 @@ class Screenshots extends PureComponent<Props, State> {
 
 const EMPTY_SCREENSHOTS_TRACK = [];
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineTrackScreenshots = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, windowId } = ownProps;
     const selectors = getThreadSelectors(threadIndex);

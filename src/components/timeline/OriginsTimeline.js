@@ -6,9 +6,9 @@
 
 import memoize from 'memoize-immutable';
 import * as React from 'react';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import { TimelineRuler } from './Ruler';
+import { TimelineSelection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
@@ -169,16 +169,18 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    threads: getThreads(state),
-    committedRange: getCommittedRange(state),
-    zeroAt: getZeroAt(state),
-    panelLayoutGeneration: getPanelLayoutGeneration(state),
-    originsTimeline: getOriginsTimeline(state),
-  }),
-  mapDispatchToProps: {
-    changeSelectedThreads,
-  },
-  component: withSize<Props>(OriginsTimelineView),
-});
+export const TimelineOrigins = explicitConnect<{||}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      threads: getThreads(state),
+      committedRange: getCommittedRange(state),
+      zeroAt: getZeroAt(state),
+      panelLayoutGeneration: getPanelLayoutGeneration(state),
+      originsTimeline: getOriginsTimeline(state),
+    }),
+    mapDispatchToProps: {
+      changeSelectedThreads,
+    },
+    component: withSize<Props>(OriginsTimelineView),
+  }
+);

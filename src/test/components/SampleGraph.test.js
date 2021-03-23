@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/flow';
-import TrackThread from 'firefox-profiler/components/timeline/TrackThread';
+import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -68,7 +68,7 @@ describe('SampleGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread
+        <TimelineTrackThread
           threadsKey={0}
           trackType="expanded"
           trackName="Test Track"
