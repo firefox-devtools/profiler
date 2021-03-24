@@ -474,7 +474,7 @@ describe('Timeline', function() {
         threads: [],
         features: [],
         capacity: 1000000,
-        activeBrowsingContextID: 123,
+        activeTabID: 123,
       };
       const store = storeWithProfile(profile);
       const { getByText } = render(
@@ -490,7 +490,7 @@ describe('Timeline', function() {
       fireFullClick(getByText('Show active tab only'));
       expect(getTimelineTrackOrganization(store.getState())).toEqual({
         type: 'active-tab',
-        browsingContextID: 123,
+        tabID: 123,
       });
 
       fireFullClick(getByText('Show active tab only'));

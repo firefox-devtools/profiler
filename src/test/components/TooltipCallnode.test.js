@@ -85,7 +85,7 @@ describe('TooltipCallNode', function() {
       // Add items to Pages array.
       profile.pages = [
         {
-          browsingContextID: 1,
+          tabID: 1,
           innerWindowID: 111111,
           url: pageUrl,
           embedderInnerWindowID: 0,
@@ -94,7 +94,7 @@ describe('TooltipCallNode', function() {
 
       if (iframeUrl) {
         profile.pages.push({
-          browsingContextID: 1,
+          tabID: 1,
           innerWindowID: 123123,
           url: iframeUrl,
           embedderInnerWindowID: 111111,

@@ -65,7 +65,7 @@ import type {
   TimelineTrackOrganization,
   Profile,
   ThreadIndex,
-  BrowsingContextID,
+  TabID,
   Page,
   InnerWindowID,
   Pid,
@@ -203,7 +203,7 @@ export function finalizeProfileView(
             finalizeActiveTabProfileView(
               profile,
               selectedThreadIndexes,
-              timelineTrackOrganization.browsingContextID
+              timelineTrackOrganization.tabID
             )
           );
         } else {
@@ -554,7 +554,7 @@ export function finalizeOriginProfileView(
 export function finalizeActiveTabProfileView(
   profile: Profile,
   selectedThreadIndexes: Set<ThreadIndex> | null,
-  browsingContextID: BrowsingContextID | null
+  tabID: TabID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
@@ -575,7 +575,7 @@ export function finalizeActiveTabProfileView(
       type: 'VIEW_ACTIVE_TAB_PROFILE',
       activeTabTimeline,
       selectedThreadIndexes,
-      browsingContextID,
+      tabID,
     });
   };
 }
@@ -609,7 +609,7 @@ export function changeTimelineTrackOrganization(
           finalizeActiveTabProfileView(
             profile,
             selectedThreadIndexes,
-            timelineTrackOrganization.browsingContextID
+            timelineTrackOrganization.tabID
           )
         );
         break;

@@ -80,7 +80,7 @@ describe('getUsefulTabs', function() {
     const {
       profile,
       parentInnerWindowIDsWithChildren,
-      firstTabBrowsingContextID,
+      firstTabTabID,
     } = addActiveTabInformationToProfile(
       getProfileWithMarkers(getNetworkMarkers())
     );
@@ -93,7 +93,7 @@ describe('getUsefulTabs', function() {
     dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: firstTabBrowsingContextID,
+        tabID: firstTabTabID,
       })
     );
 

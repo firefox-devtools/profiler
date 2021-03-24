@@ -76,7 +76,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
 
   pages: [
     {
-      browsingContextID: 10,
+      tabID: 10,
       innerWindowID: 2,
       url: "https://profiler.firefox.com",
       embedderInnerWindowID: 0,

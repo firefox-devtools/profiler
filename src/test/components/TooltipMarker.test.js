@@ -56,11 +56,11 @@ describe('TooltipMarker', function() {
 
     // Connect a page to one of the markers so that we render a URL in
     // its tooltip.
-    const browsingContextID = 123123;
+    const tabID = 123123;
     const innerWindowID = 1;
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
