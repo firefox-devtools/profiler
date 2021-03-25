@@ -318,6 +318,20 @@ ProfileLoaderAnimation--loading-message-view-not-found =
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
 
+## ServiceWorkerManager
+
+ServiceWorkerManager--installing-button = Installing…
+ServiceWorkerManager--pending-button = Apply and reload
+ServiceWorkerManager--installed-button = Reload the application
+ServiceWorkerManager--updated-while-not-ready =
+    A new version of the application was applied before this page
+    was fully loaded. You might see malfunctions.
+ServiceWorkerManager--new-version-is-ready =
+    A new version of the application has been downloaded and is ready to use.
+ServiceWorkerManager--hide-notice-button =
+    .title = Hide the reload notice
+    .aria-label = Hide the reload notice
+
 ## UploadedRecordingsHome
 
 UploadedRecordingsHome--title = Uploaded Recordings
