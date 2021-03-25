@@ -127,6 +127,11 @@ Home--additional-content-content = You can <strong>drag and drop</strong> a prof
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--recent-uploaded-recordings-title = Recent uploaded recordings
 
+## IdleSearchField
+
+IdleSearchField--search-input =
+    .placeholder = Enter filter terms
+
 ## ListOfPublishedProfiles
 
 # This string is used on the tooltip of the published profile links.
