@@ -356,6 +356,33 @@ ServiceWorkerManager--hide-notice-button =
     .title = Hide the reload notice
     .aria-label = Hide the reload notice
 
+## StackSettings
+
+StackSettings--implementation-all-stacks = All stacks
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Native
+
+StackSettings--summarize = Summarize:
+StackSettings--call-tree-strategy-timing = Timing Data
+    .title = Summarize using sampled stacks of executed code over time
+StackSettings--call-tree-strategy-js-allocations = JavaScript Allocations
+    .title = Summarize using bytes of JavaScript allocated (no de-allocations)
+StackSettings--call-tree-strategy-native-retained-allocations = Retained Memory
+    .title = Summarize using bytes of memory that were allocated, and never freed in the current preview selection
+StackSettings--call-tree-native-allocations = Allocated Memory
+    .title = Summarize using bytes of memory allocated
+StackSettings--call-tree-strategy-native-deallocations-memory = Deallocated Memory
+    .title = Summarize using bytes of memory deallocated, by the site where the memory was allocated
+StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Sites
+    .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
+
+StackSettings--invert-call-stack = Invert call stack
+StackSettings--show-user-timing = Show user timing
+
+StackSettings--panel-search =
+    .label = Filter stacks:
+    .title = Only display stacks which contain a function whose name matches this substring
+
 ## TabBar
 
 TabBar--calltree-tab = Call Tree

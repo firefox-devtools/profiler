@@ -43,7 +43,7 @@ export class PanelSearch extends React.PureComponent<Props, State> {
     return (
       <div className={classNames('panelSearchField', className)}>
         <label className="panelSearchFieldLabel">
-          {label}
+          {label + ' '}
           <IdleSearchField
             className="panelSearchFieldInput"
             title={title}
