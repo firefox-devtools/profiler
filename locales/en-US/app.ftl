@@ -132,6 +132,10 @@ Home--recent-uploaded-recordings-title = Recent uploaded recordings
 IdleSearchField--search-input =
     .placeholder = Enter filter terms
 
+## JsTracerSettings
+
+JsTracerSettings--show-only-self-time = Show only self time
+
 ## ListOfPublishedProfiles
 
 # This string is used on the tooltip of the published profile links.
