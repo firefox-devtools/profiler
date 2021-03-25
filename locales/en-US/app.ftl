@@ -61,6 +61,15 @@ DebugWarning--warning-message =
     This profile was recorded in a build without release optimizations.
     Performance observations might not apply to the release population.
 
+## Details
+
+Details--open-sidebar-button =
+    .title = Open the sidebar
+Details--close-sidebar-button =
+    .title = Close the sidebar
+Details--error-boundary-message =
+    .message = Uh oh, some unknown error happened in this panel.
+
 ## FooterLinks
 
 FooterLinks--legal = Legal
