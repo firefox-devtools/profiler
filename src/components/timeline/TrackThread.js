@@ -46,7 +46,7 @@ import {
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
+import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import './TrackThread.css';
@@ -119,7 +119,7 @@ type Props = {|
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
 |};
 
-class TimelineTrackThread extends PureComponent<Props> {
+class TimelineTrackThreadImpl extends PureComponent<Props> {
   /**
    * Handle when a sample is clicked in the ThreadStackGraph and in the ThreadActivityGraph.
    * This will select the leaf-most stack frame or call node.
@@ -383,7 +383,11 @@ const _getTimelineIsSelected = memoize(
   { limit: 1 }
 );
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineTrackThread = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadsKey } = ownProps;
     const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
@@ -439,5 +443,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     selectRootCallNode,
     reportTrackThreadHeight,
   },
-  component: withSize<Props>(TimelineTrackThread),
+  component: withSize<Props>(TimelineTrackThreadImpl),
 });

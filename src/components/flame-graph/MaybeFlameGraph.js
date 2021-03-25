@@ -17,7 +17,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './MaybeFlameGraph.css';
 
 type StateProps = {|
-  +maxStackDepth: number,
+  +isPreviewSelectionEmpty: boolean,
   +invertCallstack: boolean,
 |};
 type DispatchProps = {|
@@ -40,9 +40,9 @@ class MaybeFlameGraphImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { maxStackDepth, invertCallstack } = this.props;
+    const { isPreviewSelectionEmpty, invertCallstack } = this.props;
 
-    if (maxStackDepth === 0) {
+    if (isPreviewSelectionEmpty) {
       return <FlameGraphEmptyReasons />;
     }
 
@@ -71,9 +71,9 @@ export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
     mapStateToProps: state => {
       return {
         invertCallstack: getInvertCallstack(state),
-        maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-          state
-        ),
+        isPreviewSelectionEmpty:
+          selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(state) ===
+          0,
       };
     },
     mapDispatchToProps: {

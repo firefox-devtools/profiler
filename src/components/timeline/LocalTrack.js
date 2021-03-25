@@ -23,9 +23,9 @@ import {
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import TrackThread from './TrackThread';
+import { TimelineTrackThread } from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
-import TrackNetwork from './TrackNetwork';
+import { TrackNetwork } from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
 import { getTrackSelectionModifier } from 'firefox-profiler/utils';
@@ -126,7 +126,7 @@ class LocalTrackComponent extends PureComponent<Props> {
     switch (localTrack.type) {
       case 'thread':
         return (
-          <TrackThread
+          <TimelineTrackThread
             threadsKey={localTrack.threadIndex}
             trackType="expanded"
             trackName={trackName}
@@ -196,7 +196,11 @@ class LocalTrackComponent extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineLocalTrack = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
     let titleText = null;

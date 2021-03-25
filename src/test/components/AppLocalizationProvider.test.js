@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { ReactLocalization, Localized } from '@fluent/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from '@testing-library/react';
 import { lazilyParsedBundles } from 'firefox-profiler/app-logic/l10n';
 import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 import {
@@ -84,9 +84,9 @@ describe('AppLocalizationProvider', () => {
     expect(getDirection(getState())).toEqual('ltr');
   });
 
-  it('renders its children', async () => {
+  it(`renders children only once the localization is ready`, async () => {
     const { store } = setup();
-    const { getByTestId } = render(
+    render(
       <Provider store={store}>
         <AppLocalizationProvider>
           <div data-testid="content-test-AppLocalizationProvider" />
@@ -95,7 +95,11 @@ describe('AppLocalizationProvider', () => {
     );
 
     expect(
-      getByTestId('content-test-AppLocalizationProvider')
+      screen.queryByTestId('content-test-AppLocalizationProvider')
+    ).not.toBeInTheDocument();
+
+    expect(
+      await screen.findByTestId('content-test-AppLocalizationProvider')
     ).toBeInTheDocument();
   });
 

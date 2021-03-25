@@ -311,13 +311,19 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <TooltipDetailSeparator key="backtrace-separator" />,
         <TooltipDetail label="Stack" key="backtrace">
           <div className="tooltipDetailsBackTrace">
-            <h2 className="tooltipBackTraceTitle">
-              {data.type === 'Styles' || marker.name === 'Reflow'
-                ? `First invalidated ${formatTimestamp(
-                    causeAge
-                  )} before the flush, at:`
-                : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
-            </h2>
+            {/* The cause's time might be later than the marker's start. For
+                example this happens in some usual cases when the cause is
+                captured right when setting the end marker for tracing pairs of
+                markers. */
+            causeAge > 0 ? (
+              <h2 className="tooltipBackTraceTitle">
+                {data.type === 'Styles' || marker.name === 'Reflow'
+                  ? `First invalidated ${formatTimestamp(
+                      causeAge
+                    )} before the flush, at:`
+                  : `Triggered ${formatTimestamp(causeAge)} ago, at:`}
+              </h2>
+            ) : null}
             <Backtrace
               maxStacks={restrictHeightWidth ? 20 : Infinity}
               stackIndex={cause.stack}

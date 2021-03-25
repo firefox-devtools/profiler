@@ -10,9 +10,9 @@ import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
-import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
-import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
-import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
+import { TimelineActiveTabGlobalTrack } from '../../components/timeline/ActiveTabGlobalTrack';
+import { TimelineActiveTabResourcesPanel } from '../../components/timeline/ActiveTabResourcesPanel';
+import { TimelineActiveTabResourceTrack } from '../../components/timeline/ActiveTabResourceTrack';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
@@ -52,14 +52,14 @@ describe('ActiveTabTimeline', function() {
     const {
       profile,
       parentInnerWindowIDsWithChildren,
-      firstTabBrowsingContextID,
+      firstTabTabID,
     } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
     profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
     const store = storeWithProfile(profile);
     store.dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: firstTabBrowsingContextID,
+        tabID: firstTabTabID,
       })
     );
 
@@ -82,7 +82,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const trackIndex = 0;
@@ -104,7 +104,7 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabGlobalTrack
+          <TimelineActiveTabGlobalTrack
             trackIndex={trackIndex}
             trackReference={trackReference}
             setInitialSelected={setInitialSelected}
@@ -179,7 +179,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;
@@ -187,7 +187,7 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourcesPanel
+          <TimelineActiveTabResourcesPanel
             resourceTracks={resourceTracks}
             setInitialSelected={() => {}}
           />
@@ -283,7 +283,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;
@@ -291,7 +291,7 @@ describe('ActiveTabTimeline', function() {
       const trackIndex = 1;
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourceTrack
+          <TimelineActiveTabResourceTrack
             resourceTrack={resourceTracks[1]}
             trackIndex={trackIndex}
             setInitialSelected={() => {}}

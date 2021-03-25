@@ -235,7 +235,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       thread: selectedThreadSelectors.getFilteredThread(state),
       // Use the raw WeightType here, as the stack chart does not use the call tree
       weightType: selectedThreadSelectors.getSamplesWeightType(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
+      maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
       combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),

@@ -7,7 +7,8 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import EmptyThreadIndicator, {
+import {
+  EmptyThreadIndicator,
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';

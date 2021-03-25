@@ -48,7 +48,12 @@ class AppLocalizationProviderImpl extends React.PureComponent<Props> {
   }
 
   render() {
-    const { children, localization } = this.props;
+    const { primaryLocale, children, localization } = this.props;
+    if (!primaryLocale) {
+      // The localization isn't ready.
+      return null;
+    }
+
     return (
       <LocalizationProvider l10n={localization}>
         {children}

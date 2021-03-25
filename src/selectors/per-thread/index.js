@@ -233,7 +233,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getThread,
     selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
-    selectedThreadSelectors.getSamplesForCallTree,
+    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
     selectedThreadSelectors.getUnfilteredSamplesForCallTree,
     ProfileData.getTimingsForPath
   );

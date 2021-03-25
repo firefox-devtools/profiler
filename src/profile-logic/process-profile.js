@@ -1162,10 +1162,8 @@ export function adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
-      if (newData.type === 'tracing' || newData.type === 'Styles') {
-        if (newData.cause) {
-          newData.cause.time += delta;
-        }
+      if (newData.cause) {
+        newData.cause.time += delta;
       }
       if (newData.type === 'Network') {
         if (typeof newData.domainLookupStart === 'number') {

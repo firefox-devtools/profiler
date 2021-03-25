@@ -289,7 +289,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
     `);
 
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -298,7 +298,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
   it('returns zero if there are no samples', function() {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(0);

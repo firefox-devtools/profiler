@@ -77,7 +77,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class TimelineTrackContextMenu extends PureComponent<Props> {
+class TimelineTrackContextMenuImpl extends PureComponent<Props> {
   _showAllTracks = (): void => {
     const { showAllTracks } = this.props;
     showAllTracks();
@@ -621,7 +621,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const TimelineTrackContextMenu = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -646,5 +650,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     hideLocalTrack,
     showLocalTrack,
   },
-  component: TimelineTrackContextMenu,
+  component: TimelineTrackContextMenuImpl,
 });

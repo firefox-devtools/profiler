@@ -10,6 +10,8 @@ import './index.css';
 
 import * as React from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
@@ -138,7 +140,11 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     return (
       <div className="profileInfoUploadedActions">
         <div className="profileInfoUploadedDate">
-          <span className="profileInfoUploadedLabel">Uploaded:</span>
+          <span className="profileInfoUploadedLabel">
+            <Localized id="MenuButtons--index--profile-info-uploaded-label">
+              Uploaded:
+            </Localized>
+          </span>
           {_formatDate(currentProfileUploadedInformation.publishedDate)}
         </div>
         <div className="profileInfoUploadedActionsButtons">
@@ -153,7 +159,9 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
             }
             disabled={currentProfileUploadedInformation.jwtToken === null}
           >
-            Delete
+            <Localized id="MenuButtons--index--profile-info-uploaded-actions">
+              Delete
+            </Localized>
           </button>
         </div>
       </div>
@@ -167,7 +175,11 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       case 'initial': {
         return (
           <>
-            <h2 className="metaInfoSubTitle">Profile Information</h2>
+            <h2 className="metaInfoSubTitle">
+              <Localized id="MenuButtons--index--metaInfo-subtitle">
+                Profile Information
+              </Localized>
+            </h2>
             {currentProfileUploadedInformation
               ? this._renderUploadedProfileActions(
                   currentProfileUploadedInformation
@@ -225,16 +237,22 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   _renderMetaInfoButton() {
     const { dataSource } = this.props;
     const uploadedStatus = this._getUploadedStatus(dataSource);
+    const labelL10nId =
+      uploadedStatus === 'uploaded'
+        ? 'MenuButtons--index--metaInfo-button-uploaded-profile'
+        : 'MenuButtons--index--metaInfo-button-local-profile';
+
     return (
-      <ButtonWithPanel
-        buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
-        label={
-          uploadedStatus === 'uploaded' ? 'Uploaded Profile' : 'Local Profile'
-        }
-        onPanelClose={this._resetMetaInfoState}
-        panelClassName="metaInfoPanel"
-        panelContent={this._renderMetaInfoPanel()}
-      />
+      <Localized id={labelL10nId} attrs={{ label: true }}>
+        <ButtonWithPanel
+          buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
+          // The empty string value for the label following will be replaced by the <Localized /> wrapper.
+          label=""
+          onPanelClose={this._resetMetaInfoState}
+          panelClassName="metaInfoPanel"
+          panelContent={this._renderMetaInfoPanel()}
+        />
+      </Localized>
     );
   }
 
@@ -254,7 +272,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
         onClick={this._changeTimelineTrackOrganizationToFull}
       >
-        Full View
+        <Localized id="MenuButtons--index--full-view">Full View</Localized>
       </button>
     );
   }
@@ -272,7 +290,9 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
           className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
           onClick={abortFunction}
         >
-          Cancel Upload
+          <Localized id="MenuButtons--index--cancel-upload">
+            Cancel Upload
+          </Localized>
         </button>
       );
     }
@@ -281,27 +301,30 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
-    let label = 'Upload';
+    let labelL10nId = 'MenuButtons--index--share-upload';
     if (isRepublish) {
-      label = 'Re-upload';
+      labelL10nId = 'MenuButtons--index--share-re-upload';
     }
 
     if (isError) {
-      label = 'Error uploading';
+      labelL10nId = 'MenuButtons--index--share-error-uploading';
     }
 
     return (
-      <ButtonWithPanel
-        buttonClassName={classNames(
-          'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
-          {
-            menuButtonsShareButtonError: isError,
-          }
-        )}
-        panelClassName="menuButtonsPublishPanel"
-        label={label}
-        panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
-      />
+      <Localized id={labelL10nId} attrs={{ label: true }}>
+        <ButtonWithPanel
+          buttonClassName={classNames(
+            'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
+            {
+              menuButtonsShareButtonError: isError,
+            }
+          )}
+          panelClassName="menuButtonsPublishPanel"
+          // The value for the label following will be replaced
+          label=""
+          panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
+        />
+      </Localized>
     );
   }
 
@@ -332,7 +355,9 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
-        Revert to Original Profile
+        <Localized id="MenuButtons--index--revert">
+          Revert to Original Profile
+        </Localized>
       </button>
     );
   }
@@ -351,7 +376,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
           className="menuButtonsButton menuButtonsButton-hasLeftBorder"
           title="Open the documentation in a new window"
         >
-          Docs
+          <Localized id="MenuButtons--index--docs">Docs</Localized>
           <i className="open-in-new" />
         </a>
       </>

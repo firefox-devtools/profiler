@@ -16,7 +16,7 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
-import TrackThread from '../../components/timeline/TrackThread';
+import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
@@ -112,7 +112,7 @@ describe('timeline/TrackThread', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread
+        <TimelineTrackThread
           threadsKey={threadIndex}
           trackType="expanded"
           trackName="Test Track"

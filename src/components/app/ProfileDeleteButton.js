@@ -5,6 +5,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
+
 import classNames from 'classnames';
 
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
@@ -70,27 +72,33 @@ export class ProfileDeleteButton extends PureComponent<ButtonProps> {
     } = this.props;
 
     return (
-      <ButtonWithPanel
-        ref={this._componentDeleteButtonRef}
-        buttonClassName={classNames(
-          buttonClassName,
-          'photon-button',
-          'photon-button-default'
-        )}
-        label="Delete"
-        title={`Click here to delete the profile ${smallProfileName}`}
-        onPanelOpen={this.props.onOpenConfirmDialog}
-        onPanelClose={this.onCloseConfirmDialog}
-        panelContent={
-          <ProfileDeletePanel
-            profileName={profileName}
-            profileToken={profileToken}
-            jwtToken={jwtToken}
-            onProfileDeleted={this.onProfileDeleted}
-            onProfileDeleteCanceled={this.onProfileDeleteCanceled}
-          />
-        }
-      />
+      <Localized
+        id="ProfileDeleteButton--delete-button"
+        attrs={{ label: true, title: true }}
+        vars={{ smallProfileName: smallProfileName }}
+      >
+        <ButtonWithPanel
+          ref={this._componentDeleteButtonRef}
+          buttonClassName={classNames(
+            buttonClassName,
+            'photon-button',
+            'photon-button-default'
+          )}
+          label="Delete"
+          title={`Click here to delete the profile ${smallProfileName}`}
+          onPanelOpen={this.props.onOpenConfirmDialog}
+          onPanelClose={this.onCloseConfirmDialog}
+          panelContent={
+            <ProfileDeletePanel
+              profileName={profileName}
+              profileToken={profileToken}
+              jwtToken={jwtToken}
+              onProfileDeleted={this.onProfileDeleted}
+              onProfileDeleteCanceled={this.onProfileDeleteCanceled}
+            />
+          }
+        />
+      </Localized>
     );
   }
 }

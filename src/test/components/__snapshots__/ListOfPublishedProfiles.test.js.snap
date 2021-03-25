@@ -344,7 +344,7 @@ exports[`ListOfPublishedProfiles renders action buttons when appropriate 1`] = `
           <button
             aria-expanded="false"
             class="buttonWithPanelButton publishedProfilesDeleteButton photon-button photon-button-default"
-            title="Click here to delete the profile #012345"
+            title="Click here to delete the profile ⁨#012345⁩"
             type="button"
           >
             Delete

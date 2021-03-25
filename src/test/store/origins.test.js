@@ -50,7 +50,7 @@ function getProfileWithOrigins(...originThreads: TestDefinedOriginThread[]) {
         }
       }
       pages.push({
-        browsingContextID: uniqueId++,
+        tabID: uniqueId++,
         // The arbitrary innerWindowID is set up to be the same as the thread index.
         innerWindowID,
         url: origin,

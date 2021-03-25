@@ -24,7 +24,7 @@ class DebugWarningImp extends PureComponent<Props> {
     return (
       <>
         {meta.debug ? (
-          <Warning message="This profile was recorded in a build without release optimizations. Performance obervations might not apply to the release population." />
+          <Warning message="This profile was recorded in a build without release optimizations. Performance observations might not apply to the release population." />
         ) : null}
       </>
     );
