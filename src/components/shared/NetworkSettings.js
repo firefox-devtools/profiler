@@ -5,6 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeNetworkSearchString } from 'firefox-profiler/actions/profile-view';
@@ -35,13 +36,18 @@ class NetworkSettingsImpl extends PureComponent<Props> {
     return (
       <div className="networkSettings">
         <div className="networkSettingsSpacer" />
-        <PanelSearch
-          className="networkSettingsSearchField"
-          label="Filter Networks: "
-          title="Only display network requests that match a certain name"
-          currentSearchString={searchString}
-          onSearch={this._onSearch}
-        />
+        <Localized
+          id="NetworkSettings--panel-search"
+          attrs={{ label: true, title: true }}
+        >
+          <PanelSearch
+            className="networkSettingsSearchField"
+            label="Filter Networks: "
+            title="Only display network requests that match a certain name"
+            currentSearchString={searchString}
+            onSearch={this._onSearch}
+          />
+        </Localized>
       </div>
     );
   }

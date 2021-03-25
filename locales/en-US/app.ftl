@@ -308,6 +308,12 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## NetworkSettings
+
+NetworkSettings--panel-search =
+    .label = Filter Networks:
+    .title = Only display network requests that match a certain name
+
 ## ProfileDeleteButton
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
