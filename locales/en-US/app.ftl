@@ -319,6 +319,11 @@ NetworkSettings--panel-search =
     .label = Filter Networks:
     .title = Only display network requests that match a certain name
 
+## PanelSearch
+
+PanelSearch--search-field-hint =
+    Did you know you can use the comma (,) to search using several terms?
+
 ## ProfileDeleteButton
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
