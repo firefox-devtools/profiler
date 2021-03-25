@@ -279,6 +279,10 @@ ProfileDeleteButton--delete-button =
     .label = Delete
     .title = Click here to delete the profile { $smallProfileName }
 
+## ProfileFilterNavigator
+
+ProfileFilterNavigator--full-range = Full Range
+
 ## ProfileLoaderAnimation
 
 ProfileLoaderAnimation--loading-message-unpublished =
