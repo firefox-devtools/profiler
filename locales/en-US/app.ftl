@@ -67,6 +67,21 @@ FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
 
+## FullTimeline
+
+FullTimeline--graph-type = Graph type:
+FullTimeline--categories-with-cpu = Categories with CPU
+FullTimeline--categories = Categories
+FullTimeline--stack-height = Stack height
+
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible =
+    <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks visible
+
 ## Home
 
 Home--upload-from-file-input-button = Load a profile from file
