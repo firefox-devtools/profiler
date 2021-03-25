@@ -5,22 +5,22 @@
 // @flow
 
 /**
- * This object contains all our tab slugs with their associated title. This is
- * the "main list of tabs". This is in object form because that's how we can
- * easily derive the TabSlug type with Flow.
+ * This object contains all our tab slugs with their associated title l10n Ids.
+ * This is the "main list of tabs". This is in object form because that's how we
+ * can easily derive the TabSlug type with Flow.
  */
-export const tabsWithTitle = {
-  calltree: 'Call Tree',
-  'flame-graph': 'Flame Graph',
-  'stack-chart': 'Stack Chart',
-  'marker-chart': 'Marker Chart',
-  'marker-table': 'Marker Table',
-  'network-chart': 'Network',
-  'js-tracer': 'JS Tracer',
+export const tabsWithTitleL10nId = {
+  calltree: 'TabBar--calltree-tab',
+  'flame-graph': 'TabBar--flame-graph-tab',
+  'stack-chart': 'TabBar--stack-chart-tab',
+  'marker-chart': 'TabBar--marker-chart-tab',
+  'marker-table': 'TabBar--marker-table-tab',
+  'network-chart': 'TabBar--network-tab',
+  'js-tracer': 'TabBar--js-tracer-tab',
 };
 
-export type TabSlug = $Keys<typeof tabsWithTitle>;
-export type TabWithTitle = {| name: TabSlug, title: string |};
+export type TabSlug = $Keys<typeof tabsWithTitleL10nId>;
+export type TabsWithTitleL10nId = {| name: TabSlug, title: string |};
 
 /**
  * This array contains the list of all tab slugs that we use as codes throughout
@@ -29,15 +29,15 @@ export type TabWithTitle = {| name: TabSlug, title: string |};
 export const tabSlugs: $ReadOnlyArray<TabSlug> =
   // getOwnPropertyNames is guaranteed to keep the order in which properties
   // were defined, and this order is important for us.
-  Object.getOwnPropertyNames(tabsWithTitle);
+  Object.getOwnPropertyNames(tabsWithTitleL10nId);
 
 /**
- * This array contains the same data as tabsWithTitle above, but in an ordered
+ * This array contains the same data as tabsWithTitleL10nId above, but in an ordered
  * array so that we can use it directly in some of our components.
  */
-export const tabsWithTitleArray: $ReadOnlyArray<TabWithTitle> = tabSlugs.map(
+export const tabsWithTitleL10nIdArray: $ReadOnlyArray<TabsWithTitleL10nId> = tabSlugs.map(
   tabSlug => ({
     name: tabSlug,
-    title: tabsWithTitle[tabSlug],
+    title: tabsWithTitleL10nId[tabSlug],
   })
 );

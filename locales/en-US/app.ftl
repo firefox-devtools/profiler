@@ -347,6 +347,16 @@ ServiceWorkerManager--hide-notice-button =
     .title = Hide the reload notice
     .aria-label = Hide the reload notice
 
+## TabBar
+
+TabBar--calltree-tab = Call Tree
+TabBar--flame-graph-tab = Flame Graph
+TabBar--stack-chart-tab = Stack Chart
+TabBar--marker-chart-tab = Marker Chart
+TabBar--marker-table-tab = Marker Table
+TabBar--network-tab = Network
+TabBar--js-tracer-tab = JS Tracer
+
 ## UploadedRecordingsHome
 
 UploadedRecordingsHome--title = Uploaded Recordings
