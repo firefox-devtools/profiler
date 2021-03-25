@@ -154,6 +154,13 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
+## MarkerSettings
+
+MarkerSettings--panel-search =
+    .label = Filter Markers:
+    .title = Only display markers that match a certain name
+
+
 ## These strings are used for the buttons at the top of the profile viewer.
 
 MenuButtons--index--metaInfo-button-uploaded-profile =

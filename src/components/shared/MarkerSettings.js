@@ -5,6 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
@@ -35,13 +36,18 @@ class MarkerSettingsImpl extends PureComponent<Props> {
     return (
       <div className="markerSettings">
         <div className="markerSettingsSpacer" />
-        <PanelSearch
-          className="markerSettingsSearchField"
-          label="Filter Markers: "
-          title="Only display markers that match a certain name"
-          currentSearchString={searchString}
-          onSearch={this._onSearch}
-        />
+        <Localized
+          id="MarkerSettings--panel-search"
+          attrs={{ label: true, title: true }}
+        >
+          <PanelSearch
+            className="markerSettingsSearchField"
+            label="Filter Markers: "
+            title="Only display markers that match a certain name"
+            currentSearchString={searchString}
+            onSearch={this._onSearch}
+          />
+        </Localized>
       </div>
     );
   }
