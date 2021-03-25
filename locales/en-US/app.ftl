@@ -54,6 +54,13 @@ CompareHome--form-label-profile2 = Profile 2:
 CompareHome--submit-button =
     .value = Retrieve profiles
 
+## DebugWarning
+
+DebugWarning--warning-message =
+    .message =
+    This profile was recorded in a build without release optimizations.
+    Performance observations might not apply to the release population.
+
 ## FooterLinks
 
 FooterLinks--legal = Legal
