@@ -580,7 +580,7 @@ describe('MarkerChart', function() {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text).toEqual(['Dot marker E', 'Idle']);
+      expect(text).toEqual(['Dot marker E', 'Other']);
     });
   });
 

@@ -120,7 +120,10 @@ describe('convertJsTracerToThread', function() {
       ['IonMonkey', 6, 18],
     ]);
     const existingThread = existingProfile.threads[0];
-    const categories = existingProfile.meta.categories;
+    const categories = ensureExists(
+      existingProfile.meta.categories,
+      'Expected to find categories.'
+    );
 
     const profile = getEmptyProfile();
     const jsTracer = ensureExists(existingThread.jsTracer);
@@ -152,7 +155,10 @@ describe('convertJsTracerToThread', function() {
       ['FuncB', 6, 18],
     ]);
     const existingThread = existingProfile.threads[0];
-    const categories = existingProfile.meta.categories;
+    const categories = ensureExists(
+      existingProfile.meta.categories,
+      'Expected to find categories'
+    );
     const jsTracer = ensureExists(existingThread.jsTracer);
     const thread = convertJsTracerToThread(
       existingThread,

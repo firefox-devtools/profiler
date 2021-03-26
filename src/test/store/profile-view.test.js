@@ -2012,8 +2012,8 @@ describe('getTimingsForSidebar', () => {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
           breakdownByCategory: withSingleSubcategory([
-            1, // Idle
             0, // Other
+            1, // Idle
             1, // Layout
             3, // JavaScript
             0,
@@ -2143,8 +2143,8 @@ describe('getTimingsForSidebar', () => {
           breakdownByImplementation: { native: 2 },
 
           breakdownByCategory: withSingleSubcategory([
+            0, // Other
             1, // Idle
-            0,
             1, // Layout
             0,
             0,
@@ -2187,8 +2187,8 @@ describe('getTimingsForSidebar', () => {
         value: 2,
         breakdownByImplementation: { native: 1, ion: 1 },
         breakdownByCategory: withSingleSubcategory([
-          1, // Idle
           0, // Other
+          1, // Idle
           0, // Layout
           1, // JavaScript
           0,
@@ -2517,8 +2517,8 @@ describe('getTimingsForSidebar', () => {
               native: 2,
             },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0, // Other
+              1, // Idle
               1, // Layout
               3, // JavaScript
               0,
@@ -2580,8 +2580,8 @@ describe('getTimingsForSidebar', () => {
             value: 2,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0, // Other
+              1, // Idle
               1, // Layout
               0,
               0,
@@ -2603,8 +2603,8 @@ describe('getTimingsForSidebar', () => {
             value: 1,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0,
+              1, // Idle
               0,
               0,
               0,
@@ -2633,8 +2633,8 @@ describe('getTimingsForSidebar', () => {
             value: 2,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0,
+              1, // Idle
               1, // Layout
               0,
               0,
@@ -2678,8 +2678,8 @@ describe('getTimingsForSidebar', () => {
             value: 5,
             breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
+              0, // Other
               1, // Idle
-              0,
               1, // Layout
               3, // JavaScript
               0,
@@ -2718,8 +2718,8 @@ describe('getTimingsForSidebar', () => {
         value: 1,
         breakdownByImplementation: { ion: 1 },
         breakdownByCategory: withSingleSubcategory([
-          0, // Idle
           0, // Other
+          0, // Idle
           0, // Layout
           1, // JavaScript
           0,
@@ -2945,7 +2945,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.forPath).toEqual({
         selfTime: EMPTY_TIMING,
         totalTime: {
-          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
+          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc.
           breakdownByImplementation: {
             interpreter: 1,
             native: -1,
@@ -3670,5 +3670,22 @@ describe('mouseTimePosition', function() {
 
     dispatch(ProfileView.changeMouseTimePosition(1000));
     expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBe(1000);
+  });
+});
+
+describe('timeline type', function() {
+  it('should default to the category view', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+  });
+
+  it('should use the stack height view when using an imported profile', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    delete profile.meta.categories;
+
+    // Load the store after mutating the profile.
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('stack');
   });
 });

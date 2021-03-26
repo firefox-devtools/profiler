@@ -286,7 +286,7 @@ type TranslationMapForSamples = Map<
  * It returns a translation map that can be used in `adjustCategories` later.
  */
 function mergeCategories(
-  categoriesPerThread: CategoryList[]
+  categoriesPerThread: Array<CategoryList | void>
 ): {|
   categories: CategoryList,
   translationMaps: TranslationMapForCategories[],
@@ -298,6 +298,12 @@ function mergeCategories(
   categoriesPerThread.forEach(categories => {
     const translationMap = new Map();
     translationMaps.push(translationMap);
+
+    if (!categories) {
+      // Profiles that are imported may not have categories. Ignore it when attempting
+      // to merge categories.
+      return;
+    }
 
     categories.forEach((category, i) => {
       const { name } = category;

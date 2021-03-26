@@ -224,6 +224,12 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
 
 const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
+    case 'PROFILE_LOADED':
+      if (!action.profile.meta.categories) {
+        // An imported profile did not provide its own categories. Use the stack view instead.
+        return 'stack';
+      }
+      return state;
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     case 'VIEW_FULL_PROFILE':

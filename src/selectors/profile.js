@@ -17,6 +17,7 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
+import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 
 import type {
   Profile,
@@ -148,8 +149,6 @@ export const getProfileInterval: Selector<Milliseconds> = state =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
-export const getCategories: Selector<CategoryList> = state =>
-  getProfile(state).meta.categories;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = state =>
   getCategories(state).findIndex(c => c.color === 'grey');
 export const getThreads: Selector<Thread[]> = state =>
@@ -187,6 +186,18 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
 // See SampleUnits type definition for more information.
 export const getSampleUnits: Selector<SampleUnits | void> = state =>
   getMeta(state).sampleUnits;
+
+/**
+ * Firefox profiles will always have categories. However, imported profiles may not
+ * contain default categories. In this case, provide a default list.
+ */
+export const getCategories: Selector<CategoryList> = createSelector(
+  getProfile,
+  profile => {
+    const { categories } = profile.meta;
+    return categories ? categories : getDefaultCategories();
+  }
+);
 
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
