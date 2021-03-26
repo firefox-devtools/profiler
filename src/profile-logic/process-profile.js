@@ -1377,6 +1377,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     updateChannel: geckoProfile.meta.updateChannel,
     markerSchema: processMarkerSchema(geckoProfile),
     sampleUnits: geckoProfile.meta.sampleUnits,
+    device: geckoProfile.meta.device,
   };
 
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
