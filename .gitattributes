@@ -2,3 +2,8 @@
 # and treat them like normal text.
 *.min.js binary
 *.min.css binary
+
+# The profile conversion test includes very verbose snapshots that make code diff
+# numbers non-sensical. Jest produces nice diffs if there are mismatches. These
+# snapshots behave nicer if the diffs are treated as binary.
+src/test/unit/__snapshots__/profile-conversion.test.js.snap binary
