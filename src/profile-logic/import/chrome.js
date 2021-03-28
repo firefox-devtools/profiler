@@ -483,7 +483,9 @@ async function processTracingEvents(
     profileEvents = profileEvents.concat(cpuProfiles);
   }
 
-  const getFunctionInfo = makeFunctionInfoFinder(profile.meta.categories);
+  const getFunctionInfo = makeFunctionInfoFinder(
+    ensureExists(profile.meta.categories)
+  );
 
   const threadInfoByPidAndTid = new Map();
   const threadInfoByThread = new Map();
@@ -730,7 +732,7 @@ async function extractScreenshots(
     screenshots[0]
   );
 
-  const graphicsIndex = profile.meta.categories.findIndex(
+  const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
     category => category.name === 'Graphics'
   );
 
@@ -812,7 +814,7 @@ function extractMarkers(
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
 ) {
-  const otherCategoryIndex = profile.meta.categories.findIndex(
+  const otherCategoryIndex = ensureExists(profile.meta.categories).findIndex(
     category => category.name === 'Other'
   );
   if (otherCategoryIndex === -1) {

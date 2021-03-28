@@ -407,14 +407,12 @@ describe('profileName', function() {
 describe('ctxId', function() {
   it('serializes the ctxId in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
-    const browsingContextID = 123;
+    const tabID = 123;
 
-    dispatch(
-      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
-    );
+    dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
     const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
-    expect(queryString).toContain(`ctxId=${browsingContextID}`);
+    expect(queryString).toContain(`ctxId=${tabID}`);
   });
 
   it('reflects in the state from URL', function() {
@@ -423,7 +421,7 @@ describe('ctxId', function() {
     });
     expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
-      browsingContextID: 123,
+      tabID: 123,
     });
   });
 
@@ -492,7 +490,7 @@ describe('ctxId', function() {
     expect(getView(getState()).phase).toEqual('DATA_LOADED');
     expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
-      browsingContextID: null,
+      tabID: null,
     });
   });
 });

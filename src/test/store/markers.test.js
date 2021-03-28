@@ -96,7 +96,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       ) {
         throw new Error('Expected to find marker timing, but found a string');
       }
-      expect(category).toEqual('Idle');
+      expect(category).toEqual('Other');
       expect(markerTimingA.name).toBe('Marker Name A');
       expect(markerTimingB.name).toBe('Marker Name B');
     });
@@ -108,7 +108,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
       expect(markerTiming).toEqual([
-        'Idle',
+        'Other',
         {
           name: 'Rasterize',
           // First sample is captured at time 1, so this incomplete
@@ -117,7 +117,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
           end: [1],
           index: [0],
           label: [''],
-          bucket: 'Idle',
+          bucket: 'Other',
           length: 1,
         },
       ]);
@@ -228,7 +228,7 @@ describe('selectors/getUserTimingMarkerTiming', function() {
 });
 
 describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 2;
 
   function setup(ctxId, markers: ?Array<any>) {
@@ -270,7 +270,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     );
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
@@ -280,7 +280,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       threads: [],
       features: [],
       capacity: 1000000,
-      activeBrowsingContextID: browsingContextID,
+      activeTabID: tabID,
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
@@ -288,7 +288,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID,
+          tabID,
         })
       );
     }

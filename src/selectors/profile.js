@@ -17,6 +17,7 @@ import {
   correlateIPCMarkers,
 } from '../profile-logic/marker-data';
 import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
+import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 
 import type {
   Profile,
@@ -33,7 +34,7 @@ import type {
   ProgressGraphData,
   ProfilerConfiguration,
   InnerWindowID,
-  BrowsingContextID,
+  TabID,
   Page,
   LocalTrack,
   TrackIndex,
@@ -148,8 +149,6 @@ export const getProfileInterval: Selector<Milliseconds> = state =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
-export const getCategories: Selector<CategoryList> = state =>
-  getProfile(state).meta.categories;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = state =>
   getCategories(state).findIndex(c => c.color === 'grey');
 export const getThreads: Selector<Thread[]> = state =>
@@ -188,6 +187,18 @@ const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
 export const getSampleUnits: Selector<SampleUnits | void> = state =>
   getMeta(state).sampleUnits;
 
+/**
+ * Firefox profiles will always have categories. However, imported profiles may not
+ * contain default categories. In this case, provide a default list.
+ */
+export const getCategories: Selector<CategoryList> = createSelector(
+  getProfile,
+  profile => {
+    const { categories } = profile.meta;
+    return categories ? categories : getDefaultCategories();
+  }
+);
+
 // Combine the marker schema from Gecko and the front-end. This allows the front-end
 // to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
@@ -215,17 +226,17 @@ export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelecto
   }
 );
 
-export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
+export const getActiveTabID: Selector<TabID | null> = state => {
   const configuration = getProfilerConfiguration(state);
   if (
     configuration &&
-    configuration.activeBrowsingContextID &&
-    configuration.activeBrowsingContextID !== 0
+    configuration.activeTabID &&
+    configuration.activeTabID !== 0
   ) {
-    // BrowsingContext ID can be `0` and that means Firefox has failed to get
-    // the BrowsingContextID of the active tab. We are converting that `0` to
+    // activeTabID can be `0` and that means Firefox has failed to get
+    // the TabID of the active tab. We are converting that `0` to
     // `null` here to explicitly indicate that we don't have that information.
-    return configuration.activeBrowsingContextID;
+    return configuration.activeTabID;
   }
   return null;
 };
@@ -593,69 +604,65 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 
 /**
  * Get the pages array and construct a Map of pages that we can use to get the
- * relationships of tabs. The constructed map is `Map<BrowsingContextID,Page[]>`.
- * The BrowsingContextID we use in that map is the BrowsingContextID of the
- * topmost frame. That corresponds to a tab(Side note: don't tell any platform
- * developer that this is a tab ID, they will freak out. Because in the platform
- * world this isn't a tab ID, since the iframe has a different BrowsingContext
- * than the parent. But outer most BrowsingContextID _acts_ like a tab ID for our case).
- * So we had to figure out the outer most BrowsingContextID of each element and
+ * relationships of tabs. The constructed map is `Map<TabID,Page[]>`.
+ * The TabID we use in that map is the TabID of the topmost frame. That corresponds
+ * to a tab. So we had to figure out the outer most TabID of each element and
  * constructed an intermediate map to quickly find that value.
  */
-export const getPagesMap: Selector<Map<
-  BrowsingContextID,
-  Page[]
-> | null> = createSelector(getPageList, pageList => {
-  if (pageList === null || pageList.length === 0) {
-    // There is no data, return null
-    return null;
-  }
-
-  // Constructing this map first so we won't have to walk through the page list
-  // all the time.
-  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
-
-  for (const page of pageList) {
-    innerWindowIDToPageMap.set(page.innerWindowID, page);
-  }
-
-  // Now we have a way to fastly traverse back with the previous Map.
-  // We can do construction of BrowsingContextID to Page array map.
-  const pageMap: Map<BrowsingContextID, Page[]> = new Map();
-  const appendPageMap = (browsingContextID, page) => {
-    const tabEntry = pageMap.get(browsingContextID);
-    if (tabEntry === undefined) {
-      pageMap.set(browsingContextID, [page]);
-    } else {
-      tabEntry.push(page);
+export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
+  getPageList,
+  pageList => {
+    if (pageList === null || pageList.length === 0) {
+      // There is no data, return null
+      return null;
     }
-  };
 
-  for (const page of pageList) {
-    if (page.embedderInnerWindowID === undefined) {
-      // This is the top most page, which means the web page itself.
-      appendPageMap(page.browsingContextID, page.innerWindowID);
-    } else {
-      // This is an iframe, we should find its parent to see find top most
-      // BrowsingContextID, which is the tab ID for our case.
-      const getTopMostParent = item => {
-        // We are using a Map to make this more performant.
-        // It should be 1-2 loop iteration in 99% of the cases.
-        const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
-        if (parent !== undefined) {
-          return getTopMostParent(parent);
-        }
-        return item;
-      };
+    // Constructing this map first so we won't have to walk through the page list
+    // all the time.
+    const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
 
-      const parent = getTopMostParent(page);
-      // Now we have the top most parent. We can append the pageMap.
-      appendPageMap(parent.browsingContextID, page);
+    for (const page of pageList) {
+      innerWindowIDToPageMap.set(page.innerWindowID, page);
     }
-  }
 
-  return pageMap;
-});
+    // Now we have a way to fastly traverse back with the previous Map.
+    // We can do construction of TabID to Page array map.
+    const pageMap: Map<TabID, Page[]> = new Map();
+    const appendPageMap = (tabID, page) => {
+      const tabEntry = pageMap.get(tabID);
+      if (tabEntry === undefined) {
+        pageMap.set(tabID, [page]);
+      } else {
+        tabEntry.push(page);
+      }
+    };
+
+    for (const page of pageList) {
+      if (page.embedderInnerWindowID === undefined) {
+        // This is the top most page, which means the web page itself.
+        appendPageMap(page.tabID, page.innerWindowID);
+      } else {
+        // This is an iframe, we should find its parent to see find top most
+        // TabID, which is the tab ID for our case.
+        const getTopMostParent = item => {
+          // We are using a Map to make this more performant.
+          // It should be 1-2 loop iteration in 99% of the cases.
+          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+          if (parent !== undefined) {
+            return getTopMostParent(parent);
+          }
+          return item;
+        };
+
+        const parent = getTopMostParent(page);
+        // Now we have the top most parent. We can append the pageMap.
+        appendPageMap(parent.tabID, page);
+      }
+    }
+
+    return pageMap;
+  }
+);
 
 /**
  * Return the relevant page array for active tab.
@@ -669,30 +676,26 @@ export const getPagesMap: Selector<Map<
 const _emptyRelevantPagesForActiveTab = [];
 export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
   getPagesMap,
-  getActiveBrowsingContextID,
-  (pagesMap, activeBrowsingContextID) => {
-    if (
-      pagesMap === null ||
-      pagesMap.size === 0 ||
-      activeBrowsingContextID === null
-    ) {
+  getActiveTabID,
+  (pagesMap, activeTabID) => {
+    if (pagesMap === null || pagesMap.size === 0 || activeTabID === null) {
       // Return an empty array if we want to see everything or that data is not there.
       return _emptyRelevantPagesForActiveTab;
     }
 
-    const pages = pagesMap.get(activeBrowsingContextID);
+    const pages = pagesMap.get(activeTabID);
     return pages !== undefined ? pages : _emptyRelevantPagesForActiveTab;
   }
 );
 
 /**
- * Get the page map and return the set of InnerWindowIDs by its parent BrowsingContextID.
+ * Get the page map and return the set of InnerWindowIDs by its parent TabID.
  * This is a helper selector for other selectors so we can easily get the relevant
- * InnerWindowID set of a parent BrowsingContextID. Set is useful for faster
+ * InnerWindowID set of a parent TabID. Set is useful for faster
  * filtering operations.
  */
-export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
-  BrowsingContextID,
+export const getInnerWindowIDSetByTabID: Selector<Map<
+  TabID,
   Set<InnerWindowID>
 > | null> = createSelector(getPagesMap, pagesMap => {
   if (pagesMap === null || pagesMap.size === 0) {
@@ -700,21 +703,21 @@ export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
     return null;
   }
 
-  const innerWindowIDSetByBrowsingContextID = new Map();
-  for (const [browsingContextID, pages] of pagesMap) {
-    innerWindowIDSetByBrowsingContextID.set(
-      browsingContextID,
+  const innerWindowIDSetByTabID = new Map();
+  for (const [tabID, pages] of pagesMap) {
+    innerWindowIDSetByTabID.set(
+      tabID,
       new Set(pages.map(page => page.innerWindowID))
     );
   }
-  return innerWindowIDSetByBrowsingContextID;
+  return innerWindowIDSetByTabID;
 });
 
 /**
  * Get the page map and the active tab ID, then return the InnerWindowIDs that
  * are related to this active tab. This is a fairly simple map element access.
- * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
- * the getInnerWindowIDSetByBrowsingContextID selector.
+ * The `TabID -> Set<InnerWindowID>` construction happens inside
+ * the getInnerWindowIDSetByTabID selector.
  * This function returns the Set all the time even though we are not in the active
  * tab view at the moment. Ideally you should use the wrapper
  * getRelevantInnerWindowIDsForCurrentTab function if you want to do something
@@ -725,19 +728,15 @@ export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
 export const getRelevantInnerWindowIDsForActiveTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  getInnerWindowIDSetByBrowsingContextID,
-  getActiveBrowsingContextID,
-  (pagesMap, activeBrowsingContextID) => {
-    if (
-      pagesMap === null ||
-      pagesMap.size === 0 ||
-      activeBrowsingContextID === null
-    ) {
+  getInnerWindowIDSetByTabID,
+  getActiveTabID,
+  (pagesMap, activeTabID) => {
+    if (pagesMap === null || pagesMap.size === 0 || activeTabID === null) {
       // Return an empty set if we want to see everything or that data is not there.
       return new Set();
     }
 
-    const pageSet = pagesMap.get(activeBrowsingContextID);
+    const pageSet = pagesMap.get(activeTabID);
     return pageSet !== undefined ? pageSet : new Set();
   }
 );

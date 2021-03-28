@@ -6,13 +6,7 @@
 import { CallTree } from '../profile-logic/call-tree';
 import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
-import type {
-  Profile,
-  Thread,
-  ThreadIndex,
-  Pid,
-  BrowsingContextID,
-} from './profile';
+import type { Profile, Thread, ThreadIndex, Pid, TabID } from './profile';
 import type {
   CallNodePath,
   CallNodeTable,
@@ -323,7 +317,7 @@ type ReceiveProfileAction =
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
-      +browsingContextID: BrowsingContextID | null,
+      +tabID: TabID | null,
     |}
   | {|
       +type: 'DATA_RELOAD',

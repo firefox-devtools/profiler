@@ -52,14 +52,14 @@ describe('ActiveTabTimeline', function() {
     const {
       profile,
       parentInnerWindowIDsWithChildren,
-      firstTabBrowsingContextID,
+      firstTabTabID,
     } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
     profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
     const store = storeWithProfile(profile);
     store.dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: firstTabBrowsingContextID,
+        tabID: firstTabTabID,
       })
     );
 
@@ -82,7 +82,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const trackIndex = 0;
@@ -179,7 +179,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;
@@ -283,7 +283,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;

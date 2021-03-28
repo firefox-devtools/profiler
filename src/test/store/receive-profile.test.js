@@ -7,6 +7,7 @@ import type { Profile } from 'firefox-profiler/types';
 
 import { oneLineTrim } from 'common-tags';
 
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getEmptyProfile,
   getEmptyThread,
@@ -154,8 +155,14 @@ describe('actions/receive-profile', function() {
       );
 
       const [idleThread, workThread] = profile.threads;
-      const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({
+      const idleCategoryIndex = ensureExists(
+        profile.meta.categories,
+        'Expected to find categories'
+      ).length;
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).push({
         name: 'Idle',
         color: '#fff',
         subcategories: ['Other'],
@@ -425,7 +432,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('changeTimelineTrackOrganization', function() {
-    const browsingContextID = 123;
+    const tabID = 123;
     const innerWindowID = 111111;
     function setup(initializeCtxId: boolean = false) {
       const store = blankStore();
@@ -439,11 +446,11 @@ describe('actions/receive-profile', function() {
         threads: [],
         features: [],
         capacity: 1000000,
-        activeBrowsingContextID: browsingContextID,
+        activeTabID: tabID,
       };
       profile.pages = [
         {
-          browsingContextID: browsingContextID,
+          tabID: tabID,
           innerWindowID: innerWindowID,
           url: 'URL',
           embedderInnerWindowID: 0,
@@ -455,7 +462,7 @@ describe('actions/receive-profile', function() {
         store.dispatch(
           changeTimelineTrackOrganization({
             type: 'active-tab',
-            browsingContextID,
+            tabID,
           })
         );
       }
@@ -473,14 +480,14 @@ describe('actions/receive-profile', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID,
+          tabID,
         })
       );
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       });
     });
 
@@ -490,7 +497,7 @@ describe('actions/receive-profile', function() {
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       });
       dispatch(changeTimelineTrackOrganization({ type: 'full' }));
       expect(

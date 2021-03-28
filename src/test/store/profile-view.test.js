@@ -54,7 +54,7 @@ import {
 import type {
   TrackReference,
   Milliseconds,
-  BrowsingContextID,
+  TabID,
   Thread,
 } from 'firefox-profiler/types';
 
@@ -1569,7 +1569,7 @@ describe('actions/ProfileView', function() {
  * of mechanically running through the selectors in tests.
  */
 describe('snapshots of selectors/profile', function() {
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 2;
 
   // Set up a profile that has some nice features that can show that the selectors work.
@@ -1590,7 +1590,7 @@ describe('snapshots of selectors/profile', function() {
 
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
@@ -1601,7 +1601,7 @@ describe('snapshots of selectors/profile', function() {
       threads: [],
       features: [],
       capacity: 1000000,
-      activeBrowsingContextID: browsingContextID,
+      activeTabID: tabID,
     };
 
     const [samplesThread] = profile.threads;
@@ -1743,9 +1743,7 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
     const { getState, dispatch } = setupStore();
 
-    dispatch(
-      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
-    );
+    dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
     expect(
       selectedThreadSelectors.getTabFilteredThread(getState())
     ).toMatchSnapshot();
@@ -2014,8 +2012,8 @@ describe('getTimingsForSidebar', () => {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
           breakdownByCategory: withSingleSubcategory([
-            1, // Idle
             0, // Other
+            1, // Idle
             1, // Layout
             3, // JavaScript
             0,
@@ -2145,8 +2143,8 @@ describe('getTimingsForSidebar', () => {
           breakdownByImplementation: { native: 2 },
 
           breakdownByCategory: withSingleSubcategory([
+            0, // Other
             1, // Idle
-            0,
             1, // Layout
             0,
             0,
@@ -2189,8 +2187,8 @@ describe('getTimingsForSidebar', () => {
         value: 2,
         breakdownByImplementation: { native: 1, ion: 1 },
         breakdownByCategory: withSingleSubcategory([
-          1, // Idle
           0, // Other
+          1, // Idle
           0, // Layout
           1, // JavaScript
           0,
@@ -2519,8 +2517,8 @@ describe('getTimingsForSidebar', () => {
               native: 2,
             },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0, // Other
+              1, // Idle
               1, // Layout
               3, // JavaScript
               0,
@@ -2582,8 +2580,8 @@ describe('getTimingsForSidebar', () => {
             value: 2,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0, // Other
+              1, // Idle
               1, // Layout
               0,
               0,
@@ -2605,8 +2603,8 @@ describe('getTimingsForSidebar', () => {
             value: 1,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0,
+              1, // Idle
               0,
               0,
               0,
@@ -2635,8 +2633,8 @@ describe('getTimingsForSidebar', () => {
             value: 2,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
-              1, // Idle
               0,
+              1, // Idle
               1, // Layout
               0,
               0,
@@ -2680,8 +2678,8 @@ describe('getTimingsForSidebar', () => {
             value: 5,
             breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
+              0, // Other
               1, // Idle
-              0,
               1, // Layout
               3, // JavaScript
               0,
@@ -2720,8 +2718,8 @@ describe('getTimingsForSidebar', () => {
         value: 1,
         breakdownByImplementation: { ion: 1 },
         breakdownByCategory: withSingleSubcategory([
-          0, // Idle
           0, // Other
+          0, // Idle
           0, // Layout
           1, // JavaScript
           0,
@@ -2947,7 +2945,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.forPath).toEqual({
         selfTime: EMPTY_TIMING,
         totalTime: {
-          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
+          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc.
           breakdownByImplementation: {
             interpreter: 1,
             native: -1,
@@ -3294,14 +3292,14 @@ describe('right clicked marker info', () => {
 
 describe('pages and active tab selectors', function() {
   // Setting some IDs here so we can use those inside the setup and test functions.
-  const firstTabBrowsingContextID = 1;
-  const secondTabBrowsingContextID = 4;
+  const firstTabTabID = 1;
+  const secondTabTabID = 4;
 
-  // Setup an empty profile with pages array and activeBrowsingContextID
-  function setup(activeBrowsingContextID: BrowsingContextID) {
+  // Setup an empty profile with pages array and activeTabID
+  function setup(activeTabID: TabID) {
     const { profile, ...pageInfo } = addActiveTabInformationToProfile(
       getEmptyProfile(),
-      activeBrowsingContextID
+      activeTabID
     );
     // Adding an empty thread to the profile so the loadProfile function won't complain
     profile.threads.push(getEmptyThread());
@@ -3310,46 +3308,42 @@ describe('pages and active tab selectors', function() {
     dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: activeBrowsingContextID,
+        tabID: activeTabID,
       })
     );
     return { profile, dispatch, getState, ...pageInfo };
   }
 
-  it('getInnerWindowIDSetByBrowsingContextID will construct the whole map correctly', function() {
+  it('getInnerWindowIDSetByTabID will construct the whole map correctly', function() {
     const { getState, fistTabInnerWindowIDs, secondTabInnerWindowIDs } = setup(
-      firstTabBrowsingContextID
+      firstTabTabID
     ); // the given argument is not important for this test
     const objectResult = [
-      [firstTabBrowsingContextID, new Set(fistTabInnerWindowIDs)],
-      [secondTabBrowsingContextID, new Set(secondTabInnerWindowIDs)],
+      [firstTabTabID, new Set(fistTabInnerWindowIDs)],
+      [secondTabTabID, new Set(secondTabInnerWindowIDs)],
     ];
     const result = new Map(objectResult);
-    expect(
-      ProfileViewSelectors.getInnerWindowIDSetByBrowsingContextID(getState())
-    ).toEqual(result);
+    expect(ProfileViewSelectors.getInnerWindowIDSetByTabID(getState())).toEqual(
+      result
+    );
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
-    const { getState, fistTabInnerWindowIDs } = setup(
-      firstTabBrowsingContextID
-    );
+    const { getState, fistTabInnerWindowIDs } = setup(firstTabTabID);
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
-    const { getState, secondTabInnerWindowIDs } = setup(
-      secondTabBrowsingContextID
-    );
+    const { getState, secondTabInnerWindowIDs } = setup(secondTabTabID);
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will return an empty set for an ID that is not in the array', function() {
-    const { getState } = setup(99999); // a non-existent BrowsingContextID
+    const { getState } = setup(99999); // a non-existent TabID
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set());
@@ -3676,5 +3670,22 @@ describe('mouseTimePosition', function() {
 
     dispatch(ProfileView.changeMouseTimePosition(1000));
     expect(ProfileViewSelectors.getMouseTimePosition(getState())).toBe(1000);
+  });
+});
+
+describe('timeline type', function() {
+  it('should default to the category view', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+  });
+
+  it('should use the stack height view when using an imported profile', () => {
+    const { profile } = getProfileFromTextSamples('A');
+    delete profile.meta.categories;
+
+    // Load the store after mutating the profile.
+    const { getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('stack');
   });
 });

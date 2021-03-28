@@ -663,7 +663,7 @@ describe('app/MenuButtons', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: null,
+          tabID: null,
         })
       );
 
@@ -684,7 +684,7 @@ describe('app/MenuButtons', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: null,
+          tabID: null,
         })
       );
 

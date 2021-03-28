@@ -17,12 +17,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -37,12 +37,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -61,11 +61,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -77,11 +77,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -159,12 +159,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -179,12 +179,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -203,11 +203,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -219,11 +219,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -1151,6 +1151,38 @@ Array [
     "#d7d7db",
   ],
   Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
     "beginPath",
   ],
   Array [
@@ -1803,38 +1835,6 @@ Array [
   ],
   Array [
     "fill",
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db60",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe90060",
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe900",
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe90060",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "#6200a460",
-  ],
-  Array [
-    "set fillStyle",
-    "#6200a4",
   ],
   Array [
     "set fillStyle",
@@ -2332,140 +2332,6 @@ Array [
     "#0060df",
   ],
   Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    9.428571425378323,
-  ],
-  Array [
-    "lineTo",
-    1,
-    8.85714277625084,
-  ],
-  Array [
-    "lineTo",
-    2,
-    7.999999970197678,
-  ],
-  Array [
-    "lineTo",
-    3,
-    6.914285719394684,
-  ],
-  Array [
-    "lineTo",
-    4,
-    5.657142698764801,
-  ],
-  Array [
-    "lineTo",
-    5,
-    4.342857003211975,
-  ],
-  Array [
-    "lineTo",
-    6,
-    3.0857139825820923,
-  ],
-  Array [
-    "lineTo",
-    7,
-    1.9999998807907104,
-  ],
-  Array [
-    "lineTo",
-    8,
-    1.1428570747375488,
-  ],
-  Array [
-    "lineTo",
-    9,
-    0.5714285373687744,
-  ],
-  Array [
-    "lineTo",
-    10,
-    0.22857129573822021,
-  ],
-  Array [
-    "lineTo",
-    11,
-    0.05714297294616699,
-  ],
-  Array [
-    "lineTo",
-    12,
-    0,
-  ],
-  Array [
-    "lineTo",
-    11,
-    0,
-  ],
-  Array [
-    "lineTo",
-    10,
-    0,
-  ],
-  Array [
-    "lineTo",
-    9,
-    0,
-  ],
-  Array [
-    "lineTo",
-    8,
-    0,
-  ],
-  Array [
-    "lineTo",
-    7,
-    0,
-  ],
-  Array [
-    "lineTo",
-    6,
-    0.05714237689971924,
-  ],
-  Array [
-    "lineTo",
-    5,
-    0.22857129573822021,
-  ],
-  Array [
-    "lineTo",
-    4,
-    0.5714285373687744,
-  ],
-  Array [
-    "lineTo",
-    3,
-    1.3142859935760498,
-  ],
-  Array [
-    "lineTo",
-    2,
-    2.457142472267151,
-  ],
-  Array [
-    "lineTo",
-    1,
-    4.399999976158142,
-  ],
-  Array [
-    "lineTo",
-    0,
-    6.228571236133575,
-  ],
-  Array [
-    "closePath",
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
     "set fillStyle",
     "#0060df60",
   ],
@@ -2629,12 +2495,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -2649,12 +2515,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -2673,11 +2539,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -2689,11 +2555,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -2771,12 +2637,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -2791,12 +2657,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -2815,11 +2681,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -2831,11 +2697,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -3761,6 +3627,38 @@ Array [
   Array [
     "set fillStyle",
     "#d7d7db",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
   ],
   Array [
     "beginPath",
@@ -4493,38 +4391,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#d7d7db60",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe90060",
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe900",
-  ],
-  Array [
-    "set fillStyle",
-    "#ffe90060",
-  ],
-  Array [
-    "set fillStyle",
-    Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "#6200a460",
-  ],
-  Array [
-    "set fillStyle",
-    "#6200a4",
-  ],
-  Array [
-    "set fillStyle",
     "#6200a460",
   ],
   Array [
@@ -5017,140 +4883,6 @@ Array [
   Array [
     "set fillStyle",
     "#0060df",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    9.771428555250168,
-  ],
-  Array [
-    "lineTo",
-    1,
-    9.542857147753239,
-  ],
-  Array [
-    "lineTo",
-    2,
-    9.200000017881393,
-  ],
-  Array [
-    "lineTo",
-    3,
-    8.76571424305439,
-  ],
-  Array [
-    "lineTo",
-    4,
-    8.262857049703598,
-  ],
-  Array [
-    "lineTo",
-    5,
-    7.737142741680145,
-  ],
-  Array [
-    "lineTo",
-    6,
-    7.234285771846771,
-  ],
-  Array [
-    "lineTo",
-    7,
-    6.800000071525574,
-  ],
-  Array [
-    "lineTo",
-    8,
-    6.422857046127319,
-  ],
-  Array [
-    "lineTo",
-    9,
-    6.0914283990859985,
-  ],
-  Array [
-    "lineTo",
-    10,
-    5.748571455478668,
-  ],
-  Array [
-    "lineTo",
-    11,
-    5.3371429443359375,
-  ],
-  Array [
-    "lineTo",
-    12,
-    4.800000190734863,
-  ],
-  Array [
-    "lineTo",
-    11,
-    5.314285755157471,
-  ],
-  Array [
-    "lineTo",
-    10,
-    5.657142996788025,
-  ],
-  Array [
-    "lineTo",
-    9,
-    5.862857103347778,
-  ],
-  Array [
-    "lineTo",
-    8,
-    5.965714156627655,
-  ],
-  Array [
-    "lineTo",
-    7,
-    6.000000238418579,
-  ],
-  Array [
-    "lineTo",
-    6,
-    6.022857129573822,
-  ],
-  Array [
-    "lineTo",
-    5,
-    6.0914283990859985,
-  ],
-  Array [
-    "lineTo",
-    4,
-    6.228571534156799,
-  ],
-  Array [
-    "lineTo",
-    3,
-    6.525714099407196,
-  ],
-  Array [
-    "lineTo",
-    2,
-    6.98285698890686,
-  ],
-  Array [
-    "lineTo",
-    1,
-    7.759999930858612,
-  ],
-  Array [
-    "lineTo",
-    0,
-    8.49142849445343,
-  ],
-  Array [
-    "closePath",
-  ],
-  Array [
-    "fill",
   ],
   Array [
     "set fillStyle",

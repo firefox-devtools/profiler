@@ -295,8 +295,10 @@ export function getEmptyExtensions(): ExtensionTable {
 
 export function getDefaultCategories(): CategoryList {
   return [
-    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    // Make sure 'Other' is at index 0, as it's used as the category for stacks when no
+    // categories are provided by an imported (non-Gecko profiler) profile.
     { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
     { name: 'Layout', color: 'purple', subcategories: ['Other'] },
     { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
     { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
