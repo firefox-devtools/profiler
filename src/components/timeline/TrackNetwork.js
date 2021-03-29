@@ -11,7 +11,7 @@ import {
   getCommittedRange,
   getZeroAt,
   getPageList,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { VerticalIndicators } from './VerticalIndicators';
 import {
@@ -21,6 +21,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import type {
+  CssPixels,
   ThreadIndex,
   PageList,
   Marker,
@@ -34,60 +35,37 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackNetwork.css';
 
-type OwnProps = {|
-  +threadIndex: ThreadIndex,
-|};
-
-type StateProps = {|
-  +pages: PageList | null,
+/**
+ * When adding properties to these props, please consider the comment above the component.
+ */
+type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +zeroAt: Milliseconds,
-  +getMarker: MarkerIndex => Marker,
+  +width: CssPixels,
   +networkTiming: MarkerTiming[],
-  +verticalMarkerIndexes: MarkerIndex[],
 |};
-type DispatchProps = {||};
-type Props = {|
-  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
-  ...SizeProps,
-|};
-type State = void;
 
-class Network extends PureComponent<Props, State> {
-  _canvas: null | HTMLCanvasElement = null;
+/**
+ * This component controls the rendering of the canvas. Every render call through
+ * React triggers a new canvas render. Because of this, it's important to only pass
+ * in the props that are needed for the canvas draw call.
+ */
+class NetworkCanvas extends PureComponent<CanvasProps> {
   _requestedAnimationFrame: boolean = false;
-
-  _resizeListener = () => {
-    this.forceUpdate();
-  };
-
-  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    this._canvas = canvas;
-  };
+  _canvas = React.createRef<HTMLCanvasElement>();
 
   _scheduleDraw() {
     if (!this._requestedAnimationFrame) {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
-        const canvas = this._canvas;
+        const canvas = this._canvas.current;
         if (canvas) {
           this.drawCanvas(canvas);
         }
       });
     }
   }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._resizeListener);
-    this.forceUpdate(); // for initial size
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._resizeListener);
-  }
-
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       rangeStart,
@@ -127,6 +105,33 @@ class Network extends PureComponent<Props, State> {
   }
 
   render() {
+    this._scheduleDraw();
+    return <canvas className="timelineTrackNetworkCanvas" ref={this._canvas} />;
+  }
+}
+
+type OwnProps = {|
+  +threadIndex: ThreadIndex,
+|};
+
+type StateProps = {|
+  +pages: PageList | null,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +zeroAt: Milliseconds,
+  +getMarker: MarkerIndex => Marker,
+  +networkTiming: MarkerTiming[],
+  +verticalMarkerIndexes: MarkerIndex[],
+|};
+type DispatchProps = {||};
+type Props = {|
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+  ...SizeProps,
+|};
+type State = void;
+
+class Network extends PureComponent<Props, State> {
+  render() {
     const {
       pages,
       rangeStart,
@@ -134,8 +139,9 @@ class Network extends PureComponent<Props, State> {
       getMarker,
       verticalMarkerIndexes,
       zeroAt,
+      networkTiming,
+      width: containerWidth,
     } = this.props;
-    this._scheduleDraw();
 
     return (
       <div
@@ -144,9 +150,11 @@ class Network extends PureComponent<Props, State> {
           height: TRACK_NETWORK_HEIGHT,
         }}
       >
-        <canvas
-          className="timelineTrackNetworkCanvas"
-          ref={this._takeCanvasRef}
+        <NetworkCanvas
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          networkTiming={networkTiming}
+          width={containerWidth}
         />
         <VerticalIndicators
           verticalMarkerIndexes={verticalMarkerIndexes}
