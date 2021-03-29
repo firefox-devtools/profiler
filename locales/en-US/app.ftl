@@ -85,6 +85,7 @@ FullTimeline--stack-height = Stack height
 
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
@@ -128,11 +129,13 @@ Home--compare-recordings-info = You can also compare recordings. <a>Open the com
 Home--recent-uploaded-recordings-title = Recent uploaded recordings
 
 ## IdleSearchField
+## The component that is used for all the search inputs in the application.
 
 IdleSearchField--search-input =
     .placeholder = Enter filter terms
 
 ## JsTracerSettings
+## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
 JsTracerSettings--show-only-self-time = Show only self time
 
