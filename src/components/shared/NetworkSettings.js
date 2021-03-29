@@ -42,7 +42,7 @@ class NetworkSettingsImpl extends PureComponent<Props> {
         >
           <PanelSearch
             className="networkSettingsSearchField"
-            label="Filter Networks: "
+            label="Filter Networks:"
             title="Only display network requests that match a certain name"
             currentSearchString={searchString}
             onSearch={this._onSearch}

@@ -42,7 +42,7 @@ class MarkerSettingsImpl extends PureComponent<Props> {
         >
           <PanelSearch
             className="markerSettingsSearchField"
-            label="Filter Markers: "
+            label="Filter Markers:"
             title="Only display markers that match a certain name"
             currentSearchString={searchString}
             onSearch={this._onSearch}

@@ -243,7 +243,7 @@ class StackSettingsImpl extends PureComponent<Props> {
         >
           <PanelSearch
             className="stackSettingsSearchField"
-            label="Filter stacks: "
+            label="Filter stacks:"
             title="Only display stacks which contain a function whose name matches this substring"
             currentSearchString={currentSearchString}
             onSearch={this._onSearch}
