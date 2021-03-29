@@ -20,6 +20,7 @@ const config = {
       // Note: the alias for firefox-profiler is defined at the Babel level, so
       // that Jest can profit from it too.
       'firefox-profiler-res': path.resolve(__dirname, 'res'),
+      extensions: ['.js', '.jsx'],
     },
   },
   experiments: {
@@ -30,7 +31,7 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx)$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
