@@ -220,6 +220,7 @@ MenuButtons--metaInfo--build-type = Build Type:
 MenuButtons--metaInfo--build-type-debug = Debug
 MenuButtons--metaInfo--build-type-opt = Opt
 MenuButtons--metaInfo--platform = Platform
+MenuButtons--metaInfo--device = Device:
 
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = OS:
