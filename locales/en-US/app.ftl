@@ -58,8 +58,8 @@ CompareHome--submit-button =
 
 DebugWarning--warning-message =
     .message =
-    This profile was recorded in a build without release optimizations.
-    Performance observations might not apply to the release population.
+        This profile was recorded in a build without release optimizations.
+        Performance observations might not apply to the release population.
 
 ## Details
 
