@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TabBar } from './TabBar';
@@ -67,20 +68,30 @@ class ProfileViewerImpl extends PureComponent<Props> {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
     const extraButton = hasSidebar && (
-      <button
-        className={classNames(
-          'sidebar-open-close-button',
-          'photon-button',
-          'photon-button-ghost',
-          {
-            'sidebar-open-close-button-isopen': isSidebarOpen,
-            'sidebar-open-close-button-isclosed': !isSidebarOpen,
-          }
-        )}
-        title={isSidebarOpen ? 'Close the sidebar' : 'Open the sidebar'}
-        type="button"
-        onClick={this._onClickSidebarButton}
-      />
+      <Localized
+        id={
+          isSidebarOpen
+            ? 'Details--close-sidebar-button'
+            : 'Details--open-sidebar-button'
+        }
+        attrs={{ title: true }}
+        vars={{ isSidebarOpen: isSidebarOpen }}
+      >
+        <button
+          className={classNames(
+            'sidebar-open-close-button',
+            'photon-button',
+            'photon-button-ghost',
+            {
+              'sidebar-open-close-button-isopen': isSidebarOpen,
+              'sidebar-open-close-button-isclosed': !isSidebarOpen,
+            }
+          )}
+          title={isSidebarOpen ? 'Close the sidebar' : 'Open the sidebar'}
+          type="button"
+          onClick={this._onClickSidebarButton}
+        />
+      </Localized>
     );
 
     return (
@@ -91,22 +102,27 @@ class ProfileViewerImpl extends PureComponent<Props> {
           onSelectTab={this._onSelectTab}
           extraElements={extraButton}
         />
-        <ErrorBoundary
-          key={selectedTab}
-          message="Uh oh, some unknown error happened in this panel."
+        <Localized
+          id="Details--error-boundary-message"
+          attrs={{ message: true }}
         >
-          {
+          <ErrorBoundary
+            key={selectedTab}
+            message="Uh oh, some unknown error happened in this panel."
+          >
             {
-              calltree: <ProfileCallTreeView />,
-              'flame-graph': <FlameGraph />,
-              'stack-chart': <StackChart />,
-              'marker-chart': <MarkerChart />,
-              'marker-table': <MarkerTable />,
-              'network-chart': <NetworkChart />,
-              'js-tracer': <JsTracer />,
-            }[selectedTab]
-          }
-        </ErrorBoundary>
+              {
+                calltree: <ProfileCallTreeView />,
+                'flame-graph': <FlameGraph />,
+                'stack-chart': <StackChart />,
+                'marker-chart': <MarkerChart />,
+                'marker-table': <MarkerTable />,
+                'network-chart': <NetworkChart />,
+                'js-tracer': <JsTracer />,
+              }[selectedTab]
+            }
+          </ErrorBoundary>
+        </Localized>
         <CallNodeContextMenu />
         <MaybeMarkerContextMenu />
       </div>

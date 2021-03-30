@@ -64,7 +64,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -77,7 +77,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>
@@ -579,7 +579,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -592,7 +592,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>
@@ -1042,7 +1042,7 @@ exports[`StackChart matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -1055,7 +1055,7 @@ exports[`StackChart matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>

@@ -10,7 +10,6 @@ exports[`Timeline renders the header 1`] = `
       class="timelineSettingsToggle"
     >
       Graph type:
-       
       <label
         class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
@@ -41,16 +40,15 @@ exports[`Timeline renders the header 1`] = `
     <span
       class="timelineSettingsHiddenTracksNumber"
     >
-      4
+      ⁨4⁩
     </span>
      / 
     <span
       class="timelineSettingsHiddenTracksNumber"
     >
-      4
-       
+      ⁨4⁩
     </span>
-    tracks visible
+     tracks visible
   </button>
 </div>
 `;
