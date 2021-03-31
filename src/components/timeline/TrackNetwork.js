@@ -43,6 +43,7 @@ import './TrackNetwork.css';
 type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +hoveredMarkerIndex: MarkerIndex | null,
   +width: CssPixels,
   +networkTiming: MarkerTiming[],
   +onHoveredMarkerChange: (
@@ -134,9 +135,12 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       networkTiming,
+      hoveredMarkerIndex,
       width: containerWidth,
     } = this.props;
 
+    const NORMAL_STYLE = 'rgba(0, 127, 255, 0.3)';
+    const HOVERED_STYLE = '#0069aa';
     const rangeLength = rangeEnd - rangeStart;
 
     const devicePixelRatio = window.devicePixelRatio;
@@ -145,10 +149,12 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     canvas.height = Math.round(TRACK_NETWORK_HEIGHT * devicePixelRatio);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'rgba(0, 127, 255, 0.3)';
+    ctx.strokeStyle = NORMAL_STYLE;
 
     ctx.lineCap = 'round';
     ctx.lineWidth = rowHeight * 0.75;
+
+    let hoveredPath = null;
     for (let rowIndex = 0; rowIndex < networkTiming.length; rowIndex++) {
       const timing = networkTiming[rowIndex];
       for (let timingIndex = 0; timingIndex < timing.length; timingIndex++) {
@@ -159,11 +165,21 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
           (canvas.width / rangeLength) * (timing.end[timingIndex] - rangeStart);
         const y =
           (rowIndex % TRACK_NETWORK_ROW_REPEAT) * rowHeight + rowHeight * 0.5;
-        ctx.beginPath();
-        ctx.moveTo(start, y);
-        ctx.lineTo(end, y);
-        ctx.stroke();
+        const path = new Path2D();
+        path.moveTo(start, y);
+        path.lineTo(end, y);
+        if (timing.index[timingIndex] === hoveredMarkerIndex) {
+          // Save the hovered path to draw it at the end, on top of everything else.
+          hoveredPath = path;
+        } else {
+          ctx.stroke(path);
+        }
       }
+    }
+
+    if (hoveredPath) {
+      ctx.strokeStyle = HOVERED_STYLE;
+      ctx.stroke(hoveredPath);
     }
   }
 
@@ -230,6 +246,7 @@ class Network extends PureComponent<Props, State> {
       networkTiming,
       width: containerWidth,
     } = this.props;
+    const { hoveredMarkerIndex } = this.state;
 
     return (
       <div
@@ -242,6 +259,7 @@ class Network extends PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           networkTiming={networkTiming}
+          hoveredMarkerIndex={hoveredMarkerIndex}
           width={containerWidth}
           onHoveredMarkerChange={this._onHoveredMarkerChange}
         />
