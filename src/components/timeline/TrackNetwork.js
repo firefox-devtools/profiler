@@ -6,19 +6,21 @@
 
 import React, { PureComponent } from 'react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
-import explicitConnect from 'firefox-profiler/utils/connect';
+import { VerticalIndicators } from './VerticalIndicators';
+
 import {
   getCommittedRange,
   getZeroAt,
   getPageList,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { VerticalIndicators } from './VerticalIndicators';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
   TRACK_NETWORK_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 import type {
   CssPixels,
@@ -43,6 +45,11 @@ type CanvasProps = {|
   +rangeEnd: Milliseconds,
   +width: CssPixels,
   +networkTiming: MarkerTiming[],
+  +onHoveredMarkerChange: (
+    hoveredMarkerIndex: MarkerIndex | null,
+    mouseX?: CssPixels,
+    mouseY?: CssPixels
+  ) => void,
 |};
 
 /**
@@ -53,6 +60,61 @@ type CanvasProps = {|
 class NetworkCanvas extends PureComponent<CanvasProps> {
   _requestedAnimationFrame: boolean = false;
   _canvas = React.createRef<HTMLCanvasElement>();
+
+  _hitTest(e: SyntheticMouseEvent<>): MarkerIndex | null {
+    const { rangeStart, rangeEnd, networkTiming, width } = this.props;
+    // React's Synthetic event doesn't have these properties, but the native event does.
+    const { offsetX: x, offsetY: y } = e.nativeEvent;
+
+    const row = Math.floor(y / TRACK_NETWORK_ROW_HEIGHT);
+    const rangeLength = rangeEnd - rangeStart;
+    const time = rangeStart + (x / width) * rangeLength;
+
+    // Row i matches network timing's rows i, i + TRACK_NETWORK_ROW_REPEAT, i +
+    // TRACK_NETWORK_ROW_REPEAT * 2, etc
+    // In each of these row, there can be either 0 or 1 marker that contains
+    // this time. We want to keep the marker that's the closest to the time, and
+    // these 2 variables will help us with that.
+    let closestMarkerIndex = null;
+    let closestMarkerStart = -Infinity;
+    for (let i = row; i < networkTiming.length; i += TRACK_NETWORK_ROW_REPEAT) {
+      const timingRow = networkTiming[i];
+
+      // Bisection returns the index where we would insert the element.
+      // Therefore the previous index is where the closest smaller start is,
+      // that's the only one in this row that could contain this time.
+      const indexInRow = bisectionRight(timingRow.start, time) - 1;
+
+      if (indexInRow < 0) {
+        // All markers on this row are after this time.
+        continue;
+      }
+
+      const start = timingRow.start[indexInRow];
+      const end = timingRow.end[indexInRow];
+
+      if (end < time) {
+        // The marker we found ends before this time.
+        continue;
+      }
+
+      if (start > closestMarkerStart) {
+        closestMarkerStart = start;
+        closestMarkerIndex = timingRow.index[indexInRow];
+      }
+    }
+
+    return closestMarkerIndex;
+  }
+
+  _onMouseLeave = () => {
+    this.props.onHoveredMarkerChange(null);
+  };
+
+  _onMouseMove = (e: SyntheticMouseEvent<>) => {
+    const hoveredMarkerIndex = this._hitTest(e);
+    this.props.onHoveredMarkerChange(hoveredMarkerIndex, e.pageX, e.pageY);
+  };
 
   _scheduleDraw() {
     if (!this._requestedAnimationFrame) {
@@ -66,6 +128,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
       });
     }
   }
+
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       rangeStart,
@@ -106,7 +169,14 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
 
   render() {
     this._scheduleDraw();
-    return <canvas className="timelineTrackNetworkCanvas" ref={this._canvas} />;
+    return (
+      <canvas
+        className="timelineTrackNetworkCanvas"
+        ref={this._canvas}
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
+      />
+    );
   }
 }
 
@@ -128,9 +198,27 @@ type Props = {|
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
   ...SizeProps,
 |};
-type State = void;
+type State = {|
+  +hoveredMarkerIndex: MarkerIndex | null,
+|};
 
 class Network extends PureComponent<Props, State> {
+  state = { hoveredMarkerIndex: null };
+
+  _onHoveredMarkerChange = (hoveredMarkerIndex: MarkerIndex | null) => {
+    if (hoveredMarkerIndex === null) {
+      if (!window.persistTooltips) {
+        // This persistTooltips property is part of the web console API. It helps
+        // in being able to inspect and debug tooltips.
+        this.setState({
+          hoveredMarkerIndex: null,
+        });
+      }
+    } else {
+      this.setState({ hoveredMarkerIndex });
+    }
+  };
+
   render() {
     const {
       pages,
@@ -155,6 +243,7 @@ class Network extends PureComponent<Props, State> {
           rangeEnd={rangeEnd}
           networkTiming={networkTiming}
           width={containerWidth}
+          onHoveredMarkerChange={this._onHoveredMarkerChange}
         />
         <VerticalIndicators
           verticalMarkerIndexes={verticalMarkerIndexes}
