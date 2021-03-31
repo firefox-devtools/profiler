@@ -6,6 +6,8 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
+import { Localized } from '@fluent/react';
+
 import { TimelineGlobalTrack } from './GlobalTrack';
 import { TimelineRuler } from './Ruler';
 import { TimelineSelection } from './Selection';
@@ -104,7 +106,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
     return (
       <form>
         <div className="timelineSettingsToggle">
-          Graph type:{' '}
+          <Localized id="FullTimeline--graph-type">Graph type:</Localized>
           {isCPUUtilizationProvided ? (
             <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
               <input
@@ -114,7 +116,9 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
                 checked={timelineType === 'cpu-category'}
                 onChange={this._changeToCPUCategories}
               />
-              Categories with CPU
+              <Localized id="FullTimeline--categories-with-cpu">
+                Categories with CPU
+              </Localized>
             </label>
           ) : null}
           <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
@@ -125,7 +129,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
               checked={timelineType === 'category'}
               onChange={this._changeToCategories}
             />
-            Categories
+            <Localized id="FullTimeline--categories">Categories</Localized>
           </label>
           <label className="photon-label-micro timelineSettingsToggleLabel">
             <input
@@ -135,7 +139,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
               checked={timelineType === 'stack'}
               onChange={this._changeToStacks}
             />
-            Stack height
+            <Localized id="FullTimeline--stack-height">Stack height</Localized>
           </label>
         </div>
       </form>
@@ -162,20 +166,31 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
     const { hiddenTrackCount } = this.props;
 
     return (
-      <button
-        type="button"
-        onClick={this._showMenu}
-        className="timelineSettingsHiddenTracks"
+      <Localized
+        id="FullTimeline--tracks-visible"
+        elems={{
+          span: <span className="timelineSettingsHiddenTracksNumber" />,
+        }}
+        vars={{
+          visibleTrackCount: hiddenTrackCount.total - hiddenTrackCount.hidden,
+          totalTrackCount: hiddenTrackCount.total,
+        }}
       >
-        <span className="timelineSettingsHiddenTracksNumber">
-          {hiddenTrackCount.total - hiddenTrackCount.hidden}
-        </span>
-        {' / '}
-        <span className="timelineSettingsHiddenTracksNumber">
-          {hiddenTrackCount.total}{' '}
-        </span>
-        tracks visible
-      </button>
+        <button
+          type="button"
+          onClick={this._showMenu}
+          className="timelineSettingsHiddenTracks"
+        >
+          <span className="timelineSettingsHiddenTracksNumber">
+            {hiddenTrackCount.total - hiddenTrackCount.hidden}
+          </span>
+          {' / '}
+          <span className="timelineSettingsHiddenTracksNumber">
+            {hiddenTrackCount.total}{' '}
+          </span>
+          tracks visible
+        </button>
+      </Localized>
     );
   }
 }

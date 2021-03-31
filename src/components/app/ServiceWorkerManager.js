@@ -4,6 +4,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import { getDataSource } from 'firefox-profiler/selectors/url-state';
@@ -253,12 +255,14 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     switch (installStatus) {
       case 'installing':
         return (
-          <button
-            className="photon-button photon-button-micro photon-message-bar-action-button"
-            type="button"
-          >
-            Installing…
-          </button>
+          <Localized id="ServiceWorkerManager--installing-button">
+            <button
+              className="photon-button photon-button-micro photon-message-bar-action-button"
+              type="button"
+            >
+              Installing…
+            </button>
+          </Localized>
         );
       case 'idle':
         throw new Error(
@@ -266,24 +270,28 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         );
       case 'pending':
         return (
-          <button
-            className="photon-button photon-button-micro photon-message-bar-action-button"
-            type="button"
-            onClick={this.applyServiceWorkerUpdate}
-          >
-            Apply and reload
-          </button>
+          <Localized id="ServiceWorkerManager--pending-button">
+            <button
+              className="photon-button photon-button-micro photon-message-bar-action-button"
+              type="button"
+              onClick={this.applyServiceWorkerUpdate}
+            >
+              Apply and reload
+            </button>
+          </Localized>
         );
       case 'installed':
         // Another tab applied the new service worker.
         return (
-          <button
-            className="photon-button photon-button-micro photon-message-bar-action-button"
-            type="button"
-            onClick={this.reloadPage}
-          >
-            Reload the application
-          </button>
+          <Localized id="ServiceWorkerManager--installed-button">
+            <button
+              className="photon-button photon-button-micro photon-message-bar-action-button"
+              type="button"
+              onClick={this.reloadPage}
+            >
+              Reload the application
+            </button>
+          </Localized>
         );
       default:
         throw assertExhaustiveCheck(installStatus);
@@ -307,18 +315,25 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
           <div className="photon-message-bar photon-message-bar-warning serviceworker-ready-notice">
             <div className="photon-message-bar-inner-content">
               <div className="photon-message-bar-inner-text">
-                A new version of the application was applied before this page
-                was fully loaded. You might see malfunctions.
+                <Localized id="ServiceWorkerManager--updated-while-not-ready">
+                  A new version of the application was applied before this page
+                  was fully loaded. You might see malfunctions.
+                </Localized>
               </div>
               {this._canUpdateServiceWorker() ? this.renderButton() : null}
             </div>
-            <button
-              aria-label="Hide the reload notice"
-              title="Hide the reload notice"
-              className="photon-button photon-message-bar-close-button"
-              type="button"
-              onClick={this._onCloseNotice}
-            />
+            <Localized
+              id="ServiceWorkerManager--hide-notice-button"
+              attrs={{ 'aria-label': true, title: true }}
+            >
+              <button
+                aria-label="Hide the reload notice"
+                title="Hide the reload notice"
+                className="photon-button photon-message-bar-close-button"
+                type="button"
+                onClick={this._onCloseNotice}
+              />
+            </Localized>
           </div>
         </div>
       );
@@ -335,18 +350,25 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         <div className="photon-message-bar serviceworker-ready-notice">
           <div className="photon-message-bar-inner-content">
             <div className="photon-message-bar-inner-text">
-              A new version of the application has been downloaded and is ready
-              to use.
+              <Localized id="ServiceWorkerManager--new-version-is-ready">
+                A new version of the application has been downloaded and is
+                ready to use.
+              </Localized>
             </div>
             {this.renderButton()}
           </div>
-          <button
-            aria-label="Hide the reload notice"
-            title="Hide the reload notice"
-            className="photon-button photon-message-bar-close-button"
-            type="button"
-            onClick={this._onCloseNotice}
-          />
+          <Localized
+            id="ServiceWorkerManager--hide-notice-button"
+            attrs={{ 'aria-label': true, title: true }}
+          >
+            <button
+              aria-label="Hide the reload notice"
+              title="Hide the reload notice"
+              className="photon-button photon-message-bar-close-button"
+              type="button"
+              onClick={this._onCloseNotice}
+            />
+          </Localized>
         </div>
       </div>
     );

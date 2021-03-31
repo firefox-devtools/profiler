@@ -5,6 +5,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
+
 import { Warning } from '../shared/Warning';
 import explicitConnect from '../../utils/connect';
 import { getMeta } from '../../selectors/profile';
@@ -24,7 +26,12 @@ class DebugWarningImp extends PureComponent<Props> {
     return (
       <>
         {meta.debug ? (
-          <Warning message="This profile was recorded in a build without release optimizations. Performance observations might not apply to the release population." />
+          <Localized
+            id="DebugWarning--warning-message"
+            attrs={{ message: true }}
+          >
+            <Warning message="This profile was recorded in a build without release optimizations. Performance observations might not apply to the release population." />
+          </Localized>
         ) : null}
       </>
     );

@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
 import './IdleSearchField.css';
 
@@ -109,19 +110,24 @@ export class IdleSearchField extends PureComponent<Props, State> {
         className={classNames('idleSearchField', className)}
         onSubmit={this._onFormSubmit}
       >
-        <input
-          type="search"
-          name="search"
-          placeholder="Enter filter terms"
-          className="idleSearchFieldInput photon-input"
-          required="required"
-          title={title}
-          value={this.state.value}
-          onChange={this._onSearchFieldChange}
-          onFocus={this._onSearchFieldFocus}
-          onBlur={this._onSearchFieldBlur}
-          ref={this._takeInputRef}
-        />
+        <Localized
+          id="IdleSearchField--search-input"
+          attrs={{ placeholder: true }}
+        >
+          <input
+            type="search"
+            name="search"
+            placeholder="Enter filter terms"
+            className="idleSearchFieldInput photon-input"
+            required="required"
+            title={title}
+            value={this.state.value}
+            onChange={this._onSearchFieldChange}
+            onFocus={this._onSearchFieldFocus}
+            onBlur={this._onSearchFieldBlur}
+            ref={this._takeInputRef}
+          />
+        </Localized>
         <input
           type="reset"
           className="idleSearchFieldButton"
