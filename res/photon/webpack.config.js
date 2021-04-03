@@ -2,15 +2,15 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const projectRoot = path.join(__dirname, '../..');
-
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
   mode: 'production',
   devtool: 'source-map',
   module: {
     rules: [
       {
-        test: /\.css?$/,
-        loaders: ['style-loader', 'css-loader'],
+        test: /\.css?$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
         include: [
           path.join(projectRoot, 'src'),
           path.join(projectRoot, 'res'),
@@ -31,12 +31,13 @@ module.exports = {
       // flashing once without any styles applied.
       inject: 'head',
     }),
+    new MiniCssExtractPlugin(),
   ],
   entry: './res/photon/index.js',
   output: {
     path: path.join(projectRoot, 'dist/photon'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
+    filename: '[fullhash].bundle.js',
+    chunkFilename: '[id].[fullhash].bundle.js',
     publicPath: '/photon/',
   },
 };
