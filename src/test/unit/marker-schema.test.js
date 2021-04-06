@@ -133,7 +133,7 @@ describe('marker schema labels', function() {
       'End: 5ms',
       'Duration: 3ms',
       'Name: TestDefinedMarker',
-      'Category: Idle',
+      'Category: Other',
     ]);
     expect(console.error).toBeCalledTimes(0);
   });

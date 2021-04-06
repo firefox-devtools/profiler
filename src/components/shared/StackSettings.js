@@ -5,6 +5,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
+
 import {
   changeImplementationFilter,
   changeInvertCallstack,
@@ -94,7 +96,7 @@ class StackSettingsImpl extends PureComponent<Props> {
   };
 
   _renderImplementationRadioButton(
-    label: string,
+    labelL10Id: string,
     implementationFilter: ImplementationFilter
   ) {
     return (
@@ -108,20 +110,19 @@ class StackSettingsImpl extends PureComponent<Props> {
           onChange={this._onImplementationFilterChange}
           checked={this.props.implementationFilter === implementationFilter}
         />
-        {label}
+        <Localized id={labelL10Id}></Localized>
       </label>
     );
   }
 
   _renderCallTreeStrategyOption(
-    label: string,
-    strategy: CallTreeSummaryStrategy,
-    tooltip: string
+    labelL10nId: string,
+    strategy: CallTreeSummaryStrategy
   ) {
     return (
-      <option title={tooltip} key={strategy} value={strategy}>
-        {label}
-      </option>
+      <Localized id={labelL10nId} attrs={{ title: true }}>
+        <option key={strategy} value={strategy}></option>
+      </Localized>
     );
   }
 
@@ -145,57 +146,60 @@ class StackSettingsImpl extends PureComponent<Props> {
       <div className="stackSettings">
         <ul className="stackSettingsList">
           <li className="stackSettingsListItem stackSettingsFilter">
-            {this._renderImplementationRadioButton('All stacks', 'combined')}
-            {this._renderImplementationRadioButton('JavaScript', 'js')}
-            {this._renderImplementationRadioButton('Native', 'cpp')}
+            {this._renderImplementationRadioButton(
+              'StackSettings--implementation-all-stacks',
+              'combined'
+            )}
+            {this._renderImplementationRadioButton(
+              'StackSettings--implementation-javascript',
+              'js'
+            )}
+            {this._renderImplementationRadioButton(
+              'StackSettings--implementation-native',
+              'cpp'
+            )}
           </li>
           {hasAllocations && !disableCallTreeSummaryButtons ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
-                Summarize:{' '}
+                <Localized id="StackSettings--summarize">Summarize:</Localized>{' '}
                 <select
                   className="stackSettingsSelect"
                   onChange={this._onCallTreeSummaryStrategyChange}
                   value={callTreeSummaryStrategy}
                 >
                   {this._renderCallTreeStrategyOption(
-                    'Timing Data',
-                    'timing',
-                    'Summarize using sampled stacks of executed code over time'
+                    'StackSettings--call-tree-strategy-timing',
+                    'timing'
                   )}
                   {hasJsAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'JavaScript Allocations',
-                        'js-allocations',
-                        'Summarize using bytes of JavaScript allocated (no de-allocations)'
+                        'StackSettings--call-tree-strategy-js-allocations',
+                        'js-allocations'
                       )
                     : null}
                   {canShowRetainedMemory
                     ? this._renderCallTreeStrategyOption(
-                        'Retained Memory',
-                        'native-retained-allocations',
-                        'Summarize using bytes of memory that were allocated, and never freed in the current preview selection'
+                        'StackSettings--call-tree-strategy-native-retained-allocations',
+                        'native-retained-allocations'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Allocated Memory',
-                        'native-allocations',
-                        'Summarize using bytes of memory allocated'
+                        'StackSettings--call-tree-native-allocations',
+                        'native-allocations'
                       )
                     : null}
                   {canShowRetainedMemory
                     ? this._renderCallTreeStrategyOption(
-                        'Deallocated Memory',
-                        'native-deallocations-memory',
-                        'Summarize using bytes of memory deallocated, by the site where the memory was allocated'
+                        'StackSettings--call-tree-strategy-native-deallocations-memory',
+                        'native-deallocations-memory'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Deallocation Sites',
-                        'native-deallocations-sites',
-                        'Summarize using bytes of memory deallocated, by the site where the memory was deallocated'
+                        'StackSettings--call-tree-strategy-native-deallocations-sites',
+                        'native-deallocations-sites'
                       )
                     : null}
                 </select>
@@ -211,7 +215,9 @@ class StackSettingsImpl extends PureComponent<Props> {
                   onChange={this._onInvertCallstackClick}
                   checked={invertCallstack}
                 />
-                {' Invert call stack'}
+                <Localized id="StackSettings--invert-call-stack">
+                  Invert call stack
+                </Localized>
               </label>
             </li>
           )}
@@ -224,18 +230,25 @@ class StackSettingsImpl extends PureComponent<Props> {
                   onChange={this._onShowUserTimingsClick}
                   checked={showUserTimings}
                 />
-                {' Show user timing'}
+                <Localized id="StackSettings--show-user-timing">
+                  Show user timing
+                </Localized>
               </label>
             </li>
           )}
         </ul>
-        <PanelSearch
-          className="stackSettingsSearchField"
-          label="Filter stacks: "
-          title="Only display stacks which contain a function whose name matches this substring"
-          currentSearchString={currentSearchString}
-          onSearch={this._onSearch}
-        />
+        <Localized
+          id="StackSettings--panel-search"
+          attrs={{ label: true, title: true }}
+        >
+          <PanelSearch
+            className="stackSettingsSearchField"
+            label="Filter stacks:"
+            title="Only display stacks which contain a function whose name matches this substring"
+            currentSearchString={currentSearchString}
+            onSearch={this._onSearch}
+          />
+        </Localized>
       </div>
     );
   }

@@ -6,6 +6,8 @@
 
 import React from 'react';
 import memoize from 'memoize-immutable';
+import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
 import {
@@ -66,7 +68,13 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
         ),
       };
     } else {
-      firstItem = { content: <>Full Range</> };
+      firstItem = {
+        content: (
+          <Localized id="ProfileFilterNavigator--full-range">
+            Full Range
+          </Localized>
+        ),
+      };
     }
 
     const itemsWithFirstElement = this._getItemsWithFirstElement(

@@ -86,6 +86,7 @@ export type Pid = number | string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
+  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -658,8 +659,11 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform.
-  categories: CategoryList,
+  // The list of categories as provided by the platform. The categories are present for
+  // all Firefox profiles, but imported profiles may not include any category support.
+  // The front-end will provide a default list of categories, but the saved profile
+  // will not include them.
+  categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,
   // This value represents a boolean, but for some reason is written out as an int value.
@@ -750,6 +754,13 @@ export type ProfileMeta = {|
   // The sampleUnits property landed in Firefox 86, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
   sampleUnits?: SampleUnits,
+  // Information of the device that profile is captured from.
+  // Currently it's only present for Android devices and it includes brand and
+  // model names of that device.
+  // It's optional because profiles from non-Android devices and from older
+  // Firefox versions may not have it.
+  // This property landed in Firefox 88.
+  device?: string,
 |};
 
 /**

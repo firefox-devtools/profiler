@@ -497,7 +497,10 @@ export function getProfileFromTextSamples(
   const profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
   profile.meta.markerSchema = markerSchemaForTests;
-  const categories = profile.meta.categories;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories.'
+  );
 
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];

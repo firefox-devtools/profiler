@@ -21,6 +21,7 @@ import {
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -29,7 +30,11 @@ function callTreeFromProfile(
   threadIndex: number = 0
 ): CallTree {
   const thread = profile.threads[threadIndex];
-  const { interval, categories } = profile.meta;
+  const { interval } = profile.meta;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  );
   const defaultCategory = categories.findIndex(c => c.name === 'Other');
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
@@ -85,9 +90,10 @@ describe('unfiltered call tree', function() {
   describe('computed counts and timings', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -118,9 +124,10 @@ describe('unfiltered call tree', function() {
   describe('roots and children for flame graph', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -386,9 +393,10 @@ describe('unfiltered call tree', function() {
   describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -438,7 +446,11 @@ describe('inverted call tree', function() {
       E                Z           Y
                                    Z
     `).profile;
-    const { interval, categories } = profile.meta;
+    const { interval } = profile.meta;
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
     const defaultCategory = categories.findIndex(c => c.color === 'grey');
 
     // Check the non-inverted tree first.
@@ -615,8 +627,11 @@ describe('diffing trees', function() {
     const profile = getProfile();
 
     const thread = profile.threads[2];
-    const { interval, categories } = profile.meta;
-    const defaultCategory = categories.findIndex(c => c.name === 'Other');
+    const { interval } = profile.meta;
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,

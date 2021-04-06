@@ -435,6 +435,29 @@ describe('app/MenuButtons', function() {
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
+    it('matches the snapshot with device information', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      profile.meta.device = 'Android Device';
+
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+
+      const renderedDevice = ensureExists(
+        screen.getByText(/Device:/).nextSibling
+      );
+
+      /* This rule needs to be disabled because `renderedDevice` is a text
+       * code, and this triggers
+       * https://github.com/testing-library/jest-dom/issues/306 */
+      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      expect(renderedDevice.textContent).toBe('Android Device');
+      expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
+
     it('with no statistics object should not make the app crash', async () => {
       // Using gecko profile because it has metadata and profilerOverhead data in it.
       const profile = processGeckoProfile(createGeckoProfile());

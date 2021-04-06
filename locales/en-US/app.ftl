@@ -54,11 +54,43 @@ CompareHome--form-label-profile2 = Profile 2:
 CompareHome--submit-button =
     .value = Retrieve profiles
 
+## DebugWarning
+
+DebugWarning--warning-message =
+    .message =
+        This profile was recorded in a build without release optimizations.
+        Performance observations might not apply to the release population.
+
+## Details
+
+Details--open-sidebar-button =
+    .title = Open the sidebar
+Details--close-sidebar-button =
+    .title = Close the sidebar
+Details--error-boundary-message =
+    .message = Uh oh, some unknown error happened in this panel.
+
 ## FooterLinks
 
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
+
+## FullTimeline
+
+FullTimeline--graph-type = Graph type:
+FullTimeline--categories-with-cpu = Categories with CPU
+FullTimeline--categories = Categories
+FullTimeline--stack-height = Stack height
+
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible =
+    <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks visible
 
 ## Home
 
@@ -96,6 +128,17 @@ Home--additional-content-content = You can <strong>drag and drop</strong> a prof
 Home--compare-recordings-info = You can also compare recordings. <a>Open the comparing interface.</a>
 Home--recent-uploaded-recordings-title = Recent uploaded recordings
 
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+IdleSearchField--search-input =
+    .placeholder = Enter filter terms
+
+## JsTracerSettings
+## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
+
+JsTracerSettings--show-only-self-time = Show only self time
+
 ## ListOfPublishedProfiles
 
 # This string is used on the tooltip of the published profile links.
@@ -122,6 +165,13 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
         [one] Manage this recording
        *[other] Manage these recordings
     }
+
+## MarkerSettings
+
+MarkerSettings--panel-search =
+    .label = Filter Markers:
+    .title = Only display markers that match a certain name
+
 
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -220,6 +270,7 @@ MenuButtons--metaInfo--build-type = Build Type:
 MenuButtons--metaInfo--build-type-debug = Debug
 MenuButtons--metaInfo--build-type-opt = Opt
 MenuButtons--metaInfo--platform = Platform
+MenuButtons--metaInfo--device = Device:
 
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = OS:
@@ -269,6 +320,17 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
+## NetworkSettings
+
+NetworkSettings--panel-search =
+    .label = Filter Networks:
+    .title = Only display network requests that match a certain name
+
+## PanelSearch
+
+PanelSearch--search-field-hint =
+    Did you know you can use the comma (,) to search using several terms?
+
 ## ProfileDeleteButton
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
@@ -277,6 +339,10 @@ MenuButtons--publish--compressing = Compressing…
 ProfileDeleteButton--delete-button =
     .label = Delete
     .title = Click here to delete the profile { $smallProfileName }
+
+## ProfileFilterNavigator
+
+ProfileFilterNavigator--full-range = Full Range
 
 ## ProfileLoaderAnimation
 
@@ -305,6 +371,57 @@ ProfileLoaderAnimation--loading-message-view-not-found =
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
+
+## ServiceWorkerManager
+
+ServiceWorkerManager--installing-button = Installing…
+ServiceWorkerManager--pending-button = Apply and reload
+ServiceWorkerManager--installed-button = Reload the application
+ServiceWorkerManager--updated-while-not-ready =
+    A new version of the application was applied before this page
+    was fully loaded. You might see malfunctions.
+ServiceWorkerManager--new-version-is-ready =
+    A new version of the application has been downloaded and is ready to use.
+ServiceWorkerManager--hide-notice-button =
+    .title = Hide the reload notice
+    .aria-label = Hide the reload notice
+
+## StackSettings
+
+StackSettings--implementation-all-stacks = All stacks
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Native
+
+StackSettings--summarize = Summarize:
+StackSettings--call-tree-strategy-timing = Timing Data
+    .title = Summarize using sampled stacks of executed code over time
+StackSettings--call-tree-strategy-js-allocations = JavaScript Allocations
+    .title = Summarize using bytes of JavaScript allocated (no de-allocations)
+StackSettings--call-tree-strategy-native-retained-allocations = Retained Memory
+    .title = Summarize using bytes of memory that were allocated, and never freed in the current preview selection
+StackSettings--call-tree-native-allocations = Allocated Memory
+    .title = Summarize using bytes of memory allocated
+StackSettings--call-tree-strategy-native-deallocations-memory = Deallocated Memory
+    .title = Summarize using bytes of memory deallocated, by the site where the memory was allocated
+StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Sites
+    .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
+
+StackSettings--invert-call-stack = Invert call stack
+StackSettings--show-user-timing = Show user timing
+
+StackSettings--panel-search =
+    .label = Filter stacks:
+    .title = Only display stacks which contain a function whose name matches this substring
+
+## TabBar
+
+TabBar--calltree-tab = Call Tree
+TabBar--flame-graph-tab = Flame Graph
+TabBar--stack-chart-tab = Stack Chart
+TabBar--marker-chart-tab = Marker Chart
+TabBar--marker-table-tab = Marker Table
+TabBar--network-tab = Network
+TabBar--js-tracer-tab = JS Tracer
 
 ## UploadedRecordingsHome
 

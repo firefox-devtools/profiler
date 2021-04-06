@@ -357,6 +357,13 @@ export type GeckoProfileFullMeta = {|
   // The sampleUnits property landed in Firefox 86, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
   sampleUnits?: SampleUnits,
+  // Information of the device that profile is captured from.
+  // Currently it's only present for Android devices and it includes brand and
+  // model names of that device.
+  // It's optional because profiles from non-Android devices and from older
+  // Firefox versions may not have it.
+  // This property landed in Firefox 88.
+  device?: string,
 |};
 
 export type GeckoProfileWithMeta<Meta> = {|

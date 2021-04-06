@@ -88,7 +88,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -750,7 +750,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -1164,7 +1164,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -1814,7 +1814,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -2464,7 +2464,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3084,7 +3084,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3217,7 +3217,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3350,7 +3350,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3538,7 +3538,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -4156,7 +4156,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -4774,7 +4774,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -5392,7 +5392,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -5965,7 +5965,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -6538,7 +6538,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -6992,7 +6992,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -7446,7 +7446,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>

@@ -755,6 +755,13 @@ function _isThreadMostlyFullOfIdleSamples(
   let activeStackCount = 0;
   let filteredStackCount = 0;
 
+  const { categories } = profile.meta;
+  if (!categories) {
+    // Profiles that are imported may not have categories. In this case do not try
+    // and deduce anything about idleness.
+    return false;
+  }
+
   for (
     let sampleIndex = 0;
     sampleIndex < thread.samples.length;
@@ -771,7 +778,8 @@ function _isThreadMostlyFullOfIdleSamples(
         activeSamplePercentage * (thread.samples.length - filteredStackCount);
     } else {
       const categoryIndex = thread.stackTable.category[stackIndex];
-      const category = profile.meta.categories[categoryIndex];
+
+      const category = categories[categoryIndex];
       if (category.name !== 'Idle') {
         activeStackCount++;
         if (activeStackCount > maxActiveStackCount) {
@@ -789,13 +797,20 @@ function _hasThreadAtLeastOneNonIdleSample(
   profile: Profile,
   thread: Thread
 ): boolean {
+  const { categories } = profile.meta;
+  if (!categories) {
+    // Profiles that are imported may not have categories, assume that there are
+    // non-idle samples.
+    return true;
+  }
+
   for (const stackIndex of thread.samples.stack) {
     if (stackIndex === null) {
       continue;
     }
 
     const categoryIndex = thread.stackTable.category[stackIndex];
-    const category = profile.meta.categories[categoryIndex];
+    const category = categories[categoryIndex];
     if (category.name !== 'Idle') {
       return true;
     }

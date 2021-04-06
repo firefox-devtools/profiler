@@ -109,7 +109,8 @@ exports[`app/ServiceWorkerManager with the \`from-addon\` datasource shows a war
       <div
         class="photon-message-bar-inner-text"
       >
-        A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+        A new version of the application was applied before this page
+was fully loaded. You might see malfunctions.
       </div>
     </div>
     <button
@@ -135,7 +136,8 @@ exports[`app/ServiceWorkerManager with the \`public\` datasource shows a warning
       <div
         class="photon-message-bar-inner-text"
       >
-        A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+        A new version of the application was applied before this page
+was fully loaded. You might see malfunctions.
       </div>
     </div>
     <button
