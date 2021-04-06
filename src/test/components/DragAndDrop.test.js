@@ -4,6 +4,7 @@
 
 // @flow
 
+import { TextDecoder } from 'util';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -16,10 +17,13 @@ import {
 } from '../../components/app/DragAndDrop';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../profile-logic/process-profile';
-
-import type { Profile } from 'firefox-profiler/types';
+import { getView } from 'firefox-profiler/selectors';
 
 describe('app/DragAndDrop', () => {
+  afterEach(function() {
+    delete window.TextDecoder;
+  });
+
   it('matches the snapshot with default overlay', () => {
     const { container } = render(
       <Provider store={createStore()}>
@@ -61,27 +65,24 @@ describe('app/DragAndDrop', () => {
   });
 
   it('receives profile on file drop', async () => {
+    window.TextDecoder = TextDecoder;
+    const store = createStore();
     const { container } = render(
-      <Provider store={createStore()}>
+      <Provider store={store}>
         <DragAndDrop>Target area here</DragAndDrop>
       </Provider>
     );
     const [dragAndDrop] = container.children;
 
-    const profile = serializeProfile(_getSimpleProfile());
-    const file = new File([profile], 'profile.json', {
+    const { profile } = getProfileFromTextSamples('A');
+    const file = new File([serializeProfile(profile)], 'profile.json', {
       type: 'application/json',
     });
     const files = [file];
 
     fireEvent.drop(dragAndDrop, { dataTransfer: { files } });
-    await waitFor(() => expect('PROFILE_LOADED').toBeTruthy());
+    await waitFor(() =>
+      expect(getView(store.getState()).phase).toBe('DATA_LOADED')
+    );
   });
 });
-
-/**
- * This profile will have a single sample, and a single thread.
- */
-function _getSimpleProfile(): Profile {
-  return getProfileFromTextSamples('A').profile;
-}
