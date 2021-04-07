@@ -91,12 +91,8 @@
 
 /* These classes define respective states for the metainfo button. They change
  * the icon whose generic styles are defined above. */
-.menuButtonsMetaInfoButtonButton-uploaded::before {
-  background-image: url(firefox-profiler-res/img/svg/cloud-dark-12.svg);
-}
-
-.menuButtonsMetaInfoButtonButton-local::before {
-  background-image: url(firefox-profiler-res/img/svg/cloud-off-dark-12.svg);
+.menuButtonsMetaInfoButtonButton::before {
+  background-image: url(firefox-profiler-res/img/svg/info-12.svg);
 }
 
 /* This is the revert button, appearing after publishing a profile. */
