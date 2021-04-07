@@ -16,12 +16,14 @@
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
+## This is used at the top of the homepage and other content pages.
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app for { -firefox-brand-name } performance analysis</subheader>
 AppHeader--github-icon =
     .title = Go to our git repository (this opens in a new window)
 
 ## AppViewRouter
+## This is used for displaying errors when loading the application.
 
 AppViewRouter--error-message-unpublished =
     .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
@@ -42,6 +44,8 @@ AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
 ## CompareHome
+## This is used in the page to compare two profiles.
+## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Enter the profile URLs that you’d like to compare
 CompareHome--instruction-content =
@@ -55,6 +59,8 @@ CompareHome--submit-button =
     .value = Retrieve profiles
 
 ## DebugWarning
+## This is displayed at the top of the analysis page when the loaded profile is
+## a debug build of Firefox.
 
 DebugWarning--warning-message =
     .message =
@@ -62,6 +68,8 @@ DebugWarning--warning-message =
         Performance observations might not apply to the release population.
 
 ## Details
+## This is the bottom panel in the analysis UI. They are generic strings to be
+## used at the bottom part of the UI.
 
 Details--open-sidebar-button =
     .title = Open the sidebar
@@ -70,13 +78,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Uh oh, some unknown error happened in this panel.
 
-## FooterLinks
+## Footer Links
 
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
 
 ## FullTimeline
+## The timeline component of the full view in the analysis UI at the top of the
+## page.
 
 FullTimeline--graph-type = Graph type:
 FullTimeline--categories-with-cpu = Categories with CPU
@@ -92,7 +102,7 @@ FullTimeline--stack-height = Stack height
 FullTimeline--tracks-visible =
     <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks visible
 
-## Home
+## Home page
 
 Home--upload-from-file-input-button = Load a profile from file
 Home--upload-from-url-button = Load a profile from a URL
@@ -140,6 +150,8 @@ IdleSearchField--search-input =
 JsTracerSettings--show-only-self-time = Show only self time
 
 ## ListOfPublishedProfiles
+## This is the component that displays all the profiles the user has uploaded.
+## It's displayed both in the homepage and in the uploaded recordings page.
 
 # This string is used on the tooltip of the published profile links.
 # Variables:
@@ -167,12 +179,14 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
     }
 
 ## MarkerSettings
+## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filter Markers:
     .title = Only display markers that match a certain name
 
 
+## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
 MenuButtons--index--metaInfo-button-uploaded-profile =
@@ -198,6 +212,7 @@ MenuButtons--index--docs = Docs
 MenuButtons--permalink--button =
     .label = Permalink
 
+## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
@@ -298,6 +313,7 @@ MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
 
+## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Include hidden threads
@@ -321,17 +337,19 @@ MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
 ## NetworkSettings
+## This is used in the network chart.
 
 NetworkSettings--panel-search =
     .label = Filter Networks:
     .title = Only display network requests that match a certain name
 
 ## PanelSearch
+## The component that is used for all the search input hints in the application.
 
 PanelSearch--search-field-hint =
     Did you know you can use the comma (,) to search using several terms?
 
-## ProfileDeleteButton
+## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
 # Variables:
@@ -341,10 +359,11 @@ ProfileDeleteButton--delete-button =
     .title = Click here to delete the profile { $smallProfileName }
 
 ## ProfileFilterNavigator
+## This is used at the top of the profile analysis UI.
 
 ProfileFilterNavigator--full-range = Full Range
 
-## ProfileLoaderAnimation
+## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-message-unpublished =
     .message = Importing the profile directly from { -firefox-brand-name }…
@@ -373,6 +392,8 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
 
 ## ServiceWorkerManager
+## This is the component responsible for handling the service worker installation
+## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Installing…
 ServiceWorkerManager--pending-button = Apply and reload
@@ -387,6 +408,8 @@ ServiceWorkerManager--hide-notice-button =
     .aria-label = Hide the reload notice
 
 ## StackSettings
+## This is the settings component that is used in Call Tree, Flame Graph and Stack
+## Chart panels. It's used to switch between different views of the stack.
 
 StackSettings--implementation-all-stacks = All stacks
 StackSettings--implementation-javascript = JavaScript
@@ -413,7 +436,7 @@ StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
 
-## TabBar
+## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Call Tree
 TabBar--flame-graph-tab = Flame Graph
@@ -424,5 +447,7 @@ TabBar--network-tab = Network
 TabBar--js-tracer-tab = JS Tracer
 
 ## UploadedRecordingsHome
+## This is the page that displays all the profiles that user has uploaded.
+## See: https://profiler.firefox.com/uploaded-recordings/
 
 UploadedRecordingsHome--title = Uploaded Recordings
