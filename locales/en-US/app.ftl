@@ -43,6 +43,73 @@ AppViewRouter--error-message-from-url =
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
+## CallNodeContextMenu
+## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
+## panels.
+
+CallNodeContextMenu--transform-merge-function = Merge function
+    .title =
+        Merging a function removes it from the profile, and assigns its time to the
+        function that called it. This happens anywhere the function was called in
+        the tree.
+CallNodeContextMenu--transform-merge-call-node = Merge node only
+    .title =
+        Merging a node removes it from the profile, and assigns its time to the
+        function's node that called it. It only removes the function from that
+        specific part of the tree. Any other places the function was called
+        will remain in the profile.
+
+# This is used as the context menu item to apply the "Focus on function" transform.
+# Variables:
+#   $isInverted (Number) - This is actually a boolean value to determine if the
+#     call tree is inverted or not. Currently there is no wayt o pass a boolean
+#     value with Localized component, that's why we are passing this as a number
+#     instead. 0 is for false and 1 is for true.
+CallNodeContextMenu--transform-focus-function =
+    { $isInverted ->
+        [0] Focus on function
+       *[other] Focus on function (inverted)
+    }
+    .title =
+        Focusing on a function will remove any sample that does not include that
+        function. In addition, it re-roots the call tree so that the function
+        is the only root of the tree. This can combine multiple function call sites
+        across a profile into one call node.
+CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
+    .title =
+        Focusing on a subtree will remove any sample that does not include that
+        specific part of the call tree. It pulls out a branch of the call tree,
+        however it only does it for that single call node. All other calls
+        of the function are ignored.
+CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
+    .title =
+        Collapsing a function will remove everything it called, and assign
+        all of the time to the function. This can help simplify a profile that
+        calls into code that does not need to be analyzed.
+
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource =
+    Collapse <strong>{ $nameForResource }</strong>
+    .title =
+        Collapsing a resource will flatten out of all the calls into that
+        resource into a single collapsed call node.
+CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
+    .title =
+        Collapsing direct recursion removes calls that repeatedly recurse into
+        the same function.
+CallNodeContextMenu--transform-drop-function = Drop samples with this function
+    .title =
+        Dropping samples removes their time from the profile. This is useful to
+        eliminate timing information that is not for the analysis.
+
+CallNodeContextMenu--expand-all = Expand all
+CallNodeContextMenu--searchfox = Look up the function name on Searchfox
+CallNodeContextMenu--copy-function-name = Copy function name
+CallNodeContextMenu--copy-script-url = Copy script URL
+CallNodeContextMenu--copy-stack = Copy stack
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
