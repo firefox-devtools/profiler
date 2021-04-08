@@ -534,6 +534,24 @@ TabBar--marker-table-tab = Marker Table
 TabBar--network-tab = Network
 TabBar--js-tracer-tab = JS Tracer
 
+## TrackContextMenu
+## This is used as a context menu for timeline to organize the tracks in the
+## analysis UI.
+
+TrackContextMenu--only-show-this-process-group = Only show this process group
+
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Only show "{ $trackName }"
+TrackContextMenu--hide-other-screenshot-tracks = Hide other screenshot tracks
+
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Hide "{ $trackName }"
+TrackContextMenu--show-all-tracks = Show all tracks
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
