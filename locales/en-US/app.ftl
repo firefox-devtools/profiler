@@ -245,6 +245,27 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
+
+## MarkerContextMenu
+## This is used as a context menu for the Marker Chart, Marker Table and Network
+## panels.
+
+MarkerContextMenu--set-selection-from-duration = Set selection from marker’s duration
+MarkerContextMenu--start-selection-here = Start selection here
+MarkerContextMenu--end-selection-here = End selection here
+MarkerContextMenu--start-selection-at-marker-start =
+    Start selection at marker’s <strong>start</strong>
+MarkerContextMenu--start-selection-at-marker-end =
+    Start selection at marker’s <strong>end</strong>
+MarkerContextMenu--end-selection-at-marker-start =
+    End selection at marker’s <strong>start</strong>
+MarkerContextMenu--end-selection-at-marker-end =
+    End selection at marker’s <strong>end</strong>
+MarkerContextMenu--copy-description = Copy description
+MarkerContextMenu--copy-call-stack = Copy call stack
+MarkerContextMenu--copy-url = Copy URL
+MarkerContextMenu--copy-full-payload = Copy full payload
+
 ## MarkerSettings
 ## This is used in all panels related to markers.
 

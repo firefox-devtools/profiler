@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
+import { Localized } from '@fluent/react';
 
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -269,18 +270,24 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
           disabled={this._isZeroDurationMarker(marker)}
         >
           <span className="react-contextmenu-icon markerContextMenuIconSetSelectionFromMarker" />
-          Set selection from marker’s duration
+          <Localized id="MarkerContextMenu--set-selection-from-duration">
+            Set selection from marker’s duration
+          </Localized>
         </MenuItem>
         <div className="react-contextmenu-separator" />
         {this._isZeroDurationMarker(marker) ? (
           <>
             <MenuItem onClick={this.setStartRangeFromMarkerStart}>
               <span className="react-contextmenu-icon markerContextMenuIconStartSelectionHere" />
-              Start selection here
+              <Localized id="MarkerContextMenu--start-selection-here">
+                Start selection here
+              </Localized>
             </MenuItem>
             <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
               <span className="react-contextmenu-icon markerContextMenuIconEndSelectionHere" />
-              End selection here
+              <Localized id="MarkerContextMenu--end-selection-here">
+                End selection here
+              </Localized>
             </MenuItem>
           </>
         ) : (
@@ -288,7 +295,14 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             <MenuItem onClick={this.setStartRangeFromMarkerStart}>
               <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart" />
               <div className="react-contextmenu-item-content">
-                Start selection at marker’s <strong>start</strong>
+                <Localized
+                  id="MarkerContextMenu--start-selection-at-marker-start"
+                  elems={{ strong: <strong /> }}
+                >
+                  <>
+                    Start selection at marker’s <strong>start</strong>
+                  </>
+                </Localized>
               </div>
             </MenuItem>
             <MenuItem
@@ -297,7 +311,14 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             >
               <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd" />
               <div className="react-contextmenu-item-content">
-                Start selection at marker’s <strong>end</strong>
+                <Localized
+                  id="MarkerContextMenu--start-selection-at-marker-end"
+                  elems={{ strong: <strong /> }}
+                >
+                  <>
+                    Start selection at marker’s <strong>end</strong>
+                  </>
+                </Localized>
               </div>
             </MenuItem>
             <div className="react-contextmenu-separator" />
@@ -307,13 +328,27 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
             >
               <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart" />
               <div className="react-contextmenu-item-content">
-                End selection at marker’s <strong>start</strong>
+                <Localized
+                  id="MarkerContextMenu--end-selection-at-marker-start"
+                  elems={{ strong: <strong /> }}
+                >
+                  <>
+                    End selection at marker’s <strong>start</strong>
+                  </>
+                </Localized>
               </div>
             </MenuItem>
             <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
               <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd" />
               <div className="react-contextmenu-item-content">
-                End selection at marker’s <strong>end</strong>
+                <Localized
+                  id="MarkerContextMenu--end-selection-at-marker-end"
+                  elems={{ strong: <strong /> }}
+                >
+                  <>
+                    End selection at marker’s <strong>end</strong>
+                  </>
+                </Localized>
               </div>
             </MenuItem>
           </>
@@ -322,23 +357,29 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         <div className="react-contextmenu-separator" />
         <MenuItem onClick={this.copyMarkerDescription}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
-          Copy description
+          <Localized id="MarkerContextMenu--copy-description">
+            Copy description
+          </Localized>
         </MenuItem>
         {data && data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>
             <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
-            Copy call stack
+            <Localized id="MarkerContextMenu--copy-call-stack">
+              Copy call stack
+            </Localized>
           </MenuItem>
         ) : null}
         {data && data.type === 'Network' ? (
           <MenuItem onClick={this.copyUrl}>
             <span className="react-contextmenu-icon markerContextMenuIconCopyUrl" />
-            Copy URL
+            <Localized id="MarkerContextMenu--copy-url">Copy URL</Localized>
           </MenuItem>
         ) : null}
         <MenuItem onClick={this.copyMarkerJSON}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyPayload" />
-          Copy full payload
+          <Localized id="MarkerContextMenu--copy-full-payload">
+            Copy full payload
+          </Localized>
         </MenuItem>
       </ContextMenu>
     );
