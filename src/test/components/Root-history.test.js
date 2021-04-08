@@ -18,6 +18,8 @@ import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
 
+import { TextEncoder, TextDecoder } from 'util';
+
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
 // separate test file.
@@ -92,7 +94,12 @@ describe('Root with history', function() {
     };
   }
 
+  beforeEach(function() {
+    window.TextDecoder = TextDecoder;
+  });
+
   afterEach(() => {
+    delete window.TextDecoder;
     delete window.fetch;
   });
 
@@ -162,6 +169,10 @@ function mockFetchProfileAtUrl(
         headers: coerceMatchingShape<Headers>({
           get: () => 'application/json',
         }),
+        arrayBuffer: () =>
+          Promise.resolve(
+            new TextEncoder().encode(JSON.stringify(profile)).buffer
+          ),
         json: () => Promise.resolve(profile),
       });
       responses.push(response);
