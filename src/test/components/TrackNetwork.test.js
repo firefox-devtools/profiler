@@ -111,8 +111,6 @@ function setup() {
     </Provider>
   );
 
-  const verticalIndicators = screen.getByTestId('vertical-indicators');
-
   const getIndicatorLines = () =>
     screen.getAllByTestId('vertical-indicator-line');
 
@@ -134,7 +132,6 @@ function setup() {
     thread: profile.threads[0],
     store,
     getContextDrawCalls,
-    verticalIndicators,
     getIndicatorLines,
   };
 }

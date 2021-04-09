@@ -155,6 +155,7 @@ class Network extends PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           zeroAt={zeroAt}
+          width={containerWidth}
         />
       </div>
     );

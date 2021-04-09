@@ -406,34 +406,29 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
     width="0"
   />
   <div
-    class="timelineVerticalIndicators"
-    data-testid="vertical-indicators"
-  >
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: #000; left: 200px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--blue-50); left: 200px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
-    />
-  </div>
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: #000; left: 200px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--blue-50); left: 200px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
+  />
 </div>
 `;
