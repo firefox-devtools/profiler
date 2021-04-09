@@ -53,6 +53,7 @@ import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
+  CallNodeAndCategoryPath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SamplesLikeTable,
@@ -1760,12 +1761,13 @@ export function getCallNodePathFromIndex(
 }
 
 /**
- * This function converts a stack information into a call node path structure.
+ * This function converts a stack information into a call node and
+ * category path structure.
  */
-export function convertStackToCallNodePath(
+export function convertStackToCallNodeAndCategoryPath(
   thread: Thread,
   stack: IndexIntoStackTable
-): CallNodePath {
+): CallNodeAndCategoryPath {
   const { stackTable, frameTable } = thread;
   const path = [];
   for (
@@ -1773,7 +1775,11 @@ export function convertStackToCallNodePath(
     stackIndex !== null;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
-    path.push(frameTable.func[stackTable.frame[stackIndex]]);
+    const index = stackTable.frame[stackIndex];
+    path.push({
+      category: stackTable.category[stackIndex],
+      func: frameTable.func[index],
+    });
   }
   return path.reverse();
 }
@@ -2174,21 +2180,30 @@ export function getOriginAnnotationForFunc(
  * about each function in this path: their names and their origins.
  */
 export function getFuncNamesAndOriginsForPath(
-  path: CallNodePath,
+  path: CallNodeAndCategoryPath,
   thread: Thread
-): Array<{ funcName: string, isFrameLabel: boolean, origin: string }> {
+): Array<{
+  funcName: string,
+  category: IndexIntoCategoryList,
+  isFrameLabel: boolean,
+  origin: string,
+}> {
   const { funcTable, stringTable, resourceTable } = thread;
 
-  return path.map(func => ({
-    funcName: stringTable.getString(funcTable.name[func]),
-    isFrameLabel: funcTable.resource[func] === -1,
-    origin: getOriginAnnotationForFunc(
-      func,
-      funcTable,
-      resourceTable,
-      stringTable
-    ),
-  }));
+  return path.map(frame => {
+    const { category, func } = frame;
+    return {
+      funcName: stringTable.getString(funcTable.name[func]),
+      category: category,
+      isFrameLabel: funcTable.resource[func] === -1,
+      origin: getOriginAnnotationForFunc(
+        func,
+        funcTable,
+        resourceTable,
+        stringTable
+      ),
+    };
+  });
 }
 
 /**

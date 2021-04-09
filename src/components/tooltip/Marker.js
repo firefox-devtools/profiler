@@ -12,6 +12,7 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
+  getCategories,
   getMarkerSchemaByName,
   getImplementationFilter,
   getPageList,
@@ -38,6 +39,7 @@ import {
 } from 'firefox-profiler/profile-logic/marker-schema';
 
 import type {
+  CategoryList,
   Milliseconds,
   Marker,
   ImplementationFilter,
@@ -85,6 +87,7 @@ type StateProps = {|
   +threadIdToNameMap: Map<number, string>,
   +markerSchemaByName: MarkerSchemaByName,
   +getMarkerLabel: MarkerIndex => string,
+  +categories: CategoryList,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -302,6 +305,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       thread,
       implementationFilter,
       restrictHeightWidth,
+      categories,
     } = this.props;
     const { data, start } = marker;
     if (data && 'cause' in data && data.cause) {
@@ -329,6 +333,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               stackIndex={cause.stack}
               thread={thread}
               implementationFilter={implementationFilter}
+              categories={categories}
             />
           </div>
         </TooltipDetail>,
@@ -414,6 +419,7 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
       threadIdToNameMap: getThreadIdToNameMap(state),
       markerSchemaByName: getMarkerSchemaByName(state),
       getMarkerLabel: selectors.getMarkerTooltipLabelGetter(state),
+      categories: getCategories(state),
     };
   },
   component: MarkerTooltipContents,
