@@ -131,12 +131,15 @@ describe('timeline/TrackContextMenu', function() {
       dispatch(changeRightClickedTrack(trackReference));
 
       const isolateProcessItem = () => getByText(/Only show this process/);
+      // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
       const isolateProcessMainThreadItem = () =>
-        getByText(/Only show "Content Process"/);
+        getByText(/Only show “\u2068Content Process\u2069”/);
       const trackItem = () => getByText('Content Process');
       const isolateScreenshotTrack = () =>
-        getByText(/Hide other screenshot tracks/);
-      const hideContentProcess = () => getByText(/Hide "Content Process"/);
+        getByText(/Hide other Screenshots tracks/);
+      // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
+      const hideContentProcess = () =>
+        getByText(/Hide “\u2068Content Process\u2069”/);
 
       return {
         ...results,
@@ -300,8 +303,10 @@ describe('timeline/TrackContextMenu', function() {
       dispatch(changeSelectedThreads(new Set([threadIndex])));
       dispatch(changeRightClickedTrack(trackReference));
 
-      const isolateLocalTrackItem = () => getByText('Only show "DOM Worker"');
-      const hideDOMWorker = () => getByText('Hide "DOM Worker"');
+      // Fluent adds isolation characters \u2068 and \u2069 around DOM Worker.
+      const isolateLocalTrackItem = () =>
+        getByText('Only show “\u2068DOM Worker\u2069”');
+      const hideDOMWorker = () => getByText('Hide “\u2068DOM Worker\u2069”');
       const trackItem = () => getByText('DOM Worker');
 
       return {
