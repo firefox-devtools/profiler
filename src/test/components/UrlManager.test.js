@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import { makeProfileSerializable } from '../../profile-logic/process-profile';
+import { serializeProfile } from '../../profile-logic/process-profile';
 import { getView, getUrlSetupPhase } from '../../selectors/app';
 import { UrlManager } from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
@@ -30,6 +30,8 @@ import {
 
 jest.mock('../../profile-logic/symbol-store');
 
+import { TextEncoder, TextDecoder } from 'util';
+
 describe('UrlManager', function() {
   autoMockFullNavigation();
 
@@ -42,9 +44,11 @@ describe('UrlManager', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
+      arrayBuffer: () =>
         Promise.resolve(
-          makeProfileSerializable(getProfileFromTextSamples('A').profile)
+          new TextEncoder().encode(
+            serializeProfile(getProfileFromTextSamples('A').profile)
+          )
         ),
     }: any): Response);
     return fetch200Response;
@@ -84,10 +88,12 @@ describe('UrlManager', function() {
       .fn()
       .mockRejectedValue(new Error('Simulated network error'));
     window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+    window.TextDecoder = TextDecoder;
   });
 
   afterEach(function() {
     delete window.geckoProfilerPromise;
+    delete window.TextDecoder;
     delete window.fetch;
   });
 
