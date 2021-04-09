@@ -510,8 +510,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     const isDisabled = this.getVisibleScreenshotTracks().length <= 1;
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
-        <Localized id="TrackContextMenu--hide-other-screenshot-tracks">
-          Hide other screenshot tracks
+        <Localized id="TrackContextMenu--hide-other-screenshots-tracks">
+          Hide other Screenshots tracks
         </Localized>
       </MenuItem>
     );

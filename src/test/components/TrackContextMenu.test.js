@@ -136,7 +136,7 @@ describe('timeline/TrackContextMenu', function() {
         getByText(/Only show “\u2068Content Process\u2069”/);
       const trackItem = () => getByText('Content Process');
       const isolateScreenshotTrack = () =>
-        getByText(/Hide other screenshot tracks/);
+        getByText(/Hide other Screenshots tracks/);
       // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
       const hideContentProcess = () =>
         getByText(/Hide “\u2068Content Process\u2069”/);

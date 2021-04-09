@@ -542,7 +542,7 @@ TrackContextMenu--only-show-this-process-group = Only show this process group
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Only show “{ $trackName }”
-TrackContextMenu--hide-other-screenshot-tracks = Hide other screenshot tracks
+TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 
 # This is used as the context menu item to hide the given track.
 # Variables:

@@ -13,7 +13,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     role="menuitem"
     tabindex="-1"
   >
-    Hide other screenshot tracks
+    Hide other Screenshots tracks
   </div>
   <div
     aria-disabled="false"
