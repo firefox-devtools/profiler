@@ -294,32 +294,28 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
           <>
             <MenuItem onClick={this.setStartRangeFromMarkerStart}>
               <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart" />
-              <div className="react-contextmenu-item-content">
-                <Localized
-                  id="MarkerContextMenu--start-selection-at-marker-start"
-                  elems={{ strong: <strong /> }}
-                >
-                  <>
-                    Start selection at marker’s <strong>start</strong>
-                  </>
-                </Localized>
-              </div>
+              <Localized
+                id="MarkerContextMenu--start-selection-at-marker-start"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  Start selection at marker’s <strong>start</strong>
+                </div>
+              </Localized>
             </MenuItem>
             <MenuItem
               onClick={this.setStartRangeFromMarkerEnd}
               disabled={markerEnd > selectionEnd}
             >
               <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd" />
-              <div className="react-contextmenu-item-content">
-                <Localized
-                  id="MarkerContextMenu--start-selection-at-marker-end"
-                  elems={{ strong: <strong /> }}
-                >
-                  <>
-                    Start selection at marker’s <strong>end</strong>
-                  </>
-                </Localized>
-              </div>
+              <Localized
+                id="MarkerContextMenu--start-selection-at-marker-end"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  Start selection at marker’s <strong>end</strong>
+                </div>
+              </Localized>
             </MenuItem>
             <div className="react-contextmenu-separator" />
             <MenuItem
@@ -327,29 +323,25 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
               disabled={selectionStart > markerStart}
             >
               <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart" />
-              <div className="react-contextmenu-item-content">
-                <Localized
-                  id="MarkerContextMenu--end-selection-at-marker-start"
-                  elems={{ strong: <strong /> }}
-                >
-                  <>
-                    End selection at marker’s <strong>start</strong>
-                  </>
-                </Localized>
-              </div>
+              <Localized
+                id="MarkerContextMenu--end-selection-at-marker-start"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  End selection at marker’s <strong>start</strong>
+                </div>
+              </Localized>
             </MenuItem>
             <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
               <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd" />
-              <div className="react-contextmenu-item-content">
-                <Localized
-                  id="MarkerContextMenu--end-selection-at-marker-end"
-                  elems={{ strong: <strong /> }}
-                >
-                  <>
-                    End selection at marker’s <strong>end</strong>
-                  </>
-                </Localized>
-              </div>
+              <Localized
+                id="MarkerContextMenu--end-selection-at-marker-end"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  End selection at marker’s <strong>end</strong>
+                </div>
+              </Localized>
             </MenuItem>
           </>
         )}

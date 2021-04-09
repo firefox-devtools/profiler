@@ -421,9 +421,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           id="TrackContextMenu--only-show-track"
           vars={{ trackName: rightClickedTrackName }}
         >
-          <>
-            Only show {`“${this.getRightClickedTrackName(rightClickedTrack)}”`}
-          </>
+          <>Only show {`“${rightClickedTrackName}”`}</>
         </Localized>
       </MenuItem>
     );
@@ -472,9 +470,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           id="TrackContextMenu--only-show-track"
           vars={{ trackName: rightClickedTrackName }}
         >
-          <>
-            Only show {`“${this.getRightClickedTrackName(rightClickedTrack)}”`}
-          </>
+          <>Only show {`“rightClickedTrackName}”`}</>
         </Localized>
       </MenuItem>
     );

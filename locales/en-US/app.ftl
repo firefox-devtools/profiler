@@ -88,7 +88,7 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
 CallNodeContextMenu--transform-collapse-resource =
     Collapse <strong>{ $nameForResource }</strong>
     .title =
-        Collapsing a resource will flatten out of all the calls to that
+        Collapsing a resource will flatten out all the calls to that
         resource into a single collapsed call node.
 CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
     .title =
@@ -97,7 +97,7 @@ CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recur
 CallNodeContextMenu--transform-drop-function = Drop samples with this function
     .title =
         Dropping samples removes their time from the profile. This is useful to
-        eliminate timing information that is not for the analysis.
+        eliminate timing information that is not relevant for the analysis.
 
 CallNodeContextMenu--expand-all = Expand all
 

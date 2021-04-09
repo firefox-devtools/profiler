@@ -458,11 +458,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             icon="Merge"
             onClick={this._handleClick}
             transform="merge-function"
-            title={oneLine`
-              Merging a function removes it from the profile, and assigns its time to the
-              function that called it. This happens anywhere the function was called in
-              the tree.
-            `}
+            title=""
           >
             Merge function
           </TransformMenuItem>
@@ -478,12 +474,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               icon="Merge"
               onClick={this._handleClick}
               transform="merge-call-node"
-              title={oneLine`
-                Merging a node removes it from the profile, and assigns its time to the
-                function's node that called it. It only removes the function from that
-                specific part of the tree. Any other places the function was called from
-                will remain in the profile.
-            `}
+              title=""
             >
               Merge node only
             </TransformMenuItem>
@@ -503,12 +494,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             icon="Focus"
             onClick={this._handleClick}
             transform="focus-function"
-            title={oneLine`
-              Focusing on a function will remove any sample that does not include that
-              function. In addition, it re-roots the call tree so that the function
-              is the only root of the tree. This can combine multiple function call sites
-              across a profile into one call node.
-          `}
+            title=""
           >
             {inverted ? 'Focus on function (inverted)' : 'Focus on function'}
           </TransformMenuItem>
@@ -523,12 +509,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             icon="Focus"
             onClick={this._handleClick}
             transform="focus-subtree"
-            title={oneLine`
-              Focusing on a subtree will remove any sample that does not include that
-              specific part of the call tree. It pulls out a branch of the call tree,
-              however it only does it for that single call node. All other calls
-              of the function are ignored.
-          `}
+            title=""
           >
             Focus on subtree only
           </TransformMenuItem>
@@ -543,11 +524,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             icon="Collapse"
             onClick={this._handleClick}
             transform="collapse-function-subtree"
-            title={oneLine`
-              Collapsing a function will remove everything it called, and assign
-              all of the time to the function. This can help simplify a profile that
-              calls into code that does not need to be analyzed.
-          `}
+            title=""
           >
             Collapse function
           </TransformMenuItem>
@@ -565,10 +542,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               icon="Collapse"
               onClick={this._handleClick}
               transform="collapse-resource"
-              title={oneLine`
-                Collapsing a resource will flatten out of all the calls to that
-                resource into a single collapsed call node.
-            `}
+              title=""
             >
               Collapse <strong>{nameForResource}</strong>
             </TransformMenuItem>
@@ -585,10 +559,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               icon="Collapse"
               onClick={this._handleClick}
               transform="collapse-direct-recursion"
-              title={oneLine`
-                Collapsing direct recursion removes calls that repeatedly recurse into
-                the same function.
-            `}
+              title=""
             >
               Collapse direct recursion
             </TransformMenuItem>
@@ -604,10 +575,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
             icon="Drop"
             onClick={this._handleClick}
             transform="drop-function"
-            title={oneLine`
-              Dropping samples removes their time from the profile. This is useful to
-              eliminate timing information that is not for the analysis.
-          `}
+            title=""
           >
             Drop samples with this function
           </TransformMenuItem>
