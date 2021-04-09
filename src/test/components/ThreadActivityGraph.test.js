@@ -155,6 +155,17 @@ describe('ThreadActivityGraph', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
+  it('should not extend the sample length more if there are missing samples', () => {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    profile.meta.interval = 1;
+    // The interval is 1. But between first and second sample, there is a 3
+    // seconds gap. If the gap between two samples is longer than the interval,
+    // we should limit the samples length to the next interval time.
+    profile.threads[0].samples.time = [1, 4, 5];
+    const { ctx } = setup(profile);
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+  });
+
   /**
    * The ThreadActivityGraph is not a connected component. It's easiest to test it
    * as once it's connected to the Redux store in the SelectedActivityGraph.

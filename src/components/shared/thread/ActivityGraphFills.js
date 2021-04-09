@@ -237,7 +237,8 @@ export class ActivityGraphFillComputer {
         prevSampleTime,
         sampleTime,
         nextSampleTime,
-        cpuBeforeSample
+        cpuBeforeSample,
+        interval
       );
 
       prevSampleTime = sampleTime;
@@ -266,7 +267,8 @@ export class ActivityGraphFillComputer {
       prevSampleTime,
       sampleTime,
       sampleTime + interval,
-      cpuBeforeSample
+      cpuBeforeSample,
+      interval
     );
   }
 
@@ -280,7 +282,8 @@ export class ActivityGraphFillComputer {
     prevSampleTime: Milliseconds,
     sampleTime: Milliseconds,
     nextSampleTime: Milliseconds,
-    cpuBeforeSample: number | null
+    cpuBeforeSample: number | null,
+    interval: Milliseconds
   ) {
     const {
       rangeEnd,
@@ -301,8 +304,17 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const sampleStart = (prevSampleTime + sampleTime) / 2;
-    const sampleEnd = (sampleTime + nextSampleTime) / 2;
+    // Limiting the sample length to the interval. This is needed to display a
+    // more realistic graph to the user. Otherwise, if there are missing samples,
+    // they are not possible to see the gaps.
+    const sampleStart = Math.max(
+      (prevSampleTime + sampleTime) / 2,
+      sampleTime - interval
+    );
+    const sampleEnd = Math.min(
+      (sampleTime + nextSampleTime) / 2,
+      sampleTime + interval
+    );
     let pixelStart = (sampleStart - rangeStart) * xPixelsPerMs;
     let pixelEnd = (sampleEnd - rangeStart) * xPixelsPerMs;
     pixelStart = Math.max(0, pixelStart);
