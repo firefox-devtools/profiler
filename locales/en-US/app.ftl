@@ -55,26 +55,21 @@ CallNodeContextMenu--transform-merge-function = Merge function
 CallNodeContextMenu--transform-merge-call-node = Merge node only
     .title =
         Merging a node removes it from the profile, and assigns its time to the
-        function's node that called it. It only removes the function from that
-        specific part of the tree. Any other places the function was called
+        function’s node that called it. It only removes the function from that
+        specific part of the tree. Any other places the function was called from
         will remain in the profile.
 
-# This is used as the context menu item to apply the "Focus on function" transform.
-# Variables:
-#   $isInverted (Number) - This is actually a boolean value to determine if the
-#     call tree is inverted or not. Currently there is no wayt o pass a boolean
-#     value with Localized component, that's why we are passing this as a number
-#     instead. 0 is for false and 1 is for true.
-CallNodeContextMenu--transform-focus-function =
-    { $isInverted ->
-        [0] Focus on function
-       *[other] Focus on function (inverted)
-    }
-    .title =
-        Focusing on a function will remove any sample that does not include that
-        function. In addition, it re-roots the call tree so that the function
-        is the only root of the tree. This can combine multiple function call sites
-        across a profile into one call node.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Focusing on a function will remove any sample that does not include that
+    function. In addition, it re-roots the call tree so that the function
+    is the only root of the tree. This can combine multiple function call sites
+    across a profile into one call node.
+CallNodeContextMenu--transform-focus-function = Focus on function
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Focus on function (inverted)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
     .title =
         Focusing on a subtree will remove any sample that does not include that
@@ -93,7 +88,7 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
 CallNodeContextMenu--transform-collapse-resource =
     Collapse <strong>{ $nameForResource }</strong>
     .title =
-        Collapsing a resource will flatten out of all the calls into that
+        Collapsing a resource will flatten out of all the calls to that
         resource into a single collapsed call node.
 CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
     .title =
@@ -105,6 +100,9 @@ CallNodeContextMenu--transform-drop-function = Drop samples with this function
         eliminate timing information that is not for the analysis.
 
 CallNodeContextMenu--expand-all = Expand all
+
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Look up the function name on Searchfox
 CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
@@ -543,13 +541,13 @@ TrackContextMenu--only-show-this-process-group = Only show this process group
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
-TrackContextMenu--only-show-track = Only show "{ $trackName }"
+TrackContextMenu--only-show-track = Only show “{ $trackName }”
 TrackContextMenu--hide-other-screenshot-tracks = Hide other screenshot tracks
 
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
-TrackContextMenu--hide-track = Hide "{ $trackName }"
+TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
 
 ## UploadedRecordingsHome

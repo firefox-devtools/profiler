@@ -422,7 +422,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           vars={{ trackName: rightClickedTrackName }}
         >
           <>
-            Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+            Only show {`“${this.getRightClickedTrackName(rightClickedTrack)}”`}
           </>
         </Localized>
       </MenuItem>
@@ -473,7 +473,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           vars={{ trackName: rightClickedTrackName }}
         >
           <>
-            Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+            Only show {`“${this.getRightClickedTrackName(rightClickedTrack)}”`}
           </>
         </Localized>
       </MenuItem>
@@ -543,7 +543,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
             id="TrackContextMenu--hide-track"
             vars={{ trackName: rightClickedTrackName }}
           >
-            <>Hide {`"${rightClickedTrackName}"`}</>
+            <>Hide {`“${rightClickedTrackName}”`}</>
           </Localized>
         </MenuItem>
       );
@@ -559,7 +559,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
           id="TrackContextMenu--hide-track"
           vars={{ trackName: rightClickedTrackName }}
         >
-          <>Hide {`"${rightClickedTrackName}"`}</>
+          <>Hide {`“${rightClickedTrackName}”`}</>
         </Localized>
       </MenuItem>
     );

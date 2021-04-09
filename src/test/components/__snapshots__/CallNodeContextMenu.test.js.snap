@@ -33,7 +33,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Merging a node removes it from the profile, and assigns its time to the function's node that called it. It only removes the function from that specific part of the tree. Any other places the function was called will remain in the profile."
+    title="Merging a node removes it from the profile, and assigns its time to the function’s node that called it. It only removes the function from that specific part of the tree. Any other places the function was called from will remain in the profile."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconMerge"
@@ -117,7 +117,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
-    title="Collapsing a resource will flatten out of all the calls into that resource into a single collapsed call node."
+    title="Collapsing a resource will flatten out of all the calls to that resource into a single collapsed call node."
   >
     <span
       class="react-contextmenu-icon callNodeContextMenuIconCollapse"

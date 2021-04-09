@@ -481,7 +481,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               title={oneLine`
                 Merging a node removes it from the profile, and assigns its time to the
                 function's node that called it. It only removes the function from that
-                specific part of the tree. Any other places the function was called
+                specific part of the tree. Any other places the function was called from
                 will remain in the profile.
             `}
             >
@@ -491,12 +491,12 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         )}
 
         <Localized
-          id="CallNodeContextMenu--transform-focus-function"
+          id={
+            inverted
+              ? 'CallNodeContextMenu--transform-focus-function-inverted'
+              : 'CallNodeContextMenu--transform-focus-function'
+          }
           attrs={{ title: true }}
-          // @fluent/react doesn't support boolean values as variables yet.
-          // We are converting it to number to check it in the ftl string.
-          // See: https://github.com/projectfluent/fluent.js/issues/543
-          vars={{ isInverted: Number(inverted) }}
         >
           <TransformMenuItem
             shortcut="f"
@@ -566,7 +566,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               onClick={this._handleClick}
               transform="collapse-resource"
               title={oneLine`
-                Collapsing a resource will flatten out of all the calls into that
+                Collapsing a resource will flatten out of all the calls to that
                 resource into a single collapsed call node.
             `}
             >
