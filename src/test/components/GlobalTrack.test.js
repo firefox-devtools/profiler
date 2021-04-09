@@ -16,7 +16,7 @@ import { TimelineGlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
@@ -27,6 +27,8 @@ import {
 } from '../fixtures/utils';
 
 describe('timeline/GlobalTrack', function() {
+  autoMockCanvasContext();
+
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',   // Track index 0
@@ -64,9 +66,6 @@ describe('timeline/GlobalTrack', function() {
     const threadIndex = track.mainThreadIndex;
 
     // Some child components render to canvas.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(400, 400));

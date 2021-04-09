@@ -8,7 +8,7 @@ import * as React from 'react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -39,6 +39,7 @@ describe('Root with history', function() {
   |};
 
   autoMockFullNavigation();
+  autoMockCanvasContext();
 
   function setup(config: TestConfig) {
     const { profileHash } = config;
@@ -62,11 +63,6 @@ describe('Root with history', function() {
           'profile hash. This is needed to complete #1789.'
       );
     }
-
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     const store = blankStore();
     const renderResult = render(<Root store={store} />);

@@ -18,7 +18,10 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import { TimelineTrackThread } from '../../components/timeline/TrackThread';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, fireFullClick } from '../fixtures/utils';
@@ -40,6 +43,8 @@ function getSamplesPixelPosition(
 }
 
 describe('ThreadActivityGraph', function() {
+  autoMockCanvasContext();
+
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       A[cat:DOM]   A[cat:DOM]       A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]     A[cat:DOM]
@@ -55,11 +60,6 @@ describe('ThreadActivityGraph', function() {
     const { getState, dispatch } = store;
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -116,7 +116,6 @@ describe('ThreadActivityGraph', function() {
       activityGraphCanvas,
       clickActivityGraph,
       getCallNodePath,
-      ctx,
     };
   }
 
@@ -126,8 +125,8 @@ describe('ThreadActivityGraph', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx } = setup();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    setup();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('matches the 2d canvas draw snapshot with CPU values', () => {
@@ -149,10 +148,10 @@ describe('ThreadActivityGraph', function() {
       300,
     ];
 
-    const { ctx, getState } = setup(profile);
+    const { getState } = setup(profile);
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('matches the 2d canvas draw snapshot with only one CPU usage value', () => {
@@ -167,14 +166,14 @@ describe('ThreadActivityGraph', function() {
     // We need to have at least two samples to test it because the first
     // threadCPUDelta is always null.
     profile.threads[0].samples.threadCPUDelta = [null, 100];
-    const { ctx, getState, dispatch } = setup(profile);
+    const { getState, dispatch } = setup(profile);
 
     // Commit a range that contains only the second sample.
     dispatch(commitRange(0.1, 2.0));
 
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   /**
@@ -197,12 +196,12 @@ describe('ThreadActivityGraph', function() {
     });
 
     it('will redraw even when there are no samples in range', function() {
-      const { dispatch, ctx } = setup();
-      ctx.__flushDrawLog();
+      const { dispatch } = setup();
+      flushDrawLog();
 
       // Commit a thin range which contains no samples
       dispatch(commitRange(0.5, 0.6));
-      const drawCalls = ctx.__flushDrawLog();
+      const drawCalls = flushDrawLog();
       // We use the presence of 'globalCompositeOperation' to know
       // whether the canvas was redrawn or not.
       expect(drawCalls.map(([fn]) => fn)).toContain(

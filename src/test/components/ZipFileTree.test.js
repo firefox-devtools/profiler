@@ -12,7 +12,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getBoundingBox,
   waitUntilState,
@@ -20,6 +20,8 @@ import {
 } from '../fixtures/utils';
 
 describe('calltree/ZipFileTree', function() {
+  autoMockCanvasContext();
+
   async function setup() {
     const { store } = await storeWithZipFile([
       'foo/bar/profile1.json',
@@ -28,11 +30,6 @@ describe('calltree/ZipFileTree', function() {
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
     ]);
-
-    // Some child components render to canvas.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
 
     // This makes the bounding box large enough so that we don't trigger
     // VirtualList's virtualization.
@@ -128,14 +125,6 @@ describe('calltree/ZipFileTree', function() {
     });
 
     it('will show the ProfileViewer component when done processing', async () => {
-      // The full ProfileViewer component renders to a Canvas, which the jsdom API
-      // doesn't fully mock out.
-      jest
-        .spyOn(HTMLCanvasElement.prototype, 'getContext')
-        .mockImplementation(() => {
-          return mockCanvasContext();
-        });
-
       const {
         profileViewer,
         profile1OpenLink,

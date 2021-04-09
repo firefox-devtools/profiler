@@ -10,7 +10,10 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import {
@@ -35,14 +38,11 @@ import type { Profile } from 'firefox-profiler/types';
 
 describe('Timeline multiple thread selection', function() {
   autoMockDomRect();
+  autoMockCanvasContext();
 
   function setup() {
     const profile = getProfileWithNiceTracks();
     const store = storeWithProfile(profile);
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -399,6 +399,8 @@ function _getProfileWithDroppedSamples(): Profile {
 }
 
 describe('Timeline', function() {
+  autoMockCanvasContext();
+
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -417,10 +419,6 @@ describe('Timeline', function() {
   it('renders the header', () => {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     const profile = _getProfileWithDroppedSamples();
 
@@ -435,7 +433,7 @@ describe('Timeline', function() {
     flushRafCalls();
     flushRafCalls();
 
-    const drawCalls = ctx.__flushDrawLog();
+    const drawCalls = flushDrawLog();
 
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
@@ -447,12 +445,9 @@ describe('Timeline', function() {
   // TODO: Enable it again once we have that checbox back.
   // eslint-disable-next-line jest/no-disabled-tests
   describe.skip('TimelineSettingsActiveTabView', function() {
-    it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
-      const ctx = mockCanvasContext();
-      jest
-        .spyOn(HTMLCanvasElement.prototype, 'getContext')
-        .mockImplementation(() => ctx);
+    autoMockCanvasContext();
 
+    it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
       const store = storeWithProfile();
       const { queryByText } = render(
         <Provider store={store}>
@@ -464,11 +459,6 @@ describe('Timeline', function() {
     });
 
     it('can switch between active tab view and advanced view', () => {
-      const ctx = mockCanvasContext();
-      jest
-        .spyOn(HTMLCanvasElement.prototype, 'getContext')
-        .mockImplementation(() => ctx);
-
       const profile = _getProfileWithDroppedSamples();
       profile.meta.configuration = {
         threads: [],
@@ -503,10 +493,6 @@ describe('Timeline', function() {
   describe('TimelineSettingsHiddenTracks', () => {
     it('resets "rightClickedTrack" state when clicked', () => {
       const profile = _getProfileWithDroppedSamples();
-      const ctx = mockCanvasContext();
-      jest
-        .spyOn(HTMLCanvasElement.prototype, 'getContext')
-        .mockImplementation(() => ctx);
 
       const store = storeWithProfile(profile);
       const { getByText, getByRole } = render(

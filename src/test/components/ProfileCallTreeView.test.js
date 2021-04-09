@@ -16,7 +16,7 @@ import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
@@ -46,11 +46,8 @@ import {
 
 import type { Profile } from 'firefox-profiler/types';
 
+autoMockCanvasContext();
 beforeEach(() => {
-  // Mock out the 2d canvas for the loupe view.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
   // This makes the bounding box large enough so that we don't trigger
   // VirtualList's virtualization. We assert this above.
   jest

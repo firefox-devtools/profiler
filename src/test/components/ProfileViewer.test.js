@@ -18,10 +18,11 @@ import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { blankStore } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getBoundingBox } from '../fixtures/utils';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 describe('ProfileViewer', function() {
+  autoMockCanvasContext();
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -35,11 +36,6 @@ describe('ProfileViewer', function() {
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(200, 300));
-
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
   });
 
   function setup() {
