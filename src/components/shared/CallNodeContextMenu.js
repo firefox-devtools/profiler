@@ -5,6 +5,8 @@
 // @flow
 import * as React from 'react';
 import { MenuItem } from 'react-contextmenu';
+import { Localized } from '@fluent/react';
+
 import { ContextMenu } from './ContextMenu';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { funcHasRecursiveCall } from 'firefox-profiler/profile-logic/transforms';
@@ -447,151 +449,178 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     return (
       <>
-        <TransformMenuItem
-          shortcut="m"
-          icon="Merge"
-          onClick={this._handleClick}
-          transform="merge-function"
-          title={oneLine`
-            Merging a function removes it from the profile, and assigns its time to the
-            function that called it. This happens anywhere the function was called in
-            the tree.
-          `}
+        <Localized
+          id="CallNodeContextMenu--transform-merge-function"
+          attrs={{ title: true }}
         >
-          Merge function
-        </TransformMenuItem>
-
-        {inverted ? null : (
           <TransformMenuItem
-            shortcut="M"
+            shortcut="m"
             icon="Merge"
             onClick={this._handleClick}
-            transform="merge-call-node"
-            title={oneLine`
-              Merging a node removes it from the profile, and assigns its time to the
-              function's node that called it. It only removes the function from that
-              specific part of the tree. Any other places the function was called
-              will remain in the profile.
-            `}
+            transform="merge-function"
+            title=""
           >
-            Merge node only
+            Merge function
           </TransformMenuItem>
+        </Localized>
+
+        {inverted ? null : (
+          <Localized
+            id="CallNodeContextMenu--transform-merge-call-node"
+            attrs={{ title: true }}
+          >
+            <TransformMenuItem
+              shortcut="M"
+              icon="Merge"
+              onClick={this._handleClick}
+              transform="merge-call-node"
+              title=""
+            >
+              Merge node only
+            </TransformMenuItem>
+          </Localized>
         )}
 
-        <TransformMenuItem
-          shortcut="f"
-          icon="Focus"
-          onClick={this._handleClick}
-          transform="focus-function"
-          title={oneLine`
-            Focusing on a function will remove any sample that does not include that
-            function. In addition, it re-roots the call tree so that the function
-            is the only root of the tree. This can combine multiple function call sites
-            across a profile into one call node.
-          `}
+        <Localized
+          id={
+            inverted
+              ? 'CallNodeContextMenu--transform-focus-function-inverted'
+              : 'CallNodeContextMenu--transform-focus-function'
+          }
+          attrs={{ title: true }}
         >
-          {inverted ? 'Focus on function (inverted)' : 'Focus on function'}
-        </TransformMenuItem>
-
-        <TransformMenuItem
-          shortcut="F"
-          icon="Focus"
-          onClick={this._handleClick}
-          transform="focus-subtree"
-          title={oneLine`
-            Focusing on a subtree will remove any sample that does not include that
-            specific part of the call tree. It pulls out a branch of the call tree,
-            however it only does it for that single call node. All other calls
-            of the function are ignored.
-          `}
-        >
-          Focus on subtree only
-        </TransformMenuItem>
-
-        <TransformMenuItem
-          shortcut="c"
-          icon="Collapse"
-          onClick={this._handleClick}
-          transform="collapse-function-subtree"
-          title={oneLine`
-            Collapsing a function will remove everything it called, and assign
-            all of the time to the function. This can help simplify a profile that
-            calls into code that does not need to be analyzed.
-          `}
-        >
-          Collapse function
-        </TransformMenuItem>
-
-        {nameForResource ? (
           <TransformMenuItem
-            shortcut="C"
+            shortcut="f"
+            icon="Focus"
+            onClick={this._handleClick}
+            transform="focus-function"
+            title=""
+          >
+            {inverted ? 'Focus on function (inverted)' : 'Focus on function'}
+          </TransformMenuItem>
+        </Localized>
+
+        <Localized
+          id="CallNodeContextMenu--transform-focus-subtree"
+          attrs={{ title: true }}
+        >
+          <TransformMenuItem
+            shortcut="F"
+            icon="Focus"
+            onClick={this._handleClick}
+            transform="focus-subtree"
+            title=""
+          >
+            Focus on subtree only
+          </TransformMenuItem>
+        </Localized>
+
+        <Localized
+          id="CallNodeContextMenu--transform-collapse-function-subtree"
+          attrs={{ title: true }}
+        >
+          <TransformMenuItem
+            shortcut="c"
             icon="Collapse"
             onClick={this._handleClick}
-            transform="collapse-resource"
-            title={oneLine`
-              Collapsing a resource will flatten out of all the calls into that
-              resource into a single collapsed call node.
-            `}
+            transform="collapse-function-subtree"
+            title=""
           >
-            Collapse <strong>{nameForResource}</strong>
+            Collapse function
           </TransformMenuItem>
+        </Localized>
+
+        {nameForResource ? (
+          <Localized
+            id="CallNodeContextMenu--transform-collapse-resource"
+            attrs={{ title: true }}
+            vars={{ nameForResource: nameForResource }}
+            elems={{ strong: <strong /> }}
+          >
+            <TransformMenuItem
+              shortcut="C"
+              icon="Collapse"
+              onClick={this._handleClick}
+              transform="collapse-resource"
+              title=""
+            >
+              Collapse <strong>{nameForResource}</strong>
+            </TransformMenuItem>
+          </Localized>
         ) : null}
 
         {this.isRecursiveCall() ? (
-          <TransformMenuItem
-            shortcut="r"
-            icon="Collapse"
-            onClick={this._handleClick}
-            transform="collapse-direct-recursion"
-            title={oneLine`
-              Collapsing direct recursion removes calls that repeatedly recurse into
-              the same function.
-            `}
+          <Localized
+            id="CallNodeContextMenu--transform-collapse-direct-recursion"
+            attrs={{ title: true }}
           >
-            Collapse direct recursion
-          </TransformMenuItem>
+            <TransformMenuItem
+              shortcut="r"
+              icon="Collapse"
+              onClick={this._handleClick}
+              transform="collapse-direct-recursion"
+              title=""
+            >
+              Collapse direct recursion
+            </TransformMenuItem>
+          </Localized>
         ) : null}
 
-        <TransformMenuItem
-          shortcut="d"
-          icon="Drop"
-          onClick={this._handleClick}
-          transform="drop-function"
-          title={oneLine`
-            Dropping samples removes their time from the profile. This is useful to
-            eliminate timing information that is not for the analysis.
-          `}
+        <Localized
+          id="CallNodeContextMenu--transform-drop-function"
+          attrs={{ title: true }}
         >
-          Drop samples with this function
-        </TransformMenuItem>
+          <TransformMenuItem
+            shortcut="d"
+            icon="Drop"
+            onClick={this._handleClick}
+            transform="drop-function"
+            title=""
+          >
+            Drop samples with this function
+          </TransformMenuItem>
+        </Localized>
 
         <div className="react-contextmenu-separator" />
 
         {showExpandAll ? (
           <>
-            <MenuItem onClick={this._handleClick} data={{ type: 'expand-all' }}>
-              Expand all
-            </MenuItem>
+            <Localized id="CallNodeContextMenu--expand-all">
+              <MenuItem
+                onClick={this._handleClick}
+                data={{ type: 'expand-all' }}
+              >
+                Expand all
+              </MenuItem>
+            </Localized>
             <div className="react-contextmenu-separator" />
           </>
         ) : null}
-        <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
-          Look up the function name on Searchfox
-        </MenuItem>
-        <MenuItem
-          onClick={this._handleClick}
-          data={{ type: 'copy-function-name' }}
-        >
-          Copy function name
-        </MenuItem>
-        {isJS ? (
-          <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
-            Copy script URL
+        <Localized id="CallNodeContextMenu--searchfox">
+          <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
+            Look up the function name on Searchfox
           </MenuItem>
+        </Localized>
+        <Localized id="CallNodeContextMenu--copy-function-name">
+          <MenuItem
+            onClick={this._handleClick}
+            data={{ type: 'copy-function-name' }}
+          >
+            Copy function name
+          </MenuItem>
+        </Localized>
+        {isJS ? (
+          <Localized id="CallNodeContextMenu--copy-script-url">
+            <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
+              Copy script URL
+            </MenuItem>
+          </Localized>
         ) : null}
-        <MenuItem onClick={this._handleClick} data={{ type: 'copy-stack' }}>
-          Copy stack
-        </MenuItem>
+        <Localized id="CallNodeContextMenu--copy-stack">
+          <MenuItem onClick={this._handleClick} data={{ type: 'copy-stack' }}>
+            Copy stack
+          </MenuItem>
+        </Localized>
       </>
     );
   }
@@ -673,7 +702,7 @@ function TransformMenuItem(props: {|
     <MenuItem
       onClick={props.onClick}
       data={{ type: props.transform }}
-      attributes={{ title: props.title }}
+      attributes={{ title: oneLine`${props.title}` }}
     >
       <span
         className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
