@@ -275,16 +275,13 @@ MarkerSettings--panel-search =
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
-MenuButtons--index--metaInfo-button-uploaded-profile =
-    .label = Uploaded Profile
-
-MenuButtons--index--metaInfo-button-local-profile =
-    .label = Local Profile
+MenuButtons--index--metaInfo-button =
+    .label = Profile Info
 
 MenuButtons--index--full-view = Full View
 MenuButtons--index--cancel-upload = Cancel Upload
 MenuButtons--index--share-upload =
-    .label = Upload
+    .label = Upload Local Profile
 
 MenuButtons--index--share-re-upload =
     .label = Re-upload
