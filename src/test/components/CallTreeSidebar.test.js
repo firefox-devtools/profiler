@@ -166,7 +166,7 @@ describe('CallTreeSidebar', function() {
     dispatch(changeSelectedThreads(new Set([2])));
     dispatch(changeSelectedCallNode(2, [A]));
 
-    expect(queryByText(/Implementation/)).toBe(null);
+    expect(queryByText(/Implementation/)).not.toBeInTheDocument();
 
     dispatch(changeSelectedCallNode(2, [A, B, D]));
     expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
@@ -181,7 +181,7 @@ describe('CallTreeSidebar', function() {
       funcNamesDict: { A, B, C },
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
-    expect(queryByText('FakeSubCategoryC')).toBe(null);
+    expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
 
     const layoutCategory = getByText('Layout');
     fireFullClick(layoutCategory);

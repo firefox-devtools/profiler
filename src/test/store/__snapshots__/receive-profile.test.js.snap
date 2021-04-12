@@ -9,16 +9,16 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },
@@ -35,16 +35,16 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },
@@ -87,16 +87,16 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },

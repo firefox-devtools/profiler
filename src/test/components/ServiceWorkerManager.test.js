@@ -228,7 +228,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container.firstChild).toMatchSnapshot();
 
       // There's a reload button for the `public` datasource only once we're ready.
-      expect(queryByText(/reload/i)).toBe(null);
+      expect(queryByText(/reload/i)).not.toBeInTheDocument();
 
       dispatch(doneSymbolicating());
       expect(getReloadButton()).not.toBe(null);
@@ -281,7 +281,7 @@ describe('app/ServiceWorkerManager', () => {
         ensureExists(container.querySelector('.photon-message-bar')).className
       ).toMatch(/\bphoton-message-bar-warning\b/);
       // There's no reload button for the `from-addon` datasource.
-      expect(queryByText(/reload/i)).toBe(null);
+      expect(queryByText(/reload/i)).not.toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
 
       // The notice stays if we're getting ready after that.

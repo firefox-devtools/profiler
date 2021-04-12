@@ -159,7 +159,7 @@ describe('ActiveTabTimeline', function() {
     it('does not display the resources panel if there are no resource tracks', () => {
       const { getState, queryByText } = setup();
       expect(getActiveTabResourceTracks(getState()).length).toBe(0);
-      expect(queryByText(/Resources/)).toBe(null);
+      expect(queryByText(/Resources/)).not.toBeInTheDocument();
     });
   });
 

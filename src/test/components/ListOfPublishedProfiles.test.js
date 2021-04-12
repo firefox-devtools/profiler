@@ -395,7 +395,7 @@ describe('ListOfPublishedProfiles', () => {
       // Click on the cancel button
       fireFullClick(getCancelDeleteButton());
       jest.runAllTimers(); // Closing the panel involves a timeout too.
-      expect(queryByText(/are you sure/i)).toBe(null);
+      expect(queryByText(/are you sure/i)).not.toBeInTheDocument();
       expect(
         await retrieveUploadedProfileInformationFromDb(profileToken)
       ).toEqual(listOfProfileInformations[0]);
