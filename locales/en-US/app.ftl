@@ -16,12 +16,14 @@
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
+## This is used at the top of the homepage and other content pages.
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app for { -firefox-brand-name } performance analysis</subheader>
 AppHeader--github-icon =
     .title = Go to our git repository (this opens in a new window)
 
 ## AppViewRouter
+## This is used for displaying errors when loading the application.
 
 AppViewRouter--error-message-unpublished =
     .message = Couldn’t retrieve the profile from { -firefox-brand-name }.
@@ -41,7 +43,74 @@ AppViewRouter--error-message-from-url =
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
+## CallNodeContextMenu
+## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
+## panels.
+
+CallNodeContextMenu--transform-merge-function = Merge function
+    .title =
+        Merging a function removes it from the profile, and assigns its time to the
+        function that called it. This happens anywhere the function was called in
+        the tree.
+CallNodeContextMenu--transform-merge-call-node = Merge node only
+    .title =
+        Merging a node removes it from the profile, and assigns its time to the
+        function’s node that called it. It only removes the function from that
+        specific part of the tree. Any other places the function was called from
+        will remain in the profile.
+
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Focusing on a function will remove any sample that does not include that
+    function. In addition, it re-roots the call tree so that the function
+    is the only root of the tree. This can combine multiple function call sites
+    across a profile into one call node.
+CallNodeContextMenu--transform-focus-function = Focus on function
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Focus on function (inverted)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Focus on subtree only
+    .title =
+        Focusing on a subtree will remove any sample that does not include that
+        specific part of the call tree. It pulls out a branch of the call tree,
+        however it only does it for that single call node. All other calls
+        of the function are ignored.
+CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
+    .title =
+        Collapsing a function will remove everything it called, and assign
+        all of the time to the function. This can help simplify a profile that
+        calls into code that does not need to be analyzed.
+
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource =
+    Collapse <strong>{ $nameForResource }</strong>
+    .title =
+        Collapsing a resource will flatten out all the calls to that
+        resource into a single collapsed call node.
+CallNodeContextMenu--transform-collapse-direct-recursion = Collapse direct recursion
+    .title =
+        Collapsing direct recursion removes calls that repeatedly recurse into
+        the same function.
+CallNodeContextMenu--transform-drop-function = Drop samples with this function
+    .title =
+        Dropping samples removes their time from the profile. This is useful to
+        eliminate timing information that is not relevant for the analysis.
+
+CallNodeContextMenu--expand-all = Expand all
+
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Look up the function name on Searchfox
+CallNodeContextMenu--copy-function-name = Copy function name
+CallNodeContextMenu--copy-script-url = Copy script URL
+CallNodeContextMenu--copy-stack = Copy stack
+
 ## CompareHome
+## This is used in the page to compare two profiles.
+## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Enter the profile URLs that you’d like to compare
 CompareHome--instruction-content =
@@ -55,6 +124,8 @@ CompareHome--submit-button =
     .value = Retrieve profiles
 
 ## DebugWarning
+## This is displayed at the top of the analysis page when the loaded profile is
+## a debug build of Firefox.
 
 DebugWarning--warning-message =
     .message =
@@ -62,6 +133,8 @@ DebugWarning--warning-message =
         Performance observations might not apply to the release population.
 
 ## Details
+## This is the bottom panel in the analysis UI. They are generic strings to be
+## used at the bottom part of the UI.
 
 Details--open-sidebar-button =
     .title = Open the sidebar
@@ -70,13 +143,15 @@ Details--close-sidebar-button =
 Details--error-boundary-message =
     .message = Uh oh, some unknown error happened in this panel.
 
-## FooterLinks
+## Footer Links
 
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Privacy
 FooterLinks--Cookies = Cookies
 
 ## FullTimeline
+## The timeline component of the full view in the analysis UI at the top of the
+## page.
 
 FullTimeline--graph-type = Graph type:
 FullTimeline--categories-with-cpu = Categories with CPU
@@ -92,7 +167,7 @@ FullTimeline--stack-height = Stack height
 FullTimeline--tracks-visible =
     <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks visible
 
-## Home
+## Home page
 
 Home--upload-from-file-input-button = Load a profile from file
 Home--upload-from-url-button = Load a profile from a URL
@@ -140,6 +215,8 @@ IdleSearchField--search-input =
 JsTracerSettings--show-only-self-time = Show only self time
 
 ## ListOfPublishedProfiles
+## This is the component that displays all the profiles the user has uploaded.
+## It's displayed both in the homepage and in the uploaded recordings page.
 
 # This string is used on the tooltip of the published profile links.
 # Variables:
@@ -166,13 +243,36 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
+
+## MarkerContextMenu
+## This is used as a context menu for the Marker Chart, Marker Table and Network
+## panels.
+
+MarkerContextMenu--set-selection-from-duration = Set selection from marker’s duration
+MarkerContextMenu--start-selection-here = Start selection here
+MarkerContextMenu--end-selection-here = End selection here
+MarkerContextMenu--start-selection-at-marker-start =
+    Start selection at marker’s <strong>start</strong>
+MarkerContextMenu--start-selection-at-marker-end =
+    Start selection at marker’s <strong>end</strong>
+MarkerContextMenu--end-selection-at-marker-start =
+    End selection at marker’s <strong>start</strong>
+MarkerContextMenu--end-selection-at-marker-end =
+    End selection at marker’s <strong>end</strong>
+MarkerContextMenu--copy-description = Copy description
+MarkerContextMenu--copy-call-stack = Copy call stack
+MarkerContextMenu--copy-url = Copy URL
+MarkerContextMenu--copy-full-payload = Copy full payload
+
 ## MarkerSettings
+## This is used in all panels related to markers.
 
 MarkerSettings--panel-search =
     .label = Filter Markers:
     .title = Only display markers that match a certain name
 
 
+## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
 MenuButtons--index--metaInfo-button =
@@ -195,6 +295,7 @@ MenuButtons--index--docs = Docs
 MenuButtons--permalink--button =
     .label = Permalink
 
+## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
@@ -295,6 +396,7 @@ MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
 
+## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Include hidden threads
@@ -318,17 +420,19 @@ MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 
 ## NetworkSettings
+## This is used in the network chart.
 
 NetworkSettings--panel-search =
     .label = Filter Networks:
     .title = Only display network requests that match a certain name
 
 ## PanelSearch
+## The component that is used for all the search input hints in the application.
 
 PanelSearch--search-field-hint =
     Did you know you can use the comma (,) to search using several terms?
 
-## ProfileDeleteButton
+## Profile Delete Button
 
 # This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
 # Variables:
@@ -338,10 +442,11 @@ ProfileDeleteButton--delete-button =
     .title = Click here to delete the profile { $smallProfileName }
 
 ## ProfileFilterNavigator
+## This is used at the top of the profile analysis UI.
 
 ProfileFilterNavigator--full-range = Full Range
 
-## ProfileLoaderAnimation
+## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-message-unpublished =
     .message = Importing the profile directly from { -firefox-brand-name }…
@@ -370,6 +475,8 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
 
 ## ServiceWorkerManager
+## This is the component responsible for handling the service worker installation
+## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Installing…
 ServiceWorkerManager--pending-button = Apply and reload
@@ -384,6 +491,8 @@ ServiceWorkerManager--hide-notice-button =
     .aria-label = Hide the reload notice
 
 ## StackSettings
+## This is the settings component that is used in Call Tree, Flame Graph and Stack
+## Chart panels. It's used to switch between different views of the stack.
 
 StackSettings--implementation-all-stacks = All stacks
 StackSettings--implementation-javascript = JavaScript
@@ -410,7 +519,7 @@ StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
 
-## TabBar
+## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Call Tree
 TabBar--flame-graph-tab = Flame Graph
@@ -420,6 +529,26 @@ TabBar--marker-table-tab = Marker Table
 TabBar--network-tab = Network
 TabBar--js-tracer-tab = JS Tracer
 
+## TrackContextMenu
+## This is used as a context menu for timeline to organize the tracks in the
+## analysis UI.
+
+TrackContextMenu--only-show-this-process-group = Only show this process group
+
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Only show “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
+
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Hide “{ $trackName }”
+TrackContextMenu--show-all-tracks = Show all tracks
+
 ## UploadedRecordingsHome
+## This is the page that displays all the profiles that user has uploaded.
+## See: https://profiler.firefox.com/uploaded-recordings/
 
 UploadedRecordingsHome--title = Uploaded Recordings
