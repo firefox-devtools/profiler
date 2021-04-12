@@ -493,7 +493,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         class="metaInfoSection"
       >
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
@@ -516,7 +516,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           </ul>
         </div>
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
@@ -612,7 +612,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
@@ -931,7 +931,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
@@ -1260,7 +1260,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"

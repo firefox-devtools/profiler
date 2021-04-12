@@ -49,6 +49,10 @@
   list-style: circle inside;
 }
 
+.metaInfoListRow + .metaInfoListRow {
+  margin-top: 7px;
+}
+
 .metaInfoSubTitle {
   padding-top: 4px;
   padding-bottom: 4px;
