@@ -256,7 +256,9 @@ export class ActivityGraphFillComputer {
     if (enableCPUUsage && threadCPUDelta && threadCPUDelta[lastIdx] !== null) {
       const cpuDelta = threadCPUDelta[lastIdx];
       const intervalDistribution =
-        (samples.time[lastIdx] - samples.time[lastIdx - 1]) / interval;
+        lastIdx === 0
+          ? 1
+          : (samples.time[lastIdx] - samples.time[lastIdx - 1]) / interval;
       cpuBeforeSample = cpuDelta / intervalDistribution;
     }
 
