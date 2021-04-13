@@ -235,17 +235,13 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderMetaInfoButton() {
-    const { dataSource } = this.props;
-    const uploadedStatus = this._getUploadedStatus(dataSource);
-    const labelL10nId =
-      uploadedStatus === 'uploaded'
-        ? 'MenuButtons--index--metaInfo-button-uploaded-profile'
-        : 'MenuButtons--index--metaInfo-button-local-profile';
-
     return (
-      <Localized id={labelL10nId} attrs={{ label: true }}>
+      <Localized
+        id="MenuButtons--index--metaInfo-button"
+        attrs={{ label: true }}
+      >
         <ButtonWithPanel
-          buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
+          buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
           // The empty string value for the label following will be replaced by the <Localized /> wrapper.
           label=""
           onPanelClose={this._resetMetaInfoState}
