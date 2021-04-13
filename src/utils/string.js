@@ -11,13 +11,16 @@
  */
 export function removeURLs(
   string: string,
-  removeExtensions: boolean = true,
   redactedText: string = '<URL>'
 ): string {
-  const protocols = ['http', 'https', 'ftp', 'file', 'moz-page-thumb'];
-  if (removeExtensions) {
-    protocols.push('moz-extension');
-  }
+  const protocols = [
+    'http',
+    'https',
+    'ftp',
+    'file',
+    'moz-extension',
+    'moz-page-thumb',
+  ];
   const regExp = new RegExp(
     `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`,
     //    ^                              ^          ^
