@@ -14,17 +14,20 @@ export function removeURLs(
   removeExtensions: boolean = true,
   redactedText: string = '<URL>'
 ): string {
-  const rmExtensions = removeExtensions ? '|moz-extension' : '';
+  const protocols = ['http', 'https', 'ftp', 'file', 'moz-page-thumb'];
+  if (removeExtensions) {
+    protocols.push('moz-extension');
+  }
   const regExp = new RegExp(
-    '\\b((?:https?|ftp|file' + rmExtensions + ')://)/?[^\\s/$.?#][^\\s)]*',
-    //    ^                                           ^          ^
-    //    |                                           |          Matches any characters except
-    //    |                                           |          whitespaces and ')' character.
-    //    |                                           |          Other characters are allowed now
-    //    |                                           Matches any character except whitespace
-    //    |                                           and '/', '$', '.', '?' or '#' characters
-    //    |                                           because this is start of the URL
-    //    Matches 'http', 'https', 'ftp', 'file' and optionally 'moz-extension' protocols.
+    `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`,
+    //    ^                              ^          ^
+    //    |                              |          Matches any characters except
+    //    |                              |          whitespaces and ')' character.
+    //    |                              |          Other characters are allowed now
+    //    |                              Matches any character except whitespace
+    //    |                              and '/', '$', '.', '?' or '#' characters
+    //    |                              because this is start of the URL
+    //    Matches URL schemes we need to sanitize.
     'gi'
   );
   return string.replace(regExp, '$1' + redactedText);
