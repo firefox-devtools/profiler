@@ -155,6 +155,28 @@ describe('ThreadActivityGraph', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
+  it('matches the 2d canvas draw snapshot with only one CPU usage value', () => {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.meta.interval = 1;
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'variable CPU cycles',
+    };
+
+    // We need to have at least two samples to test it because the first
+    // threadCPUDelta is always null.
+    profile.threads[0].samples.threadCPUDelta = [null, 100];
+    const { ctx, getState, dispatch } = setup(profile);
+
+    // Commit a range that contains only the second sample.
+    dispatch(commitRange(0.1, 2.0));
+
+    // If there are CPU values, it should be automatically defaulted to this view.
+    expect(getTimelineType(getState())).toBe('cpu-category');
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+  });
+
   /**
    * The ThreadActivityGraph is not a connected component. It's easiest to test it
    * as once it's connected to the Redux store in the SelectedActivityGraph.
