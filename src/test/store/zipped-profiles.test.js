@@ -7,7 +7,6 @@ import {
   formatZipFileTable,
   storeWithZipFile,
 } from '../fixtures/profiles/zip-file';
-import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
@@ -187,7 +186,7 @@ describe('selected and expanded zip files', function() {
   });
 
   it('can procure an interesting selection', async function() {
-    const { dispatch, getState } = await storeWithZipFile([
+    const { getState, dispatch } = await storeWithZipFile([
       'a/profile1.json',
       'a/profile2.json',
       'b/profile3.json',
@@ -200,20 +199,31 @@ describe('selected and expanded zip files', function() {
 
     const zipFileTree = ZippedProfilesSelectors.getZipFileTree(getState());
     const zipFileTable = ZippedProfilesSelectors.getZipFileTable(getState());
-
     dispatch(
-      ZippedProfilesActions.changeExpandedZipFile(
-        procureInitialInterestingExpandedNodes(zipFileTree, 1)
-      )
+      ZippedProfilesActions.changeExpandedZipFile([
+        ...zipFileTree.getAllDescendants(null),
+      ])
     );
-
     const expanded = ZippedProfilesSelectors.getExpandedZipFileIndexes(
       getState()
     );
     const expandedNames = expanded.map(
       index => zipFileTable.path[ensureExists(index)]
     );
-    expect(expandedNames).toEqual(['a', 'b', 'c', 'd']);
+    expect(expandedNames).toEqual([
+      'a',
+      'a/profile1.json',
+      'a/profile2.json',
+      'b',
+      'b/profile3.json',
+      'b/profile4.json',
+      'c',
+      'c/profile5.json',
+      'c/profile6.json',
+      'd',
+      'd/profile7.json',
+      'd/profile8.json',
+    ]);
   });
 
   it('can select a zip file', function() {

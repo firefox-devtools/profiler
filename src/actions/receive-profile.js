@@ -815,18 +815,7 @@ async function _unpackGeckoProfileFromAddon(profile) {
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    const profileBytes = new Uint8Array(profile);
-    let decompressedProfile;
-    // Check for the gzip magic number in the header. If we find it, decompress
-    // the data first.
-    if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
-      decompressedProfile = await decompress(profileBytes);
-    } else {
-      decompressedProfile = profile;
-    }
-
-    const textDecoder = new TextDecoder();
-    return JSON.parse(textDecoder.decode(decompressedProfile));
+    return _extractJsonFromArrayBuffer(profile);
   }
   return profile;
 }
@@ -1137,6 +1126,22 @@ async function _extractZipFromResponse(
 }
 
 /**
+ * Parse JSON from an optionally gzipped array buffer.
+ */
+async function _extractJsonFromArrayBuffer(
+  arrayBuffer: ArrayBuffer
+): Promise<any> {
+  let profileBytes = new Uint8Array(arrayBuffer);
+  // Check for the gzip magic number in the header.
+  if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+    profileBytes = await decompress(profileBytes);
+  }
+
+  const textDecoder = new TextDecoder();
+  return JSON.parse(textDecoder.decode(profileBytes));
+}
+
+/**
  * Don't trust third party responses, try and handle a variety of responses gracefully.
  */
 async function _extractJsonFromResponse(
@@ -1145,10 +1150,8 @@ async function _extractJsonFromResponse(
   fileType: 'application/json' | null
 ): Promise<any> {
   try {
-    // Don't check the content-type, but attempt to parse the response as JSON.
-    const json = await response.json();
-    // Catch the error if unable to parse the JSON.
-    return json;
+    // await before returning so that we can catch JSON parse errors.
+    return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
@@ -1281,50 +1284,33 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      switch (file.type) {
-        case 'application/gzip':
-        case 'application/x-gzip':
-          // Parse a single profile that has been gzipped.
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const array = new Uint8Array(buffer);
-            const decompressedArray = await decompress(array);
-            const profile = await unserializeProfileOfArbitraryFormat(
-              decompressedArray.buffer
-            );
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
+      if (file.type === 'application/zip') {
+        // Open a zip file in the zip file viewer
+        const buffer = await fileReader(file).asArrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        await dispatch(receiveZipFile(zip));
+      } else {
+        // Profile files can have file names with uncommon extensions
+        // (eg .profile). So we can't rely on the mime type to decide how to
+        // handle them.
+        let arrayBuffer = await fileReader(file).asArrayBuffer();
 
-            await withHistoryReplaceStateAsync(async () => {
-              await dispatch(viewProfile(profile));
-            });
-          }
-          break;
-        case 'application/zip':
-          // Open a zip file in the zip file viewer
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const zip = await JSZip.loadAsync(buffer);
-            await dispatch(receiveZipFile(zip));
-          }
-          break;
-        default: {
-          // Plain uncompressed profile files can have file names with uncommon
-          // extensions (eg .profile). So we can't rely on the mime type to
-          // decide how to handle them.
-          const arrayBuffer = await fileReader(file).asArrayBuffer();
-          const profile = await unserializeProfileOfArbitraryFormat(
-            arrayBuffer
-          );
-          if (profile === undefined) {
-            throw new Error('Unable to parse the profile.');
-          }
-
-          await withHistoryReplaceStateAsync(async () => {
-            await dispatch(viewProfile(profile));
-          });
+        // Check for the gzip magic number in the header. If we find it, decompress
+        // the data first.
+        const profileBytes = new Uint8Array(arrayBuffer);
+        if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+          const decompressedProfile = await decompress(profileBytes);
+          arrayBuffer = decompressedProfile.buffer;
         }
+
+        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
+
+        await withHistoryReplaceStateAsync(async () => {
+          await dispatch(viewProfile(profile));
+        });
       }
     } catch (error) {
       dispatch(fatalError(error));

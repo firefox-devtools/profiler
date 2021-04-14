@@ -493,7 +493,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         class="metaInfoSection"
       >
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
@@ -516,7 +516,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           </ul>
         </div>
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
@@ -612,7 +612,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
@@ -931,7 +931,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
@@ -1260,7 +1260,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
@@ -1345,10 +1345,10 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
     >
       <button
         aria-expanded="false"
-        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
         type="button"
       >
-        Uploaded Profile
+        Profile Info
       </button>
     </div>
     <div
@@ -1445,10 +1445,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Local Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1459,7 +1459,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Upload
+      Upload Local Profile
     </button>
   </div>
   <a
@@ -1483,10 +1483,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Uploaded Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1849,10 +1849,10 @@ exports[`app/MenuButtons Full View Button is present when we are in the active t
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Local Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1863,7 +1863,7 @@ exports[`app/MenuButtons Full View Button is present when we are in the active t
       class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Upload
+      Upload Local Profile
     </button>
   </div>
   <a

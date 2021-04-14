@@ -183,8 +183,10 @@ describe('app/MenuButtons', function() {
 
       const setupResult = setup(storeWithProfile(profile));
 
-      const getPublishButton = () => screen.getByText(/^(Re-upload|Upload)$/);
-      const findPublishButton = () => screen.findByText(/^(Re-upload|Upload)$/);
+      const getPublishButton = () =>
+        screen.getByText(/^(Re-upload|Upload Local Profile)$/);
+      const findPublishButton = () =>
+        screen.findByText(/^(Re-upload|Upload Local Profile)$/);
       const getErrorButton = () => screen.getByText('Error uploading');
       const getCancelButton = () => screen.getByText('Cancel Upload');
       const getPanelForm = () =>
@@ -392,7 +394,7 @@ describe('app/MenuButtons', function() {
       const { clickAndRunTimers } = setupResult;
 
       function displayMetaInfoPanel() {
-        clickAndRunTimers(screen.getByText(/^(Local|Uploaded) Profile$/));
+        clickAndRunTimers(screen.getByText('Profile Info'));
       }
 
       function getMetaInfoPanel() {

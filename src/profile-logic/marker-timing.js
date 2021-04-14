@@ -133,12 +133,22 @@ export function getMarkerTimingAndBuckets(
   allMarkerTimings.sort((a, b) => {
     if (a.bucket !== b.bucket) {
       // Sort by buckets first.
+      // Show the 'Test' category first. Test markers are almost guaranteed to
+      // be the most relevant when they exist.
+      if (a.bucket === 'Test') {
+        return -1;
+      }
+      if (b.bucket === 'Test') {
+        return 1;
+      }
+      // Put the 'Other' category last.
       if (a.bucket === 'Other') {
         return 1;
       }
       if (b.bucket === 'Other') {
         return -1;
       }
+      // Sort alphabetically for the remaining categories.
       return a.bucket > b.bucket ? 1 : -1;
     }
     if (a.name === b.name) {
