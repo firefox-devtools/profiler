@@ -526,8 +526,8 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
@@ -583,8 +583,8 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
@@ -651,8 +651,8 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
