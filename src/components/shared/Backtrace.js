@@ -5,26 +5,32 @@
 // @flow
 
 import React from 'react';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import classNames from 'classnames';
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
-import type { ImplementationFilter } from '../../types/actions';
+import type {
+  Thread,
+  IndexIntoStackTable,
+  ImplementationFilter,
+} from 'firefox-profiler/types';
 
-require('./Backtrace.css');
+import './Backtrace.css';
 
 type Props = {|
   +thread: Thread,
-  +maxHeight: string | number,
+  // Tooltips will want to only show a certain number of stacks, while the sidebars
+  // can show all of the stacks.
+  +maxStacks: number,
   +stackIndex: IndexIntoStackTable,
   +implementationFilter: ImplementationFilter,
 |};
 
-function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxHeight } = props;
+export function Backtrace(props: Props) {
+  const { stackIndex, thread, implementationFilter, maxStacks } = props;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
     implementationFilter,
@@ -37,14 +43,23 @@ function Backtrace(props: Props) {
 
   if (funcNamesAndOrigins.length) {
     return (
-      <ol className="backtrace" style={{ '--max-height': maxHeight }}>
-        {funcNamesAndOrigins.map(({ funcName, origin }, i) => (
-          <li key={i} className="backtraceStackFrame">
-            {funcName}
-            <em className="backtraceStackFrameOrigin">{origin}</em>
-          </li>
-        ))}
-      </ol>
+      <ul className="backtrace">
+        {funcNamesAndOrigins
+          // Truncate the stacks
+          .slice(0, maxStacks)
+          .map(({ funcName, origin, isFrameLabel }, i) => (
+            <li
+              key={i}
+              className={classNames('backtraceStackFrame', {
+                backtraceStackFrame_isFrameLabel: isFrameLabel,
+              })}
+            >
+              {funcName}
+              <em className="backtraceStackFrameOrigin">{origin}</em>
+            </li>
+          ))}
+        {funcNamesAndOrigins.length > maxStacks ? '…' : null}
+      </ul>
     );
   }
   return (
@@ -55,5 +70,3 @@ function Backtrace(props: Props) {
     </div>
   );
 }
-
-export default Backtrace;

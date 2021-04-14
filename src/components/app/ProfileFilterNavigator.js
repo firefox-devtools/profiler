@@ -4,22 +4,100 @@
 
 // @flow
 
-import explicitConnect from '../../utils/connect';
-import { popCommittedRanges } from '../../actions/profile-view';
-import { getPreviewSelection } from '../../selectors/profile';
-import { getCommittedRangeLabels } from '../../selectors/url-state';
-import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
-import FilterNavigatorBar from '../shared/FilterNavigatorBar';
+import React from 'react';
+import memoize from 'memoize-immutable';
+import { Localized } from '@fluent/react';
+
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { popCommittedRanges } from 'firefox-profiler/actions/profile-view';
+import {
+  getPreviewSelection,
+  getProfileFilterPageData,
+  getProfileRootRange,
+} from 'firefox-profiler/selectors/profile';
+import { getCommittedRangeLabels } from 'firefox-profiler/selectors/url-state';
+import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
+import { FilterNavigatorBar } from 'firefox-profiler/components/shared/FilterNavigatorBar';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
 
 import type { ElementProps } from 'react';
+import type {
+  ProfileFilterPageData,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
-type Props = ElementProps<typeof FilterNavigatorBar>;
+type Props = {|
+  +filterPageData: ProfileFilterPageData | null,
+  +rootRange: StartEndRange,
+  ...ElementProps<typeof FilterNavigatorBar>,
+|};
 type DispatchProps = {|
   +onPop: $PropertyType<Props, 'onPop'>,
 |};
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
+  _getItemsWithFirstElement = memoize(
+    (firstItem, items) => [firstItem, ...items],
+    {
+      limit: 1,
+    }
+  );
+
+  render() {
+    const {
+      className,
+      items,
+      selectedItem,
+      uncommittedItem,
+      onPop,
+      filterPageData,
+      rootRange,
+    } = this.props;
+
+    let firstItem;
+    if (filterPageData) {
+      firstItem = {
+        title: filterPageData.origin,
+        content: (
+          <>
+            <Icon iconUrl={filterPageData.favicon} />
+            {filterPageData.hostname} (
+            {getFormattedTimeLength(rootRange.end - rootRange.start)})
+          </>
+        ),
+      };
+    } else {
+      firstItem = {
+        content: (
+          <Localized id="ProfileFilterNavigator--full-range">
+            Full Range
+          </Localized>
+        ),
+      };
+    }
+
+    const itemsWithFirstElement = this._getItemsWithFirstElement(
+      firstItem,
+      items
+    );
+    return (
+      <FilterNavigatorBar
+        className={className}
+        items={itemsWithFirstElement}
+        selectedItem={selectedItem}
+        uncommittedItem={uncommittedItem}
+        onPop={onPop}
+      />
+    );
+  }
+}
+
+export const ProfileFilterNavigator = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
@@ -28,15 +106,21 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
           previewSelection.selectionEnd - previewSelection.selectionStart
         )
       : undefined;
+    const filterPageData = getProfileFilterPageData(state);
+    const rootRange = getProfileRootRange(state);
     return {
       className: 'profileFilterNavigator',
       items: items,
-      selectedItem: items.length - 1,
+      // Do not remove 1 from the length because we are going to increment this
+      // array's length by adding the first element.
+      selectedItem: items.length,
       uncommittedItem,
+      filterPageData,
+      rootRange,
     };
   },
   mapDispatchToProps: {
     onPop: popCommittedRanges,
   },
-  component: FilterNavigatorBar,
+  component: ProfileFilterNavigatorBarImpl,
 });

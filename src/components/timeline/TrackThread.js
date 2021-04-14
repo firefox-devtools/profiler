@@ -5,21 +5,31 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { withSize, type SizeProps } from '../shared/WithSize';
-import ThreadStackGraph from '../shared/thread/StackGraph';
-import ThreadActivityGraph from '../shared/thread/ActivityGraph';
+import classNames from 'classnames';
+import memoize from 'memoize-immutable';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import {
+  withSize,
+  type SizeProps,
+} from 'firefox-profiler/components/shared/WithSize';
+import { ThreadStackGraph } from 'firefox-profiler/components/shared/thread/StackGraph';
+import { ThreadCPUGraph } from 'firefox-profiler/components/shared/thread/CPUGraph';
+import { ThreadSampleGraph } from 'firefox-profiler/components/shared/thread/SampleGraph';
+import { ThreadActivityGraph } from 'firefox-profiler/components/shared/thread/ActivityGraph';
+
 import {
   getProfileInterval,
   getCommittedRange,
   getCategories,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
-
-import {
-  getSelectedThreadIndex,
+  getSelectedThreadIndexes,
   getTimelineType,
-} from '../../selectors/url-state';
+  getInvertCallstack,
+  getTimelineTrackOrganization,
+  getThreadSelectorsFromThreadsKey,
+  getMaxThreadCPUDelta,
+  getSampleUnits,
+  getIsExperimentalCPUGraphsEnabled,
+} from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
   TimelineMarkersFileIo,
@@ -32,35 +42,45 @@ import {
   changeSelectedCallNode,
   focusCallTree,
   selectLeafCallNode,
-} from '../../actions/profile-view';
-import { reportTrackThreadHeight } from '../../actions/app';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
+  selectRootCallNode,
+} from 'firefox-profiler/actions/profile-view';
+import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
+import { hasThreadKeys } from 'firefox-profiler/profile-logic/profile-data';
+import { EmptyThreadIndicator } from './EmptyThreadIndicator';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import './TrackThread.css';
 
-import type { TimelineType } from '../../types/actions';
 import type {
+  TimelineType,
   Thread,
   ThreadIndex,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../types/profile';
-import type { Milliseconds, StartEndRange } from '../../types/units';
-import type {
+  Milliseconds,
+  StartEndRange,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   SelectedState,
-} from '../../types/profile-derived';
-import type { State } from '../../types/state';
-import type { ConnectedProps } from '../../utils/connect';
+  State,
+  TimelineTrackOrganization,
+  ThreadsKey,
+  SampleUnits,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
+  +trackType: 'expanded' | 'condensed',
   +showMemoryMarkers?: boolean,
+  +trackName: string,
 |};
 
 type StateProps = {|
   +fullThread: Thread,
   +filteredThread: Thread,
+  +tabFilteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -71,6 +91,17 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
+  +invertCallstack: boolean,
+  +treeOrderSampleComparator: (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
+  +timelineTrackOrganization: TimelineTrackOrganization,
+  +selectedThreadIndexes: Set<ThreadIndex>,
+  +enableCPUUsage: boolean,
+  +isExperimentalCPUGraphsEnabled: boolean,
+  +maxThreadCPUDelta: number,
+  +sampleUnits: SampleUnits | void,
 |};
 
 type DispatchProps = {|
@@ -79,6 +110,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +selectRootCallNode: typeof selectRootCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -87,22 +119,58 @@ type Props = {|
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
 |};
 
-class TimelineTrackThread extends PureComponent<Props> {
+class TimelineTrackThreadImpl extends PureComponent<Props> {
   /**
-   * Handle when a sample is clicked in the ThreadStackGraph. This will select
-   * the leaf-most stack frame or call node.
+   * Handle when a sample is clicked in the ThreadStackGraph and in the ThreadActivityGraph.
+   * This will select the leaf-most stack frame or call node.
    */
-  _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
-    const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
-    selectLeafCallNode(threadIndex, sampleIndex);
-    focusCallTree();
+  _onSampleClick = (
+    event: SyntheticMouseEvent<>,
+    sampleIndex: IndexIntoSamplesTable
+  ) => {
+    const modifier = getTrackSelectionModifier(event);
+    switch (modifier) {
+      case 'none': {
+        const {
+          threadsKey,
+          selectLeafCallNode,
+          selectRootCallNode,
+          focusCallTree,
+          invertCallstack,
+          selectedThreadIndexes,
+        } = this.props;
+
+        // Sample clicking only works for one thread. See issue #2709
+        if (selectedThreadIndexes.size === 1) {
+          if (invertCallstack) {
+            // When we're displaying the inverted call stack, the "leaf" call node we're
+            // interested in is actually displayed as the "root" of the tree.
+            selectRootCallNode(threadsKey, sampleIndex);
+          } else {
+            selectLeafCallNode(threadsKey, sampleIndex);
+          }
+          focusCallTree();
+        }
+        if (
+          typeof threadsKey === 'number' &&
+          selectedThreadIndexes.has(threadsKey)
+        ) {
+          // We could have multiple threads selected here, and we wouldn't want
+          // to de-select one when interacting with it.
+          event.stopPropagation();
+        }
+        break;
+      }
+      case 'ctrl':
+        // Do nothing, the track selection logic will kick in.
+        break;
+      default:
+        assertExhaustiveCheck(modifier, 'Unhandled modifier case.');
+        break;
+    }
   };
 
-  _onMarkerSelect = (
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) => {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
@@ -113,17 +181,18 @@ class TimelineTrackThread extends PureComponent<Props> {
   };
 
   componentDidUpdate() {
-    const { threadIndex, height, reportTrackThreadHeight } = this.props;
+    const { threadsKey, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
-    reportTrackThreadHeight(threadIndex, height);
+    reportTrackThreadHeight(threadsKey, height);
   }
 
   render() {
     const {
       filteredThread,
       fullThread,
-      threadIndex,
+      tabFilteredThread,
+      threadsKey,
       interval,
       rangeStart,
       rangeEnd,
@@ -135,6 +204,14 @@ class TimelineTrackThread extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       samplesSelectedStates,
+      treeOrderSampleComparator,
+      trackType,
+      timelineTrackOrganization,
+      trackName,
+      enableCPUUsage,
+      maxThreadCPUDelta,
+      sampleUnits,
+      isExperimentalCPUGraphsEnabled,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -142,59 +219,106 @@ class TimelineTrackThread extends PureComponent<Props> {
     const displayMarkers =
       (filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
-        filteredThread.name === 'Renderer') &&
+        filteredThread.name === 'Renderer' ||
+        filteredThread.name === 'Java Main Thread' ||
+        filteredThread.name === 'Merged thread' ||
+        filteredThread.name.startsWith('MediaDecoderStateMachine')) &&
       processType !== 'plugin';
 
     return (
-      <div className="timelineTrackThread">
-        {showMemoryMarkers ? (
-          <TimelineMarkersMemory
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            threadIndex={threadIndex}
-            onSelect={this._onMarkerSelect}
-          />
+      <div className={classNames('timelineTrackThread', trackType)}>
+        {timelineTrackOrganization.type !== 'active-tab' ? (
+          <>
+            {showMemoryMarkers ? (
+              <TimelineMarkersMemory
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {hasFileIoMarkers ? (
+              <TimelineMarkersFileIo
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {displayJank ? (
+              <TimelineMarkersJank
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {displayMarkers ? (
+              <TimelineMarkersOverview
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+          </>
         ) : null}
-        {hasFileIoMarkers ? (
-          <TimelineMarkersFileIo
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            threadIndex={threadIndex}
-            onSelect={this._onMarkerSelect}
-          />
-        ) : null}
-        {displayJank ? (
-          <TimelineMarkersJank
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            threadIndex={threadIndex}
-            onSelect={this._onMarkerSelect}
-          />
-        ) : null}
-        {displayMarkers ? (
-          <TimelineMarkersOverview
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            threadIndex={threadIndex}
-            onSelect={this._onMarkerSelect}
-          />
-        ) : null}
-        {timelineType === 'category' && !filteredThread.isJsTracer ? (
-          <ThreadActivityGraph
-            className="threadActivityGraph"
-            interval={interval}
-            fullThread={fullThread}
-            rangeStart={rangeStart}
-            rangeEnd={rangeEnd}
-            onSampleClick={this._onSampleClick}
-            categories={categories}
-            samplesSelectedStates={samplesSelectedStates}
-          />
+        {(timelineType === 'category' || timelineType === 'cpu-category') &&
+        !filteredThread.isJsTracer ? (
+          <>
+            <ThreadActivityGraph
+              className="threadActivityGraph"
+              trackName={trackName}
+              interval={interval}
+              fullThread={fullThread}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              onSampleClick={this._onSampleClick}
+              categories={categories}
+              samplesSelectedStates={samplesSelectedStates}
+              treeOrderSampleComparator={treeOrderSampleComparator}
+              enableCPUUsage={enableCPUUsage}
+              maxThreadCPUDelta={maxThreadCPUDelta}
+              sampleUnits={sampleUnits}
+            />
+            <ThreadSampleGraph
+              className="threadSampleGraph"
+              trackName={trackName}
+              interval={interval}
+              thread={filteredThread}
+              tabFilteredThread={tabFilteredThread}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              callNodeInfo={callNodeInfo}
+              selectedCallNodeIndex={selectedCallNodeIndex}
+              categories={categories}
+              onSampleClick={this._onSampleClick}
+            />
+            {isExperimentalCPUGraphsEnabled &&
+            fullThread.samples.threadCPUDelta !== undefined ? (
+              <ThreadCPUGraph
+                className="threadCPUGraph"
+                trackName={trackName}
+                interval={interval}
+                thread={filteredThread}
+                tabFilteredThread={tabFilteredThread}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                callNodeInfo={callNodeInfo}
+                selectedCallNodeIndex={selectedCallNodeIndex}
+                categories={categories}
+                onSampleClick={this._onSampleClick}
+                maxThreadCPUDelta={maxThreadCPUDelta}
+              />
+            ) : null}
+          </>
         ) : (
           <ThreadStackGraph
             className="threadStackGraph"
+            trackName={trackName}
             interval={interval}
             thread={filteredThread}
+            tabFilteredThread={tabFilteredThread}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
@@ -203,6 +327,42 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSampleClick={this._onSampleClick}
           />
         )}
+        {timelineTrackOrganization.type === 'active-tab' ? (
+          <div className="timelineTrackThreadMarkers">
+            {trackType === 'expanded' && showMemoryMarkers ? (
+              <TimelineMarkersMemory
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {trackType === 'expanded' && hasFileIoMarkers ? (
+              <TimelineMarkersFileIo
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {displayJank ? (
+              <TimelineMarkersJank
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+            {trackType === 'expanded' && displayMarkers ? (
+              <TimelineMarkersOverview
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadsKey={threadsKey}
+                onSelect={this._onMarkerSelect}
+              />
+            ) : null}
+          </div>
+        ) : null}
         <EmptyThreadIndicator
           thread={filteredThread}
           interval={interval}
@@ -215,19 +375,41 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+/**
+ * Memoize the hasThreadKeys to not compute it all the time.
+ */
+const _getTimelineIsSelected = memoize(
+  (selectedThreads, threadsKey) => hasThreadKeys(selectedThreads, threadsKey),
+  { limit: 1 }
+);
+
+export const TimelineTrackThread = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
-    const { threadIndex } = ownProps;
-    const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
+    const { threadsKey } = ownProps;
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const selectedThreadIndexes = getSelectedThreadIndexes(state);
     const committedRange = getCommittedRange(state);
-    const selectedCallNodeIndex =
-      threadIndex === selectedThread
-        ? selectors.getSelectedCallNodeIndex(state)
-        : null;
+    const selectedCallNodeIndex = _getTimelineIsSelected(
+      selectedThreadIndexes,
+      threadsKey
+    )
+      ? selectors.getSelectedCallNodeIndex(state)
+      : null;
+    const fullThread = selectors.getRangeFilteredThread(state);
+    const timelineType = getTimelineType(state);
+    const enableCPUUsage =
+      timelineType === 'cpu-category' &&
+      fullThread.samples.threadCPUDelta !== undefined;
+
     return {
+      invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
-      fullThread: selectors.getRangeFilteredThread(state),
+      fullThread,
+      tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
@@ -235,11 +417,21 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
       categories: getCategories(state),
-      timelineType: getTimelineType(state),
-      hasFileIoMarkers: selectors.getFileIoMarkerIndexes(state).length !== 0,
+      timelineType,
+      hasFileIoMarkers:
+        selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
         state
       ),
+      treeOrderSampleComparator: selectors.getTreeOrderComparatorInFilteredThread(
+        state
+      ),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
+      selectedThreadIndexes,
+      enableCPUUsage,
+      isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
+      maxThreadCPUDelta: getMaxThreadCPUDelta(state),
+      sampleUnits: getSampleUnits(state),
     };
   },
   mapDispatchToProps: {
@@ -248,7 +440,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    selectRootCallNode,
     reportTrackThreadHeight,
   },
-  component: withSize<Props>(TimelineTrackThread),
+  component: withSize<Props>(TimelineTrackThreadImpl),
 });

@@ -7,12 +7,14 @@
 import type {
   Milliseconds,
   MemoryOffset,
+  Address,
   Microseconds,
   Bytes,
-  Nanoseconds,
 } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import type { MarkerPayload } from './markers';
+import type { MarkerPayload, MarkerSchema } from './markers';
+import type { MarkerPhase } from './gecko-profile';
+
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoRawMarkerTable = number;
@@ -25,8 +27,10 @@ export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
+export type Tid = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
+export type TabID = number;
 export type InnerWindowID = number;
 
 /**
@@ -82,11 +86,65 @@ export type Pid = number | string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
+  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 |};
+
+/**
+ * Profile samples can come in a variety of forms and represent different information.
+ * The Gecko Profiler by default uses sample counts, as it samples on a fixed interval.
+ * These samples are all weighted equally by default, with a weight of one. However in
+ * comparison profiles, some weights are negative, creating a "diff" profile.
+ *
+ * In addition, tracing formats can fit into the sample-based format by reporting
+ * the "self time" of the profile. Each of these "self time" samples would then
+ * provide the weight, in duration. Currently, the tracing format assumes that
+ * the timing comes in milliseconds (see 'tracing-ms') but if needed, microseconds
+ * or nanoseconds support could be added.
+ *
+ * e.g. The following tracing data could be represented as samples:
+ *
+ *     0 1 2 3 4 5 6 7 8 9 10
+ *     | | | | | | | | | | |
+ *     - - - - - - - - - - -
+ *     A A A A A A A A A A A
+ *         B B D D D D
+ *         C C E E E E
+ *                                     .
+ * This chart represents the self time.
+ *
+ *     0 1 2 3 4 5 6 7 8 9 10
+ *     | | | | | | | | | | |
+ *     A A C C E E E E A A A
+ *
+ * And finally this is what the samples table would look like.
+ *
+ *     SamplesTable = {
+ *       time:   [0,   2,   4, 8],
+ *       stack:  [A, ABC, ADE, A],
+ *       weight: [2,   2,   4, 3],
+ *     }
+ */
+export type WeightType = 'samples' | 'tracing-ms' | 'bytes';
+
+type SamplesLikeTableShape = {
+  stack: Array<IndexIntoStackTable | null>,
+  time: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  length: number,
+};
+
+export type SamplesLikeTable =
+  | SamplesLikeTableShape
+  | SamplesTable
+  | NativeAllocationsTable
+  | JsAllocationsTable;
 
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
@@ -106,7 +164,16 @@ export type SamplesTable = {|
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
-  duration?: Milliseconds[],
+  // An optional weight array. If not present, then the weight is assumed to be 1.
+  // See the WeightType type for more information.
+  weight: null | number[],
+  weightType: WeightType,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -119,10 +186,10 @@ export type JsAllocationsTable = {|
   className: string[],
   typeName: string[], // Currently only 'JSObject'
   coarseType: string[], // Currently only 'Object',
-  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and JsAllocationsTable in the same call tree
-  // computation functions.
-  duration: Bytes[],
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
+  weight: Bytes[],
+  weightType: 'bytes',
   inNursery: boolean[],
   stack: Array<IndexIntoStackTable | null>,
   length: number,
@@ -134,10 +201,10 @@ export type JsAllocationsTable = {|
  */
 export type UnbalancedNativeAllocationsTable = {|
   time: Milliseconds[],
-  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
-  // size so that we can use a SamplesTable and NativeAllocationsTable in the same call
-  // tree computation functions.
-  duration: Bytes[],
+  // "weight" is used here rather than "bytes", so that this type will match the
+  // SamplesLikeTableShape.
+  weight: Bytes[],
+  weightType: 'bytes',
   stack: Array<IndexIntoStackTable | null>,
   length: number,
 |};
@@ -188,18 +255,23 @@ export type ProfilerMarkerPayload = {
 export type RawMarkerTable = {|
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
-  time: number[],
+  startTime: Array<number | null>,
+  endTime: Array<number | null>,
+  phase: MarkerPhase[],
   category: IndexIntoCategoryList[],
   length: number,
 |};
 
 /**
  * Frames contain the context information about the function execution at the moment in
- * time. The relationship between frames is defined by the StackTable.
+ * time. The caller/callee relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {|
-  // The address is a copy from the FuncTable entry.
-  address: Array<MemoryOffset | -1>,
+  // If this is a frame for native code, the address is the address of the frame's
+  // assembly instruction,  relative to the native library that contains it.
+  // The library is given by the frame's func: frame -> func -> resource -> lib.
+  address: Array<Address | -1>,
+
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
@@ -219,25 +291,59 @@ export type FrameTable = {|
 |};
 
 /**
- * Multiple frames represent individual invocations of a function, while the FuncTable
- * holds the static information about that function. C++ samples are single memory
- * locations. However, functions span ranges of memory. During symbolication each of
- * these samples are collapsed to point to a single function rather than multiple memory
- * locations.
+ * The funcTable stores the functions that were called in the profile.
+ * These can be native functions (e.g. C / C++ / rust), JavaScript functions, or
+ * "label" functions. Multiple frames can have the same function: The frame
+ * represents which part of a function was being executed at a given moment, and
+ * the function groups all frames that occurred inside that function.
+ * Concretely, for native code, each encountered instruction address is a separate
+ * frame, and the function groups the instruction addresses inside that native
+ * function. (The address range of a native function is the range between the
+ * address of its function symbol and the next symbol in the library.)
+ * For JS code, each encountered line/column in a JS file is a separate frame, and
+ * the function represents an entire JS function which can span multiple lines.
+ *
+ * Funcs that are orphaned, i.e. funcs that no frame refers to, do not have
+ * meaningful values in their fields. Symbolication will cause many funcs that
+ * were created upfront to become orphaned, as the frames that originally referred
+ * to them get reassigned to the canonical func for their actual function.
  */
 export type FuncTable = {|
-  // This is relevant for native entries only.
-  address: Array<MemoryOffset | -1>,
-  isJS: boolean[],
-  length: number,
-  name: IndexIntoStringTable[],
-  // The resource is -1 if we couldn't extract a function name as a native or JS
-  // function. This is most often the case for frame labels.
-  resource: Array<IndexIntoResourceTable | -1>,
+  // The function name.
+  name: Array<IndexIntoStringTable>,
+
+  // isJS and relevantForJS describe the function type. Non-JavaScript functions
+  // can be marked as "relevant for JS" so that for example DOM API label functions
+  // will show up in any JavaScript stack views.
+  // It may be worth combining these two fields into one:
+  // https://github.com/firefox-devtools/profiler/issues/2543
+  isJS: Array<boolean>,
   relevantForJS: Array<boolean>,
+
+  // The resource describes "Which bag of code did this function come from?".
+  // For JS functions, the resource is of type addon, webhost, otherhost, or url.
+  // For native functions, the resource is of type library.
+  // For labels and for other unidentified functions, we set the resource to -1.
+  resource: Array<IndexIntoResourceTable | -1>,
+
+  // These are non-null for JS functions only. The line and column describe the
+  // location of the *start* of the JS function. As for the information about which
+  // which lines / columns inside the function were actually hit during execution,
+  // that information is stored in the frameTable, not in the funcTable.
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
+
+  // This is relevant for functions of the 'native' stackType only (functions
+  // whose resource is a library).
+  // Stores the library-relative offset of the start of the function, i.e. the
+  // address of the symbol that gave this function its name.
+  // Prior to initial symbolication, it stores the same address as the single
+  // frame that refers to this func, because at that point the actual boundaries
+  // of the true functions are not known.
+  address: Array<Address | -1>,
+
+  length: number,
 |};
 
 /**
@@ -259,15 +365,28 @@ export type ResourceTable = {|
  * Information about libraries, for instance the Firefox executables, and its memory
  * offsets. This information is used for symbolicating C++ memory addresses into
  * actual function names. For instance turning 0x23459234 into "void myFuncName()".
+ *
+ * Libraries are mapped into the (virtual memory) address space of the profiled
+ * process. Libraries exist as files on disk, and not the entire file needs to be
+ * mapped. When the beginning of the file is not mapped, the library's "offset"
+ * field will be non-zero.
  */
 export type Lib = {|
+  // The range in the address space of the profiled process that the mappings for
+  // this shared library occupied.
   start: MemoryOffset,
   end: MemoryOffset,
-  offset: MemoryOffset,
+
+  // The offset relative to the library's base address where the first mapping starts.
+  // libBaseAddress + lib.offset = lib.start
+  // When instruction addresses are given as library-relative offsets, they are
+  // relative to the library's baseAddress.
+  offset: Bytes,
+
   arch: string, // e.g. "x86_64"
   name: string, // e.g. "firefox"
   path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  debugName: string, // e.g. "firefox"
+  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 |};
@@ -281,18 +400,16 @@ export type Category = {|
 export type CategoryList = Array<Category>;
 
 /**
- * A Page describes the page the browser profiled. In Firefox, there exists
- * the idea of a Browsing Context, which a large collection of useful things
- * associated with a particular tab. However, the same Browsing Context can be
- * used to navigate over many pages and they are not unique for frames. The
- * Inner Window IDs represent JS `window` objects in each Document. And they are
- * unique for each frame. That's why it's enough to keep only inner Window IDs
- * inside marker payloads. 0 means null(no embedder) for Embedder Window ID.
+ * A Page describes the page the browser profiled. In Firefox, TabIDs represent the
+ * ID that is shared between multiple frames in a single tab. The Inner Window IDs
+ * represent JS `window` objects in each Document. And they are unique for each frame.
+ * That's why it's enough to keep only inner Window IDs inside marker payloads.
+ * 0 means null(no embedder) for Embedder Window ID.
  *
- * The unique value for a page is innerWindowID.
+ * The unique field for a page is innerWindowID.
  */
 export type Page = {|
-  browsingContextID: number,
+  tabID: TabID,
   innerWindowID: InnerWindowID,
   url: string,
   // 0 means no embedder
@@ -348,28 +465,28 @@ export type Counter = {|
  * individual and overall overhead timings.
  */
 export type ProfilerOverheadStats = {|
-  maxCleaning: Nanoseconds,
-  maxCounter: Nanoseconds,
-  maxInterval: Nanoseconds,
-  maxLockings: Nanoseconds,
-  maxOverhead: Nanoseconds,
-  maxThread: Nanoseconds,
-  meanCleaning: Nanoseconds,
-  meanCounter: Nanoseconds,
-  meanInterval: Nanoseconds,
-  meanLockings: Nanoseconds,
-  meanOverhead: Nanoseconds,
-  meanThread: Nanoseconds,
-  minCleaning: Nanoseconds,
-  minCounter: Nanoseconds,
-  minInterval: Nanoseconds,
-  minLockings: Nanoseconds,
-  minOverhead: Nanoseconds,
-  minThread: Nanoseconds,
-  overheadDurations: Nanoseconds,
-  overheadPercentage: Nanoseconds,
-  profiledDuration: Nanoseconds,
-  samplingCount: Nanoseconds,
+  maxCleaning: Microseconds,
+  maxCounter: Microseconds,
+  maxInterval: Microseconds,
+  maxLockings: Microseconds,
+  maxOverhead: Microseconds,
+  maxThread: Microseconds,
+  meanCleaning: Microseconds,
+  meanCounter: Microseconds,
+  meanInterval: Microseconds,
+  meanLockings: Microseconds,
+  meanOverhead: Microseconds,
+  meanThread: Microseconds,
+  minCleaning: Microseconds,
+  minCounter: Microseconds,
+  minInterval: Microseconds,
+  minLockings: Microseconds,
+  minOverhead: Microseconds,
+  minThread: Microseconds,
+  overheadDurations: Microseconds,
+  overheadPercentage: Microseconds,
+  profiledDuration: Microseconds,
+  samplingCount: Microseconds,
 |};
 
 /**
@@ -380,6 +497,10 @@ export type ProfilerConfiguration = {|
   features: string[],
   capacity: Bytes,
   duration?: number,
+  // Optional because that field is introduced in Firefox 72.
+  // Active Tab ID indicates a Firefox tab. That field allows us to
+  // create an "active tab view".
+  activeTabID?: TabID,
 |};
 
 /**
@@ -390,10 +511,10 @@ export type ProfilerConfiguration = {|
  * threads: Time spent during threads sampling and marker collection.
  */
 export type ProfilerOverheadSamplesTable = {|
-  counters: Array<Nanoseconds>,
-  expiredMarkerCleaning: Array<Nanoseconds>,
-  locking: Array<Nanoseconds>,
-  threads: Array<Nanoseconds>,
+  counters: Array<Microseconds>,
+  expiredMarkerCleaning: Array<Microseconds>,
+  locking: Array<Microseconds>,
+  threads: Array<Microseconds>,
   time: Array<Milliseconds>,
   length: number,
 |};
@@ -440,7 +561,7 @@ export type Thread = {|
   processName?: string,
   isJsTracer?: boolean,
   pid: Pid,
-  tid: number | void,
+  tid: Tid | void,
   samples: SamplesTable,
   jsAllocations?: JsAllocationsTable,
   nativeAllocations?: NativeAllocationsTable,
@@ -511,6 +632,18 @@ export type VisualMetrics = {|
   VisualComplete99: number,
 |};
 
+// Units of ThreadCPUDelta values for different platforms.
+export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
+
+// Object that holds the units of samples table values. Some of the values can be
+// different depending on the platform, e.g. threadCPUDelta.
+// See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
+export type SampleUnits = {|
+  +time: 'ms',
+  +eventDelay: 'ms',
+  +threadCPUDelta: ThreadCPUDeltaUnit,
+|};
+
 /**
  * Meta information associated for the entire profile.
  */
@@ -526,8 +659,11 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform.
-  categories: CategoryList,
+  // The list of categories as provided by the platform. The categories are present for
+  // all Firefox profiles, but imported profiles may not include any category support.
+  // The front-end will provide a default list of categories, but the saved profile
+  // will not include them.
+  categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,
   // This value represents a boolean, but for some reason is written out as an int value.
@@ -562,14 +698,16 @@ export type ProfileMeta = {|
   // The current platform, as taken from the user agent string.
   // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
   platform?:
-    | 'Android'
+    | 'Android' // It usually has the version embedded in the string
     | 'Windows'
     | 'Macintosh'
     // X11 is used for historic reasons, but this value means that it is a Unix platform.
     | 'X11'
     | string,
   // The widget toolkit used for GUI rendering.
-  toolkit?: 'gtk' | 'windows' | 'cocoa' | 'android' | string,
+  // Older versions of Firefox for Linux had the 2 flavors gtk2/gtk3, and so
+  // we could find the value "gtk3".
+  toolkit?: 'gtk' | 'gtk3' | 'windows' | 'cocoa' | 'android' | string,
 
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
   // in Firefox 62, and are optional because older processed profile
@@ -609,6 +747,20 @@ export type ProfileMeta = {|
   // The configuration of the profiler at the time of recording. Optional since older
   // versions of Firefox did not include it.
   configuration?: ProfilerConfiguration,
+  // Markers are displayed in the UI according to a schema definition. See the
+  // MarkerSchema type for more information.
+  markerSchema: MarkerSchema[],
+  // Units of samples table values.
+  // The sampleUnits property landed in Firefox 86, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  sampleUnits?: SampleUnits,
+  // Information of the device that profile is captured from.
+  // Currently it's only present for Android devices and it includes brand and
+  // model names of that device.
+  // It's optional because profiles from non-Android devices and from older
+  // Firefox versions may not have it.
+  // This property landed in Firefox 88.
+  device?: string,
 |};
 
 /**
@@ -625,4 +777,18 @@ export type Profile = {|
   // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
+|};
+
+type SerializableThread = {|
+  ...$Diff<Thread, { stringTable: UniqueStringArray }>,
+  stringArray: string[],
+|};
+
+/**
+ * The UniqueStringArray is a class, and is not serializable to JSON. This profile
+ * variant is able to be based into JSON.stringify.
+ */
+export type SerializableProfile = {|
+  ...Profile,
+  threads: SerializableThread[],
 |};

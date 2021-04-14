@@ -6,32 +6,38 @@
 
 import * as React from 'react';
 import clamp from 'clamp';
-import { getContentRect } from '../../utils/css-geometry-tools';
+import { getContentRect } from 'firefox-profiler/utils/css-geometry-tools';
 import {
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import {
   updatePreviewSelection,
   commitRange,
-} from '../../actions/profile-view';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/actions/profile-view';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
-import Draggable from '../shared/Draggable';
-import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
+import { Draggable } from 'firefox-profiler/components/shared/Draggable';
+import { getFormattedTimeLength } from 'firefox-profiler/profile-logic/committed-ranges';
 import './Selection.css';
 
-import type { OnMove } from '../shared/Draggable';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+import type { OnMove } from 'firefox-profiler/components/shared/Draggable';
+import type {
+  Milliseconds,
+  CssPixels,
+  StartEndRange,
+  PreviewSelection,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 
 type OwnProps = {|
   +width: number,
   +children: React.Node,
+  +className?: string,
 |};
 
 type StateProps = {|
@@ -152,6 +158,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           selectionEnd,
           isModifying: false,
         });
+        // Stop propagation so that no thread is selected when creating a preview
+        // selection.
         event.stopPropagation();
         this._uninstallMoveAndUpHandlers();
         return;
@@ -165,6 +173,10 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           committedRange.start;
         const { selectionStart, selectionEnd } = previewSelection;
         if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
+          // Stop propagation so that no thread is selected when removing the preview
+          // selections.
+          event.stopPropagation();
+
           // Unset preview selection.
           this.props.updatePreviewSelection({
             hasSelection: false,
@@ -339,12 +351,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { children, previewSelection } = this.props;
+    const { children, previewSelection, className } = this.props;
     const { hoverLocation } = this.state;
 
     return (
       <div
-        className="timelineSelection"
+        className={classNames('timelineSelection', className)}
         ref={this._containerCreated}
         onMouseDown={this._onMouseDown}
         onMouseMove={this._onMouseMove}
@@ -368,7 +380,11 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineSelection = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),

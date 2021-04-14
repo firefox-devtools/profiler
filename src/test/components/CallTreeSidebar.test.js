@@ -6,15 +6,14 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
 
-import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { CallTreeSidebar } from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
   changeInvertCallstack,
-  changeSelectedThread,
+  changeSelectedThreads,
 } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -22,18 +21,57 @@ import {
   getMergedProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
 
-import type { CallNodePath } from '../../types/profile-derived';
+import type { CallNodePath } from 'firefox-profiler/types';
+import { ensureExists } from '../../utils/flow';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('CallTreeSidebar', function() {
-  function setup() {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+  function getProfileWithCategories() {
+    return getProfileFromTextSamples(`
       A    A    A              A
       B    B    B              B
       Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
       D    F    I[cat:Idle]
       Ejs  Ejs
     `);
+  }
 
+  function getProfileWithSubCategories() {
+    const result = getProfileFromTextSamples(`
+      A              A              A
+      B              B              B
+      C[cat:Layout]  C[cat:Layout]  C[cat:Layout]
+                                    D[cat:Layout]
+    `);
+
+    const {
+      profile,
+      funcNamesDictPerThread: [{ C, D }],
+    } = result;
+    const layout = ensureExists(
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).find(category => category.name === 'Layout'),
+      'Could not find Layout category.'
+    );
+    const [{ frameTable, stackTable }] = profile.threads;
+    const fakeC = layout.subcategories.length;
+    layout.subcategories.push('FakeSubCategoryC');
+    const fakeD = layout.subcategories.length;
+    layout.subcategories.push('FakeSubCategoryD');
+
+    // The frames, funcs, and stacks all share the same indexes with the layout
+    // of the stacks.
+    frameTable.subcategory[C] = fakeC;
+    frameTable.subcategory[D] = fakeD;
+    stackTable.subcategory[C] = fakeC;
+    stackTable.subcategory[D] = fakeD;
+
+    return result;
+  }
+
+  function setup({ profile, funcNamesDictPerThread }) {
     const store = storeWithProfile(profile);
 
     const selectNode = (nodePath: CallNodePath) => {
@@ -49,7 +87,7 @@ describe('CallTreeSidebar', function() {
     );
     return {
       ...renderResult,
-      store,
+      ...store,
       funcNamesDict: funcNamesDictPerThread[0],
       selectNode,
       invertCallstack,
@@ -61,7 +99,7 @@ describe('CallTreeSidebar', function() {
       selectNode,
       funcNamesDict: { A, B, Cjs, D, H, Ejs },
       container,
-    } = setup();
+    } = setup(getProfileWithCategories());
 
     expect(container.firstChild).toMatchSnapshot();
 
@@ -86,7 +124,7 @@ describe('CallTreeSidebar', function() {
       invertCallstack,
       funcNamesDict: { A, B, H, Ejs, I },
       container,
-    } = setup();
+    } = setup(getProfileWithCategories());
 
     invertCallstack();
     expect(container.firstChild).toMatchSnapshot();
@@ -104,68 +142,52 @@ describe('CallTreeSidebar', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('rounds properly the displayed values', () => {
-    const itemsCount = 25;
-    const interval = 0.7;
-
-    const profileString = Array(itemsCount)
-      .fill('A')
-      .join('  ');
-
-    const {
-      profile,
-      funcNamesDictPerThread: [{ A }],
-    } = getProfileFromTextSamples(profileString);
-    // This is lazy but this works good enough for what we're doing here.
-    profile.meta.interval = interval;
-
-    const store = storeWithProfile(profile);
-
-    const { getByText } = render(
-      <Provider store={store}>
-        <CallTreeSidebar />
-      </Provider>
-    );
-
-    store.dispatch(changeSelectedCallNode(0, [A]));
-
-    const categoryLabel = getByText(/Other/);
-    const categoryValue = ensureExists(categoryLabel.nextElementSibling);
-    expect(categoryValue.textContent).toEqual('17.5ms (100%)');
-  });
-
   it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {
     const {
-      profile,
-      funcNamesDictPerThread: [{ A, B, D }],
-    } = getMergedProfileFromTextSamples(
-      `
-      A  A  A
-      B  B  C
-      D  E  F
-    `,
-      `
-      A  A  A
-      B  B  B
-      G  I  E
-    `
+      dispatch,
+      queryByText,
+      getAllByText,
+      funcNamesDict: { A, B, D },
+    } = setup(
+      getMergedProfileFromTextSamples(
+        `
+          A  A  A
+          B  B  C
+          D  E  F
+        `,
+        `
+          A  A  A
+          B  B  B
+          G  I  E
+        `
+      )
     );
 
-    const store = storeWithProfile(profile);
+    dispatch(changeSelectedThreads(new Set([2])));
+    dispatch(changeSelectedCallNode(2, [A]));
 
-    store.dispatch(changeSelectedThread(2));
-    store.dispatch(changeSelectedCallNode(2, [A]));
+    expect(queryByText(/Implementation/)).not.toBeInTheDocument();
 
-    const { queryByText, getByText } = render(
-      <Provider store={store}>
-        <CallTreeSidebar />
-      </Provider>
-    );
+    dispatch(changeSelectedCallNode(2, [A, B, D]));
+    expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
+  });
 
-    expect(queryByText(/Implementation/)).toBe(null);
+  it('can expand subcategories', () => {
+    const {
+      selectNode,
+      container,
+      queryByText,
+      getByText,
+      funcNamesDict: { A, B, C },
+    } = setup(getProfileWithSubCategories());
+    selectNode([A, B, C]);
+    expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
 
-    store.dispatch(changeSelectedCallNode(2, [A, B, D]));
+    const layoutCategory = getByText('Layout');
+    fireFullClick(layoutCategory);
 
-    expect(getByText(/Implementation/)).not.toBe(null);
+    expect(getByText('FakeSubCategoryC')).toBeTruthy();
+
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

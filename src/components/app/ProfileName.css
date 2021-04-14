@@ -1,0 +1,31 @@
+/* this source code form is subject to the terms of the mozilla public
+ * license, v. 2.0. if a copy of the mpl was not distributed with this
+ * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
+
+.profileNameInput {
+  height: 17px;
+  padding: 0 6px;
+  border: none;
+  margin: 4px;
+  border-radius: 1px;
+  color: var(--grey-60);
+  font: inherit;
+  font-weight: 700;
+  line-height: 17px;
+}
+
+.profileNameButton {
+  overflow: hidden;
+  padding: 0 9px;
+  font-weight: 700;
+  margin-inline-end: 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Using the style for links rather than for normal inputs, because we don't
+ * want to trigger a border that would move things around. */
+.profileNameInput:focus {
+  box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
+  outline: 0;
+}

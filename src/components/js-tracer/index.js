@@ -4,23 +4,27 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import JsTracerChart from './Chart';
-import JsTracerSettings from './Settings';
-import EmptyReasons from './EmptyReasons';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { JsTracerChart } from './Chart';
+import { JsTracerSettings } from './Settings';
+import { JsTracerEmptyReasons } from './EmptyReasons';
 
-import { getProfile } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getProfile } from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getShowJsTracerSummary,
-  getSelectedThreadIndex,
-} from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+  getSelectedThreadsKey,
+} from 'firefox-profiler/selectors/url-state';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 
-import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
-import type { ConnectedProps } from '../../utils/connect';
+import type {
+  Profile,
+  JsTracerTable,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./index.css');
+import './index.css';
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
@@ -28,14 +32,14 @@ type DispatchProps = {|
 
 type StateProps = {|
   +profile: Profile,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +jsTracerTable: JsTracerTable | null,
   +showJsTracerSummary: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class JsTracer extends React.PureComponent<Props> {
+class JsTracerImpl extends React.PureComponent<Props> {
   _rafGeneration: number = 0;
 
   render() {
@@ -43,12 +47,12 @@ class JsTracer extends React.PureComponent<Props> {
       profile,
       jsTracerTable,
       showJsTracerSummary,
-      threadIndex,
+      threadsKey,
     } = this.props;
     return (
       <div className="jsTracer">
         {jsTracerTable === null || jsTracerTable.events.length === 0 ? (
-          <EmptyReasons />
+          <JsTracerEmptyReasons />
         ) : (
           <>
             <JsTracerSettings />
@@ -56,7 +60,7 @@ class JsTracer extends React.PureComponent<Props> {
               profile={profile}
               jsTracerTable={jsTracerTable}
               showJsTracerSummary={showJsTracerSummary}
-              threadIndex={threadIndex}
+              threadsKey={threadsKey}
             />
           </>
         )}
@@ -65,15 +69,15 @@ class JsTracer extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const JsTracer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       profile: getProfile(state),
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
       jsTracerTable: selectedThreadSelectors.getJsTracerTable(state),
       showJsTracerSummary: getShowJsTracerSummary(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: JsTracer,
+  component: JsTracerImpl,
 });

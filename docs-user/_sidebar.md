@@ -9,6 +9,7 @@
   * [Remote profiling on Android](./guide-remote-profiling.md)
   * [Perf profiling on Linux](./guide-perf-profiling.md)
   * [Memory Allocations](./memory-allocations.md)
+  * [IPC Messages](./ipc-messages.md)
 * [Video Tutorials](./videos.md)
   * [Firefox Profiler intro](./videos-intro.md)
   * [Samples and markers](./videos-samples-markers.md)

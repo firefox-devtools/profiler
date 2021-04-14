@@ -10,16 +10,24 @@ import * as UrlState from '../url-state';
 import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
+import { getRightClickedMarkerInfo } from '../right-clicked-marker';
+import { getLabelGetter } from '../../profile-logic/marker-schema';
 
-import type { RawMarkerTable } from '../../types/profile';
+import type { ThreadSelectorsPerThread } from './thread';
 import type {
+  RawMarkerTable,
+  ThreadIndex,
   MarkerIndex,
   Marker,
   MarkerTiming,
   MarkerTimingAndBuckets,
-} from '../../types/profile-derived';
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
+  DerivedMarkerInfo,
+  IndexedArray,
+  IndexIntoRawMarkerTable,
+  Selector,
+  $ReturnType,
+  ThreadsKey,
+} from 'firefox-profiler/types';
 
 /**
  * Infer the return type from the getMarkerSelectorsPerThread function. This
@@ -33,7 +41,11 @@ export type MarkerSelectorsPerThread = $ReturnType<
 /**
  * Create the selectors for a thread that have to do with either markers.
  */
-export function getMarkerSelectorsPerThread(threadSelectors: *) {
+export function getMarkerSelectorsPerThread(
+  threadSelectors: ThreadSelectorsPerThread,
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = state =>
     threadSelectors.getThread(state).markers;
 
@@ -45,18 +57,15 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * variants of the selectors that are created for specific views that have been
    * omitted, but the ordered steps below give the general picture.
    *
-   * 1. _getRawMarkerTable - Get the RawMarkerTable from the current thread.
-   * 2. getProcessedRawMarkerTable - Process marker payloads out of raw strings, and
-   *                                 other future processing needs. This returns a
-   *                                 RawMarkerTable still.
-   * 3a. _getDerivedMarkers        - Match up start/end markers, and start
+   * 1. _getRawMarkerTable         - Get the RawMarkerTable from the current thread.
+   * 2a. _getDerivedMarkers        - Match up start/end markers, and start
    *                                 returning the Marker[] type.
-   * 3b. _getDerivedJankMarkers    - Jank markers come from our samples data, and
+   * 2b. _getDerivedJankMarkers    - Jank markers come from our samples data, and
    *                                 this selector returns Marker structures out of
    *                                 the samples structure.
-   * 4. getFullMarkerList          - Concatenates and sorts all markers coming from
+   * 3. getFullMarkerList          - Concatenates and sorts all markers coming from
    *                                 different origin structures.
-   * 5. getFullMarkerListIndexes   - From the full marker list, generates an array
+   * 4. getFullMarkerListIndexes   - From the full marker list, generates an array
    *                                 containing the sequence of indexes for all markers.
    * 5. getCommittedRangeFilteredMarkerIndexes - Apply the committed range.
    * 6. getSearchFilteredMarkerIndexes         - Apply the search string
@@ -65,11 +74,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * Selectors are commonly written using the utility filterMarkerIndexesCreator
    * (see below for more information about this function).
    */
-  const getProcessedRawMarkerTable: Selector<RawMarkerTable> = createSelector(
-    _getRawMarkerTable,
-    threadSelectors.getStringTable,
-    MarkerData.extractMarkerDataFromName
-  );
 
   const _getThreadId: Selector<number | void> = state =>
     threadSelectors.getThread(state).tid;
@@ -77,8 +81,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   /* This selector exposes the result of the processing of the raw marker table
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
-  const _getDerivedMarkers: Selector<Marker[]> = createSelector(
-    getProcessedRawMarkerTable,
+  const getDerivedMarkerInfo: Selector<DerivedMarkerInfo> = createSelector(
+    _getRawMarkerTable,
     threadSelectors.getStringTable,
     _getThreadId,
     threadSelectors.getThreadRange,
@@ -86,10 +90,24 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
+  const _getDerivedMarkers: Selector<Marker[]> = createSelector(
+    getDerivedMarkerInfo,
+    ({ markers }) => markers
+  );
+
+  const getMarkerIndexToRawMarkerIndexes: Selector<
+    IndexedArray<MarkerIndex, IndexIntoRawMarkerTable[]>
+  > = createSelector(
+    getDerivedMarkerInfo,
+    ({ markerIndexToRawMarkerIndexes }) => markerIndexToRawMarkerIndexes
+  );
+
   /**
    * This selector constructs jank markers from the responsiveness data.
    */
-  const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
+  const _getDerivedJankMarkers: Selector<
+    Marker[]
+  > = createSelector(
     threadSelectors.getSamplesTable,
     ProfileSelectors.getDefaultCategory,
     (samples, defaultCategory) =>
@@ -100,7 +118,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This selector returns the list of all markers, this is our reference list
    * that MarkerIndex values refer to.
    */
-  const getFullMarkerList: Selector<Marker[]> = createSelector(
+  const getFullMarkerList: Selector<
+    Marker[]
+  > = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
     (derivedMarkers, derivedJankMarkers) =>
@@ -138,10 +158,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This returns the list of all marker indexes. This is simply a sequence
    * built from the full marker list.
    */
-  const getFullMarkerListIndexes: Selector<MarkerIndex[]> = createSelector(
-    getFullMarkerList,
-    markers => markers.map((_, i) => i)
-  );
+  const getFullMarkerListIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(getFullMarkerList, markers => markers.map((_, i) => i));
 
   /**
    * This utility function makes it easy to write selectors that deal with list
@@ -187,27 +206,53 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
-   * This selector filters out markers that are usually too long to be displayed
-   * in the header, because they would obscure the header, or that are displayed
-   * in other tracks already.
+   * This selector applies the tab filter(if in a single tab view) to the range filtered markers.
    */
-  const getCommittedRangeFilteredMarkerIndexesForHeader: Selector<
+  const getCommittedRangeAndTabFilteredMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(
-      marker =>
-        marker.name !== 'BHR-detected hang' &&
-        marker.name !== 'LongTask' &&
-        marker.name !== 'LongIdleTask' &&
-        marker.name !== 'Jank' &&
-        !MarkerData.isNetworkMarker(marker) &&
-        !MarkerData.isFileIoMarker(marker) &&
-        !MarkerData.isNavigationMarker(marker) &&
-        !MarkerData.isMemoryMarker(marker) &&
-        !MarkerData.isIPCMarker(marker)
-    )
+    ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
+    MarkerData.getTabFilteredMarkerIndexes
+  );
+
+  /**
+   * This selector filters out markers that are usually too long to be displayed
+   * in the header, because they would obscure the header, or that are displayed
+   * in other tracks already.
+   */
+  const getTimelineOverviewMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-overview',
+    MarkerData.filterMarkerByDisplayLocation
+  );
+
+  /**
+   * This selector applies the tab filter(if in a single tab view) to the full
+   * list of markers but excludes the global markers.
+   * This selector is useful to determine if a thread is completely empty or not
+   * so we can hide it inside active tab view.
+   */
+  const getActiveTabFilteredMarkerIndexesWithoutGlobals: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getFullMarkerListIndexes,
+    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
+    (markerGetter, markerIndexes, relevantPages) => {
+      return MarkerData.getTabFilteredMarkerIndexes(
+        markerGetter,
+        markerIndexes,
+        relevantPages,
+        false // exclude global markers
+      );
+    }
   );
 
   /**
@@ -217,17 +262,24 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(MarkerData.isNavigationMarker)
   );
 
   /**
    * This selector selects only jank markers.
    */
-  const getJankMarkerIndexesForHeader: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineJankMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(marker => marker.name === 'Jank')
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    _getDerivedJankMarkers,
+    (getMarker, markerIndexes, derivedMarkers) => {
+      const type = derivedMarkers.length > 0 ? 'Jank' : 'BHR-detected hang';
+
+      return filterMarkerIndexesCreator(marker =>
+        Boolean(marker.data && marker.data.type === type)
+      )(getMarker, markerIndexes);
+    }
   );
 
   /**
@@ -237,7 +289,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
@@ -309,26 +361,102 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
-   * This filters out network markers from the list of all markers, so that
-   * they'll be displayed in the marker chart.
+   * For performance reasons, the marker chart ignores the preview selection.
+   * It handles its own zooming behavior. It uses the SearchFilteredMarkerIndexes
+   * instead. It shows markers that use the "marker-chart" schema location, plus it
+   * shows markers that have no schema, in order to be as permissive as possible.
    */
   const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    MarkerData.filterForMarkerChart
+    getSearchFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-chart',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
   );
 
   /**
-   * This filters the previous result using a search string.
+   * The marker table uses only the preview selection filtered markers. It shows markers
+   * that use the "marker-table" schema location, plus it shows markers that have
+   * no schema, in order to be as permissive as possible.
    */
-  const getSearchFilteredMarkerChartMarkerIndexes: Selector<
-    MarkerIndex[]
+  const getMarkerTableMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getPreviewFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    // Custom filtering in addition to the schema logic:
+    (getMarker, markerIndexes, markerSchema, markerSchemaByName) => {
+      return MarkerData.filterMarkerByDisplayLocation(
+        getMarker,
+        markerIndexes,
+        markerSchema,
+        markerSchemaByName,
+        'marker-table',
+        MarkerData.getAllowMarkersWithNoSchema(markerSchemaByName)
+      );
+    }
+  );
+
+  /**
+   * This getter uses the marker schema to decide on the labels for tooltips.
+   */
+  const getMarkerTooltipLabelGetter: Selector<
+    (MarkerIndex) => string
   > = createSelector(
     getMarkerGetter,
-    getMarkerChartMarkerIndexes,
-    UrlState.getMarkersSearchStringsAsRegExp,
-    MarkerData.getSearchFilteredMarkerIndexes
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    () => 'tooltipLabel',
+    getLabelGetter
   );
+
+  /**
+   * This getter uses the marker schema to decide on the labels for the marker table.
+   */
+  const getMarkerTableLabelGetter: Selector<
+    (MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    () => 'tableLabel',
+    getLabelGetter
+  );
+
+  /**
+   * This getter uses the marker schema to decide on the labels for the marker chart.
+   */
+  const _getMarkerChartLabelGetter: Selector<
+    (MarkerIndex) => string
+  > = createSelector(
+    getMarkerGetter,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    ProfileSelectors.getCategories,
+    () => 'chartLabel',
+    getLabelGetter
+  );
+
+  /**
+   * This selector is used by the generic marker context menu to decide what to copy.
+   * Currently we want to copy the same thing that is displayed as a description
+   * in the marker table.
+   */
+  const getMarkerLabelToCopyGetter: Selector<
+    (MarkerIndex) => string
+  > = getMarkerTableLabelGetter;
 
   /**
    * This organizes the result of the previous selector in rows to be nicely
@@ -336,36 +464,54 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getMarkerChartTimingAndBuckets: Selector<MarkerTimingAndBuckets> = createSelector(
     getMarkerGetter,
-    getSearchFilteredMarkerChartMarkerIndexes,
+    getMarkerChartMarkerIndexes,
+    _getMarkerChartLabelGetter,
     ProfileSelectors.getCategories,
     MarkerTimingLogic.getMarkerTimingAndBuckets
   );
 
   /**
-   * This returns only FileIO markers.
+   * This returns markers for the FileIO timeline. The Marker Schema is obeyed, but
+   * there is special handling to ensure that the FileIO markers are displayed
+   * only for that thread.
    */
-  const getFileIoMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineFileIoMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isFileIoMarker)
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-fileio',
+    // Custom filtering in addition to the schema logic:
+    () => MarkerData.isOnThreadFileIoMarker,
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
    * This returns only memory markers.
    */
-  const getMemoryMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineMemoryMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isMemoryMarker)
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-memory',
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
    * This returns only IPC markers.
    */
-  const getIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+  const getTimelineIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    filterMarkerIndexesCreator(MarkerData.isIPCMarker)
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    ProfileSelectors.getMarkerSchema,
+    ProfileSelectors.getMarkerSchemaByName,
+    () => 'timeline-ipc',
+    MarkerData.filterMarkerByDisplayLocation
   );
 
   /**
@@ -375,6 +521,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
+    _getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -385,6 +532,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getUserTimingMarkerTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getUserTimingMarkerIndexes,
+    _getMarkerChartLabelGetter,
     MarkerTimingLogic.getMarkerTiming
   );
 
@@ -420,54 +568,77 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     return getMarker(selectedMarkerIndex);
   };
 
-  /**
-   * This returns the marker index for the currently right clicked marker.
-   */
-  const getRightClickedMarkerIndex: Selector<MarkerIndex | null> = state =>
-    threadSelectors.getViewOptions(state).rightClickedMarker;
+  const getSelectedNetworkMarkerIndex: Selector<MarkerIndex | null> = state =>
+    threadSelectors.getViewOptions(state).selectedNetworkMarker;
 
-  /**
-   * From the previous value, this returns the full marker object for the
-   * selected marker.
-   */
-  const getRightClickedMarker: Selector<Marker | null> = state => {
+  // Do we need this function?
+  const getSelectedNetworkMarker: Selector<Marker | null> = state => {
     const getMarker = getMarkerGetter(state);
-    const rightClickedMarkerIndex = getRightClickedMarkerIndex(state);
+    const selectedNetworkMarkerIndex = getSelectedNetworkMarkerIndex(state);
 
-    if (rightClickedMarkerIndex === null) {
+    if (selectedNetworkMarkerIndex === null) {
       return null;
     }
 
-    return getMarker(rightClickedMarkerIndex);
+    return getMarker(selectedNetworkMarkerIndex);
   };
+
+  const getRightClickedMarkerIndex: Selector<null | MarkerIndex> = createSelector(
+    getRightClickedMarkerInfo,
+    rightClickedMarkerInfo => {
+      if (
+        rightClickedMarkerInfo !== null &&
+        rightClickedMarkerInfo.threadsKey === threadsKey
+      ) {
+        return rightClickedMarkerInfo.markerIndex;
+      }
+
+      return null;
+    }
+  );
+
+  const getRightClickedMarker: Selector<null | Marker> = createSelector(
+    getMarkerGetter,
+    getRightClickedMarkerIndex,
+    (getMarker, markerIndex) =>
+      typeof markerIndex === 'number' ? getMarker(markerIndex) : null
+  );
 
   return {
     getMarkerGetter,
-    getJankMarkerIndexesForHeader,
-    getProcessedRawMarkerTable,
+    getTimelineJankMarkerIndexes,
+    getDerivedMarkerInfo,
+    getMarkerIndexToRawMarkerIndexes,
     getFullMarkerListIndexes,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
     getAreMarkerPanelsEmptyInFullRange,
+    getMarkerTableMarkerIndexes,
     getMarkerChartMarkerIndexes,
-    getSearchFilteredMarkerChartMarkerIndexes,
+    getMarkerTooltipLabelGetter,
+    getMarkerTableLabelGetter,
+    getMarkerLabelToCopyGetter,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
-    getCommittedRangeFilteredMarkerIndexesForHeader,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
+    getTimelineOverviewMarkerIndexes,
+    getActiveTabFilteredMarkerIndexesWithoutGlobals,
     getTimelineVerticalMarkerIndexes,
-    getFileIoMarkerIndexes,
-    getMemoryMarkerIndexes,
-    getIPCMarkerIndexes,
+    getTimelineFileIoMarkerIndexes,
+    getTimelineMemoryMarkerIndexes,
+    getTimelineIPCMarkerIndexes,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkerIndexes,
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
     getSelectedMarker,
-    getRightClickedMarkerIndex,
-    getRightClickedMarker,
+    getSelectedNetworkMarkerIndex,
+    getSelectedNetworkMarker,
     getIsNetworkChartEmptyInFullRange,
     getUserTimingMarkerIndexes,
     getUserTimingMarkerTiming,
+    getRightClickedMarkerIndex,
+    getRightClickedMarker,
   };
 }

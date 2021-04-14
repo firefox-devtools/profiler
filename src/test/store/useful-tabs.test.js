@@ -12,7 +12,9 @@ import {
   getNetworkMarkers,
   getProfileWithJsTracerEvents,
   getMergedProfileFromTextSamples,
+  addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 describe('getUsefulTabs', function() {
   it('hides the network chart and JS tracer when no data is in the thread', function() {
@@ -66,11 +68,43 @@ describe('getUsefulTabs', function() {
 
     dispatch({
       type: 'SELECT_TRACK',
-      selectedThreadIndex: 2,
+      selectedThreadIndexes: new Set([2]),
       selectedTab: 'calltree',
     });
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',
+    ]);
+  });
+
+  it('shows the network chart when network markers are present in the active tab view', function() {
+    const {
+      profile,
+      parentInnerWindowIDsWithChildren,
+      firstTabTabID,
+    } = addActiveTabInformationToProfile(
+      getProfileWithMarkers(getNetworkMarkers())
+    );
+    // Adding the parent innerWindowID to the first thread's first sample, so
+    // this thread will be inluded in the active tab view.
+    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    // Switch to the active tab view.
+    dispatch(
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        tabID: firstTabTabID,
+      })
+    );
+
+    // Check the tabs and make sure that the network chart is there.
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
+      'marker-chart',
+      'marker-table',
+      'network-chart',
     ]);
   });
 });

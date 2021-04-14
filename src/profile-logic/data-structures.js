@@ -24,7 +24,7 @@ import type {
   ExtensionTable,
   CategoryList,
   JsTracerTable,
-} from '../types/profile';
+} from 'firefox-profiler/types';
 
 /**
  * This module collects all of the creation of new empty profile data structures.
@@ -55,6 +55,8 @@ export function getEmptySamplesTableWithEventDelay(): SamplesTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
     eventDelay: [],
     stack: [],
     time: [],
@@ -73,6 +75,8 @@ export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    weightType: 'samples',
+    weight: null,
     responsiveness: [],
     stack: [],
     time: [],
@@ -176,7 +180,9 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   return {
     data: [],
     name: [],
-    time: [],
+    startTime: [],
+    endTime: [],
+    phase: [],
     category: [],
     length: 0,
   };
@@ -192,7 +198,8 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
     className: [],
     typeName: [],
     coarseType: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     inNursery: [],
     stack: [],
     length: 0,
@@ -210,7 +217,8 @@ export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllo
   // be caught by the type system.
   return {
     time: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     stack: [],
     length: 0,
   };
@@ -227,7 +235,8 @@ export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocati
   // be caught by the type system.
   return {
     time: [],
-    duration: [],
+    weight: [],
+    weightType: 'bytes',
     stack: [],
     memoryAddress: [],
     threadId: [],
@@ -245,13 +254,15 @@ export function shallowCloneRawMarkerTable(
     // be caught by the type system.
     data: markerTable.data.slice(),
     name: markerTable.name.slice(),
-    time: markerTable.time.slice(),
+    startTime: markerTable.startTime.slice(),
+    endTime: markerTable.endTime.slice(),
+    phase: markerTable.phase.slice(),
     category: markerTable.category.slice(),
     length: markerTable.length,
   };
 }
 
-export function getResourceTypes(): * {
+export function getResourceTypes() {
   return {
     unknown: 0,
     library: 1,
@@ -284,8 +295,10 @@ export function getEmptyExtensions(): ExtensionTable {
 
 export function getDefaultCategories(): CategoryList {
   return [
-    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    // Make sure 'Other' is at index 0, as it's used as the category for stacks when no
+    // categories are provided by an imported (non-Gecko profiler) profile.
     { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
     { name: 'Layout', color: 'purple', subcategories: ['Other'] },
     { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
     { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
@@ -360,6 +373,7 @@ export function getEmptyProfile(): Profile {
       physicalCPUs: 0,
       logicalCPUs: 0,
       symbolicated: true,
+      markerSchema: [],
     },
     pages: [],
     threads: [],

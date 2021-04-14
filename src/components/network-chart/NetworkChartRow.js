@@ -7,7 +7,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import { TooltipMarker } from '../tooltip/Marker';
-import Tooltip from '../tooltip/Tooltip';
+import { Tooltip } from '../tooltip/Tooltip';
 
 import {
   guessMimeTypeFromNetworkMarker,
@@ -18,11 +18,18 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
+import { ensureExists } from '../../utils/flow';
 
-import type { CssPixels, Milliseconds, StartEndRange } from '../../types/units';
-import type { ThreadIndex } from '../../types/profile';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { NetworkPayload } from '../../types/markers';
+import type {
+  CssPixels,
+  Milliseconds,
+  StartEndRange,
+  ThreadsKey,
+  Marker,
+  MarkerIndex,
+  NetworkPayload,
+  MixedObject,
+} from 'firefox-profiler/types';
 
 // This regexp is used to split a pathname into a directory path and a filename.
 // On purpose, when there's no "real" filename, the filename will contain the
@@ -78,7 +85,7 @@ type NetworkPhaseProps = {|
   +previousName: string,
   +value: number | string,
   +duration: Milliseconds,
-  +style: Object,
+  +style: MixedObject,
 |};
 
 function NetworkPhase({
@@ -216,14 +223,16 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
   }
 
   render() {
-    const {
-      marker: { start, dur },
-      networkPayload,
-    } = this.props;
-
+    const { marker, networkPayload } = this.props;
+    const start = marker.start;
+    const end = ensureExists(
+      marker.end,
+      'Network markers are assumed to have an end time.'
+    );
+    const dur = end - marker.start;
     // Compute the positioning of this network marker.
     const startPosition = this._timeToCssPixels(start);
-    const endPosition = this._timeToCssPixels(start + dur);
+    const endPosition = this._timeToCssPixels(end);
 
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;
@@ -311,8 +320,11 @@ type NetworkChartRowProps = {|
   +networkPayload: NetworkPayload,
   +timeRange: StartEndRange,
   +width: CssPixels,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
+  +isSelected: boolean,
+  +isLeftClicked: boolean,
+  +select: MarkerIndex => mixed,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
   +shouldDisplayTooltips: () => boolean,
@@ -324,7 +336,10 @@ type State = {|
   hovered: ?boolean,
 |};
 
-class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
+export class NetworkChartRow extends React.PureComponent<
+  NetworkChartRowProps,
+  State
+> {
   state = {
     pageX: 0,
     pageY: 0,
@@ -343,9 +358,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   _hoverOut = () => {
-    this.setState({
-      hovered: false,
-    });
+    // This persistTooltips property is part of the web console API. It helps
+    // in being able to inspect and debug tooltips.
+    if (!window.persistTooltips) {
+      this.setState({
+        hovered: false,
+      });
+    }
   };
 
   _onMouseDown = (e: SyntheticMouseEvent<>) => {
@@ -429,40 +448,55 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
   _getClassNameTypeForMarker() {
     const { networkPayload } = this.props;
-    const mimeType = guessMimeTypeFromNetworkMarker(networkPayload);
+    const mimeType =
+      networkPayload.contentType === undefined ||
+      networkPayload.contentType === null
+        ? guessMimeTypeFromNetworkMarker(networkPayload)
+        : networkPayload.contentType;
     return getColorClassNameForMimeType(mimeType);
   }
 
   render() {
     const {
       index,
+      markerIndex,
       marker,
       networkPayload,
       width,
       timeRange,
       isRightClicked,
       shouldDisplayTooltips,
+      isLeftClicked,
+      isSelected,
     } = this.props;
 
     if (networkPayload === null) {
       return null;
     }
 
+    // Generates className for a row
     const itemClassName = classNames(
       'networkChartRowItem',
       this._getClassNameTypeForMarker(),
       {
         odd: index % 2 === 1,
         isRightClicked,
+        isLeftClicked,
+        isSelected,
       }
     );
 
     return (
       <div
+        // The className below is responsible for the blue hover effect
         className={itemClassName}
         onMouseEnter={this._hoverIn}
         onMouseLeave={this._hoverOut}
         onMouseDown={this._onMouseDown}
+        aria-selected={isSelected}
+        aria-label={marker.name}
+        role="option"
+        id={`networkChartRowItem-${markerIndex}`}
       >
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
@@ -479,8 +513,10 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <TooltipMarker
               className="tooltipNetwork"
+              markerIndex={markerIndex}
               marker={marker}
-              threadIndex={this.props.threadIndex}
+              threadsKey={this.props.threadsKey}
+              restrictHeightWidth={true}
             />
           </Tooltip>
         ) : null}
@@ -488,5 +524,3 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     );
   }
 }
-
-export default NetworkChartRow;

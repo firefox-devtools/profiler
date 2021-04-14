@@ -5,34 +5,103 @@
 /* See https://design.firefox.com/photon/components/message-bars.html */
 .photon-message-bar {
   display: flex;
-  width: 100%;
   min-height: 32px;
   box-sizing: border-box;
-  align-items: center;
-  padding: 0 4px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.4;
-}
+  flex-wrap: nowrap;
 
-.photon-message-bar-error {
   /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
    * (space between icon and text) */
   padding: 4px 4px 4px 32px;
 
   /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
-   * for the icon) */
-  background: url(../../img/svg/error.svg) no-repeat 8px center / 16px 16px
-    var(--red-60);
+   * for the icon). And same for the top positioning, because we want the icon
+   * to stick at the top when the text is multiline */
+  background: url(../../img/svg/info-icon.svg) no-repeat 8px 8px / 16px 16px
+    var(--grey-20);
+  border-radius: 4px;
+  color: var(--grey-90);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.photon-message-bar-action-button {
+  flex: none;
+}
+
+.photon-message-bar-close-button {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin-left: auto;
+  background: url(../../img/svg/close-dark.svg) no-repeat center / 16px 16px;
+}
+
+.photon-message-bar-inner-content {
+  display: flex;
+  flex-wrap: wrap;
+  padding-right: 8px;
+  gap: 8px;
+}
+
+.photon-message-bar-inner-text {
+  display: flex;
+  align-items: center;
+}
+
+.photon-message-bar-error {
+  background-color: var(--red-60);
+  background-image: url(../../img/svg/error.svg);
   color: #fff;
 }
 
-.photon-message-bar-error .photon-button:hover {
+.photon-message-bar-warning {
+  background-color: var(--yellow-50);
+  background-image: url(../../img/svg/warning.svg);
+  color: var(--yellow-90);
+}
+
+.photon-message-bar-error .photon-message-bar-close-button {
+  background-image: url(../../img/svg/close-light.svg);
+}
+
+/* The default styles for this button are copied from the ghost button, mostly
+ * for ease of usage. */
+.photon-message-bar-close-button:hover {
+  background-color: var(--grey-90-a10);
+}
+
+.photon-message-bar-error .photon-message-bar-action-button,
+.photon-message-bar-error .photon-message-bar-close-button:hover {
+  background-color: var(--red-70);
+  color: #fff;
+}
+
+.photon-message-bar-warning .photon-message-bar-action-button,
+.photon-message-bar-warning .photon-message-bar-close-button:hover {
+  background-color: var(--yellow-60);
+}
+
+.photon-message-bar-close-button:hover:active {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-message-bar-error .photon-message-bar-action-button:hover,
+.photon-message-bar-error .photon-message-bar-close-button:hover:active {
   background-color: var(--red-80);
 }
 
-.photon-message-bar-error .photon-button:hover:active {
+.photon-message-bar-warning .photon-message-bar-action-button:hover,
+.photon-message-bar-warning .photon-message-bar-close-button:hover:active {
+  background-color: var(--yellow-70);
+  color: #fff;
+}
+
+.photon-message-bar-error .photon-message-bar-action-button:hover:active {
   background-color: var(--red-90);
+}
+
+.photon-message-bar-warning .photon-message-bar-action-button:hover:active {
+  background-color: var(--yellow-80);
 }

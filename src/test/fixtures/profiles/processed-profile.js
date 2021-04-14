@@ -12,10 +12,16 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
-import { mergeProfiles } from '../../../profile-logic/comparison';
+import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import { ensureExists } from '../../../utils/flow';
+import {
+  INTERVAL,
+  INSTANT,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
 
 import type {
   Profile,
@@ -25,58 +31,85 @@ import type {
   CategoryList,
   JsTracerTable,
   Counter,
-} from '../../../types/profile';
-import type {
+  TabID,
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
   IPCMarkerPayload,
   UserTimingMarkerPayload,
-} from '../../../types/markers';
-import type { Milliseconds } from '../../../types/units';
+  Milliseconds,
+  MarkerPhase,
+  ThreadCPUDeltaUnit,
+} from 'firefox-profiler/types';
+import {
+  deriveMarkersFromRawMarkerTable,
+  IPCMarkerCorrelations,
+} from '../../../profile-logic/marker-data';
+import { getTimeRangeForThread } from '../../../profile-logic/profile-data';
+import { markerSchemaForTests } from './marker-schema';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
 type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
+
+// These markers can create an Instant or a complete Interval marker, depending
+// on if an end time is passed in. The definition uses a union, becaus as far
+// as I can tell, Flow doesn't support multiple arity tuples.
 export type TestDefinedMarkers = Array<
-  [MarkerName, MarkerTime, MarkerPayload | MockPayload]
+  // Instant marker:
+  | [MarkerName, MarkerTime]
+  // No payload:
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null // end time
+    ]
+  | [
+      MarkerName,
+      MarkerTime, // start time
+      MarkerTime | null, // end time
+      MarkerPayload | MockPayload
+    ]
 >;
+
+// This type is used when needing to create a specific RawMarkerTable.
+export type TestDefinedRawMarker = {|
+  +name?: string,
+  +startTime: Milliseconds | null,
+  +endTime: Milliseconds | null,
+  +phase: MarkerPhase,
+  +category?: IndexIntoCategoryList,
+  +data?: MarkerPayload,
+|};
+
 export type TestDefinedJsTracerEvent = [
   // Event name:
   string,
   // Start time:
   Milliseconds,
   // End time:
-  Milliseconds,
+  Milliseconds
 ];
 
-/**
- * This function ensures that the mock payloads are converted correctly to real payloads
- * that match the MarkerPayload typing. Specifically it adds the 'DummyForTests' type
- * to { startTime, endTime } payloads. Doing this means that it's cleaner to create
- * dummy test-defined markers, since we don't have to add a `type` to the payload.
- */
-function _refineMockPayload(
-  payload: MarkerPayload | MockPayload
-): MarkerPayload {
-  if (
-    // Check for a MockPayload.
-    payload !== null &&
-    Object.keys(payload).length === 2 &&
-    typeof payload.startTime === 'number' &&
-    typeof payload.endTime === 'number'
-  ) {
-    return {
-      type: 'DummyForTests',
-      endTime: payload.endTime,
-      startTime: payload.startTime,
-    };
+export function addRawMarkersToThread(
+  thread: Thread,
+  markers: TestDefinedRawMarker[]
+) {
+  const stringTable = thread.stringTable;
+  const markersTable = thread.markers;
+
+  for (const { name, startTime, endTime, phase, category, data } of markers) {
+    markersTable.name.push(
+      stringTable.indexForString(name || 'TestDefinedMarker')
+    );
+    markersTable.phase.push(phase);
+    markersTable.startTime.push(startTime);
+    markersTable.endTime.push(endTime);
+    markersTable.data.push(data || null);
+    markersTable.category.push(category || 0);
+    markersTable.length++;
   }
-  // There is no way to refine the payload type to just the { startTime, endTime }
-  // mock marker. So check for those conditions above, and coerce the final result
-  // into a MarkerPayload using the function signature.
-  return (payload: any);
 }
 
 export function addMarkersToThreadWithCorrespondingSamples(
@@ -85,14 +118,80 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
+  const allTimes = new Set();
 
-  markers.forEach(([name, time, data]) => {
+  markers.forEach(tuple => {
+    const name = tuple[0];
+    const startTime = tuple[1];
+    // Flow doesn't support variadic tuple types.
+    const maybeEndTime = (tuple: any)[2] || null;
+    const payload: MarkerPayload = (tuple: any)[3] || null;
+
     markersTable.name.push(stringTable.indexForString(name));
-    markersTable.time.push(time);
-    markersTable.data.push(_refineMockPayload(data));
+    if (maybeEndTime === null) {
+      markersTable.phase.push(INSTANT);
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(null);
+    } else {
+      markersTable.phase.push(INTERVAL);
+      markersTable.startTime.push(startTime);
+      markersTable.endTime.push(maybeEndTime);
+      allTimes.add(maybeEndTime);
+    }
+    allTimes.add(startTime);
+    markersTable.data.push(payload);
     markersTable.category.push(0);
     markersTable.length++;
   });
+
+  // When the profile contains at least 1 sample, we use only the samples to
+  // control the initial range. Because of that we need to add samples so that
+  // the range includes these markers. Note that when a thread has no sample,
+  // then the markers are used to compute the initial range.
+  const { samples } = thread;
+  if (samples.length) {
+    const firstMarkerTime = Math.min(...allTimes);
+    const lastMarkerTime = Math.max(...allTimes);
+
+    // The first marker time should be added if there's no sample before this time.
+    const shouldAddFirstMarkerTime = samples.time[0] > firstMarkerTime;
+
+    // The last marker time should be added if there's no sample after this time,
+    // but only if it's different than the other time.
+    const shouldAddLastMarkerTime =
+      samples.time[samples.length - 1] < lastMarkerTime &&
+      firstMarkerTime !== lastMarkerTime;
+
+    if (shouldAddFirstMarkerTime) {
+      samples.time.unshift(firstMarkerTime);
+      samples.stack.unshift(null);
+      if (samples.responsiveness) {
+        samples.responsiveness.unshift(null);
+      }
+      if (samples.eventDelay) {
+        samples.eventDelay.unshift(null);
+      }
+      if (samples.weight) {
+        samples.weight.unshift(samples.weight[0]);
+      }
+      samples.length++;
+    }
+
+    if (shouldAddLastMarkerTime) {
+      samples.time.push(lastMarkerTime);
+      samples.stack.push(null);
+      if (samples.responsiveness) {
+        samples.responsiveness.push(null);
+      }
+      if (samples.eventDelay) {
+        samples.eventDelay.push(null);
+      }
+      if (samples.weight) {
+        samples.weight.push(samples.weight[0]);
+      }
+      samples.length++;
+    }
+  }
 }
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {
@@ -101,18 +200,117 @@ export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   return thread;
 }
 
+export function getThreadWithRawMarkers(markers: TestDefinedRawMarker[]) {
+  const thread = getEmptyThread();
+  addRawMarkersToThread(thread, markers);
+  return thread;
+}
+
+/**
+ * This can be a little annoying to derive with all of the dependencies,
+ * so provide an easy interface to do so here.
+ */
+export function getTestFriendlyDerivedMarkerInfo(thread: Thread) {
+  return deriveMarkersFromRawMarkerTable(
+    thread.markers,
+    thread.stringTable,
+    thread.tid || 0,
+    getTimeRangeForThread(thread, 1),
+    new IPCMarkerCorrelations()
+  );
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeStartMarker(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INTERVAL_START,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeEndMarker(
+  name: string,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime: null,
+    endTime,
+    phase: INTERVAL_END,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeInstantMarker(
+  name: string,
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime: null,
+    phase: INSTANT,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeIntervalMarker(
+  name: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    name,
+    startTime,
+    endTime,
+    phase: INTERVAL,
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeCompositorScreenshot(
+  startTime: Milliseconds
+): TestDefinedRawMarker {
+  return {
+    ...makeInstantMarker('CompositorScreenshot', startTime),
+    data: {
+      type: 'CompositorScreenshot',
+      url: 0,
+      windowID: '',
+      windowWidth: 100,
+      windowHeight: 100,
+    },
+  };
+}
+
 export function getUserTiming(
   name: string,
   startTime: number,
   duration: number
 ) {
+  const endTime = startTime + duration;
   return [
     'UserTiming',
     startTime,
+    endTime,
     ({
       type: 'UserTiming',
-      startTime,
-      endTime: startTime + duration,
       name,
       entryType: 'measure',
     }: UserTimingMarkerPayload),
@@ -123,10 +321,105 @@ export function getProfileWithMarkers(
   ...markersPerThread: TestDefinedMarkers[]
 ): Profile {
   const profile = getEmptyProfile();
+  // Provide a useful marker schema, rather than an empty one.
+  profile.meta.markerSchema = markerSchemaForTests;
+
+  if (markersPerThread.length === 0) {
+    throw new Error(
+      'getProfileWithMarkers expected to get at least one list of markers.'
+    );
+  }
   profile.threads = markersPerThread.map(testDefinedMarkers =>
     getThreadWithMarkers(testDefinedMarkers)
   );
   return profile;
+}
+
+/**
+ * This profile is useful for marker table tests. The markers were taken from
+ * real-world values.
+ */
+export function getMarkerTableProfile() {
+  return getProfileWithMarkers(
+    [
+      [
+        'UserTiming',
+        12.5,
+        12.5,
+        {
+          type: 'UserTiming',
+          name: 'foobar',
+          entryType: 'mark',
+        },
+      ],
+      [
+        'NotifyDidPaint',
+        14.5,
+        null,
+        {
+          type: 'tracing',
+          category: 'Paint',
+        },
+      ],
+      [
+        'setTimeout',
+        165.87091900000001,
+        165.871503,
+        {
+          type: 'Text',
+          name: '5.5',
+        },
+      ],
+      [
+        'IPC',
+        120,
+        120,
+        {
+          type: 'IPC',
+          startTime: 120,
+          endTime: 120,
+          otherPid: 2222,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          messageSeqno: 1,
+          side: 'parent',
+          direction: 'sending',
+          phase: 'endpoint',
+          sync: false,
+          niceDirection: 'sending to 2222',
+        },
+      ],
+      [
+        'LogMessages',
+        170,
+        null,
+        {
+          type: 'Log',
+          name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+          module: 'nsJarProtocol',
+        },
+      ],
+      [
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget magna sed magna vehicula congue id id nulla. Ut convallis, neque consequat aliquam egestas, dui urna interdum quam, id semper magna erat et nisi. Vivamus molestie quis ligula eget aliquam. Sed facilisis, turpis sed facilisis posuere, risus odio convallis velit, vitae vehicula justo risus at ipsum. Proin non porttitor neque. Vivamus fringilla ex nec iaculis cursus. Vestibulum suscipit mauris sem, vitae gravida ipsum fermentum id. Quisque pulvinar blandit ullamcorper. Donec id justo at metus scelerisque pulvinar. Proin suscipit suscipit nisi, quis tempus ipsum vulputate quis. Pellentesque sodales rutrum eros, eget pulvinar ante condimentum a. Donec accumsan, ante ut facilisis cursus, nibh quam congue eros, vitae placerat tortor magna vel lacus. Etiam odio diam, venenatis eu sollicitudin non, ultrices ut urna. Aliquam vehicula diam eu eros eleifend, ac vulputate purus faucibus.',
+        165.87091900000001,
+        165.871503,
+        {
+          type: 'Text',
+          name: '5.5',
+        },
+      ],
+      [
+        'FileIO',
+        174,
+        175,
+        {
+          type: 'FileIO',
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+        },
+      ],
+    ].sort((a, b) => a[1] - b[1])
+  );
 }
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {
@@ -169,6 +462,15 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  * this: [jit:baseline] or [jit:ion], right after the function name (see below
  * for an example). The default is no JIT.
  *
+ * The time of the sample can also be set by making the first row all numbers:
+ * ```
+ *   const { profile } = getProfileFromTextSamples(`
+ *    0  1  5  6
+ *    A  A  A  C
+ *       B
+ *  `);
+ * ```
+ *
  * The funcNamesDictPerThread array can be useful when using it like this:
  * ```
  * const {
@@ -193,7 +495,12 @@ export function getProfileFromTextSamples(
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
   const profile = getEmptyProfile();
-  const categories = profile.meta.categories;
+  // Provide a useful marker schema, rather than an empty one.
+  profile.meta.markerSchema = markerSchemaForTests;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories.'
+  );
 
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
@@ -201,6 +508,22 @@ export function getProfileFromTextSamples(
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
+
+    // See if the first row contains only numbers, if so this is the time of the sample.
+    let sampleTimes = null;
+
+    // Check if the first row is made by base 10 integers. 0x200 and other will parse
+    // as numbers, but they can be used as valid function names.
+    const isFirstRowMadeOfNumbers = textOnlyStacks.every(stack =>
+      /^\d+$/.test(stack[0])
+    );
+    if (isFirstRowMadeOfNumbers) {
+      sampleTimes = textOnlyStacks.map(stack => parseInt(stack[0]));
+      for (const stack of textOnlyStacks) {
+        // Remove the number.
+        stack.shift();
+      }
+    }
 
     // Flatten the textOnlyStacks into into a list of function names.
     const funcNamesSet = new Set();
@@ -225,7 +548,8 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      categories
+      categories,
+      sampleTimes
     );
   });
 
@@ -307,7 +631,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
-const JIT_IMPLEMENTATIONS = ['ion', 'baseline'];
+const JIT_IMPLEMENTATIONS = ['ion', 'baseline', 'blinterp'];
 
 function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
@@ -316,8 +640,13 @@ function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
     jitType = findJitTypeResult[1];
   }
 
-  if (jitType && JIT_IMPLEMENTATIONS.includes(jitType)) {
-    return jitType;
+  if (jitType) {
+    if (JIT_IMPLEMENTATIONS.includes(jitType)) {
+      return jitType;
+    }
+    throw new Error(
+      `The jitType '${jitType}' is unknown to this tool. Is it a typo or should you update the list of possible values?`
+    );
   }
 
   return null;
@@ -363,7 +692,8 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
-  categories: CategoryList
+  categories: CategoryList,
+  sampleTimes: number[] | null
 ): Thread {
   const thread = getEmptyThread();
 
@@ -515,6 +845,11 @@ function _buildThreadFromTextOnlyStacks(
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
+
+  if (sampleTimes) {
+    samples.time = sampleTimes;
+  }
+
   return thread;
 }
 
@@ -537,7 +872,10 @@ export function getMergedProfileFromTextSamples(
     search: '?thread=0&v=3',
     hash: '',
   });
-  const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
+  const { profile } = mergeProfilesForDiffing(
+    profiles,
+    profiles.map(() => profileState)
+  );
   return {
     profile,
     funcNamesPerThread: profilesAndFuncNames.map(
@@ -574,10 +912,10 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
   const startPayload: NetworkPayload = {
     type: 'Network',
     id,
-    pri: 0,
-    status: 'STATUS_START',
     startTime,
     endTime: fetchStart,
+    pri: 0,
+    status: 'STATUS_START',
     URI: uri,
   };
 
@@ -586,14 +924,13 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
     status: 'STATUS_STOP',
     startTime: fetchStart,
     endTime,
+    contentType: 'text/html',
     ...payload,
   };
 
   return [
-    // Note that the "time" of network markers is generally close to the
-    // payload's endTime. We don't use it at all in our business logic though.
-    [name, startPayload.endTime, startPayload],
-    [name, stopPayload.endTime, stopPayload],
+    [name, startTime, fetchStart, startPayload],
+    [name, fetchStart, endTime, stopPayload],
   ];
 }
 
@@ -614,12 +951,12 @@ export function getNetworkTrackProfile() {
     );
   const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 1;
 
   profile.pages = [
     {
-      browsingContextID: browsingContextID,
+      tabID: tabID,
       innerWindowID: innerWindowID,
       url: 'https://developer.mozilla.org/en-US/',
       embedderInnerWindowID: 0,
@@ -638,7 +975,6 @@ export function getNetworkTrackProfile() {
   const domContentLoadedBase = {
     type: 'tracing',
     category: 'Navigation',
-    interval: 'start',
     innerWindowID: innerWindowID,
   };
 
@@ -646,36 +982,20 @@ export function getNetworkTrackProfile() {
     [
       'Load',
       4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'Load',
       5,
       ({
         ...loadPayloadBase,
-        interval: 'end',
       }: NavigationMarkerPayload),
     ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
+    ['TTI', 6],
+    ['Navigation::Start', 7],
+    ['Contentful paint at something', 8],
     [
       'DOMContentLoaded',
       6,
-      ({
-        ...domContentLoadedBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'DOMContentLoaded',
       7,
       ({
         ...domContentLoadedBase,
-        interval: 'end',
       }: NavigationMarkerPayload),
     ],
   ]);
@@ -691,10 +1011,13 @@ type IPCMarkersOptions = {|
   messageSeqno: number,
   side: 'parent' | 'child',
   direction: 'sending' | 'receiving',
+  phase: 'endpoint' | 'transferStart' | 'transferEnd',
   sync: boolean,
 |};
 
-function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
+function _getIPCMarkers(
+  options: $Shape<IPCMarkersOptions> = {}
+): TestDefinedMarkers {
   const payload: IPCMarkerPayload = {
     type: 'IPC',
     startTime: 0,
@@ -704,11 +1027,23 @@ function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
     messageSeqno: 0,
     side: 'parent',
     direction: 'sending',
+    phase: 'endpoint',
     sync: false,
+    niceDirection: 'sending to 1234',
     ...options,
   };
 
-  return [['IPC', payload.endTime, payload]];
+  return [
+    [
+      'IPC',
+      options.startTime || 0,
+      ensureExists(
+        payload.endTime,
+        'Expected to find an endTime on the IPC marker'
+      ),
+      payload,
+    ],
+  ];
 }
 
 export function getIPCTrackProfile() {
@@ -730,6 +1065,7 @@ export function getScreenshotTrackProfile() {
       .map((_, i) => [
         'CompositorScreenshot',
         i,
+        null,
         {
           type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.
@@ -832,6 +1168,8 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
+    weightType: 'samples',
+    weight: null,
     length: endOfEvents,
   };
 
@@ -881,6 +1219,50 @@ export function getCounterForThread(
 }
 
 /**
+ * Creates a profile that includes a thread with eventDelay values.
+ */
+export function getProfileWithEventDelays(
+  userEventDelay?: Milliseconds[]
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+  profile.threads = [getThreadWithEventDelay(userEventDelay)];
+  return profile;
+}
+
+/**
+ * Creates a thread with eventDelay values.
+ */
+export function getThreadWithEventDelay(
+  userEventDelay?: Milliseconds[]
+): Thread {
+  const thread = getEmptyThread();
+
+  // Creating some empty event delays because they will be filled with the pre-process.
+  let eventDelay = Array(50).fill(0);
+
+  if (userEventDelay !== undefined && userEventDelay !== null) {
+    eventDelay = [...eventDelay, ...userEventDelay];
+  } else {
+    for (let i = 0; i < 100; i++) {
+      eventDelay.push(i % 30);
+    }
+  }
+
+  // Re-construct the samples table with new event delay values.
+  thread.samples = {
+    eventDelay: eventDelay,
+    stack: Array(eventDelay.length).fill(null),
+    time: Array.from({ length: eventDelay.length }, (_, i) => i),
+    weight: null,
+    weightType: 'samples',
+    length: eventDelay.length,
+  };
+
+  return thread;
+}
+
+/**
  * Get a profile with JS allocations. The allocations will form the following call tree.
  *
  * - A (total: 15, self: —)
@@ -894,7 +1276,7 @@ export function getCounterForThread(
  *         - E (total: 3, self: 3)
  */
 
-export function getProfileWithJsAllocations(): * {
+export function getProfileWithJsAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -931,7 +1313,7 @@ export function getProfileWithJsAllocations(): * {
     jsAllocations.className.push('Function');
     jsAllocations.typeName.push('JSObject');
     jsAllocations.coarseType.push('Object');
-    jsAllocations.duration.push(byteSize);
+    jsAllocations.weight.push(byteSize);
     jsAllocations.inNursery.push(true);
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
@@ -970,7 +1352,7 @@ export function getProfileWithJsAllocations(): * {
  *       - D (total: -11, self: —)
  *         - E (total: -11, self: -11)
  */
-export function getProfileWithUnbalancedNativeAllocations(): * {
+export function getProfileWithUnbalancedNativeAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -1009,7 +1391,7 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
   for (const { byteSize, stack } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.length++;
   }
@@ -1034,7 +1416,7 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
  *       - Gjs (total: 13, self: 13)
  */
 
-export function getProfileWithBalancedNativeAllocations(): * {
+export function getProfileWithBalancedNativeAllocations() {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -1086,7 +1468,7 @@ export function getProfileWithBalancedNativeAllocations(): * {
   for (const { byteSize, stack, memoryAddress } of allocations) {
     const thisTime = time++;
     nativeAllocations.time.push(thisTime);
-    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.weight.push(byteSize);
     nativeAllocations.stack.push(stack);
     nativeAllocations.memoryAddress.push(memoryAddress);
     nativeAllocations.threadId.push(threadId);
@@ -1094,4 +1476,163 @@ export function getProfileWithBalancedNativeAllocations(): * {
   }
 
   return { profile, funcNamesDict };
+}
+
+/**
+ * Add pages array and activeTabTabID to the given profile.
+ * Pages array has the following relationship:
+ * Tab #1                           Tab #2
+ * --------------                --------------
+ * Page #1                        Page #4
+ * |- Page #2                     |
+ * |  |- Page #3                  Page #6
+ * |
+ * Page #5
+ */
+export function addActiveTabInformationToProfile(
+  profile: Profile,
+  activeTabID?: TabID
+) {
+  const firstTabTabID = 1;
+  const secondTabTabID = 4;
+  const parentInnerWindowIDsWithChildren = 11111111111;
+  const iframeInnerWindowIDsWithChild = 11111111112;
+  const fistTabInnerWindowIDs = [
+    parentInnerWindowIDsWithChildren,
+    iframeInnerWindowIDsWithChild,
+    11111111113,
+    11111111115,
+  ];
+  const secondTabInnerWindowIDs = [11111111114, 11111111116];
+
+  // Default to first tab tabID if not given
+  activeTabID = activeTabID === undefined ? firstTabTabID : activeTabID;
+
+  // Add the pages array
+  profile.pages = [
+    // A top most page in the first tab
+    {
+      tabID: firstTabTabID,
+      innerWindowID: parentInnerWindowIDsWithChildren,
+      url: 'Page #1',
+      embedderInnerWindowID: 0,
+    },
+    // An iframe page inside the previous page
+    {
+      tabID: 2,
+      innerWindowID: iframeInnerWindowIDsWithChild,
+      url: 'Page #2',
+      embedderInnerWindowID: parentInnerWindowIDsWithChildren,
+    },
+    // Another iframe page inside the previous iframe
+    {
+      tabID: 3,
+      innerWindowID: fistTabInnerWindowIDs[2],
+      url: 'Page #3',
+      embedderInnerWindowID: iframeInnerWindowIDsWithChild,
+    },
+    // A top most frame from the second tab
+    {
+      tabID: secondTabTabID,
+      innerWindowID: secondTabInnerWindowIDs[0],
+      url: 'Page #4',
+      embedderInnerWindowID: 0,
+    },
+    // Another top most frame from the first tab
+    // Their tabIDs are the same because of that.
+    {
+      tabID: firstTabTabID,
+      innerWindowID: fistTabInnerWindowIDs[3],
+      url: 'Page #5',
+      embedderInnerWindowID: 0,
+    },
+    // Another top most frame from the second tab
+    {
+      tabID: secondTabTabID,
+      innerWindowID: secondTabInnerWindowIDs[1],
+      url: 'Page #4',
+      embedderInnerWindowID: 0,
+    },
+  ];
+
+  // Set the active Tab ID.
+  profile.meta.configuration = {
+    activeTabID,
+    capacity: 1,
+    features: [],
+    threads: [],
+  };
+
+  return {
+    profile,
+    firstTabTabID,
+    secondTabTabID,
+    parentInnerWindowIDsWithChildren,
+    iframeInnerWindowIDsWithChild,
+    activeTabID,
+    fistTabInnerWindowIDs,
+    secondTabInnerWindowIDs,
+  };
+}
+
+/**
+ * Creates a profile that includes a thread with threadCPUDelta values.
+ */
+export function getProfileWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  unit: ThreadCPUDeltaUnit = 'ns',
+  interval: Milliseconds = 1
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+  profile.threads = [getThreadWithThreadCPUDelta(userThreadCPUDelta, interval)];
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: unit,
+  };
+
+  return profile;
+}
+
+/**
+ * Creates a thread with threadCPUDelta values.
+ */
+export function getThreadWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  interval: Milliseconds = 1
+): Thread {
+  const thread = getEmptyThread();
+  const samplesLength = userThreadCPUDelta ? userThreadCPUDelta.length : 10;
+
+  // Re-construct the samples table with new threadCPUDelta values.
+  thread.samples = {
+    threadCPUDelta: userThreadCPUDelta,
+    eventDelay: Array(samplesLength).fill(null),
+    stack: Array(samplesLength).fill(null),
+    time: Array.from({ length: samplesLength }, (_, i) => i * interval),
+    weight: null,
+    weightType: 'samples',
+    length: samplesLength,
+  };
+
+  return thread;
+}
+
+/**
+ * Adds the necessary CPU usage values to the given profile.
+ */
+export function addCpuUsageValues(
+  profile: Profile,
+  threadCPUDelta: Array<number | null>,
+  threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  interval: Milliseconds = 1
+) {
+  profile.meta.interval = interval;
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: threadCPUDeltaUnit,
+  };
+  profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
 }

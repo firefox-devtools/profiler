@@ -5,30 +5,33 @@
 // @flow
 
 import * as React from 'react';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
-import { formatBytes } from '../../utils/format-numbers';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { formatBytes } from 'firefox-profiler/utils/format-numbers';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getCounterSelectors,
   getProfileInterval,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
-import Tooltip from '../tooltip/Tooltip';
-import EmptyThreadIndicator from './EmptyThreadIndicator';
-import bisection from 'bisection';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
+import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 
 import type {
   CounterIndex,
   Counter,
   Thread,
   ThreadIndex,
-} from '../../types/profile';
-import type { AccumulatedCounterSamples } from '../../types/profile-derived';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
-import type { SizeProps } from '../shared/WithSize';
-import type { ConnectedProps } from '../../utils/connect';
+  AccumulatedCounterSamples,
+  Milliseconds,
+  CssPixels,
+  StartEndRange,
+} from 'firefox-profiler/types';
+
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackMemory.css';
 
@@ -78,6 +81,9 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     const deviceLineWidth = lineWidth * devicePixelRatio;
     const deviceLineHalfWidth = deviceLineWidth * 0.5;
     const innerDeviceHeight = deviceHeight - deviceLineWidth;
+    const rangeLength = rangeEnd - rangeStart;
+    const millisecondWidth = deviceWidth / rangeLength;
+    const intervalWidth = interval * millisecondWidth;
 
     // Resize and clear the canvas.
     canvas.width = Math.round(deviceWidth);
@@ -109,7 +115,15 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
 
     {
       // Draw the chart.
-      const rangeLength = rangeEnd - rangeStart;
+      //
+      //                 ...--`
+      //  1 ...---```..--      `--. 2
+      //    |_____________________|
+      //  4                        3
+      //
+      // Start by drawing from 1 - 2. This will be the top of all the peaks of the
+      // memory graph.
+
       ctx.lineWidth = deviceLineWidth;
       ctx.strokeStyle = ORANGE_50;
       ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
@@ -118,10 +132,11 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // The x and y are used after the loop.
       let x = 0;
       let y = 0;
+      let firstX = 0;
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = (deviceWidth * (samples.time[i] - rangeStart)) / rangeLength;
+        x = (samples.time[i] - rangeStart) * millisecondWidth;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
@@ -130,7 +145,10 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
           innerDeviceHeight * unitGraphCount +
           deviceLineHalfWidth;
         if (i === 0) {
-          // This is the first iteration, only move the line.
+          // This is the first iteration, only move the line, do not draw it. Also
+          // remember this first X, as the bottom of the graph will need to connect
+          // back up to it.
+          firstX = x;
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
@@ -138,18 +156,22 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       }
       // The samples range ends at the time of the last sample, plus the interval.
       // Draw this last bit.
-      ctx.lineTo(x + interval, y);
+      ctx.lineTo(x + intervalWidth, y);
 
-      // Don't do the fill yet, just stroke the top line.
+      // Don't do the fill yet, just stroke the top line. This will draw a line from
+      // point 1 to 2 in the diagram above.
       ctx.stroke();
 
       // After doing the stroke, continue the path to complete the fill to the bottom
-      // of the canvas.
-      ctx.lineTo(x + interval, deviceHeight);
-      ctx.lineTo(
-        (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
-        deviceHeight
-      );
+      // of the canvas. This continues the path to point 3 and then 4.
+
+      // Create a line from 2 to 3.
+      ctx.lineTo(x + intervalWidth, deviceHeight);
+
+      // Create a line from 3 to 4.
+      ctx.lineTo(firstX, deviceHeight);
+
+      // The line from 4 to 1 will be implicitly filled in.
       ctx.fill();
     }
   }
@@ -247,7 +269,23 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
     } else {
-      let hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      // When the mouse pointer hovers between two points, select the point that's closer.
+      let hoveredCounter;
+      const bisectionCounter = bisectionRight(samples.time, timeAtMouse);
+      if (bisectionCounter > 0 && bisectionCounter < samples.time.length) {
+        const leftDistance = timeAtMouse - samples.time[bisectionCounter - 1];
+        const rightDistance = samples.time[bisectionCounter] - timeAtMouse;
+        if (leftDistance < rightDistance) {
+          // Left point is closer
+          hoveredCounter = bisectionCounter - 1;
+        } else {
+          // Right point is closer
+          hoveredCounter = bisectionCounter;
+        }
+      } else {
+        hoveredCounter = bisectionCounter;
+      }
+
       if (hoveredCounter === samples.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the

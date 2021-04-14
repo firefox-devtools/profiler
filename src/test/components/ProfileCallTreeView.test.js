@@ -5,20 +5,25 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
-import fakeIndexedDB from 'fake-indexeddb';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
-import { processProfile } from '../../profile-logic/process-profile';
+import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
+import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, createSelectChanger } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  createSelectChanger,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
@@ -39,24 +44,15 @@ import {
   addTransformToStack,
 } from '../../actions/profile-view';
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
+autoMockCanvasContext();
 beforeEach(() => {
-  // Mock out the 2d canvas for the loupe view.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
   // This makes the bounding box large enough so that we don't trigger
   // VirtualList's virtualization. We assert this above.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(1000, 2000));
-
-  window.indexedDB = fakeIndexedDB;
-});
-
-afterEach(() => {
-  delete window.indexedDB;
 });
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -76,7 +72,7 @@ describe('calltree/ProfileCallTreeView', function() {
       <Provider store={store}>
         <>
           <CallNodeContextMenu />
-          <ProfileCallTreeView hideThreadActivityGraph={true} />
+          <ProfileCallTreeView />
         </>
       </Provider>
     );
@@ -93,27 +89,11 @@ describe('calltree/ProfileCallTreeView', function() {
         `Couldn't find the context menu.`
       );
 
-    // Because different components listen to different events, we trigger all
-    // the right events as part of click and rightClick actions.
-    const click = (element: HTMLElement) => {
-      fireEvent.mouseDown(element);
-      fireEvent.mouseUp(element);
-      fireEvent.click(element);
-    };
-
-    const rightClick = (element: HTMLElement) => {
-      fireEvent.mouseDown(element, { button: 2, buttons: 2 });
-      fireEvent.mouseUp(element, { button: 2, buttons: 2 });
-      fireEvent.contextMenu(element);
-    };
-
     return {
       ...store,
       ...renderResult,
       getRowElement,
       getContextMenu,
-      click,
-      rightClick,
     };
   }
 
@@ -140,7 +120,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -179,17 +159,17 @@ describe('calltree/ProfileCallTreeView', function() {
     const treeBody = ensureExists(
       container.querySelector('.treeViewBodyInner1')
     );
-    const treeBodyWidth = parseInt(treeBody.style.width);
+    const treeBodyWidth = parseInt(treeBody.style.minWidth);
     expect(treeBodyWidth).toBeGreaterThan(3000);
   });
 
   it('selects a node when left clicking', () => {
-    const { getByText, getRowElement, click } = setup();
+    const { getByText, getRowElement } = setup();
 
-    click(getByText('A'));
+    fireFullClick(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isSelected');
 
-    click(getByText('B'));
+    fireFullClick(getByText('B'));
     expect(getRowElement('A')).not.toHaveClass('isSelected');
     expect(getRowElement('B')).toHaveClass('isSelected');
   });
@@ -198,17 +178,17 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { getContextMenu, getByText, getRowElement, rightClick } = setup();
+    const { getContextMenu, getByText, getRowElement } = setup();
 
     function checkMenuIsDisplayedForNode(str) {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
-      fireEvent.click(getByText('Copy function name'));
+      fireFullClick(getByText('Copy function name'));
       expect(copy).toHaveBeenLastCalledWith(str);
     }
 
-    rightClick(getByText('A'));
+    fireFullContextMenu(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('A');
 
@@ -216,8 +196,8 @@ describe('calltree/ProfileCallTreeView', function() {
     jest.runAllTimers();
 
     // Now try it again by right clicking 2 nodes in sequence.
-    rightClick(getByText('A'));
-    rightClick(getByText('C'));
+    fireFullContextMenu(getByText('A'));
+    fireFullContextMenu(getByText('C'));
     expect(getRowElement('C')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('C');
 
@@ -226,8 +206,8 @@ describe('calltree/ProfileCallTreeView', function() {
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
-    rightClick(getByText('A'));
-    rightClick(getByText('C'));
+    fireFullContextMenu(getByText('A'));
+    fireFullContextMenu(getByText('C'));
     jest.runAllTimers();
     expect(getRowElement('C')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('C');
@@ -237,11 +217,11 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { getContextMenu, getByText, click, rightClick, container } = setup();
-    rightClick(getByText('A'));
+    const { getContextMenu, getByText, container } = setup();
+    fireFullContextMenu(getByText('A'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-    click(getByText('C'));
+    fireFullClick(getByText('C'));
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
     jest.runAllTimers();
@@ -252,13 +232,13 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { getByText, getRowElement, click, rightClick } = setup();
+    const { getByText, getRowElement } = setup();
 
-    click(getByText('A'));
+    fireFullClick(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isSelected');
     expect(getRowElement('A')).not.toHaveClass('isRightClicked');
 
-    rightClick(getByText('A'));
+    fireFullContextMenu(getByText('A'));
     // Both classes will be set, but our CSS styles `rightClicked` only when
     // `selected` is not present either.
     expect(getRowElement('A')).toHaveClass('isSelected');
@@ -269,15 +249,15 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { getByText, getRowElement, click, rightClick } = setup();
+    const { getByText, getRowElement } = setup();
 
-    rightClick(getByText('A'));
+    fireFullContextMenu(getByText('A'));
     expect(getRowElement('A')).not.toHaveClass('isSelected');
     expect(getRowElement('A')).toHaveClass('isRightClicked');
 
     // When the node is highlighted from a right click, left clicking it will
     // chnage its highlight style.
-    click(getByText('A'));
+    fireFullClick(getByText('A'));
     expect(getRowElement('A')).toHaveClass('isSelected');
     expect(getRowElement('A')).toHaveClass('isRightClicked');
 
@@ -322,7 +302,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   function renderWithStore(store) {
     return render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     ).container.firstChild;
   }
@@ -356,7 +336,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const store = storeWithProfile(profile);
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -473,7 +453,7 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     expect(
@@ -487,12 +467,18 @@ describe('ProfileCallTreeView/end-to-end', () => {
   // requiring one.
   // eslint-disable-next-line jest/expect-expect
   it('can display a gecko profile without crashing', () => {
+    // We use the fake indexeddb in this test because the symbolication kicks
+    // in. The fake indexeddb relies on setImmediate to run events. That's why
+    // we use useFakeTimers so that pending event handlers are canceled when the
+    // test runs and we don't get spurious messages.
+    jest.useFakeTimers();
+
     const geckoProfile = createGeckoProfile();
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const store = storeWithProfile(processedProfile);
     render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
   });
@@ -504,7 +490,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);
@@ -537,14 +523,14 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('matches the snapshot for JS allocations', function() {
@@ -560,7 +546,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);
@@ -594,14 +580,14 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
     // After changing to native allocations, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('does not have the retained memory option', function() {
@@ -628,7 +614,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);
@@ -662,14 +648,14 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
     // After changing to retained allocations, they do.
-    getByText('Total Size (bytes)');
-    getByText('Self (bytes)');
+    expect(getByText('Total Size (bytes)')).toBeTruthy();
+    expect(getByText('Self (bytes)')).toBeTruthy();
   });
 
   it('matches the snapshot for retained allocations', function() {

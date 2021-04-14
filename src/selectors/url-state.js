@@ -5,34 +5,50 @@
 // @flow
 import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, getFirstItemFromSet } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
+import { getThreadsKey } from '../profile-logic/profile-data';
+import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
 
-import type { ThreadIndex, Pid } from '../types/profile';
-import type { TransformStack } from '../types/transforms';
 import type {
+  ThreadIndex,
+  Pid,
+  TransformStack,
   Action,
   TimelineType,
   DataSource,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../types/actions';
+  UrlState,
+  TimelineTrackOrganization,
+  Selector,
+  DangerousSelectorWithArguments,
+  StartEndRange,
+  TrackIndex,
+  ThreadsKey,
+  ProfileSpecificUrlState,
+  FullProfileSpecificUrlState,
+  ActiveTabSpecificProfileUrlState,
+} from 'firefox-profiler/types';
+
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState } from '../types/state';
-import type { Selector, DangerousSelectorWithArguments } from '../types/store';
-import type { StartEndRange } from '../types/units';
-import type { TrackIndex } from '../types/profile-derived';
 
 import urlStateReducer from '../reducers/url-state';
+import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
 
 /**
  * Various simple selectors into the UrlState.
  */
 export const getUrlState: Selector<UrlState> = (state): UrlState =>
   state.urlState;
-export const getProfileSpecificState: Selector<*> = state =>
+export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = state =>
   getUrlState(state).profileSpecific;
+export const getFullProfileSpecificState: Selector<FullProfileSpecificUrlState> = state =>
+  getProfileSpecificState(state).full;
+export const getActiveTabProfileSpecificState: Selector<ActiveTabSpecificProfileUrlState> = state =>
+  getProfileSpecificState(state).activeTab;
+
 export const getDataSource: Selector<DataSource> = state =>
   getUrlState(state).dataSource;
 export const getHash: Selector<string> = state => getUrlState(state).hash;
@@ -40,7 +56,7 @@ export const getProfileUrl: Selector<string> = state =>
   getUrlState(state).profileUrl;
 export const getProfilesToCompare: Selector<string[] | null> = state =>
   getUrlState(state).profilesToCompare;
-export const getProfileNameFromUrl: Selector<string> = state =>
+export const getProfileNameFromUrl: Selector<string | null> = state =>
   getUrlState(state).profileName;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
@@ -53,7 +69,15 @@ export const getInvertCallstack: Selector<boolean> = state =>
 export const getShowUserTimings: Selector<boolean> = state =>
   getProfileSpecificState(state).showUserTimings;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
-  getProfileSpecificState(state).showJsTracerSummary;
+  getFullProfileSpecificState(state).showJsTracerSummary;
+export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>
+  getUrlState(state).timelineTrackOrganization;
+
+/**
+ * Active tab specific url state selectors
+ */
+export const getIsActiveTabResourcesPanelOpen: Selector<boolean> = state =>
+  getActiveTabProfileSpecificState(state).isResourcesPanelOpen;
 
 /**
  * Raw search strings, before any splitting has been performed.
@@ -67,33 +91,44 @@ export const getNetworkSearchString: Selector<string> = state =>
 
 export const getSelectedTab: Selector<TabSlug> = state =>
   getUrlState(state).selectedTab;
-export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>
-  getProfileSpecificState(state).selectedThread;
-export const getSelectedThreadIndex: Selector<ThreadIndex> = state =>
+export const getSelectedThreadIndexesOrNull: Selector<Set<ThreadIndex> | null> = state =>
+  getProfileSpecificState(state).selectedThreads;
+export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = state =>
   ensureExists(
-    getSelectedThreadIndexOrNull(state),
+    getSelectedThreadIndexesOrNull(state),
     'Attempted to get a thread index before a profile was loaded.'
   );
+export const getSelectedThreadsKey: Selector<ThreadsKey> = state =>
+  getThreadsKey(getSelectedThreadIndexes(state));
+
+/**
+ * This selector is temporary for a migration to multiple selected thread indexes.
+ */
+export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
+  ensureExists(
+    getFirstItemFromSet(getSelectedThreadIndexes(state)),
+    'Expected to find at least one thread index in the selected thread indexes'
+  );
 export const getTimelineType: Selector<TimelineType> = state =>
-  getProfileSpecificState(state).timelineType;
+  getFullProfileSpecificState(state).timelineType;
 
 /**
  * Simple selectors for tracks and track order.
  */
 export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = state =>
-  getProfileSpecificState(state).legacyThreadOrder;
+  getFullProfileSpecificState(state).legacyThreadOrder;
 export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = state =>
-  getProfileSpecificState(state).legacyHiddenThreads;
+  getFullProfileSpecificState(state).legacyHiddenThreads;
 export const getGlobalTrackOrder: Selector<TrackIndex[]> = state =>
-  getProfileSpecificState(state).globalTrackOrder;
+  getFullProfileSpecificState(state).globalTrackOrder;
 export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = state =>
-  getProfileSpecificState(state).hiddenGlobalTracks;
+  getFullProfileSpecificState(state).hiddenGlobalTracks;
 export const getHiddenLocalTracksByPid: Selector<
   Map<Pid, Set<TrackIndex>>
-> = state => getProfileSpecificState(state).hiddenLocalTracksByPid;
+> = state => getFullProfileSpecificState(state).hiddenLocalTracksByPid;
 export const getLocalTrackOrderByPid: Selector<
   Map<Pid, TrackIndex[]>
-> = state => getProfileSpecificState(state).localTrackOrderByPid;
+> = state => getFullProfileSpecificState(state).localTrackOrderByPid;
 
 /**
  * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures
@@ -163,17 +198,11 @@ export const getSearchStrings: Selector<string[] | null> = createSelector(
 
 export const getMarkersSearchStrings: Selector<
   string[] | null
-> = createSelector(
-  getMarkersSearchString,
-  splitSearchString
-);
+> = createSelector(getMarkersSearchString, splitSearchString);
 
 export const getNetworkSearchStrings: Selector<
   string[] | null
-> = createSelector(
-  getNetworkSearchString,
-  splitSearchString
-);
+> = createSelector(getNetworkSearchString, splitSearchString);
 
 /**
  * A RegExp can be used for searching and filtering the thread's samples.
@@ -198,10 +227,10 @@ const EMPTY_TRANSFORM_STACK = [];
 
 export const getTransformStack: DangerousSelectorWithArguments<
   TransformStack,
-  ThreadIndex
-> = (state, threadIndex) => {
+  ThreadsKey
+> = (state, threadsKey) => {
   return (
-    getProfileSpecificState(state).transforms[threadIndex] ||
+    getProfileSpecificState(state).transforms[threadsKey] ||
     EMPTY_TRANSFORM_STACK
   );
 };
@@ -230,21 +259,76 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
   getUrlState(state).pathInZipFile;
 
 /**
- * For now only provide a name for a profile if it came from a zip file.
+ * Get a short formatted string that represents the meta info of the current profile.
  */
-export const getProfileName: Selector<null | string> = createSelector(
-  getProfileNameFromUrl,
+export const getFormattedMetaInfoString: Selector<string | null> = state => {
+  // Avoid circular dependencies by selected the profile meta manually.
+  const { profile } = state.profileView;
+  if (!profile) {
+    return null;
+  }
+
+  return formatMetaInfoString(profile.meta);
+};
+
+/**
+ * Get just the file name from the zip file path, if it exists.
+ */
+export const getFileNameInZipFilePath: Selector<string | null> = createSelector(
   getPathInZipFileFromUrl,
-  (profileName, pathInZipFile) => {
-    if (profileName) {
-      return profileName;
-    }
+  pathInZipFile => {
     if (pathInZipFile) {
-      const matchResult = pathInZipFile.match(/(?:[^/]+\/)?[^/]+$/);
-      if (matchResult !== null) {
-        return matchResult[0];
-      }
+      return getProfileNameFromZipPath(pathInZipFile);
     }
+    return null;
+  }
+);
+
+/**
+ * Get a profile name that can be used as a short identifier for the profile. This
+ * will be displayed in the UI, and will be used as a default for a profile name
+ * if none is currently set. If none is set, then a series of strategies will be
+ * used to select a default one.
+ */
+export const getProfileNameWithDefault: Selector<string> = createSelector(
+  getProfileNameFromUrl,
+  getFileNameInZipFilePath,
+  getFormattedMetaInfoString,
+  (profileNameFromUrl, fileNameInZipFilePath, formattedMetaInfoString) => {
+    // Always prefer a manually set name.
+    if (profileNameFromUrl) {
+      return profileNameFromUrl;
+    }
+    // Next, try and use a path from the zip file.
+    if (fileNameInZipFilePath) {
+      return fileNameInZipFilePath;
+    }
+
+    // Finally return a generic string describing the type of profile.
+    if (!formattedMetaInfoString) {
+      return 'Untitled profile';
+    }
+    return formattedMetaInfoString;
+  }
+);
+
+/**
+ * Determines the profile name used to store in the IndexedDB by default.
+ */
+export const getProfileNameForStorage: Selector<string> = createSelector(
+  getProfileNameFromUrl,
+  getFileNameInZipFilePath,
+  (profileNameFromUrl, fileNameInZipFilePath) => {
+    // Always prefer a manually set name.
+    if (profileNameFromUrl) {
+      return profileNameFromUrl;
+    }
+    // Next, try and use a path from the zip file.
+    if (fileNameInZipFilePath) {
+      return fileNameInZipFilePath;
+    }
+
+    // Finally, return a blank string.
     return '';
   }
 );

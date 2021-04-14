@@ -18,10 +18,10 @@ import {
   type TestDefinedJsTracerEvent,
 } from '../fixtures/profiles/processed-profile';
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
 describe('jsTracerFixed', function() {
-  function fixTiming(events: *) {
+  function fixTiming(events: TestDefinedJsTracerEvent[]) {
     const profile = getProfileWithJsTracerEvents(events);
     const jsTracer = ensureExists(profile.threads[0].jsTracer);
     const jsTracerFixed = getJsTracerFixed(jsTracer);
@@ -30,6 +30,7 @@ describe('jsTracerFixed', function() {
       end: jsTracerFixed.end,
     };
   }
+
   it('does not modify a valid structure', function() {
     const timing = fixTiming([
       // [mozilla                  ]
@@ -119,7 +120,10 @@ describe('convertJsTracerToThread', function() {
       ['IonMonkey', 6, 18],
     ]);
     const existingThread = existingProfile.threads[0];
-    const categories = existingProfile.meta.categories;
+    const categories = ensureExists(
+      existingProfile.meta.categories,
+      'Expected to find categories.'
+    );
 
     const profile = getEmptyProfile();
     const jsTracer = ensureExists(existingThread.jsTracer);
@@ -151,7 +155,10 @@ describe('convertJsTracerToThread', function() {
       ['FuncB', 6, 18],
     ]);
     const existingThread = existingProfile.threads[0];
-    const categories = existingProfile.meta.categories;
+    const categories = ensureExists(
+      existingProfile.meta.categories,
+      'Expected to find categories'
+    );
     const jsTracer = ensureExists(existingThread.jsTracer);
     const thread = convertJsTracerToThread(
       existingThread,

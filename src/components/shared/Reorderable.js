@@ -5,14 +5,14 @@
 // @flow
 
 import * as React from 'react';
-import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
 import {
   getContentRect,
   getMarginRect,
   extractDomRectValue,
-} from '../../utils/css-geometry-tools';
+} from 'firefox-profiler/utils/css-geometry-tools';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
@@ -48,7 +48,7 @@ type XY = {|
 
 type EventWithPageProperties = { pageX: number, pageY: number };
 
-class Reorderable extends React.PureComponent<Props, State> {
+export class Reorderable extends React.PureComponent<Props, State> {
   _xy: {| horizontal: XY, vertical: XY |} = {
     horizontal: {
       pageXY: 'pageX',
@@ -204,7 +204,7 @@ class Reorderable extends React.PureComponent<Props, State> {
       );
       this.setState({
         manipulationDelta: delta,
-        destinationIndex: bisection.right(midPoints, delta),
+        destinationIndex: bisectionRight(midPoints, delta),
       });
     };
     const mouseUpListener = (event: EventWithPageProperties) => {
@@ -277,13 +277,9 @@ class Reorderable extends React.PureComponent<Props, State> {
             style.zIndex = '2';
             if (phase === 'MANIPULATING') {
               delete style.transition;
-              style.transform = `${xy.translateXY}(${
-                this.state.manipulationDelta
-              }px)`;
+              style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
             } else {
-              style.transform = `${xy.translateXY}(${
-                this.state.finalOffset
-              }px)`;
+              style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
             }
           } else if (
             childIndex < manipulatingIndex &&
@@ -304,5 +300,3 @@ class Reorderable extends React.PureComponent<Props, State> {
     );
   }
 }
-
-export default Reorderable;

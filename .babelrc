@@ -1,32 +1,55 @@
 {
-  presets: [
-    "@babel/preset-env",
-    "@babel/preset-react",
-    // The "all" property is needed for Flow to properly parse the syntax. It has
-    // trouble understanding when the flow comment is the second comment.
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        // Allow `@babel/preset-env` to import polyfills from core-js as needed.
+        "useBuiltIns": "usage",
+        // Help `@babel/preset-env` make use of the correct core-js polyfills.
+        "corejs": "3.9",
+        // Perform transforms closest to targets defined in `.browserslistrc`.
+        "bugfixes": true
+      }
+    ],
+    [
+      "@babel/preset-react",
+      {
+        // When spreading props, use inline object with spread elements
+        // directly instead of Babel's `extend` helper or `Object.assign`.
+        "useSpread": true
+      }
+    ],
+    // The "all" property is needed for Flow to properly parse the syntax.
+    // It has trouble understanding when the flow comment is the second comment.
     // See: https://github.com/babel/babel/issues/9845
-    ["@babel/preset-flow", { all: true }]
+    [
+      "@babel/preset-flow",
+      {
+        "all": true
+      }
+    ]
   ],
-  plugins: [
-    // Without `loose`, the transformation uses `Object.defineProperty` which
-    // obeys the spec more, but we get a bundle that's 8kB larger. That was the
-    // default in babel v6.
-    ["@babel/plugin-proposal-class-properties", { loose: true }],
-    ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
-    "syntax-dynamic-import"
-  ],
-  env: {
-    test: {
-      presets: [
-        "@babel/preset-env",
-        "@babel/preset-react",
-        ["@babel/preset-flow", { all: true }]
-      ],
-      plugins: [
-        ["@babel/plugin-proposal-class-properties", { loose: true }],
-        ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
-        "dynamic-import-node"
-      ],
-    }
-  }
+  "plugins": [
+    // Though `@babel/plugin-proposal-class-properties` is already included
+    // in `@babel/preset-env`, we include it specifically to be able to set
+    // `loose` mode on it, without enabling it for all the plugins included
+    // in `@babel/preset-env`.
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        // Without `loose`, the transformation uses `Object.defineProperty` which
+        // obeys the spec more, but we get a bundle that's 8kB larger. That was the
+        // default in babel v6.
+        "loose": true
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "firefox-profiler": "./src"
+        }
+      }
+    ]
+  ]
 }

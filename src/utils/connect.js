@@ -3,9 +3,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+// Ignore for this file, which uses extensive use of generic type bounds, which
+// triggers a false positive with this rule.
+/* eslint-disable flowtype/no-weak-types */
+
+// At this time, it's not worth migrating away from this existential type. It's
+// probably possible to move to using the built-in react-redux types.
+/* eslint-disable flowtype/no-existential-type */
+
 import * as React from 'react';
 import { connect } from 'react-redux';
-import type { Dispatch, State, ThunkAction, Action } from '../types/store';
+import type {
+  Dispatch,
+  State,
+  ThunkAction,
+  Action,
+} from 'firefox-profiler/types';
 
 type MapStateToProps<OwnProps: Object, StateProps: Object> = (
   state: State,
@@ -34,7 +47,7 @@ type ConnectOptions = {
   areStatePropsEqual?: boolean,
   areMergedPropsEqual?: boolean,
   storeKey?: boolean,
-  withRef?: boolean,
+  forwardRef?: boolean,
 };
 
 /**

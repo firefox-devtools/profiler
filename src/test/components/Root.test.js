@@ -19,23 +19,36 @@ jest.mock('../../actions/receive-profile', () => ({
 // We mock <ProfileViewer> because it's complex and we should really test it
 // elsewhere. Using a custom name makes it possible to test that  _this_
 // component is used.
-jest.mock('../../components/app/ProfileViewer', () => 'profile-viewer');
+jest.mock('../../components/app/ProfileViewer', () => ({
+  ProfileViewer: 'profile-viewer',
+}));
 // We mock <Home> as well because it brings too much noise in snapshots and it's
 // overly tested in another test file.
-jest.mock('../../components/app/Home', () => 'home');
-jest.mock('../../components/app/CompareHome', () => 'compare-home');
+jest.mock('../../components/app/Home', () => ({
+  Home: 'home',
+}));
+jest.mock('../../components/app/CompareHome', () => ({
+  CompareHome: 'compare-home',
+}));
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { AppViewRouter } from '../../components/app/AppViewRouter';
 import { ProfileLoader } from '../../components/app/ProfileLoader';
 import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
+import { fatalError } from '../../actions/errors';
+
 // Because this module is mocked but we want the real actions in the test, we
 // use `jest.requireActual` here.
 const {
-  fatalError,
   temporaryError,
   viewProfile,
   waitingForProfileFromAddon,
@@ -149,6 +162,12 @@ describe('app/AppViewRouter', function() {
     expect(container.querySelector('.loading')).toBeTruthy();
     expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
   });
+
+  it('renders a uploaded-recordings page when navigating to /uploaded-recordings', () => {
+    const { container, navigateToMyProfiles } = setup();
+    navigateToMyProfiles();
+    expect(container.querySelector('list-of-published-profiles')).toBeTruthy();
+  });
 });
 
 function setup() {
@@ -205,6 +224,15 @@ function setup() {
     store.dispatch(updateUrlState(newUrlState));
   }
 
+  function navigateToMyProfiles() {
+    const newUrlState = stateFromLocation({
+      pathname: '/uploaded-recordings/',
+      hash: '',
+      search: '',
+    });
+    store.dispatch(updateUrlState(newUrlState));
+  }
+
   return {
     ...renderResult,
     dispatch: store.dispatch,
@@ -212,5 +240,6 @@ function setup() {
     navigateToAddonLoadingPage,
     navigateBackToHome,
     navigateToCompareHome,
+    navigateToMyProfiles,
   };
 }

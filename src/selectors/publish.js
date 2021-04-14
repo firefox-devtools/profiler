@@ -4,6 +4,8 @@
 
 // @flow
 import { createSelector } from 'reselect';
+import clamp from 'clamp';
+
 import {
   getProfile,
   getProfileRootRange,
@@ -11,6 +13,7 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
+  getThreads,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -20,19 +23,21 @@ import {
   type SanitizeProfileResult,
 } from '../profile-logic/sanitize';
 import prettyBytes from '../utils/pretty-bytes';
-import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
+import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
 import type {
   PublishState,
   UploadState,
   UploadPhase,
   State,
-} from '../types/state';
-import type { Selector } from '../types/store';
-import type { CheckedSharingOptions } from '../types/actions';
-import type { RemoveProfileInformation } from '../types/profile-derived';
+  Selector,
+  CheckedSharingOptions,
+  RemoveProfileInformation,
+  DerivedMarkerInfo,
+} from 'firefox-profiler/types';
+import { getThreadSelectors } from './per-thread';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
 
@@ -155,12 +160,33 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 );
 
 /**
+ * The derived markers are needed for profile sanitization, but they are also
+ * needed for each thread. This means that we can't use the createSelector
+ * mechanism to properly memoize the component. We need access to the full state
+ * and to the individual threads. This function therefore implements some simple
+ * memoization behavior on the current list of threads.
+ */
+let _threads = null;
+let _derivedMarkerInfo = null;
+function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
+  const threads = getThreads(state);
+  if (_threads !== threads || _derivedMarkerInfo === null) {
+    _threads = threads;
+    _derivedMarkerInfo = getThreads(state).map((_, threadIndex) =>
+      getThreadSelectors(threadIndex).getDerivedMarkerInfo(state)
+    );
+  }
+  return _derivedMarkerInfo;
+}
+
+/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
  */
 export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelector(
   getProfile,
+  getDerivedMarkerInfoForAllThreads,
   getRemoveProfileInformation,
   sanitizePII
 );
@@ -176,9 +202,8 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
  */
 export const getSanitizedProfileData: Selector<
   Promise<Uint8Array>
-> = createSelector(
-  getSanitizedProfile,
-  ({ profile }) => compress(serializeProfile(profile))
+> = createSelector(getSanitizedProfile, ({ profile }) =>
+  compress(serializeProfile(profile))
 );
 
 /**
@@ -190,9 +215,10 @@ export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getCompressedProfileBlob,
-  blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
+export const getDownloadSize: Selector<
+  Promise<string>
+> = createSelector(getCompressedProfileBlob, blobPromise =>
+  blobPromise.then(blob => prettyBytes(blob.size))
 );
 
 export const getUploadState: Selector<UploadState> = state =>
@@ -204,23 +230,22 @@ export const getUploadPhase: Selector<UploadPhase> = state =>
 export const getUploadGeneration: Selector<number> = state =>
   getUploadState(state).generation;
 
-export const getUploadProgress: Selector<number> = state =>
-  getUploadState(state).uploadProgress;
+export const getUploadProgress: Selector<number> = createSelector(
+  getUploadState,
+  ({ uploadProgress }) =>
+    // Create a minimum value of 0.1 so that there is at least some user feedback
+    // that the upload started, and a maximum value of 0.95 so that the user
+    // doesn't wait with a full bar (there's still some work to do after the
+    // uplod succeeds).
+    clamp(uploadProgress, 0.1, 0.95)
+);
 
 export const getUploadError: Selector<Error | mixed> = state =>
   getUploadState(state).error;
 
 export const getUploadProgressString: Selector<string> = createSelector(
   getUploadProgress,
-  progress =>
-    formatNumber(
-      // Create a minimum value of 0.1 so that there is at least some user feedback
-      // that the upload started.
-      Math.max(progress, 0.1),
-      0,
-      0,
-      'percent'
-    )
+  progress => formatNumber(progress, 0, 0, 'percent')
 );
 
 export const getAbortFunction: Selector<() => void> = state =>

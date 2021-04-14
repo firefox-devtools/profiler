@@ -3,14 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import StackSettings from '../../components/shared/StackSettings';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { StackSettings } from '../../components/shared/StackSettings';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getImplementationFilter,
   getCurrentSearchString,
 } from '../../selectors/url-state';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('StackSettings', function() {
   function setup() {
@@ -46,7 +49,7 @@ describe('StackSettings', function() {
     expect(getImplementationFilter(getState())).toEqual('combined');
     const radioButton = getByLabelText(/JavaScript/);
 
-    radioButton.click();
+    fireFullClick(radioButton);
 
     expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('js');
@@ -57,7 +60,7 @@ describe('StackSettings', function() {
     expect(getImplementationFilter(getState())).toEqual('combined');
     const radioButton = getByLabelText(/Native/);
 
-    radioButton.click();
+    fireFullClick(radioButton);
 
     expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('cpp');
@@ -65,11 +68,11 @@ describe('StackSettings', function() {
 
   it('can change the implementation filter to All stacks', function() {
     const { getByLabelText, getState } = setup();
-    getByLabelText(/Native/).click();
+    fireFullClick(getByLabelText(/Native/));
     expect(getImplementationFilter(getState())).toEqual('cpp');
     const radioButton = getByLabelText(/All stacks/);
 
-    radioButton.click();
+    fireFullClick(radioButton);
 
     expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('combined');

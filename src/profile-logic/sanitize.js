@@ -13,12 +13,19 @@ import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
   removePrefMarkerPreferenceValues,
+  sanitizeFileIOMarkerFilenamePath,
   filterRawMarkerTableToRangeWithMarkersToDelete,
+  sanitizeTextMarker,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
-import type { Profile, Thread, ThreadIndex } from '../types/profile';
-import type { RemoveProfileInformation } from '../types/profile-derived';
-import type { StartEndRange } from '../types/units';
+import type {
+  Profile,
+  Thread,
+  ThreadIndex,
+  RemoveProfileInformation,
+  StartEndRange,
+  DerivedMarkerInfo,
+} from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {|
   +profile: Profile,
@@ -34,6 +41,7 @@ export type SanitizeProfileResult = {|
  */
 export function sanitizePII(
   profile: Profile,
+  derivedMarkerInfoForAllThreads: DerivedMarkerInfo[],
   maybePIIToBeRemoved: RemoveProfileInformation | null
 ): SanitizeProfileResult {
   if (maybePIIToBeRemoved === null) {
@@ -48,15 +56,14 @@ export function sanitizePII(
   // Flow mistakenly thinks that PIIToBeRemoved could be null in the reduce functions
   // below, so instead re-bind it here.
   const PIIToBeRemoved = maybePIIToBeRemoved;
-  let urlCounter = 0;
   const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> = new Map();
 
   let pages;
   if (profile.pages) {
     if (PIIToBeRemoved.shouldRemoveUrls) {
-      pages = profile.pages.map(page =>
+      pages = profile.pages.map((page, pageIndex) =>
         Object.assign({}, page, {
-          url: 'Page #' + urlCounter++,
+          url: removeURLs(page.url, true, `<Page #${pageIndex}>`),
         })
       );
     } else {
@@ -78,6 +85,7 @@ export function sanitizePII(
     threads: profile.threads.reduce((acc, thread, threadIndex) => {
       const newThread: Thread | null = sanitizeThreadPII(
         thread,
+        derivedMarkerInfoForAllThreads[threadIndex],
         threadIndex,
         PIIToBeRemoved
       );
@@ -169,6 +177,7 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
  */
 function sanitizeThreadPII(
   thread: Thread,
+  derivedMarkerInfo: DerivedMarkerInfo,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation
 ): Thread | null {
@@ -222,6 +231,27 @@ function sanitizeThreadPII(
         stringArray[stringIndex] = stringArray[stringIndex].replace(/:.*/, '');
       }
 
+      // Remove the all OS paths from FileIO markers if user wants to remove them.
+      if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'FileIO'
+      ) {
+        // Remove the filename path from marker payload.
+        markerTable.data[i] = sanitizeFileIOMarkerFilenamePath(currentMarker);
+      }
+
+      if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'Text'
+      ) {
+        // Sanitize all the name fields of text markers in case they contain URLs.
+        markerTable.data[i] = sanitizeTextMarker(currentMarker);
+      }
+
       // Remove the screenshots if the current thread index is in the
       // threadsWithScreenshots array
       if (
@@ -252,6 +282,7 @@ function sanitizeThreadPII(
     // Filter marker table with given range and marker indexes array.
     markerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
       markerTable,
+      derivedMarkerInfo,
       markersToDelete,
       PIIToBeRemoved.shouldFilterToCommittedRange
     ).rawMarkerTable;

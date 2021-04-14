@@ -64,7 +64,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -77,7 +77,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>
@@ -196,7 +196,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -221,7 +221,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -246,7 +246,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -276,7 +276,7 @@ Array [
   Array [
     "fillRect",
     150,
-    48,
+    64,
     199.4,
     15,
   ],
@@ -292,7 +292,7 @@ Array [
     "fillText",
     "A",
     153,
-    59,
+    75,
   ],
   Array [
     "set fillStyle",
@@ -301,7 +301,7 @@ Array [
   Array [
     "fillRect",
     150,
-    64,
+    80,
     199.4,
     15,
   ],
@@ -317,7 +317,7 @@ Array [
     "fillText",
     "B",
     153,
-    75,
+    91,
   ],
   Array [
     "set fillStyle",
@@ -326,7 +326,7 @@ Array [
   Array [
     "fillRect",
     150,
-    80,
+    96,
     133.4,
     15,
   ],
@@ -342,81 +342,6 @@ Array [
     "fillText",
     "C",
     153,
-    91,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff60",
-  ],
-  Array [
-    "fillRect",
-    284,
-    80,
-    65.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "H",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "H",
-    286.3333333333333,
-    91,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    150,
-    96,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "D",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "D",
-    153,
-    107,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    217,
-    96,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "F",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "F",
-    219.66666666666666,
     107,
   ],
   Array [
@@ -432,7 +357,7 @@ Array [
   ],
   Array [
     "measureText",
-    "I",
+    "H",
   ],
   Array [
     "set fillStyle",
@@ -440,7 +365,7 @@ Array [
   ],
   Array [
     "fillText",
-    "I",
+    "H",
     286.3333333333333,
     107,
   ],
@@ -457,7 +382,7 @@ Array [
   ],
   Array [
     "measureText",
-    "E",
+    "D",
   ],
   Array [
     "set fillStyle",
@@ -465,7 +390,7 @@ Array [
   ],
   Array [
     "fillText",
-    "E",
+    "D",
     153,
     123,
   ],
@@ -482,6 +407,81 @@ Array [
   ],
   Array [
     "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    219.66666666666666,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    284,
+    112,
+    65.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    286.3333333333333,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    128,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    153,
+    139,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    217,
+    128,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
     "G",
   ],
   Array [
@@ -492,7 +492,7 @@ Array [
     "fillText",
     "G",
     219.66666666666666,
-    123,
+    139,
   ],
   Array [
     "set fillStyle",
@@ -579,7 +579,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -592,7 +592,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>
@@ -711,7 +711,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -736,7 +736,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -761,7 +761,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -786,7 +786,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -811,7 +811,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf060",
+    "#ffe90060",
   ],
   Array [
     "fillRect",
@@ -859,10 +859,11 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 200.36363636363637px; top: 54px;"
+  style="--tooltip-detail-max-width: 600px; left: 200.36363636363637px; top: 54px;"
 >
   <div
     class="tooltipMarker"
+    style="--tooltip-detail-max-width: 600px;"
   >
     <div
       class="tooltipHeader"
@@ -873,24 +874,13 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
         <div
           class="tooltipTiming"
         >
-          4.0ms
+          4ms
         </div>
         <div
           class="tooltipTitle"
         >
-          UserTiming
+          componentB
         </div>
-      </div>
-      <div
-        class="tooltipDetails"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Thread
-          :
-        </div>
-        Empty
       </div>
     </div>
     <div
@@ -899,10 +889,39 @@ exports[`MarkerChart shows a tooltip when hovering 1`] = `
       <div
         class="tooltipLabel"
       >
-        Name
+        Marker
         :
       </div>
-      componentB
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Entry Type
+        :
+      </div>
+      measure
+      <div
+        class="tooltipLabel"
+      >
+        Description
+        :
+      </div>
+      <div
+        class="tooltipDetailsDescription"
+      >
+        UserTiming is created using the DOM APIs performance.mark() and performance.measure().
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
     </div>
   </div>
 </div>
@@ -1023,7 +1042,7 @@ exports[`StackChart matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
       <li
@@ -1036,7 +1055,7 @@ exports[`StackChart matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Show user timing
+          Show user timing
         </label>
       </li>
     </ul>

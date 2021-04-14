@@ -1,0 +1,51 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* This implements a confirm dialog using Photon components. 
+ * While not formally part of photon.
+ *
+ * This is how we can use it:
+ *
+ *  <div className="confirmDialog">
+ *    <h3 className="confirmDialogTitle">
+ *      Wonderful title
+ *    </h3>
+ *    <div className="confirmDialogContent">
+ *      Wonderful content
+ *    </div>
+ *    <div className="confirmDialogButtons">
+ *      <input
+ *        type="button"
+ *        className="photon-button photon-button-default"
+ *        value="Cancel"
+ *        onClick={doSomethingOnCancel}
+ *      />
+ *      <input
+ *        type="button"
+ *        className="photon-button photon-button-destructive"
+ *        value="Confirm"
+ *        onClick={doSomethingOnConfirm}
+ *      />
+ *    </div>
+ *  </div>
+ *
+ */
+
+.confirmDialogTitle {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.confirmDialogContent {
+  margin: 16px 0;
+}
+
+.confirmDialogButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.confirmDialogButtons > .photon-button {
+  flex: auto;
+}

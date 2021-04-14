@@ -217,6 +217,7 @@
                   "type": "tracing",
                   "category": "DOMEvent",
                   "interval": "start",
+                  "timeStamp": 7.55,
                   "eventType": "mouseout",
                   "phase": 3,
                   "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
@@ -420,6 +421,7 @@
             { "type": "tracing", "category": "Paint", "interval": "end" }
           ],
           [5, 8, { "type": "tracing", "category": "Paint", "interval": "end" }],
+          [12, 9, { "category": "WebRender", "type": "tracing" }],
           [9, 11, { "endTime": 12, "startTime": 11 }],
           [
             8,
@@ -509,7 +511,8 @@
         "DOMEvent",
         "MinorGC",
         "Rasterize",
-        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/2"
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/2",
+        "TextureCacheFree"
       ],
       "registerTime": 0
     },

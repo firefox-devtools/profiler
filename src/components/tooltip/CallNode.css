@@ -11,7 +11,7 @@
 }
 
 .tooltipCallNodeImplementationHeader {
-  padding-right: 5px;
+  padding: 0 5px;
   border-right: 1px solid var(--grey-30);
   margin-top: 5px;
   color: var(--grey-50);
@@ -47,6 +47,8 @@
 }
 
 .tooltipCallNodeImplementationTiming {
+  padding: 0 5px;
+  text-align: right;
   white-space: nowrap;
 }
 

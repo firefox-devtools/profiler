@@ -23,7 +23,7 @@ uploadprofile /path/to/profile.js
 
 Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from The Firefox Profiler's interface. The profile needs to be served from https, and have the appropriate `Access-Control-Allow-Origin` header set to either `*` or `https://profiler.firefox.com`.
 
-See the function below for an easy utility for converting to the proper URL format. Here is a simple utility function to turn a profile URL into a [profiler.firefox.com](https://profiler.firefox.com) URL to view it:
+Here is a small utility function to turn a profile URL into a [profiler.firefox.com](https://profiler.firefox.com) URL to view it:
 
 ```js
 function getProfilerUrl (profileUrl) {
@@ -92,16 +92,14 @@ server.listen(PORT, err => {
 });
 ```
 
-### Add-on
+### Directly from Firefox
 
 > `https://profiler.firefox.com/from-addon/`
 
-The [Gecko Profiler Addon][Gecko Profiler Addon] injects the profile into the page through a frame script
+Firefox loads the profiles directly into the front-end through a WebChannel mechanism. This is done with the profile menu button, which can be enabled on the homepage of [profiler.firefox.com](https://profiler.firefox.com/)
 
 ### File
 
 > `https://profiler.firefox.com/from-file/`
 
 When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
-
-[Gecko Profiler Addon]: https://github.com/firefox-devtools/Gecko-Profiler-Addon

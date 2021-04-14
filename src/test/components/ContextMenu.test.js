@@ -4,8 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render } from 'react-testing-library';
-import ContextMenu from '../../components/shared/ContextMenu';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { ContextMenu } from '../../components/shared/ContextMenu';
 
 describe('ContextMenu', function() {
   it('correctly renders the context-menu with the props that were passed through', () => {

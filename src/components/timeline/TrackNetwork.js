@@ -5,30 +5,32 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { withSize } from '../shared/WithSize';
-import explicitConnect from '../../utils/connect';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getZeroAt,
   getPageList,
 } from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { VerticalIndicators } from './VerticalIndicators';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
   TRACK_NETWORK_HEIGHT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 
-import type { ThreadIndex, PageList } from '../../types/profile';
 import type {
+  ThreadIndex,
+  PageList,
   Marker,
   MarkerIndex,
   MarkerTiming,
-} from '../../types/profile-derived';
-import type { Milliseconds } from '../../types/units';
-import type { SizeProps } from '../shared/WithSize';
-import type { ConnectedProps } from '../../utils/connect';
+  Milliseconds,
+} from 'firefox-profiler/types';
+
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackNetwork.css';
 
@@ -159,7 +161,11 @@ class Network extends PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TrackNetwork = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);

@@ -3,12 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { Localized } from '@fluent/react';
 import React, { PureComponent } from 'react';
-require('./FooterLinks.css');
+import './FooterLinks.css';
 
 type State = {| hide: boolean |};
 
-class FooterLinks extends PureComponent<{||}, State> {
+export class FooterLinks extends PureComponent<{||}, State> {
   _onClick = () => {
     this.setState({ hide: true });
   };
@@ -38,7 +39,7 @@ class FooterLinks extends PureComponent<{||}, State> {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Legal
+          <Localized id="FooterLinks--legal">Legal</Localized>
         </a>
         <a
           className="appFooterLinksLink"
@@ -46,7 +47,7 @@ class FooterLinks extends PureComponent<{||}, State> {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Privacy
+          <Localized id="FooterLinks--Privacy">Privacy</Localized>
         </a>
         <a
           className="appFooterLinksLink"
@@ -54,11 +55,9 @@ class FooterLinks extends PureComponent<{||}, State> {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Cookies
+          <Localized id="FooterLinks--Cookies">Cookies</Localized>
         </a>
       </div>
     );
   }
 }
-
-export default FooterLinks;

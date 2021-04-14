@@ -6,8 +6,12 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
-import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
+import {
+  tabsWithTitleL10nId,
+  type TabSlug,
+} from 'firefox-profiler/app-logic/tabs-handling';
 
 import './TabBar.css';
 
@@ -19,7 +23,7 @@ type Props = {|
   +extraElements?: React.Node,
 |};
 
-class TabBar extends React.PureComponent<Props> {
+export class TabBar extends React.PureComponent<Props> {
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
   };
@@ -57,22 +61,24 @@ class TabBar extends React.PureComponent<Props> {
             >
               {/* adding a button for better keyboard navigation and
               adding ARIA attributes for screen reader support.*/}
-              <button
-                className="tabBarTabButton"
-                type="button"
-                // The tab's id attribute connects the tab to its tabpanel
-                // that has an aria-labelledby attribute of the same value.
-                // The id is not used for CSS styling.
-                id={`${tabSlug}-tab-button`}
-                role="tab"
-                aria-selected={tabSlug === selectedTabSlug}
-                // The control and content relationship is established
-                // with aria-controls attribute
-                // (the tabbanel has an id of the same value).
-                aria-controls={`${tabSlug}-tab`}
-              >
-                {tabsWithTitle[tabSlug]}
-              </button>
+              <Localized id={tabsWithTitleL10nId[tabSlug]}>
+                <button
+                  className="tabBarTabButton"
+                  type="button"
+                  // The tab's id attribute connects the tab to its tabpanel
+                  // that has an aria-labelledby attribute of the same value.
+                  // The id is not used for CSS styling.
+                  id={`${tabSlug}-tab-button`}
+                  role="tab"
+                  aria-selected={tabSlug === selectedTabSlug}
+                  // The control and content relationship is established
+                  // with aria-controls attribute
+                  // (the tabbanel has an id of the same value).
+                  aria-controls={`${tabSlug}-tab`}
+                >
+                  {tabsWithTitleL10nId[tabSlug]}
+                </button>
+              </Localized>
             </li>
           ))}
         </ol>
@@ -81,5 +87,3 @@ class TabBar extends React.PureComponent<Props> {
     );
   }
 }
-
-export default TabBar;

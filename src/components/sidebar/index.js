@@ -5,14 +5,14 @@
 
 import * as React from 'react';
 
-import CallTreeSidebar from './CallTreeSidebar';
-import MarkerSidebar from './MarkerSidebar';
+import { CallTreeSidebar } from './CallTreeSidebar';
+import { MarkerSidebar } from './MarkerSidebar';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 import './sidebar.css';
 
-export default function selectSidebar(
+export function selectSidebar(
   selectedTab: TabSlug
 ): React.ComponentType<{||}> | null {
   return {

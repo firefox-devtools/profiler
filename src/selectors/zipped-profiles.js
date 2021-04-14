@@ -8,8 +8,12 @@ import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type { ZipFileState, ZippedProfilesState } from '../types/state';
-import type { Selector } from '../types/store';
+import type {
+  ZipFileState,
+  ZippedProfilesState,
+  Selector,
+} from 'firefox-profiler/types';
+
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type JSZip from 'jszip';
 
@@ -83,7 +87,7 @@ export const getZipFileTreeOrNull: Selector<ZipFiles.ZipFileTree | null> = creat
  * Avoid a null check, by throwing an error if trying to use zip a file when it doesn't
  * exist.
  */
-export const getZipFileTree: Selector<*> = state =>
+export const getZipFileTree: Selector<ZipFiles.ZipFileTree> = state =>
   ensureExists(
     getZipFileTreeOrNull(state),
     'Attempted to view a profile from a zip, when there is no zip file loaded.'

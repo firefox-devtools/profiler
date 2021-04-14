@@ -14,10 +14,11 @@ import type {
   TrackReference,
   TimelineType,
   CheckedSharingOptions,
+  Localization,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { StartEndRange } from './units';
-import type { Profile, ThreadIndex, Pid } from './profile';
+import type { StartEndRange, CssPixels, Milliseconds } from './units';
+import type { Profile, ThreadIndex, Pid, TabID } from './profile';
 
 import type {
   CallNodePath,
@@ -25,27 +26,74 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  ActiveTabTimeline,
+  OriginsTimeline,
+  ThreadsKey,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
+import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
 export type Reducer<T> = (T | void, Action) => T;
+
+// This type is defined in uploaded-profiles-db.js because it is very tied to
+// the data stored in our local IndexedDB, and we don't want to change it
+// lightly, without changing the DB code.
+// We reexport this type here mostly for easier access.
+export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
-  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
-  +rightClickedMarker: MarkerIndex | null,
+  +selectedNetworkMarker: MarkerIndex | null,
 |};
 
-export type ProfileViewState = {|
+export type ThreadViewOptionsPerThreads = { [ThreadsKey]: ThreadViewOptions };
+
+export type RightClickedCallNode = {|
+  +threadsKey: ThreadsKey,
+  +callNodePath: CallNodePath,
+|};
+
+export type RightClickedMarker = {|
+  +threadsKey: ThreadsKey,
+  +markerIndex: MarkerIndex,
+|};
+
+/**
+ * Full profile view state
+ * They should not be used from the active tab view.
+ * NOTE: This state is empty for now, but will be used later, do not remove.
+ * globalTracks and localTracksByPid states will be here in the future.
+ */
+export type FullProfileViewState = {|
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+|};
+
+export type OriginsViewState = {|
+  originsTimeline: OriginsTimeline,
+|};
+
+/**
+ * Active tab profile view state
+ * They should not be used from the full view.
+ */
+export type ActiveTabProfileViewState = {|
+  activeTabTimeline: ActiveTabTimeline,
+|};
+
+/**
+ * Profile view state
+ */
+export type ProfileViewState = {
   +viewOptions: {|
-    perThread: ThreadViewOptions[],
+    perThread: ThreadViewOptionsPerThreads,
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
     previewSelection: PreviewSelection,
@@ -53,17 +101,22 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
+    rightClickedCallNode: RightClickedCallNode | null,
+    rightClickedMarker: RightClickedMarker | null,
+    mouseTimePosition: Milliseconds | null,
   |},
-  +globalTracks: GlobalTrack[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
   +profile: Profile | null,
-|};
+  +full: FullProfileViewState,
+  +activeTab: ActiveTabProfileViewState,
+  +origins: OriginsViewState,
+};
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
   | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
   | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
+  | {| +phase: 'DATA_RELOAD' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
       +phase: 'INITIALIZING',
@@ -112,6 +165,16 @@ export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
 
 export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 
+/*
+ * Experimental features that are mostly disabled by default. You need to enable
+ * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
+ * e.g. `experimental.enableEventDelayTracks()`.
+ */
+export type ExperimentalFlags = {|
+  +eventDelayTracks: boolean,
+  +cpuGraphs: boolean,
+|};
+
 export type AppState = {|
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
@@ -119,8 +182,14 @@ export type AppState = {|
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
-  +trackThreadHeights: Array<ThreadIndex | void>,
+  +trackThreadHeights: {
+    [key: ThreadsKey]: CssPixels,
+  },
   +isNewlyPublished: boolean,
+  +isDragAndDropDragging: boolean,
+  +isDragAndDropOverlayRegistered: boolean,
+  +experimental: ExperimentalFlags,
+  +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 export type UploadPhase =
@@ -136,15 +205,6 @@ export type UploadState = {|
   error: Error | mixed,
   abortFunction: () => void,
   generation: number,
-|};
-
-/**
- * This holds the state of the profile before it was uploaded.
- */
-export type PrePublishedState = {|
-  +profile: Profile,
-  +urlState: UrlState,
-  +zipFileState: ZipFileState,
 |};
 
 export type PublishState = {|
@@ -164,6 +224,52 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
+/**
+ * Full profile specific url state
+ * They should not be used from the active tab view.
+ */
+export type FullProfileSpecificUrlState = {|
+  globalTrackOrder: TrackIndex[],
+  hiddenGlobalTracks: Set<TrackIndex>,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  showJsTracerSummary: boolean,
+  timelineType: TimelineType,
+  legacyThreadOrder: ThreadIndex[] | null,
+  legacyHiddenThreads: ThreadIndex[] | null,
+|};
+
+/**
+ * Active tab profile specific url state
+ * They should not be used from the full view.
+ */
+export type ActiveTabSpecificProfileUrlState = {|
+  isResourcesPanelOpen: boolean,
+|};
+
+export type ProfileSpecificUrlState = {|
+  selectedThreads: Set<ThreadIndex> | null,
+  implementation: ImplementationFilter,
+  lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
+  invertCallstack: boolean,
+  showUserTimings: boolean,
+  committedRanges: StartEndRange[],
+  callTreeSearchString: string,
+  markersSearchString: string,
+  networkSearchString: string,
+  transforms: TransformStacksPerThread,
+  full: FullProfileSpecificUrlState,
+  activeTab: ActiveTabSpecificProfileUrlState,
+|};
+
+/**
+ * Determines how the timeline's tracks are organized.
+ */
+export type TimelineTrackOrganization =
+  | {| +type: 'full' |}
+  | {| +type: 'active-tab', +tabID: TabID | null |}
+  | {| +type: 'origins' |};
+
 export type UrlState = {|
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
@@ -174,27 +280,24 @@ export type UrlState = {|
   +profilesToCompare: string[] | null,
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
-  +profileName: string,
-  +profileSpecific: {|
-    selectedThread: ThreadIndex | null,
-    globalTrackOrder: TrackIndex[],
-    hiddenGlobalTracks: Set<TrackIndex>,
-    hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-    localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-    implementation: ImplementationFilter,
-    lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
-    invertCallstack: boolean,
-    showUserTimings: boolean,
-    showJsTracerSummary: boolean,
-    committedRanges: StartEndRange[],
-    callTreeSearchString: string,
-    markersSearchString: string,
-    networkSearchString: string,
-    transforms: TransformStacksPerThread,
-    timelineType: TimelineType,
-    legacyThreadOrder: ThreadIndex[] | null,
-    legacyHiddenThreads: ThreadIndex[] | null,
-  |},
+  +profileName: string | null,
+  +timelineTrackOrganization: TimelineTrackOrganization,
+  +profileSpecific: ProfileSpecificUrlState,
+|};
+
+/**
+ * Localization State
+ */
+export type L10nFetchingPhase =
+  | 'not-fetching'
+  | 'fetching-ftl'
+  | 'done-fetching';
+
+export type L10nState = {|
+  +l10nFetchingPhase: L10nFetchingPhase,
+  +localization: Localization,
+  +primaryLocale: string | null,
+  +direction: 'ltr' | 'rtl',
 |};
 
 export type IconState = Set<string>;
@@ -206,6 +309,7 @@ export type State = {|
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
+  +l10n: L10nState,
 |};
 
 export type IconWithClassName = {|

@@ -4,10 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { render } from 'react-testing-library';
+import { screen } from '@testing-library/react';
+import { stripIndent } from 'common-tags';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('app/ErrorBoundary', function() {
   const childComponentText = 'This is a child component';
@@ -29,6 +32,15 @@ describe('app/ErrorBoundary', function() {
 
   it('matches the snapshot', () => {
     const { container } = setupComponent(<ThrowingComponent />);
+
+    // We need to change the textContent of the stack, so that path information
+    // isn't tied to a specific environment.
+    const stack = screen.getByText(/at ThrowingComponent/);
+    stack.textContent = stack.textContent
+      .replace(/\\/g, '/') // normalizes Windows paths
+      .replace(/\(.*\/src/g, '(REDACTED)/src') // Removes the home directory
+      .replace(/\(.*\/node_modules/g, '(REDACTED)/node_modules'); // Removes the home directory
+
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -51,29 +63,31 @@ describe('app/ErrorBoundary', function() {
     const { getByText, getByTestId } = setupComponent(<ThrowingComponent />);
 
     // The technical error isn't visible yet.
-    expect(
-      getByTestId('error-technical-details').classList.contains('hide')
-    ).toBe(true);
+    expect(getByTestId('error-technical-details')).toHaveClass('hide');
 
     // Click the button to expand the details.
-    getByText('View full error details').click();
+    fireFullClick(getByText('View full error details'));
 
     // The technical error now exists.
-    expect(
-      getByTestId('error-technical-details').classList.contains('hide')
-    ).toBe(false);
+    expect(getByTestId('error-technical-details')).not.toHaveClass('hide');
   });
 
   it('reports errors to the analytics', () => {
     withAnalyticsMock(() => {
       setupComponent(<ThrowingComponent />);
       expect(self.ga).toHaveBeenCalledWith('send', 'exception', {
-        exDescription: [
-          'Error: This is an error.',
-          '',
-          '    in ThrowingComponent',
-          '    in ErrorBoundary',
-        ].join('\n'),
+        exDescription: expect.stringMatching(
+          // This regexp looks a  bit scary, but all it does is avoiding
+          // matching on things that depends on the environment (like path
+          // names) and path separators (unixes use `/` but windows uses `\`).
+          new RegExp(stripIndent`
+              Error: This is an error\\.
+
+                  at ThrowingComponent \\(.*[/\\\\]ErrorBoundary.test.js:20:11\\)
+                  at ErrorBoundary \\(.*[/\\\\]ErrorBoundary.js:28:66\\)
+                  at LocalizationProvider \\(.*[/\\\\]@fluent[/\\\\]react[/\\\\]index.js:.*\\)
+          `)
+        ),
         exFatal: true,
       });
     });

@@ -4,34 +4,58 @@
 
 // @flow
 
+// It's important to import the base CSS file first, so that CSS in the
+// subcomponents can more easily override the rules.
+import './index.css';
+
 import * as React from 'react';
 import classNames from 'classnames';
-import explicitConnect from '../../../utils/connect';
-import { getProfile, getProfileRootRange } from '../../../selectors/profile';
-import { getDataSource } from '../../../selectors/url-state';
-import { getIsNewlyPublished } from '../../../selectors/app';
-import { MenuButtonsMetaInfo } from './MetaInfo';
-import { MenuButtonsPublish } from './Publish';
-import { MenuButtonsPermalink } from './Permalink';
-import ArrowPanel from '../../shared/ArrowPanel';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { Localized } from '@fluent/react';
+
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
-  revertToPrePublishedState,
-  abortUpload,
-} from '../../../actions/publish';
-import { dismissNewlyPublished } from '../../../actions/app';
+  getDataSource,
+  getTimelineTrackOrganization,
+} from 'firefox-profiler/selectors/url-state';
 import {
+  getIsNewlyPublished,
+  getCurrentProfileUploadedInformation,
+} from 'firefox-profiler/selectors/app';
+
+/* Note: the order of import is important, from most general to most specific,
+ * so that the CSS rules are in the correct order. */
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { MetaInfoPanel } from 'firefox-profiler/components/app/MenuButtons/MetaInfo';
+import { MenuButtonsPublish } from 'firefox-profiler/components/app/MenuButtons/Publish';
+import { MenuButtonsPermalink } from 'firefox-profiler/components/app/MenuButtons/Permalink';
+import {
+  ProfileDeletePanel,
+  ProfileDeleteSuccess,
+} from 'firefox-profiler/components/app/ProfileDeleteButton';
+import { revertToPrePublishedState } from 'firefox-profiler/actions/publish';
+import {
+  dismissNewlyPublished,
+  profileRemotelyDeleted,
+} from 'firefox-profiler/actions/app';
+
+import {
+  getAbortFunction,
   getUploadPhase,
   getHasPrePublishedState,
-} from '../../../selectors/publish';
+} from 'firefox-profiler/selectors/publish';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
-import type { StartEndRange } from '../../../types/units';
-import type { Profile } from '../../../types/profile';
-import type { DataSource } from '../../../types/actions';
-import type { ConnectedProps } from '../../../utils/connect';
-import type { UploadPhase } from '../../../types/state';
+import type {
+  StartEndRange,
+  DataSource,
+  UploadPhase,
+  TimelineTrackOrganization,
+  UploadedProfileInformation,
+} from 'firefox-profiler/types';
 
-require('./index.css');
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
@@ -42,30 +66,215 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
   +isNewlyPublished: boolean,
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
+  +abortFunction: () => mixed,
+  +timelineTrackOrganization: TimelineTrackOrganization,
+  +currentProfileUploadedInformation: UploadedProfileInformation | null,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
-  +abortUpload: typeof abortUpload,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
+  +profileRemotelyDeleted: typeof profileRemotelyDeleted,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type State = $ReadOnly<{|
+  metaInfoPanelState: 'initial' | 'delete-confirmation' | 'profile-deleted',
+|}>;
 
-class MenuButtons extends React.PureComponent<Props> {
+class MenuButtonsImpl extends React.PureComponent<Props, State> {
+  state = { metaInfoPanelState: 'initial' };
+
   componentDidMount() {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
   }
 
+  _getUploadedStatus(dataSource: DataSource) {
+    switch (dataSource) {
+      case 'public':
+      case 'compare':
+      case 'from-url':
+        return 'uploaded';
+      case 'from-addon':
+      case 'unpublished':
+      case 'from-file':
+      case 'local':
+        return 'local';
+      case 'none':
+      case 'uploaded-recordings':
+        throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
+      default:
+        throw assertExhaustiveCheck(dataSource);
+    }
+  }
+
+  _deleteThisProfileOnServer = () => {
+    this.setState({
+      metaInfoPanelState: 'delete-confirmation',
+    });
+  };
+
+  _onProfileDeleted = () => {
+    this.props.profileRemotelyDeleted();
+    this.setState({
+      metaInfoPanelState: 'profile-deleted',
+    });
+  };
+
+  _resetMetaInfoState = () => {
+    this.setState({
+      metaInfoPanelState: 'initial',
+    });
+  };
+
+  _renderUploadedProfileActions(
+    currentProfileUploadedInformation: UploadedProfileInformation
+  ) {
+    return (
+      <div className="profileInfoUploadedActions">
+        <div className="profileInfoUploadedDate">
+          <span className="profileInfoUploadedLabel">
+            <Localized id="MenuButtons--index--profile-info-uploaded-label">
+              Uploaded:
+            </Localized>
+          </span>
+          {_formatDate(currentProfileUploadedInformation.publishedDate)}
+        </div>
+        <div className="profileInfoUploadedActionsButtons">
+          <button
+            type="button"
+            className="photon-button photon-button-default photon-button-micro"
+            onClick={this._deleteThisProfileOnServer}
+            title={
+              currentProfileUploadedInformation.jwtToken === null
+                ? 'This profile cannot be deleted because we lack the authorization information.'
+                : null
+            }
+            disabled={currentProfileUploadedInformation.jwtToken === null}
+          >
+            <Localized id="MenuButtons--index--profile-info-uploaded-actions">
+              Delete
+            </Localized>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  _renderMetaInfoPanel() {
+    const { currentProfileUploadedInformation } = this.props;
+    const { metaInfoPanelState } = this.state;
+    switch (metaInfoPanelState) {
+      case 'initial': {
+        return (
+          <>
+            <h2 className="metaInfoSubTitle">
+              <Localized id="MenuButtons--index--metaInfo-subtitle">
+                Profile Information
+              </Localized>
+            </h2>
+            {currentProfileUploadedInformation
+              ? this._renderUploadedProfileActions(
+                  currentProfileUploadedInformation
+                )
+              : null}
+            <MetaInfoPanel />
+          </>
+        );
+      }
+
+      case 'delete-confirmation': {
+        if (!currentProfileUploadedInformation) {
+          throw new Error(
+            `We're in the state "delete-confirmation" but there's no stored data for this profile, this should not happen.`
+          );
+        }
+
+        const {
+          name,
+          profileToken,
+          jwtToken,
+        } = currentProfileUploadedInformation;
+
+        if (!jwtToken) {
+          throw new Error(
+            `We're in the state "delete-confirmation" but there's no JWT token for this profile, this should not happen.`
+          );
+        }
+
+        const slicedProfileToken = profileToken.slice(0, 6);
+        const profileName = name ? name : `Profile #${slicedProfileToken}`;
+        return (
+          <ProfileDeletePanel
+            profileName={profileName}
+            profileToken={profileToken}
+            jwtToken={jwtToken}
+            onProfileDeleted={this._onProfileDeleted}
+            onProfileDeleteCanceled={this._resetMetaInfoState}
+          />
+        );
+      }
+
+      case 'profile-deleted':
+        // Note that <ProfileDeletePanel> can also render <ProfileDeleteSuccess>
+        // in some situations. However it's not suitable for this case, because
+        // we still have to pass jwtToken / profileToken, and we don't have
+        // these values anymore when we're in this state.
+        return <ProfileDeleteSuccess />;
+
+      default:
+        throw assertExhaustiveCheck(metaInfoPanelState);
+    }
+  }
+
+  _renderMetaInfoButton() {
+    return (
+      <Localized
+        id="MenuButtons--index--metaInfo-button"
+        attrs={{ label: true }}
+      >
+        <ButtonWithPanel
+          buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+          // The empty string value for the label following will be replaced by the <Localized /> wrapper.
+          label=""
+          onPanelClose={this._resetMetaInfoState}
+          panelClassName="metaInfoPanel"
+          panelContent={this._renderMetaInfoPanel()}
+        />
+      </Localized>
+    );
+  }
+
+  _changeTimelineTrackOrganizationToFull = () => {
+    this.props.changeTimelineTrackOrganization({ type: 'full' });
+  };
+
+  _renderFullViewButtonForActiveTab() {
+    const { timelineTrackOrganization } = this.props;
+    if (timelineTrackOrganization.type !== 'active-tab') {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
+        onClick={this._changeTimelineTrackOrganizationToFull}
+      >
+        <Localized id="MenuButtons--index--full-view">Full View</Localized>
+      </button>
+    );
+  }
+
   _renderPublishPanel() {
-    const { uploadPhase, dataSource, abortUpload } = this.props;
+    const { uploadPhase, dataSource, abortFunction } = this.props;
 
     const isUploading =
       uploadPhase === 'uploading' || uploadPhase === 'compressing';
@@ -74,39 +283,44 @@ class MenuButtons extends React.PureComponent<Props> {
       return (
         <button
           type="button"
-          className="buttonWithPanelButton menuButtonsAbortUploadButton"
-          onClick={abortUpload}
+          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
+          onClick={abortFunction}
         >
-          Cancel Upload
+          <Localized id="MenuButtons--index--cancel-upload">
+            Cancel Upload
+          </Localized>
         </button>
       );
     }
 
-    const isRepublish = dataSource === 'public' || dataSource === 'compare';
+    const uploadedStatus = this._getUploadedStatus(dataSource);
+    const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
-    let label = 'Publish…';
+    let labelL10nId = 'MenuButtons--index--share-upload';
     if (isRepublish) {
-      label = 'Re-publish…';
+      labelL10nId = 'MenuButtons--index--share-re-upload';
     }
+
     if (isError) {
-      label = 'Error publishing…';
+      labelL10nId = 'MenuButtons--index--share-error-uploading';
     }
 
     return (
-      <ButtonWithPanel
-        className={classNames({
-          menuButtonsShareButton: true,
-          menuButtonsShareButtonOriginal: !isRepublish && !isError,
-          menuButtonsShareButtonError: isError,
-        })}
-        label={label}
-        panel={
-          <ArrowPanel className="menuButtonsPublishPanel">
-            <MenuButtonsPublish isRepublish={isRepublish} />
-          </ArrowPanel>
-        }
-      />
+      <Localized id={labelL10nId} attrs={{ label: true }}>
+        <ButtonWithPanel
+          buttonClassName={classNames(
+            'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
+            {
+              menuButtonsShareButtonError: isError,
+            }
+          )}
+          panelClassName="menuButtonsPublishPanel"
+          // The value for the label following will be replaced
+          label=""
+          panelContent={<MenuButtonsPublish isRepublish={isRepublish} />}
+        />
+      </Localized>
     );
   }
 
@@ -134,52 +348,70 @@ class MenuButtons extends React.PureComponent<Props> {
     return (
       <button
         type="button"
-        className="buttonWithPanelButton menuButtonsRevertButton"
+        className="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
         onClick={revertToPrePublishedState}
       >
-        Revert to Original Profile
+        <Localized id="MenuButtons--index--revert">
+          Revert to Original Profile
+        </Localized>
       </button>
     );
   }
 
   render() {
-    const { profile } = this.props;
     return (
       <>
-        {/* Place the info button outside of the menu buttons to allow it to shrink. */}
-        <MenuButtonsMetaInfo profile={profile} />
-        <div className="menuButtons">
-          {this._renderRevertProfile()}
-          {this._renderPublishPanel()}
-          {this._renderPermalink()}
-          <a
-            href="/docs/"
-            target="_blank"
-            className="menuButtonsLink"
-            title="Open the documentation in a new window"
-          >
-            Docs
-            <i className="open-in-new" />
-          </a>
-        </div>
+        {this._renderFullViewButtonForActiveTab()}
+        {this._renderRevertProfile()}
+        {this._renderMetaInfoButton()}
+        {this._renderPublishPanel()}
+        {this._renderPermalink()}
+        <a
+          href="/docs/"
+          target="_blank"
+          className="menuButtonsButton menuButtonsButton-hasLeftBorder"
+          title="Open the documentation in a new window"
+        >
+          <Localized id="MenuButtons--index--docs">Docs</Localized>
+          <i className="open-in-new" />
+        </a>
       </>
     );
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    profile: getProfile(state),
-    rootRange: getProfileRootRange(state),
-    dataSource: getDataSource(state),
-    isNewlyPublished: getIsNewlyPublished(state),
-    uploadPhase: getUploadPhase(state),
-    hasPrePublishedState: getHasPrePublishedState(state),
-  }),
-  mapDispatchToProps: {
-    dismissNewlyPublished,
-    revertToPrePublishedState,
-    abortUpload,
-  },
-  component: MenuButtons,
-});
+export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      rootRange: getProfileRootRange(state),
+      dataSource: getDataSource(state),
+      isNewlyPublished: getIsNewlyPublished(state),
+      uploadPhase: getUploadPhase(state),
+      hasPrePublishedState: getHasPrePublishedState(state),
+      abortFunction: getAbortFunction(state),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
+      currentProfileUploadedInformation: getCurrentProfileUploadedInformation(
+        state
+      ),
+    }),
+    mapDispatchToProps: {
+      dismissNewlyPublished,
+      revertToPrePublishedState,
+      changeTimelineTrackOrganization,
+      profileRemotelyDeleted,
+    },
+    component: MenuButtonsImpl,
+  }
+);
+
+function _formatDate(date: Date): string {
+  const timestampDate = date.toLocaleString(undefined, {
+    month: 'short',
+    year: 'numeric',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+  return timestampDate;
+}

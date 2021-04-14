@@ -4,65 +4,64 @@
 
 // @flow
 
-import queryString from 'query-string';
-import url from 'url';
+import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
-const accessToken = 'b177b00a130faf3ecda6960e8b59fde73e902422';
-export function shortenUrl(urlToShorten: string): Promise<string> {
+const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
+
+export async function shortenUrl(urlToShorten: string): Promise<string> {
   let longUrl = urlToShorten;
   if (!longUrl.startsWith('https://profiler.firefox.com/')) {
-    const parsedUrl = url.parse(longUrl);
-    const parsedUrlOnCanonicalHost = Object.assign({}, parsedUrl, {
-      protocol: 'https:',
-      host: 'profiler.firefox.com',
-    });
-    longUrl = url.format(parsedUrlOnCanonicalHost);
+    const parsedUrl = new URL(longUrl);
+    parsedUrl.protocol = 'https';
+    parsedUrl.host = 'profiler.firefox.com';
+    parsedUrl.port = '';
+    longUrl = parsedUrl.toString();
   }
 
-  const bitlyQueryUrl =
-    'https://api-ssl.bitly.com/v3/shorten?' +
-    queryString.stringify({
-      longUrl,
-      domain: 'perfht.ml',
-      format: 'json',
-      access_token: accessToken,
-    });
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/shorten`;
+  const payload = {
+    longUrl,
+  };
 
-  return fetch(bitlyQueryUrl)
-    .then(response => response.json())
-    .then(json => json.data.url);
+  const response = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Accept: ACCEPT_HEADER_VALUE,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `An error happened while shortening the long url ${longUrl}: ${response.statusText} (${response.status})`
+    );
+  }
+
+  const json = await response.json();
+  return json.shortUrl;
 }
 
-export async function expandUrl(urlToExpand: string): Promise<string> {
-  const bitlyQueryUrl =
-    'https://api-ssl.bitly.com/v3/expand?' +
-    queryString.stringify({
-      shortUrl: urlToExpand,
-      format: 'json',
-      access_token: accessToken,
-    });
-  const response = await fetch(bitlyQueryUrl);
+export async function expandUrl(shortUrl: string): Promise<string> {
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/expand`;
+  const payload = {
+    shortUrl,
+  };
+  const response = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Accept: ACCEPT_HEADER_VALUE,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `An error happened while expanding the shortened url ${shortUrl}: ${response.statusText} (${response.status})`
+    );
+  }
+
   const json = await response.json();
-
-  if (!json.data) {
-    // In case of an error, json.data is null.
-    throw new Error(
-      `An error happened while expanding the shortened url ${urlToExpand}: ${
-        json.status_txt
-      } (${json.status_code})`
-    );
-  }
-
-  const [data] = json.data.expand;
-  if (!response) {
-    throw new Error(
-      'There were no data in the otherwise well-formed answer from bit.ly.'
-    );
-  }
-
-  const longUrl = data.long_url;
-  if (!longUrl) {
-    throw new Error(`The short URL ${urlToExpand} couldn't be expanded.`);
-  }
-  return longUrl;
+  return json.longUrl;
 }

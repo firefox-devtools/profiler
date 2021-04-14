@@ -3,16 +3,48 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getSelectedTab, getDataSource } from '../selectors/url-state';
-import { getTrackThreadHeights } from '../selectors/app';
-import { sendAnalytics } from '../utils/analytics';
-import { stateFromLocation } from '../app-logic/url-handling';
+import { oneLine } from 'common-tags';
+import {
+  getSelectedTab,
+  getDataSource,
+  getIsActiveTabResourcesPanelOpen,
+  getSelectedThreadIndexes,
+  getLocalTrackOrderByPid,
+} from 'firefox-profiler/selectors/url-state';
+import {
+  getTrackThreadHeights,
+  getIsEventDelayTracksEnabled,
+  getIsExperimentalCPUGraphsEnabled,
+} from 'firefox-profiler/selectors/app';
+import {
+  getActiveTabMainTrack,
+  getLocalTracksByPid,
+  getThreads,
+} from 'firefox-profiler/selectors/profile';
+import { sendAnalytics } from 'firefox-profiler/utils/analytics';
+import {
+  stateFromLocation,
+  withHistoryReplaceStateSync,
+} from 'firefox-profiler/app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
-import type { Profile, ThreadIndex } from '../types/profile';
-import type { CssPixels } from '../types/units';
-import type { Action, ThunkAction } from '../types/store';
-import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState } from '../types/state';
+import { fatalError } from './errors';
+import {
+  addEventDelayTracksForThreads,
+  initializeLocalTrackOrderByPid,
+} from 'firefox-profiler/profile-logic/tracks';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getIsCPUUtilizationProvided } from 'firefox-profiler/selectors/cpu';
+
+import type {
+  Profile,
+  ThreadsKey,
+  CssPixels,
+  Action,
+  ThunkAction,
+  UrlState,
+  UploadedProfileInformation,
+} from 'firefox-profiler/types';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -84,16 +116,26 @@ export function setHasZoomedViaMousewheel() {
  * This function is called when we start setting up the initial url state.
  * It takes the location and profile data, converts the location into url
  * state and then dispatches relevant actions to finalize the view.
+ * `profile` parameter can be null when the data source can't provide the profile
+ * and the url upgrader step is not needed (e.g. 'from-addon').
  */
 export function setupInitialUrlState(
   location: Location,
-  profile: Profile
+  profile: Profile | null
 ): ThunkAction<void> {
   return dispatch => {
     let urlState;
     try {
       urlState = stateFromLocation(location, profile);
     } catch (e) {
+      if (e.name === 'UrlUpgradeError') {
+        // The error is an URL upgrade error, let's fire a fatal error.
+        // If there's a service worker update, the class `ServiceWorkerManager`
+        // will automatically reload in case the new code knows how to handle
+        // this URL version.
+        dispatch(fatalError(e));
+        return;
+      }
       // The location could not be parsed, show a 404 instead.
       console.error(e);
       dispatch(show404(location.pathname + location.search));
@@ -111,9 +153,13 @@ export function setupInitialUrlState(
     // other parts of the code.
     // The first dispatch here updates the url state, then changes state as the url
     // setup is done, and lastly finalizes the profile view since everything is set up now.
-    dispatch(updateUrlState(urlState));
-    dispatch(urlSetupDone());
-    dispatch(finalizeProfileView());
+    // All of this is done while the history is replaced, as this is part of the initial
+    // load process.
+    withHistoryReplaceStateSync(() => {
+      dispatch(updateUrlState(urlState));
+      dispatch(urlSetupDone());
+      dispatch(finalizeProfileView());
+    });
   };
 }
 
@@ -127,18 +173,18 @@ export function updateUrlState(newUrlState: UrlState | null): Action {
 }
 
 export function reportTrackThreadHeight(
-  threadIndex: ThreadIndex,
+  threadsKey: ThreadsKey,
   height: CssPixels
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const trackThreadHeights = getTrackThreadHeights(getState());
-    const previousHeight = trackThreadHeights[threadIndex];
+    const previousHeight = trackThreadHeights[threadsKey];
     if (previousHeight !== height) {
       // Guard against unnecessary dispatches. This could happen frequently.
       dispatch({
         type: 'UPDATE_TRACK_THREAD_HEIGHT',
         height,
-        threadIndex,
+        threadsKey,
       });
     }
   };
@@ -150,4 +196,156 @@ export function reportTrackThreadHeight(
  */
 export function dismissNewlyPublished(): Action {
   return { type: 'DISMISS_NEWLY_PUBLISHED' };
+}
+
+/**
+ * Called when a user has started dragging a file. Used for loading
+ * profiles with the drag and drop component.
+ */
+export function startDragging(): Action {
+  return { type: 'START_DRAGGING' };
+}
+
+/**
+ * Called when a user has stopped dragging a file.
+ */
+export function stopDragging(): Action {
+  return { type: 'STOP_DRAGGING' };
+}
+
+/**
+ * Called when a custom drag and drop overlay is mounted. This lets
+ * the app know that we shouldn't create a default overlay.
+ */
+export function registerDragAndDropOverlay(): Action {
+  return { type: 'REGISTER_DRAG_AND_DROP_OVERLAY' };
+}
+
+/**
+ * Called when a custom drag and drop overlay is unmounted.
+ */
+export function unregisterDragAndDropOverlay(): Action {
+  return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
+}
+
+/**
+ * Toggle the active tab resources panel
+ */
+export function toggleResourcesPanel(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isResourcesPanelOpen = getIsActiveTabResourcesPanelOpen(getState());
+    let selectedThreadIndexes = getSelectedThreadIndexes(getState());
+
+    if (isResourcesPanelOpen) {
+      // If it was open when we dispatched that action, it means we are closing this panel.
+      // We would like to also select the main track when we close this panel.
+      const mainTrack = getActiveTabMainTrack(getState());
+      selectedThreadIndexes = new Set([...mainTrack.threadIndexes]);
+    }
+
+    // Toggle the resources panel eventually.
+    dispatch({
+      type: 'TOGGLE_RESOURCES_PANEL',
+      selectedThreadIndexes,
+    });
+  };
+}
+
+/*
+ * This action enables the event delay tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for average users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableEventDelayTracks()`
+ */
+export function enableEventDelayTracks(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsEventDelayTracksEnabled(getState())) {
+      console.error(
+        'Tried to enable the event delay tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    if (
+      selectedThreadSelectors.getSamplesTable(getState()).eventDelay ===
+      undefined
+    ) {
+      // Return early if the profile doesn't have eventDelay values.
+      console.error(oneLine`
+        Tried to enable the event delay tracks, but this profile does
+        not have eventDelay values. It is likely an older profile.
+      `);
+      return false;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addEventDelayTracksForThreads(
+      getThreads(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+    dispatch({
+      type: 'ENABLE_EVENT_DELAY_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
+    });
+
+    return true;
+  };
+}
+
+/*
+ * This action enables the CPU graph tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for average users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to enable this from the developer console by writing this line:
+ * `experimental.enableCPUGraphs()`
+ */
+export function enableExperimentalCPUGraphs(): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    if (getIsExperimentalCPUGraphsEnabled(getState())) {
+      console.error(
+        'Tried to enable the CPU graph tracks, but they are already enabled.'
+      );
+      return false;
+    }
+
+    if (!getIsCPUUtilizationProvided(getState())) {
+      // Return early if the profile doesn't have threadCPUDelta values.
+      console.error(oneLine`
+        Tried to enable the CPU graph tracks, but this profile does
+        not have threadCPUDelta values. It is likely an older profile.
+      `);
+      return false;
+    }
+
+    dispatch({
+      type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+    });
+
+    return true;
+  };
+}
+
+/**
+ * This caches the profile data in the local state for synchronous access.
+ */
+export function setCurrentProfileUploadedInformation(
+  uploadedProfileInformation: UploadedProfileInformation | null
+): Action {
+  return {
+    type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
+    uploadedProfileInformation,
+  };
+}
+
+export function profileRemotelyDeleted(): Action {
+  // Ideally we should store the current profile data in a local indexeddb, and
+  // set the URL to /local/<indexeddb-key>.
+  return { type: 'PROFILE_REMOTELY_DELETED' };
 }

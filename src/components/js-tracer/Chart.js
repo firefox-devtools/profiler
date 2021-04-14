@@ -8,31 +8,34 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   JS_TRACER_MAXIMUM_CHART_ZOOM,
-} from '../../app-logic/constants';
-import explicitConnect from '../../utils/connect';
-import JsTracerCanvas from './Canvas';
+} from 'firefox-profiler/app-logic/constants';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { JsTracerCanvas } from './Canvas';
 
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { ensureExists } from '../../utils/flow';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import type { UniqueStringArray } from '../../utils/unique-string-array';
-import type { JsTracerTable, ThreadIndex, Profile } from '../../types/profile';
-import type { JsTracerTiming } from '../../types/profile-derived';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 import type {
-  Milliseconds,
+  JsTracerTable,
+  ThreadsKey,
+  Profile,
+  JsTracerTiming,
   UnitIntervalOfProfileRange,
   CssPixels,
-} from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+  StartEndRange,
+  PreviewSelection,
+} from 'firefox-profiler/types';
 
-require('./index.css');
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+import './index.css';
 
 const ROW_HEIGHT: CssPixels = 16;
 
@@ -49,8 +52,8 @@ type DispatchProps = {|
 type StateProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
   +stringTable: UniqueStringArray,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
-  +threadIndex: number,
+  +timeRange: StartEndRange,
+  +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
 |};
 
@@ -75,7 +78,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
   render() {
     const {
       timeRange,
-      threadIndex,
+      threadsKey,
       jsTracerTable,
       jsTracerTimingRows,
       previewSelection,
@@ -89,7 +92,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
 
     return (
       <JsTracerCanvas
-        key={threadIndex}
+        key={threadsKey}
         viewportProps={{
           timeRange,
           previewSelection,
@@ -107,7 +110,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
           rangeStart: timeRange.start,
           rangeEnd: timeRange.end,
           rowHeight: ROW_HEIGHT,
-          threadIndex,
+          threadsKey,
           doFadeIn,
         }}
       />
@@ -134,7 +137,7 @@ const JsTracerExpensiveChart = explicitConnect<
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
     stringTable: selectedThreadSelectors.getStringTable(state),
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     previewSelection: getPreviewSelection(state),
     jsTracerTimingRows: ensureExists(
       ownProps.showJsTracerSummary
@@ -233,7 +236,7 @@ type ChartProps = {|
   +profile: Profile,
   +jsTracerTable: JsTracerTable,
   +showJsTracerSummary: boolean,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
 |};
 
 /**
@@ -246,15 +249,15 @@ type ChartProps = {|
  * For more information on the life cycle of keyed components see:
  * See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
-export default class JsTracerChart extends React.PureComponent<ChartProps> {
+export class JsTracerChart extends React.PureComponent<ChartProps> {
   render() {
     const {
       profile,
       jsTracerTable,
       showJsTracerSummary,
-      threadIndex,
+      threadsKey,
     } = this.props;
-    const key = `${threadIndex}-${showJsTracerSummary ? 'true' : 'false'}`;
+    const key = `${threadsKey}-${showJsTracerSummary ? 'true' : 'false'}`;
     return (
       <JsTracerChartLoader
         key={key}

@@ -2,19 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import type { CategoryList } from '../types/profile';
 import type {
-  DOMEventMarkerPayload,
-  UserTimingMarkerPayload,
-  MarkerPayload,
-  TextMarkerPayload,
-} from '../types/markers';
-import type {
+  CategoryList,
   Marker,
   MarkerIndex,
   MarkerTiming,
   MarkerTimingAndBuckets,
-} from '../types/profile-derived';
+} from 'firefox-profiler/types';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
 const MAX_STACKING_DEPTH = 300;
@@ -78,6 +72,7 @@ export function getMarkerTimingAndBuckets(
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
+  getLabel: MarkerIndex => string,
   categories: ?CategoryList
 ): MarkerTimingAndBuckets {
   // Each marker type will have it's own timing information, later collapse these into
@@ -118,8 +113,12 @@ export function getMarkerTimingAndBuckets(
       const otherEnd = markerTiming.end[markerTiming.length - 1];
       if (otherEnd === undefined || otherEnd <= marker.start) {
         markerTiming.start.push(marker.start);
-        markerTiming.end.push(marker.start + marker.dur);
-        markerTiming.label.push(computeMarkerLabel(marker.data));
+        markerTiming.end.push(
+          // If this is an instant marker, the start time and end time will match.
+          // The chart will then be responsible for drawing this as a dot.
+          marker.end === null ? marker.start : marker.end
+        );
+        markerTiming.label.push(getLabel(markerIndex));
         markerTiming.index.push(markerIndex);
         markerTiming.length++;
         break;
@@ -134,12 +133,22 @@ export function getMarkerTimingAndBuckets(
   allMarkerTimings.sort((a, b) => {
     if (a.bucket !== b.bucket) {
       // Sort by buckets first.
+      // Show the 'Test' category first. Test markers are almost guaranteed to
+      // be the most relevant when they exist.
+      if (a.bucket === 'Test') {
+        return -1;
+      }
+      if (b.bucket === 'Test') {
+        return 1;
+      }
+      // Put the 'Other' category last.
       if (a.bucket === 'Other') {
         return 1;
       }
       if (b.bucket === 'Other') {
         return -1;
       }
+      // Sort alphabetically for the remaining categories.
       return a.bucket > b.bucket ? 1 : -1;
     }
     if (a.name === b.name) {
@@ -166,39 +175,20 @@ export function getMarkerTimingAndBuckets(
 
 export function getMarkerTiming(
   getMarker: MarkerIndex => Marker,
-  markerIndexes: MarkerIndex[]
+  markerIndexes: MarkerIndex[],
+  getLabel: MarkerIndex => string
 ): MarkerTiming[] {
   // Flow didn't understand the filter operation here, so filter out bucket names
   // imperatively.
   const onlyTiming = [];
   for (const timingOrString of getMarkerTimingAndBuckets(
     getMarker,
-    markerIndexes
+    markerIndexes,
+    getLabel
   )) {
     if (typeof timingOrString !== 'string') {
       onlyTiming.push(timingOrString);
     }
   }
   return onlyTiming;
-}
-
-function computeMarkerLabel(data: MarkerPayload): string {
-  // Satisfy flow's type checker.
-  if (data !== null && typeof data === 'object') {
-    // Handle different marker payloads.
-    switch (data.type) {
-      case 'UserTiming':
-        return (data: UserTimingMarkerPayload).name;
-      case 'tracing':
-        if (data.category === 'DOMEvent') {
-          return (data: DOMEventMarkerPayload).eventType;
-        }
-        break;
-      case 'Text':
-        return (data: TextMarkerPayload).name;
-      default:
-    }
-  }
-
-  return '';
 }

@@ -9,16 +9,16 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },
@@ -35,16 +35,16 @@ Array [
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },
@@ -78,25 +78,25 @@ Array [
 ]
 `;
 
-exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
+exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be downloaded and decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
 
 exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 2`] = `
 Array [
   Array [
-    "The profile could not be decoded. This does not look like a supported file type.",
+    "The profile could not be downloaded and decoded. This does not look like a supported file type.",
   ],
   Array [
     "JSON parsing error:",
-    [Error: Invalid JSON],
+    [SyntaxError: Unexpected token i in JSON at position 0],
   ],
   Array [
     "Fetch response:",
     Object {
-      "arrayBuffer": undefined,
+      "arrayBuffer": [Function],
       "headers": Object {
         "get": [Function],
       },
-      "json": [Function],
+      "json": undefined,
       "ok": true,
       "status": 200,
     },
@@ -108,4 +108,6 @@ exports[`actions/receive-profile retrieveProfileFromFile will be an error to vie
 
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to decompress a zipped profile 1`] = `[Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html]`;
 
-exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse json 1`] = `[Error: Unserializing the profile failed: TypeError: Cannot read property 'version' of undefined]`;
+exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse gzipped profiles 1`] = `[Error: Unserializing the profile failed: Error: This does not appear to be a valid Gecko Profile, there is no meta field.]`;
+
+exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse json 1`] = `[Error: Unserializing the profile failed: Error: This does not appear to be a valid Gecko Profile, there is no meta field.]`;

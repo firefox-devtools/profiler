@@ -11,6 +11,7 @@
     "prettier/prettier": [
       true,
       { "parser": "css" }
-    ]
+    ],
+    "length-zero-no-unit": null
   }
 }

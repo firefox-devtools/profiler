@@ -31,13 +31,19 @@ Array [
 %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
 %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
 %cwindow.actions%c - All the actions that can be dispatched to change the state.
+%cwindow.experimental%c - The object that holds flags of all the experimental features.
+%cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing \\"accented\\" or \\"bidi\\" to this function, or disable using no parameters.
 
 The profile format is documented here:
-%chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
+%chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
 
 The CallTree class's source code is available here:
-%chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c",
+%chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
     "",
     "font-weight: bold;",
     "",

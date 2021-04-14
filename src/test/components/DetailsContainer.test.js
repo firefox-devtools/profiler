@@ -5,9 +5,9 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
 
-import DetailsContainer from '../../components/app/DetailsContainer';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { DetailsContainer } from '../../components/app/DetailsContainer';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -15,16 +15,18 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { tabSlugs } from '../../app-logic/tabs-handling';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
-jest.mock('../../components/app/Details', () => 'details-viewer');
+jest.mock('../../components/app/Details', () => ({
+  Details: 'details-viewer',
+}));
 
 describe('app/DetailsContainer', function() {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E E
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  E
     `);
 
     const store = storeWithProfile(profile);
@@ -57,6 +59,7 @@ describe('app/DetailsContainer', function() {
 
   tabSlugs.forEach((tabSlug: TabSlug) => {
     const expected = expectedSidebar[tabSlug];
+
     it(`renders an initial view ${
       expected ? 'with' : 'without'
     } a sidebar for tab ${tabSlug}`, () => {

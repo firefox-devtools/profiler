@@ -5,8 +5,9 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {
   getCommittedRange,
@@ -18,13 +19,18 @@ import { changeSidebarOpenState } from '../../actions/app';
 import explicitConnect from '../../utils/connect';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import type { Milliseconds } from '../../types/units';
+import type {
+  Milliseconds,
+  MixedObject,
+  PreviewSelection,
+  StartEndRange,
+} from 'firefox-profiler/types';
 
 // The following define the magic values used for the mocked bounding box of the
 // the rendered component.
@@ -44,6 +50,8 @@ const MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 3;
 const SMALL_MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 0.2;
 
 describe('Viewport', function() {
+  autoMockCanvasContext();
+
   it('matches the component snapshot', () => {
     const { container, unmount } = setup();
     expect(container.firstChild).toMatchSnapshot();
@@ -616,13 +624,8 @@ function getBoundingBoxForViewport(override: $Shape<BoundingBoxOverride> = {}) {
   return rect;
 }
 
-function setup(profileOverrides: Object = {}) {
+function setup(profileOverrides: MixedObject = {}) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -633,6 +636,14 @@ function setup(profileOverrides: Object = {}) {
   // Flow's internal structures for React don't recognize our mock function as a
   // valid stateless component. $FlowExpectError
   const ChartWithViewport = withChartViewport(DummyChart);
+
+  type Props = {
+    previewSelection: PreviewSelection,
+    timeRange: StartEndRange,
+    maxViewportHeight?: number,
+    startsAtBottom: boolean,
+    ...
+  };
 
   // The viewport component started out as an unconnected component, but then it
   // started subscribing to the store an dispatching its own actions. This migration
@@ -646,7 +657,7 @@ function setup(profileOverrides: Object = {}) {
     }),
     mapDispatchToProps: {},
     // eslint-disable-next-line react/display-name
-    component: (props: Object) => (
+    component: (props: Props) => (
       <ChartWithViewport
         viewportProps={{
           previewSelection: props.previewSelection,

@@ -4,52 +4,53 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import TreeView from '../shared/TreeView';
-import CallTreeEmptyReasons from './CallTreeEmptyReasons';
-import NodeIcon from '../shared/NodeIcon';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import memoize from 'memoize-immutable';
+import { oneLine } from 'common-tags';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { TreeView } from 'firefox-profiler/components/shared/TreeView';
+import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
   getSearchStringsAsRegExp,
-  getSelectedThreadIndex,
-} from '../../selectors/url-state';
+  getSelectedThreadsKey,
+} from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getIconsWithClassNames } from '../../selectors/icons';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   changeExpandedCallNodes,
   addTransformToStack,
-} from '../../actions/profile-view';
-import { assertExhaustiveCheck } from '../../utils/flow';
+  handleCallNodeTransformShortcut,
+} from 'firefox-profiler/actions/profile-view';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { IconWithClassName, State } from '../../types/state';
-import type { CallTree } from '../../profile-logic/call-tree';
 import type {
+  State,
   ImplementationFilter,
-  CallTreeSummaryStrategy,
-} from '../../types/actions';
-import type { ThreadIndex } from '../../types/profile';
-import type {
+  ThreadsKey,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
-} from '../../types/profile-derived';
-import type { Column } from '../shared/TreeView';
-import type { ConnectedProps } from '../../utils/connect';
+  WeightType,
+} from 'firefox-profiler/types';
+import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
+
+import type { Column } from 'firefox-profiler/components/shared/TreeView';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type StateProps = {|
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +scrollToSelectionGeneration: number,
   +focusCallTreeGeneration: number,
-  +tree: CallTree,
+  +tree: CallTreeType,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -58,9 +59,8 @@ type StateProps = {|
   +disableOverscan: boolean,
   +invertCallstack: boolean,
   +implementationFilter: ImplementationFilter,
-  +icons: IconWithClassName[],
   +callNodeMaxDepth: number,
-  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +weightType: WeightType,
 |};
 
 type DispatchProps = {|
@@ -68,27 +68,110 @@ type DispatchProps = {|
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class CallTreeComponent extends PureComponent<Props> {
-  _fixedColumnsTiming: Column[] = [
-    { propName: 'totalTimePercent', title: '' },
-    { propName: 'totalTime', title: 'Running Time (ms)' },
-    { propName: 'selfTime', title: 'Self (ms)' },
-    { propName: 'icon', title: '', component: NodeIcon },
-  ];
-  _fixedColumnsAllocations: Column[] = [
-    { propName: 'totalTimePercent', title: '' },
-    { propName: 'totalTime', title: 'Total Size (bytes)' },
-    { propName: 'selfTime', title: 'Self (bytes)' },
-    { propName: 'icon', title: '', component: NodeIcon },
-  ];
-  _mainColumn: Column = { propName: 'name', title: '' };
-  _appendageColumn: Column = { propName: 'lib', title: '' };
+class CallTreeImpl extends PureComponent<Props> {
+  _mainColumn: Column<CallNodeDisplayData> = { propName: 'name', title: '' };
+  _appendageColumn: Column<CallNodeDisplayData> = {
+    propName: 'lib',
+    title: '',
+  };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
+
+  /**
+   * Call Trees can have different types of "weights" for the data. Choose the
+   * appropriate labels for the call tree based on this weight.
+   */
+  _weightTypeToColumns = memoize(
+    (weightType: WeightType): Column<CallNodeDisplayData>[] => {
+      switch (weightType) {
+        case 'tracing-ms':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Running Time (ms)',
+              tooltip: oneLine`
+                The "total" running time includes a summary of all the time where this
+                function was observed to be on the stack. This includes the time where
+                the function was actually running, and the time spent in the callers from
+                this function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self (ms)',
+              tooltip: oneLine`
+                The "self" time only includes the time where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' time is not included. The "self" time is useful
+                for understanding where time was actually spent in a program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        case 'samples':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Total (samples)',
+              tooltip: oneLine`
+                The "total" sample count includes a summary of every sample where this
+                function was observed to be on the stack. This includes the time where the
+                function was actually running, and the time spent in the callers from this
+                function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self',
+              tooltip: oneLine`
+                The "self" sample count only includes the samples where the function was
+                the leaf-most one on the stack. If this function called into other functions,
+                then the "other" functions' counts are not included. The "self" count is useful
+                for understanding where time was actually spent in a program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        case 'bytes':
+          return [
+            { propName: 'totalPercent', title: '' },
+            {
+              propName: 'total',
+              title: 'Total Size (bytes)',
+              tooltip: oneLine`
+                The "total size" includes a summary of all of the bytes allocated or
+                deallocated while this function was observed to be on the stack. This
+                includes both the bytes where the function was actually running, and the
+                bytes of the callers from this function.
+            `,
+            },
+            {
+              propName: 'self',
+              title: 'Self (bytes)',
+              tooltip: oneLine`
+                The "self" bytes includes the bytes allocated or deallocated while this
+                function was the leaf-most one on the stack. If this function called into
+                other functions, then the "other" functions' bytes are not included.
+                The "self" bytes are useful for understanding where memory was actually
+                allocated or deallocated in the program.
+            `,
+            },
+            { propName: 'icon', title: '', component: Icon },
+          ];
+        default:
+          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+      }
+    },
+    // Use a Map cache, as the function only takes one argument, which is a simple string.
+    { cache: new Map() }
+  );
 
   componentDidMount() {
     this.focus();
@@ -123,21 +206,17 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 
   _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
 
   _onRightClickSelection = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const {
-      callNodeInfo,
-      threadIndex,
-      changeRightClickedCallNode,
-    } = this.props;
+    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
@@ -145,13 +224,23 @@ class CallTreeComponent extends PureComponent<Props> {
   _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) => {
-    const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
+    const { callNodeInfo, threadsKey, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
-      threadIndex,
+      threadsKey,
       newExpandedCallNodeIndexes.map(callNodeIndex =>
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
+  };
+
+  _onKeyDown = (
+    event: SyntheticKeyboardEvent<>,
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    if (callNodeIndex !== null) {
+      const { handleCallNodeTransformShortcut, threadsKey } = this.props;
+      handleCallNodeTransformShortcut(event, threadsKey, callNodeIndex);
+    }
   };
 
   procureInterestingInitialSelection() {
@@ -195,30 +284,15 @@ class CallTreeComponent extends PureComponent<Props> {
       searchStringsRegExp,
       disableOverscan,
       callNodeMaxDepth,
-      callTreeSummaryStrategy,
+      weightType,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
     }
-    let fixedColumns;
-    switch (callTreeSummaryStrategy) {
-      case 'timing':
-        fixedColumns = this._fixedColumnsTiming;
-        break;
-      case 'native-retained-allocations':
-      case 'native-allocations':
-      case 'native-deallocations-memory':
-      case 'native-deallocations-sites':
-      case 'js-allocations':
-        fixedColumns = this._fixedColumnsAllocations;
-        break;
-      default:
-        throw assertExhaustiveCheck(callTreeSummaryStrategy);
-    }
     return (
       <TreeView
         tree={tree}
-        fixedColumns={fixedColumns}
+        fixedColumns={this._weightTypeToColumns(weightType)}
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
         onSelectionChange={this._onSelectedCallNodeChange}
@@ -232,17 +306,17 @@ class CallTreeComponent extends PureComponent<Props> {
         ref={this._takeTreeViewRef}
         contextMenuId="CallNodeContextMenu"
         maxNodeDepth={callNodeMaxDepth}
-        icons={this.props.icons}
         rowHeight={16}
         indentWidth={10}
+        onKeyDown={this._onKeyDown}
       />
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
-    threadIndex: getSelectedThreadIndex(state),
+    threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
@@ -260,18 +334,20 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    icons: getIconsWithClassNames(state),
-    callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+    // Use the filtered call node max depth, rather than the preview filtered call node
+    // max depth so that the width of the TreeView component is stable across preview
+    // selections.
+    callNodeMaxDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(
       state
     ),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
     changeExpandedCallNodes,
     addTransformToStack,
+    handleCallNodeTransformShortcut,
   },
-  options: { withRef: true },
-  component: CallTreeComponent,
+  component: CallTreeImpl,
 });

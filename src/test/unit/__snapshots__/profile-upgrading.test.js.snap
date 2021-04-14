@@ -66,6 +66,7 @@ Object {
     ],
     "configuration": undefined,
     "debug": false,
+    "device": undefined,
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -74,20 +75,348 @@ Object {
     },
     "interval": 1,
     "logicalCPUs": undefined,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": undefined,
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 28,
+    "preprocessedProfileVersion": 35,
     "processType": 0,
     "product": "Firefox",
+    "sampleUnits": undefined,
     "sourceURL": undefined,
     "stackwalk": 1,
     "startTime": 2574592839.818,
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 19,
+    "version": 23,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -274,9 +603,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -319,6 +650,7 @@ Object {
           7,
           8,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592839.818,
           2574592839.836,
@@ -331,6 +663,8 @@ Object {
           2574592843.502,
           2574592844.132,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -500,9 +834,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -533,12 +869,15 @@ Object {
           2,
           2,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592843.0039997,
           2574592843.027,
           2574592843.035,
           2574592843.057,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -674,9 +1013,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -707,12 +1048,15 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592868.3659997,
           2574592868.39,
           2574592868.3980002,
           2574592868.406,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1035,9 +1379,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -1070,6 +1416,7 @@ Object {
           8,
           13,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592869.355,
           2574592869.37,
@@ -1077,6 +1424,8 @@ Object {
           2574592869.395,
           2574592870.224,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1295,9 +1644,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -1328,12 +1679,15 @@ Object {
           2,
           4,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592877.46,
           2574592877.474,
           2574592877.4830003,
           2574592877.49,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1530,9 +1884,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "gdbus",
       "pausedRanges": Array [],
@@ -1573,6 +1929,7 @@ Object {
           7,
           8,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592878.268,
           2574592878.282,
@@ -1584,6 +1941,8 @@ Object {
           2574592880.015,
           2574592880.252,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1732,9 +2091,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -1765,12 +2126,15 @@ Object {
           1,
           0,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592938.803,
           2574592938.827,
           2574592938.835,
           2574592938.8430004,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -1900,9 +2264,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -1933,12 +2299,15 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.456,
           2574592945.4709997,
           2574592945.479,
           2574592945.4859996,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2074,9 +2443,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -2107,12 +2478,15 @@ Object {
           2,
           3,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592945.7780004,
           2574592945.79,
           2574592945.797,
           2574592945.803,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2252,9 +2626,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -2285,12 +2661,15 @@ Object {
           2,
           1,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592946.053,
           2574592946.069,
           2574592946.0769997,
           2574592946.085,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -2443,9 +2822,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -2476,12 +2857,15 @@ Object {
           10,
           10,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.093,
           2574592948.128,
           2574592948.136,
           2574592948.142,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -3144,9 +3528,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3177,12 +3563,15 @@ Object {
           33,
           32,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.301,
           2574592948.32,
           2574592948.33,
           2574592948.337,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -3993,9 +4382,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4026,12 +4417,15 @@ Object {
           33,
           32,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3170004,
           2574592948.3269997,
           2574592948.337,
           2574592948.342,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -4842,9 +5236,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4875,12 +5271,15 @@ Object {
           33,
           34,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.38,
           2574592948.391,
           2574592948.397,
           2574592948.403,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -5695,9 +6094,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -5728,12 +6129,15 @@ Object {
           33,
           34,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592948.3989997,
           2574592948.4100003,
           2574592948.419,
           2574592948.428,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -6344,9 +6748,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
+        "endTime": Array [],
         "length": 0,
         "name": Array [],
-        "time": Array [],
+        "phase": Array [],
+        "startTime": Array [],
       },
       "name": "FS Broker 5906",
       "pausedRanges": Array [],
@@ -6371,9 +6777,12 @@ Object {
         "stack": Array [
           19,
         ],
+        "threadCPUDelta": undefined,
         "time": Array [
           2574592949.428,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -6614,6 +7023,333 @@ Object {
       },
     ],
     "interval": 1,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
@@ -6623,7 +7359,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 19,
+    "version": 23,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -6721,6 +7457,7 @@ Object {
           },
         ],
         "interval": 1,
+        "markerSchema": Array [],
         "misc": "rv:48.0",
         "oscpu": "Intel Mac OS X 10.11",
         "platform": "Macintosh",
@@ -6790,15 +7527,20 @@ Object {
               Array [
                 4,
                 0,
+                null,
+                0,
+                4,
                 Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
-                4,
               ],
               Array [
                 5,
                 2,
+                null,
+                2,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "start",
@@ -6832,79 +7574,87 @@ Object {
                   },
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 10,
+                4,
+                null,
+                2,
                 4,
                 Object {
                   "category": "Paint",
                   "interval": "start",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 10,
+                null,
                 5,
+                3,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "end",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 5,
+                null,
                 8,
+                3,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "end",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 9,
                 11,
-                Object {
-                  "endTime": 12,
-                  "startTime": 11,
-                },
+                12,
                 1,
+                1,
+                Object {},
               ],
               Array [
                 8,
                 9,
+                null,
+                2,
+                5,
                 Object {
                   "category": "DOMEvent",
                   "eventType": "mouseout",
                   "interval": "start",
                   "phase": 3,
-                  "timeStamp": undefined,
-                  "type": "tracing",
+                  "type": "DOMEvent",
                 },
-                5,
               ],
               Array [
                 8,
+                null,
                 10,
+                3,
+                5,
                 Object {
                   "category": "DOMEvent",
                   "eventType": "mouseout",
                   "interval": "end",
                   "phase": 3,
-                  "timeStamp": undefined,
-                  "type": "tracing",
+                  "type": "DOMEvent",
                 },
-                5,
               ],
             ],
             "schema": Object {
-              "category": 3,
-              "data": 2,
+              "category": 4,
+              "data": 5,
+              "endTime": 2,
               "name": 0,
-              "time": 1,
+              "phase": 3,
+              "startTime": 1,
             },
           },
           "name": "GeckoMain",
@@ -7060,15 +7810,20 @@ Object {
           Array [
             4,
             0,
+            null,
+            0,
+            4,
             Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
-            4,
           ],
           Array [
             5,
             2,
+            null,
+            2,
+            4,
             Object {
               "category": "Paint",
               "interval": "start",
@@ -7102,79 +7857,87 @@ Object {
               },
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            4,
+            null,
+            2,
             4,
             Object {
               "category": "Paint",
               "interval": "start",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            null,
             5,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             5,
+            null,
             8,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             9,
             11,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            12,
             1,
+            1,
+            Object {},
           ],
           Array [
             8,
             9,
+            null,
+            2,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "interval": "start",
               "phase": 3,
-              "timeStamp": undefined,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
           Array [
             8,
+            null,
             10,
+            3,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "interval": "end",
               "phase": 3,
-              "timeStamp": undefined,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
         ],
         "schema": Object {
-          "category": 3,
-          "data": 2,
+          "category": 4,
+          "data": 5,
+          "endTime": 2,
           "name": 0,
-          "time": 1,
+          "phase": 3,
+          "startTime": 1,
         },
       },
       "name": "GeckoMain",
@@ -7326,15 +8089,20 @@ Object {
           Array [
             4,
             0,
+            null,
+            0,
+            4,
             Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
-            4,
           ],
           Array [
             5,
             2,
+            null,
+            2,
+            4,
             Object {
               "category": "Paint",
               "interval": "start",
@@ -7368,79 +8136,87 @@ Object {
               },
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            4,
+            null,
+            2,
             4,
             Object {
               "category": "Paint",
               "interval": "start",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            null,
             5,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             5,
+            null,
             8,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             9,
             11,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            12,
             1,
+            1,
+            Object {},
           ],
           Array [
             8,
             9,
+            null,
+            2,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "interval": "start",
               "phase": 3,
-              "timeStamp": undefined,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
           Array [
             8,
+            null,
             10,
+            3,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "interval": "end",
               "phase": 3,
-              "timeStamp": undefined,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
         ],
         "schema": Object {
-          "category": 3,
-          "data": 2,
+          "category": 4,
+          "data": 5,
+          "endTime": 2,
           "name": 0,
-          "time": 1,
+          "phase": 3,
+          "startTime": 1,
         },
       },
       "name": "Compositor",
@@ -7692,6 +8468,333 @@ Object {
       },
     ],
     "interval": 1,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
@@ -7701,19 +8804,19 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 19,
+    "version": 23,
   },
   "pages": Array [
     Object {
-      "browsingContextID": 1,
       "embedderInnerWindowID": 0,
       "innerWindowID": 1,
+      "tabID": 1,
       "url": "https://github.com/rustwasm/wasm-bindgen/issues/1",
     },
     Object {
-      "browsingContextID": 1,
       "embedderInnerWindowID": 0,
       "innerWindowID": 2,
+      "tabID": 1,
       "url": "https://github.com/rustwasm/wasm-bindgen/issues/2",
     },
   ],
@@ -7813,6 +8916,7 @@ Object {
           },
         ],
         "interval": 1,
+        "markerSchema": Array [],
         "misc": "rv:48.0",
         "oscpu": "Intel Mac OS X 10.11",
         "platform": "Macintosh",
@@ -7826,15 +8930,15 @@ Object {
       },
       "pages": Array [
         Object {
-          "browsingContextID": 2,
           "embedderInnerWindowID": 0,
           "innerWindowID": 3,
+          "tabID": 2,
           "url": "https://profiler.firefox.com",
         },
         Object {
-          "browsingContextID": 2,
           "embedderInnerWindowID": 0,
           "innerWindowID": 4,
+          "tabID": 2,
           "url": "about:blank",
         },
       ],
@@ -7918,15 +9022,20 @@ Object {
               Array [
                 4,
                 0,
+                null,
+                0,
+                4,
                 Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
-                4,
               ],
               Array [
                 5,
                 2,
+                null,
+                2,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "start",
@@ -7960,76 +9069,88 @@ Object {
                   },
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 10,
+                4,
+                null,
+                2,
                 4,
                 Object {
                   "category": "Paint",
                   "interval": "start",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 10,
+                null,
                 5,
+                3,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "end",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 5,
+                null,
                 8,
+                3,
+                4,
                 Object {
                   "category": "Paint",
                   "interval": "end",
                   "type": "tracing",
                 },
-                4,
               ],
               Array [
                 9,
                 11,
-                Object {
-                  "endTime": 12,
-                  "startTime": 11,
-                },
+                12,
                 1,
+                1,
+                Object {},
               ],
               Array [
                 8,
                 9,
+                null,
+                2,
+                5,
                 Object {
                   "category": "DOMEvent",
                   "eventType": "mouseout",
                   "innerWindowID": 3,
                   "interval": "start",
+                  "latency": 1.4500000000000002,
                   "phase": 3,
-                  "type": "tracing",
+                  "type": "DOMEvent",
                 },
-                5,
               ],
               Array [
                 8,
+                null,
                 10,
+                3,
+                5,
                 Object {
                   "category": "DOMEvent",
                   "eventType": "mouseout",
                   "innerWindowID": 3,
                   "interval": "end",
                   "phase": 3,
-                  "type": "tracing",
+                  "type": "DOMEvent",
                 },
-                5,
               ],
               Array [
                 11,
+                3,
                 13,
+                1,
+                7,
                 Object {
                   "URI": "https://github.com/rustwasm/wasm-bindgen/issues/1",
                   "connectEnd": 9,
@@ -8049,31 +9170,32 @@ Object {
                   "tcpConnectEnd": 7,
                   "type": "Network",
                 },
-                7,
               ],
               Array [
                 16,
+                13.5,
                 14,
+                1,
+                1,
                 Object {
                   "cause": Object {
                     "stack": 0,
                     "time": 13.5,
                   },
-                  "endTime": 14,
                   "filename": "",
                   "operation": "stat",
                   "source": "NSPRIOInterposer",
-                  "startTime": 13.5,
                   "type": "FileIO",
                 },
-                1,
               ],
             ],
             "schema": Object {
-              "category": 3,
-              "data": 2,
+              "category": 4,
+              "data": 5,
+              "endTime": 2,
               "name": 0,
-              "time": 1,
+              "phase": 3,
+              "startTime": 1,
             },
           },
           "name": "GeckoMain",
@@ -8243,15 +9365,20 @@ Object {
           Array [
             4,
             0,
+            null,
+            0,
+            4,
             Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
-            4,
           ],
           Array [
             5,
             2,
+            null,
+            2,
+            4,
             Object {
               "category": "Paint",
               "interval": "start",
@@ -8285,76 +9412,98 @@ Object {
               },
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            4,
+            null,
+            2,
             4,
             Object {
               "category": "Paint",
               "interval": "start",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            null,
             5,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             5,
+            null,
             8,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
+            12,
             9,
-            11,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            null,
+            0,
             1,
+            Object {
+              "category": "WebRender",
+              "type": "tracing",
+            },
+          ],
+          Array [
+            9,
+            11,
+            12,
+            1,
+            1,
+            Object {},
           ],
           Array [
             8,
             9,
+            null,
+            2,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "innerWindowID": 1,
               "interval": "start",
               "phase": 3,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
           Array [
             8,
+            null,
             10,
+            3,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "innerWindowID": 1,
               "interval": "end",
               "phase": 3,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
           Array [
             11,
+            3,
             13,
+            1,
+            7,
             Object {
               "URI": "https://github.com/rustwasm/wasm-bindgen/issues/2",
               "connectEnd": 9,
@@ -8374,14 +9523,15 @@ Object {
               "tcpConnectEnd": 7,
               "type": "Network",
             },
-            7,
           ],
         ],
         "schema": Object {
-          "category": 3,
-          "data": 2,
+          "category": 4,
+          "data": 5,
+          "endTime": 2,
           "name": 0,
-          "time": 1,
+          "phase": 3,
+          "startTime": 1,
         },
       },
       "name": "GeckoMain",
@@ -8476,6 +9626,7 @@ Object {
         "MinorGC",
         "Rasterize",
         "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/2",
+        "TextureCacheFree",
       ],
       "unregisterTime": null,
     },
@@ -8534,15 +9685,20 @@ Object {
           Array [
             4,
             0,
+            null,
+            0,
+            4,
             Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
-            4,
           ],
           Array [
             5,
             2,
+            null,
+            2,
+            4,
             Object {
               "category": "Paint",
               "interval": "start",
@@ -8576,79 +9732,89 @@ Object {
               },
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            4,
+            null,
+            2,
             4,
             Object {
               "category": "Paint",
               "interval": "start",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             10,
+            null,
             5,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             5,
+            null,
             8,
+            3,
+            4,
             Object {
               "category": "Paint",
               "interval": "end",
               "type": "tracing",
             },
-            4,
           ],
           Array [
             9,
             11,
-            Object {
-              "endTime": 12,
-              "startTime": 11,
-            },
+            12,
             1,
+            1,
+            Object {},
           ],
           Array [
             8,
             9,
+            null,
+            2,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "innerWindowID": 2,
               "interval": "start",
               "phase": 3,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
           Array [
             8,
+            null,
             10,
+            3,
+            5,
             Object {
               "category": "DOMEvent",
               "eventType": "mouseout",
               "innerWindowID": 2,
               "interval": "end",
               "phase": 3,
-              "type": "tracing",
+              "type": "DOMEvent",
             },
-            5,
           ],
         ],
         "schema": Object {
-          "category": 3,
-          "data": 2,
+          "category": 4,
+          "data": 5,
+          "endTime": 2,
           "name": 0,
-          "time": 1,
+          "phase": 3,
+          "startTime": 1,
         },
       },
       "name": "Compositor",
@@ -8812,10 +9978,337 @@ Object {
       },
     ],
     "interval": 1,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 28,
+    "preprocessedProfileVersion": 35,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9059,19 +10552,26 @@ Object {
             "eventType": "mouseout",
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
+        ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          10,
+          12,
         ],
         "length": 8,
         "name": Array [
@@ -9084,14 +10584,24 @@ Object {
           8,
           9,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
-          8,
+          null,
+          null,
           9,
-          10,
+          null,
           11,
         ],
       },
@@ -9166,6 +10676,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -9419,19 +10931,26 @@ Object {
             "eventType": "mouseout",
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
+        ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          10,
+          12,
         ],
         "length": 8,
         "name": Array [
@@ -9444,14 +10963,24 @@ Object {
           8,
           9,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
-          8,
+          null,
+          null,
           9,
-          10,
+          null,
           11,
         ],
       },
@@ -9526,6 +11055,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -9779,19 +11310,26 @@ Object {
             "eventType": "mouseout",
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
+        ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          1005,
+          1008,
+          null,
+          1010,
+          1012,
         ],
         "length": 8,
         "name": Array [
@@ -9804,14 +11342,24 @@ Object {
           8,
           9,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+        ],
+        "startTime": Array [
           1000,
           1002,
           1004,
-          1005,
-          1008,
+          null,
+          null,
           1009,
-          1010,
+          null,
           1011,
         ],
       },
@@ -9886,6 +11434,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -10003,10 +11553,337 @@ Object {
       },
     ],
     "interval": 1,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 28,
+    "preprocessedProfileVersion": 35,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10251,19 +12128,16 @@ Object {
             "eventType": "mouseout",
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
             "connectEnd": 9,
@@ -10284,6 +12158,17 @@ Object {
             "type": "Network",
           },
         ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          10,
+          12,
+          13,
+        ],
         "length": 9,
         "name": Array [
           4,
@@ -10296,16 +12181,27 @@ Object {
           9,
           14,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
-          8,
+          null,
+          null,
           9,
-          10,
+          null,
           11,
-          13,
+          3,
         ],
       },
       "name": "GeckoMain",
@@ -10379,6 +12275,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -10635,19 +12533,26 @@ Object {
             "eventType": "mouseout",
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
+        ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          10,
+          12,
         ],
         "length": 8,
         "name": Array [
@@ -10660,14 +12565,24 @@ Object {
           8,
           9,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
-          8,
+          null,
+          null,
           9,
-          10,
+          null,
           11,
         ],
       },
@@ -10742,6 +12657,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -11029,22 +12946,18 @@ Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "start",
+            "latency": 8,
             "phase": 3,
-            "timeStamp": 1001,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "interval": "end",
             "phase": 3,
-            "timeStamp": 1001,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
             "connectEnd": 1009,
@@ -11065,6 +12978,17 @@ Object {
             "type": "Network",
           },
         ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          1005,
+          1008,
+          null,
+          1010,
+          1012,
+          1013,
+        ],
         "length": 9,
         "name": Array [
           4,
@@ -11077,16 +13001,27 @@ Object {
           9,
           11,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+          1,
+        ],
+        "startTime": Array [
           1000,
           1002,
           1004,
-          1005,
-          1008,
+          null,
+          null,
           1009,
-          1010,
+          null,
           1011,
-          1013,
+          1003,
         ],
       },
       "name": "GeckoMain",
@@ -11170,6 +13105,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -11343,10 +13280,337 @@ Object {
       },
     ],
     "interval": 1,
+    "markerSchema": Array [
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMajor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCMinor",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "GCSlice",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-memory",
+        ],
+        "name": "CC",
+        "tooltipLabel": "Cycle Collect",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "operation",
+            "label": "Operation",
+            "searchable": true,
+          },
+          Object {
+            "format": "string",
+            "key": "source",
+            "label": "Source",
+            "searchable": true,
+          },
+          Object {
+            "format": "file-path",
+            "key": "filename",
+            "label": "Filename",
+            "searchable": true,
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "FileIO",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "microseconds",
+            "key": "sampleStartTimeUs",
+            "label": "Sample start time",
+          },
+          Object {
+            "format": "microseconds",
+            "key": "sampleEndTimeUs",
+            "label": "Sample end time",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "MediaSample",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "integer",
+            "key": "elementsTraversed",
+            "label": "Elements traversed",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsStyled",
+            "label": "Elements styled",
+          },
+          Object {
+            "format": "integer",
+            "key": "elementsMatched",
+            "label": "Elements matched",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesShared",
+            "label": "Styles shared",
+          },
+          Object {
+            "format": "integer",
+            "key": "stylesReused",
+            "label": "Styles reused",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Styles",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "prefName",
+            "label": "Name",
+          },
+          Object {
+            "format": "string",
+            "key": "prefKind",
+            "label": "Kind",
+          },
+          Object {
+            "format": "string",
+            "key": "prefType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "prefValue",
+            "label": "Value",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "PreferenceRead",
+      },
+      Object {
+        "chartLabel": "{marker.data.name}",
+        "data": Array [
+          Object {
+            "label": "Marker",
+            "value": "UserTiming",
+          },
+          Object {
+            "format": "string",
+            "key": "entryType",
+            "label": "Entry Type",
+          },
+          Object {
+            "label": "Description",
+            "value": "UserTiming is created using the DOM APIs performance.mark() and performance.measure().",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "UserTiming",
+        "tableLabel": "{marker.data.name}",
+        "tooltipLabel": "{marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.name} — {marker.data.name}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Details",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "name": "Text",
+        "tableLabel": "{marker.name} — {marker.data.name}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "module",
+            "label": "Module",
+          },
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Name",
+          },
+        ],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Log",
+        "tableLabel": "({marker.data.module}) {marker.data.name}",
+      },
+      Object {
+        "chartLabel": "{marker.data.eventType}",
+        "data": Array [
+          Object {
+            "format": "duration",
+            "key": "latency",
+            "label": "Latency",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "DOMEvent",
+        "tableLabel": "{marker.data.eventType}",
+        "tooltipLabel": "{marker.data.eventType} — DOMEvent",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Paint",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Navigation",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "category",
+            "label": "Type",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "Layout",
+      },
+      Object {
+        "chartLabel": "{marker.data.messageType}",
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "messageType",
+            "label": "Type",
+          },
+          Object {
+            "format": "string",
+            "key": "sync",
+            "label": "Sync",
+          },
+          Object {
+            "format": "string",
+            "key": "sendThreadName",
+            "label": "From",
+          },
+          Object {
+            "format": "string",
+            "key": "recvThreadName",
+            "label": "To",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-ipc",
+        ],
+        "name": "IPC",
+        "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
+        "tooltipLabel": "IPC — {marker.data.niceDirection}",
+      },
+      Object {
+        "data": Array [
+          Object {
+            "format": "string",
+            "key": "name",
+            "label": "Tick Reasons",
+          },
+        ],
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+          "timeline-overview",
+        ],
+        "name": "RefreshDriverTick",
+      },
+      Object {
+        "data": Array [],
+        "display": Array [
+          "marker-table",
+        ],
+        "name": "Network",
+      },
+    ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 28,
+    "preprocessedProfileVersion": 35,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -11356,27 +13620,27 @@ Object {
   },
   "pages": Array [
     Object {
-      "browsingContextID": 1,
       "embedderInnerWindowID": 0,
       "innerWindowID": 1,
+      "tabID": 1,
       "url": "https://github.com/rustwasm/wasm-bindgen/issues/1",
     },
     Object {
-      "browsingContextID": 1,
       "embedderInnerWindowID": 0,
       "innerWindowID": 2,
+      "tabID": 1,
       "url": "https://github.com/rustwasm/wasm-bindgen/issues/2",
     },
     Object {
-      "browsingContextID": 2,
       "embedderInnerWindowID": 0,
       "innerWindowID": 3,
+      "tabID": 2,
       "url": "https://profiler.firefox.com",
     },
     Object {
-      "browsingContextID": 2,
       "embedderInnerWindowID": 0,
       "innerWindowID": 4,
+      "tabID": 2,
       "url": "about:blank",
     },
   ],
@@ -11578,6 +13842,7 @@ Object {
           4,
           4,
           4,
+          4,
           5,
           5,
           1,
@@ -11613,12 +13878,17 @@ Object {
             "type": "tracing",
           },
           Object {
+            "category": "WebRender",
+            "type": "tracing",
+          },
+          Object {
             "category": "DOMEvent",
             "eventType": "mouseout",
             "innerWindowID": 3,
             "interval": "start",
+            "latency": 4,
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
@@ -11626,12 +13896,9 @@ Object {
             "innerWindowID": 3,
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
             "connectEnd": 9,
@@ -11652,28 +13919,54 @@ Object {
             "type": "Network",
           },
         ],
-        "length": 9,
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          null,
+          10,
+          12,
+          13,
+        ],
+        "length": 10,
         "name": Array [
           4,
           5,
           10,
           10,
           5,
+          17,
           8,
           8,
           9,
           14,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          0,
+          2,
+          3,
+          1,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
+          null,
+          null,
           8,
           9,
-          10,
+          null,
           11,
-          13,
+          3,
         ],
       },
       "name": "GeckoMain",
@@ -11747,6 +14040,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -11797,6 +14092,7 @@ Object {
         "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3",
         "DiskIO",
         "FileIO",
+        "TextureCacheFree",
       ],
       "unregisterTime": null,
     },
@@ -12004,7 +14300,7 @@ Object {
             "innerWindowID": 1,
             "interval": "start",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
@@ -12012,12 +14308,19 @@ Object {
             "innerWindowID": 1,
             "interval": "end",
             "phase": 3,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 12,
-            "startTime": 11,
-          },
+          Object {},
+        ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          5,
+          8,
+          null,
+          10,
+          12,
         ],
         "length": 8,
         "name": Array [
@@ -12030,14 +14333,24 @@ Object {
           8,
           9,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+        ],
+        "startTime": Array [
           0,
           2,
           4,
-          5,
-          8,
+          null,
+          null,
           9,
-          10,
+          null,
           11,
         ],
       },
@@ -12112,6 +14425,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [
@@ -12400,9 +14715,9 @@ Object {
             "eventType": "mouseout",
             "innerWindowID": 2,
             "interval": "start",
+            "latency": 8,
             "phase": 3,
-            "timeStamp": 1001,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
           Object {
             "category": "DOMEvent",
@@ -12410,13 +14725,9 @@ Object {
             "innerWindowID": 2,
             "interval": "end",
             "phase": 3,
-            "timeStamp": 1001,
-            "type": "tracing",
+            "type": "DOMEvent",
           },
-          Object {
-            "endTime": 1012,
-            "startTime": 1011,
-          },
+          Object {},
           Object {
             "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
             "connectEnd": 1009,
@@ -12437,6 +14748,17 @@ Object {
             "type": "Network",
           },
         ],
+        "endTime": Array [
+          null,
+          null,
+          null,
+          1005,
+          1008,
+          null,
+          1010,
+          1012,
+          1013,
+        ],
         "length": 9,
         "name": Array [
           4,
@@ -12449,16 +14771,27 @@ Object {
           9,
           11,
         ],
-        "time": Array [
+        "phase": Array [
+          0,
+          2,
+          2,
+          3,
+          3,
+          2,
+          3,
+          1,
+          1,
+        ],
+        "startTime": Array [
           1000,
           1002,
           1004,
-          1005,
-          1008,
+          null,
+          null,
           1009,
-          1010,
+          null,
           1011,
-          1013,
+          1003,
         ],
       },
       "name": "GeckoMain",
@@ -12542,6 +14875,8 @@ Object {
           null,
           null,
         ],
+        "weight": null,
+        "weightType": "samples",
       },
       "stackTable": Object {
         "category": Array [

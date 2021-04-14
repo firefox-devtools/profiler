@@ -19,9 +19,10 @@ import type {
   IndexIntoStackTable,
   SamplesTable,
   CategoryList,
-} from '../types/profile';
-import type { JsTracerTiming } from '../types/profile-derived';
-import type { Microseconds } from '../types/units';
+  JsTracerTiming,
+  Microseconds,
+} from 'firefox-profiler/types';
+
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { JsImplementation } from '../profile-logic/profile-data';
 
@@ -504,7 +505,8 @@ export function convertJsTracerToThreadWithoutSamples(
   const stackTable = getEmptyStackTable();
   const samples: SamplesTable = {
     ...getEmptySamplesTableWithEventDelay(),
-    duration: [],
+    weight: [],
+    weightType: 'tracing-ms',
   };
   const markers = getEmptyRawMarkerTable();
   const funcTable = { ...fromThread.funcTable };
@@ -825,7 +827,7 @@ export function getSelfTimeSamplesFromJsTracer(
   const { stringTable } = thread;
   const samples = getEmptySamplesTableWithEventDelay();
   const sampleWeights = [];
-  samples.duration = sampleWeights;
+  samples.weight = sampleWeights;
 
   function addSelfTimeAsASample(
     eventIndex: IndexIntoJsTracerEvents,

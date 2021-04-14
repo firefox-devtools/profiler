@@ -21,6 +21,7 @@
 .photon-input:focus:invalid {
   border: 1px solid var(--blue-50);
   box-shadow: 0 0 0 1px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
+  outline: 0;
 }
 
 .photon-input:invalid:not(:placeholder-shown) {

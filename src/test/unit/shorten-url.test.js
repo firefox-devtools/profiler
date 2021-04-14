@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { shortenUrl, expandUrl } from '../../utils/shorten-url';
+
+import { shortenUrl, expandUrl } from 'firefox-profiler/utils/shorten-url';
+import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 
 beforeEach(() => {
   window.fetch = jest.fn();
@@ -13,32 +15,70 @@ afterEach(() => {
   delete window.fetch;
 });
 
+// This implements some base checks and behavior to mock the fetch API when
+// testing functions dealing with this API.
+function mockFetchForBitly({
+  endpointUrl,
+  responseFromRequestPayload,
+}: {|
+  endpointUrl: string,
+  responseFromRequestPayload: any => Response,
+|}) {
+  window.fetch.mockImplementation(async (urlString, options) => {
+    const { method, headers, body } = options;
+
+    if (urlString !== endpointUrl) {
+      return new Response(null, {
+        status: 404,
+        statusText: 'Not found',
+      });
+    }
+
+    if (method !== 'POST') {
+      return new Response(null, {
+        status: 405,
+        statusText: 'Method not allowed',
+      });
+    }
+
+    if (
+      headers['Content-Type'] !== 'application/json' ||
+      headers.Accept !== 'application/vnd.firefox-profiler+json;version=1.0'
+    ) {
+      return new Response(null, {
+        status: 406,
+        statusText: 'Not acceptable',
+      });
+    }
+
+    const payload = JSON.parse(body);
+    return responseFromRequestPayload(payload);
+  });
+}
+
 describe('shortenUrl', () => {
   function mockFetchWith(returnedHash) {
-    window.fetch.mockImplementation(async urlString => {
-      const url = new URL(urlString);
-      const params = new URLSearchParams(url.search);
-      const domain = params.get('domain') || 'bit.ly';
-
-      return {
-        json: async () => ({
-          data: {
-            global_hash: '900913',
-            hash: returnedHash,
-            long_url: urlString,
-            new_hash: 1,
-            url: `https://${domain}/${returnedHash}`,
-          },
-          status_code: 200,
-          status_txt: 'OK',
-        }),
-      };
+    mockFetchForBitly({
+      endpointUrl: 'https://api.profiler.firefox.com/shorten',
+      responseFromRequestPayload: () => {
+        return new Response(
+          JSON.stringify({
+            shortUrl: `https://share.firefox.dev/${returnedHash}`,
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      },
     });
   }
 
   it('calls the bitly API properly and returns the value', async () => {
     const bitlyHash = 'BITLYHASH';
-    const expectedShortUrl = `https://perfht.ml/${bitlyHash}`;
+    const expectedShortUrl = `https://share.firefox.dev/${bitlyHash}`;
     mockFetchWith(bitlyHash);
 
     const longUrl =
@@ -47,16 +87,16 @@ describe('shortenUrl', () => {
 
     expect(shortUrl).toBe(expectedShortUrl);
     expect(window.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`longUrl=${encodeURIComponent(longUrl)}`)
-    );
-    expect(window.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('domain=perfht.ml')
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.stringContaining(`"longUrl":"${longUrl}"`),
+      })
     );
   });
 
   it('changes the requested url if is not the main URL', async () => {
     const bitlyHash = 'BITLYHASH';
-    const expectedShortUrl = `https://perfht.ml/${bitlyHash}`;
+    const expectedShortUrl = `https://share.firefox.dev/${bitlyHash}`;
     const longUrl =
       'https://perf-html.io/public/FAKE_HASH/calltree/?thread=1&v=3';
     const expectedLongUrl = longUrl.replace(
@@ -67,46 +107,38 @@ describe('shortenUrl', () => {
     mockFetchWith(bitlyHash);
 
     const shortUrl = await shortenUrl(longUrl);
-
     expect(shortUrl).toBe(expectedShortUrl);
     expect(window.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`longUrl=${encodeURIComponent(expectedLongUrl)}`)
-    );
-    expect(window.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('domain=perfht.ml')
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.stringContaining(`"longUrl":"${expectedLongUrl}"`),
+      })
     );
   });
 });
 
 describe('expandUrl', () => {
   function mockFetchWith(returnedLongUrl) {
-    window.fetch.mockImplementation(async urlString => {
-      const url = new URL(urlString);
-      const params = new URLSearchParams(url.search);
-      const shortUrl = params.get('shortUrl') || '';
-      const hash = shortUrl.slice(shortUrl.lastIndexOf('/') + 1);
-
-      return {
-        json: async () => ({
-          data: {
-            expand: [
-              {
-                global_hash: '900913',
-                long_url: returnedLongUrl,
-                short_url: shortUrl,
-                user_hash: hash,
-              },
-            ],
-          },
-          status_code: 200,
-          status_txt: 'OK',
-        }),
-      };
+    mockFetchForBitly({
+      endpointUrl: 'https://api.profiler.firefox.com/expand',
+      responseFromRequestPayload: () => {
+        return new Response(
+          JSON.stringify({
+            longUrl: returnedLongUrl,
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      },
     });
   }
 
   it('returns the long url returned by the API', async () => {
-    const shortUrl = 'https://perfht.ml/BITLYHASH';
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     const returnedLongUrl =
       'https://profiler.firefox.com/public/FAKE_HASH/calltree/?thread=1&v=3';
     mockFetchWith(returnedLongUrl);
@@ -114,33 +146,34 @@ describe('expandUrl', () => {
     const longUrl = await expandUrl(shortUrl);
     expect(longUrl).toBe(returnedLongUrl);
     expect(window.fetch).toHaveBeenCalledWith(
-      expect.stringContaining(`shortUrl=${encodeURIComponent(shortUrl)}`)
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.stringContaining(`"shortUrl":"${shortUrl}"`),
+      })
     );
   });
 
   it('forwards errors', async () => {
-    window.fetch.mockImplementation(async () => ({
-      json: async () => ({
-        data: null,
-        status_code: 503,
-        status_txt: 'TEMPORARILY_UNAVAILABLE',
-      }),
-    }));
+    window.fetch.mockImplementation(
+      async () =>
+        new Response(null, {
+          status: 503,
+        })
+    );
 
-    const shortUrl = 'https://perfht.ml/BITLYHASH';
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 
-  it('returns an error when the API returns (successfully) no data', async () => {
-    window.fetch.mockImplementation(async shortUrl => ({
-      json: async () => ({
-        data: { expand: [{ short_url: shortUrl, error: 'NOT_FOUND' }] },
-        status_code: 200,
-        status_txt: 'OK',
-      }),
-    }));
+  it('returns an error when there is no match for this hash', async () => {
+    window.fetch.mockImplementation(
+      async () =>
+        new Response(null, {
+          status: 404,
+        })
+    );
 
-    const shortUrl = 'https://perfht.ml/BITLYHASH';
+    const shortUrl = 'https://share.firefox.dev/BITLYHASH';
     await expect(expandUrl(shortUrl)).rejects.toThrow();
   });
 });

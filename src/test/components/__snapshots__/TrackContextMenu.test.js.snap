@@ -2,7 +2,7 @@
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global non-process track 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -13,7 +13,15 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     role="menuitem"
     tabindex="-1"
   >
-    Hide other screenshot tracks
+    Hide other Screenshots tracks
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide “⁨Screenshots⁩”
   </div>
   <div
     class="react-contextmenu-separator"
@@ -34,59 +42,12 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
       />
     </div>
   </div>
-  <div>
-    <div
-      aria-disabled="false"
-      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-      role="menuitem"
-      tabindex="-1"
-      title="Screenshots"
-    >
-      <span>
-        Screenshots
-      </span>
-      <span
-        class="timelineTrackContextMenuSpacer"
-      />
-    </div>
-  </div>
-  <div>
-    <div
-      aria-disabled="false"
-      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-      role="menuitem"
-      tabindex="-1"
-      title="Process 0 (Process ID: 0)"
-    >
-      <span>
-        Process 0
-      </span>
-      <span
-        class="timelineTrackContextMenuSpacer"
-      />
-      <span
-        class="timelineTrackContextMenuPid"
-      >
-        (
-        0
-        )
-      </span>
-    </div>
-    <div
-      aria-disabled="false"
-      class="react-contextmenu-item checkable indented checked"
-      role="menuitem"
-      tabindex="-1"
-    >
-      Empty
-    </div>
-  </div>
 </nav>
 `;
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -97,8 +58,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     role="menuitem"
     tabindex="-1"
   >
-    Only show 
-    "Content Process"
+    Only show “⁨Content Process⁩”
   </div>
   <div
     aria-disabled="false"
@@ -109,31 +69,16 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     Only show this process group
   </div>
   <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide “⁨Content Process⁩”
+  </div>
+  <div
     class="react-contextmenu-separator"
   />
-  <div>
-    <div
-      aria-disabled="false"
-      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
-      role="menuitem"
-      tabindex="-1"
-      title="GeckoMain (Process ID: 111)"
-    >
-      <span>
-        GeckoMain
-      </span>
-      <span
-        class="timelineTrackContextMenuSpacer"
-      />
-      <span
-        class="timelineTrackContextMenuPid"
-      >
-        (
-        111
-        )
-      </span>
-    </div>
-  </div>
   <div>
     <div
       aria-disabled="false"
@@ -176,9 +121,9 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 </nav>
 `;
 
-exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
+exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for ctxId 1`] = `
 <nav
-  class="react-contextmenu timeline-context-menu"
+  class="react-contextmenu timelineTrackContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -189,22 +134,18 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     role="menuitem"
     tabindex="-1"
   >
-    Only show 
-    "DOM Worker"
+    Hide “⁨Process 0⁩”
   </div>
-  <div
-    class="react-contextmenu-separator"
-  />
   <div>
     <div
       aria-disabled="false"
       class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
       role="menuitem"
       tabindex="-1"
-      title="GeckoMain (Process ID: 111)"
+      title="Process 0 (Process ID: 0)"
     >
       <span>
-        GeckoMain
+        Process 0
       </span>
       <span
         class="timelineTrackContextMenuSpacer"
@@ -213,11 +154,56 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
         class="timelineTrackContextMenuPid"
       >
         (
-        111
+        0
         )
       </span>
     </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Network
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Empty
+    </div>
   </div>
+</nav>
+`;
+
+exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
+<nav
+  class="react-contextmenu timelineTrackContextMenu"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Only show “⁨DOM Worker⁩”
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+  >
+    Hide “⁨DOM Worker⁩”
+  </div>
+  <div
+    class="react-contextmenu-separator"
+  />
   <div>
     <div
       aria-disabled="false"

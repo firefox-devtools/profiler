@@ -8,12 +8,16 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
     class="appErrorBoundaryContents"
   >
     <div
-      class="photon-message-bar photon-message-bar-error"
+      class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage"
     >
-      Oops, there was an error
+      <div
+        class="photon-message-bar-inner-text"
+      >
+        Oops, there was an error
+      </div>
       <button
         aria-expanded="false"
-        class="photon-button photon-button-micro"
+        class="photon-button photon-button-micro photon-message-bar-action-button"
         type="button"
       >
         View full error details
@@ -28,8 +32,9 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
       </div>
       <div>
         
-    in ThrowingComponent
-    in ErrorBoundary
+    at ThrowingComponent (REDACTED)/src/test/components/ErrorBoundary.test.js:20:11)
+    at ErrorBoundary (REDACTED)/src/components/app/ErrorBoundary.js:28:66)
+    at LocalizationProvider (REDACTED)/node_modules/@fluent/react/index.js:96:26)
       </div>
     </div>
   </div>

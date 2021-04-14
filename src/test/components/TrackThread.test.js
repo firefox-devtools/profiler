@@ -4,27 +4,34 @@
 
 // @flow
 
-import type { Profile } from '../../types/profile';
+import type { Profile, FileIoPayload } from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
 import { oneLine } from 'common-tags';
 
-import { changeTimelineType } from '../../actions/profile-view';
-import TrackThread from '../../components/timeline/TrackThread';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  changeTimelineType,
+  changeInvertCallstack,
+  changeSelectedCallNode,
+} from '../../actions/profile-view';
+import { TimelineTrackThread } from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
-  getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 
 import {
@@ -32,17 +39,11 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
-import type { FileIoPayload } from '../../types/markers';
-
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and
 // incrementing by steps of 100 pixels to get to the next stack.
 const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = 50;
-const STACK_1_X_POSITION = 50;
-const STACK_2_X_POSITION = 150;
-const STACK_3_X_POSITION = 250;
-const STACK_4_X_POSITION = 350;
 
 /**
  * This test is asserting behavior more for the ThreadStackGraph component. The
@@ -52,6 +53,7 @@ const STACK_4_X_POSITION = 350;
 describe('timeline/TrackThread', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
+  autoMockCanvasContext();
 
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
@@ -63,10 +65,10 @@ describe('timeline/TrackThread', function() {
 
   function getMarkersProfile(
     testMarkers = [
-      ['Marker A', 0, { startTime: 0, endTime: 1 }],
-      ['Marker B', 1, { startTime: 1, endTime: 2 }],
-      ['Marker C', 2, { startTime: 2, endTime: 3 }],
-      ['Marker D', 3, { startTime: 3, endTime: 4 }],
+      ['Marker A', 0],
+      ['Marker B', 1],
+      ['Marker C', 2],
+      ['Marker D', 3],
     ]
   ) {
     const profile = getProfileWithMarkers(testMarkers);
@@ -81,10 +83,22 @@ describe('timeline/TrackThread', function() {
     const { getState, dispatch } = store;
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+
+    type Coordinate = {| pageX: number, pageY: number |};
+
+    // Look through the draw log and find the center of a specific fillRect
+    // call. This is a good way to know where the canvas drew something.
+    function getFillRectCenterByIndex(log: any[], index: number): Coordinate {
+      type FillRectCall = [string, number, number, number, number];
+      const calls: FillRectCall[] = log.filter(call => call[0] === 'fillRect');
+      const call = calls[index];
+      if (!call) {
+        console.error(log);
+        throw new Error(`Could not find a fillRect call at ${index}.`);
+      }
+      const [, x, y, w, h] = call;
+      return { pageX: x + w * 0.5, pageY: y + h * 0.5 };
+    }
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -97,12 +111,18 @@ describe('timeline/TrackThread', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread threadIndex={threadIndex} />
+        <TimelineTrackThread
+          threadsKey={threadIndex}
+          trackType="expanded"
+          trackName="Test Track"
+        />
       </Provider>
     );
     const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
+    flushRafCalls();
+    // The size update then schedules another rAF draw call for canvas components.
     flushRafCalls();
 
     const stackGraphCanvas = () =>
@@ -129,16 +149,29 @@ describe('timeline/TrackThread', function() {
       threadIndex,
       stackGraphCanvas,
       markerCanvas,
+      getFillRectCenterByIndex,
     };
   }
 
-  it('matches the snapshot', () => {
+  it('matches the snapshot for the component', () => {
     const { container } = setup(getSamplesProfile());
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('can click a stack in the stack graph', function() {
-    const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
+  it('matches the 2d canvas draw snapshot', () => {
+    setup(getSamplesProfile());
+    expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('can click a stack in the stack graph in normal call trees', function() {
+    const {
+      getState,
+      stackGraphCanvas,
+      thread,
+      getFillRectCenterByIndex,
+    } = setup(getSamplesProfile());
+
+    const log = flushDrawLog();
 
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
@@ -148,48 +181,98 @@ describe('timeline/TrackThread', function() {
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
     expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_2_X_POSITION })
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 1));
     expect(getCallNodePath()).toEqual(['d', 'e', 'f']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
     expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
 
-    fireEvent(
-      stackGraphCanvas(),
-      getMouseEvent('mouseup', { pageX: STACK_4_X_POSITION })
-    );
+    fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 3));
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
 
-  it('can click a marker', function() {
-    const { getState, markerCanvas } = setup(getMarkersProfile());
+  it('can click a stack in the stack graph in inverted call trees', function() {
+    const {
+      dispatch,
+      getState,
+      stackGraphCanvas,
+      thread,
+      getFillRectCenterByIndex,
+    } = setup(getSamplesProfile());
 
-    function clickAndGetMarkerName(pageX: number) {
-      fireEvent(markerCanvas(), getMouseEvent('mousedown', { pageX }));
-      fireEvent(markerCanvas(), getMouseEvent('mouseup', { pageX }));
+    // Provide a quick helper for nicely asserting the call node path.
+    const getCallNodePath = () =>
+      selectedThreadSelectors
+        .getSelectedCallNodePath(getState())
+        .map(funcIndex =>
+          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+        );
+
+    function changeInvertCallstackAndGetDrawLog(value) {
+      // We don't want a selected stack graph to change fillRect ordering.
+      dispatch(changeSelectedCallNode(0, []));
+      flushDrawLog();
+      dispatch(changeInvertCallstack(value));
+      return flushDrawLog();
+    }
+
+    // Switch to "inverted" mode to test with this state
+    {
+      const log = changeInvertCallstackAndGetDrawLog(true);
+
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
+      expect(getCallNodePath()).toEqual(['c']);
+
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
+      expect(getCallNodePath()).toEqual(['i']);
+    }
+    {
+      // Switch back to "uninverted" mode
+      const log = changeInvertCallstackAndGetDrawLog(false);
+
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 0));
+      expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
+
+      fireFullClick(stackGraphCanvas(), getFillRectCenterByIndex(log, 2));
+      expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
+    }
+  });
+
+  it('can click a marker', function() {
+    const { getState, markerCanvas, getFillRectCenterByIndex } = setup(
+      getMarkersProfile([
+        ['DOMEvent', 0, 4],
+        ['DOMEvent', 4, 8],
+      ])
+    );
+
+    const log = flushDrawLog();
+
+    function clickAndGetMarkerName(event) {
+      fireFullClick(markerCanvas(), event);
       return getPreviewSelection(getState());
     }
 
-    expect(clickAndGetMarkerName(STACK_1_X_POSITION)).toMatchObject({
+    // Currently markers are drawn with 3 fillRects, the middle of the three is the
+    // big interesting one. If this test breaks, likely the drawing strategy
+    // has changed.
+    const determineIndex = i => i * 3 + 1;
+
+    expect(
+      clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(0)))
+    ).toMatchObject({
       selectionStart: 0,
-      selectionEnd: 1,
+      selectionEnd: 4,
     });
 
-    expect(clickAndGetMarkerName(STACK_2_X_POSITION)).toMatchObject({
-      selectionStart: 1,
-      selectionEnd: 2,
+    expect(
+      clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(1)))
+    ).toMatchObject({
+      selectionStart: 4,
+      selectionEnd: 8,
     });
   });
 
@@ -199,15 +282,14 @@ describe('timeline/TrackThread', function() {
     expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
   });
 
-  it('adds disk io markers if they are present', function() {
+  it('adds file io markers if they are present', function() {
     const fileIoMarker = [
       [
         'FileIO',
         2,
+        3,
         ({
           type: 'FileIO',
-          startTime: 2,
-          endTime: 3,
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
@@ -216,5 +298,24 @@ describe('timeline/TrackThread', function() {
     ];
     const { getByTestId } = setup(getMarkersProfile(fileIoMarker));
     expect(getByTestId('TimelineMarkersFileIo')).toBeTruthy();
+  });
+
+  it('does not add off-thread file io markers even if they are present', function() {
+    const fileIoMarker = [
+      [
+        'FileIO',
+        2,
+        3,
+        ({
+          type: 'FileIO',
+          source: 'PoisionOIInterposer',
+          filename: '/foo/bar/',
+          operation: 'read/write',
+          threadId: 123,
+        }: FileIoPayload),
+      ],
+    ];
+    const { queryByTestId } = setup(getMarkersProfile(fileIoMarker));
+    expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
   });
 });

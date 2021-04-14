@@ -4,14 +4,9 @@
 
 // @flow
 import { CallTree } from '../profile-logic/call-tree';
+import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
-import type {
-  Profile,
-  Thread,
-  ThreadIndex,
-  IndexIntoFuncTable,
-  Pid,
-} from './profile';
+import type { Profile, Thread, ThreadIndex, Pid, TabID } from './profile';
 import type {
   CallNodePath,
   CallNodeTable,
@@ -19,23 +14,41 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  OriginsTimeline,
+  ActiveTabTimeline,
+  ThreadsKey,
 } from './profile-derived';
+import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State } from '../types/state';
-import type { CssPixels, StartEndRange } from '../types/units';
+import type {
+  UrlState,
+  UploadState,
+  State,
+  UploadedProfileInformation,
+} from './state';
+import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
 export type DataSource =
   | 'none'
   | 'from-file'
+  //  This datasource is used to fetch a profile from Firefox. This used to be
+  //  handled by an addon, hence the name, but now this is all inside Firefox.
   | 'from-addon'
+  // This is an alias for 'from-addon' until we phase that one out. We
+  // introduced it when implementing the "delete profile" functionality, because
+  // `from-addon` didn't suit this use-case well. In the future we want to
+  // completely replace `from-addon` with this one.
+  | 'unpublished'
   | 'local'
   | 'public'
   | 'from-url'
-  | 'compare';
-export type TimelineType = 'stack' | 'category';
+  | 'compare'
+  | 'uploaded-recordings';
+
+export type TimelineType = 'stack' | 'category' | 'cpu-category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
@@ -44,14 +57,6 @@ export type PreviewSelection =
       +selectionStart: number,
       +selectionEnd: number,
     |};
-export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
-export type FunctionsUpdatePerThread = {
-  [id: ThreadIndex]: {|
-    oldFuncToNewFuncMap: FuncToFuncMap,
-    funcIndices: IndexIntoFuncTable[],
-    funcNames: string[],
-  |},
-};
 
 /**
  * The counts for how many tracks are hidden in the timeline.
@@ -75,7 +80,25 @@ export type LocalTrackReference = {|
   +trackIndex: TrackIndex,
   +pid: Pid,
 |};
+
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
+
+/**
+ * Active tab track references
+ * A TrackReference uniquely identifies a track.
+ */
+export type ActiveTabGlobalTrackReference = {|
+  +type: 'global',
+  +trackIndex: TrackIndex,
+|};
+export type ActiveTabResourceTrackReference = {|
+  +type: 'resource',
+  +trackIndex: TrackIndex,
+|};
+
+export type ActiveTabTrackReference =
+  | ActiveTabGlobalTrackReference
+  | ActiveTabResourceTrackReference;
 
 export type RequestedLib = {|
   +debugName: string,
@@ -104,6 +127,13 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
+export type RightClickedMarkerInfo = {|
+  +threadsKey: ThreadsKey,
+  +markerIndex: MarkerIndex,
+|};
+
+export type Localization = ReactLocalization;
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
@@ -116,18 +146,18 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_SELECTED_CALL_NODE',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
       +type: 'UPDATE_TRACK_THREAD_HEIGHT',
       +height: CssPixels,
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +callNodePath: CallNodePath | null,
     |}
   | {|
@@ -135,17 +165,22 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_EXPANDED_CALL_NODES',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +expandedCallNodePaths: Array<CallNodePath>,
     |}
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +selectedMarker: MarkerIndex | null,
     |}
   | {|
+      +type: 'CHANGE_SELECTED_NETWORK_MARKER',
+      +threadsKey: ThreadsKey,
+      +selectedNetworkMarker: MarkerIndex | null,
+    |}
+  | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +markerIndex: MarkerIndex | null,
     |}
   | {|
@@ -167,7 +202,10 @@ type ProfileAction =
   | {|
       +type: 'HIDE_GLOBAL_TRACK',
       +trackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
+      +type: 'SHOW_ALL_TRACKS',
     |}
   | {|
       +type: 'SHOW_GLOBAL_TRACK',
@@ -178,7 +216,7 @@ type ProfileAction =
       +type: 'ISOLATE_PROCESS',
       +hiddenGlobalTracks: Set<TrackIndex>,
       +isolatedTrackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       // Isolate the process track, and hide the local tracks.
@@ -186,7 +224,7 @@ type ProfileAction =
       pid: Pid,
       hiddenGlobalTracks: Set<TrackIndex>,
       isolatedTrackIndex: TrackIndex,
-      selectedThreadIndex: ThreadIndex,
+      selectedThreadIndexes: Set<ThreadIndex>,
       hiddenLocalTracks: Set<TrackIndex>,
     |}
   | {|
@@ -203,7 +241,7 @@ type ProfileAction =
       +type: 'HIDE_LOCAL_TRACK',
       +pid: Pid,
       +trackIndex: TrackIndex,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'SHOW_LOCAL_TRACK',
@@ -215,23 +253,31 @@ type ProfileAction =
       +pid: Pid,
       +hiddenGlobalTracks: Set<TrackIndex>,
       +hiddenLocalTracks: Set<TrackIndex>,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
     |}
   | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |}
-  | {| +type: 'DISMISS_NEWLY_PUBLISHED' |};
+  | {| +type: 'DISMISS_NEWLY_PUBLISHED' |}
+  | {|
+      +type: 'ENABLE_EVENT_DELAY_TRACKS',
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |}
+  | {|
+      +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+    |};
 
 type ReceiveProfileAction =
   | {|
-      +type: 'COALESCED_FUNCTIONS_UPDATE',
-      +functionsUpdatePerThread: FunctionsUpdatePerThread,
+      +type: 'BULK_SYMBOLICATION',
+      +symbolicatedThreads: Thread[],
+      +oldFuncToNewFuncMaps: Map<ThreadIndex, FuncToFuncMap>,
     |}
   | {|
       +type: 'DONE_SYMBOLICATING',
@@ -252,14 +298,29 @@ type ReceiveProfileAction =
       +transformStacks: ?TransformStacksPerThread,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
-      +selectedThreadIndex: ThreadIndex,
+      +type: 'VIEW_FULL_PROFILE',
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
       +hiddenGlobalTracks: Set<TrackIndex>,
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +timelineType: TimelineType | null,
+    |}
+  | {|
+      +type: 'VIEW_ORIGINS_PROFILE',
+      +selectedThreadIndexes: Set<ThreadIndex>,
+      +originsTimeline: OriginsTimeline,
+    |}
+  | {|
+      +type: 'VIEW_ACTIVE_TAB_PROFILE',
+      +selectedThreadIndexes: Set<ThreadIndex>,
+      +activeTabTimeline: ActiveTabTimeline,
+      +tabID: TabID | null,
+    |}
+  | {|
+      +type: 'DATA_RELOAD',
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -285,15 +346,19 @@ type UrlStateAction =
   | {|
       +type: 'PROFILE_PUBLISHED',
       +hash: string,
+      +profileName: string,
       +prePublishedState: State | null,
     |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
   | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
-  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThreadIndex: ThreadIndex |}
+  | {|
+      +type: 'CHANGE_SELECTED_THREAD',
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
   | {|
       +type: 'SELECT_TRACK',
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
       +selectedTab: TabSlug,
     |}
   | {|
@@ -303,13 +368,13 @@ type UrlStateAction =
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +transform: Transform,
       +transformedThread: Thread,
     |}
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +firstPoppedFilterIndex: number,
     |}
   | {|
@@ -319,7 +384,7 @@ type UrlStateAction =
   | {|
       +type: 'CHANGE_IMPLEMENTATION_FILTER',
       +implementation: ImplementationFilter,
-      +threadIndex: ThreadIndex,
+      +threadsKey: ThreadsKey,
       +transformedThread: Thread,
       +previousImplementation: ImplementationFilter,
       +implementation: ImplementationFilter,
@@ -333,7 +398,7 @@ type UrlStateAction =
       +invertCallstack: boolean,
       +callTree: CallTree,
       +callNodeTable: CallNodeTable,
-      +selectedThreadIndex: ThreadIndex,
+      +selectedThreadIndexes: Set<ThreadIndex>,
     |}
   | {|
       +type: 'CHANGE_SHOW_USER_TIMINGS',
@@ -346,17 +411,29 @@ type UrlStateAction =
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
   | {| +type: 'CHANGE_NETWORK_SEARCH_STRING', +searchString: string |}
   | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
-  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |}
+  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string | null |}
   | {|
       +type: 'SANITIZED_PROFILE_PUBLISHED',
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-      +prePublishedState: State,
+      +profileName: string,
+      +prePublishedState: State | null,
     |}
   | {|
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
+    |}
+  | {|
+      +type: 'CHANGE_MOUSE_TIME_POSITION',
+      +mouseTimePosition: Milliseconds | null,
+    |}
+  | {|
+      +type: 'TOGGLE_RESOURCES_PANEL',
+      +selectedThreadIndexes: Set<ThreadIndex>,
+    |}
+  | {|
+      +type: 'PROFILE_REMOTELY_DELETED',
     |};
 
 type IconsAction =
@@ -376,7 +453,6 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_STARTED',
-      +abortFunction: () => void,
     |}
   | {|
       +type: 'UPDATE_UPLOAD_PROGRESS',
@@ -394,6 +470,7 @@ type PublishAction =
     |}
   | {|
       +type: 'UPLOAD_COMPRESSION_STARTED',
+      +abortFunction: () => void,
     |}
   | {|
       +type: 'CHANGE_UPLOAD_STATE',
@@ -405,6 +482,34 @@ type PublishAction =
     |}
   | {| +type: 'HIDE_STALE_PROFILE' |};
 
+type DragAndDropAction =
+  | {|
+      +type: 'START_DRAGGING',
+    |}
+  | {|
+      +type: 'STOP_DRAGGING',
+    |}
+  | {|
+      +type: 'REGISTER_DRAG_AND_DROP_OVERLAY',
+    |}
+  | {|
+      +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
+    |};
+
+type CurrentProfileUploadedInformationAction = {|
+  +type: 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION',
+  +uploadedProfileInformation: UploadedProfileInformation | null,
+|};
+
+type L10nAction =
+  | {| +type: 'REQUEST_L10N' |}
+  | {|
+      +type: 'RECEIVE_L10N',
+      +localization: Localization,
+      +primaryLocale: string,
+      +direction: 'ltr' | 'rtl',
+    |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -412,4 +517,7 @@ export type Action =
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction
-  | PublishAction;
+  | PublishAction
+  | DragAndDropAction
+  | CurrentProfileUploadedInformationAction
+  | L10nAction;

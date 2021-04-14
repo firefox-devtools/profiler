@@ -4,7 +4,7 @@
 // @flow
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { TransformType } from '../types/transforms';
+import type { TransformType } from 'firefox-profiler/types';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally
@@ -31,7 +31,7 @@ export function assertExhaustiveCheck(
  * type information of the object. Flow will occasionally throw errors when
  * inferring what is going on with Object.assign.
  */
-export function immutableUpdate<T: Object>(object: T, ...rest: Object[]): T {
+export function immutableUpdate<T>(object: T, ...rest: any[]): T {
   return Object.assign({}, object, ...rest);
 }
 
@@ -102,13 +102,28 @@ export function convertToTransformType(type: string): TransformType | null {
 }
 
 /**
+ * This function coerces one type into another type.
+ * This is equivalent to: (((value: A): any): B)
+ */
+export function coerce<A, B>(item: A): B {
+  return (item: any);
+}
+
+/**
+ * It can be helpful to coerce one type that matches the shape of another.
+ */
+export function coerceMatchingShape<T>(item: $Shape<T>): T {
+  return (item: any);
+}
+
+/**
  * This is a type-friendly version of Object.values that assumes the object has
  * a Map-like structure.
  */
 export function objectValues<Value, Obj: {| [string]: Value |}>(
   object: Obj
 ): Value[] {
-  return (Object.values: Function)(object);
+  return (Object.values: any)(object);
 }
 
 /**
@@ -118,9 +133,26 @@ export function objectValues<Value, Obj: {| [string]: Value |}>(
 export function objectEntries<Key, Value>(object: {
   [Key]: Value,
 }): Array<[Key, Value]> {
-  return (Object.entries: Function)(object);
+  return (Object.entries: any)(object);
 }
 
+/**
+ * This is a type-friendly version of Object.entries that assumes the object has
+ * a Map-like structure.
+ */
+export function objectMap<Return, Key, Value>(
+  object: { [Key]: Value },
+  fn: (Value, Key) => Return
+): { [Key]: Return } {
+  const result: { [Key]: Return } = {};
+  for (const [key, value] of objectEntries(object)) {
+    result[key] = fn(value, key);
+  }
+  return result;
+}
+
+// Generic bounds with an Object is a false positive.
+// eslint-disable-next-line flowtype/no-weak-types
 export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
   return Object.values(obj);
 }
@@ -149,4 +181,11 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
     );
   }
   return item;
+}
+
+/**
+ * Returns the first item from Set in a type friendly manner.
+ */
+export function getFirstItemFromSet<T>(set: Set<T>): T | void {
+  return set.values().next().value;
 }

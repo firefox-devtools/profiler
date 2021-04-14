@@ -3,10 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { CallTree } from '../../profile-logic/call-tree';
-import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
-import type { Store, State } from '../../types/store';
+import type {
+  IndexIntoCallNodeTable,
+  Store,
+  State,
+} from 'firefox-profiler/types';
+
 import { ensureExists } from '../../utils/flow';
-import { fireEvent, type RenderResult } from 'react-testing-library';
+import { fireEvent, type RenderResult } from '@testing-library/react';
 
 export function getBoundingBox(width: number, height: number) {
   return {
@@ -62,7 +66,7 @@ class FakeMouseEvent extends MouseEvent {
 
   constructor(type: string, values: FakeMouseEventInit) {
     const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
-    super(type, (mouseValues: Object));
+    super(type, (mouseValues: any));
 
     Object.assign(this, {
       offsetX: offsetX || 0,
@@ -130,12 +134,12 @@ export function formatTree(
   const whitespace = Array(depth * 2 + 1).join(' ');
 
   children.forEach(callNodeIndex => {
-    const { name, totalTime, selfTime, categoryName } = callTree.getDisplayData(
+    const { name, total, self, categoryName } = callTree.getDisplayData(
       callNodeIndex
     );
     const displayName = includeCategories ? `${name} [${categoryName}]` : name;
     lines.push(
-      `${whitespace}- ${displayName} (total: ${totalTime}, self: ${selfTime})`
+      `${whitespace}- ${displayName} (total: ${total}, self: ${self})`
     );
     formatTree(
       callTree,
@@ -176,6 +180,10 @@ export function waitUntilState(
   store: Store,
   predicate: State => boolean
 ): Promise<void> {
+  if (predicate(store.getState())) {
+    return Promise.resolve();
+  }
+
   return new Promise(resolve => {
     store.subscribe(() => {
       if (predicate(store.getState())) {
@@ -185,6 +193,29 @@ export function waitUntilState(
       }
     });
   });
+}
+
+/**
+ * This waits until the predicate returns something non-undefined.
+ * The predicate can return either a direct value or a promise.
+ */
+export async function waitUntilData<T>(
+  predicate: () => Promise<T> | T,
+  times: number = 10
+): Promise<T> {
+  function wait() {
+    return new Promise(resolve => setTimeout(resolve, 50));
+  }
+
+  for (let i = 0; i < times; i++) {
+    await wait();
+    const value = await predicate();
+    if (value !== undefined || value !== null) {
+      return value;
+    }
+  }
+
+  throw new Error(`We waited more than ${times} times for a defined value.`);
 }
 
 /**
@@ -219,7 +250,7 @@ export function removeRootOverlayElement() {
  * Usage:
  * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
  */
-export function createSelectChanger(renderResult: RenderResult) {
+export function createSelectChanger(renderResult: RenderResult<>) {
   return function changeSelect({ from, to }: {| from: string, to: string |}) {
     // Look up the <option> with the text label.
     const option = renderResult.getByText(to);
@@ -250,4 +281,122 @@ export function findFillTextPositionFromDrawLog(
   }
 
   return positions[0];
+}
+
+/**
+ * React Testing Library only sends one event at a time, but a lot of component logic
+ * assumes that events come in a natural cascade. This utility ensures that cascasde
+ * gets fired correctly. This also includes the fix to make properties like pageX work.
+ */
+export function fireFullClick(
+  element: HTMLElement,
+  options?: FakeMouseEventInit
+) {
+  fireEvent(element, getMouseEvent('mousedown', options));
+  fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('click', options));
+}
+
+/**
+ * This utility will fire a full context menu event as a user would. The options
+ * paramter is optional. It will always add the `button` and `buttons` value to
+ * ensure that it is correct, unless the ctrlKey is specified, as that is a valid
+ * option in macOS to open a context menu.
+ */
+export function fireFullContextMenu(
+  element: HTMLElement,
+  options: FakeMouseEventInit = {}
+) {
+  const isMacContextMenu =
+    options.ctrlKey && !options.metaKey && !options.shiftKey && !options.altKey;
+
+  if (!isMacContextMenu) {
+    // Ensure that the `options` properties "button" and "buttons" have the correct
+    // values of 2, so that tests don't have to specify this. The only time this value
+    // would not be 2 is on a Mac context menu event.
+    options = {
+      ...options,
+      button: 2,
+      buttons: 2,
+    };
+  }
+
+  fireEvent(element, getMouseEvent('mousedown', options));
+  fireEvent(element, getMouseEvent('mouseup', options));
+  fireEvent(element, getMouseEvent('contextmenu', options));
+}
+
+/**
+ * React Testing Library only sends one event at a time, but a lot of component logic
+ * assumes that events come in a natural cascade. This utility ensures that cascasde
+ * gets fired more correctly.
+ *
+ * Note, that this utility is not quite complete in it's implementation. There are
+ * more complex interactions with prevent defaulting, and passing in the correct
+ * keycode information.
+ *
+ * For a more complete implementation see:
+ * https://github.com/testing-library/user-event/blob/c187639cbc7d2651d3392db6967f614a75a32695/src/type.js#L283
+ *
+ * And addition Julien's review comments here:
+ * https://github.com/firefox-devtools/profiler/pull/2842/commits/6be20eb6eafca56644b1d55010cc1824a1d03695#r501061693
+ */
+export function fireFullKeyPress(
+  element: HTMLElement,
+  options: { key: string, ... }
+) {
+  // Since this is test code, only use QWERTY layout keyboards.
+  // Note the key is always converted to lowercase here.
+  const codes: { [key: string]: number } = {
+    enter: 13,
+    escape: 27,
+    ' ': 32,
+    '?': 191,
+    a: 65,
+    b: 66,
+    c: 67,
+    d: 68,
+    e: 69,
+    f: 70,
+    g: 71,
+    h: 72,
+    i: 73,
+    j: 74,
+    k: 75,
+    l: 76,
+    m: 77,
+    n: 78,
+    o: 79,
+    p: 80,
+    q: 81,
+    r: 82,
+    s: 83,
+    t: 84,
+    u: 85,
+    v: 86,
+    w: 87,
+    x: 88,
+    y: 89,
+    z: 90,
+  };
+
+  // It's important that the codes are correctly configured here, or else the keypress
+  // event won't fire.
+  // https://github.com/testing-library/react-testing-library/issues/269#issuecomment-455854112
+  const optionsConfigured = {
+    code: codes[options.key.toLowerCase()],
+    charCode: codes[options.key.toLowerCase()],
+    ...options,
+  };
+
+  if (!optionsConfigured.code) {
+    throw new Error(
+      `An unhandled keypress key was encountered: "${options.key}", look it up here:` +
+        ` https://keycode.info/ and then add to this function.`
+    );
+  }
+
+  fireEvent.keyDown(element, optionsConfigured);
+  fireEvent.keyPress(element, optionsConfigured);
+  fireEvent.keyUp(element, optionsConfigured);
 }

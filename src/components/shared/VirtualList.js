@@ -37,7 +37,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 type RenderItem<Item> = (Item, number, number) => React.Node;
 
@@ -196,7 +196,7 @@ class VirtualListInner<Item> extends React.PureComponent<
         // Add padding to list height to account for overlay scrollbars.
         style={{
           height: `${(items.length + 1) * itemHeight}px`,
-          width: columnIndex === 1 ? containerWidth : undefined,
+          minWidth: columnIndex === 1 ? containerWidth : undefined,
         }}
       >
         <div
@@ -234,8 +234,8 @@ type VirtualListProps<Item> = {|
   +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
-  +onKeyDown: KeyboardEvent => void,
-  +onCopy: Event => void,
+  +onKeyDown: (SyntheticKeyboardEvent<>) => void,
+  +onCopy: ClipboardEvent => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.
   +disableOverscan: boolean,
@@ -264,7 +264,9 @@ type Geometry = {
   innerRectY: CssPixels,
 };
 
-class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
+export class VirtualList<Item> extends React.PureComponent<
+  VirtualListProps<Item>
+> {
   _container: {| current: HTMLDivElement | null |} = React.createRef();
   _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
   _geometry: ?Geometry;
@@ -297,7 +299,7 @@ class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
     this.forceUpdate();
   };
 
-  _onCopy = (event: Event) => {
+  _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._container.current) {
       this.props.onCopy(event);
     }
@@ -423,5 +425,3 @@ class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
     );
   }
 }
-
-export default VirtualList;

@@ -7,7 +7,13 @@
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import type { Microseconds, Milliseconds, Nanoseconds } from '../types/units';
+import type {
+  Microseconds,
+  Milliseconds,
+  Nanoseconds,
+  WeightType,
+} from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from './flow';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
 // problem. It's much better to reuse an instance of `Intl.NumberFormat`.
@@ -79,12 +85,23 @@ export function formatNumber(
  * Format call node numbers consistently.
  */
 export function formatCallNodeNumber(
-  interval: number,
+  weightType: WeightType,
   isHighPrecision: boolean,
   number: number
 ): string {
   // If the interval is an integer, display the number as an integer.
-  let precision = Number.isInteger(interval) ? 0 : 1;
+  let precision;
+  switch (weightType) {
+    case 'tracing-ms':
+      precision = 1;
+      break;
+    case 'samples':
+    case 'bytes':
+      precision = 0;
+      break;
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
 
   if (isHighPrecision) {
     // Sometimes the number should be high precision, such as on a JS tracer thread
@@ -94,25 +111,91 @@ export function formatCallNodeNumber(
   return formatNumber(number, 3, precision);
 }
 
-export function formatPercent(value: number): string {
+/**
+ * Format call node numbers consistently.
+ */
+export function formatCallNodeNumberWithUnit(
+  weightType: WeightType,
+  isHighPrecision: boolean,
+  number: number
+): string {
+  switch (weightType) {
+    case 'tracing-ms': {
+      // Sometimes the number should be high precision, such as on a JS tracer thread
+      // which has timing to the microsecond.
+      const precision = isHighPrecision ? 3 : 1;
+      return formatNumber(number, 3, precision) + 'ms';
+    }
+    case 'samples': {
+      // TODO - L10n properly
+      const unit = number === 1 ? ' sample' : ' samples';
+      return formatNumber(number, 3, 0) + unit;
+    }
+    case 'bytes': {
+      // TODO - L10n properly
+      const unit = number === 1 ? ' byte' : ' bytes';
+      return formatNumber(number, 3, 0) + unit;
+    }
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+/**
+ * Format a localized percentage. This takes a number valued between 0-1.
+ */
+export function formatPercent(ratio: number): string {
   return formatNumber(
-    value,
+    ratio,
     /* significantDigits */ 2,
     /* maxFractionalDigits */ 1,
     'percent'
   );
 }
 
-export function formatBytes(bytes: number): string {
+/**
+ * Turn a number ranged 0 to 1 into a valid CSS percentage string. Use this over
+ * formatPercent, as the latter is localized and may not be a valid percentage
+ * for CSS.
+ *
+ * e.g.
+ * 0.1       => "10.0000%"
+ * 0.5333333 => "53.3333%"
+ * 1.0       => "100.0000%"
+ */
+export function ratioToCssPercent(ratio: number): string {
+  return (ratio * 100).toFixed(4) + '%';
+}
+
+export function formatBytes(
+  bytes: number,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 2
+): string {
   if (bytes < 10000) {
     // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
-    return formatNumber(bytes) + 'B';
+    // We use "0" for significantDigits because bytes will always be integers.
+    return formatNumber(bytes, 0) + 'B';
   } else if (bytes < 1024 * 1024) {
-    return formatNumber(bytes / 1024, 3, 2) + 'KB';
+    return (
+      formatNumber(bytes / 1024, significantDigits, maxFractionalDigits) + 'KB'
+    );
   } else if (bytes < 1024 * 1024 * 1024) {
-    return formatNumber(bytes / (1024 * 1024), 3, 2) + 'MB';
+    return (
+      formatNumber(
+        bytes / (1024 * 1024),
+        significantDigits,
+        maxFractionalDigits
+      ) + 'MB'
+    );
   }
-  return formatNumber(bytes / (1024 * 1024 * 1024), 3, 2) + 'GB';
+  return (
+    formatNumber(
+      bytes / (1024 * 1024 * 1024),
+      significantDigits,
+      maxFractionalDigits
+    ) + 'GB'
+  );
 }
 
 export function formatSI(num: number): string {
@@ -158,6 +241,44 @@ export function formatSeconds(
 ) {
   return (
     formatNumber(time / 1000, significantDigits, maxFractionalDigits) + 's'
+  );
+}
+
+export function formatTimestamp(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 3
+) {
+  // Format in the closest base (seconds, milliseconds, microseconds, or nanoseconds),
+  // to avoid cases where times are displayed with too many leading zeroes to be useful.
+  if (time >= 1000) {
+    return formatSeconds(
+      time,
+      significantDigits,
+      Number.isInteger(time / 1000) ? 0 : maxFractionalDigits
+    );
+  }
+  if (time >= 1) {
+    return formatMilliseconds(
+      time,
+      significantDigits,
+      Number.isInteger(time) ? 0 : maxFractionalDigits
+    );
+  }
+  if (time * 1000 >= 1) {
+    return formatMicroseconds(
+      time * 1000,
+      significantDigits,
+      Number.isInteger(time * 1000) ? 0 : maxFractionalDigits
+    );
+  }
+  if (time === 0) {
+    return '0s';
+  }
+  return formatNanoseconds(
+    time * 1000 * 1000,
+    significantDigits,
+    Number.isInteger(time * 1000 * 1000) ? 0 : maxFractionalDigits
   );
 }
 

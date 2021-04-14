@@ -5,11 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { Localized } from '@fluent/react';
 
-import { changeProfilesToCompare } from '../../actions/app';
-import explicitConnect from '../../utils/connect';
-import type { ConnectedProps } from '../../utils/connect';
-
+import { AppHeader } from './AppHeader';
+import { changeProfilesToCompare } from 'firefox-profiler/actions/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
 
 type DispatchProps = {|
@@ -23,7 +24,7 @@ type State = {|
   profile2: string,
 |};
 
-class CompareHome extends PureComponent<Props, State> {
+class CompareHomeImpl extends PureComponent<Props, State> {
   state = { profile1: '', profile2: '' };
 
   handleInputChange = (event: SyntheticInputEvent<>) => {
@@ -43,17 +44,24 @@ class CompareHome extends PureComponent<Props, State> {
 
     return (
       <main className="compareHome">
-        <h1 className="compareHomeTitle">
-          Enter the profile URLs that you’d like to compare
-        </h1>
-        <p>
-          The tool will extract the data from the selected track and range for
-          each profile, and put them both on the same view to make them easy to
-          compare.
+        <AppHeader />
+        <h2 className="photon-title-20">
+          <Localized id="CompareHome--instruction-title">
+            Enter the profile URLs that you’d like to compare
+          </Localized>
+        </h2>
+        <p className="photon-body-20">
+          <Localized id="CompareHome--instruction-content">
+            The tool will extract the data from the selected track and range for
+            each profile, and put them both on the same view to make them easy
+            to compare.
+          </Localized>
         </p>
         <form className="compareHomeForm" onSubmit={this.handleFormSubmit}>
           <label className="compareHomeFormLabel" htmlFor="compareHomeProfile1">
-            Profile 1:
+            <Localized id="CompareHome--form-label-profile1">
+              Profile 1:
+            </Localized>
           </label>
           <input
             name="profile1"
@@ -66,7 +74,9 @@ class CompareHome extends PureComponent<Props, State> {
             value={profile1}
           />
           <label className="compareHomeFormLabel" htmlFor="compareHomeProfile2">
-            Profile 2:
+            <Localized id="CompareHome--form-label-profile2">
+              Profile 2:
+            </Localized>
           </label>
           <input
             name="profile2"
@@ -78,18 +88,20 @@ class CompareHome extends PureComponent<Props, State> {
             onChange={this.handleInputChange}
             value={profile2}
           />
-          <input
-            className="compareHomeSubmitButton"
-            type="submit"
-            value="Retrieve profiles"
-          />
+          <Localized id="CompareHome--submit-button" attrs={{ value: true }}>
+            <input
+              className="compareHomeSubmitButton photon-button photon-button-primary"
+              type="submit"
+              value="Retrieve profiles"
+            />
+          </Localized>
         </form>
       </main>
     );
   }
 }
 
-export default explicitConnect<{||}, {||}, DispatchProps>({
+export const CompareHome = explicitConnect<{||}, {||}, DispatchProps>({
   mapDispatchToProps: { changeProfilesToCompare },
-  component: CompareHome,
+  component: CompareHomeImpl,
 });

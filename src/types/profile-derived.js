@@ -12,7 +12,11 @@ import type {
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
   CounterIndex,
+  InnerWindowID,
+  Page,
+  IndexIntoRawMarkerTable,
 } from './profile';
+import type { IndexedArray } from './utils';
 import type { StackTiming } from '../profile-logic/stack-timing';
 export type IndexIntoCallNodeTable = number;
 
@@ -75,11 +79,22 @@ export type CallNodeInfo = {
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
+/**
+ * This type contains the first derived `Marker[]` information, plus an IndexedArray
+ * to get back to the RawMarkerTable.
+ */
+export type DerivedMarkerInfo = {|
+  markers: Marker[],
+  markerIndexToRawMarkerIndexes: IndexedArray<
+    MarkerIndex,
+    IndexIntoRawMarkerTable[]
+  >,
+|};
+
 export type Marker = {|
   start: Milliseconds,
-  dur: Milliseconds,
+  end: Milliseconds | null,
   name: string,
-  title: string | null,
   category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
@@ -98,24 +113,25 @@ export type MarkerIndex = number;
 
 export type CallNodeData = {
   funcName: string,
-  totalTime: number,
-  totalTimeRelative: number,
-  selfTime: number,
-  selfTimeRelative: number,
+  total: number,
+  totalRelative: number,
+  self: number,
+  selfRelative: number,
 };
 
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
-    totalTime: string,
-    totalTimeWithUnit: string,
-    totalTimePercent: string,
-    selfTime: string,
-    selfTimeWithUnit: string,
+    total: string,
+    totalWithUnit: string,
+    totalPercent: string,
+    self: string,
+    selfWithUnit: string,
     name: string,
     lib: string,
     isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
+    iconSrc: string | null,
     icon: string | null,
     ariaLabel: string,
   }>
@@ -189,18 +205,120 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 export type GlobalTrack =
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
   | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
-  | {| +type: 'visual-progress', +id: string |}
-  | {| +type: 'perceptual-visual-progress', +id: string |}
-  | {| +type: 'contentful-visual-progress', +id: string |};
+  | {| +type: 'visual-progress' |}
+  | {| +type: 'perceptual-visual-progress' |}
+  | {| +type: 'contentful-visual-progress' |};
 
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
-  | {| +type: 'ipc', +threadIndex: ThreadIndex |};
+  | {| +type: 'ipc', +threadIndex: ThreadIndex |}
+  | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
+
+/**
+ * The origins timeline view is experimental. These data structures may need to be
+ * adjusted to fit closer to the other track types, but they were easy to do for now.
+ */
+
+/**
+ * This origin was loaded as a sub-frame to another one. It will be nested in the view.
+ */
+export type OriginsTimelineEntry = {|
+  type: 'sub-origin',
+  innerWindowID: InnerWindowID,
+  threadIndex: ThreadIndex,
+  page: Page,
+  origin: string,
+|};
+
+/**
+ * This is a "root" origin, which is viewed at the top level in a tab.
+ */
+export type OriginsTimelineRoot = {|
+  type: 'origin',
+  innerWindowID: InnerWindowID,
+  threadIndex: ThreadIndex,
+  page: Page,
+  origin: string,
+  children: Array<OriginsTimelineEntry | OriginsTimelineNoOrigin>,
+|};
+
+/**
+ * This thread does not have any origin information associated with it. However
+ * it may be listed as a child of another "root" timeline origin if it is in the
+ * same process as that thread.
+ */
+export type OriginsTimelineNoOrigin = {|
+  type: 'no-origin',
+  threadIndex: ThreadIndex,
+|};
+
+export type OriginsTimelineTrack =
+  | OriginsTimelineEntry
+  | OriginsTimelineRoot
+  | OriginsTimelineNoOrigin;
+
+export type OriginsTimeline = Array<
+  OriginsTimelineNoOrigin | OriginsTimelineRoot
+>;
+
+/**
+ * Active tab view tracks
+ */
+
+/**
+ * Main track for active tab view.
+ * Currently it holds mainThreadIndex to make things easier because most of the
+ * places require a single thread index instead of thread indexes array.
+ * This will go away soon.
+ */
+export type ActiveTabMainTrack = {|
+  type: 'tab',
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey,
+|};
+
+export type ActiveTabScreenshotTrack = {|
+  +type: 'screenshots',
+  +id: string,
+  +threadIndex: ThreadIndex,
+|};
+
+export type ActiveTabResourceTrack =
+  | {|
+      +type: 'sub-frame',
+      +threadIndex: ThreadIndex,
+      +name: string,
+    |}
+  | {|
+      +type: 'thread',
+      +threadIndex: ThreadIndex,
+      +name: string,
+    |};
+
+/**
+ * Timeline for active tab view.
+ * It holds main track for the current tab, screenshots and resource tracks.
+ * Main track is being computed during profile load and rest is being added to resources.
+ * This timeline type is different compared to full view. This makes making main
+ * track acess a lot easier.
+ */
+export type ActiveTabTimeline = {
+  mainTrack: ActiveTabMainTrack,
+  screenshots: Array<ActiveTabScreenshotTrack>,
+  resources: Array<ActiveTabResourceTrack>,
+  resourcesThreadsKey: ThreadsKey,
+};
+
+export type ActiveTabGlobalTrack =
+  | ActiveTabMainTrack
+  | ActiveTabScreenshotTrack;
+
+export type ActiveTabTrack = ActiveTabGlobalTrack | ActiveTabResourceTrack;
 
 /**
  * Type that holds the values of personally identifiable information that user
@@ -228,7 +346,9 @@ export type RemoveProfileInformation = {
 export type SelectedState =
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  | 'FILTERED_OUT'
+  | 'FILTERED_OUT_BY_TRANSFORM'
+  // Samples can be filtered out if they are not part of the active tab.
+  | 'FILTERED_OUT_BY_ACTIVE_TAB'
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
   | 'SELECTED'
@@ -238,3 +358,51 @@ export type SelectedState =
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
   | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+
+/**
+ * It holds the initially selected track's HTMLElement. This allows the timeline
+ * to scroll the initially selected track into view once the page is loaded.
+ */
+export type InitialSelectedTrackReference = HTMLElement;
+
+/**
+ * Page data for ProfileFilterNavigator component.
+ */
+export type ProfileFilterPageData = {|
+  origin: string,
+  hostname: string,
+  favicon: string,
+|};
+
+/**
+ * This struct contains the traced timing for each call node. The arrays are indexed
+ * by the CallNodeIndex, and the values in the Float32Arrays are Milliseconds. The
+ * traced timing is computed by summing the distance between samples for a given call
+ * node. See the `computeTracedTiming` for more details.
+ */
+export type TracedTiming = {|
+  +self: Float32Array,
+  +running: Float32Array,
+|};
+
+/*
+ * Event delay table that holds the pre-processed event delay values and other
+ * statistics about it.
+ * Gecko sends the non processed event delay values to the front-end and we have
+ * to make a calculation to find out their real values. Also see:
+ * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
+ */
+export type EventDelayInfo = {|
+  +eventDelays: Float32Array,
+  +minDelay: Milliseconds,
+  +maxDelay: Milliseconds,
+  +delayRange: Milliseconds,
+|};
+
+/**
+ * This is a unique key that can be used in an object cache that represents either
+ * a single thread, or a selection of multiple threads. When it's a number, it's
+ * the ThreadIndex. When there are multiple threads, the key is a string of sorted,
+ * comma separated thread indexes, e.g. "5,7,10"
+ */
+export type ThreadsKey = string | number;

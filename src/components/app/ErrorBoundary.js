@@ -4,7 +4,7 @@
 // @flow
 
 import * as React from 'react';
-import { reportError } from '../../utils/analytics';
+import { reportError } from 'firefox-profiler/utils/analytics';
 import './ErrorBoundary.css';
 
 type State = {|
@@ -71,10 +71,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
-            <div className="photon-message-bar photon-message-bar-error">
-              {this.props.message}
+            <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content appErrorBoundaryMessage">
+              <div className="photon-message-bar-inner-text">
+                {this.props.message}
+              </div>
               <button
-                className="photon-button photon-button-micro"
+                className="photon-button photon-button-micro photon-message-bar-action-button"
                 type="button"
                 onClick={this._toggleErrorDetails}
                 aria-expanded={showDetails ? 'true' : 'false'}

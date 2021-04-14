@@ -1,20 +1,23 @@
-// flow-typed signature: 72cb54db24df27a7bac24b0b302df296
-// flow-typed version: 6cb74e5628/webpack_v4.x.x/flow_>=v0.71.x
+// flow-typed signature: 5de44ba0d9d6f5a48ca71345151a9801
+// flow-typed version: 7448070196/webpack_v4.x.x/flow_>=v0.71.x <=v0.103.x
 
 import * as http from 'http';
 import fs from 'fs';
 
 declare module 'webpack' {
-  declare class WebpackError extends Error {
+  declare class $WebpackError extends Error {
     constructor(message: string): WebpackError;
     inspect(): string;
+    details: string;
   }
+
+  declare type WebpackError = $WebpackError;
 
   declare interface Stats {
     hasErrors(): boolean;
     hasWarnings(): boolean;
     toJson(options?: StatsOptions): any;
-    toString(options?: StatsOptions & { colors?: boolean }): string;
+    toString(options?: { ...StatsOptions, colors?: boolean }): string;
   }
 
   declare type Callback = (error: WebpackError, stats: Stats) => void;
@@ -581,6 +584,13 @@ declare module 'webpack' {
     watchOptions?: WatchOptions,
   };
 
+  declare class EnvironmentPlugin {
+    constructor(env: { [string]: mixed } | string[]): $ElementType<
+      $NonMaybeType<$PropertyType<ResolveOptions, 'plugins'>>,
+      number
+    >;
+  }
+
   declare function builder(
     options: WebpackOptions,
     callback?: Callback
@@ -590,5 +600,7 @@ declare module 'webpack' {
     callback?: Callback
   ): WebpackMultiCompiler;
 
-  declare module.exports: typeof builder;
+  declare module.exports: typeof builder & {
+    EnvironmentPlugin: typeof EnvironmentPlugin,
+  };
 }

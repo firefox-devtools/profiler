@@ -6,15 +6,12 @@
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import memoize from 'memoize-immutable';
-import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
+import { TIMELINE_MARGIN_RIGHT } from '../../app-logic/constants';
 import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
+import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatMilliseconds } from '../../utils/format-numbers';
@@ -27,20 +24,20 @@ import type {
   Thread,
   CategoryList,
   PageList,
-  ThreadIndex,
-} from '../../types/profile';
-import type { UserTimingMarkerPayload } from '../../types/markers';
-import type {
+  ThreadsKey,
+  UserTimingMarkerPayload,
+  WeightType,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   CombinedTimingRows,
-} from '../../types/profile-derived';
-import type {
   Milliseconds,
   CssPixels,
   DevicePixels,
   UnitIntervalOfProfileRange,
-} from '../../types/units';
+  MarkerIndex,
+  Marker,
+} from 'firefox-profiler/types';
+
 import type {
   StackTimingDepth,
   IndexIntoStackTiming,
@@ -51,8 +48,9 @@ import type { WrapFunctionInDispatch } from '../../utils/connect';
 type OwnProps = {|
   +thread: Thread,
   +pages: PageList | null,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +interval: Milliseconds,
+  +weightType: WeightType,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +combinedTimingRows: CombinedTimingRows,
@@ -60,7 +58,7 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
   >,
-  +getMarker: Function,
+  +getMarker: MarkerIndex => Marker,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -68,6 +66,7 @@ type OwnProps = {|
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
+  +marginLeft: CssPixels,
 |};
 
 type Props = $ReadOnly<{|
@@ -80,7 +79,7 @@ type HoveredStackTiming = {|
   +stackTimingIndex: IndexIntoStackTiming,
 |};
 
-require('./Canvas.css');
+import './Canvas.css';
 
 const ROW_CSS_PIXELS_HEIGHT = 16;
 const TEXT_CSS_PIXELS_OFFSET_START = 3;
@@ -88,7 +87,7 @@ const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
-class StackChartCanvas extends React.PureComponent<Props> {
+class StackChartCanvasImpl extends React.PureComponent<Props> {
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
 
@@ -158,6 +157,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       categories,
       callNodeInfo: { callNodeTable },
       getMarker,
+      marginLeft,
       viewport: {
         containerWidth,
         containerHeight,
@@ -191,7 +191,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
 
     const innerContainerWidth =
-      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
 
     const pixelAtViewportPosition = (
@@ -199,7 +199,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     ): DevicePixels =>
       devicePixelRatio *
       // The right hand side of this formula is all in CSS pixels.
-      (TIMELINE_MARGIN_LEFT +
+      (marginLeft +
         ((viewportPosition - viewportLeft) * innerContainerWidth) /
           viewportLength);
 
@@ -210,6 +210,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
       TEXT_CSS_PIXELS_OFFSET_START * devicePixelRatio;
     const textDevicePixelsOffsetTop =
       TEXT_CSS_PIXELS_OFFSET_TOP * devicePixelRatio;
+    let categoryForUserTiming = categories.findIndex(
+      category => category.name === 'JavaScript'
+    );
+    if (categoryForUserTiming === -1) {
+      // Default to the first item in the categories list.
+      categoryForUserTiming = 0;
+    }
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -232,9 +239,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
       // Decide which samples to actually draw
       const timeAtStart: Milliseconds =
-        rangeStart +
-        rangeLength * viewportLeft -
-        timePerPixel * TIMELINE_MARGIN_LEFT;
+        rangeStart + rangeLength * viewportLeft - timePerPixel * marginLeft;
       const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
 
       let lastDrawnPixelX = 0;
@@ -320,8 +325,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             const markerPayload = ((getMarker(markerIndex)
               .data: any): UserTimingMarkerPayload);
             text = markerPayload.name;
-            const categoryIndex = 0;
-            category = categories[categoryIndex];
+            category = categories[categoryForUserTiming];
             isSelected = selectedCallNodeIndex === markerIndex;
           }
 
@@ -409,7 +413,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }: HoveredStackTiming): React.Node | null => {
     const {
       thread,
-      threadIndex,
+      weightType,
+      threadsKey,
       combinedTimingRows,
       categories,
       callNodeInfo,
@@ -430,8 +435,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
       return (
         <TooltipMarker
+          markerIndex={markerIndex}
           marker={getMarker(markerIndex)}
-          threadIndex={threadIndex}
+          threadsKey={threadsKey}
+          restrictHeightWidth={true}
         />
       );
     }
@@ -443,6 +450,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <TooltipCallNode
         thread={thread}
+        weightType={weightType}
         pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}
@@ -522,17 +530,18 @@ class StackChartCanvas extends React.PureComponent<Props> {
       rangeStart,
       rangeEnd,
       combinedTimingRows,
+      marginLeft,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
     const innerDevicePixelsWidth =
-      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+      containerWidth - marginLeft - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
       viewportLeft +
-      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelsWidth);
+      viewportLength * ((x - marginLeft) / innerDevicePixelsWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
     const stackTiming = combinedTimingRows[depth];
@@ -573,6 +582,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  StackChartCanvas
-);
+export const StackChartCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(StackChartCanvasImpl);

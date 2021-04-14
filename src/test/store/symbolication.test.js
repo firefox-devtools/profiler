@@ -4,8 +4,14 @@
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import exampleSymbolTable from '../fixtures/example-symbol-table';
-import { SymbolStore } from '../../profile-logic/symbol-store.js';
+import {
+  completeSymbolTable,
+  partialSymbolTable,
+} from '../fixtures/example-symbol-table';
+import {
+  SymbolStore,
+  readSymbolsFromSymbolTable,
+} from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { resourceTypes } from '../../profile-logic/data-structures';
@@ -29,6 +35,7 @@ import { SymbolsNotFoundError } from '../../profile-logic/errors';
 describe('doSymbolicateProfile', function() {
   const symbolStoreName = 'test-db';
   beforeAll(function() {
+    // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = fakeIndexedDB;
     window.IDBKeyRange = FDBKeyRange;
     window.TextDecoder = TextDecoder;
@@ -51,6 +58,15 @@ describe('doSymbolicateProfile', function() {
     const profile = _createUnsymbolicatedProfile();
     const store = storeWithProfile(profile);
 
+    let symbolTable = completeSymbolTable;
+    function switchSymbolTable(otherSymbolTable: SymbolTableAsTuple) {
+      symbolTable = otherSymbolTable;
+    }
+    let symbolicationProviderMode: 'from-server' | 'from-addon' = 'from-addon';
+    function switchSymbolProviderMode(newMode: 'from-server' | 'from-addon') {
+      symbolicationProviderMode = newMode;
+    }
+
     return {
       profile,
       store,
@@ -64,12 +80,37 @@ describe('doSymbolicateProfile', function() {
           const stringIndex = thread.stringTable.indexForString(name);
           return thread.funcTable.name.indexOf(stringIndex);
         }),
+      switchSymbolTable,
+      switchSymbolProviderMode,
       symbolStore: new SymbolStore(symbolStoreName, {
         requestSymbolsFromServer: requests =>
-          requests.map(() => Promise.reject(new Error(''))),
+          requests.map(async request => {
+            if (request.lib.debugName === 'firefox.pdb') {
+              if (symbolicationProviderMode === 'from-server') {
+                return readSymbolsFromSymbolTable(
+                  request.addresses,
+                  symbolTable,
+                  s => s
+                );
+              }
+              throw new SymbolsNotFoundError(
+                'Not in from-server mode, try requestSymbolTableFromAddon.',
+                request.lib
+              );
+            }
+            throw new SymbolsNotFoundError(
+              'Should only have lib called firefox.pdb',
+              request.lib
+            );
+          }),
         requestSymbolTableFromAddon: async lib => {
           if (lib.debugName === 'firefox.pdb') {
-            return exampleSymbolTable;
+            if (symbolicationProviderMode === 'from-addon') {
+              return symbolTable;
+            }
+            throw new Error(
+              'should not call requestSymbolTableFromAddon if requestSymbolsFromServer is successful'
+            );
           }
           throw new SymbolsNotFoundError(
             'Should only have libs called firefox.pdb',
@@ -88,7 +129,7 @@ describe('doSymbolicateProfile', function() {
   } = selectedThreadSelectors;
 
   describe('doSymbolicateProfile', function() {
-    it('can symbolicate a profile', async () => {
+    it('can symbolicate a profile when symbols come from-addon', async () => {
       const {
         store: { dispatch, getState },
         profile,
@@ -102,6 +143,37 @@ describe('doSymbolicateProfile', function() {
         '- 0x1a0f (total: 1, self: 1)',
         '- 0x0f0f (total: 1, self: 1)',
       ]);
+
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      expect(formatTree(getCallTree(getState()))).toEqual([
+        // 0x0000 and 0x000a get merged together.
+        '- first symbol (total: 2, self: —)',
+        '  - last symbol (total: 2, self: 2)',
+        '- third symbol (total: 1, self: 1)',
+        '- second symbol (total: 1, self: 1)',
+      ]);
+    });
+
+    it('can symbolicate a profile when symbols come from-server', async () => {
+      // Get rid of any cached symbol tables from the previous test.
+      await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
+
+      const {
+        store: { dispatch, getState },
+        profile,
+        symbolStore,
+        switchSymbolProviderMode,
+      } = init();
+      expect(formatTree(getCallTree(getState()))).toEqual([
+        '- 0x000a (total: 1, self: —)',
+        '  - 0x2000 (total: 1, self: 1)',
+        '- 0x0000 (total: 1, self: —)',
+        '  - 0x2000 (total: 1, self: 1)',
+        '- 0x1a0f (total: 1, self: 1)',
+        '- 0x0f0f (total: 1, self: 1)',
+      ]);
+
+      switchSymbolProviderMode('from-server');
 
       await doSymbolicateProfile(dispatch, profile, symbolStore);
       expect(formatTree(getCallTree(getState()))).toEqual([
@@ -200,6 +272,126 @@ describe('doSymbolicateProfile', function() {
         [['first symbol']].map(funcNamesToFuncIndexes)
       );
     });
+  });
+
+  it('can symbolicate a profile with a partial symbol table and re-symbolicate it with a complete symbol table', async () => {
+    // Get rid of any cached symbol tables from the previous tests.
+    await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
+
+    const {
+      store: { dispatch, getState },
+      symbolStore,
+      switchSymbolTable,
+      switchSymbolProviderMode,
+    } = init();
+
+    let profile = ProfileViewSelectors.getProfile(getState());
+
+    switchSymbolProviderMode('from-server');
+    switchSymbolTable(partialSymbolTable);
+
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      '- 0x000a (total: 1, self: —)',
+      '  - 0x2000 (total: 1, self: 1)',
+      '- 0x0000 (total: 1, self: —)',
+      '  - 0x2000 (total: 1, self: 1)',
+      '- 0x1a0f (total: 1, self: 1)',
+      '- 0x0f0f (total: 1, self: 1)',
+    ]);
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    profile = ProfileViewSelectors.getProfile(getState());
+
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      // 0x0000, 0x000a, 0x0f0f and 0x1a0f get merged together.
+      '- overencompassing first symbol (total: 4, self: 2)',
+      '  - last symbol (total: 2, self: 2)',
+    ]);
+
+    switchSymbolTable(completeSymbolTable);
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      // "overencompassing first symbol" gets split into "first symbol",
+      // "second symbol" and "third symbol".
+      '- first symbol (total: 2, self: —)',
+      '  - last symbol (total: 2, self: 2)',
+      '- third symbol (total: 1, self: 1)',
+      '- second symbol (total: 1, self: 1)',
+    ]);
+  });
+
+  it('can re-symbolicate a partially-symbolicated profile even if it needs to add funcs to the funcTable', async () => {
+    // Get rid of any cached symbol tables from the previous tests.
+    await _deleteDatabase(`${symbolStoreName}-symbol-tables`);
+
+    const {
+      store: { dispatch, getState },
+      symbolStore,
+      switchSymbolTable,
+      switchSymbolProviderMode,
+    } = init();
+
+    let profile = ProfileViewSelectors.getProfile(getState());
+
+    switchSymbolProviderMode('from-server');
+    switchSymbolTable(partialSymbolTable);
+
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      '- 0x000a (total: 1, self: —)',
+      '  - 0x2000 (total: 1, self: 1)',
+      '- 0x0000 (total: 1, self: —)',
+      '  - 0x2000 (total: 1, self: 1)',
+      '- 0x1a0f (total: 1, self: 1)',
+      '- 0x0f0f (total: 1, self: 1)',
+    ]);
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    profile = ProfileViewSelectors.getProfile(getState());
+
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      // 0x0000, 0x000a, 0x0f0f and 0x1a0f get merged together.
+      '- overencompassing first symbol (total: 4, self: 2)',
+      '  - last symbol (total: 2, self: 2)',
+    ]);
+
+    const thread = profile.threads[0];
+    const { frameTable, funcTable } = thread;
+    expect(funcTable.length).toBeGreaterThanOrEqual(2);
+
+    // Only func 0 and 1 should be in use. These are the funcs for the first and
+    // last symbol.
+    expect(frameTable.func).toContain(0);
+    expect(frameTable.func).toContain(1);
+    expect(new Set(frameTable.func).size).toBe(2);
+
+    // Now forcefully truncate the funcTable.
+    const newFuncTable = { ...funcTable, length: 2 };
+    const newThread = { ...thread, funcTable: newFuncTable };
+    const newProfile = { ...profile, threads: [newThread] };
+    dispatch({
+      type: 'PROFILE_LOADED',
+      profile: newProfile,
+      implementationFilter: undefined,
+      pathInZipFile: undefined,
+      transformStacks: undefined,
+    });
+    profile = ProfileViewSelectors.getProfile(getState());
+    expect(profile).toBe(newProfile);
+
+    switchSymbolTable(completeSymbolTable);
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+    profile = ProfileViewSelectors.getProfile(getState());
+
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      // "overencompassing first symbol" gets split into "first symbol",
+      // "second symbol" and "third symbol".
+      '- first symbol (total: 2, self: —)',
+      '  - last symbol (total: 2, self: 2)',
+      '- third symbol (total: 1, self: 1)',
+      '- second symbol (total: 1, self: 1)',
+    ]);
   });
 });
 

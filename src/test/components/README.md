@@ -16,9 +16,9 @@ using more specific expectations.
 
 ## react-testing-library
 
-We use [react-testing-library](https://github.com/kentcdodds/react-testing-library)
+We use [React Testing Library](https://github.com/testing-library/react-testing-library)
 to tests our React components. Generally we try to test our components by
-exercizing them just like a user would do: finding a control by text using [the
+exercising them just like a user would do: finding a control by text using [the
 queries provided by the library](https://testing-library.com/docs/api-queries)
 and [fire events](https://testing-library.com/docs/api-events) to these targets.
 
@@ -39,11 +39,11 @@ Here is a full example:
 describe('app/Details', function() {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E E
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  E
     `);
 
     const store = storeWithProfile(profile);
@@ -72,7 +72,7 @@ describe('app/Details', function() {
 
 ## Solutions to common problems
 
-The library `react-testing-library` relies a lot on the underlying DOM library.
+React Testing Library relies a lot on the underlying DOM library.
 In our case we use [jsdom](https://github.com/jsdom/jsdom) which is excellent
 but has a few shortcomings.
 
@@ -93,21 +93,12 @@ fireEvent(target, getMouseEvent({ pageX: 5 }));
 A lot of our components use the Canvas Context API to draw graphs and display
 data. To test this properly we developed a mock that can be used in this way:
 ```js
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 ...
-
-function setup() {
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
-
-  return { flushDrawLogs: ctx.__flushDrawLogs };
-}
+autoMockCanvasContext();
 
 it('draws the right things to the screen', () => {
-  const { flushDrawLogs } = setup();
-  expect(flushDrawLogs()).toMatchSnapshot();
+  expect(window.__flushDrawLog()).toMatchSnapshot();
 });
 ```
 
@@ -124,4 +115,3 @@ it('renders a lot of things', () => {
   ...
 });
 ```
-

@@ -1,33 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`app/Home renders a button to enable the popup when it is available 1`] = `
+<div
+  class="homeInstructions"
+  data-testid="home-enable-popup-instructions"
+>
+  <img
+    alt="screenshot of profiler.firefox.com"
+    class="homeSectionScreenshot"
+    src="test-file-stub"
+  />
+  <div>
+    <button
+      class="homeSectionButton"
+      type="button"
+    >
+      <span
+        class="homeSectionPlus"
+      >
+        +
+      </span>
+      Enable ⁨Firefox Profiler⁩ Menu Button
+    </button>
+    <a
+      class="homeSectionButton"
+      href="/docs/"
+    >
+      <span
+        class="homeSectionDocsIcon"
+      />
+      Documentation
+    </a>
+    <p>
+      Enable the profiler menu button to start recording a performance
+profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
+    </p>
+  </div>
+</div>
+`;
+
 exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
-            Firefox Profiler
-          </span>
+            ⁨Firefox Profiler⁩
+          </a>
+           — 
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -48,37 +88,28 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
       <div
         class="homeInstructions"
+        data-testid="home-other-browser-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <div
-            style="text-align: center;"
-          >
-            <img
-              alt="screenshot of profiler.firefox.com"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </div>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="screenshot of profiler.firefox.com"
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="/docs/"
@@ -92,55 +123,91 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             How to view and record profiles
           </h2>
           <p>
-            Recording performance profiles requires
-             
+            Recording performance profiles requires 
             <a
               href="https://www.mozilla.org/en-US/firefox/new/"
             >
-              Firefox
+              ⁨Firefox⁩
             </a>
-            . However, existing profiles can be viewed in any modern browser.
+            .
+However, existing profiles can be viewed in any modern browser.
           </p>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
-          </div>
         </div>
       </div>
     </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle protocol-display-xs"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <label
+              class="homeSectionButton"
+            >
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          You can also compare recordings. 
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+          withactionbuttons="false"
+        />
+      </section>
+    </section>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
 </div>
 `;
 
@@ -148,30 +215,31 @@ exports[`app/Home renders the install screen for the extension 1`] = `
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
-            Firefox Profiler
-          </span>
+            ⁨Firefox Profiler⁩
+          </a>
+           — 
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -192,37 +260,28 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
       <div
         class="homeInstructions"
+        data-testid="home-install-addon-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <div
-            style="text-align: center;"
-          >
-            <img
-              alt="screenshot of profiler.firefox.com"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </div>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="screenshot of profiler.firefox.com"
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
@@ -244,223 +303,85 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             Documentation
           </a>
           <p>
-            Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
+            Install the Gecko Profiler Add-on to start recording a performance
+profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com.
           </p>
+        </div>
+      </div>
+    </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle protocol-display-xs"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
           <div
-            class="homeSectionLoadProfile"
+            class="homeSectionActionButtons"
           >
-            <div
-              class="homeSectionActionButtons"
+            <label
+              class="homeSectionButton"
             >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
           </div>
         </div>
-      </div>
-    </div>
-    <div
-      class="homeDrop"
-    >
-      <div
-        class="homeDropMessage"
-      >
-        Drop a saved profile here
-      </div>
-    </div>
-  </section>
-</div>
-`;
-
-exports[`app/Home renders the install screen for the legacy add-on 1`] = `
-<div
-  class="home"
->
-  <section
-    class="homeSection"
-  >
-    <header>
-      <h1
-        class="homeTitle"
-      >
-        <span
-          class="homeTitleSlogan"
-        >
-          <span
-            class="homeTitleText"
-          >
-            Firefox Profiler
-          </span>
-          <span
-            class="homeTitleSubtext"
-          >
-             
-            — Web app for Firefox performance analysis
-          </span>
-        </span>
-        <a
-          class="homeTitleGithubIcon"
-          href="https://github.com/firefox-devtools/profiler"
-          rel="noopener noreferrer"
-          target="_blank"
-          title="Go to our git repository (this opens in a new window)"
-        >
-          <svg
-            aria-label="github"
-            class="octicon octicon-mark-github"
-            height="22"
-            version="1.1"
-            viewBox="0 0 16 16"
-            width="22"
-          >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </a>
-      </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
-    </header>
-    <div
-      class="homeInstructionsTransitionGroup"
-    >
-      <div
-        class="homeInstructions"
-      >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <div
-            style="text-align: center;"
-          >
-            <img
-              alt="screenshot of profiler.firefox.com"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </div>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <p>
+          You can also compare recordings. 
           <a
-            class="homeSectionButton"
-            href="/docs/"
+            href="/compare/"
           >
-            <span
-              class="homeSectionDocsIcon"
-            />
-            Documentation
+            Open the comparing interface.
           </a>
-          <p>
-            To start recording a performance profile in Firefox, first install the
-             
-            <a
-              href="https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
-            >
-              Gecko Profiler Add-on
-            </a>
-            . Then use the button added to the browser, or use the following shortcuts to record a profile. The button’s icon is blue when a profile is recording. Hit 
-            <kbd>
-              Capture Profile
-            </kbd>
-             to load the data into profiler.firefox.com.
-          </p>
-          <div>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                1
-              </kbd>
-               Stop and start profiling
-            </p>
-            <p>
-              <kbd>
-                Ctrl
-              </kbd>
-              +
-              <kbd>
-                Shift
-              </kbd>
-              +
-              <kbd>
-                2
-              </kbd>
-               Capture and load profile
-            </p>
-          </div>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+          withactionbuttons="false"
+        />
+      </section>
+    </section>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
 </div>
 `;
 
@@ -468,30 +389,31 @@ exports[`app/Home renders the usage instructions for pages with the extension in
 <div
   class="home"
 >
-  <section
+  <main
     class="homeSection"
   >
     <header>
       <h1
-        class="homeTitle"
+        class="appHeader"
       >
         <span
-          class="homeTitleSlogan"
+          class="appHeaderSlogan"
         >
-          <span
-            class="homeTitleText"
+          <a
+            class="appHeaderLink"
+            href="/"
           >
-            Firefox Profiler
-          </span>
+            ⁨Firefox Profiler⁩
+          </a>
+           — 
           <span
-            class="homeTitleSubtext"
+            class="appHeaderSubtext"
           >
-             
-            — Web app for Firefox performance analysis
+            Web app for ⁨Firefox⁩ performance analysis
           </span>
         </span>
         <a
-          class="homeTitleGithubIcon"
+          class="appHeaderGithubIcon"
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
@@ -512,35 +434,28 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </svg>
         </a>
       </h1>
-      <div
-        class="homeSpecialMessage"
-      >
-        This is a special message
-      </div>
-      <p>
-        Capture a performance profile. Analyze it. Share it. Make the web faster.
-      </p>
     </header>
+    <div
+      class="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
     <div
       class="homeInstructionsTransitionGroup"
     >
       <div
         class="homeInstructions"
+        data-testid="home-record-instructions"
       >
-        <div
-          class="homeInstructionsLeft"
-        >
-          <p>
-            <img
-              alt="Screenshot of the Gecko Profiler addon settings"
-              class="homeSectionScreenshot"
-              src="test-file-stub"
-            />
-          </p>
-        </div>
-        <div
-          class="homeInstructionsRight"
-        >
+        <img
+          alt="Screenshot of the profiler settings from the Firefox menu."
+          class="homeSectionScreenshot"
+          src="test-file-stub"
+        />
+        <div>
           <a
             class="homeSectionButton"
             href="/docs/"
@@ -551,7 +466,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             Documentation
           </a>
           <p>
-            To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
+            To start profiling, click on the profiling button, or use the
+keyboard shortcuts. The icon is blue when a profile is recording.
+Hit 
             <kbd>
               Capture Profile
             </kbd>
@@ -570,7 +487,8 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               <kbd>
                 1
               </kbd>
-               Stop and start profiling
+               
+              Stop and start profiling
             </p>
             <p>
               <kbd>
@@ -584,48 +502,150 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               <kbd>
                 2
               </kbd>
-               Capture and load profile
-            </p>
-          </div>
-          <div
-            class="homeSectionLoadProfile"
-          >
-            <div
-              class="homeSectionActionButtons"
-            >
-              <label
-                class="homeSectionButton"
-              >
-                <input
-                  class="homeSectionUploadFromFileInput"
-                  type="file"
-                />
-                Load a profile from file
-              </label>
-              <button
-                aria-expanded="false"
-                class="homeSectionButton"
-                type="button"
-              >
-                Load a profile from a URL
-              </button>
-            </div>
-            <p>
-              You can also drag and drop a profile file here to load it.
+               
+              Capture and load profile
             </p>
           </div>
         </div>
       </div>
     </div>
+    <section
+      class="homeAdditionalContent"
+    >
+      <h2
+        class="homeAdditionalContentTitle protocol-display-xs"
+      >
+        Load existing profiles
+      </h2>
+      <section
+        class="homeActions"
+      >
+        <p>
+          You can 
+          <strong>
+            drag and drop
+          </strong>
+           a profile file here to load it, or:
+        </p>
+        <div
+          class="homeSectionLoadProfile"
+        >
+          <div
+            class="homeSectionActionButtons"
+          >
+            <label
+              class="homeSectionButton"
+            >
+              <input
+                class="homeSectionUploadFromFileInput"
+                type="file"
+              />
+              Load a profile from file
+            </label>
+            <button
+              aria-expanded="false"
+              class="homeSectionButton"
+              type="button"
+            >
+              Load a profile from a URL
+            </button>
+          </div>
+        </div>
+        <p>
+          You can also compare recordings. 
+          <a
+            href="/compare/"
+          >
+            Open the comparing interface.
+          </a>
+        </p>
+      </section>
+      <section>
+        <h2
+          class="homeRecentUploadedRecordingsTitle protocol-display-xxs"
+        >
+          Recent uploaded recordings
+        </h2>
+        <list-of-published-profiles
+          limit="3"
+          withactionbuttons="false"
+        />
+      </section>
+    </section>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
     </div>
-  </section>
+  </main>
+</div>
+`;
+
+exports[`app/Home renders the usage instructions for when the popup is enabled 1`] = `
+<div
+  class="homeInstructions homeTransition-enter homeTransition-enter-active"
+  data-testid="home-record-instructions"
+>
+  <img
+    alt="Screenshot of the profiler settings from the Firefox menu."
+    class="homeSectionScreenshot"
+    src="test-file-stub"
+  />
+  <div>
+    <a
+      class="homeSectionButton"
+      href="/docs/"
+    >
+      <span
+        class="homeSectionDocsIcon"
+      />
+      Documentation
+    </a>
+    <p>
+      To start profiling, click on the profiling button, or use the
+keyboard shortcuts. The icon is blue when a profile is recording.
+Hit 
+      <kbd>
+        Capture Profile
+      </kbd>
+       to load the data into profiler.firefox.com.
+    </p>
+    <div>
+      <p>
+        <kbd>
+          Ctrl
+        </kbd>
+        +
+        <kbd>
+          Shift
+        </kbd>
+        +
+        <kbd>
+          1
+        </kbd>
+         
+        Stop and start profiling
+      </p>
+      <p>
+        <kbd>
+          Ctrl
+        </kbd>
+        +
+        <kbd>
+          Shift
+        </kbd>
+        +
+        <kbd>
+          2
+        </kbd>
+         
+        Capture and load profile
+      </p>
+    </div>
+  </div>
 </div>
 `;

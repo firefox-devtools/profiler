@@ -26,13 +26,21 @@ describe('strip-function-arguments', function() {
       'ns::fn'
     );
   });
+
   it('should do nothing if not ending with parentheses', function() {
     expect(stripFunctionArguments('ns::fn [clone .part.123]')).toEqual(
       'ns::fn [clone .part.123]'
     );
   });
+
   it('should do nothing if not a function call', function() {
     expect(stripFunctionArguments('(root)')).toEqual('(root)');
+  });
+
+  it('should remove also the storage class', function() {
+    expect(
+      stripFunctionArguments('static nsThread::ThreadFunc(void*)')
+    ).toEqual('nsThread::ThreadFunc');
   });
 });
 
@@ -57,12 +65,31 @@ describe('remove-template-information', function() {
     fixture = 'starting handling <script>';
     expect(removeTemplateInformation(fixture)).toEqual(fixture);
   });
+
+  it('should not remove java initializer functions', function() {
+    // See issue https://github.com/firefox-devtools/profiler/issues/3199
+    const fixture =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity.<init>';
+    expect(removeTemplateInformation(fixture)).toEqual(fixture);
+  });
+
+  it('should remove template information that contains "false positive" templates', function() {
+    // This is a theoretical issue that we never encountered in the wild, but
+    // this is theoretically possible, so let's test it.
+    const fixture =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity<TemplateInformation.<init>>';
+    const expected =
+      'mozilla.components.support.locale.LocaleAwareAppCompatActivity';
+    expect(removeTemplateInformation(fixture)).toEqual(expected);
+  });
 });
 
 describe('get-function-name', function() {
   it('should get the function name', function() {
     expect(
-      getFunctionName('ns::Foo<0>::fn(bool (*)(JS::Handle<JSObject*>)) const')
+      getFunctionName(
+        'static ns::Foo<0>::fn(bool (*)(JS::Handle<JSObject*>)) const'
+      )
     ).toEqual('ns::Foo::fn');
   });
 });

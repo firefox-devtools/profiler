@@ -8,85 +8,229 @@ import * as React from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import NetworkSettings from '../shared/NetworkSettings';
-import VirtualList from '../shared/VirtualList';
+import { NetworkSettings } from '../shared/NetworkSettings';
+import { VirtualList } from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
-import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
-import NetworkChartRow from './NetworkChartRow';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { NetworkChartEmptyReasons } from './NetworkChartEmptyReasons';
+import { NetworkChartRow } from './NetworkChartRow';
+import { ContextMenuTrigger } from '../shared/ContextMenuTrigger';
 
 import {
+  getScrollToSelectionGeneration,
   getPreviewSelection,
   getPreviewSelectionRange,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { changeRightClickedMarker } from '../../actions/profile-view';
-
+import { getSelectedThreadsKey } from '../../selectors/url-state';
+import {
+  changeSelectedNetworkMarker,
+  changeRightClickedMarker,
+} from '../../actions/profile-view';
 import type { SizeProps } from '../shared/WithSize';
-import type { NetworkPayload } from '../../types/markers';
-import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
+import type {
+  NetworkPayload,
+  Marker,
+  MarkerIndex,
+  StartEndRange,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+
 import type { ConnectedProps } from '../../utils/connect';
 
-require('./index.css');
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
 type DispatchProps = {|
+  +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
 |};
 
 type StateProps = {|
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
   +markerIndexes: MarkerIndex[],
   +getMarker: MarkerIndex => Marker,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
+  +scrollToSelectionGeneration: number,
 |};
 
 type OwnProps = {| ...SizeProps |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class NetworkChart extends React.PureComponent<Props> {
+class NetworkChartImpl extends React.PureComponent<Props> {
+  _virtualListRef = React.createRef<VirtualList<MarkerIndex>>();
   _memoizedGetSpecialItems = memoize(
-    rightClickedMarkerIndex => {
-      if (rightClickedMarkerIndex !== null) {
-        return [rightClickedMarkerIndex];
+    (selectedNetworkMarkerIndex, rightClickedMarkerIndex) => {
+      const specialItems = [undefined, undefined];
+
+      if (selectedNetworkMarkerIndex !== null) {
+        specialItems[0] = selectedNetworkMarkerIndex;
       }
-      return [];
+      if (rightClickedMarkerIndex !== null) {
+        specialItems[1] = rightClickedMarkerIndex;
+      }
+      return specialItems;
     },
     { limit: 1 }
   );
 
+  componentDidMount() {
+    this.focus();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.scrollToSelectionGeneration >
+      prevProps.scrollToSelectionGeneration
+    ) {
+      this.scrollSelectionIntoView();
+    }
+  }
+
+  focus() {
+    if (this._virtualListRef.current) {
+      this._virtualListRef.current.focus();
+    }
+  }
+
   _getSpecialItems = () => {
-    const { rightClickedMarkerIndex } = this.props;
-    return this._memoizedGetSpecialItems(rightClickedMarkerIndex);
+    const { selectedNetworkMarkerIndex, rightClickedMarkerIndex } = this.props;
+    return this._memoizedGetSpecialItems(
+      selectedNetworkMarkerIndex,
+      rightClickedMarkerIndex
+    );
   };
+
+  scrollSelectionIntoView() {
+    const { selectedNetworkMarkerIndex, markerIndexes } = this.props;
+    const list = this._virtualListRef.current;
+    if (list && selectedNetworkMarkerIndex !== null) {
+      const selectedRowIndex = markerIndexes.findIndex(
+        markerIndex => markerIndex === selectedNetworkMarkerIndex
+      );
+      list.scrollItemIntoView(selectedRowIndex, 0);
+    }
+  }
 
   _onCopy = (_event: Event) => {
     // Not implemented.
   };
 
-  _onKeyDown = (_event: KeyboardEvent) => {
-    // Not implemented.
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    const hasModifier = event.ctrlKey || event.altKey;
+    const isNavigationKey =
+      event.key.startsWith('Arrow') ||
+      event.key.startsWith('Page') ||
+      event.key === 'Home' ||
+      event.key === 'End';
+    const isAsteriskKey = event.key === '*';
+    const isEnterKey = event.key === 'Enter';
+
+    if (hasModifier || (!isNavigationKey && !isAsteriskKey && !isEnterKey)) {
+      // No key events that we care about were found, so don't try and handle them.
+      return;
+    }
+    event.stopPropagation();
+    event.preventDefault();
+
+    const selected = this.props.selectedNetworkMarkerIndex;
+    const allRows = this.props.markerIndexes;
+    const selectedRowIndex = allRows.findIndex(
+      markerIndex => markerIndex === selected
+    );
+
+    if (selected === null || selectedRowIndex === -1) {
+      // the first condition is redundant, but it makes flow happy
+      this._select(allRows[0]);
+      return;
+    }
+    if (isNavigationKey) {
+      switch (event.key) {
+        case 'ArrowUp': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the Home gesture
+            this._select(allRows[0]);
+            break;
+          }
+
+          if (selectedRowIndex > 0) {
+            this._select(allRows[selectedRowIndex - 1]);
+          }
+          break;
+        }
+        case 'ArrowDown': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the End gesture
+            this._select(allRows[allRows.length - 1]);
+            break;
+          }
+          if (selectedRowIndex < allRows.length - 1) {
+            this._select(allRows[selectedRowIndex + 1]);
+          }
+          break;
+        }
+        case 'PageUp': {
+          if (selectedRowIndex > 0) {
+            const nextRow = Math.max(0, selectedRowIndex - ROW_HEIGHT);
+            this._select(allRows[nextRow]);
+          }
+          break;
+        }
+        case 'PageDown': {
+          if (selectedRowIndex < allRows.length - 1) {
+            const nextRow = Math.min(
+              allRows.length - 1,
+              selectedRowIndex + ROW_HEIGHT
+            );
+            this._select(allRows[nextRow]);
+          }
+          break;
+        }
+        case 'Home': {
+          this._select(allRows[0]);
+          break;
+        }
+        case 'End': {
+          this._select(allRows[allRows.length - 1]);
+          break;
+        }
+        default:
+          throw new Error('Unhandled navigation key.');
+      }
+    }
   };
 
-  _onRightClick = (markerIndex: MarkerIndex) => {
-    const { threadIndex, changeRightClickedMarker } = this.props;
-    changeRightClickedMarker(threadIndex, markerIndex);
+  _onRightClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
+    const { threadsKey, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadsKey, selectedNetworkMarkerIndex);
+  };
+
+  _onLeftClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
+    this._onSelectionChange(selectedNetworkMarkerIndex);
+  };
+
+  _select(selectedNetworkMarkerIndex: MarkerIndex) {
+    this._onSelectionChange(selectedNetworkMarkerIndex);
+  }
+
+  _onSelectionChange = (selectedNetworkMarkerIndex: MarkerIndex) => {
+    const { threadsKey, changeSelectedNetworkMarker } = this.props;
+    changeSelectedNetworkMarker(threadsKey, selectedNetworkMarkerIndex);
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
     const {
-      threadIndex,
+      threadsKey,
       getMarker,
       rightClickedMarkerIndex,
+      selectedNetworkMarkerIndex,
       timeRange,
       width,
     } = this.props;
@@ -110,18 +254,28 @@ class NetworkChart extends React.PureComponent<Props> {
         marker={marker}
         markerIndex={markerIndex}
         networkPayload={networkPayload}
-        threadIndex={threadIndex}
+        threadsKey={threadsKey}
         timeRange={timeRange}
         width={width}
         shouldDisplayTooltips={this._shouldDisplayTooltips}
         isRightClicked={rightClickedMarkerIndex === markerIndex}
         onRightClick={this._onRightClick}
+        isLeftClicked={selectedNetworkMarkerIndex === markerIndex}
+        isSelected={selectedNetworkMarkerIndex === markerIndex}
+        select={this._select}
+        onLeftClick={this._onLeftClick}
       />
     );
   };
 
   render() {
-    const { markerIndexes, width, timeRange, disableOverscan } = this.props;
+    const {
+      selectedNetworkMarkerIndex,
+      markerIndexes,
+      width,
+      timeRange,
+      disableOverscan,
+    } = this.props;
 
     // We want to force a full rerender whenever the width or the range changes.
     // We compute a string using these values, so that when one of the value
@@ -147,6 +301,13 @@ class NetworkChart extends React.PureComponent<Props> {
           >
             <VirtualList
               className="treeViewBody"
+              ariaRole="listbox"
+              ariaLabel="List of all network markers"
+              ariaActiveDescendant={
+                selectedNetworkMarkerIndex !== null
+                  ? `networkChartRowItem-${selectedNetworkMarkerIndex}`
+                  : null
+              }
               items={markerIndexes}
               renderItem={this._renderRow}
               itemHeight={ROW_HEIGHT}
@@ -158,6 +319,7 @@ class NetworkChart extends React.PureComponent<Props> {
               disableOverscan={disableOverscan}
               onCopy={this._onCopy}
               onKeyDown={this._onKeyDown}
+              ref={this._virtualListRef}
             />
           </ContextMenuTrigger>
         )}
@@ -172,26 +334,31 @@ class NetworkChart extends React.PureComponent<Props> {
  */
 const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => {
-      return {
-        markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
-          state
-        ),
-        getMarker: selectedThreadSelectors.getMarkerGetter(state),
-        rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-          state
-        ),
-        timeRange: getPreviewSelectionRange(state),
-        disableOverscan: getPreviewSelection(state).isModifying,
-        threadIndex: getSelectedThreadIndex(state),
-      };
+    mapStateToProps: state => ({
+      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        state
+      ),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      selectedNetworkMarkerIndex: selectedThreadSelectors.getSelectedNetworkMarkerIndex(
+        state
+      ),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
+      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
+      ),
+      timeRange: getPreviewSelectionRange(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
+      threadsKey: getSelectedThreadsKey(state),
+    }),
+    mapDispatchToProps: {
+      changeSelectedNetworkMarker,
+      changeRightClickedMarker,
     },
-    mapDispatchToProps: { changeRightClickedMarker },
-    component: NetworkChart,
+    component: NetworkChartImpl,
   }
 );
 
-export default withSize<OwnProps>(ConnectedComponent);
+export const NetworkChart = withSize<OwnProps>(ConnectedComponent);
 
 /**
  * Our definition of markers does not currently have the ability to refine

@@ -67,9 +67,9 @@ It is probably a good iea to read up some on profile format docs for more inform
 
 ## Samples
 
-The call tree, flame graph, and stack chart all use the samples data to generate the reports. If your data is shaped like sample data, it can be easy to shove the information in there. At the time of this writing we don't support variable durations. It's assumed 1 sample is equal in length to the sampling interval. This is probably going to change soon.
+The call tree, flame graph, and stack chart all use the samples data to generate the reports. If your data is shaped like sample data, it can be convenient to shove the information in there. At the time of this writing we don't support variable durations. It's assumed 1 sample is equal in length to the sampling interval. This is probably going to change soon.
 
-Most likely the profile formats will assume that there is at least one sample in a thread. It might be necessary to fill out the samples with dummy time data if your format isn't needing samples. It's a good idea to push on 1 sample for the start, and 1 for the end.
+Most likely the profile formats will assume that there is at least one sample in a thread. It might be necessary to fill out the samples with fake time data if your format isn't needing samples. It's a good idea to push on 1 sample for the start, and 1 for the end.
 
 ## Markers
 

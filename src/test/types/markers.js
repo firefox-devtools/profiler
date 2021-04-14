@@ -3,13 +3,13 @@
  * file, You can obtain one at <http://mozilla.org/MPL/2.0/>. */
 // @flow
 
-/* eslint-disable no-unused-vars, flowtype/no-unused-expressions */
+/* eslint-disable no-unused-vars */
 
 import type {
   $ReplaceCauseWithStack,
   CauseBacktrace,
-} from '../../types/markers';
-import type { GeckoMarkerStack } from '../../types/gecko-profile';
+  GeckoMarkerStack,
+} from 'firefox-profiler/types';
 
 type ObjectWithCause = {| a: number, cause: CauseBacktrace |};
 type ObjectWithOptionalCause = {| a: number, cause?: CauseBacktrace |};

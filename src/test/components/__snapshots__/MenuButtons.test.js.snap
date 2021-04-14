@@ -1,594 +1,1413 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile clicking on the button shows the confirmation 1`] = `
 <div
-  class="buttonWithPanel menuButtonsMetaInfoButton open"
+  class="arrowPanel open metaInfoPanel"
 >
   <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-      type="button"
-      value="Firefox (48.0) Intel Mac OS X 10.11"
-    />
-  </div>
+    class="arrowPanelArrow"
+  />
   <div
-    class="arrowPanelAnchor"
+    class="arrowPanelContent"
   >
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="confirmDialog"
     >
-      <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
+      <h2
+        class="confirmDialogTitle"
       >
-        <h2
-          class="arrowPanelSubTitle"
-        >
-          Profile Information
-        </h2>
-        <div
-          class="arrowPanelSection"
-        >
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Recording started:
-            </span>
-            toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Interval:
-            </span>
-            1
-            ms
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Profile Version:
-            </span>
-            28
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Buffer Capacity:
-            </span>
-            16.0KB
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Buffer Duration:
-            </span>
-            20 seconds
-          </div>
-          <div
-            class="arrowPanelSection"
-          >
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Features:
-              </span>
-              <ul
-                class="metaInfoList"
-              >
-                <li
-                  class="metaInfoListItem"
-                >
-                  js
-                </li>
-                <li
-                  class="metaInfoListItem"
-                >
-                  threads
-                </li>
-              </ul>
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Threads Filter:
-              </span>
-              <ul
-                class="metaInfoList"
-              >
-                <li
-                  class="metaInfoListItem"
-                >
-                  GeckoMain
-                </li>
-                <li
-                  class="metaInfoListItem"
-                >
-                  DOM Worker
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <h2
-          class="arrowPanelSubTitle"
-        >
-          Application
-        </h2>
-        <div
-          class="arrowPanelSection"
-        >
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Name:
-            </span>
-            Firefox
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Version:
-            </span>
-            48.0
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Update Channel:
-            </span>
-            nightly
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Build ID:
-            </span>
-            20181126165837
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Build Type:
-            </span>
-            Debug
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Extensions:
-            </span>
-            <ul
-              class="metaInfoList"
-            >
-              <li
-                class="metaInfoListItem"
-              >
-                Form Autofill
-              </li>
-              <li
-                class="metaInfoListItem"
-              >
-                Firefox Screenshots
-              </li>
-              <li
-                class="metaInfoListItem"
-              >
-                Gecko Profiler
-              </li>
-            </ul>
-          </div>
-        </div>
-        <h2
-          class="arrowPanelSubTitle"
-        >
-          Platform
-        </h2>
-        <div
-          class="arrowPanelSection"
-        >
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Platform:
-            </span>
-            Macintosh
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              OS:
-            </span>
-            Intel Mac OS X 10.11
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              ABI:
-            </span>
-            x86_64-gcc3
-          </div>
-        </div>
-        <details>
-          <summary
-            class="arrowPanelSubTitle"
-          >
-            Profiler Overhead
-          </summary>
-          <div
-            class="arrowPanelSection"
-          >
-            <div
-              class="metaInfoGrid"
-            >
-              <div />
-              <div>
-                Mean
-              </div>
-              <div>
-                Max
-              </div>
-              <div>
-                Min
-              </div>
-              <div>
-                Overhead
-              </div>
-              <div>
-                227ns
-              </div>
-              <div>
-                410ns
-              </div>
-              <div>
-                38.0ns
-              </div>
-              <div>
-                Cleaning
-              </div>
-              <div>
-                54.1ns
-              </div>
-              <div>
-                100ns
-              </div>
-              <div>
-                7.00ns
-              </div>
-              <div>
-                Counter
-              </div>
-              <div>
-                59.1ns
-              </div>
-              <div>
-                105ns
-              </div>
-              <div>
-                12.0ns
-              </div>
-              <div>
-                Interval
-              </div>
-              <div>
-                857ns
-              </div>
-              <div>
-                1,000ns
-              </div>
-              <div>
-                0.0000ns
-              </div>
-              <div>
-                Lockings
-              </div>
-              <div>
-                49.1ns
-              </div>
-              <div>
-                95.0ns
-              </div>
-              <div>
-                2.00ns
-              </div>
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoWideLabel"
-              >
-                Overhead Durations:
-              </span>
-              <span
-                class="metaInfoValueRight"
-              >
-                1,586ns
-              </span>
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoWideLabel"
-              >
-                Overhead Percentage:
-              </span>
-              <span
-                class="metaInfoValueRight"
-              >
-                26,433%
-              </span>
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoWideLabel"
-              >
-                Profiled Duration:
-              </span>
-              <span
-                class="metaInfoValueRight"
-              >
-                6.00ns
-              </span>
-            </div>
-          </div>
-        </details>
+        Delete 
+        PROFILE
+      </h2>
+      <div
+        class="confirmDialogContent"
+      >
+        Are you sure you want to delete uploaded data for this profile? Links that were previously shared will no longer work.
+      </div>
+      <div
+        class="confirmDialogButtons"
+      >
+        <input
+          class="photon-button photon-button-default"
+          type="button"
+          value="Cancel"
+        />
+        <input
+          class="photon-button photon-button-destructive"
+          type="button"
+          value="Delete"
+        />
       </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`app/MenuButtons <MenuButtonsMetaInfo> with no statistics object should not make the app crash 1`] = `
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile confirming the delete should delete on the server and in the db 1`] = `
 <div
-  class="buttonWithPanel menuButtonsMetaInfoButton open"
+  class="arrowPanel open metaInfoPanel"
 >
   <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-      type="button"
-      value="Firefox (48.0) Intel Mac OS X 10.11"
-    />
-  </div>
+    class="arrowPanelArrow"
+  />
   <div
-    class="arrowPanelAnchor"
+    class="arrowPanelContent"
   >
+    <p
+      class="profileDeleteButtonSuccess"
+    >
+      Successfully deleted uploaded data.
+    </p>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete button if we have the uploaded data and some JWT token 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
     <div
-      class="arrowPanel open arrowPanelOpenMetaInfo"
+      class="profileInfoUploadedActions"
     >
       <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
+        class="profileInfoUploadedDate"
       >
-        <h2
-          class="arrowPanelSubTitle"
+        <span
+          class="profileInfoUploadedLabel"
         >
-          Profile Information
-        </h2>
+          Uploaded:
+        </span>
+        toLocaleString Sat, 04 Jul 2020 13:00:00 GMT
+      </div>
+      <div
+        class="profileInfoUploadedActionsButtons"
+      >
+        <button
+          class="photon-button photon-button-default photon-button-micro"
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete button if we have the uploaded data but no JWT token 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="profileInfoUploadedActions"
+    >
+      <div
+        class="profileInfoUploadedDate"
+      >
+        <span
+          class="profileInfoUploadedLabel"
+        >
+          Uploaded:
+        </span>
+        toLocaleString Sat, 04 Jul 2020 13:00:00 GMT
+      </div>
+      <div
+        class="profileInfoUploadedActionsButtons"
+      >
+        <button
+          class="photon-button photon-button-default photon-button-micro"
+          disabled=""
+          title="This profile cannot be deleted because we lack the authorization information."
+          type="button"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the delete button if the profile is public but without uploaded data 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Re-symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        release
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Recording started:
+        </span>
+        toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Buffer Capacity:
+        </span>
+        1GB
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Buffer Duration:
+        </span>
+        ⁨20⁩ seconds
+      </div>
+      <div
+        class="metaInfoSection"
+      >
         <div
-          class="arrowPanelSection"
+          class="metaInfoRow metaInfoListRow"
         >
-          <div
-            class="metaInfoRow"
+          <span
+            class="metaInfoLabel"
           >
-            <span
-              class="metaInfoLabel"
+            Features:
+          </span>
+          <ul
+            class="metaInfoList"
+          >
+            <li
+              class="metaInfoListItem"
             >
-              Recording started:
-            </span>
-            toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+              js
+            </li>
+            <li
+              class="metaInfoListItem"
+            >
+              threads
+            </li>
+          </ul>
+        </div>
+        <div
+          class="metaInfoRow metaInfoListRow"
+        >
+          <span
+            class="metaInfoLabel"
+          >
+            Threads Filter:
+          </span>
+          <ul
+            class="metaInfoList"
+          >
+            <li
+              class="metaInfoListItem"
+            >
+              GeckoMain
+            </li>
+            <li
+              class="metaInfoListItem"
+            >
+              DOM Worker
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is not symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox 48
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        nightly
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build ID:
+        </span>
+        20181126165837
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build Type:
+        </span>
+        Debug
+      </div>
+      <div
+        class="metaInfoRow metaInfoListRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Extensions:
+        </span>
+        <ul
+          class="metaInfoList"
+        >
+          <li
+            class="metaInfoListItem"
+          >
+            Form Autofill
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Firefox Screenshots
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Gecko Profiler
+          </li>
+        </ul>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          OS:
+        </span>
+        macOS 10.11
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          ABI:
+        </span>
+        x86_64-gcc3
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          CPU:
+        </span>
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
+      </div>
+    </div>
+    <details>
+      <summary
+        class="arrowPanelSubTitle"
+      >
+        Profiler Overhead
+      </summary>
+      <div
+        class="arrowPanelSection"
+      >
+        <div
+          class="metaInfoGrid"
+        >
+          <div />
+          <div>
+            Mean
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Interval:
-            </span>
-            1
-            ms
+          <div>
+            Max
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Profile Version:
-            </span>
-            28
+          <div>
+            Min
+          </div>
+          <div>
+            Overhead
+          </div>
+          <div>
+            227μs
+          </div>
+          <div>
+            410μs
+          </div>
+          <div>
+            38μs
+          </div>
+          <div>
+            Cleaning
+          </div>
+          <div>
+            54μs
+          </div>
+          <div>
+            100μs
+          </div>
+          <div>
+            7.0μs
+          </div>
+          <div>
+            Counter
+          </div>
+          <div>
+            59μs
+          </div>
+          <div>
+            105μs
+          </div>
+          <div>
+            12μs
+          </div>
+          <div>
+            Interval
+          </div>
+          <div>
+            857μs
+          </div>
+          <div>
+            1,000μs
+          </div>
+          <div>
+            0.000μs
+          </div>
+          <div>
+            Lockings
+          </div>
+          <div>
+            49μs
+          </div>
+          <div>
+            95μs
+          </div>
+          <div>
+            2.0μs
           </div>
         </div>
-        <h2
-          class="arrowPanelSubTitle"
-        >
-          Application
-        </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoRow"
         >
-          <div
-            class="metaInfoRow"
+          <span
+            class="metaInfoWideLabel"
           >
-            <span
-              class="metaInfoLabel"
-            >
-              Name:
-            </span>
-            Firefox
+            Overhead Durations:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            1,586μs
+          </span>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Overhead Percentage:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            26,433%
+          </span>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Profiled Duration:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            6.0μs
+          </span>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device information 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Recording started:
+        </span>
+        toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is not symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox 48
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        nightly
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build ID:
+        </span>
+        20181126165837
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build Type:
+        </span>
+        Debug
+      </div>
+      <div
+        class="metaInfoRow metaInfoListRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Extensions:
+        </span>
+        <ul
+          class="metaInfoList"
+        >
+          <li
+            class="metaInfoListItem"
+          >
+            Form Autofill
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Firefox Screenshots
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Gecko Profiler
+          </li>
+        </ul>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Device:
+        </span>
+        Android Device
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          OS:
+        </span>
+        macOS 10.11
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          ABI:
+        </span>
+        x86_64-gcc3
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          CPU:
+        </span>
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
+      </div>
+    </div>
+    <details>
+      <summary
+        class="arrowPanelSubTitle"
+      >
+        Profiler Overhead
+      </summary>
+      <div
+        class="arrowPanelSection"
+      >
+        <div
+          class="metaInfoGrid"
+        >
+          <div />
+          <div>
+            Mean
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Version:
-            </span>
-            48.0
+          <div>
+            Max
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Update Channel:
-            </span>
-            nightly
+          <div>
+            Min
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Build ID:
-            </span>
-            20181126165837
+          <div>
+            Overhead
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Build Type:
-            </span>
-            Debug
+          <div>
+            227μs
           </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              Extensions:
-            </span>
-            <ul
-              class="metaInfoList"
-            >
-              <li
-                class="metaInfoListItem"
-              >
-                Form Autofill
-              </li>
-              <li
-                class="metaInfoListItem"
-              >
-                Firefox Screenshots
-              </li>
-              <li
-                class="metaInfoListItem"
-              >
-                Gecko Profiler
-              </li>
-            </ul>
+          <div>
+            410μs
+          </div>
+          <div>
+            38μs
+          </div>
+          <div>
+            Cleaning
+          </div>
+          <div>
+            54μs
+          </div>
+          <div>
+            100μs
+          </div>
+          <div>
+            7.0μs
+          </div>
+          <div>
+            Counter
+          </div>
+          <div>
+            59μs
+          </div>
+          <div>
+            105μs
+          </div>
+          <div>
+            12μs
+          </div>
+          <div>
+            Interval
+          </div>
+          <div>
+            857μs
+          </div>
+          <div>
+            1,000μs
+          </div>
+          <div>
+            0.000μs
+          </div>
+          <div>
+            Lockings
+          </div>
+          <div>
+            49μs
+          </div>
+          <div>
+            95μs
+          </div>
+          <div>
+            2.0μs
           </div>
         </div>
-        <h2
-          class="arrowPanelSubTitle"
-        >
-          Platform
-        </h2>
         <div
-          class="arrowPanelSection"
+          class="metaInfoRow"
         >
-          <div
-            class="metaInfoRow"
+          <span
+            class="metaInfoWideLabel"
           >
-            <span
-              class="metaInfoLabel"
-            >
-              Platform:
-            </span>
-            Macintosh
-          </div>
-          <div
-            class="metaInfoRow"
+            Overhead Durations:
+          </span>
+          <span
+            class="metaInfoValueRight"
           >
-            <span
-              class="metaInfoLabel"
-            >
-              OS:
-            </span>
-            Intel Mac OS X 10.11
-          </div>
-          <div
-            class="metaInfoRow"
-          >
-            <span
-              class="metaInfoLabel"
-            >
-              ABI:
-            </span>
-            x86_64-gcc3
-          </div>
+            1,586μs
+          </span>
         </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Overhead Percentage:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            26,433%
+          </span>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Profiled Duration:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            6.0μs
+          </span>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not make the app crash 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Recording started:
+        </span>
+        toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is not symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox 48
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        nightly
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build ID:
+        </span>
+        20181126165837
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build Type:
+        </span>
+        Debug
+      </div>
+      <div
+        class="metaInfoRow metaInfoListRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Extensions:
+        </span>
+        <ul
+          class="metaInfoList"
+        >
+          <li
+            class="metaInfoListItem"
+          >
+            Form Autofill
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Firefox Screenshots
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Gecko Profiler
+          </li>
+        </ul>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          OS:
+        </span>
+        macOS 10.11
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          ABI:
+        </span>
+        x86_64-gcc3
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          CPU:
+        </span>
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
       </div>
     </div>
   </div>
 </div>
+`;
+
+exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
+<body>
+  <div>
+    <button
+      class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertButton"
+      type="button"
+    >
+      Revert to Original Profile
+    </button>
+    <div
+      class="buttonWithPanel"
+    >
+      <button
+        aria-expanded="false"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+        type="button"
+      >
+        Profile Info
+      </button>
+    </div>
+    <div
+      class="buttonWithPanel"
+    >
+      <button
+        aria-expanded="false"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+        type="button"
+      >
+        Re-upload
+      </button>
+    </div>
+    <div
+      class="buttonWithPanel open"
+    >
+      <button
+        aria-expanded="true"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+        type="button"
+      >
+        Permalink
+      </button>
+      <div
+        class="arrowPanelAnchor"
+      >
+        <div
+          class="arrowPanel open menuButtonsPermalinkPanel"
+        >
+          <div
+            class="arrowPanelArrow"
+          />
+          <div
+            class="arrowPanelContent"
+          >
+            <input
+              class="menuButtonsPermalinkTextField photon-input"
+              data-testid="MenuButtonsPermalink-input"
+              readonly=""
+              type="text"
+              value="https://profiler.firefox.com/"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <a
+      class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+      href="/docs/"
+      target="_blank"
+      title="Open the documentation in a new window"
+    >
+      Docs
+      <i
+        class="open-in-new"
+      />
+    </a>
+  </div>
+</body>
 `;
 
 exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
@@ -597,11 +1416,15 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   data-testid="MenuButtonsPublish-container"
 >
   <div
-    class="photon-message-bar photon-message-bar-error"
+    class="photon-message-bar photon-message-bar-error photon-message-bar-inner-content"
   >
-    Uh oh, something went wrong when publishing the profile.
+    <div
+      class="photon-message-bar-inner-text"
+    >
+      Uh oh, something went wrong when uploading the profile.
+    </div>
     <button
-      class="photon-button photon-button-micro"
+      class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
     >
       Try again
@@ -618,68 +1441,189 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
 exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`] = `
 <div>
   <div
-    class="buttonWithPanel menuButtonsMetaInfoButton"
+    class="buttonWithPanel"
   >
-    <div
-      class="buttonWithPanelButtonWrapper"
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+      type="button"
     >
-      <input
-        class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
-        type="button"
-        value="Firefox () "
-      />
-    </div>
-    <div
-      class="arrowPanelAnchor"
-    >
-      <div
-        class="arrowPanel arrowPanelOpenMetaInfo"
-      >
-        <div
-          class="arrowPanelArrow"
-        />
-      </div>
-    </div>
+      Profile Info
+    </button>
   </div>
   <div
-    class="menuButtons"
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Upload Local Profile
+    </button>
+  </div>
+  <a
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 1`] = `
+<div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Profile Info
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Re-upload
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+      type="button"
+    >
+      Permalink
+    </button>
+  </div>
+  <a
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and the opened panel for an already uploaded profile 2`] = `
+<div
+  data-testid="MenuButtonsPublish-container"
+>
+  <form
+    class="menuButtonsPublishContent"
   >
     <div
-      class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
+      class="menuButtonsPublishIcon"
+    />
+    <h1
+      class="menuButtonsPublishTitle"
     >
-      <div
-        class="buttonWithPanelButtonWrapper"
+      Re-upload Performance Profile
+    </h1>
+    <p
+      class="menuButtonsPublishInfoDescription"
+    >
+      Upload your profile and make it accessible to anyone with the link.
+       
+      By default, your personal data is removed.
+    </p>
+    <h3>
+      Include additional data that may be identifiable
+    </h3>
+    <div
+      class="menuButtonsPublishDataChoices"
+    >
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
       >
         <input
-          class="buttonWithPanelButton"
-          type="button"
-          value="Publish…"
+          class="photon-checkbox photon-checkbox-default"
+          name="includeHiddenThreads"
+          type="checkbox"
         />
-      </div>
-      <div
-        class="arrowPanelAnchor"
+        Include hidden threads
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
       >
-        <div
-          class="arrowPanel menuButtonsPublishPanel"
-        >
-          <div
-            class="arrowPanelArrow"
-          />
-        </div>
-      </div>
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeFullTimeRange"
+          type="checkbox"
+        />
+        Include hidden time range
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeScreenshots"
+          type="checkbox"
+        />
+        Include screenshots
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeUrls"
+          type="checkbox"
+        />
+        Include resource URLs and paths
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeExtension"
+          type="checkbox"
+        />
+        Include extension information
+      </label>
     </div>
-    <a
-      class="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
+    <div
+      class="menuButtonsPublishButtons"
     >
-      Docs
-      <i
-        class="open-in-new"
-      />
-    </a>
-  </div>
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+        type="button"
+      >
+        Compressing…
+      </button>
+      <button
+        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+        />
+        Upload
+      </button>
+    </div>
+  </form>
 </div>
 `;
 
@@ -702,7 +1646,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       This profile is from Firefox Nightly, so by default all information is included.
+       
+      This profile is from ⁨Firefox Nightly⁩, so by default all information is included.
     </p>
     <h3>
       Include additional data that may be identifiable
@@ -752,7 +1697,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs
+        Include resource URLs and paths
       </label>
       <label
         class="photon-label menuButtonsPublishDataChoicesLabel"
@@ -782,7 +1727,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
         />
-        Publish
+        Upload
       </button>
     </div>
   </form>
@@ -808,7 +1753,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       By default, your personal data is removed.
+       
+      By default, your personal data is removed.
     </p>
     <h3>
       Include additional data that may be identifiable
@@ -854,7 +1800,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs
+        Include resource URLs and paths
       </label>
       <label
         class="photon-label menuButtonsPublishDataChoicesLabel"
@@ -883,9 +1829,53 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
         />
-        Publish
+        Upload
       </button>
     </div>
   </form>
+</div>
+`;
+
+exports[`app/MenuButtons Full View Button is present when we are in the active tab view 1`] = `
+<div>
+  <button
+    class="menuButtonsButton menuButtonsButton-hasIcon menuButtonsRevertToFullView"
+    type="button"
+  >
+    Full View
+  </button>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Profile Info
+    </button>
+  </div>
+  <div
+    class="buttonWithPanel"
+  >
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
+      type="button"
+    >
+      Upload Local Profile
+    </button>
+  </div>
+  <a
+    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs
+    <i
+      class="open-in-new"
+    />
+  </a>
 </div>
 `;

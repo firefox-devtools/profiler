@@ -4,12 +4,13 @@
 // @flow
 
 import * as React from 'react';
-import { computeActivityGraphFills } from './ActivityGraphFills';
-import { timeCode } from '../../../utils/time-code';
+import { ActivityGraphCanvas } from './ActivityGraphCanvas';
 import classNames from 'classnames';
-import Tooltip, { MOUSE_OFFSET } from '../../tooltip/Tooltip';
-import SampleTooltipContents from '../SampleTooltipContents';
-import { mapCategoryColorNameToStyles } from '../../../utils/colors';
+import {
+  Tooltip,
+  MOUSE_OFFSET,
+} from 'firefox-profiler/components/tooltip/Tooltip';
+import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
 
 import './ActivityGraph.css';
 
@@ -17,27 +18,34 @@ import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../../types/profile';
-import type { SelectedState } from '../../../types/profile-derived';
-import type { Milliseconds, CssPixels } from '../../../types/units';
-import type {
-  CategoryDrawStyles,
-  ActivityFillGraphQuerier,
-} from './ActivityGraphFills';
+  SelectedState,
+  Milliseconds,
+  CssPixels,
+  SampleUnits,
+} from 'firefox-profiler/types';
+
+import type { ActivityFillGraphQuerier } from './ActivityGraphFills';
 
 export type Props = {|
   +className: string,
+  +trackName: string,
   +fullThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
+  +onSampleClick: (
+    event: SyntheticMouseEvent<>,
+    sampleIndex: IndexIntoSamplesTable
+  ) => void,
   +categories: CategoryList,
   +samplesSelectedStates: null | SelectedState[],
-  +treeOrderSampleComparator?: (
+  +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
+  +enableCPUUsage: boolean,
+  +maxThreadCPUDelta: number,
+  +sampleUnits: SampleUnits | void,
 |};
 
 type State = {
@@ -46,11 +54,14 @@ type State = {
   mouseY: CssPixels,
 };
 
-class ThreadActivityGraph extends React.PureComponent<Props, State> {
-  _canvas: null | HTMLCanvasElement = null;
+function _stopPropagation(e: TransitionEvent) {
+  e.stopPropagation();
+}
+
+export class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _resizeListener = () => this.forceUpdate();
-  _categoryDrawStyles: null | CategoryDrawStyles = null;
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
+  _container: HTMLElement | null = null;
 
   state = {
     hoveredSample: null,
@@ -62,8 +73,8 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     this.setState({ hoveredSample: null });
   };
 
-  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const canvas = this._canvas;
+  _onMouseMove = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+    const canvas = event.currentTarget;
     if (!canvas) {
       return;
     }
@@ -76,150 +87,37 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     });
   };
 
-  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    this._canvas = canvas;
+  // This setter function gets the value of fillsQuerier from
+  // the passFillsQuerier prop of ActivityGraphCanvas and assign it to this._fillsQuerier
+  _setFillsQuerier = (fillsQuerier: ActivityFillGraphQuerier) => {
+    this._fillsQuerier = fillsQuerier;
   };
-
-  _renderCanvas() {
-    const canvas = this._canvas;
-    if (canvas !== null) {
-      timeCode('ThreadActivityGraph render', () => {
-        this.drawCanvas(canvas);
-      });
-    }
-  }
 
   componentDidMount() {
     window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
+    const container = this._container;
+    if (container !== null) {
+      // Stop the propagation of transitionend so we won't fire multiple events
+      // on the active tab resource track `transitionend` event.
+      container.addEventListener('transitionend', _stopPropagation);
+    }
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._resizeListener);
-  }
-
-  /**
-   * Get or lazily create the category info. It requires the 2d ctx to exist in order
-   * to create the fill patterns.
-   */
-  _getCategoryDrawStyles(ctx: CanvasRenderingContext2D): CategoryDrawStyles {
-    if (this._categoryDrawStyles === null) {
-      // Lazily initialize this list.
-      this._categoryDrawStyles = this.props.categories.map(
-        ({ color: colorName }, categoryIndex) => {
-          const styles = mapCategoryColorNameToStyles(colorName);
-          return {
-            ...styles,
-            category: categoryIndex,
-            filteredOutFillStyle: _createDiagonalStripePattern(
-              ctx,
-              styles.unselectedFillStyle
-            ),
-          };
-        }
-      );
-    }
-
-    return this._categoryDrawStyles;
-  }
-
-  drawCanvas(canvas: HTMLCanvasElement) {
-    const {
-      fullThread,
-      interval,
-      rangeStart,
-      rangeEnd,
-      samplesSelectedStates,
-      treeOrderSampleComparator,
-      categories,
-    } = this.props;
-
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    const canvasPixelWidth = Math.round(rect.width * window.devicePixelRatio);
-    const canvasPixelHeight = Math.round(rect.height * window.devicePixelRatio);
-    canvas.width = canvasPixelWidth;
-    canvas.height = canvasPixelHeight;
-
-    const { fills, fillsQuerier } = computeActivityGraphFills({
-      canvasPixelWidth,
-      canvasPixelHeight,
-      fullThread,
-      interval,
-      rangeStart,
-      rangeEnd,
-      samplesSelectedStates,
-      xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
-      treeOrderSampleComparator,
-      greyCategoryIndex: categories.findIndex(c => c.color === 'grey') || 0,
-      categoryDrawStyles: this._getCategoryDrawStyles(ctx),
-    });
-
-    this._fillsQuerier = fillsQuerier;
-
-    // Draw adjacent filled paths using Operator ADD and disjoint paths.
-    // This avoids any bleeding and seams.
-    // lighter === OP_ADD
-    ctx.globalCompositeOperation = 'lighter';
-
-    // The previousUpperEdge keeps track of where the "mountain ridge" is after the
-    // previous fill.
-    let previousUpperEdge = new Float32Array(canvasPixelWidth);
-    for (const { fillStyle, accumulatedUpperEdge } of fills) {
-      ctx.fillStyle = fillStyle;
-
-      // Some fills might not span the full width of the graph - they have parts where
-      // their contribution stays zero for some time. So instead of having one fill call
-      // with a path that is mostly empty, we split the shape of the fill so that we have
-      // potentially multiple fill calls, one fill call for each range during which the
-      // fill has an uninterrupted sequence of non-zero-contribution pixels.
-      let lastNonZeroRangeEnd = 0;
-      while (lastNonZeroRangeEnd < canvasPixelWidth) {
-        const currentNonZeroRangeStart = _findNextDifferentIndex(
-          accumulatedUpperEdge,
-          previousUpperEdge,
-          lastNonZeroRangeEnd
-        );
-        if (currentNonZeroRangeStart >= canvasPixelWidth) {
-          break;
-        }
-        let currentNonZeroRangeEnd = canvasPixelWidth;
-        ctx.beginPath();
-        ctx.moveTo(
-          currentNonZeroRangeStart,
-          (1 - previousUpperEdge[currentNonZeroRangeStart]) * canvasPixelHeight
-        );
-        for (let i = currentNonZeroRangeStart + 1; i < canvasPixelWidth; i++) {
-          const lastVal = previousUpperEdge[i];
-          const thisVal = accumulatedUpperEdge[i];
-          ctx.lineTo(i, (1 - lastVal) * canvasPixelHeight);
-          if (lastVal === thisVal) {
-            currentNonZeroRangeEnd = i;
-            break;
-          }
-        }
-        for (
-          let i = currentNonZeroRangeEnd - 1;
-          i >= currentNonZeroRangeStart;
-          i--
-        ) {
-          ctx.lineTo(i, (1 - accumulatedUpperEdge[i]) * canvasPixelHeight);
-        }
-        ctx.closePath();
-        ctx.fill();
-
-        lastNonZeroRangeEnd = currentNonZeroRangeEnd;
-      }
-      previousUpperEdge = accumulatedUpperEdge;
+    const container = this._container;
+    if (container !== null) {
+      container.removeEventListener('transitionend', _stopPropagation);
     }
   }
 
   _getSampleAtMouseEvent(
-    event: SyntheticMouseEvent<>
+    event: SyntheticMouseEvent<HTMLCanvasElement>
   ): null | IndexIntoSamplesTable {
     // Create local variables so that Flow can refine the following to be non-null.
     const fillsQuerier = this._fillsQuerier;
-    const canvas = this._canvas;
+    const canvas = event.currentTarget;
     if (!canvas || !fillsQuerier) {
       return null;
     }
@@ -233,30 +131,56 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     return fillsQuerier.getSampleAtClick(x, y, time, rect);
   }
 
-  _onMouseUp = (event: SyntheticMouseEvent<>) => {
+  _onMouseUp = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const sample = this._getSampleAtMouseEvent(event);
     if (sample !== null) {
-      this.props.onSampleClick(sample);
+      this.props.onSampleClick(event, sample);
     }
   };
 
+  _takeContainerRef = (el: HTMLElement | null) => {
+    this._container = el;
+  };
+
   render() {
-    this._renderCanvas();
-    const { fullThread, categories } = this.props;
+    const {
+      fullThread,
+      categories,
+      trackName,
+      interval,
+      rangeStart,
+      rangeEnd,
+      samplesSelectedStates,
+      treeOrderSampleComparator,
+      maxThreadCPUDelta,
+      enableCPUUsage,
+      sampleUnits,
+    } = this.props;
     const { hoveredSample, mouseX, mouseY } = this.state;
     return (
       <div
         className={this.props.className}
         onMouseMove={this._onMouseMove}
         onMouseLeave={this._onMouseLeave}
+        ref={this._takeContainerRef}
       >
-        <canvas
+        <ActivityGraphCanvas
           className={classNames(
             `${this.props.className}Canvas`,
             'threadActivityGraphCanvas'
           )}
-          ref={this._takeCanvasRef}
+          trackName={trackName}
+          fullThread={fullThread}
+          interval={interval}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          samplesSelectedStates={samplesSelectedStates}
+          treeOrderSampleComparator={treeOrderSampleComparator}
+          categories={categories}
+          passFillsQuerier={this._setFillsQuerier}
           onMouseUp={this._onMouseUp}
+          enableCPUUsage={enableCPUUsage}
+          maxThreadCPUDelta={maxThreadCPUDelta}
         />
         {hoveredSample === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
@@ -264,55 +188,13 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
               sampleIndex={hoveredSample}
               fullThread={fullThread}
               categories={categories}
+              sampleUnits={sampleUnits}
+              maxThreadCPUDelta={maxThreadCPUDelta}
+              interval={interval}
             />
           </Tooltip>
         )}
       </div>
     );
   }
-}
-
-export default ThreadActivityGraph;
-
-/**
- * Filtered out samples use a diagonal stripe pattern, create that here.
- */
-function _createDiagonalStripePattern(
-  chartCtx: CanvasRenderingContext2D,
-  color: string
-): CanvasPattern {
-  // Create a second canvas, draw to it in order to create a pattern. This canvas
-  // and context will be discarded after the pattern is created.
-  const patternCanvas = document.createElement('canvas');
-  const dpr = Math.round(window.devicePixelRatio);
-  patternCanvas.width = 4 * dpr;
-  patternCanvas.height = 4 * dpr;
-  const patternContext = patternCanvas.getContext('2d');
-  patternContext.scale(dpr, dpr);
-
-  const linear = patternContext.createLinearGradient(0, 0, 4, 4);
-  linear.addColorStop(0, color);
-  linear.addColorStop(0.25, color);
-  linear.addColorStop(0.25, 'transparent');
-  linear.addColorStop(0.5, 'transparent');
-  linear.addColorStop(0.5, color);
-  linear.addColorStop(0.75, color);
-  linear.addColorStop(0.75, 'transparent');
-  linear.addColorStop(1, 'transparent');
-  patternContext.fillStyle = linear;
-  patternContext.fillRect(0, 0, 4, 4);
-
-  return chartCtx.createPattern(patternCanvas, 'repeat');
-}
-
-/**
- * Search an array from a starting index to find where two arrays diverge.
- */
-function _findNextDifferentIndex(arr1, arr2, startIndex) {
-  for (let i = startIndex; i < arr1.length; i++) {
-    if (arr1[i] !== arr2[i]) {
-      return i;
-    }
-  }
-  return arr1.length;
 }

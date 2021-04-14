@@ -7,7 +7,7 @@ import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
-import type { CallNodeDisplayData } from '../../types/profile-derived';
+import type { CallNodeDisplayData } from 'firefox-profiler/types';
 
 describe('actions/icons', function() {
   const validIcons = [
@@ -25,27 +25,28 @@ describe('actions/icons', function() {
   beforeEach(() => {
     const mock = createImageMock();
     imageInstances = mock.instances;
-    (window: Object).Image = mock.Image;
+    (window: any).Image = mock.Image;
   });
 
   afterEach(() => {
-    delete (window: Object).Image;
+    delete (window: any).Image;
     imageInstances = [];
   });
 
   function _createCallNodeWithIcon(icon: string): CallNodeDisplayData {
     return {
-      totalTime: '0',
-      totalTimeWithUnit: '0 ms',
-      totalTimePercent: '0',
-      selfTime: '0',
-      selfTimeWithUnit: '0 ms',
+      total: '0',
+      totalWithUnit: '0 ms',
+      totalPercent: '0',
+      self: '0',
+      selfWithUnit: '0 ms',
       name: 'icon',
       lib: 'icon',
       isFrameLabel: false,
       categoryName: 'Other',
       categoryColor: 'grey',
       icon,
+      iconSrc: 'https://edition.cnn.com/favicon.ico',
       ariaLabel: 'fake aria label',
     };
   }
@@ -54,16 +55,17 @@ describe('actions/icons', function() {
     function getInitialState() {
       return blankStore().getState();
     }
+
     it('getIcons return an empty set', function() {
       const initialState = iconsAccessors.getIcons(getInitialState());
       expect(initialState).toBeInstanceOf(Set);
       expect(initialState.size).toEqual(0);
     });
 
-    it('getIconClassNameForCallNode returns an empty string for any icon', function() {
-      const subject = iconsAccessors.getIconClassNameForCallNode(
+    it('getIconClassName returns an empty string for any icon', function() {
+      const subject = iconsAccessors.getIconClassName(
         getInitialState(),
-        _createCallNodeWithIcon(validIcons[0])
+        _createCallNodeWithIcon(validIcons[0]).icon
       );
       expect(subject).toBe('');
     });
@@ -91,7 +93,7 @@ describe('actions/icons', function() {
         expect(instance.src).toEqual(validIcons[i]);
         expect(instance.referrerPolicy).toEqual('no-referrer');
       });
-      imageInstances.forEach(instance => (instance: Object).onload());
+      imageInstances.forEach(instance => (instance: any).onload());
       await Promise.all(promises);
 
       const state = getState();
@@ -104,9 +106,9 @@ describe('actions/icons', function() {
       );
 
       validIcons.forEach((icon, i) => {
-        subject = iconsAccessors.getIconClassNameForCallNode(
+        subject = iconsAccessors.getIconClassName(
           state,
-          _createCallNodeWithIcon(icon)
+          _createCallNodeWithIcon(icon).icon
         );
         expect(subject).toEqual(expectedClasses[i]);
       });
@@ -120,7 +122,7 @@ describe('actions/icons', function() {
         iconsActions.iconStartLoading(invalidIcon)
       );
       expect(imageInstances.length).toBe(1);
-      (imageInstances[0]: Object).onerror();
+      (imageInstances[0]: any).onerror();
 
       await actionPromise;
 
@@ -128,9 +130,9 @@ describe('actions/icons', function() {
       let subject = iconsAccessors.getIcons(state);
       expect([...subject]).toEqual([]);
 
-      subject = iconsAccessors.getIconClassNameForCallNode(
+      subject = iconsAccessors.getIconClassName(
         state,
-        _createCallNodeWithIcon(invalidIcon)
+        _createCallNodeWithIcon(invalidIcon).icon
       );
       expect(subject).toBe('');
 

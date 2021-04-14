@@ -62,7 +62,7 @@ The `perf script` command takes the `perf.data` file that was written by the `pe
 
 ### Step 3: View the profile in profiler.firefox.com
 
-You can now load the .perf file into [profiler.firefox.com](https://profiler.firefox.com): just tell the Firefox Profiler to open the file and it should be auto-identified and loaded.
+You can now load the .perf file into [profiler.firefox.com](https://profiler.firefox.com): tell the Firefox Profiler to open the file and it should be auto-identified and loaded.
 Note that there will be no markers and no categories.  Many stack frames will say `[unknown]`.  There will be no JavaScript stacks, unless you do extra work as described below.  Symbols might be mangled.
 
 ## Analyzing perf traces and tips

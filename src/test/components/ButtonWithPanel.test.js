@@ -4,10 +4,12 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
-import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
-import ArrowPanel from '../../components/shared/ArrowPanel';
+import { fireEvent } from '@testing-library/react';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
+import { fireFullClick } from '../fixtures/utils';
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -21,11 +23,9 @@ describe('shared/ButtonWithPanel', () => {
         className="button"
         buttonClassName="buttonButton"
         label="My Button"
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        title="Click here to open the panel"
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
   }
@@ -40,12 +40,9 @@ describe('shared/ButtonWithPanel', () => {
       <ButtonWithPanel
         className="button"
         label="My Button"
-        open={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        initialOpen={true}
+        panelClassName="panel"
+        panelContent={<div>Panel content</div>}
       />
     );
     expect(container.firstChild).toMatchSnapshot();
@@ -57,11 +54,7 @@ describe('shared/ButtonWithPanel', () => {
         <ButtonWithPanel
           className="button"
           label="My Button"
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
       expect(queryByTestId('panel-content')).toBeFalsy();
@@ -72,26 +65,31 @@ describe('shared/ButtonWithPanel', () => {
      * not open.
      */
     it('only renders the contents when open', function() {
-      const { queryByTestId } = render(
+      const { getByTestId } = render(
         <ButtonWithPanel
           className="button"
           label="My Button"
-          open={true}
-          panel={
-            <ArrowPanel className="panel">
-              <div data-testid="panel-content">Panel content</div>
-            </ArrowPanel>
-          }
+          initialOpen={true}
+          panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(queryByTestId('panel-content')).toBeTruthy();
+      expect(getByTestId('panel-content')).toBeTruthy();
     });
   });
 
-  it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {
-    const { getByValue, container } = setup();
+  it('displays a title only when not open', () => {
+    const { getByText } = setup();
+    const button = getByText('My Button');
+    expect(button.title).toBe('Click here to open the panel');
+    fireFullClick(button);
+    jest.runAllTimers();
+    expect(button.title).toBe('');
+  });
 
-    fireEvent.click(getByValue('My Button'));
+  it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {
+    const { getByText, container } = setup();
+
+    fireFullClick(getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -101,13 +99,14 @@ describe('shared/ButtonWithPanel', () => {
       keyCode: 27,
       which: 27,
     });
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking outside the panel', () => {
-    const { getByValue, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireFullClick(getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -115,39 +114,40 @@ describe('shared/ButtonWithPanel', () => {
     const newDiv = ensureExists(document.body).appendChild(
       document.createElement('div')
     );
-    fireEvent.click(newDiv);
+    fireFullClick(newDiv);
 
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking the button again', () => {
-    const { getByValue, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireFullClick(getByText('My Button'));
     jest.runAllTimers();
 
     ensureExists(container.querySelector('.arrowPanel.open'));
 
-    fireEvent.click(getByValue('My Button'));
+    fireFullClick(getByText('My Button'));
     jest.runAllTimers();
 
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
 
   it('opens the panel when the button is clicked and does not close the panel by clicking inside the panel', () => {
-    const { getByValue, getByText, container } = setup();
+    const { getByText, container } = setup();
 
-    fireEvent.click(getByValue('My Button'));
+    fireFullClick(getByText('My Button'));
     jest.runAllTimers();
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     // Clicking on the panel doesn't hide the popup.
-    fireEvent.click(getByText('Panel content'));
+    fireFullClick(getByText('Panel content'));
     jest.runAllTimers();
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     // But clicking on the arrow area does.
-    fireEvent.click(ensureExists(container.querySelector('.arrowPanelArrow')));
+    fireFullClick(ensureExists(container.querySelector('.arrowPanelArrow')));
     jest.runAllTimers();
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });

@@ -5,15 +5,15 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import { getCommittedRange } from '../../selectors/profile';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getCommittedRange } from 'firefox-profiler/selectors/profile';
 import { TimelineMarkersIPC } from './Markers';
-import { updatePreviewSelection } from '../../actions/profile-view';
-import { TRACK_IPC_MARKERS_HEIGHT } from '../../app-logic/constants';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
+import { TRACK_IPC_MARKERS_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
-import type { ThreadIndex } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
-import type { ConnectedProps } from '../../utils/connect';
+import type { ThreadIndex, Milliseconds } from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackIPC.css';
 
@@ -38,11 +38,7 @@ type State = {||};
  * A component for showing IPC messages for a particular thread.
  */
 export class TrackIPCImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) => {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
@@ -64,7 +60,7 @@ export class TrackIPCImpl extends React.PureComponent<Props, State> {
         <TimelineMarkersIPC
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           onSelect={this._onMarkerSelect}
         />
       </div>

@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
-  computeCallTreeCountsAndTimings,
+  computeCallTreeCountsAndSummary,
   CallTree,
 } from '../../profile-logic/call-tree';
 import { getRootsAndChildren } from '../../profile-logic/flame-graph';
@@ -21,15 +21,20 @@ import {
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
 function callTreeFromProfile(
   profile: Profile,
   threadIndex: number = 0
 ): CallTree {
   const thread = profile.threads[threadIndex];
-  const { interval, categories } = profile.meta;
+  const { interval } = profile.meta;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  );
   const defaultCategory = categories.findIndex(c => c.name === 'Other');
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
@@ -37,7 +42,7 @@ function callTreeFromProfile(
     thread.funcTable,
     defaultCategory
   );
-  const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+  const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
     thread.samples,
     callNodeInfo,
     interval,
@@ -49,8 +54,8 @@ function callTreeFromProfile(
     callNodeInfo,
     categories,
     'combined',
-    callTreeCountsAndTimings,
-    'timing'
+    callTreeCountsAndSummary,
+    'samples'
   );
 }
 
@@ -85,9 +90,10 @@ describe('unfiltered call tree', function() {
   describe('computed counts and timings', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -97,7 +103,7 @@ describe('unfiltered call tree', function() {
 
     it('yields expected results', function() {
       expect(
-        computeCallTreeCountsAndTimings(
+        computeCallTreeCountsAndSummary(
           thread.samples,
           callNodeInfo,
           profile.meta.interval,
@@ -105,11 +111,11 @@ describe('unfiltered call tree', function() {
         )
       ).toEqual({
         rootCount: 1,
-        rootTotalTime: 3,
+        rootTotalSummary: 3,
         callNodeChildCount: new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
-        callNodeTimes: {
-          selfTime: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
-          totalTime: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        callNodeSummary: {
+          self: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          total: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },
       });
     });
@@ -118,9 +124,10 @@ describe('unfiltered call tree', function() {
   describe('roots and children for flame graph', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -167,7 +174,7 @@ describe('unfiltered call tree', function() {
      *         v    v
      *         E    G
      *
-     * Assert this form for each node where (FuncName:TotalTime,SelfTime)
+     * Assert this form for each node where (FuncName:Total,Self)
      *
      *             A:3,0
      *               |
@@ -191,6 +198,7 @@ describe('unfiltered call tree', function() {
       E  G
     `);
     const callTree = callTreeFromProfile(profile);
+
     it('computes an unfiltered call tree', function() {
       expect(formatTree(callTree)).toEqual([
         '- A (total: 3, self: —)',
@@ -222,6 +230,7 @@ describe('unfiltered call tree', function() {
       E           G
     `);
     const callTree = callTreeFromProfile(profile);
+
     it('computes an unfiltered call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: —)',
@@ -309,10 +318,10 @@ describe('unfiltered call tree', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getNodeData(A)).toEqual({
           funcName: 'A',
-          totalTime: 3,
-          totalTimeRelative: 1,
-          selfTime: 0,
-          selfTimeRelative: 0,
+          total: 3,
+          totalRelative: 1,
+          self: 0,
+          selfRelative: 0,
         });
       });
     });
@@ -320,30 +329,34 @@ describe('unfiltered call tree', function() {
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
-          ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
+          ariaLabel:
+            'A, running count is 3 samples (100%), self count is 0 samples',
           isFrameLabel: true,
+          iconSrc: null,
           icon: null,
           lib: '',
           name: 'A',
-          selfTime: '—',
-          selfTimeWithUnit: '—',
-          totalTime: '3',
-          totalTimeWithUnit: '3ms',
-          totalTimePercent: '100%',
+          self: '—',
+          selfWithUnit: '—',
+          total: '3',
+          totalWithUnit: '3 samples',
+          totalPercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
         expect(callTree.getDisplayData(I)).toEqual({
-          ariaLabel: 'I, running time is 1ms (33%), self time is 1ms',
+          ariaLabel:
+            'I, running count is 1 sample (33%), self count is 1 sample',
           isFrameLabel: false,
+          iconSrc: null,
           icon: null,
           lib: 'libI.so',
           name: 'I',
-          selfTime: '1',
-          selfTimeWithUnit: '1ms',
-          totalTime: '1',
-          totalTimeWithUnit: '1ms',
-          totalTimePercent: '33%',
+          self: '1',
+          selfWithUnit: '1 sample',
+          total: '1',
+          totalWithUnit: '1 sample',
+          totalPercent: '33%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
@@ -380,9 +393,10 @@ describe('unfiltered call tree', function() {
   describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -432,7 +446,11 @@ describe('inverted call tree', function() {
       E                Z           Y
                                    Z
     `).profile;
-    const { interval, categories } = profile.meta;
+    const { interval } = profile.meta;
+    const categories = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    );
     const defaultCategory = categories.findIndex(c => c.color === 'grey');
 
     // Check the non-inverted tree first.
@@ -443,7 +461,7 @@ describe('inverted call tree', function() {
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
       callNodeInfo,
       interval,
@@ -455,8 +473,8 @@ describe('inverted call tree', function() {
       callNodeInfo,
       categories,
       'combined',
-      callTreeCountsAndTimings,
-      'timing'
+      callTreeCountsAndSummary,
+      'samples'
     );
 
     it('computes an non-inverted call tree', function() {
@@ -483,7 +501,7 @@ describe('inverted call tree', function() {
       invertedThread.funcTable,
       defaultCategory
     );
-    const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const invertedCallTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       invertedThread.samples,
       invertedCallNodeInfo,
       interval,
@@ -495,8 +513,8 @@ describe('inverted call tree', function() {
       invertedCallNodeInfo,
       categories,
       'combined',
-      invertedCallTreeCountsAndTimings,
-      'timing'
+      invertedCallTreeCountsAndSummary,
+      'samples'
     );
 
     /**
@@ -568,7 +586,7 @@ describe('diffing trees', function() {
     return profile;
   }
 
-  it('displays a proper call tree, including nodes with totalTime = 0', () => {
+  it('displays a proper call tree, including nodes with total = 0', () => {
     const profile = getProfile();
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
@@ -605,25 +623,28 @@ describe('diffing trees', function() {
     ]);
   });
 
-  it('computes a rootTotalTime that is the absolute count of all intervals', () => {
+  it('computes a rootTotalSummary that is the absolute count of all intervals', () => {
     const profile = getProfile();
 
     const thread = profile.threads[2];
-    const { interval, categories } = profile.meta;
-    const defaultCategory = categories.findIndex(c => c.name === 'Other');
+    const { interval } = profile.meta;
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable,
       defaultCategory
     );
-    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    const callTreeCountsAndSummary = computeCallTreeCountsAndSummary(
       thread.samples,
       callNodeInfo,
       interval,
       false
     );
-    expect(callTreeCountsAndTimings.rootTotalTime).toBe(4);
+    expect(callTreeCountsAndSummary.rootTotalSummary).toBe(4);
   });
 });
 

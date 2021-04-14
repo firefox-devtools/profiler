@@ -5,29 +5,42 @@
 
 import React, { PureComponent } from 'react';
 import { Provider } from 'react-redux';
-import UrlManager from './UrlManager';
-import FooterLinks from './FooterLinks';
+import { UrlManager } from './UrlManager';
+import { FooterLinks } from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
 import { AppViewRouter } from './AppViewRouter';
 import { ProfileLoader } from './ProfileLoader';
+import { ServiceWorkerManager } from './ServiceWorkerManager';
+import { WindowTitle } from './WindowTitle';
+import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLocalizationProvider';
 
-import type { Store } from '../../types/store';
+import type { Store } from 'firefox-profiler/types';
+
+import './Root.css';
 
 type RootProps = {
   store: Store,
 };
 
-export default class Root extends PureComponent<RootProps> {
+import { DragAndDrop } from './DragAndDrop';
+
+export class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
       <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
         <Provider store={store}>
-          <UrlManager>
-            <ProfileLoader />
-            <AppViewRouter />
-            <FooterLinks />
-          </UrlManager>
+          <AppLocalizationProvider>
+            <DragAndDrop>
+              <UrlManager>
+                <ServiceWorkerManager />
+                <ProfileLoader />
+                <AppViewRouter />
+                <FooterLinks />
+                <WindowTitle />
+              </UrlManager>
+            </DragAndDrop>
+          </AppLocalizationProvider>
         </Provider>
       </ErrorBoundary>
     );

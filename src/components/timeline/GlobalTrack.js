@@ -10,15 +10,15 @@ import {
   changeRightClickedTrack,
   changeLocalTrackOrder,
   selectTrack,
-} from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
-  getSelectedThreadIndex,
-  getHiddenGlobalTracks,
+  getSelectedThreadIndexes,
   getLocalTrackOrder,
   getSelectedTab,
-} from '../../selectors/url-state';
-import explicitConnect from '../../utils/connect';
+  getHiddenGlobalTracks,
+} from 'firefox-profiler/selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getGlobalTracks,
   getLocalTracks,
@@ -27,30 +27,36 @@ import {
   getVisualProgress,
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import './Track.css';
-import TimelineTrackThread from './TrackThread';
-import TimelineTrackScreenshots from './TrackScreenshots';
-import TimelineLocalTrack from './LocalTrack';
+import { TimelineTrackThread } from './TrackThread';
+import { TimelineTrackScreenshots } from './TrackScreenshots';
+import { TimelineLocalTrack } from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
-import Reorderable from '../shared/Reorderable';
-import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
+import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
+import { TRACK_PROCESS_BLANK_HEIGHT } from 'firefox-profiler/app-logic/constants';
+import { getTrackSelectionModifier } from 'firefox-profiler/utils';
 
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { GlobalTrackReference } from '../../types/actions';
-import type { Pid, ProgressGraphData } from '../../types/profile';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
+  GlobalTrackReference,
+  Pid,
+  ProgressGraphData,
   TrackIndex,
   GlobalTrack,
   LocalTrack,
-} from '../../types/profile-derived';
-import type { ConnectedProps } from '../../utils/connect';
+  InitialSelectedTrackReference,
+  MixedObject,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +style?: Object /* This is used by Reorderable */,
+  +style?: MixedObject /* This is used by Reorderable */,
+  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
 type StateProps = {|
@@ -76,23 +82,59 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class GlobalTrackComponent extends PureComponent<Props> {
-  _onLabelMouseDown = (event: MouseEvent) => {
-    const { changeRightClickedTrack, trackReference } = this.props;
+  _container: HTMLElement | null = null;
+  _isInitialSelectedPane: boolean | null = null;
 
-    if (event.button === 0) {
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-      this._selectCurrentTrack();
-    } else if (event.button === 2) {
-      // This is needed to allow the context menu to know what was right clicked without
-      // actually changing the current selection.
+  _onLabelMouseDown = (event: MouseEvent) => {
+    if (event.button === 2) {
+      const { changeRightClickedTrack, trackReference } = this.props;
+      // Notify the redux store that this was right clicked.
       changeRightClickedTrack(trackReference);
     }
   };
 
-  _selectCurrentTrack = () => {
+  /**
+   * Special care must be taken when selecting a track. This handler is registered in two
+   * places.
+   *
+   *  1. mouse up of the entire track's wrapping div.
+   *  2. keypress of the focusable button
+   *
+   * This is done to allow for two behaviors that conflict with each other. It's important
+   * when making a preview selection to not select a track on the mouse up. In order to
+   * prevent this, the mouse up handler in the preview selection component prevents further
+   * propagation.
+   *
+   * However, for accessibility reasons, we want to be able to select tracks using the
+   * keyboard. In order to still allow for this behavior, we also listen for the keypress
+   * handler on the button. We do this rather than with the onClick event, as this would
+   * get in the way of the mouse up behavior. The keypress then needs to check that it's
+   * a validation "activation" key, such as Enter of Spacebar.
+   */
+  _selectCurrentTrack = (
+    event: SyntheticMouseEvent<> | SyntheticKeyboardEvent<>
+  ) => {
+    if (
+      event.button === 2 ||
+      (window.navigator.platform === 'MacIntel' && event.ctrlKey)
+    ) {
+      // This is a right click, do nothing.
+      return;
+    }
+
+    if (
+      // Is this a keypress?
+      typeof event.key === 'string' &&
+      // Only allow Spacebar and Enter, which signals the button is being pressed.
+      event.key !== ' ' &&
+      event.key !== 'Enter'
+    ) {
+      // Ignore this keypress.
+      return;
+    }
+
     const { selectTrack, trackReference } = this.props;
-    selectTrack(trackReference);
+    selectTrack(trackReference, getTrackSelectionModifier(event));
   };
 
   renderTrack() {
@@ -100,6 +142,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       globalTrack,
       processesWithMemoryTrack,
       progressGraphData,
+      trackName,
     } = this.props;
     switch (globalTrack.type) {
       case 'process': {
@@ -116,8 +159,10 @@ class GlobalTrackComponent extends PureComponent<Props> {
         }
         return (
           <TimelineTrackThread
-            threadIndex={mainThreadIndex}
+            threadsKey={mainThreadIndex}
             showMemoryMarkers={!processesWithMemoryTrack.has(globalTrack.pid)}
+            trackType="expanded"
+            trackName={trackName}
           />
         );
       }
@@ -135,7 +180,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
           <TrackVisualProgress
             progressGraphData={progressGraphData}
             graphDotTooltipText=" visual completeness at this time"
-            windowId={globalTrack.id}
           />
         );
       }
@@ -147,7 +191,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
           <TrackVisualProgress
             progressGraphData={progressGraphData}
             graphDotTooltipText=" perceptual visual completeness at this time"
-            windowId={globalTrack.id}
           />
         );
       }
@@ -159,7 +202,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
           <TrackVisualProgress
             progressGraphData={progressGraphData}
             graphDotTooltipText=" contentful visual completeness at this time"
-            windowId={globalTrack.id}
           />
         );
       }
@@ -194,10 +236,30 @@ class GlobalTrackComponent extends PureComponent<Props> {
             pid={pid}
             localTrack={localTrack}
             trackIndex={trackIndex}
+            setIsInitialSelectedPane={this.setIsInitialSelectedPane}
           />
         ))}
       </Reorderable>
     );
+  }
+
+  _takeContainerRef = (el: HTMLElement | null) => {
+    const { isSelected } = this.props;
+    this._container = el;
+
+    if (isSelected) {
+      this.setIsInitialSelectedPane(true);
+    }
+  };
+
+  setIsInitialSelectedPane = (value: boolean) => {
+    this._isInitialSelectedPane = value;
+  };
+
+  componentDidMount() {
+    if (this._isInitialSelectedPane && this._container !== null) {
+      this.props.setInitialSelected(this._container);
+    }
   }
 
   render() {
@@ -219,12 +281,12 @@ class GlobalTrackComponent extends PureComponent<Props> {
     }
 
     return (
-      <li className="timelineTrack" style={style}>
+      <li ref={this._takeContainerRef} className="timelineTrack" style={style}>
         <div
           className={classNames('timelineTrackRow timelineTrackGlobalRow', {
             selected: isSelected,
           })}
-          onClick={this._selectCurrentTrack}
+          onMouseUp={this._selectCurrentTrack}
         >
           <ContextMenuTrigger
             id="TimelineTrackContextMenu"
@@ -235,7 +297,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            <button type="button" className="timelineTrackNameButton">
+            <button
+              type="button"
+              className="timelineTrackNameButton"
+              onKeyUp={this._selectCurrentTrack}
+            >
               {trackName}
               {
                 // Only show the PID if:
@@ -266,7 +332,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineGlobalTrack = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
@@ -290,7 +360,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
           threadIndex = globalTrack.mainThreadIndex;
           const selectors = getThreadSelectors(threadIndex);
           isSelected =
-            threadIndex === getSelectedThreadIndex(state) &&
+            getSelectedThreadIndexes(state).has(threadIndex) &&
             selectedTab !== 'network-chart';
           titleText = selectors.getThreadProcessDetails(state);
         }

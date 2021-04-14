@@ -4,11 +4,11 @@
 
 // @flow
 import * as React from 'react';
-import { timeCode } from '../../../utils/time-code';
+import { timeCode } from 'firefox-profiler/utils/time-code';
 import classNames from 'classnames';
-import Tooltip from '../../tooltip/Tooltip';
+import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 
-import type { CssPixels, DevicePixels } from '../../../types/units';
+import type { CssPixels, DevicePixels } from 'firefox-profiler/types';
 
 type Props<HoveredItem> = {|
   +containerWidth: CssPixels,
@@ -38,7 +38,7 @@ type State<HoveredItem> = {
   pageY: CssPixels,
 };
 
-require('./Canvas.css');
+import './Canvas.css';
 
 /**
  * The maximum amount of movement in either direction between the
@@ -53,7 +53,7 @@ const MOUSE_CLICK_MAX_MOVEMENT_DELTA: CssPixels = 5;
 
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
-export default class ChartCanvas<HoveredItem> extends React.Component<
+export class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
@@ -224,7 +224,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
         pageX: event.pageX,
         pageY: event.pageY,
       });
-    } else if (this.state.hoveredItem !== null) {
+    } else if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({
         hoveredItem: null,
       });
@@ -232,7 +237,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   };
 
   _onMouseOut = () => {
-    if (this.state.hoveredItem !== null) {
+    if (
+      this.state.hoveredItem !== null &&
+      // This persistTooltips property is part of the web console API. It helps
+      // in being able to inspect and debug tooltips.
+      !window.persistTooltips
+    ) {
       this.setState({ hoveredItem: null });
     }
   };
@@ -253,7 +263,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     this._canvas = canvas;
   };
 
-  componentWillReceiveProps() {
+  UNSAFE_componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
     // hoveredItem if the mouse no longer hovers over it.

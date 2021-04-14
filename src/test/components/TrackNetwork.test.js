@@ -5,14 +5,16 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, getByTestId, fireEvent } from 'react-testing-library';
+import { getByTestId, fireEvent } from '@testing-library/react';
 
-import TrackNetwork from '../../components/timeline/TrackNetwork';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+
+import { TrackNetwork } from '../../components/timeline/TrackNetwork';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
 } from '../../app-logic/constants';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -29,6 +31,8 @@ import { ensureExists } from '../../utils/flow';
 // mimicks what is computed by the actual component.
 const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
+
+autoMockCanvasContext();
 
 describe('timeline/TrackNetwork', function() {
   it('matches the component snapshot', () => {
@@ -94,10 +98,6 @@ function setup() {
 
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -122,7 +122,7 @@ function setup() {
    */
   function getContextDrawCalls() {
     flushRafCalls();
-    return ctx.__flushDrawLog();
+    return (window: any).__flushDrawLog();
   }
 
   return {

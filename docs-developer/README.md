@@ -1,6 +1,6 @@
 # Firefox Profiler development docs
 
-[profiler.firefox.com](https://profiler.firefox.com) is a client for reading profiles from the profiler component built inside of Firefox, known as the Gecko Profiler. It also can read in formats from [a variety of sources](./loading-in-profiles.md). The front-end client is written using JavaScript and [Flow types](https://flow.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. This client interacts with Firefox using the [Gecko Profiler add-on](https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi). This add-on is the glue between [profiler.firefox.com](https://profiler.firefox.com), and the internal profiler interface in Gecko.
+[profiler.firefox.com](https://profiler.firefox.com) is a client for reading profiles from the profiler component built inside of Firefox, known as the Gecko Profiler. It also can read in formats from [a variety of sources](./loading-in-profiles.md). The front-end client is written using JavaScript and [Flow types](https://flow.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. Firefox can interact with this client by directly injecting profiles into the webpage via a WebChannel mechanism. This code lives in Mozilla Central under [devtools/client/performance-new](https://searchfox.org/mozilla-central/source/devtools/client/performance-new)
 
 ## The Docs
 
@@ -22,7 +22,7 @@
  * [Processed profile format](./processed-profile-format.md)
  * [Writing a Custom Profile Importer](./custom-importer.md)
  * [Markers](./markers.md)
- * [Upgrading profiles](./upgrading-profiles.md)
+ * [Profile expiration and upgrading profiles](./upgrading-profiles.md)
  * [Potential performance data sources in Gecko](./data-sources.md)
  * [Call tree](./call-tree.md)
  * [Frames, funcs, stacks and CallNodes in C++](./call-nodes-in-cpp.md)

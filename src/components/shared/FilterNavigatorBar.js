@@ -4,20 +4,26 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 type Props = {|
   +className: string,
-  +items: string[],
-  +onPop: number => *,
+  +items: $ReadOnlyArray<
+    | {
+        title?: string,
+        content: React.Node,
+      }
+    | string
+  >,
+  +onPop: number => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
 
-class FilterNavigatorBar extends PureComponent<Props> {
+export class FilterNavigatorBar extends React.PureComponent<Props> {
   _onLiClick = (e: SyntheticMouseEvent<HTMLLIElement>) => {
     const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;
@@ -35,7 +41,7 @@ class FilterNavigatorBar extends PureComponent<Props> {
           <CSSTransition
             key={i}
             classNames="filterNavigatorBarTransition"
-            timeout={300}
+            timeout={250}
           >
             <li
               data-index={i}
@@ -45,14 +51,16 @@ class FilterNavigatorBar extends PureComponent<Props> {
                 filterNavigatorBarSelectedItem: i === selectedItem,
                 filterNavigatorBarLeafItem: i === items.length - 1,
               })}
-              title={item}
+              title={typeof item === 'string' ? item : item.title}
               onClick={this._onLiClick}
             >
               {i === items.length - 1 ? (
-                <span className="filterNavigatorBarItemContent">{item}</span>
+                <span className="filterNavigatorBarItemContent">
+                  {typeof item === 'string' ? item : item.content}
+                </span>
               ) : (
                 <button type="button" className="filterNavigatorBarItemContent">
-                  {item}
+                  {typeof item === 'string' ? item : item.content}
                 </button>
               )}
             </li>
@@ -82,5 +90,3 @@ class FilterNavigatorBar extends PureComponent<Props> {
     );
   }
 }
-
-export default FilterNavigatorBar;

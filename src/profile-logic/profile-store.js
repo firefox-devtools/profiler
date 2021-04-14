@@ -3,13 +3,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { oneLine } from 'common-tags';
+import { PROFILER_SERVER_ORIGIN } from 'firefox-profiler/app-logic/constants';
 
-export function uploadBinaryProfileData(): * {
+// This is the server we use to publish new profiles.
+const PUBLISHING_ENDPOINT = `${PROFILER_SERVER_ORIGIN}/compressed-store`;
+
+const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
+
+// This error is used when we get an "abort" event. This happens when we call
+// "abort" expliitely, and so when the user actually cancels the upload.
+// We use a specific class error to distinguish this case from other cases from
+// the caller function.
+// It's exported because we use it in tests.
+export class UploadAbortedError extends Error {
+  name = 'UploadAbortedError';
+}
+
+export function uploadBinaryProfileData() {
   const xhr = new XMLHttpRequest();
   let isAborted = false;
 
   return {
-    abortFunction: (): void => {
+    abortUpload: (): void => {
       isAborted = true;
       xhr.abort();
     },
@@ -19,41 +34,53 @@ export function uploadBinaryProfileData(): * {
     ): Promise<string> =>
       new Promise((resolve, reject) => {
         if (isAborted) {
-          reject(new Error('The request was already aborted.'));
+          reject(new UploadAbortedError('The request was already aborted.'));
           return;
         }
 
         xhr.onload = () => {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(
-              new Error(
-                `xhr onload with status != 200, xhr.statusText: ${
-                  xhr.statusText
-                }`
-              )
-            );
+          switch (xhr.status) {
+            case 413:
+              reject(
+                new Error(
+                  oneLine`
+                    The profile size is too large.
+                    You can try enabling some of the privacy features to trim its size down.
+                  `
+                )
+              );
+              break;
+            default:
+              if (xhr.status >= 200 && xhr.status <= 299) {
+                // Success!
+                resolve(xhr.responseText);
+              } else {
+                reject(
+                  new Error(
+                    `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
+                  )
+                );
+              }
           }
         };
 
         xhr.onerror = () => {
           console.error(
-            'There was an XHR error in uploadBinaryProfileData()',
+            'There was an XHR network error in uploadBinaryProfileData()',
             xhr
           );
+
+          let errorMessage =
+            'Unable to make a connection to publish the profile.';
+          if (xhr.statusText) {
+            errorMessage += ` The error response was: ${xhr.statusText}`;
+          }
+          reject(new Error(errorMessage));
+        };
+
+        xhr.onabort = () => {
           reject(
-            new Error(
-              // The profile store does not give useful responses.
-              // See: https://github.com/firefox-devtools/profiler/issues/998
-              xhr.statusText
-                ? oneLine`
-                    There was an issue uploading the profile to the server. This is often
-                    caused by the profile file size being too large. The error
-                    response was: ${xhr.statusText}
-                  `
-                : 'Unable to make a connection to publish the profile.'
-            )
+            new UploadAbortedError('The error has been aborted by the user.')
           );
         };
 
@@ -63,8 +90,34 @@ export function uploadBinaryProfileData(): * {
           }
         };
 
-        xhr.open('POST', 'https://profile-store.appspot.com/compressed-store');
+        xhr.open('POST', PUBLISHING_ENDPOINT);
+        xhr.setRequestHeader('Accept', ACCEPT_HEADER_VALUE);
         xhr.send(data);
       }),
   };
+}
+
+export async function deleteProfileOnServer({
+  profileToken,
+  jwtToken,
+}: {
+  profileToken: string,
+  jwtToken: string,
+}): Promise<void> {
+  const ENDPOINT = `${PROFILER_SERVER_ORIGIN}/profile/${profileToken}`;
+
+  const response = await fetch(ENDPOINT, {
+    method: 'DELETE',
+    headers: {
+      Accept: ACCEPT_HEADER_VALUE,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwtToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `An error happened while deleting the profile with the token "${profileToken}": ${response.statusText} (${response.status})`
+    );
+  }
 }

@@ -4,8 +4,10 @@
 
 // @flow
 import * as React from 'react';
+
 import explicitConnect from '../../utils/connect';
-import FlameGraphCanvas from './Canvas';
+import { FlameGraphCanvas } from './Canvas';
+
 import {
   getCategories,
   getCommittedRange,
@@ -13,38 +15,43 @@ import {
   getScrollToSelectionGeneration,
   getProfileInterval,
   getPageList,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
-  getSelectedThreadIndex,
+  getSelectedThreadsKey,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
+import { getCallNodePathFromIndex } from 'firefox-profiler/profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
-} from '../../actions/profile-view';
-import { getIconsWithClassNames } from '../../selectors/icons';
-import { BackgroundImageStyleDef } from '../shared/StyleDef';
+  handleCallNodeTransformShortcut,
+} from 'firefox-profiler/actions/profile-view';
 
-import type { Thread, CategoryList, PageList } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
-import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type {
+  Thread,
+  CategoryList,
+  PageList,
+  Milliseconds,
+  StartEndRange,
+  WeightType,
+  SamplesLikeTable,
   PreviewSelection,
   CallTreeSummaryStrategy,
-} from '../../types/actions';
-import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
-import type { CallTree } from '../../profile-logic/call-tree';
-import type { IconWithClassName } from '../../types/state';
+  TracedTiming,
+  ThreadsKey,
+} from 'firefox-profiler/types';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { FlameGraphTiming } from 'firefox-profiler/profile-logic/flame-graph';
 
-require('./FlameGraph.css');
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+import './FlameGraph.css';
 
 const STACK_FRAME_HEIGHT = 16;
 
@@ -57,40 +64,44 @@ const SELECTABLE_THRESHOLD = 0.001;
 
 type StateProps = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
   +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
-  +threadIndex: number,
+  +threadsKey: ThreadsKey,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
-  +icons: IconWithClassName[],
   +categories: CategoryList,
   +interval: Milliseconds,
   +isInverted: boolean,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +samples: SamplesLikeTable,
+  +unfilteredSamples: SamplesLikeTable,
+  +tracedTiming: TracedTiming | null,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class FlameGraph extends React.PureComponent<Props> {
+class FlameGraphImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
 
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
@@ -98,13 +109,9 @@ class FlameGraph extends React.PureComponent<Props> {
   _onRightClickedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const {
-      callNodeInfo,
-      threadIndex,
-      changeRightClickedCallNode,
-    } = this.props;
+    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
     changeRightClickedCallNode(
-      threadIndex,
+      threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
@@ -115,7 +122,7 @@ class FlameGraph extends React.PureComponent<Props> {
     this._viewport = viewport;
   };
 
-  _focusViewport = () => {
+  focus = () => {
     if (this._viewport) {
       this._viewport.focus();
     }
@@ -179,11 +186,12 @@ class FlameGraph extends React.PureComponent<Props> {
 
   _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
     const {
-      threadIndex,
+      threadsKey,
       callTree,
       callNodeInfo: { callNodeTable },
       selectedCallNodeIndex,
       changeSelectedCallNode,
+      handleCallNodeTransformShortcut,
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
@@ -192,7 +200,7 @@ class FlameGraph extends React.PureComponent<Props> {
       ) {
         // Just select the "root" node if we've got no prior selection.
         changeSelectedCallNode(
-          threadIndex,
+          threadsKey,
           getCallNodePathFromIndex(0, callNodeTable)
         );
       }
@@ -204,7 +212,7 @@ class FlameGraph extends React.PureComponent<Props> {
         const prefix = callNodeTable.prefix[selectedCallNodeIndex];
         if (prefix !== -1) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(prefix, callNodeTable)
           );
         }
@@ -219,7 +227,7 @@ class FlameGraph extends React.PureComponent<Props> {
 
         if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(callNodeIndex, callNodeTable)
           );
         }
@@ -234,28 +242,28 @@ class FlameGraph extends React.PureComponent<Props> {
 
         if (callNodeIndex !== undefined) {
           changeSelectedCallNode(
-            threadIndex,
+            threadsKey,
             getCallNodePathFromIndex(callNodeIndex, callNodeTable)
           );
         }
         break;
       }
       default:
-        // Other keys are ignored
+        handleCallNodeTransformShortcut(
+          event,
+          threadsKey,
+          selectedCallNodeIndex
+        );
         break;
     }
   };
-
-  componentDidMount() {
-    this._focusViewport();
-  }
 
   render() {
     const {
       thread,
       unfilteredThread,
       sampleIndexOffset,
-      threadIndex,
+      threadsKey,
       maxStackDepth,
       flameGraphTiming,
       callTree,
@@ -265,24 +273,20 @@ class FlameGraph extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
       callTreeSummaryStrategy,
-      icons,
       categories,
       interval,
       isInverted,
       pages,
+      weightType,
+      samples,
+      unfilteredSamples,
+      tracedTiming,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
-        {icons.map(({ className, icon }) => (
-          <BackgroundImageStyleDef
-            className={className}
-            url={icon}
-            key={className}
-          />
-        ))}
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{
@@ -290,7 +294,7 @@ class FlameGraph extends React.PureComponent<Props> {
           }}
         >
           <FlameGraphCanvas
-            key={threadIndex}
+            key={threadsKey}
             // ChartViewport props
             viewportProps={{
               timeRange,
@@ -308,6 +312,7 @@ class FlameGraph extends React.PureComponent<Props> {
             chartProps={{
               thread,
               pages,
+              weightType,
               unfilteredThread,
               sampleIndexOffset,
               maxStackDepth,
@@ -324,6 +329,9 @@ class FlameGraph extends React.PureComponent<Props> {
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
+              samples,
+              unfilteredSamples,
+              tracedTiming,
             }}
           />
         </ContextMenuTrigger>
@@ -340,43 +348,50 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    return {
-      thread: selectedThreadSelectors.getFilteredThread(state),
-      unfilteredThread: selectedThreadSelectors.getThread(state),
-      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
-        state
-      ),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
-      flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-      callTree: selectedThreadSelectors.getCallTree(state),
-      timeRange: getCommittedRange(state),
-      previewSelection: getPreviewSelection(state),
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-      categories: getCategories(state),
-      threadIndex: getSelectedThreadIndex(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-        state
-      ),
-      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-      icons: getIconsWithClassNames(state),
-      interval: getProfileInterval(state),
-      isInverted: getInvertCallstack(state),
-      callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-        state
-      ),
-      pages: getPageList(state),
-    };
-  },
+export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
+    thread: selectedThreadSelectors.getFilteredThread(state),
+    unfilteredThread: selectedThreadSelectors.getThread(state),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+      state
+    ),
+    // Use the filtered call node max depth, rather than the preview filtered one, so
+    // that the viewport height is stable across preview selections.
+    maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
+    flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
+    callTree: selectedThreadSelectors.getCallTree(state),
+    timeRange: getCommittedRange(state),
+    previewSelection: getPreviewSelection(state),
+    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    categories: getCategories(state),
+    threadsKey: getSelectedThreadsKey(state),
+    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+      state
+    ),
+    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      state
+    ),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+    interval: getProfileInterval(state),
+    isInverted: getInvertCallstack(state),
+    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+      state
+    ),
+    pages: getPageList(state),
+    samples: selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(
+      state
+    ),
+    unfilteredSamples: selectedThreadSelectors.getUnfilteredSamplesForCallTree(
+      state
+    ),
+    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
+  }),
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
+    handleCallNodeTransformShortcut,
   },
-  component: FlameGraph,
+  options: { forwardRef: true },
+  component: FlameGraphImpl,
 });

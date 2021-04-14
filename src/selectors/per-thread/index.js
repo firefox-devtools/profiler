@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { createSelector } from 'reselect';
+import memoize from 'memoize-immutable';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import {
@@ -22,9 +23,10 @@ import {
   type ComposedSelectorsPerThread,
 } from './composed';
 import * as ProfileSelectors from '../profile';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
-import type { ThreadIndex } from '../../types/profile';
-import type { Selector } from '../../types/store';
+import type { ThreadIndex, Selector, ThreadsKey } from 'firefox-profiler/types';
+
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 
 /**
@@ -44,7 +46,30 @@ export type ThreadSelectors = {|
 /**
  * This is the static object store that holds the selector functions.
  */
-const _threadSelectorsCache: { [key: ThreadIndex]: ThreadSelectors } = {};
+const _threadSelectorsCache: { [number]: ThreadSelectors } = {};
+const _mergedThreadSelectorsMemoized = memoize(
+  (threadsKey: ThreadsKey) => {
+    // We don't pass this set inside this memoization function since we create
+    // an intermediate Set whenever we need to access the cache. Memoize should
+    // only use threadsKey as the key.
+    const threadIndexes = new Set(('' + threadsKey).split(',').map(n => +n));
+    return _buildThreadSelectors(threadIndexes, threadsKey);
+  },
+  { limit: 5 }
+);
+
+const getSingleThreadSelectors = (
+  threadIndex: ThreadIndex
+): ThreadSelectors => {
+  if (threadIndex in _threadSelectorsCache) {
+    return _threadSelectorsCache[threadIndex];
+  }
+
+  const threadIndexes = new Set([threadIndex]);
+  const selectors = _buildThreadSelectors(threadIndexes);
+  _threadSelectorsCache[threadIndex] = selectors;
+  return selectors;
+};
 
 /**
  * This function does the work of building out the selectors for a given thread index.
@@ -52,28 +77,86 @@ const _threadSelectorsCache: { [key: ThreadIndex]: ThreadSelectors } = {};
  * what they specifically include.
  */
 export const getThreadSelectors = (
-  threadIndex: ThreadIndex
+  oneOrManyThreadIndexes: ThreadIndex | Set<ThreadIndex>
 ): ThreadSelectors => {
-  if (!(threadIndex in _threadSelectorsCache)) {
-    // We define the thread selectors in 3 steps to ensure clarity in the
-    // separate files.
-    // 1. The basic selectors.
-    let selectors = getThreadSelectorsPerThread(threadIndex);
-    // 2. Stack, sample and marker selectors that need the previous basic
-    // selectors for their own definition.
-    selectors = {
-      ...selectors,
-      ...getStackAndSampleSelectorsPerThread(selectors),
-      ...getMarkerSelectorsPerThread(selectors),
-    };
-    // 3. Other selectors that need selectors from different files to be defined.
-    _threadSelectorsCache[threadIndex] = {
-      ...selectors,
-      ...getComposedSelectorsPerThread(selectors),
-    };
+  let threadIndex: null | ThreadIndex = null;
+  let threadIndexes: null | Set<ThreadIndex> = null;
+
+  if (typeof oneOrManyThreadIndexes === 'number') {
+    threadIndex = oneOrManyThreadIndexes;
+  } else {
+    threadIndexes = oneOrManyThreadIndexes;
   }
-  return _threadSelectorsCache[threadIndex];
+
+  // The thread selectors have two different caching strategies. For a single thread
+  // index, we will retain the cache forever. For a Set of more than one thread indexes
+  // we will only memoize the last used Set. Most likely, users will add on to a
+  // selection until they have the desired set of Threads. It would be very memory
+  // intensive to retain this set of selectors forever, as it can change frequently
+  // and with various different values.
+  if (threadIndex !== null) {
+    return getSingleThreadSelectors(threadIndex);
+  }
+
+  // This must be true with the logic above.
+  threadIndexes = ensureExists(threadIndexes);
+
+  return getThreadSelectorsFromThreadsKey(
+    ProfileData.getThreadsKey(threadIndexes),
+    threadIndexes
+  );
 };
+
+/**
+ * This function returns the selectors for a group of threads, based on the ThreadsKey.
+ * It only memoizes off of a single ThreadsKey. If that key changes, the caching will
+ * be invalidated, and a new set of selectors will be generated. This is because
+ * thread selections are fairly dynamic, and we don't want to retain too many
+ * extraneous results.
+ */
+export const getThreadSelectorsFromThreadsKey = (
+  threadsKey: ThreadsKey,
+  threadIndexes: Set<ThreadIndex> = new Set(
+    ('' + threadsKey).split(',').map(n => +n)
+  )
+): ThreadSelectors => {
+  if (threadIndexes.size === 1) {
+    // We should get the single thread and use its caching mechanism.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return getSingleThreadSelectors(
+      ensureExists(getFirstItemFromSet(threadIndexes))
+    );
+  }
+
+  return _mergedThreadSelectorsMemoized(threadsKey);
+};
+
+function _buildThreadSelectors(
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey = ProfileData.getThreadsKey(threadIndexes)
+) {
+  // We define the thread selectors in 3 steps to ensure clarity in the
+  // separate files.
+  // 1. The basic selectors.
+  let selectors = getThreadSelectorsPerThread(threadIndexes, threadsKey);
+  // 2. Stack, sample and marker selectors that need the previous basic
+  // selectors for their own definition.
+  selectors = {
+    ...selectors,
+    ...getStackAndSampleSelectorsPerThread(
+      selectors,
+      threadIndexes,
+      threadsKey
+    ),
+    ...getMarkerSelectorsPerThread(selectors, threadIndexes, threadsKey),
+  };
+  // 3. Other selectors that need selectors from different files to be defined.
+  selectors = {
+    ...selectors,
+    ...getComposedSelectorsPerThread(selectors),
+  };
+  return selectors;
+}
 
 /**
  * Most of the time, we only want to work with the selected thread. This object
@@ -84,7 +167,7 @@ export const selectedThreadSelectors: ThreadSelectors = (() => {
   const result: $Shape<ThreadSelectors> = {};
   for (const key in anyThreadSelectors) {
     result[key] = state =>
-      getThreadSelectors(UrlState.getSelectedThreadIndex(state))[key](state);
+      getThreadSelectors(UrlState.getSelectedThreadIndexes(state))[key](state);
   }
   const result2: ThreadSelectors = (result: any);
   return result2;
@@ -150,6 +233,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getThread,
     selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
+    selectedThreadSelectors.getPreviewFilteredSamplesForCallTree,
+    selectedThreadSelectors.getUnfilteredSamplesForCallTree,
     ProfileData.getTimingsForPath
   );
 

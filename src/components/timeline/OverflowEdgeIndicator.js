@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import type { InitialSelectedTrackReference } from 'firefox-profiler/types';
 
 import './OverflowEdgeIndicator.css';
 
@@ -13,6 +14,8 @@ type Props = {
   className: string,
   children: React.Node,
   panelLayoutGeneration: number,
+  initialSelected: InitialSelectedTrackReference | null,
+  forceLayoutGeneration?: number,
 };
 
 type State = {
@@ -25,6 +28,7 @@ type State = {
 class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null = null;
   _contentsWrapper: HTMLDivElement | null = null;
+  _scrolledToInitialSelected: boolean = false;
 
   state = {
     overflowsOnTop: false,
@@ -49,8 +53,36 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     this._updateIndicatorStatus();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._updateIndicatorStatus();
+    const { initialSelected, forceLayoutGeneration } = this.props;
+    const container = this._container;
+
+    if (
+      forceLayoutGeneration !== undefined &&
+      forceLayoutGeneration !== prevProps.forceLayoutGeneration &&
+      initialSelected &&
+      container !== null
+    ) {
+      // If forceLayoutGeneration exists and incremented, scroll to the selected
+      // element even though it's already scrolled before.
+      const childPosition =
+        initialSelected.offsetTop + initialSelected.offsetHeight;
+      const parentPosition = container.offsetTop + container.offsetHeight;
+
+      if (childPosition > parentPosition) {
+        container.scrollTop = initialSelected.offsetTop;
+      }
+    }
+
+    if (
+      !this._scrolledToInitialSelected &&
+      initialSelected &&
+      this._container
+    ) {
+      this._container.scrollTop = initialSelected.offsetTop;
+      this._scrolledToInitialSelected = true;
+    }
   }
 
   _updateIndicatorStatus() {
@@ -102,4 +134,4 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
   }
 }
 
-export default OverflowEdgeIndicator;
+export { OverflowEdgeIndicator };

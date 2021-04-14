@@ -7,14 +7,16 @@ import { createSelector } from 'reselect';
 
 import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
 
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
-import type { Thread, JsTracerTable } from '../../types/profile';
 import type {
+  Selector,
+  $ReturnType,
+  Thread,
+  JsTracerTable,
   MarkerTimingRows,
   CombinedTimingRows,
   MarkerTiming,
-} from '../../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import type {
   StackTiming,
   StackTimingByDepth,
@@ -47,7 +49,7 @@ type NeededThreadSelectors = {
  */
 export function getComposedSelectorsPerThread(
   threadSelectors: NeededThreadSelectors
-): * {
+) {
   /**
    * Visible tabs are computed based on the current state of the profile. Some
    * effort is made to not show a tab when there is no data available for it or
@@ -66,6 +68,7 @@ export function getComposedSelectorsPerThread(
 
       let visibleTabs = tabSlugs;
       if (isNetworkChartEmpty) {
+        // Don't show the network chart if it's empty.
         visibleTabs = visibleTabs.filter(
           tabSlug => tabSlug !== 'network-chart'
         );

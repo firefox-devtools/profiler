@@ -1,0 +1,51 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* We use em in this CSS file so that it will adjust with the inherited font-size. */
+
+.profileMetaInfoSummary {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.profileMetaInfoSummaryProductAndVersion,
+.profileMetaInfoSummaryPlatform {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileMetaInfoSummaryProductAndVersion {
+  padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
+  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+}
+
+.profileMetaInfoSummaryProductAndVersion[data-product^='Firefox'],
+.profileMetaInfoSummaryProductAndVersion[data-product='Fennec'] {
+  background-image: url(../../../res/img/svg/brands/firefoxbrowser.svg);
+}
+
+.profileMetaInfoSummaryPlatform {
+  padding-left: 1.4em; /* 1 (for the background image) + 0.4 */
+  margin-left: 1em;
+  background: url(../../../res/img/svg/info.svg) left center / 1em no-repeat;
+}
+
+.profileMetaInfoSummaryPlatform[data-toolkit^='macOS'] {
+  background-image: url(../../../res/img/svg/brands/apple.svg);
+}
+
+.profileMetaInfoSummaryPlatform[data-toolkit^='Windows'] {
+  background-image: url(../../../res/img/svg/brands/windows.svg);
+}
+
+.profileMetaInfoSummaryPlatform[data-toolkit^='Linux'] {
+  background-image: url(../../../res/img/svg/brands/linux.svg);
+}
+
+.profileMetaInfoSummaryPlatform[data-toolkit^='Android'] {
+  background-image: url(../../../res/img/svg/brands/android.svg);
+}

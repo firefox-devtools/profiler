@@ -11,26 +11,28 @@ import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
-import { assertExhaustiveCheck, ensureExists } from '../../utils/flow';
+import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   Thread,
-  SamplesTable,
-  JsAllocationsTable,
-  NativeAllocationsTable,
+  ThreadIndex,
+  SamplesLikeTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
-} from '../../types/profile';
-import type {
+  WeightType,
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
   SelectedState,
-} from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
-import type { Selector } from '../../types/store';
-import type { $ReturnType } from '../../types/utils';
-import type { CallTreeSummaryStrategy } from '../../types/actions';
+  StartEndRange,
+  Selector,
+  $ReturnType,
+  CallTreeSummaryStrategy,
+  TracedTiming,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+
 import type { ThreadSelectorsPerThread } from './thread';
 
 /**
@@ -46,8 +48,10 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with either stacks or samples.
  */
 export function getStackAndSampleSelectorsPerThread(
-  threadSelectors: ThreadSelectorsPerThread
-): * {
+  threadSelectors: ThreadSelectorsPerThread,
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+) {
   /**
    * The buffers of the samples can be cleared out. This function lets us know the
    * absolute range of samples that we have collected.
@@ -80,12 +84,6 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getCallNodeMaxDepth: Selector<number> = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
-  );
-
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
     (threadViewOptions): CallNodePath => threadViewOptions.selectedCallNodePath
@@ -99,21 +97,6 @@ export function getStackAndSampleSelectorsPerThread(
         callNodePath,
         callNodeInfo.callNodeTable
       );
-    }
-  );
-
-  const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
-    threadSelectors.getViewOptions(state).rightClickedCallNodePath;
-
-  const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
-    getCallNodeInfo,
-    getRightClickedCallNodePath,
-    ({ callNodeTable }, callNodePath): IndexIntoCallNodeTable | null => {
-      if (callNodePath === null) {
-        return null;
-      }
-
-      return ProfileData.getCallNodeIndexFromPath(callNodePath, callNodeTable);
     }
   );
 
@@ -138,10 +121,12 @@ export function getStackAndSampleSelectorsPerThread(
     null | SelectedState[]
   > = createSelector(
     threadSelectors.getFilteredThread,
+    threadSelectors.getTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
       thread,
+      tabFilteredThread,
       { callNodeTable, stackIndexToCallNodeIndex },
       selectedCallNode
     ) => {
@@ -153,9 +138,14 @@ export function getStackAndSampleSelectorsPerThread(
         thread.samples.stack,
         stackIndexToCallNodeIndex
       );
+      const activeTabFilteredCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
+        tabFilteredThread.samples.stack,
+        stackIndexToCallNodeIndex
+      );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
         sampleIndexToCallNodeIndex,
+        activeTabFilteredCallNodeIndex,
         selectedCallNode
       );
     }
@@ -218,78 +208,54 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getSamplesForCallTree: Selector<
-    SamplesTable | JsAllocationsTable | NativeAllocationsTable
-  > = createSelector(
-    threadSelectors.getPreviewFilteredThread,
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getThread,
     getCallTreeSummaryStrategy,
-    (thread, strategy) => {
-      switch (strategy) {
-        case 'timing':
-          return thread.samples;
-        case 'js-allocations':
-          return ensureExists(
-            thread.jsAllocations,
-            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-          );
-        case 'native-retained-allocations': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
-          );
-
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-          return ProfileData.filterToRetainedAllocations(nativeAllocations);
-        }
-        case 'native-allocations':
-          return ProfileData.filterToAllocations(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-allocations" strategy'
-            )
-          );
-        case 'native-deallocations-sites':
-          return ProfileData.filterToDeallocationsSites(
-            ensureExists(
-              thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "native-deallocations-sites" strategy'
-            )
-          );
-        case 'native-deallocations-memory': {
-          const nativeAllocations = ensureExists(
-            thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "native-deallocations-memory" strategy'
-          );
-
-          if (!nativeAllocations.memoryAddress) {
-            throw new Error(
-              'Attempting to filter by retained allocations data that is missing the memory addresses.'
-            );
-          }
-
-          return ProfileData.filterToDeallocationsMemory(
-            ensureExists(
-              nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
-            )
-          );
-        }
-        default:
-          throw assertExhaustiveCheck(strategy);
-      }
-    }
+    CallTree.extractSamplesLikeTable
   );
 
-  const getCallTreeCountsAndTimings: Selector<CallTree.CallTreeCountsAndTimings> = createSelector(
-    getSamplesForCallTree,
+  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getFilteredThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    threadSelectors.getPreviewFilteredThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getFilteredCallNodeMaxDepth: Selector<number> = createSelector(
+    getFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileData.computeCallNodeMaxDepth
+  );
+
+  const getPreviewFilteredCallNodeMaxDepth: Selector<number> = createSelector(
+    getPreviewFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileData.computeCallNodeMaxDepth
+  );
+
+  /**
+   * When computing the call tree, a "samples" table is used, which
+   * can represent a variety of formats with different weight types.
+   * This selector uses that table's weight type if it exists, or
+   * defaults to samples, which the Gecko Profiler outputs by default.
+   */
+  const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
+    // The weight type is not changed by the filtering done on the profile.
+    getUnfilteredSamplesForCallTree,
+    samples => samples.weightType || 'samples'
+  );
+
+  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> = createSelector(
+    getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
-    CallTree.computeCallTreeCountsAndTimings
+    CallTree.computeCallTreeCountsAndSummary
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
@@ -298,48 +264,72 @@ export function getStackAndSampleSelectorsPerThread(
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
-    getCallTreeCountsAndTimings,
-    getCallTreeSummaryStrategy,
+    getCallTreeCountsAndSummary,
+    getWeightTypeForCallTree,
     CallTree.getCallTree
+  );
+
+  const getTracedTiming: Selector<TracedTiming | null> = createSelector(
+    getFilteredSamplesForCallTree,
+    getCallNodeInfo,
+    ProfileSelectors.getProfileInterval,
+    UrlState.getInvertCallstack,
+    CallTree.computeTracedTiming
   );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
-    getCallNodeMaxDepth,
+    getFilteredCallNodeMaxDepth,
     ProfileSelectors.getProfileInterval,
     StackTiming.getStackTimingByDepth
-  );
-
-  const getCallNodeMaxDepthForFlameGraph: Selector<number> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
-    getCallNodeInfo,
-    ProfileData.computeCallNodeMaxDepth
   );
 
   const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
-    getCallTreeCountsAndTimings,
+    getCallTreeCountsAndSummary,
     FlameGraph.getFlameGraphTiming
+  );
+
+  const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> = createSelector(
+    getRightClickedCallNodeInfo,
+    getCallNodeInfo,
+    (rightClickedCallNodeInfo, { callNodeTable }) => {
+      if (
+        rightClickedCallNodeInfo !== null &&
+        threadsKey === rightClickedCallNodeInfo.threadsKey
+      ) {
+        return ProfileData.getCallNodeIndexFromPath(
+          rightClickedCallNodeInfo.callNodePath,
+          callNodeTable
+        );
+      }
+
+      return null;
+    }
   );
 
   return {
     unfilteredSamplesRange,
+    getWeightTypeForCallTree,
     getCallNodeInfo,
-    getCallNodeMaxDepth,
+    getUnfilteredSamplesForCallTree,
+    getFilteredSamplesForCallTree,
+    getPreviewFilteredSamplesForCallTree,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
-    getRightClickedCallNodePath,
-    getRightClickedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTreeSummaryStrategy,
     getCallTree,
+    getTracedTiming,
     getStackTimingByDepth,
-    getCallNodeMaxDepthForFlameGraph,
+    getFilteredCallNodeMaxDepth,
+    getPreviewFilteredCallNodeMaxDepth,
     getFlameGraphTiming,
+    getRightClickedCallNodeIndex,
   };
 }

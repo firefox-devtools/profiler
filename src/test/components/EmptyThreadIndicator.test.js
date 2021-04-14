@@ -3,20 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-jest.mock('react-dom');
-
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from 'react-testing-library';
 
-import EmptyThreadIndicator, {
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  EmptyThreadIndicator,
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-import type { StartEndRange } from '../../types/units';
+import type { StartEndRange } from 'firefox-profiler/types';
 
 describe('EmptyThreadIndicator', function() {
   beforeEach(() => {
@@ -35,7 +34,7 @@ describe('EmptyThreadIndicator', function() {
   const height = 10;
 
   const { profile } = getProfileFromTextSamples(`
-    A A A
+    A  A  A
   `);
 
   const thread = profile.threads[0];
@@ -57,6 +56,7 @@ describe('EmptyThreadIndicator', function() {
       height: 10,
     };
   }
+
   describe('rendering', function() {
     it('matches the snapshot when rendering all three types of indicators', () => {
       const props = propsFromViewportRange({ start: 0, end: 10 });

@@ -4,90 +4,47 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
+import { stripIndent } from 'common-tags';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import MarkerTable from '../../components/marker-table';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { MarkerTable } from '../../components/marker-table';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
   updatePreviewSelection,
   changeMarkersSearchString,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
+import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getProfileFromTextSamples,
+  getMarkerTableProfile,
+  addMarkersToThreadWithCorrespondingSamples,
+} from '../fixtures/profiles/processed-profile';
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
+
+import type { CauseBacktrace } from 'firefox-profiler/types';
 
 describe('MarkerTable', function() {
-  function setup(markers) {
+  function setup(profile = getMarkerTableProfile()) {
     // Set an arbitrary size that will not kick in any virtualization behavior.
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(2000, 1000));
 
-    // These were all taken from real-world values.
-    const profile = getProfileWithMarkers(
-      markers !== undefined
-        ? markers
-        : [
-            [
-              'UserTiming',
-              12.5,
-              {
-                type: 'UserTiming',
-                startTime: 12.5,
-                endTime: 12.5,
-                name: 'foobar',
-                entryType: 'mark',
-              },
-            ],
-            [
-              'NotifyDidPaint',
-              14.5,
-              {
-                type: 'tracing',
-                category: 'Paint',
-                interval: 'start',
-              },
-            ],
-            [
-              'setTimeout',
-              165.87091900000001,
-              {
-                type: 'Text',
-                startTime: 165.87091900000001,
-                endTime: 165.871503,
-                name: '5.5',
-              },
-            ],
-            [
-              'IPC',
-              120,
-              {
-                type: 'IPC',
-                startTime: 120,
-                endTime: 120,
-                otherPid: 2222,
-                messageType: 'PContent::Msg_PreferenceUpdate',
-                messageSeqno: 1,
-                side: 'parent',
-                direction: 'sending',
-                sync: false,
-              },
-            ],
-          ]
-            // Sort the markers.
-            .sort((a, b) => a[1] - b[1])
-    );
-
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
         <>
-          <MarkerContextMenu />
+          <MaybeMarkerContextMenu />
           <MarkerTable />
         </>
       </Provider>
@@ -110,20 +67,6 @@ describe('MarkerTable', function() {
         `Couldn't find the context menu.`
       );
 
-    // Because different components listen to different events, we trigger all
-    // the right events as part of click and rightClick actions.
-    const click = (element: HTMLElement) => {
-      fireEvent.mouseDown(element);
-      fireEvent.mouseUp(element);
-      fireEvent.click(element);
-    };
-
-    const rightClick = (element: HTMLElement) => {
-      fireEvent.mouseDown(element, { button: 2, buttons: 2 });
-      fireEvent.mouseUp(element, { button: 2, buttons: 2 });
-      fireEvent.contextMenu(element);
-    };
-
     return {
       ...renderResult,
       ...store,
@@ -131,16 +74,14 @@ describe('MarkerTable', function() {
       scrolledRows,
       getRowElement,
       getContextMenu,
-      click,
-      rightClick,
     };
   }
 
   it('renders some basic markers and updates when needed', () => {
     const { container, fixedRows, scrolledRows, dispatch } = setup();
 
-    expect(fixedRows()).toHaveLength(4);
-    expect(scrolledRows()).toHaveLength(4);
+    expect(fixedRows()).toHaveLength(7);
+    expect(scrolledRows()).toHaveLength(7);
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */
@@ -158,12 +99,12 @@ describe('MarkerTable', function() {
   });
 
   it('selects a row when left clicking', () => {
-    const { getByText, getRowElement, click } = setup();
+    const { getByText, getRowElement } = setup();
 
-    click(getByText(/setTimeout/));
+    fireFullClick(getByText(/setTimeout/));
     expect(getRowElement(/setTimeout/)).toHaveClass('isSelected');
 
-    click(getByText('foobar'));
+    fireFullClick(getByText('foobar'));
     expect(getRowElement(/setTimeout/)).not.toHaveClass('isSelected');
     expect(getRowElement('foobar')).toHaveClass('isSelected');
   });
@@ -171,17 +112,17 @@ describe('MarkerTable', function() {
   it('displays a context menu when right clicking', () => {
     jest.useFakeTimers();
 
-    const { getContextMenu, getRowElement, rightClick, getByText } = setup();
+    const { getContextMenu, getRowElement, getByText } = setup();
 
     function checkMenuIsDisplayedForNode(str) {
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
-      fireEvent.click(getByText('Copy'));
+      fireFullClick(getByText('Copy description'));
       expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(str));
     }
 
-    rightClick(getByText(/setTimeout/));
+    fireFullContextMenu(getByText(/setTimeout/));
     checkMenuIsDisplayedForNode(/setTimeout/);
     expect(getRowElement(/setTimeout/)).toHaveClass('isRightClicked');
 
@@ -189,8 +130,8 @@ describe('MarkerTable', function() {
     jest.runAllTimers();
 
     // Now try it again by right clicking 2 nodes in sequence.
-    rightClick(getByText(/setTimeout/));
-    rightClick(getByText('foobar'));
+    fireFullContextMenu(getByText(/setTimeout/));
+    fireFullContextMenu(getByText('foobar'));
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement(/setTimeout/)).not.toHaveClass('isRightClicked');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
@@ -200,16 +141,62 @@ describe('MarkerTable', function() {
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
-    rightClick(getByText('NotifyDidPaint'));
-    rightClick(getByText('foobar'));
+    fireFullContextMenu(getByText('NotifyDidPaint'));
+    fireFullContextMenu(getByText('foobar'));
     jest.runAllTimers();
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
   });
 
+  it("can copy a marker's cause using the context menu", () => {
+    jest.useFakeTimers();
+
+    // This is a tid we'll reuse later.
+    const tid = 4444;
+
+    // Just a simple profile with 1 thread and a nice stack.
+    const {
+      profile,
+      funcNamesDictPerThread: [{ E }],
+    } = getProfileFromTextSamples(`
+      A[lib:libxul.so]
+      B[lib:libxul.so]
+      C[lib:libxul.so]
+      D[lib:libxul.so]
+      E[lib:libxul.so]
+    `);
+    profile.threads[0].name = 'Main Thread';
+
+    // Add another thread with a known tid that we'll reuse in the marker's cause.
+    profile.threads.push(getEmptyThread({ name: 'Another Thread', tid }));
+    // Add the reflow marker to the first thread.
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      getReflowMarker(3, 100, {
+        tid: tid,
+        // We're cheating a bit here: E is a funcIndex, but because of how
+        // getProfileFromTextSamples works internally, this will be the right
+        // stackIndex too.
+        stack: E,
+        time: 1,
+      }),
+    ]);
+
+    const { getByText } = setup(profile);
+    fireFullContextMenu(getByText(/Reflow/));
+    fireFullClick(getByText('Copy call stack'));
+    expect(copy).toHaveBeenLastCalledWith(stripIndent`
+      A [libxul.so]
+      B [libxul.so]
+      C [libxul.so]
+      D [libxul.so]
+      E [libxul.so]
+    `);
+  });
+
   describe('EmptyReasons', () => {
     it('shows reasons when a profile has no non-network markers', () => {
-      const { container } = setup([]);
+      const { profile } = getProfileFromTextSamples('A'); // Just a simple profile without any marker.
+      const { container } = setup(profile);
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
@@ -220,3 +207,20 @@ describe('MarkerTable', function() {
     });
   });
 });
+
+function getReflowMarker(
+  startTime: number,
+  endTime: number,
+  cause?: CauseBacktrace
+) {
+  return [
+    'Reflow',
+    startTime,
+    endTime,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      cause,
+    },
+  ];
+}

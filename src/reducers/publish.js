@@ -6,14 +6,14 @@
 import { combineReducers } from 'redux';
 import { getShouldSanitizeByDefault } from '../profile-logic/sanitize';
 
-import type { CheckedSharingOptions } from '../types/actions';
 import type {
+  CheckedSharingOptions,
   PublishState,
   UploadState,
   UploadPhase,
   Reducer,
   State,
-} from '../types/state';
+} from 'firefox-profiler/types';
 
 function _getDefaultSharingOptions(): CheckedSharingOptions {
   return {
@@ -122,7 +122,7 @@ const abortFunction: Reducer<() => void> = (state = noop, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_FAILED':
       return noop;
-    case 'UPLOAD_STARTED':
+    case 'UPLOAD_COMPRESSION_STARTED':
       return action.abortFunction;
     default:
       return state;
@@ -138,6 +138,7 @@ const generation: Reducer<number> = (state = 0, action) => {
     case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_ABORTED':
     case 'UPLOAD_FAILED':
+    case 'HIDE_STALE_PROFILE':
       // Increment the generation value when exiting out of the profile uploading.
       return state + 1;
     default:
@@ -180,7 +181,9 @@ const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'HIDE_STALE_PROFILE':
       return true;
-    case 'VIEW_PROFILE': // TODO: should this be PROFILE_LOADED?
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ORIGINS_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return false;
     default:
       return state;

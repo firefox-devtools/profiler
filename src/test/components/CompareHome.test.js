@@ -5,16 +5,16 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent, cleanup } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
-import CompareHome from '../../components/app/CompareHome';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { CompareHome } from '../../components/app/CompareHome';
 import { getProfilesToCompare } from '../../selectors/url-state';
 
 import { blankStore } from '../fixtures/stores';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('app/CompareHome', () => {
-  afterEach(cleanup);
-
   function setup() {
     const store = blankStore();
     const renderResult = render(
@@ -41,7 +41,7 @@ describe('app/CompareHome', () => {
       target: { value: 'http://www.url12.com' },
     });
     const retrieveButton = getByText(/Retrieve/);
-    fireEvent.click(retrieveButton);
+    fireFullClick(retrieveButton);
 
     expect(getProfilesToCompare(getState())).toEqual([
       'http://www.url11.com',

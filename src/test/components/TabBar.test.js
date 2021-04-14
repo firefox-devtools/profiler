@@ -5,8 +5,10 @@
 // @flow
 
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
-import TabBar from '../../components/app/TabBar';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { TabBar } from '../../components/app/TabBar';
+import { fireFullClick } from '../fixtures/utils';
 
 describe('app/TabBar', () => {
   it('renders the TabBar and handles clicks properly', () => {
@@ -27,8 +29,7 @@ describe('app/TabBar', () => {
     );
     expect(container.firstChild).toMatchSnapshot();
 
-    const leftClick = { button: 0 };
-    fireEvent.click(getByText('Call Tree'), leftClick);
+    fireFullClick(getByText('Call Tree'));
     expect(handleTabSelection).toHaveBeenCalledWith('calltree');
   });
 });

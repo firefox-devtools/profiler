@@ -13,8 +13,11 @@ import type {
   IsSidebarOpenPerPanelState,
   Reducer,
   UrlSetupPhase,
-} from '../types/state';
-import type { ThreadIndex } from '../types/profile';
+  ThreadsKey,
+  ExperimentalFlags,
+  CssPixels,
+  UploadedProfileInformation,
+} from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
@@ -33,6 +36,7 @@ const view: Reducer<AppViewState> = (
       return { phase: 'FATAL_ERROR', error: action.error };
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
     case 'WAITING_FOR_PROFILE_FROM_URL':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
@@ -41,8 +45,12 @@ const view: Reducer<AppViewState> = (
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'PROFILE_LOADED':
       return { phase: 'PROFILE_LOADED' };
+    case 'DATA_RELOAD':
+      return { phase: 'DATA_RELOAD' };
     case 'RECEIVE_ZIP_FILE':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ORIGINS_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
@@ -56,6 +64,8 @@ const urlSetupPhase: Reducer<UrlSetupPhase> = (
   switch (action.type) {
     case 'START_FETCHING_PROFILES':
       return 'loading-profile';
+    case 'ROUTE_NOT_FOUND':
+    case 'FATAL_ERROR':
     case 'URL_SETUP_DONE':
       return 'done';
     default:
@@ -73,14 +83,16 @@ const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-function _getNoSidebarsOpen() {
+function _getSidebarInitialState() {
   const state = {};
   tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+  state.calltree = true;
+  state['marker-table'] = true;
   return state;
 }
 
 const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
-  state = _getNoSidebarsOpen(),
+  state = _getSidebarInitialState(),
   action
 ) => {
   switch (action.type) {
@@ -114,12 +126,15 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'CHANGE_SIDEBAR_OPEN_STATE':
     // Timeline: (fallthrough)
     case 'HIDE_GLOBAL_TRACK':
+    case 'SHOW_ALL_TRACKS':
     case 'SHOW_GLOBAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_LOCAL_TRACK':
     case 'SHOW_LOCAL_TRACK':
     case 'ISOLATE_LOCAL_TRACK':
+    case 'TOGGLE_RESOURCES_PANEL':
+    case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':
@@ -152,14 +167,14 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
   }
 };
 
-const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
-  state = [],
+const trackThreadHeights: Reducer<{ [key: ThreadsKey]: CssPixels }> = (
+  state = {},
   action
 ) => {
   switch (action.type) {
     case 'UPDATE_TRACK_THREAD_HEIGHT': {
-      const newState = state.slice();
-      newState[action.threadIndex] = action.height;
+      const newState = { ...state };
+      newState[action.threadsKey] = action.height;
       return newState;
     }
     default:
@@ -183,6 +198,102 @@ const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/**
+ * Holds the state for whether or not the user is currently dragging a
+ * file over a drag and drop target. This way we know if we should
+ * show an overlay suggesting the user to drop the file to load a new
+ * profile.
+ */
+const isDragAndDropDragging: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'START_DRAGGING':
+      return true;
+    case 'STOP_DRAGGING':
+      return false;
+    default:
+      return state;
+  }
+};
+
+/**
+ * Holds the state for whether or not a custom drag and drop overlay
+ * is registered. If it isn't, we will mount a default overlay instead.
+ */
+const isDragAndDropOverlayRegistered: Reducer<boolean> = (
+  state = false,
+  action
+) => {
+  switch (action.type) {
+    case 'REGISTER_DRAG_AND_DROP_OVERLAY':
+      return true;
+    case 'UNREGISTER_DRAG_AND_DROP_OVERLAY':
+      return false;
+    default:
+      return state;
+  }
+};
+
+/*
+ * This reducer hold the state for whether the event delay tracks are enabled.
+ * This way we can hide the event delay tracks by default and display if we
+ * change the state.
+ */
+const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_EVENT_DELAY_TRACKS': {
+      return true;
+    }
+    default:
+      return state;
+  }
+};
+
+/*
+ * This reducer hold the state for whether the CPU graphs are enabled.
+ * They are mostly for debugging purpose and they will be removed soon.
+ */
+const cpuGraphs: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_EXPERIMENTAL_CPU_GRAPHS':
+      return true;
+    default:
+      return state;
+  }
+};
+
+/**
+ * This keeps the information about the upload for the current profile, if any.
+ * This is retrieved from the IndexedDB for published profiles information in
+ * CurrentProfileUploadedInformationLoader.
+ * This will be null if the currently loaded profile doesn't come from the
+ * public store (for example if this comes from Firefox and hasn't been uploaded
+ * yet) or if this profile hasn't been uploaded by this user and we don't have
+ * its uploaded information in the IndexedDB.
+ */
+const currentProfileUploadedInformation: Reducer<UploadedProfileInformation | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':
+      return action.uploadedProfileInformation;
+    default:
+      return state;
+  }
+};
+
+/**
+ * Experimental features that are mostly disabled by default. You need to enable
+ * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
+ * e.g. `experimental.enableEventDelayTracks()`.
+ * If you want to add a new experimental flag here, don't forget to add it to
+ * window.experimental object in window-console.js.
+ */
+const experimental: Reducer<ExperimentalFlags> = combineReducers({
+  eventDelayTracks,
+  cpuGraphs,
+});
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -192,6 +303,10 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   lastVisibleThreadTabSlug,
   trackThreadHeights,
   isNewlyPublished,
+  isDragAndDropDragging,
+  isDragAndDropOverlayRegistered,
+  experimental,
+  currentProfileUploadedInformation,
 });
 
 export default appStateReducer;

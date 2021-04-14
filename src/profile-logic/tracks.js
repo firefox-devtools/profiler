@@ -3,13 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { ScreenshotPayload } from '../types/markers';
-import type { Profile, Thread, ThreadIndex, Pid } from '../types/profile';
 import type {
+  ScreenshotPayload,
+  Profile,
+  Thread,
+  ThreadIndex,
+  Pid,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-} from '../types/profile-derived';
+} from 'firefox-profiler/types';
+
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
@@ -33,13 +37,16 @@ const LOCAL_TRACK_INDEX_ORDER = {
   network: 1,
   memory: 2,
   ipc: 3,
+  'event-delay': 4,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
   memory: 1,
   thread: 2,
   ipc: 3,
+  'event-delay': 4,
 };
+
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
   screenshots: 1,
@@ -223,7 +230,7 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (!_isMainThread(thread)) {
+    if (!isMainThread(thread)) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
@@ -268,6 +275,37 @@ export function computeLocalTracksByPid(
 }
 
 /**
+ * Take threads and add event delay tracks for them. Return the new
+ * localTracksByPid map.
+ */
+export function addEventDelayTracksForThreads(
+  threads: Thread[],
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  const newLocalTracksByPid = new Map();
+
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const thread = threads[threadIndex];
+    const { pid } = thread;
+    // Get or create the tracks and trackOrder.
+    let tracks = newLocalTracksByPid.get(pid);
+    if (tracks === undefined) {
+      tracks = localTracksByPid.get(pid);
+      if (tracks === undefined) {
+        tracks = [];
+      }
+      // copy it so we don't mutate the state
+      tracks = [...tracks];
+    }
+
+    tracks.push({ type: 'event-delay', threadIndex });
+    newLocalTracksByPid.set(pid, tracks);
+  }
+
+  return newLocalTracksByPid;
+}
+
+/**
  * Take a profile and figure out what GlobalTracks it contains.
  */
 export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
@@ -290,7 +328,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   ) {
     const thread = profile.threads[threadIndex];
     const { pid, markers, stringTable } = thread;
-    if (_isMainThread(thread)) {
+    if (isMainThread(thread)) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
       let globalTrack = globalTracksByPid.get(pid);
@@ -338,13 +376,15 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
       }
       for (const id of ids) {
         globalTracks.push({ type: 'screenshots', id, threadIndex });
-        if (profile.meta && profile.meta.visualMetrics) {
-          globalTracks.push({ type: 'visual-progress', id });
-          globalTracks.push({ type: 'perceptual-visual-progress', id });
-          globalTracks.push({ type: 'contentful-visual-progress', id });
-        }
       }
     }
+  }
+
+  // Add the visual progress tracks if we have visualMetrics data.
+  if (profile.meta && profile.meta.visualMetrics) {
+    globalTracks.push({ type: 'visual-progress' });
+    globalTracks.push({ type: 'perceptual-visual-progress' });
+    globalTracks.push({ type: 'contentful-visual-progress' });
   }
 
   // When adding a new track type, this sort ensures that the newer tracks are added
@@ -420,17 +460,23 @@ export function initializeGlobalTrackOrder(
 }
 
 export function initializeSelectedThreadIndex(
-  selectedThreadIndex: ThreadIndex | null,
+  selectedThreadIndexes: Set<ThreadIndex> | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
-): ThreadIndex {
-  if (
-    selectedThreadIndex !== null &&
-    visibleThreadIndexes.includes(selectedThreadIndex)
-  ) {
-    // This is a valid thread index to select.
-    return selectedThreadIndex;
+): Set<ThreadIndex> {
+  if (selectedThreadIndexes !== null) {
+    // Make sure all of the selected thread indexes are actually visible.
+    const visibleSelectedThreadIndexes = new Set();
+    for (const threadIndex of visibleThreadIndexes) {
+      if (selectedThreadIndexes.has(threadIndex)) {
+        visibleSelectedThreadIndexes.add(threadIndex);
+      }
+    }
+    if (visibleSelectedThreadIndexes.size > 0) {
+      return visibleSelectedThreadIndexes;
+    }
   }
+
   // Select either the GeckoMain [tab] thread, or the first thread in the thread
   // order.
   const threadIndex = profile.threads.indexOf(
@@ -441,7 +487,7 @@ export function initializeSelectedThreadIndex(
   if (threadIndex === -1) {
     throw new Error('Expected to find a thread index to select.');
   }
-  return threadIndex;
+  return new Set([threadIndex]);
 }
 
 export function initializeHiddenGlobalTracks(
@@ -548,11 +594,25 @@ export function getGlobalTrackName(
         // happen for instance when recording "DOM Worker" but not "GeckoMain". The
         // "DOM Worker" thread will be captured, but not the main thread, thus leaving
         // a process track with no main thread.
-        return typeof globalTrack.pid === 'string'
-          ? // The pid is a unique string label, use that.
-            globalTrack.pid
-          : // The pid is a number, make a label for it.
-            `Process ${globalTrack.pid}`;
+        // It can also happen when importing other profile formats.
+
+        // First, see if any thread in this process has a non-empty processName.
+        const pid = globalTrack.pid;
+        const processName = threads
+          .filter(thread => thread.pid === pid)
+          .map(thread => thread.processName)
+          .find(processName => !!processName);
+        if (processName) {
+          return processName;
+        }
+
+        // Fallback: Use the PID.
+        if (typeof pid === 'string') {
+          // The pid is a unique string label, use that.
+          return pid;
+        }
+        // The pid is a number, make a label for it.
+        return `Process ${pid}`;
       }
       return getFriendlyThreadName(
         threads,
@@ -588,6 +648,11 @@ export function getLocalTrackName(
         threads,
         threads[localTrack.threadIndex]
       )}`;
+    case 'event-delay':
+      return (
+        getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
+        ' Event Delay'
+      );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
@@ -610,6 +675,13 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     return false;
   }
 
+  if (thread.samples.length === 0) {
+    // This is a profile without any sample (taken with no periodic sampling mode)
+    // and we can't take a look at the samples to decide whether that thread is
+    // active or not. So we are checking if we have a paint marker instead.
+    return _isThreadWithNoPaint(thread);
+  }
+
   if (_isContentThreadWithNoPaint(thread)) {
     // If content thread doesn't have any paint markers, set it idle if the
     // thread has at least 80% idle samples.
@@ -620,33 +692,44 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     );
   }
 
+  if (/^(?:Audio|Media|GraphRunner)/.test(thread.name)) {
+    // This is a media thread: they are usually very idle, but are interesting
+    // as soon as there's at least one sample. They're present with the media
+    // preset, but not usually captured otherwise.
+    // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
+    // MediaDecoderStateMachine, GraphRunner. They're enabled by the media
+    // preset.
+    return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
+  }
+
   return _isThreadMostlyFullOfIdleSamples(profile, thread);
 }
 
 function _isContentThreadWithNoPaint(thread: Thread): boolean {
-  // Hide content threads with no RefreshDriverTick. This indicates they were
-  // not painted to, and most likely idle. This is just a heuristic to help users.
   if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    let isPaintMarkerFound = false;
-    if (thread.stringTable.hasString('RefreshDriverTick')) {
-      const paintStringIndex = thread.stringTable.indexForString(
-        'RefreshDriverTick'
-      );
+    return _isThreadWithNoPaint(thread);
+  }
 
-      for (
-        let markerIndex = 0;
-        markerIndex < thread.markers.length;
-        markerIndex++
-      ) {
-        if (paintStringIndex === thread.markers.name[markerIndex]) {
-          isPaintMarkerFound = true;
-          break;
-        }
+  return false;
+}
+
+// Returns true if the thread doesn't include any RefreshDriverTick. This
+// indicates they were not painted to, and most likely idle. This is just
+// a heuristic to help users.
+function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
+  let isPaintMarkerFound = false;
+  if (stringTable.hasString('RefreshDriverTick')) {
+    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
+
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (paintStringIndex === markers.name[markerIndex]) {
+        isPaintMarkerFound = true;
+        break;
       }
     }
-    if (!isPaintMarkerFound) {
-      return true;
-    }
+  }
+  if (!isPaintMarkerFound) {
+    return true;
   }
   return false;
 }
@@ -672,6 +755,13 @@ function _isThreadMostlyFullOfIdleSamples(
   let activeStackCount = 0;
   let filteredStackCount = 0;
 
+  const { categories } = profile.meta;
+  if (!categories) {
+    // Profiles that are imported may not have categories. In this case do not try
+    // and deduce anything about idleness.
+    return false;
+  }
+
   for (
     let sampleIndex = 0;
     sampleIndex < thread.samples.length;
@@ -688,7 +778,8 @@ function _isThreadMostlyFullOfIdleSamples(
         activeSamplePercentage * (thread.samples.length - filteredStackCount);
     } else {
       const categoryIndex = thread.stackTable.category[stackIndex];
-      const category = profile.meta.categories[categoryIndex];
+
+      const category = categories[categoryIndex];
       if (category.name !== 'Idle') {
         activeStackCount++;
         if (activeStackCount > maxActiveStackCount) {
@@ -700,6 +791,31 @@ function _isThreadMostlyFullOfIdleSamples(
 
   // Do one final check to see if we have enough active samples.
   return activeStackCount <= maxActiveStackCount;
+}
+
+function _hasThreadAtLeastOneNonIdleSample(
+  profile: Profile,
+  thread: Thread
+): boolean {
+  const { categories } = profile.meta;
+  if (!categories) {
+    // Profiles that are imported may not have categories, assume that there are
+    // non-idle samples.
+    return true;
+  }
+
+  for (const stackIndex of thread.samples.stack) {
+    if (stackIndex === null) {
+      continue;
+    }
+
+    const categoryIndex = thread.stackTable.category[stackIndex];
+    const category = categories[categoryIndex];
+    if (category.name !== 'Idle') {
+      return true;
+    }
+  }
+  return false;
 }
 
 function _findDefaultThread(threads: Thread[]): Thread | null {
@@ -716,7 +832,7 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
   return threads[defaultThreadIndex];
 }
 
-function _isMainThread(thread: Thread): boolean {
+export function isMainThread(thread: Thread): boolean {
   return (
     thread.name === 'GeckoMain' ||
     // If the pid is a string, then it's not one that came from the system.

@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import { Localized } from '@fluent/react';
 
 import './IdleSearchField.css';
 
@@ -20,9 +21,10 @@ type Props = {|
 
 type State = {
   value: string,
+  previousDefaultValue: string,
 };
 
-class IdleSearchField extends PureComponent<Props, State> {
+export class IdleSearchField extends PureComponent<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
   _input: HTMLInputElement | null = null;
@@ -32,6 +34,7 @@ class IdleSearchField extends PureComponent<Props, State> {
     super(props);
     this.state = {
       value: props.defaultValue || '',
+      previousDefaultValue: props.defaultValue || '',
     };
     this._previouslyNotifiedValue = this.state.value;
   }
@@ -90,14 +93,14 @@ class IdleSearchField extends PureComponent<Props, State> {
   _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
   }
-
-  componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.defaultValue !== this.props.defaultValue) {
-      this._notifyIfChanged(nextProps.defaultValue || '');
-      this.setState({
-        value: nextProps.defaultValue || '',
-      });
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.defaultValue !== state.previousDefaultValue) {
+      return {
+        previousDefaultValue: props.defaultValue || '',
+        value: props.defaultValue || '',
+      };
     }
+    return null;
   }
 
   render() {
@@ -107,19 +110,24 @@ class IdleSearchField extends PureComponent<Props, State> {
         className={classNames('idleSearchField', className)}
         onSubmit={this._onFormSubmit}
       >
-        <input
-          type="search"
-          name="search"
-          placeholder="Enter filter terms"
-          className="idleSearchFieldInput photon-input"
-          required="required"
-          title={title}
-          value={this.state.value}
-          onChange={this._onSearchFieldChange}
-          onFocus={this._onSearchFieldFocus}
-          onBlur={this._onSearchFieldBlur}
-          ref={this._takeInputRef}
-        />
+        <Localized
+          id="IdleSearchField--search-input"
+          attrs={{ placeholder: true }}
+        >
+          <input
+            type="search"
+            name="search"
+            placeholder="Enter filter terms"
+            className="idleSearchFieldInput photon-input"
+            required="required"
+            title={title}
+            value={this.state.value}
+            onChange={this._onSearchFieldChange}
+            onFocus={this._onSearchFieldFocus}
+            onBlur={this._onSearchFieldBlur}
+            ref={this._takeInputRef}
+          />
+        </Localized>
         <input
           type="reset"
           className="idleSearchFieldButton"
@@ -130,5 +138,3 @@ class IdleSearchField extends PureComponent<Props, State> {
     );
   }
 }
-
-export default IdleSearchField;

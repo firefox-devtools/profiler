@@ -4,41 +4,43 @@
 
 // @flow
 import * as React from 'react';
-import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
-import explicitConnect from '../../utils/connect';
-import MarkerChartCanvas from './Canvas';
-import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
-import MarkerSettings from '../shared/MarkerSettings';
+import { TIMELINE_MARGIN_RIGHT } from 'firefox-profiler/app-logic/constants';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { MarkerChartCanvas } from './Canvas';
+import { MarkerChartEmptyReasons } from './MarkerChartEmptyReasons';
+import { MarkerSettings } from 'firefox-profiler/components/shared/MarkerSettings';
 
 import {
   getCommittedRange,
-  getProfileInterval,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/profile';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import {
+  getSelectedThreadsKey,
+  getTimelineTrackOrganization,
+} from 'firefox-profiler/selectors/url-state';
+import { getTimelineMarginLeft } from 'firefox-profiler/selectors/app';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
-} from '../../actions/profile-view';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+} from 'firefox-profiler/actions/profile-view';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 
 import type {
   Marker,
   MarkerIndex,
   MarkerTimingAndBuckets,
-} from '../../types/profile-derived';
-import type {
-  Milliseconds,
   UnitIntervalOfProfileRange,
-} from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+  StartEndRange,
+  PreviewSelection,
+  ThreadsKey,
+  CssPixels,
+  TimelineTrackOrganization,
+} from 'firefox-profiler/types';
 
-require('./index.css');
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+import './index.css';
 
 const ROW_HEIGHT = 16;
 
@@ -51,29 +53,35 @@ type StateProps = {|
   +getMarker: MarkerIndex => Marker,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
-  +interval: Milliseconds,
-  +threadIndex: number,
+  +timeRange: StartEndRange,
+  +threadsKey: ThreadsKey,
   +previewSelection: PreviewSelection,
-  +rightClickedMarker: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
+  +timelineMarginLeft: CssPixels,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerChart extends React.PureComponent<Props> {
+class MarkerChartImpl extends React.PureComponent<Props> {
   _viewport: HTMLDivElement | null = null;
+
   /**
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
     const {
       timeRange: { start, end },
-      interval,
     } = this.props;
-    return interval / (end - start);
+
+    // This is set to a very small value, that represents 1ns. We can't set it
+    // to zero unless we revamp how ranges are handled in the app to prevent
+    // less-than-1ns ranges, otherwise we can get stuck at a "0" zoom.
+    const ONE_NS = 1e-6;
+    return ONE_NS / (end - start);
   }
 
-  _shouldDisplayTooltips = () => this.props.rightClickedMarker === null;
+  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -93,13 +101,15 @@ class MarkerChart extends React.PureComponent<Props> {
     const {
       maxMarkerRows,
       timeRange,
-      threadIndex,
+      threadsKey,
       markerTimingAndBuckets,
       getMarker,
       previewSelection,
       updatePreviewSelection,
       changeRightClickedMarker,
-      rightClickedMarker,
+      rightClickedMarkerIndex,
+      timelineMarginLeft,
+      timelineTrackOrganization,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -124,14 +134,14 @@ class MarkerChart extends React.PureComponent<Props> {
             }}
           >
             <MarkerChartCanvas
-              key={threadIndex}
+              key={threadsKey}
               viewportProps={{
                 timeRange,
                 previewSelection,
                 maxViewportHeight,
                 viewportNeedsUpdate,
                 maximumZoom: this.getMaximumZoom(),
-                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 containerRef: this._takeViewportRef,
               }}
@@ -144,11 +154,12 @@ class MarkerChart extends React.PureComponent<Props> {
                 rangeStart: timeRange.start,
                 rangeEnd: timeRange.end,
                 rowHeight: ROW_HEIGHT,
-                threadIndex,
-                marginLeft: TIMELINE_MARGIN_LEFT,
+                threadsKey,
+                marginLeft: timelineMarginLeft,
                 marginRight: TIMELINE_MARGIN_RIGHT,
-                rightClickedMarker,
+                rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
+                timelineTrackOrganization,
               }}
             />
           </ContextMenuTrigger>
@@ -166,7 +177,7 @@ function viewportNeedsUpdate(
   return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
@@ -176,14 +187,15 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
-      threadIndex: getSelectedThreadIndex(state),
+      threadsKey: getSelectedThreadsKey(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
+      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
         state
       ),
+      timelineMarginLeft: getTimelineMarginLeft(state),
+      timelineTrackOrganization: getTimelineTrackOrganization(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
-  component: MarkerChart,
+  component: MarkerChartImpl,
 });

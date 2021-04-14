@@ -4,16 +4,24 @@
 
 // @flow
 import * as React from 'react';
-import Home from '../../components/app/Home';
-import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { Home } from '../../components/app/Home';
 import createStore from '../../app-logic/create-store';
+import { mockWebChannel } from '../fixtures/mocks/web-channel';
+import { fireFullClick } from '../fixtures/utils';
+
+// ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
+// just test we want to render it, but otherwise test it more fully in a
+// separate test file.
+jest.mock('../../components/app/ListOfPublishedProfiles', () => ({
+  ListOfPublishedProfiles: 'list-of-published-profiles',
+}));
 
 // Provide a mechanism to overwrite the navigator.userAgent, which can't be set.
-const FIREFOX_WEBEXT =
+const FIREFOX =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0';
-const FIREFOX_LEGACY =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:53.0) Gecko/20100101 Firefox/53.0';
 const SAFARI =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8';
 let userAgent;
@@ -24,55 +32,108 @@ let userAgent;
 });
 
 describe('app/Home', function() {
+  function setup(userAgentToConfigure: string) {
+    userAgent = userAgentToConfigure;
+    const renderResults = render(
+      <Provider store={createStore()}>
+        <Home specialMessage="This is a special message" />
+      </Provider>
+    );
+
+    return { ...renderResults };
+  }
+
   it('renders the install screen for the extension', () => {
-    userAgent = FIREFOX_WEBEXT;
-
-    const { container } = render(
-      <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
-      </Provider>
-    );
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders the install screen for the legacy add-on', () => {
-    userAgent = FIREFOX_LEGACY;
-
-    const { container } = render(
-      <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
-      </Provider>
-    );
-
+    const { container } = setup(FIREFOX);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders the information screen for other browsers', () => {
-    userAgent = SAFARI;
-
-    const { container } = render(
-      <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
-      </Provider>
-    );
-
+    const { container } = setup(SAFARI);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders the usage instructions for pages with the extension installed', () => {
-    userAgent = FIREFOX_WEBEXT;
-
     window.isGeckoProfilerAddonInstalled = true;
 
-    const { container } = render(
-      <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
-      </Provider>
-    );
+    const { container } = setup(FIREFOX);
 
     expect(container.firstChild).toMatchSnapshot();
 
     delete window.isGeckoProfilerAddonInstalled;
+  });
+
+  it('renders a button to enable the popup when it is available', async () => {
+    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
+
+    // No one has asked anything to the WebChannel.
+    expect(listeners).toHaveLength(0);
+
+    const { findByTestId } = setup(FIREFOX);
+
+    // There is an outstanding question to the WebChannel
+    expect(listeners.length).toBeGreaterThan(0);
+
+    // Respond from the browser that the menu button is available.
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: false,
+      requestId: getLastRequestId(),
+    });
+
+    // The UI should update for the record instructions, which is an async
+    // handle of the WebChannel message.
+    const instructions = await findByTestId('home-enable-popup-instructions');
+
+    expect(instructions).toMatchSnapshot();
+  });
+
+  it('renders the usage instructions for when the popup is enabled', async () => {
+    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
+
+    // No one has asked anything to the WebChannel.
+    expect(listeners).toHaveLength(0);
+
+    const { findByTestId } = setup(FIREFOX);
+
+    // There is an outstanding question to the WebChannel
+    expect(listeners.length).toBeGreaterThan(0);
+
+    // Respond from the browser that the menu button is available.
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: true,
+      requestId: getLastRequestId(),
+    });
+
+    // The UI should update for the record instructions, which is an async
+    // handle of the WebChannel message.
+    const instructions = await findByTestId('home-record-instructions');
+
+    expect(instructions).toMatchSnapshot();
+  });
+
+  // This test's assertions are that it can find elements through getByTestId.
+  // eslint-disable-next-line jest/expect-expect
+  it('will switch to recording instructions when enabling the popup', async () => {
+    const { triggerResponse, getLastRequestId } = mockWebChannel();
+    const { findByTestId, getByText } = setup(FIREFOX);
+
+    // Respond back from the browser that the menu button is not yet enabled.
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: false,
+      requestId: getLastRequestId(),
+    });
+    await findByTestId('home-enable-popup-instructions');
+
+    fireFullClick(getByText('Enable \u2068Firefox Profiler\u2069 Menu Button'));
+
+    // Respond back from the browser that the menu button was enabled.
+    triggerResponse({
+      type: 'ENABLE_MENU_BUTTON_DONE',
+      requestId: getLastRequestId(),
+    });
+    await findByTestId('home-record-instructions');
   });
 });

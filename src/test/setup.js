@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { cleanup } from 'react-testing-library';
+// Importing this here makes it work everywhere.
+import '@testing-library/jest-dom';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
@@ -11,11 +12,9 @@ import * as WorkerFactory from '../utils/worker-factory';
 afterEach(function() {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
   // do not use flow typing on it.
-  const { __shutdownWorkers } = (WorkerFactory: Object);
+  const { __shutdownWorkers } = (WorkerFactory: any);
   __shutdownWorkers();
 });
-
-afterEach(cleanup);
 
 afterEach(() => {
   // The configuration to restore and reset all of the mocks in tests does not seem
@@ -24,7 +23,9 @@ afterEach(() => {
   //
   // See https://github.com/facebook/jest/issues/7654
   jest.resetAllMocks();
+  jest.restoreAllMocks();
   jest.clearAllTimers();
+  jest.useRealTimers();
 });
 
 expect.extend({
@@ -43,9 +44,7 @@ expect.extend({
     }
     return {
       message: () =>
-        `expected element to have class ${className}, current classes are ${
-          received.className
-        }`,
+        `expected element to have class ${className}, current classes are ${received.className}`,
       pass: false,
     };
   },

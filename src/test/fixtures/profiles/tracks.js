@@ -4,7 +4,7 @@
 // @flow
 
 import * as profileViewSelectors from '../../../selectors/profile';
-import * as urlStateReducers from '../../../selectors/url-state';
+import * as urlStateSelectors from '../../../selectors/url-state';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
@@ -12,8 +12,18 @@ import {
 import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
-import type { Profile } from '../../../types/profile';
-import type { State } from '../../../types/state';
+import type {
+  OriginsTimelineTrack,
+  Profile,
+  State,
+} from 'firefox-profiler/types';
+
+import { assertExhaustiveCheck } from '../../../utils/flow';
+import {
+  getFriendlyThreadName,
+  hasThreadKeys,
+} from '../../../profile-logic/profile-data';
+import { INSTANT } from 'firefox-profiler/app-logic/constants';
 
 /**
  * This function takes the current timeline tracks, and generates a human readable result
@@ -41,10 +51,20 @@ import type { State } from '../../../types/state';
 export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
-  const hiddenGlobalTracks = urlStateReducers.getHiddenGlobalTracks(state);
-  const selectedThreadIndex = urlStateReducers.getSelectedThreadIndex(state);
+  const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
+  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
+    state
+  );
+  const timelineTrackOrganization = urlStateSelectors.getTimelineTrackOrganization(
+    state
+  );
   const text: string[] = [];
-  for (const globalTrackIndex of urlStateReducers.getGlobalTrackOrder(state)) {
+
+  if (timelineTrackOrganization.type !== 'full') {
+    throw new Error('Expected to have the full timeline track organization.');
+  }
+
+  for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];
     const globalHiddenText = hiddenGlobalTracks.has(globalTrackIndex)
       ? 'hide'
@@ -53,9 +73,11 @@ export function getHumanReadableTracks(state: State): string[] {
       globalTrack.type === 'process' &&
       globalTrack.mainThreadIndex !== null
     ) {
-      const selected =
-        globalTrack.mainThreadIndex === selectedThreadIndex ? ' SELECTED' : '';
-      const thread = threads[globalTrack.mainThreadIndex];
+      const { mainThreadIndex } = globalTrack;
+      const selected = selectedThreadIndexes.has(mainThreadIndex)
+        ? ' SELECTED'
+        : '';
+      const thread = threads[mainThreadIndex];
       text.push(
         // This is broken up into multiple lines to make it easier to read, but it is
         // in fact one line.
@@ -70,7 +92,7 @@ export function getHumanReadableTracks(state: State): string[] {
     }
 
     if (globalTrack.type === 'process') {
-      const trackOrder = urlStateReducers.getLocalTrackOrder(
+      const trackOrder = urlStateSelectors.getLocalTrackOrder(
         state,
         globalTrack.pid
       );
@@ -89,13 +111,17 @@ export function getHumanReadableTracks(state: State): string[] {
         } else {
           trackName = threads[track.threadIndex].name;
         }
-        const hiddenTracks = urlStateReducers.getHiddenLocalTracks(
+        const hiddenTracks = urlStateSelectors.getHiddenLocalTracks(
           state,
           globalTrack.pid
         );
+
         const hiddenText = hiddenTracks.has(trackIndex) ? 'hide' : 'show';
         const selected =
-          track.threadIndex === selectedThreadIndex ? ' SELECTED' : '';
+          track.threadIndex !== undefined &&
+          selectedThreadIndexes.has(track.threadIndex)
+            ? ' SELECTED'
+            : '';
 
         text.push(`  - ${hiddenText} [${track.type} ${trackName}]${selected}`);
       }
@@ -128,13 +154,14 @@ export function getProfileWithNiceTracks(): Profile {
   thread2.markers.data.push({
     type: 'tracing',
     category: 'Paint',
-    interval: 'start',
   });
   thread2.markers.category.push(0);
   thread2.markers.name.push(
     thread2.stringTable.indexForString('RefreshDriverTick')
   );
-  thread2.markers.time.push(0);
+  thread2.markers.startTime.push(0);
+  thread2.markers.endTime.push(null);
+  thread2.markers.phase.push(INSTANT);
   thread2.markers.length++;
 
   thread3.name = 'DOM Worker';
@@ -147,7 +174,7 @@ export function getProfileWithNiceTracks(): Profile {
   return profile;
 }
 
-export function getStoreWithMemoryTrack(pid: number = 222): * {
+export function getStoreWithMemoryTrack(pid: number = 222) {
   const { profile } = getProfileFromTextSamples(
     // Create a trivial profile with 10 samples, all of the function "A".
     Array(10)
@@ -179,4 +206,114 @@ export function getStoreWithMemoryTrack(pid: number = 222): * {
     throw new Error('Expected a memory track.');
   }
   return { store, ...store, profile, trackReference, localTrack, threadIndex };
+}
+
+/**
+ * This function takes the current active tab timeline tracks, and generates a
+ * human readable result that makes it easy to assert the shape and structure
+ * of the tracks in tests.
+ *
+ * Usage:
+ *
+ * expect(getHumanReadableTracks(getState())).toEqual([
+ *  'screenshots',
+ *  'main track [tab]',
+ * ]);
+ *
+ */
+export function getHumanReadableActiveTabTracks(state: State): string[] {
+  const globalTracks = profileViewSelectors.getActiveTabGlobalTracks(state);
+  const selectedThreadIndexes = urlStateSelectors.getSelectedThreadIndexes(
+    state
+  );
+  const text: string[] = [];
+
+  for (const globalTrack of globalTracks) {
+    switch (globalTrack.type) {
+      case 'tab': {
+        // Only print the main track if we actually managed to find it.
+        if (globalTrack.threadIndexes.size > 0) {
+          const selected = hasThreadKeys(
+            selectedThreadIndexes,
+            globalTrack.threadsKey
+          )
+            ? ' SELECTED'
+            : '';
+          text.push(`main track [tab]${selected}`);
+          // TODO: Add resource tracks
+        }
+        break;
+      }
+      case 'screenshots': {
+        text.push(`${globalTrack.type}`);
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          globalTrack,
+          'Unhandled ActiveTabGlobalTrack.'
+        );
+    }
+  }
+
+  return text;
+}
+
+/**
+ * This function takes the current origins timeline tracks, and generates a
+ * human readable result that makes it easy to assert the shape and structure
+ * of the tracks in tests.
+ *
+ * Usage:
+ *
+ *  expect(getHumanReadableOriginTracks(getState())).toEqual([
+ *    'Parent Process',
+ *    'Compositor',
+ *    'GeckoMain pid:(2)',
+ *    'GeckoMain pid:(3)',
+ *    'https://aaaa.example.com',
+ *    '  - https://bbbb.example.com',
+ *    '  - https://cccc.example.com',
+ *    'https://dddd.example.com',
+ *    '  - https://eeee.example.com',
+ *    '  - https://ffff.example.com',
+ *  ]);
+ */
+export function getHumanReadableOriginTracks(state: State): string[] {
+  const threads = profileViewSelectors.getThreads(state);
+  const originsTimeline = profileViewSelectors.getOriginsTimeline(state);
+
+  const results: string[] = [];
+
+  function addHumanFriendlyTrack(
+    track: OriginsTimelineTrack,
+    nested: boolean = false
+  ) {
+    const prefix = nested ? '  - ' : '';
+    switch (track.type) {
+      case 'origin':
+        results.push(track.origin);
+        for (const child of track.children) {
+          addHumanFriendlyTrack(child, true);
+        }
+        break;
+      case 'no-origin': {
+        const thread = threads[track.threadIndex];
+        results.push(prefix + getFriendlyThreadName(threads, thread));
+        break;
+      }
+      case 'sub-origin': {
+        results.push(prefix + track.origin);
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(track, 'Unhandled OriginsTimelineTrack.');
+    }
+  }
+
+  for (const track of originsTimeline) {
+    addHumanFriendlyTrack(track);
+  }
+
+  return results;
 }

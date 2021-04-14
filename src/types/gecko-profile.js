@@ -14,23 +14,50 @@ import type {
   ProfilerOverheadStats,
   VisualMetrics,
   ProfilerConfiguration,
+  SampleUnits,
 } from './profile';
-import type { MarkerPayload_Gecko } from './markers';
+import type { MarkerPayload_Gecko, MarkerSchema } from './markers';
 import type { Milliseconds, Nanoseconds } from './units';
+import type { MixedObject } from './utils';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
 
+// These integral values are exported in the JSON of the profile, and are in the
+// RawMarkerTable. They represent a C++ class in Gecko that defines the type of
+// marker it is. These markers are then combined together to form the Marker[] type.
+// See deriveMarkersFromRawMarkerTable for more information. Also see the constants.js
+// file for JS values that can be used to refer to the different phases.
+//
+// From the C++:
+//
+// enum class MarkerPhase : int {
+//   Instant = 0,
+//   Interval = 1,
+//   IntervalStart = 2,
+//   IntervalEnd = 3,
+// };
+export type MarkerPhase = 0 | 1 | 2 | 3;
+
+export type GeckoMarkerTuple = [
+  IndexIntoStringTable,
+  Milliseconds | null,
+  Milliseconds | null,
+  MarkerPhase,
+  IndexIntoCategoryList,
+  MarkerPayload_Gecko
+];
+
 export type GeckoMarkers = {
-  schema: { name: 0, time: 1, category: 2, data: 3 },
-  data: Array<
-    [
-      IndexIntoStringTable,
-      Milliseconds,
-      IndexIntoCategoryList,
-      MarkerPayload_Gecko,
-    ]
-  >,
+  schema: {
+    name: 0,
+    startTime: 1,
+    endTime: 2,
+    phase: 3,
+    category: 4,
+    data: 5,
+  },
+  data: Array<GeckoMarkerTuple>,
 };
 
 /**
@@ -41,7 +68,9 @@ export type GeckoMarkers = {
  */
 export type GeckoMarkerStruct = {|
   name: IndexIntoStringTable[],
-  time: Milliseconds[],
+  startTime: Milliseconds[],
+  endTime: Milliseconds[],
+  phase: MarkerPhase[],
   data: MarkerPayload_Gecko[],
   category: IndexIntoCategoryList[],
   length: number,
@@ -69,15 +98,26 @@ export type GeckoSamples = {|
         stack: 0,
         time: 1,
         eventDelay: 2,
+        threadCPUDelta?: 3,
       |},
   data: Array<
-    [
-      null | IndexIntoGeckoStackTable,
-      Milliseconds, // since profile.meta.startTime
-      // milliseconds since the last event was processed in this
-      // thread's event loop at the time that the sample was taken
-      Milliseconds,
-    ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds
+      ]
+    | [
+        null | IndexIntoGeckoStackTable,
+        Milliseconds, // since profile.meta.startTime
+        // milliseconds since the last event was processed in this
+        // thread's event loop at the time that the sample was taken
+        Milliseconds,
+        // CPU usage value of the current thread.
+        // It's present only when the CPU Utilization feature is enabled in Firefox.
+        number | null
+      ]
   >,
 |};
 
@@ -86,6 +126,12 @@ export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -94,6 +140,12 @@ export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   eventDelay: Array<?Milliseconds>,
+  // CPU usage value of the current thread. Its values are null only if the back-end
+  // fails to get the CPU usage from operating system.
+  // It's landed in Firefox 86, and it is optional because older profile
+  // versions may not have it or that feature could be disabled. No upgrader was
+  // written for this change because it's a completely new data source.
+  threadCPUDelta?: Array<number | null>,
   length: number,
 |};
 
@@ -127,7 +179,7 @@ export type GeckoFrameTable = {|
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
       // JSON info about JIT optimizations.
-      null | Object,
+      null | MixedObject,
       // The line of code
       null | number,
       // The column of code
@@ -135,7 +187,7 @@ export type GeckoFrameTable = {|
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-      null | number,
+      null | number
     ]
   >,
 |};
@@ -144,7 +196,7 @@ export type GeckoFrameStruct = {|
   location: IndexIntoStringTable[],
   relevantForJS: Array<boolean>,
   implementation: Array<null | IndexIntoStringTable>,
-  optimizations: Array<null | Object>,
+  optimizations: Array<null | MixedObject>,
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
@@ -235,6 +287,7 @@ export type GeckoProfileShortMeta = {|
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
   categories: CategoryList,
+  markerSchema: MarkerSchema[],
 |};
 
 /* This meta object is used on the top level profile object.
@@ -300,6 +353,17 @@ export type GeckoProfileFullMeta = {|
   visualMetrics?: VisualMetrics,
   // Optional because older Firefox versions may not have the data.
   configuration?: ProfilerConfiguration,
+  // Units of samples table values.
+  // The sampleUnits property landed in Firefox 86, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  sampleUnits?: SampleUnits,
+  // Information of the device that profile is captured from.
+  // Currently it's only present for Android devices and it includes brand and
+  // model names of that device.
+  // It's optional because profiles from non-Android devices and from older
+  // Firefox versions may not have it.
+  // This property landed in Firefox 88.
+  device?: string,
 |};
 
 export type GeckoProfileWithMeta<Meta> = {|
@@ -312,7 +376,7 @@ export type GeckoProfileWithMeta<Meta> = {|
   pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
-  tasktracer?: Object,
+  tasktracer?: MixedObject,
   processes: GeckoSubprocessProfile[],
   jsTracerDictionary?: string[],
 |};

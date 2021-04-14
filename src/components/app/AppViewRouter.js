@@ -4,31 +4,37 @@
 
 // @flow
 
-import React, { Fragment, PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import React, { PureComponent } from 'react';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import ProfileViewer from './ProfileViewer';
-import ZipFileViewer from './ZipFileViewer';
-import Home from './Home';
-import CompareHome from './CompareHome';
+import { ProfileViewer } from './ProfileViewer';
+import { ZipFileViewer } from './ZipFileViewer';
+import { Home } from './Home';
+import { CompareHome } from './CompareHome';
 import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from '../../selectors/app';
-import { getHasZipFile } from '../../selectors/zipped-profiles';
-import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
-import ServiceWorkerManager from './ServiceWorkerManager';
+import { getView } from 'firefox-profiler/selectors/app';
+import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
+import {
+  getDataSource,
+  getProfilesToCompare,
+} from 'firefox-profiler/selectors/url-state';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
+import { UploadedRecordingsHome } from './UploadedRecordingsHome';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { AppViewState, State } from '../../types/state';
-import type { DataSource } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 
-const ERROR_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
-  'from-file': "Couldn't read the file or parse the profile in it.",
-  local: 'Not implemented yet.',
-  public: 'Could not download the profile.',
-  'from-url': 'Could not download the profile.',
-  compare: 'Could not retrieve the profile',
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { Localized } from '@fluent/react';
+
+const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
+  'from-addon': 'AppViewRouter--error-message-unpublished',
+  unpublished: 'AppViewRouter--error-message-unpublished',
+  'from-file': 'AppViewRouter--error-message-from-file',
+  local: 'AppViewRouter--error-message-local',
+  public: 'AppViewRouter--error-message-public',
+  'from-url': 'AppViewRouter--error-message-from-url',
+  compare: 'AppViewRouter--error-message-compare',
 });
 
 type AppViewRouterStateProps = {|
@@ -41,23 +47,43 @@ type AppViewRouterStateProps = {|
 type AppViewRouterProps = ConnectedProps<{||}, AppViewRouterStateProps, {||}>;
 
 class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
-  renderCurrentRoute() {
+  render() {
     const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
-    if (dataSource === 'none') {
-      return <Home />;
+
+    // We're using a switch to assert that all values for the dataSource has
+    // been checked. This is useful when we add a new dataSource, as Flow will
+    // error here if we forget to update this code.
+    switch (dataSource) {
+      case 'none':
+        return <Home />;
+      case 'compare':
+        if (profilesToCompare === null) {
+          return <CompareHome />;
+        }
+        break;
+      case 'uploaded-recordings':
+        return <UploadedRecordingsHome />;
+      case 'from-addon':
+      case 'unpublished':
+      case 'from-file':
+      case 'local':
+      case 'public':
+      case 'from-url':
+        break;
+      default:
+        throw assertExhaustiveCheck(dataSource);
     }
 
-    if (dataSource === 'compare' && profilesToCompare === null) {
-      return <CompareHome />;
-    }
     switch (phase) {
       case 'INITIALIZING':
       case 'PROFILE_LOADED':
+      case 'DATA_RELOAD':
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =
-          ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
+          ERROR_MESSAGES_L10N_ID[dataSource] ||
+          'AppViewRouter--error-message-public';
         let additionalMessage = null;
         if (view.error) {
           console.error(view.error);
@@ -67,11 +93,13 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         }
 
         return (
-          <ProfileRootMessage
-            message={message}
-            additionalMessage={additionalMessage}
-            showLoader={false}
-          />
+          <Localized id={message} attrs={{ message: true }}>
+            <ProfileRootMessage
+              message={message}
+              additionalMessage={additionalMessage}
+              showLoader={false}
+            />
+          </Localized>
         );
       }
       case 'DATA_LOADED':
@@ -87,18 +115,14 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         // should be 'ROUTE_NOT_FOUND' or 'PROFILE_LOADED'.
         (phase: 'ROUTE_NOT_FOUND');
         return (
-          <Home specialMessage="The URL you came in on was not recognized." />
+          <Localized
+            id="AppViewRouter--route-not-found--home"
+            attrs={{ specialMessage: true }}
+          >
+            <Home specialMessage="The URL you tried to reach was not recognized." />
+          </Localized>
         );
     }
-  }
-
-  render() {
-    return (
-      <Fragment>
-        <ServiceWorkerManager />
-        {this.renderCurrentRoute()}
-      </Fragment>
-    );
   }
 }
 

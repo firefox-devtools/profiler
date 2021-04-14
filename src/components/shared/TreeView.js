@@ -1,19 +1,22 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 // @flow
+
+// This file uses extensive use of Object generic trait bounds, which is a false
+// positive for this rule.
+/* eslint-disable flowtype/no-weak-types */
 
 import * as React from 'react';
 import classNames from 'classnames';
 
-import VirtualList from './VirtualList';
-import { BackgroundImageStyleDef } from './StyleDef';
+import { VirtualList } from './VirtualList';
 
-import ContextMenuTrigger from './ContextMenuTrigger';
+import { ContextMenuTrigger } from './ContextMenuTrigger';
 
-import type { IconWithClassName } from '../../types/state';
-import type { CssPixels } from '../../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
+
+import './TreeView.css';
 
 /**
  * This number is used to decide how many lines the selection moves when the
@@ -30,18 +33,24 @@ const PAGE_KEYS_DELTA = 15;
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 type NodeIndex = number;
 
-export type Column = {
-  propName: string,
-  title: string,
-  component?: React.ComponentType<*>,
-};
-
-type TreeViewHeaderProps = {|
-  +fixedColumns: Column[],
-  +mainColumn: Column,
+export type Column<DisplayData: Object> = {|
+  +propName: string,
+  +title: string,
+  +tooltip?: string,
+  +component?: React.ComponentType<{|
+    displayData: DisplayData,
+  |}>,
 |};
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
+type TreeViewHeaderProps<DisplayData: Object> = {|
+  +fixedColumns: Column<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
+|};
+
+const TreeViewHeader = <DisplayData: Object>({
+  fixedColumns,
+  mainColumn,
+}: TreeViewHeaderProps<DisplayData>) => {
   if (fixedColumns.length === 0 && !mainColumn.title) {
     // If there is nothing to display in the header, do not render it.
     return null;
@@ -52,14 +61,13 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
         <span
           className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
           key={col.propName}
+          title={col.tooltip}
         >
           {col.title}
         </span>
       ))}
       <span
-        className={`treeViewHeaderColumn treeViewMainColumn ${
-          mainColumn.propName
-        }`}
+        className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
       >
         {mainColumn.title}
       </span>
@@ -102,7 +110,7 @@ function reactStringWithHighlightedSubstrings(
 type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
-  +columns: Column[],
+  +columns: Column<DisplayData>[],
   +index: number,
   +isSelected: boolean,
   +isRightClicked: boolean,
@@ -146,9 +154,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
 
           return (
             <span
-              className={`treeViewRowColumn treeViewFixedColumn ${
-                col.propName
-              }`}
+              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
               key={col.propName}
               title={text}
             >
@@ -173,8 +179,8 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +depth: number,
-  +mainColumn: Column,
-  +appendageColumn?: Column,
+  +mainColumn: Column<DisplayData>,
+  +appendageColumn?: Column<DisplayData>,
   +index: number,
   +canBeExpanded: boolean,
   +isExpanded: boolean,
@@ -189,6 +195,7 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +indentWidth: CssPixels,
 |};
 
+// This is a false-positive, as it's used as a generic trait bounds.
 class TreeViewRowScrolledColumns<
   DisplayData: Object
 > extends React.PureComponent<TreeViewRowScrolledColumnsProps<DisplayData>> {
@@ -244,9 +251,9 @@ class TreeViewRowScrolledColumns<
       ariaExpanded = true;
     }
     // Cleaning up self time display so we can use it in aria-label below.
-    let selfTimeDisplay = displayData.selfTimeWithUnit;
-    if (selfTimeDisplay === '—') {
-      selfTimeDisplay = '0ms';
+    let selfDisplay = displayData.selfTimeUnit;
+    if (selfDisplay === '—') {
+      selfDisplay = '0ms';
     }
 
     return (
@@ -256,7 +263,6 @@ class TreeViewRowScrolledColumns<
           odd: index % 2 !== 0,
           isSelected,
           isRightClicked,
-          dim: displayData.isFrameLabel,
         })}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
@@ -281,19 +287,26 @@ class TreeViewRowScrolledColumns<
           } ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
           onClick={this._onToggleClick}
         />
+        {/* The category square is out of the treeview column element because we
+            reduce the opacity for that element in some cases (with the "dim"
+            class).
+          */
+        displayData.categoryColor && displayData.categoryName ? (
+          <span
+            className={`colored-square category-color-${displayData.categoryColor}`}
+            title={displayData.categoryName}
+          />
+        ) : null}
         <span
-          className={`treeViewRowColumn treeViewMainColumn ${
-            mainColumn.propName
-          }`}
+          className={classNames(
+            'treeViewRowColumn',
+            'treeViewMainColumn',
+            mainColumn.propName,
+            {
+              dim: displayData.isFrameLabel,
+            }
+          )}
         >
-          {displayData.categoryColor && displayData.categoryName ? (
-            <span
-              className={`colored-square category-color-${
-                displayData.categoryColor
-              }`}
-              title={displayData.categoryName}
-            />
-          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (
@@ -306,9 +319,7 @@ class TreeViewRowScrolledColumns<
         </span>
         {appendageColumn ? (
           <span
-            className={`treeViewRowColumn treeViewAppendageColumn ${
-              appendageColumn.propName
-            }`}
+            className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
           >
             {reactStringWithHighlightedSubstrings(
               displayData[appendageColumn.propName],
@@ -333,17 +344,16 @@ interface Tree<DisplayData: Object> {
 }
 
 type TreeViewProps<DisplayData> = {|
-  +fixedColumns: Column[],
-  +mainColumn: Column,
+  +fixedColumns: Column<DisplayData>[],
+  +mainColumn: Column<DisplayData>,
   +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
   +rightClickedNodeId?: NodeIndex | null,
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
-  +appendageColumn?: Column,
+  +appendageColumn?: Column<DisplayData>,
   +disableOverscan?: boolean,
-  +icons?: IconWithClassName[],
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
@@ -352,9 +362,10 @@ type TreeViewProps<DisplayData> = {|
   +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
+  +onKeyDown?: (SyntheticKeyboardEvent<>, null | NodeIndex) => void,
 |};
 
-class TreeView<DisplayData: Object> extends React.PureComponent<
+export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
   _specialItems: [NodeIndex | void, NodeIndex | void];
@@ -401,7 +412,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
+  UNSAFE_componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     const hasNewSelectedNode =
       nextProps.selectedNodeId !== this.props.selectedNodeId;
     const hasNewRightClickedNode =
@@ -509,7 +520,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
   _toggle = (
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
-    toggleAll: * = false
+    toggleAll: boolean = false
   ) => {
     const newSet = new Set(this._expandedNodes);
     if (newExpanded) {
@@ -557,22 +568,21 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   };
 
-  /**
-   * Flow doesn't yet know about Clipboard events, so infer what's going on with the
-   * event.
-   * See: https://github.com/facebook/flow/issues/1856
-   */
-  _onCopy = (event: *) => {
+  _onCopy = (event: ClipboardEvent) => {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
-      const clipboardData: DataTransfer = (event: Object).clipboardData;
+      const clipboardData: DataTransfer = (event: any).clipboardData;
       clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
   };
 
-  _onKeyDown = (event: KeyboardEvent) => {
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    if (this.props.onKeyDown) {
+      this.props.onKeyDown(event, this.props.selectedNodeId);
+    }
+
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -706,21 +716,12 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       disableOverscan,
       contextMenu,
       contextMenuId,
-      icons,
       maxNodeDepth,
       rowHeight,
       selectedNodeId,
     } = this.props;
     return (
       <div className="treeView">
-        {icons &&
-          icons.map(({ className, icon }) => (
-            <BackgroundImageStyleDef
-              className={className}
-              url={icon}
-              key={className}
-            />
-          ))}
         <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
         <ContextMenuTrigger
           id={contextMenuId}
@@ -733,7 +734,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
             // This attribute exposes the current active child element,
             // while keeping focus on the parent (call tree).
             ariaActiveDescendant={
-              selectedNodeId ? `treeViewRow-${selectedNodeId}` : null
+              selectedNodeId !== null ? `treeViewRow-${selectedNodeId}` : null
             }
             items={this._visibleRows}
             renderItem={this._renderRow}
@@ -755,5 +756,3 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     );
   }
 }
-
-export default TreeView;

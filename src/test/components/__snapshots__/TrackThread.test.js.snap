@@ -1,25 +1,101 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeline/TrackThread matches the snapshot 1`] = `
+exports[`timeline/TrackThread matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    100,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    200,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    300,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "set fillStyle",
+    "#c5e1fe",
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    400,
+    50,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;
+
+exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
 <div
-  class="timelineTrackThread"
+  class="timelineTrackThread expanded"
 >
   <div
     class="timelineMarkers selected"
     data-testid="TimelineMarkersJank"
   >
-    <canvas
-      class="timelineMarkersCanvas"
-    />
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <canvas
+        class="timelineMarkersCanvas"
+        height="50"
+        width="400"
+      />
+    </div>
   </div>
   <div
     class="threadStackGraph"
   >
     <canvas
-      class="threadStackGraphCanvas threadStackGraphCanvas"
+      class="threadStackGraphCanvas threadHeightGraphCanvas"
       height="50"
       width="400"
-    />
+    >
+      <h2>
+        Stack Graph for 
+        Test Track
+      </h2>
+      <p>
+        This graph charts the stack height of each sample.
+      </p>
+    </canvas>
   </div>
   <div
     class="timelineEmptyThreadIndicator"

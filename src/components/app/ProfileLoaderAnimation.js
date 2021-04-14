@@ -5,23 +5,26 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import { Localized } from '@fluent/react';
 
-import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from '../../selectors/app';
-import { getDataSource } from '../../selectors/url-state';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { AppViewState, State } from '../../types/state';
-import type { DataSource } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+import { ProfileRootMessage } from 'firefox-profiler/components/app/ProfileRootMessage';
+import { getView } from 'firefox-profiler/selectors/app';
+import { getDataSource } from 'firefox-profiler/selectors/url-state';
 
-const LOADING_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
-  'from-file': 'Reading the file and processing the profile...',
-  local: 'Not implemented yet.',
-  public: 'Downloading and processing the profile...',
-  'from-url': 'Downloading and processing the profile...',
-  compare: 'Reading and processing profiles...',
+import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+const LOADING_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
+  'from-addon': 'ProfileLoaderAnimation--loading-message-unpublished',
+  unpublished: 'ProfileLoaderAnimation--loading-message-unpublished',
+  'from-file': 'ProfileLoaderAnimation--loading-message-from-file',
+  local: 'ProfileLoaderAnimation--loading-message-local',
+  public: 'ProfileLoaderAnimation--loading-message-public',
+  'from-url': 'ProfileLoaderAnimation--loading-message-from-url',
+  compare: 'ProfileLoaderAnimation--loading-message-compare',
 });
 
 // TODO Switch to a proper i18n library
@@ -50,8 +53,10 @@ type ProfileLoaderAnimationProps = ConnectedProps<
 class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationProps> {
   render() {
     const { view, dataSource } = this.props;
-    const loadingMessage = LOADING_MESSAGES[dataSource];
-    const message = loadingMessage ? loadingMessage : 'View not found';
+    const loadingMessage = LOADING_MESSAGES_L10N_ID[dataSource];
+    const message = loadingMessage
+      ? loadingMessage
+      : 'ProfileLoaderAnimation--loading-message-view-not-found';
     const showLoader = Boolean(loadingMessage);
 
     let additionalMessage = '';
@@ -69,11 +74,13 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
     }
 
     return (
-      <ProfileRootMessage
-        message={message}
-        additionalMessage={additionalMessage}
-        showLoader={showLoader}
-      />
+      <Localized id={message} attrs={{ message: true }}>
+        <ProfileRootMessage
+          message={message}
+          additionalMessage={additionalMessage}
+          showLoader={showLoader}
+        />
+      </Localized>
     );
   }
 }

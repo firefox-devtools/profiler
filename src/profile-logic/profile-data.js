@@ -7,9 +7,24 @@
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import {
+  resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
+import { timeCode } from 'firefox-profiler/utils/time-code';
+import { hashPath } from 'firefox-profiler/utils/path';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/flow';
 
 import type {
   Profile,
@@ -25,6 +40,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
   IndexIntoStackTable,
+  IndexIntoResourceTable,
   ThreadIndex,
   Category,
   Counter,
@@ -32,26 +48,24 @@ import type {
   NativeAllocationsTable,
   InnerWindowID,
   BalancedNativeAllocationsTable,
-} from '../types/profile';
-import type {
+  IndexIntoFrameTable,
+  PageList,
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
+  SamplesLikeTable,
   SelectedState,
-} from '../types/profile-derived';
-import { assertExhaustiveCheck } from '../utils/flow';
-
-import type { Milliseconds, StartEndRange } from '../types/units';
-import { timeCode } from '../utils/time-code';
-import { hashPath } from '../utils/path';
-import type {
+  ProfileFilterPageData,
+  Milliseconds,
+  StartEndRange,
   ImplementationFilter,
   CallTreeSummaryStrategy,
-} from '../types/actions';
-import bisection from 'bisection';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+  EventDelayInfo,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -182,7 +196,7 @@ export function getSampleIndexToCallNodeIndex(
 /**
  * Go through the samples, and determine their current state.
  *
- * For samples that are neither 'FILTERED_OUT' nor 'SELECTED', this function compares
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED', this function compares
  * the sample's call node to the selected call node, in tree order. It uses the same
  * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
  * call compareCallNodes with the selected node for each sample's call node, because doing
@@ -193,6 +207,7 @@ export function getSampleIndexToCallNodeIndex(
 export function getSamplesSelectedStates(
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   const result = new Array(sampleCallNodes.length);
@@ -222,11 +237,16 @@ export function getSamplesSelectedStates(
    * Take a call node, and compute its selected state.
    */
   function getSelectedStateFromCallNode(
-    callNode: IndexIntoCallNodeTable | null
+    callNode: IndexIntoCallNodeTable | null,
+    activeTabFilteredCallNode: IndexIntoCallNodeTable | null
   ): SelectedState {
     let callNodeIndex = callNode;
     if (callNodeIndex === null) {
-      return 'FILTERED_OUT';
+      return activeTabFilteredCallNode === null
+        ? // This sample was not part of the active tab.
+          'FILTERED_OUT_BY_ACTIVE_TAB'
+        : // This sample was filtered out in the transform pipeline.
+          'FILTERED_OUT_BY_TRANSFORM';
     }
 
     // When there's no selected call node, we don't want to shadow everything
@@ -289,7 +309,8 @@ export function getSamplesSelectedStates(
     sampleIndex++
   ) {
     result[sampleIndex] = getSelectedStateFromCallNode(
-      sampleCallNodes[sampleIndex]
+      sampleCallNodes[sampleIndex],
+      activeTabFilteredCallNodes[sampleIndex]
     );
   }
   return result;
@@ -307,7 +328,12 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+export type JsImplementation =
+  | 'interpreter'
+  | 'blinterp'
+  | 'baseline'
+  | 'ion'
+  | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 export type OneCategoryBreakdown = {|
@@ -339,31 +365,6 @@ export type TimingsForPath = {|
 |};
 
 /**
- * This function Returns the JS implementation information for a specific stack.
- */
-export function getJsImplementationForStack(
-  stackIndex: IndexIntoStackTable,
-  { stackTable, frameTable, stringTable }: Thread
-): JsImplementation {
-  const frameIndex = stackTable.frame[stackIndex];
-  const jsImplementationStrIndex = frameTable.implementation[frameIndex];
-
-  if (jsImplementationStrIndex === null) {
-    return 'interpreter';
-  }
-
-  const jsImplementation = stringTable.getString(jsImplementationStrIndex);
-
-  switch (jsImplementation) {
-    case 'baseline':
-    case 'ion':
-      return jsImplementation;
-    default:
-      return 'unknown';
-  }
-}
-
-/**
  * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
  * instead of a CallNodePath.
  */
@@ -375,7 +376,9 @@ export function getTimingsForPath(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ) {
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
@@ -385,7 +388,9 @@ export function getTimingsForPath(
     thread,
     unfilteredThread,
     sampleIndexOffset,
-    categories
+    categories,
+    samples,
+    unfilteredSamples
   );
 }
 
@@ -405,14 +410,32 @@ export function getTimingsForCallNodeIndex(
   thread: Thread,
   unfilteredThread: Thread,
   sampleIndexOffset: number,
-  categories: CategoryList
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  unfilteredSamples: SamplesLikeTable
 ): TimingsForPath {
-  const { samples, stackTable, funcTable } = thread;
+  /* ------------ Variables definitions ------------*/
+
+  // This is the data from the filtered thread that we'll loop over.
+  const { stackTable, stringTable } = thread;
+
+  // This is the data from the unfiltered thread that we'll use to gather
+  // category and JS implementation information. Note that samples are offset by
+  // `sampleIndexOffset` because of range filtering.
   const {
-    samples: unfilteredSamples,
     stackTable: unfilteredStackTable,
+    funcTable: unfilteredFuncTable,
+    frameTable: unfilteredFrameTable,
   } = unfilteredThread;
 
+  // This holds the category index for the JavaScript category, so that we can
+  // use it to quickly check the category later on.
+  const javascriptCategoryIndex = categories.findIndex(
+    ({ name }) => name === 'JavaScript'
+  );
+
+  // This object holds the timings for the current call node path, specified by
+  // needleNodeIndex.
   const pathTimings: ItemTimings = {
     selfTime: {
       value: 0,
@@ -425,6 +448,9 @@ export function getTimingsForCallNodeIndex(
       breakdownByCategory: null,
     },
   };
+
+  // This object holds the timings for the function (all occurrences) pointed by
+  // the specified call node.
   const funcTimings: ItemTimings = {
     selfTime: {
       value: 0,
@@ -437,14 +463,91 @@ export function getTimingsForCallNodeIndex(
       breakdownByCategory: null,
     },
   };
+
+  // This holds the root time, it's incremented for all samples and is useful to
+  // have an absolute value to compare the other values with.
   let rootTime = 0;
 
-  if (needleNodeIndex === null) {
-    // No index was provided, return empty timing information.
-    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  /* -------- End of variable definitions ------- */
+
+  /* ------------ Functions definitions --------- *
+   * We define functions here so that they have easy access to the variables and
+   * the algorithm's parameters. */
+
+  /**
+   * This function is called for native stacks. If the native stack has the
+   * 'JavaScript' category, then we move up the call tree to find the nearest
+   * ancestor that's JS and returns its JS implementation.
+   */
+  function getImplementationForNativeStack(
+    unfilteredStackIndex: IndexIntoStackTable
+  ): StackImplementation {
+    const category = unfilteredStackTable.category[unfilteredStackIndex];
+    if (category !== javascriptCategoryIndex) {
+      return 'native';
+    }
+
+    for (
+      let currentStackIndex = unfilteredStackIndex;
+      currentStackIndex !== null;
+      currentStackIndex = unfilteredStackTable.prefix[currentStackIndex]
+    ) {
+      const frameIndex = unfilteredStackTable.frame[currentStackIndex];
+      const funcIndex = unfilteredFrameTable.func[frameIndex];
+      const isJS = unfilteredFuncTable.isJS[funcIndex];
+      if (isJS) {
+        return getImplementationForJsStack(frameIndex);
+      }
+    }
+
+    // No JS frame was found in the ancestors, this is weird but why not?
+    return 'native';
   }
 
-  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
+  /**
+   * This function Returns the JS implementation information for a specific JS stack.
+   */
+  function getImplementationForJsStack(
+    unfilteredFrameIndex: IndexIntoFrameTable
+  ): JsImplementation {
+    const jsImplementationStrIndex =
+      unfilteredFrameTable.implementation[unfilteredFrameIndex];
+
+    if (jsImplementationStrIndex === null) {
+      return 'interpreter';
+    }
+
+    const jsImplementation = stringTable.getString(jsImplementationStrIndex);
+
+    switch (jsImplementation) {
+      case 'baseline':
+      case 'blinterp':
+      case 'ion':
+        return jsImplementation;
+      default:
+        return 'unknown';
+    }
+  }
+
+  function getImplementationForStack(
+    thisSampleIndex: IndexIntoSamplesTable
+  ): StackImplementation {
+    const stackIndex =
+      unfilteredSamples.stack[thisSampleIndex + sampleIndexOffset];
+    if (stackIndex === null) {
+      // This should not happen in the unfiltered thread.
+      console.error('We got a null stack, this should not happen.');
+      return 'native';
+    }
+
+    const frameIndex = unfilteredStackTable.frame[stackIndex];
+    const funcIndex = unfilteredFrameTable.func[frameIndex];
+    const implementation = unfilteredFuncTable.isJS[funcIndex]
+      ? getImplementationForJsStack(frameIndex)
+      : getImplementationForNativeStack(stackIndex);
+
+    return implementation;
+  }
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
@@ -459,16 +562,13 @@ export function getTimingsForCallNodeIndex(
     },
     sampleIndex: IndexIntoSamplesTable,
     stackIndex: IndexIntoStackTable,
-    funcIndex: IndexIntoFuncTable,
     duration: Milliseconds
   ): void {
     // Step 1: increment the total value
     timings.value += duration;
 
-    // Step 2: find the implementation value for this stack
-    const implementation = funcTable.isJS[funcIndex]
-      ? getJsImplementationForStack(stackIndex, thread)
-      : 'native';
+    // Step 2: find the implementation value for this sample
+    const implementation = getImplementationForStack(sampleIndex);
 
     // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
@@ -503,6 +603,16 @@ export function getTimingsForCallNodeIndex(
       ] += duration;
     }
   }
+  /* ------------- End of function definitions ------------- */
+
+  /* ------------ Start of the algorithm itself ------------ */
+  if (needleNodeIndex === null) {
+    // No index was provided, return empty timing information.
+    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  }
+
+  // This is the function index for this call node.
+  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
 
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
@@ -512,11 +622,9 @@ export function getTimingsForCallNodeIndex(
       continue;
     }
 
-    const duration = samples.duration
-      ? samples.duration[sampleIndex]
-      : interval;
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
 
-    rootTime += Math.abs(duration);
+    rootTime += Math.abs(weight);
 
     const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
     const thisFunc = callNodeTable.func[thisNodeIndex];
@@ -528,8 +636,7 @@ export function getTimingsForCallNodeIndex(
           pathTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          thisFunc,
-          duration
+          weight
         );
       }
 
@@ -538,8 +645,7 @@ export function getTimingsForCallNodeIndex(
           funcTimings.selfTime,
           sampleIndex,
           thisStackIndex,
-          thisFunc,
-          duration
+          weight
         );
       }
     }
@@ -572,8 +678,7 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            thisFunc,
-            duration
+            weight
           );
         }
 
@@ -591,8 +696,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             thisStackIndex,
-            thisFunc,
-            duration
+            weight
           );
         }
         funcFound = true;
@@ -616,7 +720,7 @@ export function getTimingsForCallNodeIndex(
           // This root node matches the passed call node path.
           // This is the only place where we don't accumulate timings, mainly
           // because this would be the same as for the total time.
-          pathTimings.selfTime.value += duration;
+          pathTimings.selfTime.value += weight;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
@@ -625,8 +729,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.selfTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
-            duration
+            weight
           );
         }
 
@@ -637,8 +740,7 @@ export function getTimingsForCallNodeIndex(
             pathTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
-            duration
+            weight
           );
         }
 
@@ -649,8 +751,7 @@ export function getTimingsForCallNodeIndex(
             funcTimings.totalTime,
             sampleIndex,
             currentStackIndex,
-            currentFuncIndex,
-            duration
+            weight
           );
         }
       }
@@ -683,22 +784,45 @@ function _getTimeRangeForThread(
     // We need to look at those because it can be a marker only profile(no-sampling mode).
     // Finding start and end times sadly requires looping through all markers :(
     for (let i = 0; i < markers.length; i++) {
-      const thisStartTime =
-        markers.data[i] && typeof markers.data[i].startTime === 'number'
-          ? markers.data[i].startTime
-          : markers.time[i];
+      const maybeStartTime = markers.startTime[i];
+      const maybeEndTime = markers.endTime[i];
+      const markerPhase = markers.phase[i];
+      // The resulting range needs to adjust BOTH the start and end of the range, as
+      // each marker type could adjust the total range beyond the current bounds.
+      // Note the use of Math.min and Math.max are different for the start and end
+      // of the markers.
 
-      // We add `interval` to the read value here. It could be any number, but
-      // we use `interval` instead of for example 0.001 so that numbers round a
-      // bit more in tests, and this doesn't change things much in practice
-      // otherwise.
-      const thisEndTime =
-        markers.data[i] && typeof markers.data[i].endTime === 'number'
-          ? markers.data[i].endTime + interval
-          : markers.time[i] + interval;
+      switch (markerPhase) {
+        case INSTANT:
+        case INTERVAL_START: {
+          const startTime = ensureExists(maybeStartTime);
 
-      result.start = Math.min(result.start, thisStartTime);
-      result.end = Math.max(result.end, thisEndTime);
+          result.start = Math.min(result.start, startTime);
+          result.end = Math.max(result.end, startTime + interval);
+          break;
+        }
+        case INTERVAL_END: {
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, endTime);
+          result.end = Math.max(result.end, endTime + interval);
+          break;
+        }
+        case INTERVAL: {
+          const startTime = ensureExists(maybeStartTime);
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, startTime, endTime);
+          result.end = Math.max(
+            result.end,
+            startTime + interval,
+            endTime + interval
+          );
+          break;
+        }
+        default:
+          throw new Error('Unhandled marker phase type.');
+      }
     }
   }
 
@@ -1029,6 +1153,83 @@ export function filterThreadToSearchString(
 }
 
 /**
+ * We have page data(innerWindowID) inside the JS frames. Go through each sample
+ * and filter out the ones that don't include any JS frame with the relevant innerWindowID.
+ * Please note that it also keeps native frames if that sample has a relevant JS
+ * frame in any part of the stack. Also it doesn't mutate the stack itself, only
+ * nulls the stack array elements of samples object. Therefore, it doesn't
+ * invalidate transforms.
+ * If we don't have any item in relevantPages, returns all the samples.
+ */
+export function filterThreadByTab(
+  thread: Thread,
+  relevantPages: Set<InnerWindowID>
+): Thread {
+  return timeCode('filterThreadByTab', () => {
+    if (relevantPages.size === 0) {
+      // Either there is no relevant page or "active tab only" view is not active.
+      return thread;
+    }
+
+    const { frameTable, stackTable } = thread;
+
+    // innerWindowID array lives inside the frameTable. Check that and decide
+    // if we should keep that sample or not.
+    const frameMatchesFilterCache: Map<
+      IndexIntoFrameTable,
+      boolean
+    > = new Map();
+    function frameMatchesFilter(frame) {
+      const cache = frameMatchesFilterCache.get(frame);
+      if (cache !== undefined) {
+        return cache;
+      }
+
+      const innerWindowID = frameTable.innerWindowID[frame];
+      const matches =
+        innerWindowID && innerWindowID > 0
+          ? relevantPages.has(innerWindowID)
+          : false;
+      frameMatchesFilterCache.set(frame, matches);
+      return matches;
+    }
+
+    // Use the stackTable to navigate to frameTable and cache the result of it.
+    const stackMatchesFilterCache: Map<
+      IndexIntoStackTable,
+      boolean
+    > = new Map();
+    function stackMatchesFilter(stackIndex) {
+      if (stackIndex === null) {
+        return false;
+      }
+      const cache = stackMatchesFilterCache.get(stackIndex);
+      if (cache !== undefined) {
+        return cache;
+      }
+
+      const prefix = stackTable.prefix[stackIndex];
+      if (stackMatchesFilter(prefix)) {
+        stackMatchesFilterCache.set(stackIndex, true);
+        return true;
+      }
+
+      const frame = stackTable.frame[stackIndex];
+      const matches = frameMatchesFilter(frame);
+      stackMatchesFilterCache.set(stackIndex, matches);
+      return matches;
+    }
+
+    // Update the stack array elements of samples object and make them null if
+    // they don't include any relevant JS frame.
+    // It doesn't mutate the stack itself.
+    return updateThreadStacks(thread, stackTable, stackIndex =>
+      stackMatchesFilter(stackIndex) ? stackIndex : null
+    );
+  });
+}
+
+/**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
@@ -1036,18 +1237,9 @@ export function getSampleIndexRangeForSelection(
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  // TODO: This should really use bisect. table.time is sorted.
-  const firstSample = table.time.findIndex(t => t >= rangeStart);
-  if (firstSample === -1) {
-    return [table.length, table.length];
-  }
-  const afterLastSample = table.time
-    .slice(firstSample)
-    .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstSample, table.length];
-  }
-  return [firstSample, firstSample + afterLastSample];
+  const sampleStart = bisectionLeft(table.time, rangeStart);
+  const sampleEnd = bisectionLeft(table.time, rangeEnd, sampleStart);
+  return [sampleStart, sampleEnd];
 }
 
 export function filterThreadSamplesToRange(
@@ -1064,9 +1256,10 @@ export function filterThreadSamplesToRange(
   const newSamples: SamplesTable = {
     length: endSampleIndex - beginSampleIndex,
     time: samples.time.slice(beginSampleIndex, endSampleIndex),
-    duration: samples.duration
-      ? samples.duration.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
+    weight: samples.weight
+      ? samples.weight.slice(beginSampleIndex, endSampleIndex)
+      : null,
+    weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
   };
 
@@ -1077,6 +1270,13 @@ export function filterThreadSamplesToRange(
     );
   } else if (samples.responsiveness) {
     newSamples.responsiveness = samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
+
+  if (samples.threadCPUDelta) {
+    newSamples.threadCPUDelta = samples.threadCPUDelta.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -1101,7 +1301,8 @@ export function filterThreadSamplesToRange(
         startAllocIndex,
         endAllocIndex
       ),
-      duration: jsAllocations.duration.slice(startAllocIndex, endAllocIndex),
+      weight: jsAllocations.weight.slice(startAllocIndex, endAllocIndex),
+      weightType: jsAllocations.weightType,
       inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
       stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
       length: endAllocIndex - startAllocIndex,
@@ -1115,7 +1316,7 @@ export function filterThreadSamplesToRange(
       rangeEnd
     );
     const time = nativeAllocations.time.slice(startAllocIndex, endAllocIndex);
-    const duration = nativeAllocations.duration.slice(
+    const weight = nativeAllocations.weight.slice(
       startAllocIndex,
       endAllocIndex
     );
@@ -1124,7 +1325,8 @@ export function filterThreadSamplesToRange(
     if (nativeAllocations.memoryAddress) {
       newThread.nativeAllocations = {
         time,
-        duration,
+        weight,
+        weightType: nativeAllocations.weightType,
         stack,
         memoryAddress: nativeAllocations.memoryAddress.slice(
           startAllocIndex,
@@ -1139,7 +1341,8 @@ export function filterThreadSamplesToRange(
     } else {
       newThread.nativeAllocations = {
         time,
-        duration,
+        weight,
+        weightType: nativeAllocations.weightType,
         stack,
         length,
       };
@@ -1235,6 +1438,170 @@ export function accumulateCounterSamples(
   });
 
   return accumulatedSamples;
+}
+
+/**
+ * Pre-processing of raw eventDelay values.
+ *
+ * We don't do 16ms event injection for responsiveness values anymore. Instead,
+ * profiler records the time since running event blocked the input events. But
+ * this value is not enough to calculate event delays by itself. We need to process
+ * these values and turn them into event delays, which we can use for determining
+ * responsiveness later.
+ *
+ * For every event that gets enqueued, the delay time will go up by the event's
+ * running time at the time at which the event is enqueued. The delay function
+ * will be a sawtooth of the following shape:
+ *
+ *              |\           |...
+ *              | \          |
+ *         |\   |  \         |
+ *         | \  |   \        |
+ *      |\ |  \ |    \       |
+ *   |\ | \|   \|     \      |
+ *   | \|              \     |
+ *  _|                  \____|
+ *
+ * Calculate the delay of a new event added at time t: (run every sample)
+ *
+ *  TimeSinceRunningEventBlockedInputEvents = RunningEventDelay + (now - RunningEventStart);
+ *  effective_submission = now - TimeSinceRunningEventBlockedInputEvents;
+ *  delta = (now - last_sample_time);
+ *  last_sample_time = now;
+ *  for (t=effective_submission to now) {
+ *     delay[t] += delta;
+ *  }
+ *
+ * Note that TimeSinceRunningEventBlockedInputEvents is our eventDelay values in
+ * the profile. So we don't have to calculate this. It's calculated in the gecko side already.
+ *
+ * This first algorithm is not efficient because we are running this loop for each sample.
+ * Instead it can be reduced in overhead by:
+ *
+ *  TimeSinceRunningEventBlockedInputEvents = RunningEventDelay + (now - RunningEventStart);
+ *  effective_submission = now - TimeSinceRunningEventBlockedInputEvents;
+ *  if (effective_submission != last_submission) {
+ *    delta = (now - last_submission);
+ *    // this loop should be made to match each sample point in the range
+ *    // intead of assuming 1ms sampling as this pseudocode does
+ *    for (t=last_submission to effective_submission-1) {
+ *       delay[t] += delta;
+ *       delta -= 1; // assumes 1ms; adjust as needed to match for()
+ *    }
+ *    last_submission = effective_submission;
+ *  }
+ *
+ * In this algorithm, we are running this only if effective submission is changed.
+ * This reduces the calculation overhead a lot.
+ * So we used the second algorithm in this function to make it faster.
+ *
+ * For instance the processed eventDelay values will be something like this:
+ *
+ *   [12 , 3, 42, 31, 22, 10, 3, 71, 65, 42, 23, 3, 33, 25, 5, 3]
+ *         |___|              |___|              |___|
+ *     A new event is    New event is enqueued   New event is enqueued
+ *     enqueued
+ *
+ * A more realistic and minimal example:
+ *  Unprocessed values
+ *
+ *   [0, 0, 1, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0]
+ *          ^last submission           ^ effective submission
+ *
+ *  Will be converted to:
+ *
+ *   [0, 0, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+ *
+ * If you want to learn more about this eventDelay value on gecko side, see:
+ * https://searchfox.org/mozilla-central/rev/3811b11b5773c1dccfe8228bfc7143b10a9a2a99/tools/profiler/core/platform.cpp#3000-3186
+ */
+export function processEventDelays(
+  samples: SamplesTable,
+  interval: Milliseconds
+): EventDelayInfo {
+  if (!samples.eventDelay) {
+    throw new Error(
+      'processEventDelays step should not be called for older profiles'
+    );
+  }
+
+  const eventDelays = new Float32Array(samples.length);
+  const rawEventDelays = ensureExists(
+    samples.eventDelay,
+    'eventDelays field is not present in this profile'
+  );
+  let lastSubmission = samples.time[0];
+  let lastSubmissionIdx = 0;
+
+  // Skipping the first element because we don't have any sample of its past.
+  for (let i = 1; i < samples.length; i++) {
+    const currentEventDelay = rawEventDelays[i];
+    const nextEventDelay = rawEventDelays[i + 1] || 0; // it can be null or undefined (for the last element)
+    const now = samples.time[i];
+    if (currentEventDelay === null || currentEventDelay === undefined) {
+      // Ignore anything that's not numeric. This can happen if there is no responsiveness
+      // information, or if the sampler failed to collect a responsiveness value. This
+      // can happen intermittently.
+      //
+      // See Bug 1506226.
+      continue;
+    }
+
+    if (currentEventDelay < nextEventDelay) {
+      // The submission is still ongoing, we should get the next event delay
+      // value until the submission ends.
+      continue;
+    }
+
+    // This is a new submission
+    const sampleSinceBlockedEvents = Math.trunc(currentEventDelay / interval);
+    const effectiveSubmission = now - currentEventDelay;
+    const effectiveSubmissionIdx = i - sampleSinceBlockedEvents;
+
+    if (effectiveSubmissionIdx < 0) {
+      // Unfortunately submissions that were started before the profiler start
+      // time are not reliable because we don't have any sample data for earlier.
+      // Skipping it.
+      lastSubmission = now;
+      lastSubmissionIdx = i;
+      continue;
+    }
+
+    if (lastSubmissionIdx === effectiveSubmissionIdx) {
+      // Bail out early since there is nothing to do.
+      lastSubmission = effectiveSubmission;
+      lastSubmissionIdx = effectiveSubmissionIdx;
+      continue;
+    }
+
+    let delta = now - lastSubmission;
+    for (let j = lastSubmissionIdx + 1; j <= effectiveSubmissionIdx; j++) {
+      eventDelays[j] += delta;
+      delta -= samples.time[j + 1] - samples.time[j];
+    }
+
+    lastSubmission = effectiveSubmission;
+    lastSubmissionIdx = effectiveSubmissionIdx;
+  }
+
+  // We are done with processing the delays.
+  // Calculate min/max delay and delay range
+  let minDelay = Number.MAX_SAFE_INTEGER;
+  let maxDelay = 0;
+  for (const delay of eventDelays) {
+    if (delay) {
+      minDelay = Math.min(delay, minDelay);
+      maxDelay = Math.max(delay, maxDelay);
+    }
+  }
+  const delayRange = maxDelay - minDelay;
+
+  return {
+    eventDelays,
+    minDelay,
+    maxDelay,
+    delayRange,
+  };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------
@@ -1417,27 +1784,29 @@ export function convertStackToCallNodePath(
  * Returns the depth of the deepest call node, but with a one-based
  * depth instead of a zero-based.
  *
- * If no samples are found, 0 is returned.
+ * If there are no samples, or the stacks are all filtered out for the samples, then
+ * 0 is returned.
  */
 export function computeCallNodeMaxDepth(
-  thread: Thread,
+  samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo
 ): number {
-  let maxDepth = 0;
-  const { samples } = thread;
+  // Compute the depth on a per-sample basis. This is done since the callNodeInfo is
+  // computed for the filtered thread, but a samples-like table can use the preview
+  // filtered thread, which involves a subset of the total call nodes.
+  let max = -1;
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  for (let i = 0; i < samples.length; i++) {
-    const stackIndex = samples.stack[i];
-    if (stackIndex !== null) {
-      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      // Change to one-based depth
-      const depth = callNodeTable.depth[callNodeIndex] + 1;
-      if (depth > maxDepth) {
-        maxDepth = depth;
-      }
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
     }
+    const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    const depth = callNodeTable.depth[callNodeIndex];
+    max = Math.max(max, depth);
   }
-  return maxDepth;
+
+  return max + 1;
 }
 
 export function invertCallstack(
@@ -1589,13 +1958,13 @@ export function getMapStackUpdater(
   };
 }
 
-export function getSampleIndexClosestToTime(
+export function getSampleIndexClosestToStartTime(
   samples: SamplesTable,
   time: number,
   interval: Milliseconds
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
-  const index = bisection.right(samples.time, time);
+  const index = bisectionRight(samples.time, time);
 
   if (index === 0) {
     return 0;
@@ -1609,16 +1978,61 @@ export function getSampleIndexClosestToTime(
   // and its predecessor.
   const previousIndex = index - 1;
 
-  let duration = interval;
-  let previousDuration = interval;
-  if (samples.duration) {
-    duration = Math.abs(samples.duration[index]);
-    previousDuration = Math.abs(samples.duration[previousIndex]);
+  let weight = interval;
+  let previousWeight = interval;
+  if (samples.weight) {
+    const samplesWeight = samples.weight;
+    weight = Math.abs(samplesWeight[index]);
+    previousWeight = Math.abs(samplesWeight[previousIndex]);
   }
 
-  const distanceToThis = samples.time[index] + duration / 2 - time;
+  const distanceToThis = samples.time[index] + weight / 2 - time;
   const distanceToLast =
-    time - (samples.time[previousIndex] + previousDuration / 2);
+    time - (samples.time[previousIndex] + previousWeight / 2);
+  return distanceToThis < distanceToLast ? index : index - 1;
+}
+
+/*
+ * Returns the sample index that is closest to *adjusted* sample time. This is a
+ * very similar function to getSampleIndexClosestToStartTime. The difference is that
+ * the other function uses the raw time values, on the other hand, this function
+ * uses the adjusted time. In this context, adjusted time means that `time` array
+ * represent the "center" of the sample, and raw values represent the "start" of
+ * the sample.
+ */
+export function getSampleIndexClosestToCenteredTime(
+  samples: SamplesTable,
+  time: number
+): IndexIntoSamplesTable {
+  // Bisect to find the index of the first sample after the provided time.
+  const index = bisectionRight(samples.time, time);
+
+  if (index === 0) {
+    return 0;
+  }
+
+  if (index === samples.length) {
+    return samples.length - 1;
+  }
+
+  // Check the distance between the provided time and the center of the bisected sample
+  // and its predecessor.
+  const previousIndex = index - 1;
+  let distanceToThis;
+  let distanceToLast;
+
+  if (samples.weight) {
+    const samplesWeight = samples.weight;
+    const weight = Math.abs(samplesWeight[index]);
+    const previousWeight = Math.abs(samplesWeight[previousIndex]);
+
+    distanceToThis = samples.time[index] + weight / 2 - time;
+    distanceToLast = time - (samples.time[previousIndex] + previousWeight / 2);
+  } else {
+    distanceToThis = samples.time[index] - time;
+    distanceToLast = time - samples.time[previousIndex];
+  }
+
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
@@ -1762,11 +2176,12 @@ export function getOriginAnnotationForFunc(
 export function getFuncNamesAndOriginsForPath(
   path: CallNodePath,
   thread: Thread
-): Array<{ funcName: string, origin: string }> {
+): Array<{ funcName: string, isFrameLabel: boolean, origin: string }> {
   const { funcTable, stringTable, resourceTable } = thread;
 
   return path.map(func => ({
     funcName: stringTable.getString(funcTable.name[func]),
+    isFrameLabel: funcTable.resource[func] === -1,
     origin: getOriginAnnotationForFunc(
       func,
       funcTable,
@@ -1834,6 +2249,11 @@ export function getTreeOrderComparator(
 
   /**
    * Determine the ordering of (possibly null) call nodes for two given samples.
+   * Returns a value < 0 if sampleA is ordered before sampleB,
+   *                 > 0 if sampleA is ordered after sampleB,
+   *                == 0 if there is no ordering between sampleA and sampleB.
+   * Samples which are filtered out, i.e. for which sampleCallNodes[sample] is
+   * null, are ordered *after* samples which are not filtered out.
    */
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
@@ -1841,14 +2261,18 @@ export function getTreeOrderComparator(
   ): number {
     const callNodeA = sampleCallNodes[sampleA];
     const callNodeB = sampleCallNodes[sampleB];
+
     if (callNodeA === null) {
       if (callNodeB === null) {
+        // Both samples are filtered out
         return 0;
       }
-      return -1;
+      // A filtered out, B not filtered out. A goes after B.
+      return 1;
     }
     if (callNodeB === null) {
-      return 1;
+      // B filtered out, A not filtered out. B goes after A.
+      return -1;
     }
     return compareCallNodes(callNodeA, callNodeB);
   };
@@ -1976,11 +2400,12 @@ export function getFriendlyStackTypeName(
   implementation: StackImplementation
 ): string {
   switch (implementation) {
-    case 'ion':
-    case 'baseline':
-      return `JS JIT (${implementation})`;
     case 'interpreter':
       return 'JS interpreter';
+    case 'blinterp':
+    case 'baseline':
+    case 'ion':
+      return `JS JIT (${implementation})`;
     case 'native':
       return 'Native code';
     case 'unknown':
@@ -2021,11 +2446,11 @@ export function filterToAllocations(
   if (nativeAllocations.memoryAddress) {
     newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration > 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight > 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.memoryAddress.push(
           nativeAllocations.memoryAddress[i]
         );
@@ -2036,11 +2461,11 @@ export function filterToAllocations(
   } else {
     newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration > 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight > 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.length++;
       }
     }
@@ -2059,11 +2484,11 @@ export function filterToDeallocationsSites(
   if (nativeAllocations.memoryAddress) {
     newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration < 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight < 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.memoryAddress.push(
           nativeAllocations.memoryAddress[i]
         );
@@ -2074,11 +2499,11 @@ export function filterToDeallocationsSites(
   } else {
     newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
     for (let i = 0; i < nativeAllocations.length; i++) {
-      const duration = nativeAllocations.duration[i];
-      if (duration < 0) {
+      const weight = nativeAllocations.weight[i];
+      if (weight < 0) {
         newNativeAllocations.time.push(nativeAllocations.time[i]);
         newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.weight.push(weight);
         newNativeAllocations.length++;
       }
     }
@@ -2106,7 +2531,7 @@ export function filterToDeallocationsMemory(
     allocationIndex < nativeAllocations.length;
     allocationIndex++
   ) {
-    const bytes = nativeAllocations.duration[allocationIndex];
+    const bytes = nativeAllocations.weight[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
     if (bytes >= 0) {
       // Handle the allocation.
@@ -2132,12 +2557,12 @@ export function filterToDeallocationsMemory(
 
   const newDeallocations = getEmptyBalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.duration[i];
+    const duration = nativeAllocations.weight[i];
     const stackIndex = stackOfOriginalAllocation[i];
     if (stackIndex !== null) {
       newDeallocations.time.push(nativeAllocations.time[i]);
       newDeallocations.stack.push(stackIndex);
-      newDeallocations.duration.push(duration);
+      newDeallocations.weight.push(duration);
       newDeallocations.memoryAddress.push(nativeAllocations.memoryAddress[i]);
       newDeallocations.threadId.push(nativeAllocations.threadId[i]);
       newDeallocations.length++;
@@ -2172,7 +2597,7 @@ export function filterToRetainedAllocations(
     allocationIndex < nativeAllocations.length;
     allocationIndex++
   ) {
-    const bytes = nativeAllocations.duration[allocationIndex];
+    const bytes = nativeAllocations.weight[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
     if (bytes >= 0) {
       // Handle the allocation.
@@ -2199,11 +2624,11 @@ export function filterToRetainedAllocations(
 
   const newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.duration[i];
+    const weight = nativeAllocations.weight[i];
     if (retainedAllocation[i]) {
       newNativeAllocations.time.push(nativeAllocations.time[i]);
       newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-      newNativeAllocations.duration.push(duration);
+      newNativeAllocations.weight.push(weight);
       newNativeAllocations.memoryAddress.push(
         nativeAllocations.memoryAddress[i]
       );
@@ -2213,4 +2638,140 @@ export function filterToRetainedAllocations(
   }
 
   return newNativeAllocations;
+}
+
+/**
+ * Extract the hostname and favicon from the first page if we are in single tab
+ * view. Currently we assume that we don't change the origin of webpages while
+ * profiling in web developer preset. That's why we are simply getting the first
+ * page we find that belongs to the active tab. Returns null if profiler is not
+ * in the single tab view at the moment.
+ */
+export function extractProfileFilterPageData(
+  pages: PageList | null,
+  relevantPages: Set<InnerWindowID>
+): ProfileFilterPageData | null {
+  if (relevantPages.size === 0 || pages === null) {
+    // Either we are not in single tab view, or we don't have pages array(which
+    // is the case for older profiles). Return early.
+    return null;
+  }
+
+  // Getting the first page's innerWindowID and then getting its url.
+  const innerWindowID = [...relevantPages][0];
+  const filteredPages = pages.filter(
+    page => page.innerWindowID === innerWindowID
+  );
+
+  if (filteredPages.length !== 1) {
+    // There should be only one page with the given innerWindowID, they are unique.
+    console.error(`Expected one page but ${filteredPages.length} found.`);
+    return null;
+  }
+
+  const pageUrl = filteredPages[0].url;
+  try {
+    const page = new URL(pageUrl);
+    // FIXME(Bug 1620546): This is not ideal and we should get the favicon
+    // either during profile capture or profile pre-process.
+    const favicon = new URL('/favicon.ico', page.origin);
+    if (favicon.protocol === 'http:') {
+      // Upgrade http requests.
+      favicon.protocol = 'https:';
+    }
+    return {
+      origin: page.origin,
+      hostname: page.hostname,
+      favicon: favicon.href,
+    };
+  } catch (e) {
+    console.error(
+      'Error while extracing the hostname and favicon from the page url',
+      pageUrl
+    );
+    return null;
+  }
+}
+
+// Returns the resource index for a "url" or "webhost" resource which is created
+// on demand based on the script URI.
+export function getOrCreateURIResource(
+  scriptURI: string,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray,
+  originToResourceIndex: Map<string, IndexIntoResourceTable>
+): IndexIntoResourceTable {
+  // Figure out the origin and host.
+  let origin;
+  let host;
+  try {
+    const url = new URL(scriptURI);
+    if (
+      !(
+        url.protocol === 'http:' ||
+        url.protocol === 'https:' ||
+        url.protocol === 'moz-extension:'
+      )
+    ) {
+      throw new Error('not a webhost or extension protocol');
+    }
+    origin = url.origin;
+    host = url.host;
+  } catch (e) {
+    origin = scriptURI;
+    host = null;
+  }
+
+  let resourceIndex = originToResourceIndex.get(origin);
+  if (resourceIndex !== undefined) {
+    return resourceIndex;
+  }
+
+  resourceIndex = resourceTable.length++;
+  const originStringIndex = stringTable.indexForString(origin);
+  originToResourceIndex.set(origin, resourceIndex);
+  if (host) {
+    // This is a webhost URL.
+    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.name[resourceIndex] = originStringIndex;
+    resourceTable.host[resourceIndex] = stringTable.indexForString(host);
+    resourceTable.type[resourceIndex] = resourceTypes.webhost;
+  } else {
+    // This is a URL, but it doesn't point to something on the web, e.g. a
+    // chrome url.
+    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
+    resourceTable.host[resourceIndex] = undefined;
+    resourceTable.type[resourceIndex] = resourceTypes.url;
+  }
+  return resourceIndex;
+}
+
+/**
+ * See the ThreadsKey type for an explanation.
+ */
+export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
+  if (threadIndexes.size === 1) {
+    // Return the ThreadIndex directly if there is only one thread.
+    // We know this value exists because of the size check, even if Flow doesn't.
+    return ensureExists(getFirstItemFromSet(threadIndexes));
+  }
+
+  return [...threadIndexes].sort((a, b) => b - a).join(',');
+}
+
+/**
+ * Checks if threadIndexesSet contains all the threads in the threadsKey.
+ */
+export function hasThreadKeys(
+  threadIndexesSet: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+): boolean {
+  const threadIndexes = ('' + threadsKey).split(',').map(n => +n);
+  for (const threadIndex of threadIndexes) {
+    if (!threadIndexesSet.has(threadIndex)) {
+      return false;
+    }
+  }
+  return true;
 }

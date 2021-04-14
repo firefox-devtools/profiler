@@ -6,30 +6,59 @@
 import type { IDBFactory, IDBKeyRange } from '../indexeddb';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
+import type { MixedObject } from '../utils';
 
 // Because this type isn't an existing Global type, but still it's useful to
 // have it available, we define it with a $ as prfix.
 declare type $GeckoProfiler = {
-  getProfile: () => Object,
+  getProfile: () => MixedObject,
   getSymbolTable: (
     debugName: string,
     breakpadId: string
   ) => Promise<SymbolTableAsTuple>,
 };
 
-declare class Window extends EventTarget {
+declare class WebChannelEvent {
+  detail: {
+    id: string,
+    message: mixed,
+  };
+}
+
+declare class Window {
   // Google Analytics
   ga?: GoogleAnalytics;
-  // profiler.firefox.com and Gecko Profiler Addon
+  // profiler.firefox.com and globals injected via frame scripts.
   geckoProfilerPromise: Promise<$GeckoProfiler>;
   connectToGeckoProfiler: $GeckoProfiler => void;
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
   InstallTrigger?: {
-    install: Object => {},
+    install: MixedObject => boolean,
   };
 
+  // For debugging purposes, allow tooltips to persist. This aids in inspecting
+  // the DOM structure.
+  persistTooltips?: boolean;
+
+  // WebChannel events.
+  // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.jsm
+  addEventListener: $PropertyType<EventTarget, 'addEventListener'> &
+    ((
+      'WebChannelMessageToContent',
+      (event: WebChannelEvent) => void,
+      true
+    ) => void);
+
+  removeEventListener: $PropertyType<EventTarget, 'removeEventListener'> &
+    ((
+      'WebChannelMessageToContent',
+      (event: WebChannelEvent) => void,
+      true
+    ) => void);
+
   // Built-ins.
+  dispatchEvent: $PropertyType<EventTarget, 'dispatchEvent'>;
   getComputedStyle: (
     element: HTMLElement,
     pseudoEl: ?string
@@ -47,7 +76,10 @@ declare class Window extends EventTarget {
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
   devicePixelRatio: number;
-  indexedDB: IDBFactory;
+  // The indexedDB is marked as optional, as we should handle the test environment
+  // where this is not available. It can lead to hard to debug promise failure
+  // messages.
+  indexedDB?: IDBFactory;
   IDBKeyRange: IDBKeyRange<>;
   innerWidth: number;
   innerHeight: number;
@@ -58,6 +90,7 @@ declare class Window extends EventTarget {
   WheelEvent: WheelEvent;
   navigator: {
     userAgent: string,
+    platform: string,
   };
 }
 

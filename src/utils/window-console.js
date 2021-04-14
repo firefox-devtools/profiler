@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { stripIndent } from 'common-tags';
-import type { GetState, Dispatch } from '../types/store';
-import selectors from '../selectors';
+import type { GetState, Dispatch, MixedObject } from 'firefox-profiler/types';
+import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from '../actions';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
@@ -20,26 +20,28 @@ const defineProperty = Object.defineProperty;
 export function addDataToWindowObject(
   getState: GetState,
   dispatch: Dispatch,
-  target: Object = window
+  target: MixedObject = window
 ) {
   defineProperty(target, 'profile', {
     enumerable: true,
     get() {
-      return selectors.profile.getProfile(getState());
+      return selectorsForConsole.profile.getProfile(getState());
     },
   });
 
   defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
-      return selectors.selectedThread.getPreviewFilteredThread(getState());
+      return selectorsForConsole.selectedThread.getPreviewFilteredThread(
+        getState()
+      );
     },
   });
 
   defineProperty(target, 'callTree', {
     enumerable: true,
     get() {
-      return selectors.selectedThread.getCallTree(getState());
+      return selectorsForConsole.selectedThread.getCallTree(getState());
     },
   });
 
@@ -47,18 +49,79 @@ export function addDataToWindowObject(
     enumerable: true,
     get() {
       const state = getState();
-      const getMarker = selectors.selectedThread.getMarkerGetter(state);
-      const markerIndexes = selectors.selectedThread.getPreviewFilteredMarkerIndexes(
+      const getMarker = selectorsForConsole.selectedThread.getMarkerGetter(
+        state
+      );
+      const markerIndexes = selectorsForConsole.selectedThread.getPreviewFilteredMarkerIndexes(
         state
       );
       return markerIndexes.map(getMarker);
     },
   });
 
+  target.experimental = {
+    enableEventDelayTracks() {
+      const areEventDelayTracksEnabled = dispatch(
+        actions.enableEventDelayTracks()
+      );
+      if (areEventDelayTracksEnabled) {
+        console.log(stripIndent`
+          ✅ The event delay tracks are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
+    },
+
+    enableCPUGraphs() {
+      const areExperimentalCPUGraphsEnabled = dispatch(
+        actions.enableExperimentalCPUGraphs()
+      );
+      if (areExperimentalCPUGraphsEnabled) {
+        console.log(stripIndent`
+          ✅ The CPU graphs are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
+    },
+  };
+
+  target.togglePseudoLocalization = function(pseudoStrategy?: string) {
+    if (
+      pseudoStrategy !== undefined &&
+      pseudoStrategy !== 'accented' &&
+      pseudoStrategy !== 'bidi'
+    ) {
+      console.log(stripIndent`
+        ❗ The pseudo strategy "${pseudoStrategy}" is unknown.
+        💡 Valid strategies are: "accented" or "bidi".
+        Please try again 😊
+      `);
+      return;
+    }
+
+    dispatch(actions.setupLocalization(navigator.languages, pseudoStrategy));
+    if (pseudoStrategy) {
+      console.log(stripIndent`
+        ✅ The pseudo strategy "${pseudoStrategy}" is now enabled for the localization.
+        👉 To disable it, you can call togglePseudoLocalization() again without a parameter.
+      `);
+    } else {
+      console.log(stripIndent`
+        ✅ The pseudo strategy is now disabled.
+      `);
+    }
+  };
+
   target.getState = getState;
-  target.selectors = selectors;
+  target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
   target.actions = actions;
+
+  // For debugging purposes, allow tooltips to persist. This aids in inspecting
+  // the DOM structure.
+  target.persistTooltips = false;
 }
 
 export function logFriendlyPreamble() {
@@ -105,12 +168,14 @@ export function logFriendlyPreamble() {
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
       %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
+      %cwindow.experimental%c - The object that holds flags of all the experimental features.
+      %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
 
       The profile format is documented here:
-      %chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c
     `,
     // "The following profiler..."
     intro,
@@ -139,6 +204,12 @@ export function logFriendlyPreamble() {
     // "window.actions"
     bold,
     reset,
+    // "window.experimental"
+    bold,
+    reset,
+    // "window.togglePseudoLocalization"
+    bold,
+    reset,
     // "processed-profile-format.md"
     link,
     reset,
@@ -146,4 +217,8 @@ export function logFriendlyPreamble() {
     link,
     reset
   );
+}
+
+export function logDevelopmentTips() {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
 }

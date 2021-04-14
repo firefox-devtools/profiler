@@ -5,8 +5,8 @@
 // @flow
 
 import React from 'react';
-import { render } from 'react-testing-library';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   addRootOverlayElement,
   removeRootOverlayElement,
@@ -14,7 +14,11 @@ import {
 
 import { ensureExists } from '../../utils/flow';
 
-import Tooltip, { MOUSE_OFFSET } from '../../components/tooltip/Tooltip';
+import {
+  Tooltip,
+  MOUSE_OFFSET,
+  VISUAL_MARGIN,
+} from '../../components/tooltip/Tooltip';
 
 describe('shared/Tooltip', () => {
   beforeEach(addRootOverlayElement);
@@ -39,6 +43,7 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${MOUSE_OFFSET}px`,
         top: `${MOUSE_OFFSET}px`,
+        '--tooltip-detail-max-width': '600px',
       });
 
       const mouseX = 50;
@@ -48,6 +53,7 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
         top: `${mouseY + MOUSE_OFFSET}px`,
+        '--tooltip-detail-max-width': '600px',
       });
     });
 
@@ -66,6 +72,7 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,
+        '--tooltip-detail-max-width': '600px',
       });
     });
 
@@ -75,11 +82,12 @@ describe('shared/Tooltip', () => {
         mouse: { x: 500, y: 300 },
       });
 
-      const expectedLeft = 0;
-      const expectedTop = 0;
+      const expectedLeft = VISUAL_MARGIN;
+      const expectedTop = VISUAL_MARGIN;
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,
+        '--tooltip-detail-max-width': '600px',
       });
     });
   });

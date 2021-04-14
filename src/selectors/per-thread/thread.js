@@ -11,6 +11,7 @@ import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
+import * as Cpu from '../../profile-logic/cpu';
 
 import type {
   Thread,
@@ -18,14 +19,21 @@ import type {
   JsTracerTable,
   SamplesTable,
   NativeAllocationsTable,
-} from '../../types/profile';
-import type { Selector } from '../../types/store';
-import type { ThreadViewOptions } from '../../types/state';
-import type { TransformStack } from '../../types/transforms';
+  Selector,
+  ThreadViewOptions,
+  TransformStack,
+  JsTracerTiming,
+  $ReturnType,
+  StartEndRange,
+  WeightType,
+  EventDelayInfo,
+  ThreadsKey,
+} from 'firefox-profiler/types';
+
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import type { JsTracerTiming } from '../../types/profile-derived';
-import type { $ReturnType } from '../../types/utils';
-import type { StartEndRange } from '../../types/units';
+import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
+import { mergeThreads } from '../../profile-logic/merge-compare';
+import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This
@@ -40,9 +48,27 @@ export type ThreadSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with an entire thread. This includes
  * the general filtering pipeline for threads.
  */
-export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
+export function getThreadSelectorsPerThread(
+  threadIndexes: Set<ThreadIndex>,
+  threadsKey: ThreadsKey
+) {
+  const getMergedThread: Selector<Thread> = createSelector(
+    ProfileSelectors.getProfile,
+    profile =>
+      mergeThreads(
+        [...threadIndexes].map(threadIndex => profile.threads[threadIndex])
+      )
+  );
+  /**
+   * Either return the raw thread from the profile, or merge several raw threads
+   * together.
+   */
   const getThread: Selector<Thread> = state =>
-    ProfileSelectors.getProfile(state).threads[threadIndex];
+    threadIndexes.size === 1
+      ? ProfileSelectors.getProfile(state).threads[
+          ensureExists(getFirstItemFromSet(threadIndexes))
+        ]
+      : getMergedThread(state);
   const getStringTable: Selector<UniqueStringArray> = state =>
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
@@ -58,18 +84,70 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     );
 
   /**
+   * This selector gets the weight type from the thread.samples table, but
+   * does not get it for others like the Native Allocations table. The call
+   * tree uses the getWeightTypeForCallTree selector.
+   */
+  const getSamplesWeightType: Selector<WeightType> = state =>
+    getSamplesTable(state).weightType || 'samples';
+
+  /**
    * The first per-thread selectors filter out and transform a thread based on user's
    * interactions. The transforms are order dependendent.
    *
    * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
-   * 2. Range - New samples table with only samples in the committed range.
-   * 3. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 4. Implementation - Modify stacks and samples to only show a single implementation.
-   * 5. Search - Exclude samples that don't include some text in the stack.
-   * 6. Preview - Only include samples that are within a user's preview range selection.
+   * 2. CPU - New samples table with processed threadCPUDelta values.
+   * 3. Tab - New samples table with only samples that belongs to the active tab.
+   * 4. Range - New samples table with only samples in the committed range.
+   * 5. Transform - Apply the transform stack that modifies the stacks and samples.
+   * 6. Implementation - Modify stacks and samples to only show a single implementation.
+   * 7. Search - Exclude samples that don't include some text in the stack.
+   * 8. Preview - Only include samples that are within a user's preview range selection.
    */
-  const getRangeFilteredThread: Selector<Thread> = createSelector(
+
+  const getCPUProcessedThread: Selector<Thread> = createSelector(
     getThread,
+    ProfileSelectors.getSampleUnits,
+    (thread, sampleUnits) =>
+      thread.samples === null ||
+      thread.samples.threadCPUDelta === undefined ||
+      !sampleUnits
+        ? thread
+        : Cpu.processThreadCPUDelta(thread, sampleUnits)
+  );
+
+  const getTabFilteredThread: Selector<Thread> = createSelector(
+    getCPUProcessedThread,
+    ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
+    (thread, relevantPages) => {
+      if (relevantPages.size === 0) {
+        // If this set doesn't have any relevant page, just return the whole thread.
+        return thread;
+      }
+      return ProfileData.filterThreadByTab(thread, relevantPages);
+    }
+  );
+
+  /**
+   * Similar to getTabFilteredThread, but this selector returns the active tab
+   * filtered thread even though we are not in the active tab view at the moment.
+   * This selector is needed to make the hidden track calculations during profile
+   * load time(during viewProfile).
+   */
+  const getActiveTabFilteredThread: Selector<Thread> = createSelector(
+    getCPUProcessedThread,
+    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
+    (thread, relevantPages) => {
+      if (relevantPages.size === 0) {
+        // If this set doesn't have any relevant page, just return the whole thread.
+        return thread;
+      }
+      return ProfileData.filterThreadByTab(thread, relevantPages);
+    }
+  );
+
+  const getRangeFilteredThread: Selector<Thread> = createSelector(
+    getTabFilteredThread,
     ProfileSelectors.getCommittedRange,
     (thread, range) => {
       const { start, end } = range;
@@ -86,7 +164,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   });
 
   const getTransformStack: Selector<TransformStack> = state =>
-    UrlState.getTransformStack(state, threadIndex);
+    UrlState.getTransformStack(state, threadsKey);
 
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
     getRangeFilteredThread,
@@ -203,7 +281,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   );
 
   const getViewOptions: Selector<ThreadViewOptions> = state =>
-    ProfileSelectors.getProfileViewOptions(state).perThread[threadIndex];
+    ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
+    defaultThreadViewOptions;
 
   /**
    * Check to see if there are any JS allocations for this thread. This way we
@@ -247,13 +326,10 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    */
   const getExpensiveJsTracerTiming: Selector<
     JsTracerTiming[] | null
-  > = createSelector(
-    getJsTracerTable,
-    getThread,
-    (jsTracerTable, thread) =>
-      jsTracerTable === null
-        ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
+  > = createSelector(getJsTracerTable, getThread, (jsTracerTable, thread) =>
+    jsTracerTable === null
+      ? null
+      : JsTracer.getJsTracerTiming(jsTracerTable, thread)
   );
 
   /**
@@ -272,10 +348,26 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
+  const getProcessedEventDelaysOrNull: Selector<EventDelayInfo | null> = createSelector(
+    getSamplesTable,
+    ProfileSelectors.getProfileInterval,
+    (samplesTable, interval) =>
+      samplesTable === null || samplesTable.eventDelay === undefined
+        ? null
+        : ProfileData.processEventDelays(samplesTable, interval)
+  );
+
+  const getProcessedEventDelays: Selector<EventDelayInfo> = state =>
+    ensureExists(
+      getProcessedEventDelaysOrNull(state),
+      'Could not get the processed event delays'
+    );
+
   return {
     getThread,
     getStringTable,
     getSamplesTable,
+    getSamplesWeightType,
     getNativeAllocations,
     getThreadRange,
     getFilteredThread,
@@ -295,5 +387,9 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getHasJsAllocations,
     getHasNativeAllocations,
     getCanShowRetainedMemory,
+    getCPUProcessedThread,
+    getTabFilteredThread,
+    getActiveTabFilteredThread,
+    getProcessedEventDelays,
   };
 }

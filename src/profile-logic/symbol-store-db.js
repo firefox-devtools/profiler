@@ -12,7 +12,7 @@ import type {
   IDBObjectStore,
   IDBIndex,
   IDBKeyRange,
-} from '../types/indexeddb';
+} from 'firefox-profiler/types';
 
 // Contains a symbol table, which can be used to map addresses to strings.
 // Symbol tables of this format are created within Firefox's implementation of
@@ -36,7 +36,7 @@ import type {
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
   Uint32Array, // index
-  Uint8Array, // buffer
+  Uint8Array // buffer
 ];
 
 type SymbolItem = {|
@@ -90,8 +90,11 @@ export default class SymbolStoreDB {
   }
 
   _setupDB(dbName: string): Promise<IDBDatabase> {
+    const indexedDB: IDBFactory | void = window.indexedDB;
+    if (!indexedDB) {
+      throw new Error('Could not find indexedDB on the window object.');
+    }
     return new Promise((resolve, reject) => {
-      const indexedDB: IDBFactory = window.indexedDB;
       const openReq = indexedDB.open(dbName, 2);
       openReq.onerror = () => {
         if (openReq.error.name === 'VersionError') {
@@ -259,7 +262,9 @@ export default class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
+      'lastUsedDate'
+    );
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
@@ -285,7 +290,9 @@ export default class SymbolStoreDB {
   ): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
-    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
+      'lastUsedDate'
+    );
     const cursorReq = lastUsedDateIndex.openCursor();
     let deletedCount = 0;
     cursorReq.onsuccess = () => {

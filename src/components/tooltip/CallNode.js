@@ -4,25 +4,29 @@
 // @flow
 import * as React from 'react';
 
-import { getStackType } from '../../profile-logic/transforms';
-import { objectEntries } from '../../utils/flow';
-import { formatCallNodeNumber } from '../../utils/format-numbers';
-import NodeIcon from '../shared/NodeIcon';
+import { getStackType } from 'firefox-profiler/profile-logic/transforms';
+import { objectEntries } from 'firefox-profiler/utils/flow';
+import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
+import { Icon } from 'firefox-profiler/components/shared/Icon';
 import {
   getFriendlyStackTypeName,
   getCategoryPairLabel,
-} from '../../profile-logic/profile-data';
+} from 'firefox-profiler/profile-logic/profile-data';
 
-import type { CallTree } from '../../profile-logic/call-tree';
-import type { Thread, CategoryList, PageList } from '../../types/profile';
+import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type {
+  Thread,
+  CategoryList,
+  PageList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   CallNodeInfo,
-} from '../../types/profile-derived';
-import type { TimingsForPath } from '../../profile-logic/profile-data';
-import type { Milliseconds } from '../../types/units';
-import type { CallTreeSummaryStrategy } from '../../types/actions';
+  WeightType,
+  Milliseconds,
+  CallTreeSummaryStrategy,
+} from 'firefox-profiler/types';
+
+import type { TimingsForPath } from 'firefox-profiler/profile-logic/profile-data';
 
 import './CallNode.css';
 
@@ -31,6 +35,7 @@ const GRAPH_HEIGHT = 10;
 
 type Props = {|
   +thread: Thread,
+  +weightType: WeightType,
   +pages: PageList | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
@@ -43,6 +48,13 @@ type Props = {|
   +timings?: TimingsForPath,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
+
+// For debugging purposes, allow tooltips to persist. This aids in inspecting
+// the DOM structure.
+window.persistTooltips = false;
+if (process.env.NODE_ENV === 'development') {
+  console.log('To debug tooltips, set window.persistTooltips to true.');
+}
 
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.
@@ -65,7 +77,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const sortedTotalBreakdownByImplementation = objectEntries(
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
-    const { interval, thread } = this.props;
+    const { thread, weightType } = this.props;
 
     // JS Tracer threads have data relevant to the microsecond level.
     const isHighPrecision = Boolean(thread.isJsTracer);
@@ -99,8 +111,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             }}
           />
         </div>
-        <div>{displayData.totalTimeWithUnit}</div>
-        <div>{displayData.selfTimeWithUnit}</div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.totalWithUnit}
+        </div>
+        <div className="tooltipCallNodeImplementationTiming">
+          {displayData.selfWithUnit}
+        </div>
         {/* grid row -------------------------------------------------- */}
         {sortedTotalBreakdownByImplementation.map(
           ([implementation, time], index) => {
@@ -130,16 +146,20 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatCallNodeNumber(interval, isHighPrecision, time)}ms
+                  {formatCallNodeNumberWithUnit(
+                    weightType,
+                    isHighPrecision,
+                    time
+                  )}
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
-                    : `${formatCallNodeNumber(
-                        interval,
+                    : formatCallNodeNumberWithUnit(
+                        weightType,
                         isHighPrecision,
                         selfTimeValue
-                      )}ms`}
+                      )}
                 </div>
               </React.Fragment>
             );
@@ -174,44 +194,47 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       displayData = callTree.getDisplayData(callNodeIndex);
     }
 
-    let resourceOrFileName = null;
+    let fileName = null;
+
     // Only JavaScript functions have a filename.
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
-      let fileName = thread.stringTable.getString(fileNameIndex);
+      let fileNameURL = thread.stringTable.getString(fileNameIndex);
       const lineNumber = thread.funcTable.lineNumber[funcIndex];
       if (lineNumber !== null) {
-        fileName += ':' + lineNumber;
+        fileNameURL += ':' + lineNumber;
         const columnNumber = thread.funcTable.columnNumber[funcIndex];
         if (columnNumber !== null) {
-          fileName += ':' + columnNumber;
+          fileNameURL += ':' + columnNumber;
         }
       }
 
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
       // the elements as direct children.
-      resourceOrFileName = [
+      fileName = [
         <div className="tooltipLabel" key="file">
           Script URL:
         </div>,
-        fileName,
+        fileNameURL,
       ];
-    } else {
-      const resourceIndex = thread.funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-        if (resourceNameIndex !== -1) {
-          // Because of our use of Grid Layout, all our elements need to be direct
-          // children of the grid parent. That's why we use arrays here, to add
-          // the elements as direct children.
-          resourceOrFileName = [
-            <div className="tooltipLabel" key="resource">
-              Resource:
-            </div>,
-            thread.stringTable.getString(resourceNameIndex),
-          ];
-        }
+    }
+
+    let resource = null;
+    const resourceIndex = thread.funcTable.resource[funcIndex];
+
+    if (resourceIndex !== -1) {
+      const resourceNameIndex = thread.resourceTable.name[resourceIndex];
+      if (resourceNameIndex !== -1) {
+        // Because of our use of Grid Layout, all our elements need to be direct
+        // children of the grid parent. That's why we use arrays here, to add
+        // the elements as direct children.
+        resource = [
+          <div className="tooltipLabel" key="resource">
+            Resource:
+          </div>,
+          thread.stringTable.getString(resourceNameIndex),
+        ];
       }
     }
 
@@ -285,7 +308,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div className="tooltipTitle">{funcName}</div>
           <div className="tooltipIcon">
             {displayData && displayData.icon ? (
-              <NodeIcon displayData={displayData} />
+              <Icon displayData={displayData} />
             ) : null}
           </div>
         </div>
@@ -296,10 +319,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
               {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
               <div className="tooltipLabel">Total Bytes:</div>
-              <div>{displayData.totalTimeWithUnit}</div>
+              <div>{displayData.totalWithUnit}</div>
               {/* --------------------------------------------------------------- */}
               <div className="tooltipLabel">Self Bytes:</div>
-              <div>{displayData.selfTimeWithUnit}</div>
+              <div>{displayData.selfWithUnit}</div>
               {/* --------------------------------------------------------------- */}
             </div>
           ) : null}
@@ -322,8 +345,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             </div>
             {/* --------------------------------------------------------------- */}
             {pageAndParentPageURL}
-            {/* --------------------------------------------------------------- */}
-            {resourceOrFileName}
+            {fileName}
+            {resource}
           </div>
         </div>
       </div>

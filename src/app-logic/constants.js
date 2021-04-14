@@ -4,22 +4,26 @@
 
 // @flow
 
+import type { MarkerPhase } from 'firefox-profiler/types';
+
 // The current version of the Gecko profile format.
-export const GECKO_PROFILE_VERSION = 19;
+export const GECKO_PROFILE_VERSION = 23;
 
 // The current version of the "processed" profile format.
-export const PROCESSED_PROFILE_VERSION = 28;
+export const PROCESSED_PROFILE_VERSION = 35;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
 export const TIMELINE_MARGIN_RIGHT = 15;
 export const TIMELINE_MARGIN_LEFT = 150;
+export const ACTIVE_TAB_TIMELINE_MARGIN_LEFT = 0;
 
 export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 // Export the value for tests, and for computing the max height of the timeline
 // for the splitter.
-export const TRACK_SCREENSHOT_HEIGHT = 50;
+export const FULL_TRACK_SCREENSHOT_HEIGHT = 50;
+export const ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT = 30;
 
 // The following values are for network track.
 export const TRACK_NETWORK_ROW_HEIGHT = 5;
@@ -33,6 +37,10 @@ export const TRACK_MEMORY_MARKERS_HEIGHT = 15;
 export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
+
+// The following values are for experimental event delay track.
+export const TRACK_EVENT_DELAY_HEIGHT = 40;
+export const TRACK_EVENT_DELAY_LINE_WIDTH = 2;
 
 // The following values are for IPC track.
 export const TRACK_IPC_MARKERS_HEIGHT = 25;
@@ -50,3 +58,47 @@ export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;
 // The following values are for the visual progress tracks.
 export const TRACK_VISUAL_PROGRESS_HEIGHT = 40;
 export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;
+
+// Height of the active tab resources panel header.
+export const ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT = 20;
+
+// =============================================================================
+// Storage and server-related constants
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// For the 2 values GOOGLE_STORAGE_BUCKET and PROFILER_SERVER_ORIGIN, several
+// values are possible, so that you can easily switch between existing server
+// (both local or remote).
+//
+// GOOGLE_STORAGE_BUCKET
+// ---------------------
+// This defines which bucket we fetch profile data at load time.
+
+// Google storage bucket, where production profile data is stored:
+export const GOOGLE_STORAGE_BUCKET = 'profile-store';
+
+// You can also use one of the following values instead:
+// To use the bucket used by the server deployment for the main branch:
+// export const GOOGLE_STORAGE_BUCKET = 'moz-fx-dev-firefoxprofiler-bucket';
+
+// To use the bucket developers usually use on their local working copy:
+// export const GOOGLE_STORAGE_BUCKET = 'profile-store-julien-dev';
+
+// PROFILER_SERVER_ORIGIN
+// ----------------------
+// This defines our server-side endpoint. This is currently used to publish
+// profiles and manage shortlinks.
+
+// This is the production server:
+export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
+
+// This is the deployment from the main branch:
+// export const PROFILER_SERVER_ORIGIN = 'https://dev.firefoxprofiler.nonprod.cloudops.mozgcp.net';
+
+// This is your local server:
+// export const PROFILER_SERVER_ORIGIN = 'http://localhost:5252';
+
+// See the MarkerPhase type for more information.
+export const INSTANT: MarkerPhase = 0;
+export const INTERVAL: MarkerPhase = 1;
+export const INTERVAL_START: MarkerPhase = 2;
+export const INTERVAL_END: MarkerPhase = 3;

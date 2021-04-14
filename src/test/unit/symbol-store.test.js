@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import 'babel-polyfill';
 import { SymbolStore } from '../../profile-logic/symbol-store';
+import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { TextDecoder } from 'util';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
@@ -26,6 +26,7 @@ describe('SymbolStore', function() {
   }
 
   beforeAll(function() {
+    // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = fakeIndexedDB;
     window.IDBKeyRange = FDBKeyRange;
     window.TextDecoder = TextDecoder;
@@ -47,10 +48,6 @@ describe('SymbolStore', function() {
   });
 
   it('should only request symbols from the symbol provider once per library', async function() {
-    // Because of the promise rejection below, our code outputs logs for easier
-    // debugging. This mock silences these logs, but we'll check some
-    // expectations about these logs at the end.
-    jest.spyOn(console, 'log').mockImplementation(() => {});
     symbolProvider = {
       requestSymbolsFromServer: jest.fn(requests =>
         requests.map(request => {
@@ -70,15 +67,17 @@ describe('SymbolStore', function() {
 
     const lib1 = { debugName: 'firefox', breakpadId: 'dont-care' };
     let secondAndThirdSymbol = new Map();
+    const errorCallback = jest.fn((_request, _error) => {});
     await symbolStore.getSymbols(
       [{ lib: lib1, addresses: new Set([0xf01, 0x1a50]) }],
       (request, results) => {
         secondAndThirdSymbol = results;
       },
-      (_request, _error) => {}
+      errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    expect(errorCallback).not.toHaveBeenCalled();
     expect(secondAndThirdSymbol.get(0xf01)).toEqual({
       name: 'second symbol',
       functionOffset: 1,
@@ -95,10 +94,11 @@ describe('SymbolStore', function() {
       (request, results) => {
         firstAndLastSymbol = results;
       },
-      (_request, _error) => {}
+      errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
+    expect(errorCallback).not.toHaveBeenCalled();
     expect(firstAndLastSymbol.get(0x33)).toEqual({
       name: 'first symbol',
       functionOffset: 0x33,
@@ -115,15 +115,23 @@ describe('SymbolStore', function() {
     await symbolStore.getSymbols(
       [{ lib: libWithEmptyBreakpadId, addresses: new Set([0x33, 0x2000]) }],
       (_request, _results) => {},
-      (_request, _error) => {}
+      errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
-    expect(console.log).toHaveBeenCalledTimes(2); // Once for each uncached call
+
+    // Empty breakpadIds should result in an error.
+    expect(errorCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lib: { breakpadId: '', debugName: 'dalvik-jit-code-cache' },
+      }),
+      expect.objectContaining({
+        message: expect.stringContaining('Invalid debugName or breakpadId'),
+      })
+    );
   });
 
   it('should persist in DB', async function() {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
     symbolProvider = {
       requestSymbolsFromServer: jest.fn(requests =>
         requests.map(() =>
@@ -137,11 +145,13 @@ describe('SymbolStore', function() {
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
     const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
+    const errorCallback = jest.fn((_request, _error) => {});
     await symbolStore.getSymbols(
       [{ lib: lib, addresses: new Set([0]) }],
       (_request, _results) => {},
-      (_request, _error) => {}
+      errorCallback
     );
+    expect(errorCallback).not.toHaveBeenCalled();
 
     // Using another symbol store simulates a page reload
     // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
@@ -152,23 +162,20 @@ describe('SymbolStore', function() {
     await symbolStore.getSymbols(
       [{ lib: lib, addresses: new Set([0x1]) }],
       (_request, _results) => {},
-      (_request, _error) => {}
+      errorCallback
     );
 
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
-    expect(console.log).toHaveBeenCalledTimes(1);
+    expect(errorCallback).not.toHaveBeenCalled();
   });
 
   it('should call requestSymbolsFromServer first', async function() {
-    // This test has some console output because of unrecognized mock data. This is
-    // fine, but hide it from the test runner.
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-
-    const symbolTable = new Map();
-    symbolTable.set(0, 'first symbol');
-    symbolTable.set(0xf00, 'second symbol');
-    symbolTable.set(0x1a00, 'third symbol');
-    symbolTable.set(0x2000, 'last symbol');
+    const symbolTable = new Map([
+      [0, 'first symbol'],
+      [0xf00, 'second symbol'],
+      [0x1a00, 'third symbol'],
+      [0x2000, 'last symbol'],
+    ]);
     const fakeSymbolStore = new FakeSymbolStore(
       new Map([['available-for-addresses', symbolTable]])
     );
@@ -205,6 +212,7 @@ describe('SymbolStore', function() {
     };
 
     const symbolsPerLibrary = new Map();
+    const errorCallback = jest.fn((_request, _error) => {});
     await symbolStore.getSymbols(
       [
         { lib: lib1, addresses: new Set([0xf01, 0x1a50]) },
@@ -213,13 +221,14 @@ describe('SymbolStore', function() {
       (request, results) => {
         symbolsPerLibrary.set(request.lib, results);
       },
-      (_request, _error) => {}
+      errorCallback
     );
 
     // Both requests should have been coalesced into one call to
     // requestSymbolsFromServer.
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
     expect(symbolsForAddressesRequestCount).toEqual(2);
+    expect(errorCallback).not.toHaveBeenCalled();
 
     // requestSymbolsFromServer should have failed for lib2, so
     // requestSymbolTableFromAddon should have been called for it, once.
@@ -258,16 +267,140 @@ describe('SymbolStore', function() {
         { lib: lib2, addresses: new Set([0x33, 0x2000]) },
       ],
       (_request, _results) => {},
-      (_request, _error) => {}
+      errorCallback
     );
 
     // The symbolStore should already have a cached symbol table for lib2 now,
     // so requestSymbolsFromServer should only have been called for one request.
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
     expect(symbolsForAddressesRequestCount).toEqual(3);
+    expect(errorCallback).not.toHaveBeenCalled();
 
     // requestSymbolsFromServer should have succeeded for that one request,
     // so requestSymbolTableFromAddon should not have been called again.
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+  });
+
+  it('should should report the right errors', async function() {
+    const libs = [
+      {
+        debugName: 'available-from-both-server-and-addon',
+        breakpadId: 'dont-care',
+      },
+      {
+        debugName: 'available-from-server',
+        breakpadId: 'dont-care',
+      },
+      {
+        debugName: 'available-from-addon',
+        breakpadId: 'dont-care',
+      },
+      {
+        debugName: 'available-from-neither',
+        breakpadId: 'dont-care',
+      },
+      {
+        debugName: 'empty-breakpadid',
+        breakpadId: '',
+      },
+      {
+        debugName: '',
+        breakpadId: 'empty-debugname',
+      },
+    ];
+
+    const symbolTable = new Map([
+      [0, 'first symbol'],
+      [0xf00, 'second symbol'],
+      [0x1a00, 'third symbol'],
+      [0x2000, 'last symbol'],
+    ]);
+    const fakeSymbolStore = new FakeSymbolStore(
+      new Map([
+        ['available-from-both-server-and-addon', symbolTable],
+        ['available-from-server', symbolTable],
+      ])
+    );
+    symbolProvider = {
+      requestSymbolsFromServer: requests => {
+        return requests.map(request => {
+          const { debugName, breakpadId } = request.lib;
+          expect(debugName).not.toEqual('');
+          expect(breakpadId).not.toEqual('');
+          return new Promise((resolve, reject) => {
+            fakeSymbolStore.getSymbols(
+              [request],
+              (_request, results) => resolve(results),
+              (_request, error) => reject(error)
+            );
+          });
+        });
+      },
+      requestSymbolTableFromAddon: async ({ debugName, breakpadId }) => {
+        expect(debugName).not.toEqual('');
+        expect(breakpadId).not.toEqual('');
+        if (
+          debugName === 'available-from-addon' ||
+          debugName === 'available-from-both-server-and-addon'
+        ) {
+          return exampleSymbolTable;
+        }
+        throw new Error('The add-on does not have symbols for this library.');
+      },
+    };
+    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
+
+    const addresses = new Set([0xf01, 0x1a50]);
+    const succeededLibs = new Set();
+    const failedLibs = new Map();
+    await symbolStore.getSymbols(
+      libs.map(lib => ({ lib, addresses })),
+      (request, _results) => {
+        succeededLibs.add(request.lib);
+      },
+      (request, error) => {
+        failedLibs.set(request.lib.debugName, error);
+      }
+    );
+
+    // If symbols are available from at least one source, symbolication for that
+    // library should be successful and no error should be returned.
+    expect(succeededLibs).toEqual(
+      new Set([
+        expect.objectContaining({ debugName: 'available-from-addon' }),
+        expect.objectContaining({ debugName: 'available-from-server' }),
+        expect.objectContaining({
+          debugName: 'available-from-both-server-and-addon',
+        }),
+      ])
+    );
+
+    // Empty debugNames or breakpadIds should cause errors. And if symbols are
+    // not available from any source, all errors along the way should be included
+    // in the reported error.
+    expect(failedLibs.size).toBe(3);
+    expect(failedLibs.get('empty-breakpadid')).toEqual(
+      expect.objectContaining({
+        message: expect.stringContaining('Invalid debugName or breakpadId'),
+      })
+    );
+    expect(failedLibs.get('')).toEqual(
+      expect.objectContaining({
+        message: expect.stringContaining('Invalid debugName or breakpadId'),
+      })
+    );
+
+    // For error objects, Jest's deep equality checks only check the message.
+    expect(failedLibs.get('available-from-neither')).toEqual(
+      new SymbolsNotFoundError(
+        'Could not obtain symbols for available-from-neither/dont-care.\n' +
+          ' - Error: symbol table not found\n' +
+          ' - Error: The add-on does not have symbols for this library.',
+        {
+          debugName: 'available-from-neither',
+          breakpadId: 'dont-care',
+        }
+      )
+    );
   });
 });

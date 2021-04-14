@@ -5,23 +5,24 @@
 // @flow
 
 import { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfilesToCompare,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
   getProfilesToCompare,
-} from '../../selectors/url-state';
+} from 'firefox-profiler/selectors/url-state';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
-import type { DataSource } from '../../types/actions';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { DataSource } from 'firefox-profiler/types';
 
 type StateProps = {|
   +dataSource: DataSource,
@@ -53,7 +54,8 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
-        retrieveProfileFromAddon().catch(e => console.error(e));
+      case 'unpublished':
+        retrieveProfileFromAddon();
         break;
       case 'from-file':
         // retrieveProfileFromFile should already have been called
@@ -71,11 +73,12 @@ class ProfileLoaderImpl extends PureComponent<Props> {
           retrieveProfilesToCompare(profilesToCompare);
         }
         break;
+      case 'uploaded-recordings':
       case 'none':
         // nothing to do
         break;
       default:
-        throw new Error(`Unknown datasource ${dataSource}`);
+        throw assertExhaustiveCheck(dataSource);
     }
   };
 

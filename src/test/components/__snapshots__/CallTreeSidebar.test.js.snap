@@ -1,10 +1,245 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CallTreeSidebar can expand subcategories 1`] = `
+<aside
+  class="sidebar sidebar-calltree"
+>
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    <header
+      class="sidebar-titlegroup"
+    >
+      <h2
+        class="sidebar-title can-select-content"
+        title="C
+(click to select)"
+      >
+        <input
+          class="can-select-content-input"
+          readonly=""
+          value="C"
+        />
+      </h2>
+    </header>
+    <h4
+      class="sidebar-title3"
+    >
+      <div>
+        Call node details
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      3.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      67%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      <button
+        class="sidebar-toggle expanded"
+        data-category="Layout"
+        type="button"
+      >
+        Layout
+      </button>
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <div
+      class="sidebar-label sidebar-label-indent"
+    >
+      FakeSubCategoryC
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      67%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-label sidebar-label-indent"
+    >
+      FakeSubCategoryD
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      33%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      3
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Self 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Native code
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
+    </div>
+  </div>
+</aside>
+`;
+
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
 <div
   class="sidebar sidebar-calltree"
 >
-  Select a node to display some information about it.
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    Select a node to display some information about it.
+  </div>
 </div>
 `;
 
@@ -30,27 +265,63 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
+    <h4
+      class="sidebar-title3"
     >
-      This selected call node
-    </h3>
+      <div>
+        Call node details
+      </div>
+    </h4>
     <div
       class="sidebar-label"
     >
-      Running Time
-      :
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      —
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
     </div>
     <div
       class="sidebar-value"
     >
-      2ms (50%)
+      2
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
-      :
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      —
     </div>
     <div
       class="sidebar-value"
@@ -58,95 +329,76 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       —
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Categories
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
     >
       <div
-        class="sidebar-categoryname"
-      >
-        <span
-          class="sidebar-color colored-square category-color-yellow"
-          title="JavaScript"
-        />
-        JavaScript
-      </div>
-      <div
-        class="sidebar-categorytiming"
-      >
-        2ms
-         (
-        100%
-        )
-      </div>
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       JS interpreter
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      2
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      —
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -174,27 +426,63 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
+    <h4
+      class="sidebar-title3"
     >
-      This selected call node
-    </h3>
+      <div>
+        Call node details
+      </div>
+    </h4>
     <div
       class="sidebar-label"
     >
-      Running Time
-      :
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      —
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
-      :
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      —
     </div>
     <div
       class="sidebar-value"
@@ -202,95 +490,76 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       —
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Categories
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
     >
       <div
-        class="sidebar-categoryname"
-      >
-        <span
-          class="sidebar-color colored-square category-color-yellow"
-          title="JavaScript"
-        />
-        JavaScript
-      </div>
-      <div
-        class="sidebar-categorytiming"
-      >
-        1ms
-         (
-        100%
-        )
-      </div>
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       JS interpreter
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      1ms (25%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      —
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -318,178 +587,197 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
-    >
-      This selected call node
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
     <h4
       class="sidebar-title3"
     >
-      Categories
+      <div>
+        Call node details
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
     >
-      <div
-        class="sidebar-categoryname"
-      >
-        <span
-          class="sidebar-color colored-square category-color-transparent"
-          title="Idle"
-        />
-        Idle
-      </div>
-      <div
-        class="sidebar-categorytiming"
-      >
-        1ms
-         (
-        50%
-        )
-      </div>
-      <div
-        class="sidebar-categoryname"
-      >
-        <span
-          class="sidebar-color colored-square category-color-purple"
-          title="Layout"
-        />
-        Layout
-      </div>
-      <div
-        class="sidebar-categorytiming"
-      >
-        1ms
-         (
-        50%
-        )
-      </div>
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Idle
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-transparent"
+        style="width: 50.0000%;"
+      />
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Layout
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 50.0000%;"
+      />
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
+    >
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       Native code
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      100
-      %)
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – self time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Self 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       Native code
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – self time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -517,161 +805,174 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
-    >
-      This selected call node
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
     <h4
       class="sidebar-title3"
     >
-      Categories
+      <div>
+        Call node details
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
     >
       <div
-        class="sidebar-categoryname"
+        class="sidebar-title-label-left"
       >
-        <span
-          class="sidebar-color colored-square category-color-yellow"
-          title="JavaScript"
-        />
-        JavaScript
+        Categories
       </div>
       <div
-        class="sidebar-categorytiming"
+        class="sidebar-title-label-right"
       >
-        1ms
-         (
-        100%
-        )
+        Running 
+        sample count
       </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       JS interpreter
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – self time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Self 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       JS interpreter
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms (50%)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – self time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -681,7 +982,11 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
 <div
   class="sidebar sidebar-calltree"
 >
-  Select a node to display some information about it.
+  <div
+    class="sidebar-contents-wrapper"
+  >
+    Select a node to display some information about it.
+  </div>
 </div>
 `;
 
@@ -707,142 +1012,140 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
-    >
-      This selected call node
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms (50%)
-    </div>
     <h4
       class="sidebar-title3"
     >
-      Categories
+      <div>
+        Call node details
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      2.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      50%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
     >
       <div
-        class="sidebar-categoryname"
+        class="sidebar-title-label-left"
       >
-        <span
-          class="sidebar-color colored-square category-color-yellow"
-          title="JavaScript"
-        />
-        JavaScript
+        Categories
       </div>
       <div
-        class="sidebar-categorytiming"
+        class="sidebar-title-label-right"
       >
-        2ms
-         (
-        100%
-        )
+        Running 
+        sample count
       </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      JavaScript
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      2
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-yellow"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       JS interpreter
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      2
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms (50%)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – self time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -870,142 +1173,140 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
-    >
-      This selected call node
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
     <h4
       class="sidebar-title3"
     >
-      Categories
+      <div>
+        Call node details
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <h4
+      class="sidebar-title3 sidebar-title-label"
     >
       <div
-        class="sidebar-categoryname"
+        class="sidebar-title-label-left"
       >
-        <span
-          class="sidebar-color colored-square category-color-purple"
-          title="Layout"
-        />
-        Layout
+        Categories
       </div>
       <div
-        class="sidebar-categorytiming"
+        class="sidebar-title-label-right"
       >
-        1ms
-         (
-        100%
-        )
+        Running 
+        sample count
       </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Layout
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       Native code
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – self time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -1033,27 +1334,63 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
+    <h4
+      class="sidebar-title3"
     >
-      This selected call node
-    </h3>
+      <div>
+        Call node details
+      </div>
+    </h4>
     <div
       class="sidebar-label"
     >
-      Running Time
-      :
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      —
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
-      :
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      —
     </div>
     <div
       class="sidebar-value"
@@ -1061,114 +1398,76 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       —
     </div>
     <h4
-      class="sidebar-title3"
-    >
-      Categories
-    </h4>
-    <div
-      class="sidebar-categorylist"
+      class="sidebar-title3 sidebar-title-label"
     >
       <div
-        class="sidebar-categoryname"
+        class="sidebar-title-label-left"
       >
-        <span
-          class="sidebar-color colored-square category-color-transparent"
-          title="Idle"
-        />
-        Idle
+        Categories
       </div>
       <div
-        class="sidebar-categorytiming"
+        class="sidebar-title-label-right"
       >
-        1ms
-         (
-        100%
-        )
+        Running 
+        sample count
       </div>
+    </h4>
+    <div
+      class="sidebar-label"
+    >
+      Idle
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
+    >
+      <div
+        class="sidebar-histogram-bar-color category-color-transparent"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       Native code
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      2ms (50%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms (25%)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      100
-      %)
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – self time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      1ms
-       (
-      100
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>
@@ -1196,27 +1495,63 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         />
       </h2>
     </header>
-    <h3
-      class="sidebar-title2"
+    <h4
+      class="sidebar-title3"
     >
-      This selected call node
-    </h3>
+      <div>
+        Call node details
+      </div>
+    </h4>
     <div
       class="sidebar-label"
     >
-      Running Time
-      :
+      Traced running time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      1.0ms
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Traced self time
+    </div>
+    <div
+      class="sidebar-percentage"
+    />
+    <div
+      class="sidebar-value"
+    >
+      —
+    </div>
+    <div
+      class="sidebar-label"
+    >
+      Running samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      25%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms (25%)
+      1
     </div>
     <div
       class="sidebar-label"
     >
-      Self Time
-      :
+      Self samples
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      —
     </div>
     <div
       class="sidebar-value"
@@ -1224,109 +1559,76 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       —
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Categories
+      <div
+        class="sidebar-title-label-left"
+      >
+        Categories
+      </div>
+      <div
+        class="sidebar-title-label-right"
+      >
+        Running 
+        sample count
+      </div>
     </h4>
     <div
-      class="sidebar-categorylist"
+      class="sidebar-label"
+    >
+      Layout
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
+    </div>
+    <div
+      class="sidebar-value"
+    >
+      1
+    </div>
+    <div
+      class="sidebar-histogram-bar"
     >
       <div
-        class="sidebar-categoryname"
-      >
-        <span
-          class="sidebar-color colored-square category-color-purple"
-          title="Layout"
-        />
-        Layout
-      </div>
-      <div
-        class="sidebar-categorytiming"
-      >
-        1ms
-         (
-        100%
-        )
-      </div>
+        class="sidebar-histogram-bar-color category-color-purple"
+        style="width: 100.0000%;"
+      />
     </div>
     <h4
-      class="sidebar-title3"
+      class="sidebar-title3 sidebar-title-label"
     >
-      Implementation – running time
+      <div>
+        Implementation
+      </div>
+      <div>
+        Running 
+        sample count
+      </div>
     </h4>
     <div
       class="sidebar-label"
     >
       Native code
-      :
+    </div>
+    <div
+      class="sidebar-percentage"
+    >
+      100%
     </div>
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      100
-      %)
-    </div>
-    <h3
-      class="sidebar-title2"
-    >
-      This function across the entire tree
-    </h3>
-    <div
-      class="sidebar-label"
-    >
-      Running Time
-      :
+      1
     </div>
     <div
-      class="sidebar-value"
+      class="sidebar-histogram-bar"
     >
-      4ms (100%)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      Self Time
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      —
-    </div>
-    <h4
-      class="sidebar-title3"
-    >
-      Implementation – running time
-    </h4>
-    <div
-      class="sidebar-label"
-    >
-      Native code
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      50
-      %)
-    </div>
-    <div
-      class="sidebar-label"
-    >
-      JS interpreter
-      :
-    </div>
-    <div
-      class="sidebar-value"
-    >
-      2ms
-       (
-      50
-      %)
+      <div
+        class="sidebar-histogram-bar-color"
+        style="width: 100.0000%;"
+      />
     </div>
   </div>
 </aside>

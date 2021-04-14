@@ -5,12 +5,14 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { changeNetworkSearchString } from '../../actions/profile-view';
-import { getNetworkSearchString } from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+import { Localized } from '@fluent/react';
 
-import type { ConnectedProps } from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { changeNetworkSearchString } from 'firefox-profiler/actions/profile-view';
+import { getNetworkSearchString } from 'firefox-profiler/selectors/url-state';
+import { PanelSearch } from './PanelSearch';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './NetworkSettings.css';
 
@@ -24,7 +26,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class Settings extends PureComponent<Props> {
+class NetworkSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeNetworkSearchString(value);
   };
@@ -34,22 +36,29 @@ class Settings extends PureComponent<Props> {
     return (
       <div className="networkSettings">
         <div className="networkSettingsSpacer" />
-        <PanelSearch
-          className="networkSettingsSearchField"
-          label="Filter Networks: "
-          title="Only display network requests that match a certain name"
-          currentSearchString={searchString}
-          onSearch={this._onSearch}
-        />
+        <Localized
+          id="NetworkSettings--panel-search"
+          attrs={{ label: true, title: true }}
+        >
+          <PanelSearch
+            className="networkSettingsSearchField"
+            label="Filter Networks:"
+            title="Only display network requests that match a certain name"
+            currentSearchString={searchString}
+            onSearch={this._onSearch}
+          />
+        </Localized>
       </div>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    searchString: getNetworkSearchString(state),
-  }),
-  mapDispatchToProps: { changeNetworkSearchString },
-  component: Settings,
-});
+export const NetworkSettings = explicitConnect<{||}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => ({
+      searchString: getNetworkSearchString(state),
+    }),
+    mapDispatchToProps: { changeNetworkSearchString },
+    component: NetworkSettingsImpl,
+  }
+);

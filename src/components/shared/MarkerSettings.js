@@ -5,12 +5,14 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import { changeMarkersSearchString } from '../../actions/profile-view';
-import { getMarkersSearchString } from '../../selectors/url-state';
-import PanelSearch from '../shared/PanelSearch';
+import { Localized } from '@fluent/react';
 
-import type { ConnectedProps } from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
+import { getMarkersSearchString } from 'firefox-profiler/selectors/url-state';
+import { PanelSearch } from './PanelSearch';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './MarkerSettings.css';
 
@@ -24,7 +26,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class Settings extends PureComponent<Props> {
+class MarkerSettingsImpl extends PureComponent<Props> {
   _onSearch = (value: string) => {
     this.props.changeMarkersSearchString(value);
   };
@@ -34,22 +36,27 @@ class Settings extends PureComponent<Props> {
     return (
       <div className="markerSettings">
         <div className="markerSettingsSpacer" />
-        <PanelSearch
-          className="markerSettingsSearchField"
-          label="Filter Markers: "
-          title="Only display markers that match a certain name"
-          currentSearchString={searchString}
-          onSearch={this._onSearch}
-        />
+        <Localized
+          id="MarkerSettings--panel-search"
+          attrs={{ label: true, title: true }}
+        >
+          <PanelSearch
+            className="markerSettingsSearchField"
+            label="Filter Markers:"
+            title="Only display markers that match a certain name"
+            currentSearchString={searchString}
+            onSearch={this._onSearch}
+          />
+        </Localized>
       </div>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     searchString: getMarkersSearchString(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
-  component: Settings,
+  component: MarkerSettingsImpl,
 });

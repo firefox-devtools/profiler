@@ -1,12 +1,20 @@
-body, html {
-  font: message-box;
+body,
+html {
+  /* Please keep it synced with res/css/style.css */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen-Sans, Ubuntu, 'Noto Sans', 'Liberation Sans', Cantarell,
+    'Helvetica Neue', sans-serif;
   font-size: 11px;
 }
 
 .row {
   padding: 0 3em 2em;
-  margin: 3em 0;
   border-left: 2px solid var(--grey-30);
+  margin: 3em 0;
+}
+
+.row:hover {
+  border-color: var(--blue-60);
 }
 
 .row pre {
@@ -20,4 +28,18 @@ body, html {
   background-image: url(../img/svg/pane-expand.svg);
   background-position: 50%;
   background-repeat: no-repeat;
+}
+
+/* Give nearby message bars some room so that they can breathe a bit. */
+.photon-message-bar {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.sized-to-content {
+  max-width: max-content;
+}
+
+.sized-constrained {
+  max-width: 300px;
 }

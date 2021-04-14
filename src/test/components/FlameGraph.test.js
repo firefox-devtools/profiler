@@ -4,22 +4,29 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent, within, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import FlameGraph from '../../components/flame-graph';
-import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { FlameGraph } from '../../components/flame-graph';
+import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
+  findFillTextPositionFromDrawLog,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
@@ -30,6 +37,7 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
   commitRange,
+  updatePreviewSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -37,17 +45,18 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels } from 'firefox-profiler/types';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
 describe('FlameGraph', function() {
+  autoMockCanvasContext();
   afterEach(removeRootOverlayElement);
   beforeEach(addRootOverlayElement);
 
   it('matches the snapshot', () => {
-    const { container, flushDrawLog } = setupFlameGraph();
+    const { container } = setupFlameGraph();
     const drawCalls = flushDrawLog();
 
     expect(container.firstChild).toMatchSnapshot();
@@ -57,28 +66,45 @@ describe('FlameGraph', function() {
   it('renders a message instead of the graph when call stack is inverted', () => {
     const { getByText, dispatch } = setupFlameGraph();
     dispatch(changeInvertCallstack(true));
-    expect(getByText(/The Flame Graph is not available/)).toBeDefined();
+    expect(getByText(/The Flame Graph is not available/)).toBeInTheDocument();
   });
 
   it('switches back to uninverted mode when clicking the button', () => {
     const { getByText, dispatch, getState } = setupFlameGraph();
     dispatch(changeInvertCallstack(true));
     expect(getInvertCallstack(getState())).toBe(true);
-    fireEvent.click(getByText(/Switch to the normal call stack/));
+    fireFullClick(getByText(/Switch to the normal call stack/));
     expect(getInvertCallstack(getState())).toBe(false);
   });
 
   it('shows a tooltip when hovering', () => {
-    const { getTooltip, moveMouse } = setupFlameGraph();
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
     expect(getTooltip()).toBe(null);
-    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    moveMouse(findFillTextPosition('A'));
     expect(getTooltip()).toBeTruthy();
   });
 
   it('has a tooltip that matches the snapshot', () => {
-    const { getTooltip, moveMouse } = setupFlameGraph();
-    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
+    moveMouse(findFillTextPosition('A'));
     expect(getTooltip()).toMatchSnapshot();
+  });
+
+  it('shows a tooltip with the resource information', () => {
+    const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
+    moveMouse(findFillTextPosition('J'));
+    const tooltip = ensureExists(getTooltip());
+
+    // First, a targeted test.
+    const { getByText } = within(tooltip);
+    const resourceLabel = getByText('Resource:');
+    const valueElement = ensureExists(resourceLabel.nextSibling);
+
+    // See https://github.com/testing-library/jest-dom/issues/306
+    // eslint-disable-next-line jest-dom/prefer-to-have-text-content
+    expect(valueElement.textContent).toBe('libxul.so');
+    // But also do a good old snapshot.
+    expect(tooltip).toMatchSnapshot();
   });
 
   it('can be navigated with the keyboard', () => {
@@ -117,9 +143,14 @@ describe('FlameGraph', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const { rightClick, clickMenuItem, getContextMenu } = setupFlameGraph();
+    const {
+      rightClick,
+      clickMenuItem,
+      getContextMenu,
+      findFillTextPosition,
+    } = setupFlameGraph();
 
-    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    rightClick(findFillTextPosition('A'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
@@ -127,14 +158,14 @@ describe('FlameGraph', function() {
     jest.runAllTimers();
 
     // Try another node to make sure the menu can handle other nodes than the first.
-    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 25);
+    rightClick(findFillTextPosition('B'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
   });
 
   describe('EmptyReasons', () => {
-    it('shows reasons when a profile has no samples', () => {
+    it('matches the snapshot when a profile has no samples', () => {
       const profile = getEmptyProfile();
       const thread = getEmptyThread();
       thread.name = 'Empty Thread';
@@ -152,31 +183,50 @@ describe('FlameGraph', function() {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
-    it('shows reasons when samples are out of range', () => {
-      const { dispatch, container } = setupFlameGraph();
+    it('shows reasons when samples are not in the committed range', () => {
+      const { dispatch } = setupFlameGraph();
       dispatch(commitRange(5, 10));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText('Broaden the selected range to view samples.')
+      ).toBeTruthy();
+    });
+
+    it('shows reasons when samples are not in the preview range', () => {
+      const { dispatch } = setupFlameGraph();
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 5,
+          selectionEnd: 10,
+        })
+      );
+
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
     });
 
     it('shows reasons when samples have been completely filtered out', function() {
-      const { dispatch, container } = setupFlameGraph();
+      const { dispatch } = setupFlameGraph();
       dispatch(changeImplementationFilter('js'));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
     });
   });
 });
 
 function setupFlameGraph() {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   const {
     profile,
@@ -187,6 +237,7 @@ function setupFlameGraph() {
     C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
     D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
     E[cat:Graphics]  G[cat:Graphics]
+                     J[lib:libxul.so]
   `);
 
   // Add some file and line number to the profile so that tooltips generate
@@ -234,34 +285,26 @@ function setupFlameGraph() {
     return positioningOptions;
   }
 
+  const canvas = ensureExists(
+    container.querySelector('canvas'),
+    'The container should contain a canvas element.'
+  );
+
   function fireMouseEvent(eventName, options) {
-    fireEvent(
-      ensureExists(
-        container.querySelector('canvas'),
-        'The container should contain a canvas element.'
-      ),
-      getMouseEvent(eventName, options)
-    );
+    fireEvent(canvas, getMouseEvent(eventName, options));
   }
 
-  // Note to a future developer: the x/y values can be derived from the
-  // array returned by flushDrawLog().
-  function rightClick(x: CssPixels, y: CssPixels) {
+  // You can use findFillTextPosition to derive the x, y positioning from the
+  // draw log.
+  function rightClick({ x, y }: { x: CssPixels, y: CssPixels }) {
     const positioningOptions = getPositioningOptions(x, y);
-    const clickOptions = {
-      ...positioningOptions,
-      button: 2,
-      buttons: 2,
-    };
 
     fireMouseEvent('mousemove', positioningOptions);
-    fireMouseEvent('mousedown', clickOptions);
-    fireMouseEvent('mouseup', clickOptions);
-    fireMouseEvent('contextmenu', clickOptions);
+    fireFullContextMenu(canvas, positioningOptions);
     flushRafCalls();
   }
 
-  function moveMouse(x, y) {
+  function moveMouse({ x, y }) {
     fireMouseEvent('mousemove', getPositioningOptions(x, y));
   }
 
@@ -290,20 +333,23 @@ function setupFlameGraph() {
     );
 
   function clickMenuItem(strOrRegexp) {
-    fireEvent.click(getByText(strOrRegexp));
+    fireFullClick(getByText(strOrRegexp));
+  }
+
+  function findFillTextPosition(fillText: string) {
+    return findFillTextPositionFromDrawLog(flushDrawLog(), fillText);
   }
 
   return {
     ...store,
     ...renderResult,
     funcNames,
-    ctx,
     moveMouse,
     rightClick,
     getTooltip,
     getContentDiv,
     getContextMenu,
     clickMenuItem,
-    flushDrawLog: () => ctx.__flushDrawLog(),
+    findFillTextPosition,
   };
 }

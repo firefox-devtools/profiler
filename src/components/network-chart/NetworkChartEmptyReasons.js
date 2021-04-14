@@ -5,13 +5,13 @@
 
 import React, { PureComponent } from 'react';
 
-import EmptyReasons from '../shared/EmptyReasons';
+import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
-import type { State } from '../../types/store';
+import type { State } from 'firefox-profiler/types';
 
 type StateProps = {|
   +threadName: string,
@@ -19,7 +19,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class MarkerChartEmptyReasons extends PureComponent<Props> {
+class NetworkChartEmptyReasonsImpl extends PureComponent<Props> {
   render() {
     const { threadName } = this.props;
 
@@ -40,9 +40,11 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: (state: State) => ({
-    threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-  }),
-  component: MarkerChartEmptyReasons,
-});
+export const NetworkChartEmptyReasons = explicitConnect<{||}, StateProps, {||}>(
+  {
+    mapStateToProps: (state: State) => ({
+      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+    }),
+    component: NetworkChartEmptyReasonsImpl,
+  }
+);

@@ -4,18 +4,16 @@
 // @flow
 import * as colors from 'photon-colors';
 
-import type { CssPixels } from '../types/units';
+import type { CssPixels, Marker } from 'firefox-profiler/types';
 
-type MarkerStyles = {
-  +[styleName: string]: {|
-    +top: CssPixels,
-    +height: CssPixels,
-    +background: string,
-    +squareCorners: boolean,
-    +borderLeft: null | string,
-    +borderRight: null | string,
-  |},
-};
+type MarkerStyle = {|
+  +top: CssPixels,
+  +height: CssPixels,
+  +background: string,
+  +squareCorners: boolean,
+  +borderLeft: null | string,
+  +borderRight: null | string,
+|};
 
 const defaultStyle = {
   top: 0,
@@ -39,7 +37,22 @@ const ccStyle = {
   background: colors.ORANGE_50,
 };
 
-export const markerStyles: MarkerStyles = {
+/**
+ * Get the marker style. Start off by looking at the marker name, then fallback to
+ * the marker type.
+ */
+export function getMarkerStyle(marker: Marker): MarkerStyle {
+  const { data, name } = marker;
+  if (name in markerStyles) {
+    return markerStyles[name];
+  }
+  if (data && data.type in markerStyles) {
+    return markerStyles[data.type];
+  }
+  return markerStyles.default;
+}
+
+const markerStyles: { +[styleName: string]: MarkerStyle } = {
   default: defaultStyle,
   RefreshDriverTick: {
     ...defaultStyle,
@@ -135,6 +148,15 @@ export const markerStyles: MarkerStyles = {
     background: 'rgb(200,0,0)',
   },
   Jank: {
+    ...defaultStyle,
+    background: 'hsl(347, 100%, 60%)',
+    borderLeft: colors.RED_50,
+    borderRight: colors.RED_50,
+    squareCorners: true,
+  },
+  // BHR markers are displayed in the timeline only if jank markers are
+  // unavailable. Let's style them like Jank markers.
+  'BHR-detected hang': {
     ...defaultStyle,
     background: 'hsl(347, 100%, 60%)',
     borderLeft: colors.RED_50,

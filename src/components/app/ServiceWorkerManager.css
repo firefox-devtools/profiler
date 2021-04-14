@@ -16,47 +16,8 @@
   /* Other */
   pointer-events: none;
 }
+
 .serviceworker-ready-notice {
-  /* Box */
-  display: flex;
-  align-items: center;
-  padding: 0 4px;
   margin: 0 auto;
-
-  /* Other */
-  background: var(--grey-20);
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--grey-90);
   pointer-events: auto;
-}
-
-.serviceworker-ready-notice-close-button {
-  /* Position */
-  width: 16px;
-  height: 16px;
-
-  /* Box */
-  flex: none;
-  padding: 4px;
-  margin-left: 8px;
-
-  /* Other */
-  background-image: url(../../../res/img/svg/close-icon.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
-  border-radius: 4px;
-}
-
-.serviceworker-ready-notice-action-button {
-  margin-left: 8px;
-}
-
-.serviceworker-ready-notice p {
-  flex: auto;
-  padding: 0.5em 0.5em 0.5em 24px;
-  margin: 0;
-  background: url(../../../res/img/svg/info-icon.svg) no-repeat left center /
-    16px 16px;
 }

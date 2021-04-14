@@ -1,3 +1,4 @@
+// @flow
 module.exports = {
   env: {
     browser: true,
@@ -5,14 +6,14 @@ module.exports = {
     node: true,
   },
   parser: 'babel-eslint',
+  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:flowtype/recommended',
-    'prettier',
-    'prettier/flowtype',
-    'prettier/react',
-    'plugin:jest/recommended'
+    // This works with the prettier plugin, this needs to be at the end always.
+    // Replace it with the "prettier" config if we remove the plugin.
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: '2017',
@@ -22,13 +23,11 @@ module.exports = {
     },
     sourceType: 'module',
   },
-  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   rules: {
     // Plugin rules:
     'import/no-duplicates': 'error',
     'import/no-unresolved': 'error',
     'import/named': 'error',
-    'prettier/prettier': 'error',
     'react/button-has-type': 'error',
     'react/no-access-state-in-setstate': 'error',
     'react/no-danger': 'error',
@@ -41,14 +40,21 @@ module.exports = {
     // Flow provides enough coverage over the prop types, and there can be errors
     // with some of the more complicated Flow types.
     'react/prop-types': 'off',
-    "react/jsx-curly-brace-presence": ['error', { "props": 'never', "children": 'never' }],
+    'react/jsx-curly-brace-presence': [
+      'error',
+      { props: 'never', children: 'never' },
+    ],
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
     // 'react/no-unused-prop-types': 'error',
     'react/no-unused-state': 'error',
     'react/jsx-no-bind': 'error',
-    'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
+    'flowtype/require-valid-file-annotation': [
+      'error',
+      'always',
+      { annotationStyle: 'line' },
+    ],
     // no-dupe-keys crashes with recent eslint. See
     // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
     // https://github.com/gajus/eslint-plugin-flowtype/pull/302
@@ -62,6 +68,7 @@ module.exports = {
     // possible errors
     'array-callback-return': 'error',
     'consistent-return': 'error',
+    curly: 'error',
     'default-case': 'error',
     'dot-notation': 'error',
     eqeqeq: 'error',
@@ -83,6 +90,18 @@ module.exports = {
     // We use the version from the flowtype plugin so that flow assertions don't
     // output an error.
     'flowtype/no-unused-expressions': 'error',
+    // The Object type and Function type aren't particularly useful, and usually hide
+    // type errors. It also blocks a migration to TypeScript. Disable this rule if
+    // using the Object or Function as generic type bounds.
+    'flowtype/no-weak-types': [
+      'error',
+      {
+        any: false,
+        Object: true,
+        Function: true,
+      },
+    ],
+    'flowtype/no-existential-type': 'error',
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',
@@ -97,12 +116,25 @@ module.exports = {
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
     'no-else-return': 'error',
+    'no-nested-ternary': 'error',
   },
+  // This property is specified both here in addition to the command line in
+  // package.json.
+  // The reason is that the property only warns but the command line option
+  // outputs errors, but the property is useful so that we have the information
+  // directly in editors.
+  reportUnusedDisableDirectives: true,
   settings: {
     react: {
       pragma: 'React',
       version: '15.0',
       flowVersion: '0.63.1',
+    },
+    'import/resolver': {
+      alias: {
+        map: [['firefox-profiler', './src']],
+        extensions: ['.js'],
+      },
     },
   },
 };

@@ -5,41 +5,57 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
-import ContextMenu from '../shared/ContextMenu';
-import explicitConnect from '../../utils/connect';
+import { Localized } from '@fluent/react';
+
+import { ContextMenu } from './ContextMenu';
+import explicitConnect from 'firefox-profiler/utils/connect';
+
 import {
   setContextMenuVisibility,
   updatePreviewSelection,
-} from '../../actions/profile-view';
+} from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
   getCommittedRange,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'firefox-profiler/selectors/profile';
+import { getRightClickedMarkerInfo } from 'firefox-profiler/selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
-import type { Marker } from '../../types/profile-derived';
-import type { StartEndRange } from '../../types/units';
 import type {
+  Marker,
+  MarkerIndex,
+  StartEndRange,
   PreviewSelection,
   ImplementationFilter,
-} from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
-import { getImplementationFilter } from '../../selectors/url-state';
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
-import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+  IndexIntoStackTable,
+  Thread,
+  RightClickedMarkerInfo,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import { getImplementationFilter } from 'firefox-profiler/selectors/url-state';
+
+import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
-} from '../../profile-logic/profile-data';
-import { getMarkerFullDescription } from '../../profile-logic/marker-data';
+} from 'firefox-profiler/profile-logic/profile-data';
+import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
+
+import './MarkerContextMenu.css';
+
+type OwnProps = {|
+  +rightClickedMarkerInfo: RightClickedMarkerInfo,
+|};
 
 type StateProps = {|
+  +marker: Marker,
+  +markerIndex: MarkerIndex,
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: Marker | null,
-  +thread: Thread,
+  +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
+  +getMarkerLabelToCopy: MarkerIndex => string,
 |};
 
 type DispatchProps = {|
@@ -47,20 +63,15 @@ type DispatchProps = {|
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class MarkerContextMenu extends PureComponent<Props> {
-  setStartRange = () => {
+class MarkerContextMenuImpl extends PureComponent<Props> {
+  _setStartRange = (selectionStart: number) => {
     const {
-      selectedMarker,
       updatePreviewSelection,
       previewSelection,
       committedRange,
     } = this.props;
-
-    if (selectedMarker === null) {
-      return;
-    }
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -69,62 +80,82 @@ class MarkerContextMenu extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: selectedMarker.start,
+      selectionStart,
       selectionEnd,
     });
   };
 
-  setEndRange = () => {
+  _setEndRange = (selectionEnd: number) => {
     const {
-      selectedMarker,
       updatePreviewSelection,
       committedRange,
       previewSelection,
     } = this.props;
 
-    if (selectedMarker === null) {
-      return;
-    }
-
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
       : committedRange.start;
+
+    if (selectionEnd === selectionStart) {
+      // For InstantMarkers, or Interval markers with 0 duration, add an arbitrarily
+      // small bit of time at the end to make sure the selected marker doesn't disappear
+      // from view.
+      selectionEnd += 0.0001;
+    }
 
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart,
-      // For markers without a duration, add an arbitrarily small bit of time at
-      // the end to make sure the selected marker doesn't disappear from view.
-      selectionEnd: selectedMarker.start + (selectedMarker.dur || 0.0001),
+      selectionEnd,
     });
   };
 
+  setStartRangeFromMarkerStart = () => {
+    const { marker } = this.props;
+    this._setStartRange(marker.start);
+  };
+
+  setStartRangeFromMarkerEnd = () => {
+    const { marker } = this.props;
+    this._setStartRange(marker.end || marker.start);
+  };
+
+  setEndRangeFromMarkerStart = () => {
+    const { marker } = this.props;
+    this._setEndRange(marker.start);
+  };
+
+  setEndRangeFromMarkerEnd = () => {
+    const { marker } = this.props;
+    this._setEndRange(marker.end || marker.start);
+  };
+
   setRangeByDuration = () => {
-    const { selectedMarker, updatePreviewSelection } = this.props;
+    const { marker, updatePreviewSelection } = this.props;
 
-    if (selectedMarker === null) {
-      return;
-    }
-
-    if (this._isZeroDurationMarker(selectedMarker)) {
+    if (marker.end === null) {
       return;
     }
 
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: selectedMarker.start,
-      selectionEnd: selectedMarker.start + selectedMarker.dur,
+      selectionStart: marker.start,
+      selectionEnd: marker.end,
     });
   };
 
   _isZeroDurationMarker(marker: ?Marker): boolean {
-    return !marker || !marker.dur;
+    return !marker || marker.end === null;
   }
 
   _convertStackToString(stack: IndexIntoStackTable): string {
     const { thread, implementationFilter } = this.props;
+
+    if (thread === null) {
+      return '';
+    }
 
     const callNodePath = filterCallNodePathByImplementation(
       thread,
@@ -142,29 +173,19 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   copyMarkerJSON = () => {
-    const { selectedMarker } = this.props;
-
-    if (selectedMarker === null) {
-      return;
-    }
-
-    copy(JSON.stringify(selectedMarker, null, 2));
+    copy(JSON.stringify(this.props.marker, null, 2));
   };
 
   copyMarkerDescription = () => {
-    const { selectedMarker } = this.props;
-
-    if (selectedMarker === null) {
-      return;
-    }
-
-    copy(getMarkerFullDescription(selectedMarker));
+    const { markerIndex, getMarkerLabelToCopy } = this.props;
+    copy(getMarkerLabelToCopy(markerIndex));
   };
 
   copyMarkerCause = () => {
-    const { selectedMarker } = this.props;
-    if (selectedMarker && selectedMarker.data && selectedMarker.data.cause) {
-      const stack = this._convertStackToString(selectedMarker.data.cause.stack);
+    const { marker } = this.props;
+
+    if (marker.data && marker.data.cause) {
+      const stack = this._convertStackToString(marker.data.cause.stack);
       if (stack) {
         copy(stack);
       } else {
@@ -176,14 +197,10 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   copyUrl = () => {
-    const { selectedMarker } = this.props;
+    const { marker } = this.props;
 
-    if (
-      selectedMarker &&
-      selectedMarker.data &&
-      selectedMarker.data.type === 'Network'
-    ) {
-      copy(selectedMarker.data.URI);
+    if (marker.data && marker.data.type === 'Network') {
+      copy(marker.data.URI);
     }
   };
 
@@ -226,51 +243,187 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   render() {
-    const { selectedMarker } = this.props;
+    const { marker, previewSelection, committedRange } = this.props;
+    const { data } = marker;
 
-    if (selectedMarker === null) {
-      return null;
-    }
+    const selectionEnd = previewSelection.hasSelection
+      ? previewSelection.selectionEnd
+      : committedRange.end;
+
+    const selectionStart = previewSelection.hasSelection
+      ? previewSelection.selectionStart
+      : committedRange.start;
+
+    const markerEnd = marker.end || marker.start;
+
+    const markerStart = marker.start;
 
     return (
       <ContextMenu
         id="MarkerContextMenu"
+        className="markerContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
       >
-        <MenuItem onClick={this.setStartRange}>
-          Set selection start time here
-        </MenuItem>
-        <MenuItem onClick={this.setEndRange}>
-          Set selection end time here
-        </MenuItem>
         <MenuItem
           onClick={this.setRangeByDuration}
-          disabled={this._isZeroDurationMarker(selectedMarker)}
+          disabled={this._isZeroDurationMarker(marker)}
         >
-          Set selection from duration
+          <span className="react-contextmenu-icon markerContextMenuIconSetSelectionFromMarker" />
+          <Localized id="MarkerContextMenu--set-selection-from-duration">
+            Set selection from marker’s duration
+          </Localized>
         </MenuItem>
-        <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
-        {selectedMarker.data && selectedMarker.data.cause ? (
-          <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
+        <div className="react-contextmenu-separator" />
+        {this._isZeroDurationMarker(marker) ? (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionHere" />
+              <Localized id="MarkerContextMenu--start-selection-here">
+                Start selection here
+              </Localized>
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionHere" />
+              <Localized id="MarkerContextMenu--end-selection-here">
+                End selection here
+              </Localized>
+            </MenuItem>
+          </>
+        ) : (
+          <>
+            <MenuItem onClick={this.setStartRangeFromMarkerStart}>
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerStart" />
+              <Localized
+                id="MarkerContextMenu--start-selection-at-marker-start"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  Start selection at marker’s <strong>start</strong>
+                </div>
+              </Localized>
+            </MenuItem>
+            <MenuItem
+              onClick={this.setStartRangeFromMarkerEnd}
+              disabled={markerEnd > selectionEnd}
+            >
+              <span className="react-contextmenu-icon markerContextMenuIconStartSelectionAtMarkerEnd" />
+              <Localized
+                id="MarkerContextMenu--start-selection-at-marker-end"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  Start selection at marker’s <strong>end</strong>
+                </div>
+              </Localized>
+            </MenuItem>
+            <div className="react-contextmenu-separator" />
+            <MenuItem
+              onClick={this.setEndRangeFromMarkerStart}
+              disabled={selectionStart > markerStart}
+            >
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerStart" />
+              <Localized
+                id="MarkerContextMenu--end-selection-at-marker-start"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  End selection at marker’s <strong>start</strong>
+                </div>
+              </Localized>
+            </MenuItem>
+            <MenuItem onClick={this.setEndRangeFromMarkerEnd}>
+              <span className="react-contextmenu-icon markerContextMenuIconEndSelectionAtMarkerEnd" />
+              <Localized
+                id="MarkerContextMenu--end-selection-at-marker-end"
+                elems={{ strong: <strong /> }}
+              >
+                <div className="react-contextmenu-item-content">
+                  End selection at marker’s <strong>end</strong>
+                </div>
+              </Localized>
+            </MenuItem>
+          </>
+        )}
+
+        <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.copyMarkerDescription}>
+          <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
+          <Localized id="MarkerContextMenu--copy-description">
+            Copy description
+          </Localized>
+        </MenuItem>
+        {data && data.cause ? (
+          <MenuItem onClick={this.copyMarkerCause}>
+            <span className="react-contextmenu-icon markerContextMenuIconCopyStack" />
+            <Localized id="MarkerContextMenu--copy-call-stack">
+              Copy call stack
+            </Localized>
+          </MenuItem>
         ) : null}
-        {selectedMarker.data && selectedMarker.data.type === 'Network' ? (
-          <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
+        {data && data.type === 'Network' ? (
+          <MenuItem onClick={this.copyUrl}>
+            <span className="react-contextmenu-icon markerContextMenuIconCopyUrl" />
+            <Localized id="MarkerContextMenu--copy-url">Copy URL</Localized>
+          </MenuItem>
         ) : null}
-        <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
+        <MenuItem onClick={this.copyMarkerJSON}>
+          <span className="react-contextmenu-icon markerContextMenuIconCopyPayload" />
+          <Localized id="MarkerContextMenu--copy-full-payload">
+            Copy full payload
+          </Localized>
+        </MenuItem>
       </ContextMenu>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    previewSelection: getPreviewSelection(state),
-    committedRange: getCommittedRange(state),
-    thread: selectedThreadSelectors.getThread(state),
-    implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
-  }),
+const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: (state, ownProps) => {
+    const { threadsKey, markerIndex } = ownProps.rightClickedMarkerInfo;
+
+    const selectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const getMarker = selectors.getMarkerGetter(state);
+
+    return {
+      markerIndex,
+      marker: getMarker(markerIndex),
+      previewSelection: getPreviewSelection(state),
+      committedRange: getCommittedRange(state),
+      implementationFilter: getImplementationFilter(state),
+      thread: selectors.getThread(state),
+      getMarkerLabelToCopy: selectors.getMarkerLabelToCopyGetter(state),
+    };
+  },
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
-  component: MarkerContextMenu,
+  component: MarkerContextMenuImpl,
+});
+
+type MaybeProps = {|
+  +rightClickedMarkerInfo: RightClickedMarkerInfo | null,
+|};
+
+/**
+ * This component only renders the context menu if there is a right clicked marker.
+ * It is the component that is actually exported here.
+ */
+class MaybeMarkerContextMenuImpl extends PureComponent<MaybeProps> {
+  render() {
+    const { rightClickedMarkerInfo } = this.props;
+
+    if (rightClickedMarkerInfo === null) {
+      return null;
+    }
+
+    return (
+      <MarkerContextMenu rightClickedMarkerInfo={rightClickedMarkerInfo} />
+    );
+  }
+}
+
+export const MaybeMarkerContextMenu = explicitConnect<{||}, MaybeProps, {||}>({
+  mapStateToProps: state => ({
+    rightClickedMarkerInfo: getRightClickedMarkerInfo(state),
+  }),
+  component: MaybeMarkerContextMenuImpl,
 });

@@ -8,30 +8,31 @@ import * as React from 'react';
 import {
   withChartViewport,
   type WithChartViewport,
-} from '../shared/chart/Viewport';
-import ChartCanvas from '../shared/chart/Canvas';
-import { TooltipMarker } from '../tooltip/Marker';
-import TextMeasurement from '../../utils/text-measurement';
+} from 'firefox-profiler/components/shared/chart/Viewport';
+import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
+import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
+import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
-} from '../../actions/profile-view';
-import { BLUE_40 } from '../../utils/colors';
-import { TIMELINE_MARGIN_LEFT } from '../../app-logic/constants';
+} from 'firefox-profiler/actions/profile-view';
+import { BLUE_40 } from 'firefox-profiler/utils/colors';
+import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
-} from '../../types/units';
-import type { ThreadIndex } from '../../types/profile';
-import type {
+  ThreadsKey,
   Marker,
   MarkerTimingAndBuckets,
   MarkerIndex,
-} from '../../types/profile-derived';
-import type { Viewport } from '../shared/chart/Viewport';
-import type { WrapFunctionInDispatch } from '../../utils/connect';
+  TimelineTrackOrganization,
+} from 'firefox-profiler/types';
+import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
+
+import type { Viewport } from 'firefox-profiler/components/shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
 type MarkerDrawingInformation = {
   x: CssPixels,
   y: CssPixels,
@@ -41,19 +42,43 @@ type MarkerDrawingInformation = {
   text: string,
 };
 
+// We can hover over multiple items with Marker chart when we are in the active
+// tab view. Usually on other charts, we only have one selected item at a time.
+// But in here, we can hover over both markers and marker labels.
+// Also, they can be hovered at the same time. That's why we keep both of their
+// state in a two value tuple.
+// So if we take a look at all the possible states, we can have:
+//    [Hovered Marker Index, Hovered label row]
+// 1. [123                 , null             ]
+// 2. [null                , 12               ] (for active tab only)
+// 3. [123                 , 12               ] (for active tab only)
+// 4. [null                , null             ] (not used, we use primitive null
+//                                              to make shared canvas happy)
+// First state is the most common case, which is the only one available for the
+// full view. We have second and third cases for active tab view where we can
+// also see the hovered labels. 4th case is not used. We use primitive `null`
+// instead when both of the states are null, because that's what our shared
+// canvas component require.
+type IndexIntoHoveredLabelRow = number;
+type HoveredMarkerChartItems = {|
+  markerIndex: MarkerIndex | null,
+  rowIndexOfLabel: IndexIntoHoveredLabelRow | null,
+|};
+
 type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: MarkerIndex => Marker,
-  +threadIndex: ThreadIndex,
+  +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
-  +rightClickedMarker: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
   +shouldDisplayTooltips: () => boolean,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = {|
@@ -71,19 +96,22 @@ const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const DOT_WIDTH = 10;
+const LABEL_PADDING = 5;
 
-class MarkerChartCanvas extends React.PureComponent<Props, State> {
+class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: MarkerIndex | null,
-    prevHoveredItem: MarkerIndex | null,
+    hoveredItems: HoveredMarkerChartItems | null,
+    prevHoveredItems: HoveredMarkerChartItems | null,
     isHoveredOnlyDifferent: boolean
   ) => {
     const {
       rowHeight,
       markerTimingAndBuckets,
+      rightClickedMarkerIndex,
+      timelineTrackOrganization,
       viewport: {
         viewportTop,
         viewportBottom,
@@ -91,44 +119,109 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         containerHeight,
       },
     } = this.props;
+    let hoveredMarker = null;
+    let hoveredLabel = null;
+    let prevHoveredMarker = null;
+    let prevHoveredLabel = null;
+
+    if (hoveredItems) {
+      hoveredMarker = hoveredItems.markerIndex;
+      hoveredLabel = hoveredItems.rowIndexOfLabel;
+    }
+    if (prevHoveredItems) {
+      prevHoveredMarker = prevHoveredItems.markerIndex;
+      prevHoveredLabel = prevHoveredItems.rowIndexOfLabel;
+    }
+
     // Convert CssPixels to Stack Depth
     const startRow = Math.floor(viewportTop / rowHeight);
     const endRow = Math.min(
       Math.ceil(viewportBottom / rowHeight),
       markerTimingAndBuckets.length
     );
+    const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+      markerTimingAndBuckets
+    );
+    const rightClickedRow: number | void =
+      rightClickedMarkerIndex === null
+        ? undefined
+        : markerIndexToTimingRow.get(rightClickedMarkerIndex);
+    let newRow: number | void =
+      hoveredMarker === null
+        ? undefined
+        : markerIndexToTimingRow.get(hoveredMarker);
+    if (
+      timelineTrackOrganization.type === 'active-tab' &&
+      newRow === undefined &&
+      hoveredLabel !== null
+    ) {
+      // If it's active tab view and we don't know the row yet, assign
+      // `hoveredLabel` if it's non-null. This is needed because we can hover
+      // the label and not the marker. That way we are making sure that we
+      // select the correct row.
+      newRow = hoveredLabel;
+    }
 
     if (isHoveredOnlyDifferent) {
       // Only re-draw the rows that have been updated if only the hovering information
       // is different.
-      const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
-        markerTimingAndBuckets
-      );
-
-      const oldRow: number | void =
-        prevHoveredItem === null
+      let oldRow: number | void =
+        prevHoveredMarker === null
           ? undefined
-          : markerIndexToTimingRow.get(prevHoveredItem);
-      const newRow: number | void =
-        hoveredItem === null
-          ? undefined
-          : markerIndexToTimingRow.get(hoveredItem);
+          : markerIndexToTimingRow.get(prevHoveredMarker);
+      if (
+        timelineTrackOrganization.type === 'active-tab' &&
+        oldRow === undefined &&
+        prevHoveredLabel !== null
+      ) {
+        // If it's active tab view and we don't know the row yet, assign
+        // `prevHoveredLabel` if it's non-null. This is needed because we can
+        // hover the label and not the marker. That way we are making sure that
+        // previous hovered row is correct.
+        oldRow = prevHoveredLabel;
+      }
 
       if (newRow !== undefined) {
         this.clearRow(ctx, newRow);
-        this.drawMarkers(ctx, hoveredItem, newRow, newRow + 1);
+        this.highlightRow(ctx, newRow);
+        this.drawMarkers(ctx, hoveredMarker, newRow, newRow + 1);
+        if (hoveredLabel === null) {
+          this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1);
+        }
       }
       if (oldRow !== undefined && oldRow !== newRow) {
-        this.clearRow(ctx, oldRow);
-        this.drawMarkers(ctx, hoveredItem, oldRow, oldRow + 1);
+        if (oldRow !== rightClickedRow) {
+          this.clearRow(ctx, oldRow);
+        }
+        this.drawMarkers(ctx, hoveredMarker, oldRow, oldRow + 1);
+        this.drawSeparatorsAndLabels(ctx, oldRow, oldRow + 1);
       }
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, containerWidth, containerHeight);
-
-      this.drawMarkers(ctx, hoveredItem, startRow, endRow);
+      if (rightClickedRow !== undefined) {
+        this.highlightRow(ctx, rightClickedRow);
+      } else if (newRow !== undefined) {
+        this.highlightRow(ctx, newRow);
+      }
+      this.drawMarkers(ctx, hoveredMarker, startRow, endRow);
       this.drawSeparatorsAndLabels(ctx, startRow, endRow);
     }
+  };
+
+  highlightRow = (ctx, row) => {
+    const {
+      rowHeight,
+      viewport: { viewportTop, containerWidth },
+    } = this.props;
+
+    ctx.fillStyle = 'rgba(40, 122, 169, 0.2)';
+    ctx.fillRect(
+      0, // To include the labels also
+      row * rowHeight - viewportTop,
+      containerWidth,
+      rowHeight - 1 // Subtract 1 for borders.
+    );
   };
 
   /**
@@ -201,7 +294,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     } else {
       ctx.beginPath();
       ctx.arc(
-        x + w / 2, // x
+        x + uncutWidth / 2, // x
         y + h / 2, // y
         h * MARKER_DOT_RADIUS, // radius
         0, // arc start
@@ -224,7 +317,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rowHeight,
       marginLeft,
       marginRight,
-      rightClickedMarker,
+      rightClickedMarkerIndex,
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
@@ -299,7 +392,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           const markerIndex = markerTiming.index[i];
 
           const isHighlighted =
-            rightClickedMarker === markerIndex || hoveredItem === markerIndex;
+            rightClickedMarkerIndex === markerIndex ||
+            hoveredItem === markerIndex;
 
           if (isHighlighted) {
             highlightedMarkers.push({ x, y, w, h, uncutWidth, text });
@@ -342,10 +436,10 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     ctx.fillStyle = '#fff';
     ctx.fillRect(
-      TIMELINE_MARGIN_LEFT,
-      rowIndex * rowHeight - viewportTop + 1, // Add plus one for borders.
-      containerWidth - TIMELINE_MARGIN_LEFT,
-      rowHeight - 2 // Subtract 2 for borders.
+      0,
+      rowIndex * rowHeight - viewportTop,
+      containerWidth,
+      rowHeight - 1 // Subtract 1 for borders.
     );
   }
 
@@ -369,12 +463,16 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       markerTimingAndBuckets,
       rowHeight,
       marginLeft,
+      timelineTrackOrganization,
       viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
 
     // Draw separators
     ctx.fillStyle = GREY_20;
-    ctx.fillRect(marginLeft - 1, 0, 1, containerHeight);
+    if (timelineTrackOrganization.type !== 'active-tab') {
+      // Don't draw the separator on the right side if we are in the active tab.
+      ctx.fillRect(marginLeft - 1, 0, 1, containerHeight);
+    }
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
@@ -398,11 +496,23 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       }
 
       const y = rowIndex * rowHeight - viewportTop;
+      // Even though it's on active tab view, have a hard cap on the text length.
       const fittedText = textMeasurement.getFittedText(
         name,
         TIMELINE_MARGIN_LEFT
       );
-      ctx.fillText(fittedText, 5, y + TEXT_OFFSET_TOP);
+
+      if (timelineTrackOrganization.type === 'active-tab') {
+        // Draw the text backgound for active tab.
+        ctx.fillStyle = '#ffffffbf'; // white with 75% opacity
+        const textWidth = textMeasurement.getTextWidth(fittedText);
+        ctx.fillRect(0, y, textWidth + LABEL_PADDING * 2, rowHeight);
+
+        // Set the fill style back for text.
+        ctx.fillStyle = '#000000';
+      }
+
+      ctx.fillText(fittedText, LABEL_PADDING, y + TEXT_OFFSET_TOP);
     }
 
     // Draw the bucket names.
@@ -425,11 +535,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
       // Draw the text.
       ctx.fillStyle = '#000000';
-      ctx.fillText(bucketName, 5 + TIMELINE_MARGIN_LEFT, y + TEXT_OFFSET_TOP);
+      ctx.fillText(bucketName, LABEL_PADDING + marginLeft, y + TEXT_OFFSET_TOP);
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): MarkerIndex | null => {
+  hitTest = (x: CssPixels, y: CssPixels): HoveredMarkerChartItems | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -437,11 +547,14 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rowHeight,
       marginLeft,
       marginRight,
+      timelineTrackOrganization,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
     if (x < marginLeft - MARKER_DOT_RADIUS) {
       return null;
     }
+    let markerIndex = null;
+    let rowIndexOfLabel = null;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -466,29 +579,76 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Ensure that really small markers are hoverable with a minDuration.
       const end = Math.max(start + minDuration, markerTiming.end[i]);
       if (start < time && end > time) {
-        return markerTiming.index[i];
+        markerIndex = markerTiming.index[i];
       }
     }
-    return null;
+
+    if (timelineTrackOrganization.type === 'active-tab') {
+      // We can also hover over a marker label on active tab view. That's why we
+      // also need to hit test for the labels. On active tab view, markers and
+      // labels can overlap with each other. Because of that, we need to hide
+      // the texts if we are hovering them to make the markers more visible.
+      const prevMarkerTiming = markerTimingAndBuckets[rowIndex - 1];
+      if (
+        // Only the first row of a marker type has label, so we are checking
+        // if we changed the marker type.
+        prevMarkerTiming.name !== markerTiming.name &&
+        // We don't have the canvas context in this function, but if we are doing
+        // the hit testing, that means we already rendered the chart and therefore
+        // we initialized `this._textMeasurement`. But we are checking it just in case.
+        this._textMeasurement
+      ) {
+        const textWidth = this._textMeasurement.getTextWidth(markerTiming.name);
+        if (x < textWidth + LABEL_PADDING * 2) {
+          rowIndexOfLabel = rowIndex;
+        }
+      }
+    }
+
+    if (markerIndex === null && rowIndexOfLabel === null) {
+      // If both of them are null, return a null instead of `[null, null]`.
+      // That's because shared canvas component only understands that.
+      return null;
+    }
+
+    // Yes, we are returning a new array all the time when we do the hit testing.
+    // I can hear you say "How does equality check work for old and new hovered
+    // items then?". Well, on the shared canvas component we have a function
+    // called `hoveredItemsAreEqual` that shallowly checks for equality of
+    // objects and arrays. So it's safe to return a new array all the time.
+    return { markerIndex, rowIndexOfLabel };
   };
 
-  onDoubleClickMarker = (markerIndex: MarkerIndex | null) => {
+  onDoubleClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
     if (markerIndex === null) {
       return;
     }
-    const { getMarker, updatePreviewSelection } = this.props;
+    const {
+      getMarker,
+      updatePreviewSelection,
+      rangeStart,
+      rangeEnd,
+    } = this.props;
     const marker = getMarker(markerIndex);
+    const { start, end } = getStartEndRangeForMarker(
+      rangeStart,
+      rangeEnd,
+      marker
+    );
+
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.start,
-      selectionEnd: marker.start + marker.dur,
+      selectionStart: start,
+      selectionEnd: end,
     });
   };
 
-  onRightClickMarker = (markerIndex: MarkerIndex | null) => {
-    const { changeRightClickedMarker, threadIndex } = this.props;
-    changeRightClickedMarker(threadIndex, markerIndex);
+  onRightClickMarker = (hoveredItems: HoveredMarkerChartItems | null) => {
+    const markerIndex = hoveredItems === null ? null : hoveredItems.markerIndex;
+    const { changeRightClickedMarker, threadsKey } = this.props;
+    changeRightClickedMarker(threadsKey, markerIndex);
   };
 
   drawRoundedRect(
@@ -507,14 +667,21 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
-    if (!this.props.shouldDisplayTooltips()) {
+  getHoveredMarkerInfo = ({
+    markerIndex,
+  }: HoveredMarkerChartItems): React.Node => {
+    if (!this.props.shouldDisplayTooltips() || markerIndex === null) {
       return null;
     }
 
     const marker = this.props.getMarker(markerIndex);
     return (
-      <TooltipMarker marker={marker} threadIndex={this.props.threadIndex} />
+      <TooltipMarker
+        markerIndex={markerIndex}
+        marker={marker}
+        threadsKey={this.props.threadsKey}
+        restrictHeightWidth={true}
+      />
     );
   };
 
@@ -538,6 +705,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  MarkerChartCanvas
-);
+export const MarkerChartCanvas = (withChartViewport: WithChartViewport<
+  OwnProps,
+  Props
+>)(MarkerChartCanvasImpl);

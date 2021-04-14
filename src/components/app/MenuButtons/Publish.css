@@ -2,34 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsShareButton,
-.menuButtonsPermalinkButton,
-.menuButtonsRevertButton,
-.menuButtonsAbortUploadButton {
-  height: 24px;
-  border-left: 1px solid var(--grey-30);
-  margin-bottom: -24px;
+/* These two background images build on the generic styles defined in
+ * MenuButtons/index.css when using an icon. */
+.menuButtonsShareButtonButton::before {
+  background-image: url(firefox-profiler-res/img/svg/share-dark-12.svg);
 }
 
-.menuButtonsAbortUploadButton {
-  background-color: var(--green-70);
-  color: #fff;
-}
-
-.menuButtonsUploadingButtonLabel {
-  position: relative;
-  padding: 0 10px;
-  color: hsla(0, 0%, 100%, 0.7);
-  cursor: default;
-  line-height: 24px;
-  text-align: center;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.menuButtonsShareButtonOriginal {
-  background-color: var(--green-70);
-  color: white;
+.menuButtonsShareButtonButton-uploading::before {
+  background-image: url(firefox-profiler-res/img/svg/sharing-animated-dark-12.svg);
 }
 
 .menuButtonsShareButtonError {
@@ -37,20 +17,32 @@
   color: white;
 }
 
-.menuButtonsPublishPanel {
-  --width: 500px;
+.menuButtonsShareButtonError:hover {
+  background-color: var(--red-70);
 }
 
-.menuButtonsPermalinkTextField {
-  width: 14em;
-  height: 19px;
-  padding: 0 4px;
-  margin: 5px -5px;
+.buttonWithPanel.open > .menuButtonsShareButtonError,
+.menuButtonsShareButtonError:hover:active {
+  background-color: var(--red-80);
+}
+
+.menuButtonsShareButtonError::before {
+  background-image: url(firefox-profiler-res/img/svg/error.svg);
+}
+
+.menuButtonsPublishPanel {
+  --width: 510px;
 }
 
 .menuButtonsPublishContent {
   position: relative;
-  padding: 0 0 10px 70px;
+
+  /* This aligns all content, except the big icon. */
+  padding-left: 70px;
+
+  /* This is the same value as the "top" property for menuButtonsPublishIcon,
+   * so that the visible space at the top is the same as at the bottom. */
+  margin-top: 6px;
 }
 
 .menuButtonsPublishIcon {
@@ -59,12 +51,11 @@
   left: 10px;
   width: 44px;
   height: 44px;
-  background: url(../../../../res/img/svg/info.svg) center center no-repeat;
+  background: url(firefox-profiler-res/img/svg/info.svg) center center no-repeat;
 }
 
 .menuButtonsPublishTitle {
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin: 0;
 }
 
 .menuButtonsPublishInfoDescription {
@@ -81,11 +72,6 @@
 .menuButtonsPublishDataChoicesLabel {
   display: flex;
   margin: 4px 0;
-}
-
-.menuButtonsPublishDataLabel {
-  display: block;
-  line-height: 2.3;
 }
 
 .menuButtonsPublishButtons {
@@ -127,13 +113,15 @@
 .menuButtonsPublishButtonsSvgUpload {
   width: 20px;
   height: 20px;
-  background: url(../../../../res/img/svg/upload.svg) center center no-repeat;
+  background: url(firefox-profiler-res/img/svg/upload.svg) center center
+    no-repeat;
 }
 
 .menuButtonsPublishButtonsSvgDownload {
   width: 20px;
   height: 20px;
-  background: url(../../../../res/img/svg/download.svg) center center no-repeat;
+  background: url(firefox-profiler-res/img/svg/download.svg) center center
+    no-repeat;
 }
 
 .menuButtonsDownloadSize {

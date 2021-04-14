@@ -4,19 +4,20 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeNetworkSearchString,
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import NetworkChart from '../../components/network-chart';
-import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
+import { NetworkChart } from '../../components/network-chart';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 import {
@@ -24,7 +25,10 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
@@ -36,6 +40,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -54,10 +60,6 @@ const NETWORK_MARKERS = (function() {
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
@@ -75,7 +77,7 @@ function setupWithProfile(profile) {
   const renderResult = render(
     <Provider store={store}>
       <>
-        <MarkerContextMenu />
+        <MaybeMarkerContextMenu />
         <NetworkChart />
       </>
     </Provider>
@@ -116,22 +118,10 @@ function setupWithProfile(profile) {
       `Couldn't find the context menu.`
     );
 
-  function rightClick(where) {
-    const clickOptions = {
-      button: 2,
-      buttons: 2,
-    };
-
-    fireEvent.mouseDown(where, clickOptions);
-    fireEvent.mouseUp(where, clickOptions);
-    fireEvent.contextMenu(where, clickOptions);
-  }
-
   return {
     ...renderResult,
     ...store,
     flushRafCalls,
-    flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
     getBarElements,
     getBarElementStyles,
@@ -139,7 +129,6 @@ function setupWithProfile(profile) {
     getPhaseElementStyles,
     rowItem,
     getContextMenu,
-    rightClick,
   };
 }
 
@@ -149,8 +138,10 @@ function setupWithPayload(markers: TestDefinedMarkers) {
 }
 
 describe('NetworkChart', function() {
+  autoMockCanvasContext();
+
   it('renders NetworkChart correctly', () => {
-    const { flushDrawLog, container } = setupWithPayload([...NETWORK_MARKERS]);
+    const { container } = setupWithPayload([...NETWORK_MARKERS]);
 
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
@@ -176,12 +167,12 @@ describe('NetworkChart', function() {
         endTime: 70,
       }),
     ];
-    const { getByText, getContextMenu, rightClick } = setupWithPayload(markers);
-    rightClick(getByText('/1'));
+    const { getByText, getContextMenu } = setupWithPayload(markers);
+    fireFullContextMenu(getByText('/1'));
 
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-    fireEvent.click(getByText('Copy URL'));
+    fireFullClick(getByText('Copy URL'));
     expect(copy).toHaveBeenLastCalledWith('https://mozilla.org/1');
     expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
@@ -381,15 +372,17 @@ describe('NetworkChartRowBar phase calculations', function() {
       0,
       // With an endTime at 99, the profile's end time is 100 which gives
       // integer values for test results.
-      { startTime: 0, endTime: 99 },
+      99,
     ];
 
-    const startMarker = getNetworkMarkers({
+    // Create a start marker, but discard the end marker.
+    const [startMarker] = getNetworkMarkers({
       uri: 'https://mozilla.org/img/',
       id: 100,
       startTime: 10,
+      fetchStart: 20,
       endTime: 60,
-    })[0];
+    });
 
     const { getPhaseElementStyles } = setupWithPayload([
       markerForProfileRange,
@@ -403,11 +396,12 @@ describe('NetworkChartRowBar phase calculations', function() {
   });
 
   it('divides the phases when only the end marker is present', () => {
-    const endMarker = getNetworkMarkers({
+    // Get the end marker, but not the start.
+    const [, endMarker] = getNetworkMarkers({
       uri: 'https://mozilla.org/img/',
       id: 100,
-      startTime: 5,
-      fetchStart: 10,
+      startTime: 10,
+      fetchStart: 15,
       // With an endTime at 109, the profile's end time is 110, and so the
       // profile's length is 100, which gives integer values for test results.
       endTime: 109,
@@ -424,7 +418,10 @@ describe('NetworkChartRowBar phase calculations', function() {
         responseStart: 60,
         responseEnd: 80,
       },
-    })[1];
+    });
+
+    // Force the start time to be 10.
+    endMarker[1] = 10;
 
     const { getPhaseElementStyles } = setupWithPayload([endMarker]);
 
@@ -596,47 +593,42 @@ describe('NetworkChartRowBar URL split', function() {
 });
 
 describe('NetworkChartRowBar MIME-type filter', function() {
-  it('searches for img MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({
-        uri: 'https://test.mozilla.org/img/optimized/test.png',
-      })
+  /**
+   * Setup network markers payload for URL, with content type removed.
+   */
+  function setupForUrl(uri: string) {
+    return setupWithPayload(
+      getNetworkMarkers({ uri, payload: { contentType: undefined } })
     );
-    expect(rowItem().classList.contains('network-color-img')).toBe(true);
+  }
+
+  it('searches for img MIME-Type', function() {
+    const { rowItem } = setupForUrl(
+      'https://test.mozilla.org/img/optimized/test.png'
+    );
+    expect(rowItem()).toHaveClass('network-color-img');
   });
 
   it('searches for html MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({
-        uri: 'https://test.mozilla.org/img/optimized/test.html',
-      })
+    const { rowItem } = setupForUrl(
+      'https://test.mozilla.org/img/optimized/test.html'
     );
-
-    expect(rowItem().classList.contains('network-color-html')).toBe(true);
+    expect(rowItem()).toHaveClass('network-color-html');
   });
 
   it('searches for js MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/scripts/test.js' })
-    );
-
-    expect(rowItem().classList.contains('network-color-js')).toBe(true);
+    const { rowItem } = setupForUrl('https://test.mozilla.org/scripts/test.js');
+    expect(rowItem()).toHaveClass('network-color-js');
   });
 
   it('searches for css MIME-Type', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/styles/test.css' })
-    );
-
-    expect(rowItem().classList.contains('network-color-css')).toBe(true);
+    const { rowItem } = setupForUrl('https://test.mozilla.org/styles/test.css');
+    expect(rowItem()).toHaveClass('network-color-css');
   });
 
   it('uses default when no filter applies', function() {
-    const { rowItem } = setupWithPayload(
-      getNetworkMarkers({ uri: 'https://test.mozilla.org/file.xuul' })
-    );
-
-    expect(rowItem().classList.contains('network-color-other')).toBe(true);
+    const { rowItem } = setupForUrl('https://test.mozilla.org/file.xuul');
+    expect(rowItem()).toHaveClass('network-color-other');
   });
 });
 
@@ -675,12 +667,11 @@ describe('Network Chart/tooltip behavior', () => {
     const {
       rowItem,
       queryByTestId,
-      rightClick,
       getByText,
       getContextMenu,
     } = setupWithPayload(getNetworkMarkers());
 
-    rightClick(getByText('mozilla.org'));
+    fireFullContextMenu(getByText('mozilla.org'));
 
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
@@ -688,5 +679,86 @@ describe('Network Chart/tooltip behavior', () => {
     // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
     fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
     expect(queryByTestId('tooltip')).toBeFalsy();
+  });
+});
+
+describe('calltree/ProfileCallTreeView navigation keys', () => {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  function setup(markers) {
+    const { container } = setupWithPayload(markers);
+
+    const renderedRows = container.querySelectorAll('.networkChartRowItem');
+    expect(renderedRows.length).toEqual(48);
+
+    return {
+      // take either a key as a string, or a full event if we need more
+      // information like modifier keys.
+      simulateKey: (param: string | { key: string }) => {
+        const treeViewBody = ensureExists(
+          container.querySelector('div.treeViewBody'),
+          `Couldn't find the tree view body with selector .networkChart`
+        );
+        fireEvent.keyDown(
+          treeViewBody,
+          // There's a shortcoming in either Flow or the flow type for the
+          // `keyDown` method. $FlowExpectError
+          param.key ? param : { key: param }
+        );
+      },
+      selectedText: () =>
+        ensureExists(
+          container.querySelector('.isSelected'),
+          `Couldn't find the selected row with selector .isSelected`
+        ).textContent,
+    };
+  }
+
+  it('selects row on left click', () => {
+    const { rowItem } = setupWithPayload(getNetworkMarkers());
+
+    fireFullClick(rowItem());
+    expect(rowItem()).toHaveClass('isSelected');
+  });
+
+  it('reacts properly to up/down navigation keys', () => {
+    // This generates a profile where function "name<i + 1>" is present
+    // <length - i> times, which means it will have a self time of <length - i>
+    // ms. This is a good way to control the order we'll get in the call tree
+    // view: function "name1" will be first, etc.
+    const markers = (function() {
+      const arrayOfNetworkMarkers = Array(48)
+        .fill()
+        .map((_, i) =>
+          getNetworkMarkers({
+            uri: `https://mozilla.org/${i + 1}`,
+            id: i,
+            startTime: 3 + 0.1 * i,
+          })
+        );
+      return [].concat(...arrayOfNetworkMarkers);
+    })();
+
+    const { simulateKey, selectedText } = setup(markers);
+
+    simulateKey('ArrowDown');
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
+    simulateKey('PageDown');
+    expect(selectedText()).toBe(`https://mozilla.org/17`); // 15 rows below
+    simulateKey('End');
+    expect(selectedText()).toBe(`https://mozilla.org/48`);
+    simulateKey('ArrowUp');
+    expect(selectedText()).toBe(`https://mozilla.org/47`);
+    simulateKey('PageUp');
+    expect(selectedText()).toBe(`https://mozilla.org/31`); // 15 rows above
+    simulateKey('Home');
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
+
+    // These are MacOS shortcuts.
+    simulateKey({ key: 'ArrowDown', metaKey: true });
+    expect(selectedText()).toBe(`https://mozilla.org/48`);
+    simulateKey({ key: 'ArrowUp', metaKey: true });
+    expect(selectedText()).toBe(`https://mozilla.org/1`);
   });
 });

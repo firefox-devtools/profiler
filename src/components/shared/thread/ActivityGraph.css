@@ -11,13 +11,3 @@
   width: 100%;
   height: 100%;
 }
-
-.chartViewport.selectedThreadActivityGraphViewport {
-  flex: auto 0 0;
-  border-top: 1px solid var(--grey-30);
-}
-
-.selectedThreadActivityGraph {
-  height: 30px;
-  -moz-user-focus: ignore;
-}

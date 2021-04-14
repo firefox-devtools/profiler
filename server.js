@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @noflow
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
@@ -13,9 +16,12 @@ const localConfigExists = fs.existsSync(
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],
+  // We disable hot reloading because this takes lot of CPU and memory in the
+  // case of the profiler, which is a quite heavy program.
+  hot: false,
+  liveReload: false,
   contentBase: config.output.path,
   publicPath: config.output.publicPath,
-  hot: process.env.NODE_ENV === 'development' ? true : false,
   historyApiFallback: {
     disableDotRule: true,
   },

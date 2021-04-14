@@ -4,16 +4,19 @@
 
 // @flow
 
-import type { IndexIntoSamplesTable } from '../../types/profile';
-import type { CssPixels } from '../../types/units';
+import type { IndexIntoSamplesTable, CssPixels } from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackMemory } from '../../components/timeline/TrackMemory';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -35,10 +38,11 @@ const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
 function getSamplesPixelPosition(
-  sampleIndex: IndexIntoSamplesTable
+  sampleIndex: IndexIntoSamplesTable,
+  samplePosition
 ): CssPixels {
   // Compute the pixel position of the center of a given sample.
-  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
+  return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * samplePosition;
 }
 
 /**
@@ -57,11 +61,6 @@ describe('TrackMemory', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -85,10 +84,12 @@ describe('TrackMemory', function() {
       document.querySelector('.timelineTrackMemoryTooltip');
     const getMemoryDot = () =>
       container.querySelector('.timelineTrackMemoryGraphDot');
-    const moveMouseAtCounter = index =>
+    const moveMouseAtCounter = (index, pos) =>
       fireEvent(
         canvas,
-        getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(index, pos),
+        })
       );
 
     return {
@@ -102,12 +103,12 @@ describe('TrackMemory', function() {
       canvas,
       getTooltipContents,
       moveMouseAtCounter,
-      ctx,
       flushRafCalls,
       getMemoryDot,
     };
   }
 
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -117,15 +118,15 @@ describe('TrackMemory', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx, flushRafCalls } = setup();
+    const { flushRafCalls } = setup();
     flushRafCalls();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can create a tooltip', function() {
     const { moveMouseAtCounter, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
     expect(getTooltipContents()).toBeTruthy();
     fireEvent.mouseLeave(canvas);
     expect(getTooltipContents()).toBeFalsy();
@@ -133,20 +134,29 @@ describe('TrackMemory', function() {
 
   it('has a tooltip that matches the snapshot', function() {
     const { moveMouseAtCounter, getTooltipContents } = setup();
-    moveMouseAtCounter(5);
+    moveMouseAtCounter(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
   it('draws a dot on the graph', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     expect(getMemoryDot()).toBeFalsy();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
+    expect(getMemoryDot()).toBeTruthy();
+  });
+
+  it('can draw a dot on both extremes of the graph', function() {
+    const { moveMouseAtCounter, getMemoryDot } = setup();
+    expect(getMemoryDot()).toBeFalsy();
+    moveMouseAtCounter(0, 0.25);
+    expect(getMemoryDot()).toBeTruthy();
+    moveMouseAtCounter(7, 0);
     expect(getMemoryDot()).toBeTruthy();
   });
 
   it('draws a dot that matches the snapshot', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
-    moveMouseAtCounter(1);
+    moveMouseAtCounter(1, 0.5);
     expect(getMemoryDot()).toMatchSnapshot();
   });
 });

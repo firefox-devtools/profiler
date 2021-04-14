@@ -1,16 +1,18 @@
 clone_depth: 5
 environment:
-  nodejs_version: "10.15"
+  nodejs_version: "12"
 platform: x64 # flow needs 64b platforms
+
+branches:
+  only:
+    - main
+    - production
+
 # Install scripts. (runs after repo cloning)
 install:
-  # 1. Yarn 1.9.4 is preinstalled, but we need a newer version, so let's install it.
-  # Go to https://www.appveyor.com/docs/windows-images-software/#tools to check if a
-  # newer version is preinstalled in the future.
-  - choco install yarn
-  # 2. Select the right node
+  # 1. Select the right node
   - ps: Install-Product node $env:nodejs_version $env:platform
-  # 3. Setup the project
+  # 2. Setup the project
   - yarn install --frozen-lockfile
 
 # Post-install test scripts.
@@ -18,11 +20,7 @@ test_script:
   # Output useful info for debugging.
   - yarn versions
   # run tests
-  - yarn license-check
-  - yarn test-alex
-  - yarn lint
-  - yarn flow:ci
-  - yarn test
+  - yarn test-all:ci
   - yarn build-prod:quiet
 
 cache:

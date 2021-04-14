@@ -5,7 +5,7 @@
 
 import {
   extractFuncsAndResourcesFromFrameLocations,
-  processProfile,
+  processGeckoProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
@@ -20,8 +20,10 @@ import { ensureExists } from '../../utils/flow';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
-} from '../../types/markers';
-import type { GeckoThread } from '../../types/gecko-profile';
+  GeckoThread,
+  IndexIntoGeckoStackTable,
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function() {
   // These location strings are turned into the proper funcs.
@@ -204,7 +206,7 @@ describe('gecko counters processing', function() {
 
   it('can extract the counter information correctly', function() {
     const { parentGeckoProfile, parentPid, childPid } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const counters = ensureExists(
       processedProfile.counters,
       'Expected to find counters on the processed profile'
@@ -228,7 +230,7 @@ describe('gecko counters processing', function() {
 
   it('offsets the counter timing for child processes', function() {
     const { parentGeckoProfile, parentCounter, childCounter } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedCounters = ensureExists(processedProfile.counters);
 
     const originalTime = [0, 1, 2, 3, 4, 5, 6];
@@ -291,7 +293,7 @@ describe('gecko profilerOverhead processing', function() {
 
   it('can extract the overhead information correctly', function() {
     const { parentGeckoProfile, parentPid, childPid } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const overhead = ensureExists(
       processedProfile.profilerOverhead,
       'Expected to find profilerOverhead on the processed profile'
@@ -315,7 +317,7 @@ describe('gecko profilerOverhead processing', function() {
 
   it('offsets the overhead timing for child processes', function() {
     const { parentGeckoProfile, parentOverhead, childOverhead } = setup();
-    const processedProfile = processProfile(parentGeckoProfile);
+    const processedProfile = processGeckoProfile(parentGeckoProfile);
     const processedOverheads = ensureExists(processedProfile.profilerOverhead);
 
     const originalTime = [0, 1000, 2000, 3000, 4000, 5000, 6000];
@@ -339,13 +341,13 @@ describe('gecko profilerOverhead processing', function() {
 
 describe('serializeProfile', function() {
   it('should produce a parsable profile string', async function() {
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     expect(JSON.parse.bind(null, serialized)).not.toThrow();
   });
 
   it('should produce the same profile in a roundtrip', async function() {
-    const profile = processProfile(createGeckoProfile());
+    const profile = processGeckoProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
     // FIXME: Uncomment this line after resolving `undefined` serialization issue
@@ -369,8 +371,6 @@ describe('js allocation processing', function() {
       const markerTuple: any = [];
       const payload: JsAllocationPayload_Gecko = {
         type: 'JS allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         className: 'Function',
         typeName: 'JSObject',
         coarseType: 'Object',
@@ -380,7 +380,9 @@ describe('js allocation processing', function() {
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 
@@ -409,7 +411,7 @@ describe('js allocation processing', function() {
     expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
 
     // Process the profile and get out the new thread.
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const processedThread = processedProfile.threads[0];
 
     // Check for the existence of the allocations.
@@ -420,7 +422,7 @@ describe('js allocation processing', function() {
 
     // Assert that the transformation makes sense.
     expect(jsAllocations.time).toEqual([0, 1, 2]);
-    expect(jsAllocations.duration).toEqual([3, 5, 7]);
+    expect(jsAllocations.weight).toEqual([3, 5, 7]);
     expect(jsAllocations.stack).toEqual([11, 13, null]);
   });
 });
@@ -443,14 +445,14 @@ describe('native allocation processing', function() {
       const markerTuple: any = [];
       const payload: NativeAllocationPayload_Gecko = {
         type: 'Native allocation',
-        startTime: thisTime,
-        endTime: thisTime,
         size: byteSize,
         stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
       };
 
       markerTuple[geckoThread.markers.schema.name] = 'Native allocation';
-      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.startTime] = thisTime;
+      markerTuple[geckoThread.markers.schema.endTime] = null;
+      markerTuple[geckoThread.markers.schema.phase] = 0;
       markerTuple[geckoThread.markers.schema.data] = payload;
       markerTuple[geckoThread.markers.schema.category] = 0;
 
@@ -479,7 +481,7 @@ describe('native allocation processing', function() {
     expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
 
     // Process the profile and get out the new thread.
-    const processedProfile = processProfile(geckoProfile);
+    const processedProfile = processGeckoProfile(geckoProfile);
     const processedThread = processedProfile.threads[0];
 
     // Check for the existence of the allocations.
@@ -492,7 +494,87 @@ describe('native allocation processing', function() {
 
     // Assert that the transformation makes sense.
     expect(nativeAllocations.time).toEqual([0, 1, 2]);
-    expect(nativeAllocations.duration).toEqual([3, 5, 7]);
+    expect(nativeAllocations.weight).toEqual([3, 5, 7]);
     expect(nativeAllocations.stack).toEqual([11, 13, null]);
+  });
+});
+
+describe('gecko samples table processing', function() {
+  it('properly converts all the fields in the schema', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoSamples = geckoProfile.threads[0].samples;
+
+    // Check if the gecko sample schema is correct.
+    expect(geckoSamples.schema).toEqual({
+      stack: 0,
+      time: 1,
+      eventDelay: 2,
+      threadCPUDelta: 3,
+    });
+
+    // Add some values to the samples table so we can have hardcoded tests.
+    const hardcodedTime: Milliseconds[] = [1, 2];
+    const hardcodedStack: Array<null | IndexIntoGeckoStackTable> = [5, 4];
+    const hardcodedEventDelay: Milliseconds[] = [0, 1];
+    const hardcodedThreadCPUDelta: Array<number | null> = [0.1, 0.2];
+    const hardcodedSamplesTable = [
+      [
+        hardcodedStack[0],
+        hardcodedTime[0],
+        hardcodedEventDelay[0],
+        hardcodedThreadCPUDelta[0],
+      ],
+      [
+        hardcodedStack[1],
+        hardcodedTime[1],
+        hardcodedEventDelay[1],
+        hardcodedThreadCPUDelta[1],
+      ],
+    ];
+
+    geckoSamples.data = [...hardcodedSamplesTable, ...geckoSamples.data];
+
+    // Process the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedSamples = processedProfile.threads[0].samples;
+
+    // Check the processed samples length.
+    expect(processedSamples.length).toBe(geckoSamples.data.length);
+
+    // Let's check the hardcoded values here.
+    expect(processedSamples.stack.slice(0, 2)).toEqual(hardcodedStack);
+    expect(processedSamples.time.slice(0, 2)).toEqual(hardcodedTime);
+    expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
+      hardcodedEventDelay
+    );
+    expect(ensureExists(processedSamples.threadCPUDelta).slice(0, 2)).toEqual(
+      hardcodedThreadCPUDelta
+    );
+
+    // Check the processed profile samples array to see if we properly processed
+    // the sample fields.
+    for (const fieldName in geckoSamples.schema) {
+      const fieldIndex = geckoSamples.schema[fieldName];
+
+      for (let i = 0; i < processedSamples.length; i++) {
+        expect(processedSamples[fieldName][i]).toBe(
+          geckoSamples.data[i][fieldIndex]
+        );
+      }
+    }
+  });
+});
+
+describe('profile meta processing', function() {
+  it('keeps the sampleUnits object successfully', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoMeta = geckoProfile.meta;
+
+    // Processing the profile.
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const processedMeta = processedProfile.meta;
+
+    // Checking if it keeps the sampleUnits object.
+    expect(processedMeta.sampleUnits).toEqual(geckoMeta.sampleUnits);
   });
 });

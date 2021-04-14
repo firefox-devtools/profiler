@@ -27,7 +27,7 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     <span
       class="timelineTrackMemoryTooltipNumber"
     >
-      2.0B
+      2B
     </span>
      memory range in graph
   </div>
@@ -117,7 +117,7 @@ Array [
   ],
   Array [
     "lineTo",
-    71,
+    80,
     16.42625851218512,
   ],
   Array [
@@ -125,12 +125,12 @@ Array [
   ],
   Array [
     "lineTo",
-    71,
+    80,
     25,
   ],
   Array [
     "lineTo",
-    1,
+    0,
     25,
   ],
   Array [
@@ -142,15 +142,19 @@ Array [
 exports[`TrackMemory matches the component snapshot 1`] = `
 <div
   class="timelineTrackMemory"
-  style="height: 40px;"
+  style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
 >
   <div
     class="timelineMarkers timelineMarkersMemory selected"
     data-testid="TimelineMarkersMemory"
   >
-    <canvas
-      class="timelineMarkersCanvas"
-    />
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <canvas
+        class="timelineMarkersCanvas"
+      />
+    </div>
   </div>
   <div
     class="timelineTrackMemoryGraph"

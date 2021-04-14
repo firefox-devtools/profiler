@@ -3,8 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import bisection from 'bisection';
 import clamp from 'clamp';
+
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import './ActivityGraph.css';
 
@@ -12,13 +14,11 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
   Thread,
-} from '../../../types/profile';
-import type { SelectedState } from '../../../types/profile-derived';
-import type {
+  SelectedState,
   Milliseconds,
   DevicePixels,
   CssPixels,
-} from '../../../types/units';
+} from 'firefox-profiler/types';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React
@@ -38,6 +38,8 @@ type RenderedComponentSettings = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +xPixelsPerMs: number,
+  +enableCPUUsage: boolean,
+  +maxThreadCPUDelta: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -70,7 +72,7 @@ export type CategoryDrawStyles = $ReadOnlyArray<{|
   +gravity: number,
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
-  +filteredOutFillStyle: CanvasPattern,
+  +filteredOutByTransformFillStyle: CanvasPattern,
   +selectedTextColor: string,
 |}>;
 
@@ -79,7 +81,8 @@ type SelectedPercentageAtPixelBuffers = {|
   +beforeSelectedPercentageAtPixel: Float32Array,
   +selectedPercentageAtPixel: Float32Array,
   +afterSelectedPercentageAtPixel: Float32Array,
-  +filteredOutPercentageAtPixel: Float32Array,
+  +filteredOutByTransformPercentageAtPixel: Float32Array,
+  +filteredOutByTabPercentageAtPixel: Float32Array,
 |};
 
 const BOX_BLUR_RADII = [3, 2, 2];
@@ -196,6 +199,7 @@ export class ActivityGraphFillComputer {
       fullThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
+      enableCPUUsage,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -207,6 +211,7 @@ export class ActivityGraphFillComputer {
     let sampleTime = samples.time[0];
 
     // Go through the samples and accumulate the category into the percentageBuffers.
+    const { threadCPUDelta } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
       const nextSampleTime = samples.time[i + 1];
       const stackIndex = samples.stack[i];
@@ -215,13 +220,24 @@ export class ActivityGraphFillComputer {
           ? greyCategoryIndex
           : stackTable.category[stackIndex];
 
+      let cpuBeforeSample = null;
+      if (enableCPUUsage && threadCPUDelta) {
+        // It must be non-null because we are checking this in the processing
+        // step and eliminating all the null values.
+        const cpuDelta = ensureExists(threadCPUDelta[i]);
+        const intervalDistribution =
+          i === 0 ? 1 : (samples.time[i] - samples.time[i - 1]) / interval;
+        cpuBeforeSample = cpuDelta / intervalDistribution;
+      }
+
       // Mutate the percentage buffers.
       this._accumulateInCategory(
         category,
         i,
         prevSampleTime,
         sampleTime,
-        nextSampleTime
+        nextSampleTime,
+        cpuBeforeSample
       );
 
       prevSampleTime = sampleTime;
@@ -229,18 +245,30 @@ export class ActivityGraphFillComputer {
     }
 
     // Handle the last sample, which was not covered by the for loop above.
-    const lastSampleStack = samples.stack[samples.length - 1];
+    const lastIdx = samples.length - 1;
+    const lastSampleStack = samples.stack[lastIdx];
     const lastSampleCategory =
       lastSampleStack !== null
         ? stackTable.category[lastSampleStack]
         : greyCategoryIndex;
+
+    let cpuBeforeSample = null;
+    if (enableCPUUsage && threadCPUDelta && threadCPUDelta[lastIdx] !== null) {
+      const cpuDelta = threadCPUDelta[lastIdx];
+      const intervalDistribution =
+        lastIdx === 0
+          ? 1
+          : (samples.time[lastIdx] - samples.time[lastIdx - 1]) / interval;
+      cpuBeforeSample = cpuDelta / intervalDistribution;
+    }
 
     this._accumulateInCategory(
       lastSampleCategory,
       samples.length - 1,
       prevSampleTime,
       sampleTime,
-      sampleTime + interval
+      sampleTime + interval,
+      cpuBeforeSample
     );
   }
 
@@ -253,7 +281,8 @@ export class ActivityGraphFillComputer {
     sampleIndex: IndexIntoSamplesTable,
     prevSampleTime: Milliseconds,
     sampleTime: Milliseconds,
-    nextSampleTime: Milliseconds
+    nextSampleTime: Milliseconds,
+    cpuBeforeSample: number | null
   ) {
     const {
       rangeEnd,
@@ -261,6 +290,7 @@ export class ActivityGraphFillComputer {
       categoryDrawStyles,
       xPixelsPerMs,
       canvasPixelWidth,
+      maxThreadCPUDelta,
     } = this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
@@ -308,11 +338,18 @@ export class ActivityGraphFillComputer {
       percentageBuffers,
       sampleIndex
     );
+
+    // A number between 0 and 1 for sample percentage. It changes depending on
+    // the CPU usage if it's given. If not, it uses 1 directly.
+    const samplePercentage =
+      cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
     for (let i = intPixelStart; i <= intPixelEnd; i++) {
-      percentageBuffer[i] += 1;
+      percentageBuffer[i] += samplePercentage;
     }
-    percentageBuffer[intPixelStart] -= pixelStart - intPixelStart;
-    percentageBuffer[intPixelEnd] -= 1 - (pixelEnd - intPixelEnd);
+    percentageBuffer[intPixelStart] -=
+      samplePercentage * (pixelStart - intPixelStart);
+    percentageBuffer[intPixelEnd] -=
+      samplePercentage * (1 - (pixelEnd - intPixelEnd));
   }
 
   /**
@@ -327,8 +364,10 @@ export class ActivityGraphFillComputer {
       return percentageBuffers.selectedPercentageAtPixel;
     }
     switch (samplesSelectedStates[sampleIndex]) {
-      case 'FILTERED_OUT':
-        return percentageBuffers.filteredOutPercentageAtPixel;
+      case 'FILTERED_OUT_BY_TRANSFORM':
+        return percentageBuffers.filteredOutByTransformPercentageAtPixel;
+      case 'FILTERED_OUT_BY_ACTIVE_TAB':
+        return percentageBuffers.filteredOutByTabPercentageAtPixel;
       case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
         return percentageBuffers.beforeSelectedPercentageAtPixel;
       case 'SELECTED':
@@ -377,18 +416,32 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    let { offsetToCategoryStart } = categoryUnderMouse;
-    const candidateSamples = this._getCategoriesSamplesAtTime(
-      time,
-      categoryUnderMouse.category
-    );
+    // Get all samples that contribute pixels to the clicked category in this
+    // pixel column of the graph.
+    const { category, categoryLowerEdge, yPercentage } = categoryUnderMouse;
+    const candidateSamples = this._getCategoriesSamplesAtTime(time, category);
 
-    for (let i = 0; i < candidateSamples.length; i++) {
-      const { sample, contribution } = candidateSamples[i];
-      if (offsetToCategoryStart <= contribution) {
+    // The candidate samples are sorted by gravity, bottom to top.
+    // Each sample occupies a non-empty subrange of the [0, 1] range. The height
+    // of each sample's range is called "contribution" here. The sample ranges are
+    // directly adjacent, there's no space between them.
+    // yPercentage is the mouse position converted to the [0, 1] range. We want
+    // to find the sample whose range contains that yPercentage value.
+    // Since we already filtered the contributing samples by the clicked
+    // category, we start stacking up their contributions onto the lower edge
+    // of that category's fill.
+    let upperEdgeOfPreviousSample = categoryLowerEdge;
+    // Loop invariant: yPercentage >= upperEdgeOfPreviousSample.
+    // (In fact, yPercentage > upperEdgeOfPreviousSample except during the first
+    // iteration - in the first iteration, yPercentage can be == categoryLowerEdge.)
+    for (const { sample, contribution } of candidateSamples) {
+      const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
+      if (yPercentage <= upperEdgeOfThisSample) {
+        // We use <= rather than < here so that we don't return null if
+        // yPercentage is equal to the upper edge of the last sample.
         return sample;
       }
-      offsetToCategoryStart -= contribution;
+      upperEdgeOfPreviousSample = upperEdgeOfThisSample;
     }
 
     return null;
@@ -396,13 +449,20 @@ export class ActivityFillGraphQuerier {
 
   /**
    * Find a specific category at a pixel location.
+   * devicePixelY == 0 is the upper edge of the canvas,
+   * devicePixelY == this.renderedComponentSettings.canvasPixelHeight is the
+   * lower edge of the canvas.
+   *
+   * Returns a category such that categoryLowerEdge <= yPercentage and the next
+   * category's lower edge would be > yPercentage.
    */
   _categoryAtDevicePixel(
     deviceX: DevicePixels,
     deviceY: DevicePixels
   ): null | {
     category: IndexIntoCategoryList,
-    offsetToCategoryStart: DevicePixels,
+    categoryLowerEdge: number,
+    yPercentage: number,
   } {
     const {
       canvasPixelWidth,
@@ -418,10 +478,25 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    const valueToFind = 1 - deviceY / canvasPixelHeight;
+    // Convert the device pixel position into the range [0, 1], with 0 being
+    // the *lower* edge of the canvas.
+    const yPercentage = 1 - deviceY / canvasPixelHeight;
+
     let currentCategory = null;
     let currentCategoryStart = 0.0;
     let previousFillEnd = 0.0;
+
+    // Find a fill such that yPercentage is between the fill's lower and its
+    // upper edge. (The lower edge of a fill is given by the upper edge of the
+    // previous fill. The first fill's lower edge is zero, i.e. the bottom edge
+    // of the canvas.)
+    // For each category, multiple fills can be present. All fills of the same
+    // category will be consecutive in the fills array. See _getCategoryFills
+    // for the full list.
+    // Loop invariant: yPercentage >= previousFillEnd.
+    // (In fact, yPercentage > previousFillEnd once we have encountered the first
+    // non-empty fill. Before that, yPercentage can be == previousFillEnd, if
+    // both are zero.)
     for (const { category, accumulatedUpperEdge } of this.fills) {
       const fillEnd = accumulatedUpperEdge[deviceX];
 
@@ -430,10 +505,17 @@ export class ActivityFillGraphQuerier {
         currentCategoryStart = previousFillEnd;
       }
 
-      if (fillEnd >= valueToFind) {
+      if (fillEnd === previousFillEnd) {
+        continue; // Ignore empty fills
+      }
+
+      if (yPercentage <= fillEnd) {
+        // We use <= rather than < here so that we don't return null if
+        // yPercentage is equal to the upper edge of the last fill.
         return {
           category,
-          offsetToCategoryStart: valueToFind - currentCategoryStart,
+          categoryLowerEdge: currentCategoryStart,
+          yPercentage,
         };
       }
 
@@ -476,14 +558,17 @@ export class ActivityFillGraphQuerier {
           ? stackTable.category[stackIndex]
           : greyCategoryIndex;
       if (sampleCategory === category) {
-        sampleContributions.push({
-          sample,
-          contribution: this._getSmoothedContributionFromSampleToPixel(
-            xPixel,
-            xPixelsPerMs,
-            sample
-          ),
-        });
+        const contribution = this._getSmoothedContributionFromSampleToPixel(
+          xPixel,
+          xPixelsPerMs,
+          sample
+        );
+        if (contribution > 0) {
+          sampleContributions.push({
+            sample,
+            contribution,
+          });
+        }
       }
     }
     if (treeOrderSampleComparator) {
@@ -515,11 +600,11 @@ export class ActivityFillGraphQuerier {
 
     // Now find the samples where the range [mid(previousSample.time, thisSample.time), mid(thisSample.time, nextSample.time)]
     // overlaps with contributionTimeRange.
-    const firstSampleAfterContributionTimeRangeStart = bisection.right(
+    const firstSampleAfterContributionTimeRangeStart = bisectionRight(
       samples.time,
       contributionTimeRangeStart
     );
-    const firstSampleAfterContributionTimeRangeEnd = bisection.right(
+    const firstSampleAfterContributionTimeRangeEnd = bisectionRight(
       samples.time,
       contributionTimeRangeEnd
     );
@@ -605,7 +690,10 @@ function _createSelectedPercentageAtPixelBuffers({
     beforeSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
     selectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
     afterSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    filteredOutPercentageAtPixel: new Float32Array(canvasPixelWidth),
+    filteredOutByTransformPercentageAtPixel: new Float32Array(canvasPixelWidth),
+    // Unlike other fields, we do not mutate that array and we keep that zero
+    // array to indicate that we don't want to draw anything for this case.
+    filteredOutByTabPercentageAtPixel: new Float32Array(canvasPixelWidth),
   }));
 }
 
@@ -616,7 +704,7 @@ function _createSelectedPercentageAtPixelBuffers({
  * 'UNSELECTED_ORDERED_BEFORE_SELECTED',
  * 'SELECTED',
  * 'UNSELECTED_ORDERED_AFTER_SELECTED',
- * 'FILTERED_OUT'
+ * 'FILTERED_OUT_BY_TRANSFORM'
  */
 function _getCategoryFills(
   categoryDrawStyles: CategoryDrawStyles,
@@ -661,8 +749,8 @@ function _getCategoryFills(
         },
         {
           category: categoryDrawStyle.category,
-          fillStyle: categoryDrawStyle.filteredOutFillStyle,
-          perPixelContribution: buffer.filteredOutPercentageAtPixel,
+          fillStyle: categoryDrawStyle.filteredOutByTransformFillStyle,
+          perPixelContribution: buffer.filteredOutByTransformPercentageAtPixel,
           accumulatedUpperEdge: new Float32Array(
             buffer.beforeSelectedPercentageAtPixel.length
           ),

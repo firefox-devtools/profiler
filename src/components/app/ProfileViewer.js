@@ -1,44 +1,52 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* this source code form is subject to the terms of the mozilla public
+ * license, v. 2.0. if a copy of the mpl was not distributed with this
+ * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
 // @flow
 
 import React, { PureComponent } from 'react';
-import explicitConnect from '../../utils/connect';
-import DetailsContainer from './DetailsContainer';
-import ProfileFilterNavigator from './ProfileFilterNavigator';
-import MenuButtons from './MenuButtons';
-import WindowTitle from '../shared/WindowTitle';
-import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
-import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { getProfileName } from '../../selectors/url-state';
-import Timeline from '../timeline';
-import { getHasZipFile } from '../../selectors/zipped-profiles';
+import explicitConnect from 'firefox-profiler/utils/connect';
+
+import { DetailsContainer } from './DetailsContainer';
+import { ProfileFilterNavigator } from './ProfileFilterNavigator';
+import { MenuButtons } from './MenuButtons';
+import { CurrentProfileUploadedInformationLoader } from './CurrentProfileUploadedInformationLoader';
+import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
+import { ProfileName } from './ProfileName';
+import { BeforeUnloadManager } from './BeforeUnloadManager';
+import { KeyboardShortcut } from './KeyboardShortcut';
+
+import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
+import { Timeline } from 'firefox-profiler/components/timeline';
+import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
-import { invalidatePanelLayout } from '../../actions/app';
-import { getTimelineHeight } from '../../selectors/app';
+import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
+import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import {
-  getUploadProgressString,
+  getUploadProgress,
   getUploadPhase,
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
-} from '../../selectors/publish';
+} from 'firefox-profiler/selectors/publish';
+
+import { getIconsWithClassNames } from 'firefox-profiler/selectors/icons';
+import { BackgroundImageStyleDef } from 'firefox-profiler/components/shared/StyleDef';
 import classNames from 'classnames';
+import { DebugWarning } from 'firefox-profiler/components/app/DebugWarning';
 
-import type { CssPixels } from '../../types/units';
-import type { ConnectedProps } from '../../utils/connect';
+import type { CssPixels, IconWithClassName } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./ProfileViewer.css');
+import './ProfileViewer.css';
 
 type StateProps = {|
-  +profileName: string | null,
   +hasZipFile: boolean,
   +timelineHeight: CssPixels | null,
-  +uploadProgress: string,
+  +uploadProgress: number,
   +isUploading: boolean,
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
+  +icons: IconWithClassName[],
 |};
 
 type DispatchProps = {|
@@ -48,11 +56,10 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewer extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props> {
   render() {
     const {
       hasZipFile,
-      profileName,
       returnToZipFileList,
       invalidatePanelLayout,
       timelineHeight,
@@ -60,15 +67,23 @@ class ProfileViewer extends PureComponent<Props> {
       uploadProgress,
       isHidingStaleProfile,
       hasSanitizedProfile,
+      icons,
     } = this.props;
 
     return (
-      <div
-        className={classNames({
+      <KeyboardShortcut
+        wrapperClassName={classNames({
           profileViewerWrapper: true,
           profileViewerWrapperBackground: hasSanitizedProfile,
         })}
       >
+        {icons.map(({ className, icon }) => (
+          <BackgroundImageStyleDef
+            className={className}
+            url={icon}
+            key={className}
+          />
+        ))}
         <div
           className={classNames({
             profileViewer: true,
@@ -93,9 +108,7 @@ class ProfileViewer extends PureComponent<Props> {
                 onClick={returnToZipFileList}
               />
             ) : null}
-            {profileName ? (
-              <div className="profileViewerName">{profileName}</div>
-            ) : null}
+            <ProfileName />
             <ProfileFilterNavigator />
             {
               // Define a spacer in the middle that will shrink based on the availability
@@ -107,7 +120,7 @@ class ProfileViewer extends PureComponent<Props> {
             {isUploading ? (
               <div
                 className="menuButtonsPublishUploadBarInner"
-                style={{ width: uploadProgress }}
+                style={{ width: `${uploadProgress * 100}%` }}
               />
             ) : null}
           </div>
@@ -124,27 +137,29 @@ class ProfileViewer extends PureComponent<Props> {
             <Timeline />
             <DetailsContainer />
           </SplitterLayout>
-          <WindowTitle />
           <SymbolicationStatusOverlay />
+          <BeforeUnloadManager />
+          <DebugWarning />
+          <CurrentProfileUploadedInformationLoader />
         </div>
-      </div>
+      </KeyboardShortcut>
     );
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    profileName: getProfileName(state),
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
-    uploadProgress: getUploadProgressString(state),
+    uploadProgress: getUploadProgress(state),
     isUploading: getUploadPhase(state) === 'uploading',
     isHidingStaleProfile: getIsHidingStaleProfile(state),
     hasSanitizedProfile: getHasSanitizedProfile(state),
+    icons: getIconsWithClassNames(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,
     invalidatePanelLayout,
   },
-  component: ProfileViewer,
+  component: ProfileViewerImpl,
 });

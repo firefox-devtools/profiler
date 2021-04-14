@@ -6,26 +6,29 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
-  changeSelectedThread,
+  changeSelectedThreads,
   hideGlobalTrack,
 } from '../../actions/profile-view';
-import GlobalTrack from '../../components/timeline/GlobalTrack';
+import { TimelineGlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
-
-const LEFT_CLICK = 0;
-const RIGHT_CLICK = 2;
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 
 describe('timeline/GlobalTrack', function() {
+  autoMockCanvasContext();
+
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',   // Track index 0
@@ -56,6 +59,7 @@ describe('timeline/GlobalTrack', function() {
     const trackReference = { type: 'global', trackIndex };
     const tracks = getGlobalTracks(getState());
     const track = tracks[trackIndex];
+    const setInitialSelected = () => {};
     if (track.type !== 'process') {
       throw new Error('Expected a process track.');
     }
@@ -63,20 +67,21 @@ describe('timeline/GlobalTrack', function() {
 
     // Some child components render to canvas.
     jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-    jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(400, 400));
 
     if (threadIndex !== null) {
       // The assertions are simpler if the GeckoMain tab thread is not already selected.
-      dispatch(changeSelectedThread(threadIndex + 1));
+      dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
     }
 
     const renderResult = render(
       <Provider store={store}>
-        <GlobalTrack trackIndex={trackIndex} trackReference={trackReference} />
+        <TimelineGlobalTrack
+          trackIndex={trackIndex}
+          trackReference={trackReference}
+          setInitialSelected={setInitialSelected}
+        />
       </Provider>
     );
     const { container } = renderResult;
@@ -118,7 +123,7 @@ describe('timeline/GlobalTrack', function() {
 
   it('has the correct selectors into useful parts of the component', function() {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
-    expect(getGlobalTrackLabel().textContent).toBe('Content ProcessPID: 222');
+    expect(getGlobalTrackLabel()).toHaveTextContent('Content ProcessPID: 222');
     expect(getGlobalTrackRow()).toBeTruthy();
   });
 
@@ -130,8 +135,8 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
     } = setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getGlobalTrackRow()).not.toHaveClass('selected');
   });
 
   it('can select a thread by clicking the label', () => {
@@ -141,10 +146,10 @@ describe('timeline/GlobalTrack', function() {
       getGlobalTrackRow,
       threadIndex,
     } = setup();
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    fireEvent.mouseDown(getGlobalTrackLabel(), { button: LEFT_CLICK });
-    expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
-    expect(getGlobalTrackRow().classList.contains('selected')).toBe(true);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    fireFullClick(getGlobalTrackLabel());
+    expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
+    expect(getGlobalTrackRow()).toHaveClass('selected');
   });
 
   it('can right click a thread', () => {
@@ -155,16 +160,16 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
     } = setup();
 
-    fireEvent.mouseDown(getGlobalTrackLabel(), { button: RIGHT_CLICK });
+    fireFullContextMenu(getGlobalTrackLabel());
     expect(getRightClickedTrack(getState())).toEqual(trackReference);
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
 
   it('can select a thread by clicking the row', () => {
     const { getState, getGlobalTrackRow, threadIndex } = setup();
-    expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    fireEvent.click(getGlobalTrackRow());
-    expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+    expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    fireFullClick(getGlobalTrackRow());
+    expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
   });
 
   it('will render a stub div if the track is hidden', () => {

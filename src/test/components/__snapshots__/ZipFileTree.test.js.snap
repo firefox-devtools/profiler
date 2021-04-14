@@ -36,7 +36,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0"
-              style="height: 210px;"
+              style="height: 420px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -69,11 +69,39 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns even"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns odd"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns even"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns odd"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns even"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns odd"
+                  style="height: 30px; line-height: 30px;"
+                />
+                <div
+                  class="treeViewRow treeViewRowFixedColumns even"
+                  style="height: 30px; line-height: 30px;"
+                />
               </div>
             </div>
             <div
               class="treeViewBodyInner treeViewBodyInner1"
-              style="height: 210px; width: 3000px;"
+              style="height: 420px; min-width: 3000px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -223,10 +251,176 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     </a>
                   </span>
                 </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="1"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns even"
+                  id="treeViewRow-6"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 0px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    boat
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="2"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns odd"
+                  id="treeViewRow-7"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 15px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    ship
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="3"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns even"
+                  id="treeViewRow-8"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 30px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    new
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="4"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns odd"
+                  id="treeViewRow-9"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 45px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    anything
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="5"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns even"
+                  id="treeViewRow-10"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 60px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    explore
+                  </span>
+                </div>
+                <div
+                  aria-expanded="true"
+                  aria-level="6"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns odd"
+                  id="treeViewRow-11"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 75px;"
+                  />
+                  <span
+                    class="treeRowToggleButton expanded canBeExpanded"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    yes
+                  </span>
+                </div>
+                <div
+                  aria-level="7"
+                  aria-selected="false"
+                  class="treeViewRow treeViewRowScrolledColumns even"
+                  id="treeViewRow-12"
+                  role="treeitem"
+                  style="height: 30px; line-height: 30px;"
+                >
+                  <span
+                    class="treeRowIndentSpacer"
+                    style="width: 90px;"
+                  />
+                  <span
+                    class="treeRowToggleButton collapsed leaf"
+                  />
+                  <span
+                    class="treeViewRowColumn treeViewMainColumn name"
+                  >
+                    <a
+                      href="http://localhost/from-url//calltree/?file=boat%2Fship%2Fnew%2Fanything%2Fexplore%2Fyes%2Fprofile4.json"
+                    >
+                      profile4.json
+                    </a>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div
+      class="dragAndDropOverlayWrapper"
+    >
+      <div
+        class="dragAndDropOverlay"
+      >
+        Drop a saved profile here
       </div>
     </div>
   </div>

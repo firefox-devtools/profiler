@@ -12,7 +12,7 @@ import type {
   ZipFileState,
   Reducer,
   ZippedProfilesState,
-} from '../types/state';
+} from 'firefox-profiler/types';
 
 /**
  * This reducer contains all of the state that deals with loading in profiles from
@@ -86,7 +86,9 @@ const zipFile: Reducer<ZipFileState> = (
             zip: ensureExists(state.zip),
             pathInZipFile: ensureExists(state.pathInZipFile),
           });
-    case 'VIEW_PROFILE':
+    case 'VIEW_ORIGINS_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       // Only process this as a change if a zip file is actually loaded.
       return state.phase === 'NO_ZIP_FILE'
         ? state
@@ -97,6 +99,7 @@ const zipFile: Reducer<ZipFileState> = (
           });
     case 'PROFILE_PUBLISHED':
     case 'SANITIZED_PROFILE_PUBLISHED':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       // Revert back to not having a zip file.
       return {
         phase: 'NO_ZIP_FILE',

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { isChromeProfile, convertChromeProfile } from './import/chrome';
+import { attemptToConvertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
@@ -15,23 +15,19 @@ import {
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
 } from './data-structures';
-import { immutableUpdate, ensureExists } from '../utils/flow';
-import {
-  upgradeProcessedProfileToCurrentVersion,
-  isProcessedProfile,
-} from './processed-profile-versioning';
+import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
+import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
-import {
-  isOldCleopatraFormat,
-  convertOldCleopatraProfile,
-} from './old-cleopatra-profile-format';
 import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
-import { convertPhaseTimes } from './convert-markers';
+import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
-import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  getOrCreateURIResource,
+} from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
@@ -55,19 +51,19 @@ import type {
   JsAllocationsTable,
   ProfilerOverhead,
   NativeAllocationsTable,
-} from '../types/profile';
-import type { Milliseconds, Microseconds } from '../types/units';
-import type {
+  Milliseconds,
+  Microseconds,
+  Address,
+  MemoryOffset,
   GeckoProfile,
   GeckoSubprocessProfile,
   GeckoThread,
+  GeckoMarkers,
   GeckoMarkerStruct,
   GeckoFrameStruct,
   GeckoSampleStruct,
   GeckoStackStruct,
   GeckoProfilerOverhead,
-} from '../types/gecko-profile';
-import type {
   GCSliceMarkerPayload,
   GCMajorMarkerPayload,
   MarkerPayload,
@@ -76,7 +72,10 @@ import type {
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
-} from '../types/markers';
+  PhaseTimes,
+  SerializableProfile,
+  MarkerSchema,
+} from 'firefox-profiler/types';
 
 type RegExpResult = null | string[];
 /**
@@ -95,7 +94,7 @@ type RegExpResult = null | string[];
  * And turn it into a data table of the form
  *  `{ length: number, field1: array, field2: array }`
  */
-function _toStructOfArrays(geckoTable: Object): Object {
+function _toStructOfArrays(geckoTable: any): any {
   const result = { length: geckoTable.data.length };
   for (const fieldName in geckoTable.schema) {
     const fieldIndex = geckoTable.schema[fieldName];
@@ -123,11 +122,26 @@ function _getRealScriptURI(url: string): string {
   return url;
 }
 
-function _sortByField<T: Object>(fieldName: string, geckoTable: T): T {
-  const fieldIndex: number = geckoTable.schema[fieldName];
-  const sortedData: any[] = geckoTable.data.slice(0);
-  sortedData.sort((a, b) => a[fieldIndex] - b[fieldIndex]);
-  return Object.assign({}, geckoTable, { data: sortedData });
+function _sortMarkers(markers: GeckoMarkers): GeckoMarkers {
+  const { startTime, endTime } = markers.schema;
+  const sortedData = markers.data.slice(0);
+  // Sort the markers based on their startTime. If there is no startTime, then use
+  // endtime.
+  sortedData.sort((a, b) => {
+    const aTime: null | Milliseconds = a[endTime] || a[startTime];
+    const bTime: null | Milliseconds = b[endTime] || b[startTime];
+    if (aTime === null) {
+      console.error(a);
+      throw new Error('A marker had null start and end time.');
+    }
+    if (bTime === null) {
+      console.error(b);
+      throw new Error('A marker had null start and end time.');
+    }
+    return aTime - bTime;
+  });
+
+  return Object.assign({}, markers, { data: sortedData });
 }
 
 function _cleanFunctionName(functionName: string): string {
@@ -257,15 +271,21 @@ function _extractUnsymbolicatedFunction(
   } = extractionInfo;
 
   let resourceIndex = -1;
-  let addressRelativeToLib = -1;
+  let addressRelativeToLib: Address = -1;
 
-  const address = parseInt(locationString.substr(2), 16);
-  // Look up to see if it's a known library address.
+  // The frame address, as observed in the profiled process. This address was
+  // valid in the (virtual memory) address space of the profiled process.
+  const address: MemoryOffset = parseInt(locationString.substr(2), 16);
+
+  // We want to turn this address into a library-relative offset.
+  // Look up to see if it falls into one of the libraries that were mapped into
+  // the profiled process, according to the libs list.
   const lib = getContainingLibrary(libs, address);
   if (lib) {
-    // This is a known library.
-    const baseAddress = lib.start - lib.offset;
-    addressRelativeToLib = address - baseAddress;
+    // Yes, we found the library whose mapping covers this address!
+    const libBaseAddress = lib.start - lib.offset;
+    addressRelativeToLib = address - libBaseAddress;
+
     resourceIndex = libToResourceIndex.get(lib);
     if (resourceIndex === undefined) {
       // This library doesn't exist in the libs array, insert it. This resou
@@ -418,47 +438,12 @@ function _extractJsFunction(
   const [, funcName, rawScriptURI] = jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
-  // Figure out the origin and host.
-  let origin;
-  let host;
-  try {
-    const url = new URL(scriptURI);
-    if (
-      !(
-        url.protocol === 'http:' ||
-        url.protocol === 'https:' ||
-        url.protocol === 'moz-extension:'
-      )
-    ) {
-      throw new Error('not a webhost or extension protocol');
-    }
-    origin = url.origin;
-    host = url.host;
-  } catch (e) {
-    origin = scriptURI;
-    host = null;
-  }
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    const originStringIndex = stringTable.indexForString(origin);
-    originToResourceIndex.set(origin, resourceIndex);
-    if (host) {
-      // This is a webhost URL.
-      resourceTable.lib[resourceIndex] = undefined;
-      resourceTable.name[resourceIndex] = originStringIndex;
-      resourceTable.host[resourceIndex] = stringTable.indexForString(host);
-      resourceTable.type[resourceIndex] = resourceTypes.webhost;
-    } else {
-      // This is a URL, but it doesn't point to something on the web, e.g. a
-      // chrome url.
-      resourceTable.lib[resourceIndex] = undefined;
-      resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-      resourceTable.host[resourceIndex] = undefined;
-      resourceTable.type[resourceIndex] = resourceTypes.url;
-    }
-  }
+  const resourceIndex = getOrCreateURIResource(
+    scriptURI,
+    resourceTable,
+    stringTable,
+    originToResourceIndex
+  );
 
   let funcNameIndex;
   if (funcName) {
@@ -579,18 +564,18 @@ function _processStackTable(
 
 /**
  * Convert stack field to cause field for the given payload. A cause field includes
- * both an IndexIntoStackTable, and the time the stack was captured. If the stack
- * was captured within the the start and end time of the marker, this was a synchronous
- * stack. Otherwise, if it happened before, it was an async stack, and is most likely
- * some event that happened in the past that triggered the marker.
+ * the thread ID (tid), an IndexIntoStackTable, and the time the stack was captured.
+ * If the stack was captured within the start and end time of the marker, this was a
+ * synchronous stack. Otherwise, if it happened before, it was an async stack, and is
+ * most likely some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: Object): Object {
+function _convertStackToCause(data: any): any {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
     if (stackIndex !== null) {
-      newData.cause = { time, stack: stackIndex };
+      newData.cause = { tid: stack.tid, time, stack: stackIndex };
     }
     return newData;
   }
@@ -645,11 +630,16 @@ function _processMarkers(
         case 'JS allocation': {
           // Build up a separate table for the JS allocation data, and do not
           // include it in the marker information.
-          jsAllocations.time.push(geckoPayload.startTime);
+          jsAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'JS Allocations are assumed to have a startTime'
+            )
+          );
           jsAllocations.className.push(geckoPayload.className);
           jsAllocations.typeName.push(geckoPayload.typeName);
           jsAllocations.coarseType.push(geckoPayload.coarseType);
-          jsAllocations.duration.push(geckoPayload.size);
+          jsAllocations.weight.push(geckoPayload.size);
           jsAllocations.inNursery.push(geckoPayload.inNursery);
           jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
           jsAllocations.length++;
@@ -664,8 +654,13 @@ function _processMarkers(
           }
           // Build up a separate table for the native allocation data, and do not
           // include it in the marker information.
-          inProgressNativeAllocations.time.push(geckoPayload.startTime);
-          inProgressNativeAllocations.duration.push(geckoPayload.size);
+          inProgressNativeAllocations.time.push(
+            ensureExists(
+              geckoMarkers.startTime[markerIndex],
+              'Native Allocations are assumed to have a startTime'
+            )
+          );
+          inProgressNativeAllocations.weight.push(geckoPayload.size);
           inProgressNativeAllocations.stack.push(
             _convertPayloadStackToIndex(geckoPayload)
           );
@@ -695,10 +690,15 @@ function _processMarkers(
 
     const payload = _processMarkerPayload(geckoPayload);
     const name = geckoMarkers.name[markerIndex];
-    const time = geckoMarkers.time[markerIndex];
+    const startTime = geckoMarkers.startTime[markerIndex];
+    const endTime = geckoMarkers.endTime[markerIndex];
+    const phase = geckoMarkers.phase[markerIndex];
     const category = geckoMarkers.category[markerIndex];
+
     markers.name.push(name);
-    markers.time.push(time);
+    markers.startTime.push(startTime);
+    markers.endTime.push(endTime);
+    markers.phase.push(phase);
     markers.category.push(category);
     markers.data.push(payload);
     markers.length++;
@@ -713,7 +713,8 @@ function _processMarkers(
     // This is the newer native allocations with memory addresses.
     nativeAllocations = {
       time: inProgressNativeAllocations.time,
-      duration: inProgressNativeAllocations.duration,
+      weight: inProgressNativeAllocations.weight,
+      weightType: inProgressNativeAllocations.weightType,
       stack: inProgressNativeAllocations.stack,
       memoryAddress,
       threadId,
@@ -723,7 +724,8 @@ function _processMarkers(
     // There is the older native allocations, without memory addresses.
     nativeAllocations = {
       time: inProgressNativeAllocations.time,
-      duration: inProgressNativeAllocations.duration,
+      weight: inProgressNativeAllocations.weight,
+      weightType: inProgressNativeAllocations.weightType,
       stack: inProgressNativeAllocations.stack,
       length: inProgressNativeAllocations.length,
     };
@@ -734,6 +736,16 @@ function _processMarkers(
     jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
     nativeAllocations,
   };
+}
+
+function convertPhaseTimes(
+  old_phases: PhaseTimes<Milliseconds>
+): PhaseTimes<Microseconds> {
+  const phases = {};
+  for (const phase in old_phases) {
+    phases[phase] = old_phases[phase] * 1000;
+  }
+  return phases;
 }
 
 /**
@@ -750,8 +762,7 @@ function _processMarkerPayload(
   // If there is a "stack" field, convert it to a "cause" field. This is
   // pre-emptively done for every single marker payload.
   //
-  // Warning: This function converts the payload into an Object type, which is
-  // about as bad as an any.
+  // Warning: This function converts the payload into an any type
   const payload = _convertStackToCause(geckoPayload);
 
   switch (payload.type) {
@@ -767,8 +778,6 @@ function _processMarkerPayload(
 
       return ({
         type: 'GCSlice',
-        startTime: payload.startTime,
-        endTime: payload.endTime,
         timings: {
           ...partialTimings,
           phase_times: times ? convertPhaseTimes(times) : {},
@@ -789,16 +798,12 @@ function _processMarkerPayload(
           };
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: timings,
           }: GCMajorMarkerPayload);
         }
         case 'aborted':
           return ({
             type: 'GCMajor',
-            startTime: payload.startTime,
-            endTime: payload.endTime,
             timings: { status: 'aborted' },
           }: GCMajorMarkerPayload);
         default:
@@ -822,6 +827,9 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
+    threadCPUDelta: geckoSamples.threadCPUDelta,
+    weightType: 'samples',
+    weight: null,
     length: geckoSamples.length,
   };
 
@@ -971,7 +979,7 @@ function _processThread(
   );
   const geckoSamples: GeckoSampleStruct = _toStructOfArrays(thread.samples);
   const geckoMarkers: GeckoMarkerStruct = _toStructOfArrays(
-    _sortByField('time', thread.markers)
+    _sortMarkers(thread.markers)
   );
 
   const { libs, pausedRanges, meta } = processProfile;
@@ -1136,9 +1144,13 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
+  function adjustTimeIfNotNull(time: number | null) {
+    return time === null ? time : time + delta;
+  }
   return {
     ...markers,
-    time: markers.time.map(time => time + delta),
+    startTime: markers.startTime.map(adjustTimeIfNotNull),
+    endTime: markers.endTime.map(adjustTimeIfNotNull),
     data: markers.data.map(data => {
       if (!data) {
         return data;
@@ -1150,13 +1162,8 @@ export function adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
-      if (newData.type === 'tracing' || newData.type === 'Styles') {
-        if (newData.cause) {
-          newData.cause.time += delta;
-        }
-        if (newData.category === 'DOMEvent' && 'timeStamp' in newData) {
-          newData.timeStamp += delta;
-        }
+      if (newData.cause) {
+        newData.cause.time += delta;
       }
       if (newData.type === 'Network') {
         if (typeof newData.domainLookupStart === 'number') {
@@ -1198,16 +1205,65 @@ export function adjustMarkerTimestamps(
 }
 
 /**
+ * Marker schemas are only emitted for markers that are used. Each subprocess
+ * can have a different list, as the processes are not coordinating with each
+ * other in Gecko. These per-process lists need to be consolidated into a
+ * primary list that is stored on the processed profile's meta object.
+ */
+function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
+  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema;
+  const names: Set<string> = new Set(
+    geckoProfile.meta.markerSchema.map(({ name }) => name)
+  );
+
+  for (const subprocess of geckoProfile.processes) {
+    for (const markerSchema of subprocess.meta.markerSchema) {
+      if (!names.has(markerSchema.name)) {
+        names.add(markerSchema.name);
+        combinedSchemas.push(markerSchema);
+      }
+    }
+  }
+
+  return combinedSchemas;
+}
+
+/**
+ * Convert an unknown profile from either the Gecko format or the DevTools format
+ * into the processed format. Throws if there is an error.
+ */
+export function processGeckoOrDevToolsProfile(json: mixed): Profile {
+  if (!json) {
+    throw new Error('The profile was empty.');
+  }
+  if (typeof json !== 'object') {
+    throw new Error('The profile was not an object');
+  }
+
+  // The profile can be embedded in an object if it's exported from the old DevTools
+  // performance panel.
+  // { profile: GeckoProfile }
+  const geckoProfile = coerce<mixed, GeckoProfile>(
+    json.profile ? json.profile : json
+  );
+
+  // Double check that there is a meta object, since this is the first time we've
+  // coerced a "mixed" object to a GeckoProfile.
+  if (!geckoProfile.meta) {
+    throw new Error(
+      'This does not appear to be a valid Gecko Profile, there is no meta field.'
+    );
+  }
+
+  return processGeckoProfile(geckoProfile);
+}
+
+/**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
-export function processProfile(
-  rawProfile: GeckoProfile | { profile: GeckoProfile }
-): Profile {
-  // We may have been given a DevTools profile, in that case extract the Gecko Profile.
-  const geckoProfile = rawProfile.profile ? rawProfile.profile : rawProfile;
-
+export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
@@ -1319,6 +1375,9 @@ export function processProfile(
     // already symbolicated, otherwise we indicate it needs to be symbolicated.
     symbolicated: !!geckoProfile.meta.presymbolicated,
     updateChannel: geckoProfile.meta.updateChannel,
+    markerSchema: processMarkerSchema(geckoProfile),
+    sampleUnits: geckoProfile.meta.sampleUnits,
+    device: geckoProfile.meta.device,
   };
 
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
@@ -1362,81 +1421,113 @@ export function processProfile(
 }
 
 /**
+ * The UniqueStringArray is a class, and is not serializable. This function turns
+ * a profile into the serializable variant.
+ */
+export function makeProfileSerializable({
+  threads,
+  ...restOfProfile
+}: Profile): SerializableProfile {
+  return {
+    ...restOfProfile,
+    threads: threads.map(({ stringTable, ...restOfThread }) => {
+      return {
+        ...restOfThread,
+        stringArray: stringTable.serializeToArray(),
+      };
+    }),
+  };
+}
+
+/**
  * Take a processed profile and remove any non-serializable classes such as the
  * StringTable class.
  */
 export function serializeProfile(profile: Profile): string {
-  // stringTable -> stringArray
-  const newProfile = {
-    ...profile,
-    threads: profile.threads.map(thread => {
-      const stringArray = thread.stringTable.serializeToArray();
-      // Has to be any since Threads don't have stringArray.
-      const newThread: any = Object.assign({}, thread);
-      delete newThread.stringTable;
-      newThread.stringArray = stringArray;
-      return newThread;
-    }),
-  };
-
-  return JSON.stringify(newProfile);
+  return JSON.stringify(makeProfileSerializable(profile));
 }
 
 /**
  * Take a serialized processed profile from some saved source, and re-initialize
  * any non-serializable classes.
  */
-function _unserializeProfile(profile: Object): Profile {
-  // stringArray -> stringTable
-  const newProfile = Object.assign({}, profile, {
-    threads: profile.threads.map(thread => {
-      const { stringArray, ...newThread } = thread;
-
-      newThread.stringTable = new UniqueStringArray(stringArray);
-
-      return newThread;
+function _unserializeProfile({
+  threads,
+  ...restOfProfile
+}: SerializableProfile): Profile {
+  return {
+    ...restOfProfile,
+    threads: threads.map(({ stringArray, ...restOfThread }) => {
+      return {
+        ...restOfThread,
+        stringTable: new UniqueStringArray(stringArray),
+      };
     }),
-  });
-  return newProfile;
+  };
 }
 
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
+ * The profile can be in the form of an array buffer or of a string or of a JSON
+ * object, .
+ * The following profile formats are supported for the various input types:
+ *  - Processed profile: input can be ArrayBuffer or string or JSON object
+ *  - Gecko profile: input can be ArrayBuffer or string or JSON object
+ *  - Devtools profile: input can be ArrayBuffer or string or JSON object
+ *  - Chrome profile: input can be ArrayBuffer or string or JSON object
+ *  - `perf script` profile: input can be ArrayBuffer or string
+ *  - ART trace: input must be ArrayBuffer
  */
 export async function unserializeProfileOfArbitraryFormat(
-  stringOrObject: string | Object
+  arbitraryFormat: mixed
 ): Promise<Profile> {
   try {
-    let profile = null;
-    if (typeof stringOrObject === 'string') {
-      try {
-        profile = JSON.parse(stringOrObject);
-      } catch (e) {
-        // The string is not json. It might be the output from `perf script`.
-        if (isPerfScriptFormat(stringOrObject)) {
-          profile = convertPerfScriptProfile(stringOrObject);
-        } else {
-          throw e;
+    if (arbitraryFormat instanceof ArrayBuffer) {
+      if (isArtTraceFormat(arbitraryFormat)) {
+        arbitraryFormat = convertArtTraceProfile(arbitraryFormat);
+      } else {
+        try {
+          const textDecoder = new TextDecoder('utf-8', { fatal: true });
+          arbitraryFormat = await textDecoder.decode(arbitraryFormat);
+        } catch (e) {
+          console.error('Source exception:', e);
+          throw new Error(
+            'The profile array buffer could not be parsed as a UTF-8 string.'
+          );
         }
       }
-    } else {
-      profile = stringOrObject;
     }
 
-    if (isOldCleopatraFormat(profile)) {
-      profile = convertOldCleopatraProfile(profile); // outputs preprocessed profile
+    if (typeof arbitraryFormat === 'string') {
+      // The profile could be JSON or the output from `perf script`. Try `perf script` first.
+      if (isPerfScriptFormat(arbitraryFormat)) {
+        arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
+      } else {
+        // Try parsing as JSON.
+        arbitraryFormat = JSON.parse(arbitraryFormat);
+      }
     }
-    if (isProcessedProfile(profile)) {
-      upgradeProcessedProfileToCurrentVersion(profile);
-      return _unserializeProfile(profile);
+
+    // At this point, we expect arbitraryFormat to contain a JSON object of some profile format.
+    const json = arbitraryFormat;
+
+    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
+      json
+    );
+    if (processedProfile) {
+      return _unserializeProfile(processedProfile);
     }
-    if (isChromeProfile(profile)) {
-      return convertChromeProfile(profile);
+
+    const processedChromeProfile = attemptToConvertChromeProfile(json);
+    if (processedChromeProfile) {
+      return processedChromeProfile;
     }
+
     // Else: Treat it as a Gecko profile and just attempt to process it.
-    return processProfile(profile);
+    return processGeckoOrDevToolsProfile(json);
   } catch (e) {
+    console.error('UnserializationError:', e);
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }

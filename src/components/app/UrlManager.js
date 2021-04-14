@@ -5,35 +5,35 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import { getUrlSetupPhase } from '../../selectors/app';
+import explicitConnect from 'firefox-profiler/utils/connect';
+import { getView, getUrlSetupPhase } from 'firefox-profiler/selectors/app';
 import {
   updateUrlState,
   startFetchingProfiles,
   urlSetupDone,
   show404,
   setupInitialUrlState,
-} from '../../actions/app';
+} from 'firefox-profiler/actions/app';
 import {
   urlFromState,
   stateFromLocation,
   getIsHistoryReplaceState,
-} from '../../app-logic/url-handling';
+} from 'firefox-profiler/app-logic/url-handling';
 import {
   getProfilesFromRawUrl,
   typeof getProfilesFromRawUrl as GetProfilesFromRawUrl,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
-} from '../../utils/connect';
-import type { UrlState, UrlSetupPhase } from '../../types/state';
-import type { Profile } from '../../types/profile';
+} from 'firefox-profiler/utils/connect';
+import type { UrlState, Phase, UrlSetupPhase } from 'firefox-profiler/types';
 
 type StateProps = {|
+  +phase: Phase,
   +urlState: UrlState,
   +urlSetupPhase: UrlSetupPhase,
 |};
@@ -82,7 +82,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  *       view with the `UrlState` information.
  *    4. Display the profile view.
  */
-class UrlManager extends React.PureComponent<Props> {
+class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
     const {
       startFetchingProfiles,
@@ -92,33 +92,32 @@ class UrlManager extends React.PureComponent<Props> {
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
     const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> = (this
       .props.getProfilesFromRawUrl: any);
+
+    // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
 
     try {
       // Process the raw url and fetch the profile.
-      const results: {
-        profile: Profile | null,
-        shouldSetupInitialUrlState: boolean,
-      } = await getProfilesFromRawUrl(window.location);
-
-      // Manually coerce these into the proper type due to the FlowFixMe above.
-      // Profile may be null only for the `from-addon` dataSource since we do
-      // not `await` for retrieveProfileFromAddon function.
-      const profile: Profile | null = results.profile;
-      const shouldSetupInitialUrlState: boolean =
-        results.shouldSetupInitialUrlState;
-      if (profile !== null && shouldSetupInitialUrlState) {
-        setupInitialUrlState(window.location, profile);
-      } else {
-        urlSetupDone();
-      }
+      // We try to fetch the profile before setting the url state, because
+      // while processing and especially upgrading the url information we may
+      // need the profile data.
+      //
+      // Also note the profile may be null for the `from-addon` dataSource since
+      // we do not `await` for retrieveProfileFromAddon function, but also in
+      // case of fatal errors in the process of retrieving and processing a
+      // profile. To handle the latter case properly, we won't `pushState` if
+      // we're in a FATAL_ERROR state.
+      const profile = await getProfilesFromRawUrl(window.location);
+      setupInitialUrlState(window.location, profile);
     } catch (error) {
-      // Silently complete the url setup.
+      // Complete the URL setup, as values can come from the user, so we should
+      // still proceed with loading the app.
+      console.error('There was an error in the initial URL setup.', error);
       urlSetupDone();
     }
   }
 
-  _updateState() {
+  _updateState = () => {
     const { updateUrlState, show404, urlState: previousUrlState } = this.props;
     let newUrlState;
     if (window.history.state) {
@@ -138,13 +137,31 @@ class UrlManager extends React.PureComponent<Props> {
       }
     }
 
-    if (
-      previousUrlState.dataSource !== newUrlState.dataSource ||
-      previousUrlState.hash !== newUrlState.hash
-    ) {
-      // Profile sanitization and publishing can do weird things for the history API.
-      // Rather than write lots of complicated interactions, just prevent the back button
-      // from working when going between a published profile, and one that is not.
+    // Profile sanitization and publishing can do weird things for the history API
+    // and we could end up having unconsistent state.
+    // That's why we prevent going back in history in these cases:
+    // 1 - between "from-addon" and "public" (in any direction)
+    // 2 - with the "public" datasource when the hash changes (this means the
+    //     user once published again an already public profile, and then wants to go
+    //     back).
+    // But we want to accept the other interactions.
+
+    // 1. Do we move between "from-addon" and "public"?
+    const movesBetweenFromAddonAndPublic =
+      // from-addon -> public
+      (['from-addon', 'unpublished'].includes(previousUrlState.dataSource) &&
+        newUrlState.dataSource === 'public') ||
+      // or public -> from-addon
+      (previousUrlState.dataSource === 'public' &&
+        ['from-addon', 'unpublished'].includes(newUrlState.dataSource));
+
+    // 2. Do we move between 2 different hashes for a public profile
+    const movesBetweenHashValues =
+      previousUrlState.dataSource === 'public' &&
+      newUrlState.dataSource === 'public' &&
+      previousUrlState.hash !== newUrlState.hash;
+
+    if (movesBetweenFromAddonAndPublic || movesBetweenHashValues) {
       window.history.replaceState(
         previousUrlState,
         document.title,
@@ -155,27 +172,44 @@ class UrlManager extends React.PureComponent<Props> {
 
     // Update the Redux store.
     updateUrlState(newUrlState);
-  }
+  };
 
   componentDidMount() {
     this._processInitialUrls();
-    window.addEventListener('popstate', () => this._updateState());
+    window.addEventListener('popstate', this._updateState);
   }
 
-  componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.urlSetupPhase !== 'done') {
+  componentWillUnmount() {
+    window.removeEventListener('popstate', this._updateState);
+  }
+
+  componentDidUpdate() {
+    const { urlSetupPhase, phase, urlState } = this.props;
+    if (urlSetupPhase !== 'done') {
+      // Do not change the history before the url setup is done, because the URL
+      // state isn't in a consistent state yet.
       return;
     }
-    const newUrl = urlFromState(nextProps.urlState);
+
+    if (phase === 'FATAL_ERROR') {
+      // Even if the url setup phase is done, we must not change the URL if
+      // we're in a FATAL_ERROR state. Likely the profile update failed, and so
+      // the url state wasn't initialized properly. Therefore trying to
+      // pushState will result in a broken URL and break reload mechanisms,
+      // especially the reload we do in ServiceWorkerManager.
+      return;
+    }
+
+    const newUrl = urlFromState(urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
       if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
-        window.history.pushState(nextProps.urlState, document.title, newUrl);
+        window.history.pushState(urlState, document.title, newUrl);
       } else {
         // Replace the URL state before the URL setup is done, and if we've specifically
         // flagged to replace the URL state.
-        window.history.replaceState(nextProps.urlState, document.title, newUrl);
+        window.history.replaceState(urlState, document.title, newUrl);
       }
     }
   }
@@ -196,10 +230,11 @@ class UrlManager extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
+    phase: getView(state).phase,
   }),
   mapDispatchToProps: {
     updateUrlState,
@@ -209,5 +244,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     setupInitialUrlState,
     getProfilesFromRawUrl,
   },
-  component: UrlManager,
+  component: UrlManagerImpl,
 });

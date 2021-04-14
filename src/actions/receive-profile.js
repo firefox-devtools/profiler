@@ -6,30 +6,40 @@
 import { oneLine } from 'common-tags';
 import queryString from 'query-string';
 import {
-  processProfile,
+  processGeckoProfile,
   unserializeProfileOfArbitraryFormat,
-} from '../profile-logic/process-profile';
-import { SymbolStore } from '../profile-logic/symbol-store';
-import { symbolicateProfile } from '../profile-logic/symbolication';
-import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
-import { mergeProfiles } from '../profile-logic/comparison';
-import { decompress } from '../utils/gz';
-import { expandUrl } from '../utils/shorten-url';
-import { TemporaryError } from '../utils/errors';
+} from 'firefox-profiler/profile-logic/process-profile';
+import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
+import {
+  symbolicateProfile,
+  applySymbolicationStep,
+} from 'firefox-profiler/profile-logic/symbolication';
+import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
+import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
+import { decompress } from 'firefox-profiler/utils/gz';
+import { expandUrl } from 'firefox-profiler/utils/shorten-url';
+import { TemporaryError } from 'firefox-profiler/utils/errors';
 import JSZip from 'jszip';
 import {
-  getSelectedThreadIndexOrNull,
+  getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from '../selectors/url-state';
+  getTimelineTrackOrganization,
+  getProfileOrNull,
+  getProfile,
+  getView,
+  getRelevantPagesForActiveTab,
+  getIsCPUUtilizationProvided,
+} from 'firefox-profiler/selectors';
 import {
+  withHistoryReplaceStateAsync,
   stateFromLocation,
-  getDataSourceFromPathParts,
-} from '../app-logic/url-handling';
+  ensureIsValidDataSource,
+} from 'firefox-profiler/app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -39,25 +49,34 @@ import {
   initializeSelectedThreadIndex,
   initializeHiddenGlobalTracks,
   getVisibleThreads,
-} from '../profile-logic/tracks';
-import { getProfileOrNull } from '../selectors/profile';
-import { getView } from '../selectors/app';
+} from 'firefox-profiler/profile-logic/tracks';
+import { computeActiveTabTracks } from 'firefox-profiler/profile-logic/active-tab';
 import { setDataSource } from './profile-view';
+import { fatalError } from './errors';
+import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 
 import type {
-  FunctionsUpdatePerThread,
-  FuncToFuncMap,
   RequestedLib,
   ImplementationFilter,
-} from '../types/actions';
-import type { TransformStacksPerThread } from '../types/transforms';
-import type { Action, ThunkAction, Dispatch } from '../types/store';
-import type {
+  TransformStacksPerThread,
+  Action,
+  ThunkAction,
+  Dispatch,
+  TimelineTrackOrganization,
   Profile,
   ThreadIndex,
-  IndexIntoFuncTable,
-} from '../types/profile';
-import { assertExhaustiveCheck } from '../utils/flow';
+  TabID,
+  Page,
+  InnerWindowID,
+  Pid,
+  OriginsTimelineRoot,
+} from 'firefox-profiler/types';
+
+import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+} from 'firefox-profiler/utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -84,10 +103,12 @@ export function waitingForProfileFromAddon(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler?: $GeckoProfiler,
+    geckoProfiler: $GeckoProfiler,
+    skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
@@ -123,7 +144,13 @@ export function loadProfile(
     // before finalizing profile view. That's why we are dispatching this action
     // after completing those steps inside `setupInitialUrlState`.
     if (initialLoad === false) {
-      await dispatch(finalizeProfileView(config.geckoProfiler));
+      await dispatch(
+        finalizeProfileView(
+          config.geckoProfiler,
+          config.timelineTrackOrganization,
+          config.skipSymbolication
+        )
+      );
     }
   };
 }
@@ -134,11 +161,19 @@ export function loadProfile(
  * view information, this function will compute the defaults. There is a decent amount of
  * complexity to making all of these decisions, which has been collected in a bunch of
  * functions in the src/profile-logic/tracks.js file.
+ *
+ * Note: skipSymbolication is used in tests only, this is enforced.
  */
 export function finalizeProfileView(
-  geckoProfiler?: $GeckoProfiler
+  geckoProfiler?: $GeckoProfiler,
+  timelineTrackOrganization?: TimelineTrackOrganization,
+  skipSymbolication?: boolean
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
+    if (skipSymbolication && process.env.NODE_ENV !== 'test') {
+      throw new Error('Please do not use skipSymbolication outside of tests');
+    }
+
     const profile = getProfileOrNull(getState());
     if (profile === null || getView(getState()).phase !== 'PROFILE_LOADED') {
       // Profile load was not successful. Do not continue.
@@ -148,8 +183,81 @@ export function finalizeProfileView(
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
-    let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
-    const hasUrlInfo = selectedThreadIndex !== null;
+    const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
+    const pages = profile.pages;
+    if (!timelineTrackOrganization) {
+      // Most likely we'll need to load the timeline track organization, as requested
+      // by the URL, but tests can pass in a value.
+      timelineTrackOrganization = getTimelineTrackOrganization(getState());
+    }
+
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
+        break;
+      case 'active-tab':
+        if (pages) {
+          dispatch(
+            finalizeActiveTabProfileView(
+              profile,
+              selectedThreadIndexes,
+              timelineTrackOrganization.tabID
+            )
+          );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the active tab based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
+        }
+
+        break;
+      case 'origins': {
+        if (pages) {
+          dispatch(
+            finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
+          );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the origins based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
+        }
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
+    }
+
+    // Note we kick off symbolication only for the profiles we know for sure
+    // that they weren't symbolicated.
+    // We can skip the symbolication in tests if needed.
+    if (!skipSymbolication && profile.meta.symbolicated === false) {
+      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
+      if (symbolStore) {
+        // Only symbolicate if a symbol store is available. In tests we may not
+        // have access to IndexedDB.
+        await doSymbolicateProfile(dispatch, profile, symbolStore);
+      }
+    }
+  };
+}
+
+/**
+ * Finalize the profile state for full view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeFullProfileView(
+  profile: Profile,
+  selectedThreadIndexes: Set<ThreadIndex> | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const hasUrlInfo = selectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -198,8 +306,8 @@ export function finalizeProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    selectedThreadIndex = initializeSelectedThreadIndex(
-      selectedThreadIndex,
+    selectedThreadIndexes = initializeSelectedThreadIndex(
+      selectedThreadIndexes,
       visibleThreadIndexes,
       profile
     );
@@ -226,23 +334,319 @@ export function finalizeProfileView(
       }
     }
 
+    // Check the profile to see if we have threadCPUDelta values and switch to
+    // the category view with CPU if we have. This is needed only while we are
+    // still experimenting with the new activity graph. We should remove this
+    // when we have this on by default.
+    let timelineType = null;
+    if (
+      !hasUrlInfo &&
+      profile.meta.sampleUnits &&
+      profile.threads[0].samples.threadCPUDelta
+    ) {
+      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
+      if (hasCPUDeltaValues) {
+        timelineType = 'cpu-category';
+      }
+    }
+
     dispatch({
-      type: 'VIEW_PROFILE',
-      selectedThreadIndex,
+      type: 'VIEW_FULL_PROFILE',
+      selectedThreadIndexes,
       globalTracks,
       globalTrackOrder,
       hiddenGlobalTracks,
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
+      timelineType,
+    });
+  };
+}
+
+/**
+ * This is a small utility to extract the origin from a URL, to build the origins-based
+ * profile view.
+ */
+function getOrigin(urlString: string): string {
+  if (urlString.startsWith('chrome://')) {
+    return urlString;
+  }
+  try {
+    const url = new URL(urlString);
+    if (url.origin === 'null') {
+      // This can happen for "about:newtab"
+      return urlString;
+    }
+    return url.origin;
+  } catch {
+    // This failed, maybe it's an internal URL.
+    return urlString;
+  }
+}
+
+/**
+ * Finalize the profile state for the origin-based view. This is an experimental
+ * view for fission. It's not turned on by default. Note, that this function
+ * probably needs a lot of work to become more correct to handle everything,
+ * so it shouldn't be trusted too much at this time.
+ */
+export function finalizeOriginProfileView(
+  profile: Profile,
+  pages: Page[],
+  selectedThreadIndexes: Set<ThreadIndex> | null
+): ThunkAction<void> {
+  return dispatch => {
+    const idToPage: Map<InnerWindowID, Page> = new Map();
+    for (const page of pages) {
+      idToPage.set(page.innerWindowID, page);
+    }
+
+    // TODO - A thread can have multiple pages. Ignore this for now.
+    const pageOfThread: Array<Page | null> = [];
+    // These maps essentially serve as a tuple of the InnerWindowID and ThreadIndex
+    // that can be iterated through on a "for of" loop.
+    const rootOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    const subOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    // The set of all thread indexes that do not have an origin associated with them.
+    const noOrigins: Set<ThreadIndex> = new Set();
+
+    // Populate the collections above by iterating through all of the threads.
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const { frameTable } = profile.threads[threadIndex];
+
+      let originFound = false;
+      for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        if (innerWindowID === null || innerWindowID === 0) {
+          continue;
+        }
+
+        const page = idToPage.get(innerWindowID);
+        if (!page) {
+          // This should only happen if there is an error in the Gecko implementation.
+          console.error('Could not find the page for an innerWindowID', {
+            innerWindowID,
+            pages,
+          });
+          break;
+        }
+
+        if (page.embedderInnerWindowID === 0) {
+          rootOrigins.set(innerWindowID, threadIndex);
+        } else {
+          subOrigins.set(innerWindowID, threadIndex);
+        }
+
+        originFound = true;
+        pageOfThread[threadIndex] = page;
+        break;
+      }
+
+      if (!originFound) {
+        pageOfThread[threadIndex] = null;
+        noOrigins.add(threadIndex);
+      }
+    }
+
+    // Build up the `originsTimelineRoots` variable and any relationships needed
+    // for determining the structure of the threads in terms of their origins.
+    const originsTimelineRoots: OriginsTimelineRoot[] = [];
+    // This map can be used to take a thread with no origin information, and assign
+    // it to some origin based on a shared PID.
+    const pidToRootInnerWindowID: Map<Pid, InnerWindowID> = new Map();
+    // The root is a root domain only.
+    const innerWindowIDToRoot: Map<InnerWindowID, InnerWindowID> = new Map();
+    for (const [innerWindowID, threadIndex] of rootOrigins) {
+      const thread = profile.threads[threadIndex];
+      const page = ensureExists(pageOfThread[threadIndex]);
+      pidToRootInnerWindowID.set(thread.pid, innerWindowID);
+      // These are all roots.
+      innerWindowIDToRoot.set(innerWindowID, innerWindowID);
+      originsTimelineRoots.push({
+        type: 'origin',
+        innerWindowID,
+        threadIndex,
+        page,
+        origin: getOrigin(page.url),
+        children: [],
+      });
+    }
+
+    // Iterate and drain the sub origins from this set, and attempt to assign them
+    // to a root origin. This needs to loop to handle arbitrary sub-iframe depths.
+    const remainingSubOrigins = new Set([...subOrigins]);
+    let lastRemaining = Infinity;
+    while (lastRemaining !== remainingSubOrigins.size) {
+      lastRemaining = remainingSubOrigins.size;
+      for (const suborigin of remainingSubOrigins) {
+        const [innerWindowID, threadIndex] = suborigin;
+        const page = ensureExists(pageOfThread[threadIndex]);
+        const rootInnerWindowID = innerWindowIDToRoot.get(
+          page.embedderInnerWindowID
+        );
+        if (rootInnerWindowID === undefined) {
+          // This root has not been found yet.
+          continue;
+        }
+        const thread = profile.threads[threadIndex];
+        pidToRootInnerWindowID.set(thread.pid, rootInnerWindowID);
+
+        remainingSubOrigins.delete(suborigin);
+        innerWindowIDToRoot.set(innerWindowID, rootInnerWindowID);
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push({
+          type: 'sub-origin',
+          innerWindowID,
+          threadIndex,
+          origin: getOrigin(page.url),
+          page,
+        });
+      }
+    }
+
+    // Try to blame a thread on another thread with an origin. If this doesn't work,
+    // then add it to this originsTimelineNoOrigin array.
+    const originsTimelineNoOrigin = [];
+    for (const threadIndex of noOrigins) {
+      const thread = profile.threads[threadIndex];
+      const rootInnerWindowID = pidToRootInnerWindowID.get(thread.pid);
+      const noOriginEntry = {
+        type: 'no-origin',
+        threadIndex,
+      };
+      if (rootInnerWindowID) {
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push(noOriginEntry);
+      } else {
+        originsTimelineNoOrigin.push(noOriginEntry);
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_ORIGINS_PROFILE',
+      // TODO - We should pick the best selected thread.
+      selectedThreadIndexes:
+        selectedThreadIndexes === null ? new Set([0]) : selectedThreadIndexes,
+      originsTimeline: [...originsTimelineNoOrigin, ...originsTimelineRoots],
+    });
+  };
+}
+
+/**
+ * Finalize the profile state for active tab view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeActiveTabProfileView(
+  profile: Profile,
+  selectedThreadIndexes: Set<ThreadIndex> | null,
+  tabID: TabID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const relevantPages = getRelevantPagesForActiveTab(getState());
+    const activeTabTimeline = computeActiveTabTracks(
+      profile,
+      relevantPages,
+      getState()
+    );
+
+    if (selectedThreadIndexes === null) {
+      // Select the main track if there is no selected thread.
+      selectedThreadIndexes = new Set([
+        ...activeTabTimeline.mainTrack.threadIndexes,
+      ]);
+    }
+
+    dispatch({
+      type: 'VIEW_ACTIVE_TAB_PROFILE',
+      activeTabTimeline,
+      selectedThreadIndexes,
+      tabID,
+    });
+  };
+}
+
+/**
+ * Re-compute the profile view data. That's used to be able to switch between
+ * full and active tab view.
+ */
+export function changeTimelineTrackOrganization(
+  timelineTrackOrganization: TimelineTrackOrganization
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    // We are resetting the selected thread index, because we are not sure if
+    // the selected thread will be availabe in the next view.
+    const selectedThreadIndexes = new Set([0]);
+    dispatch({
+      type: 'DATA_RELOAD',
     });
 
-    // Note we kick off symbolication only for the profiles we know for sure
-    // that they weren't symbolicated.
-    if (profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
+        break;
+      case 'active-tab':
+        // The url state says this is an active tab view. We should compute and
+        // initialize the state relevant to that state.
+        dispatch(
+          finalizeActiveTabProfileView(
+            profile,
+            selectedThreadIndexes,
+            timelineTrackOrganization.tabID
+          )
+        );
+        break;
+      case 'origins': {
+        const pages = ensureExists(
+          profile.pages,
+          'There was no page information in the profile.'
+        );
+        dispatch(
+          finalizeOriginProfileView(profile, pages, selectedThreadIndexes)
+        );
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
+  };
+}
+
+/**
+ * Symbolication normally happens when a profile is first loaded. This function
+ * provides the ability to kick off symbolication again after it has already been
+ * attempted once.
+ */
+export function resymbolicateProfile(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const symbolStore = getSymbolStore(dispatch);
+    const profile = getProfile(getState());
+    if (!symbolStore) {
+      throw new Error(
+        'There was no symbol store when attempting to re-symbolicate.'
+      );
+    }
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
   };
 }
 
@@ -255,10 +659,12 @@ export function finalizeProfileView(
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     geckoProfiler: $GeckoProfiler,
+    skipSymbolication: boolean,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
@@ -290,12 +696,43 @@ export function doneSymbolicating(): Action {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function coalescedFunctionsUpdate(
-  functionsUpdatePerThread: FunctionsUpdatePerThread
-): Action {
-  return {
-    type: 'COALESCED_FUNCTIONS_UPDATE',
-    functionsUpdatePerThread,
+// Apply all the individual "symbolication steps" from symbolicationStepsPerThread
+// to the current profile, as one redux action.
+// We combine steps into one redux action in order to avoid unnecessary renders.
+// When symbolication results arrive, we often get a very high number of individual
+// symbolication updates. If we dispatched all of them as individual redux actions,
+// we would cause React to re-render synchronously for each action, and the profile
+// selectors called from rendering would do expensive work, most of which would never
+// reach the screen because it would be invalidated by the next symbolication update.
+// So we queue up symbolication steps and run the update from requestIdleCallback.
+export function bulkProcessSymbolicationSteps(
+  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { threads } = getProfile(getState());
+    const oldFuncToNewFuncMaps = new Map();
+    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
+      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
+      if (symbolicationSteps === undefined) {
+        return oldThread;
+      }
+      const oldFuncToNewFuncMap = new Map();
+      let thread = oldThread;
+      for (const symbolicationStep of symbolicationSteps) {
+        thread = applySymbolicationStep(
+          thread,
+          symbolicationStep,
+          oldFuncToNewFuncMap
+        );
+      }
+      oldFuncToNewFuncMaps.set(threadIndex, oldFuncToNewFuncMap);
+      return thread;
+    });
+    dispatch({
+      type: 'BULK_SYMBOLICATION',
+      oldFuncToNewFuncMaps,
+      symbolicatedThreads,
+    });
   };
 }
 
@@ -313,29 +750,24 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
-class ColascedFunctionsUpdateDispatcher {
-  _updates: FunctionsUpdatePerThread;
+// Queues up symbolication steps and bulk-processes them from requestIdleCallback,
+// in order to improve UI responsiveness during symbolication.
+class SymbolicationStepQueue {
+  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
-  _requestIdleTimeout: { timeout: number };
-  scheduledUpdatesDone: Promise<void>;
 
   constructor() {
-    this._updates = {};
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    this._requestIdleTimeout = { timeout: 2000 };
-    this.scheduledUpdatesDone = Promise.resolve();
   }
 
   _scheduleUpdate(dispatch) {
-    // Only request an update if one hasn't already been schedule.
+    // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
-      // Let any consumers of this class be able to know when all scheduled updates
-      // are done.
-      this.scheduledUpdatesDone = new Promise(resolve => {
-        requestIdleCallbackPolyfill(() => {
-          this._dispatchUpdate(dispatch);
-          resolve();
-        }, this._requestIdleTimeout);
+      requestIdleCallbackPolyfill(() => this._dispatchUpdate(dispatch), {
+        timeout: 2000,
       });
       this._requestedUpdate = true;
     }
@@ -343,103 +775,47 @@ class ColascedFunctionsUpdateDispatcher {
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
-    this._updates = {};
+    const observers = this._updateObservers;
+    this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    dispatch(coalescedFunctionsUpdate(updates));
+
+    dispatch(bulkProcessSymbolicationSteps(updates));
+
+    for (const observer of observers) {
+      observer();
+    }
   }
 
-  mergeFunctions(
+  enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: FuncToFuncMap
+    symbolicationStepInfo: SymbolicationStepInfo,
+    completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        oldFuncToNewFuncMap,
-        funcIndices: [],
-        funcNames: [],
-      };
-    } else {
-      for (const oldFunc of oldFuncToNewFuncMap.keys()) {
-        const funcIndex = oldFuncToNewFuncMap.get(oldFunc);
-        if (funcIndex === undefined) {
-          throw new Error(
-            'Unable to merge functions together, an undefined funcIndex was returned.'
-          );
-        }
-        this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
-      }
+    let threadSteps = this._updates.get(threadIndex);
+    if (threadSteps === undefined) {
+      threadSteps = [];
+      this._updates.set(threadIndex, threadSteps);
     }
-  }
-
-  assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames) {
-    this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        funcIndices,
-        funcNames,
-        oldFuncToNewFuncMap: new Map(),
-      };
-    } else {
-      this._updates[threadIndex].funcIndices = this._updates[
-        threadIndex
-      ].funcIndices.concat(funcIndices);
-      this._updates[threadIndex].funcNames = this._updates[
-        threadIndex
-      ].funcNames.concat(funcNames);
-    }
+    threadSteps.push(symbolicationStepInfo);
+    this._updateObservers.push(completionHandler);
   }
 }
 
-const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
-
-export function mergeFunctions(
-  threadIndex: ThreadIndex,
-  oldFuncToNewFuncMap: FuncToFuncMap
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(
-      dispatch,
-      threadIndex,
-      oldFuncToNewFuncMap
-    );
-  };
-}
-
-export function assignFunctionNames(
-  threadIndex: ThreadIndex,
-  funcIndices: IndexIntoFuncTable[],
-  funcNames: string[]
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(
-      dispatch,
-      threadIndex,
-      funcIndices,
-      funcNames
-    );
-  };
-}
+const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
 
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromAddon(profile) {
-  if (profile instanceof ArrayBuffer) {
-    const profileBytes = new Uint8Array(profile);
-    let decompressedProfile;
-    // Check for the gzip magic number in the header. If we find it, decompress
-    // the data first.
-    if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
-      decompressedProfile = await decompress(profileBytes);
-    } else {
-      decompressedProfile = profile;
-    }
-
-    const textDecoder = new TextDecoder();
-    return JSON.parse(textDecoder.decode(decompressedProfile));
+  // Note: the following check will work for array buffers coming from another
+  // global. This happens especially with tests but could happen in the future
+  // in Firefox too.
+  if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
+    return _extractJsonFromArrayBuffer(profile);
   }
   return profile;
 }
@@ -453,7 +829,7 @@ async function getProfileFromAddon(
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
-  const profile = processProfile(unpackedProfile);
+  const profile = processGeckoProfile(unpackedProfile);
   await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
@@ -462,7 +838,12 @@ async function getProfileFromAddon(
 function getSymbolStore(
   dispatch: Dispatch,
   geckoProfiler?: $GeckoProfiler
-): SymbolStore {
+): SymbolStore | null {
+  if (!window.indexedDB) {
+    // We could be running in a test environment with no indexedDB support. Do not
+    // return a symbol store in this case.
+    return null;
+  }
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
@@ -513,32 +894,32 @@ export async function doSymbolicateProfile(
   symbolStore: SymbolStore
 ) {
   dispatch(startSymbolicating());
-  await symbolicateProfile(profile, symbolStore, {
-    onMergeFunctions: (
-      threadIndex: ThreadIndex,
-      oldFuncToNewFuncMap: FuncToFuncMap
-    ) => {
-      dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
-    },
-    onGotFuncNames: (
-      threadIndex: ThreadIndex,
-      funcIndices: IndexIntoFuncTable[],
-      funcNames: string[]
-    ) => {
-      dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-    },
-  });
 
-  await gCoalescedFunctionsUpdateDispatcher.scheduledUpdatesDone;
+  const completionPromises = [];
+
+  await symbolicateProfile(
+    profile,
+    symbolStore,
+    (
+      threadIndex: ThreadIndex,
+      symbolicationStepInfo: SymbolicationStepInfo
+    ) => {
+      completionPromises.push(
+        new Promise(resolve => {
+          _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
+            dispatch,
+            threadIndex,
+            symbolicationStepInfo,
+            resolve
+          );
+        })
+      );
+    }
+  );
+
+  await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
-}
-
-export function fatalError(error: Error): Action {
-  return {
-    type: 'FATAL_ERROR',
-    error,
-  };
 }
 
 export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
@@ -561,7 +942,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
-      throw error;
+      console.error(error);
     }
   };
 }
@@ -601,7 +982,7 @@ type FetchProfileArgs = {
   url: string,
   onTemporaryError: TemporaryError => void,
   // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: Function,
+  reportError?: (...data: Array<any>) => void,
 };
 
 type ProfileOrZip = {
@@ -693,7 +1074,7 @@ function _deduceContentType(
 async function _extractProfileOrZipFromResponse(
   url: string,
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<ProfileOrZip> {
   const contentType = _deduceContentType(
     url,
@@ -726,7 +1107,7 @@ async function _extractProfileOrZipFromResponse(
  */
 async function _extractZipFromResponse(
   response: Response,
-  reportError: Function
+  reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
   const buffer = await response.arrayBuffer();
   try {
@@ -745,26 +1126,42 @@ async function _extractZipFromResponse(
 }
 
 /**
+ * Parse JSON from an optionally gzipped array buffer.
+ */
+async function _extractJsonFromArrayBuffer(
+  arrayBuffer: ArrayBuffer
+): Promise<any> {
+  let profileBytes = new Uint8Array(arrayBuffer);
+  // Check for the gzip magic number in the header.
+  if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+    profileBytes = await decompress(profileBytes);
+  }
+
+  const textDecoder = new TextDecoder();
+  return JSON.parse(textDecoder.decode(profileBytes));
+}
+
+/**
  * Don't trust third party responses, try and handle a variety of responses gracefully.
  */
 async function _extractJsonFromResponse(
   response: Response,
-  reportError: Function,
+  reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<any> {
   try {
-    // Don't check the content-type, but attempt to parse the response as JSON.
-    const json = await response.json();
-    // Catch the error if unable to parse the JSON.
-    return json;
+    // await before returning so that we can catch JSON parse errors.
+    return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
-    if (fileType === 'application/json') {
+    if (error && typeof error === 'object' && error.name === 'AbortError') {
+      message = 'The network request to load the profile was aborted.';
+    } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
     } else {
       message = oneLine`
-        The profile could not be decoded. This does not look like a supported file
+        The profile could not be downloaded and decoded. This does not look like a supported file
         type.
       `;
     }
@@ -780,14 +1177,15 @@ async function _extractJsonFromResponse(
   }
 }
 
-function getProfileUrlForHash(hash: string): string {
+export function getProfileUrlForHash(hash: string): string {
   // See https://cloud.google.com/storage/docs/access-public-data
   // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
   // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
   // is not documented nowadays.
+
   // By convention, "profile-store" is the name of our bucket, and the file path
   // is the hash we receive in the URL.
-  return `https://storage.googleapis.com/profile-store/${hash}`;
+  return `https://storage.googleapis.com/${GOOGLE_STORAGE_BUCKET}/${hash}`;
 }
 
 export function retrieveProfileFromStore(
@@ -847,7 +1245,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-function _fileReader(input: File): * {
+function _fileReader(input: File) {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of
@@ -886,45 +1284,33 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      switch (file.type) {
-        case 'application/gzip':
-        case 'application/x-gzip':
-          // Parse a single profile that has been gzipped.
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const arrayBuffer = new Uint8Array(buffer);
-            const decompressedArrayBuffer = await decompress(arrayBuffer);
-            const textDecoder = new TextDecoder();
-            const text = await textDecoder.decode(decompressedArrayBuffer);
-            const profile = await unserializeProfileOfArbitraryFormat(text);
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
+      if (file.type === 'application/zip') {
+        // Open a zip file in the zip file viewer
+        const buffer = await fileReader(file).asArrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        await dispatch(receiveZipFile(zip));
+      } else {
+        // Profile files can have file names with uncommon extensions
+        // (eg .profile). So we can't rely on the mime type to decide how to
+        // handle them.
+        let arrayBuffer = await fileReader(file).asArrayBuffer();
 
-            await dispatch(viewProfile(profile));
-          }
-          break;
-        case 'application/zip':
-          // Open a zip file in the zip file viewer
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const zip = await JSZip.loadAsync(buffer);
-            await dispatch(receiveZipFile(zip));
-          }
-          break;
-        default: {
-          // Plain uncompressed profile files can have file names with uncommon
-          // extensions (eg .profile). So we can't rely on the mime type to
-          // decide how to handle them. We'll try to parse them as a plain JSON
-          // file.
-          const text = await fileReader(file).asText();
-          const profile = await unserializeProfileOfArbitraryFormat(text);
-          if (profile === undefined) {
-            throw new Error('Unable to parse the profile.');
-          }
-
-          await dispatch(viewProfile(profile));
+        // Check for the gzip magic number in the header. If we find it, decompress
+        // the data first.
+        const profileBytes = new Uint8Array(arrayBuffer);
+        if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+          const decompressedProfile = await decompress(profileBytes);
+          arrayBuffer = decompressedProfile.buffer;
         }
+
+        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
+
+        await withHistoryReplaceStateAsync(async () => {
+          await dispatch(viewProfile(profile));
+        });
       }
     } catch (error) {
       dispatch(fatalError(error));
@@ -950,6 +1336,7 @@ export function retrieveProfilesToCompare(
         profileViewUrls.map(async url => {
           if (
             url.startsWith('https://perfht.ml/') ||
+            url.startsWith('https://share.firefox.dev/') ||
             url.startsWith('https://bit.ly/')
           ) {
             url = await expandUrl(url);
@@ -995,7 +1382,7 @@ export function retrieveProfilesToCompare(
         profile: resultProfile,
         implementationFilters,
         transformStacks,
-      } = mergeProfiles(profiles, profileStates);
+      } = mergeProfilesForDiffing(profiles, profileStates);
 
       // We define an implementationFilter if both profiles agree with the value.
       let implementationFilter;
@@ -1025,12 +1412,10 @@ export function retrieveProfilesToCompare(
 // the url and processing the UrlState.
 export function getProfilesFromRawUrl(
   location: Location
-): ThunkAction<
-  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
-> {
+): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
-    let dataSource = getDataSourceFromPathParts(pathParts);
+    let dataSource = ensureIsValidDataSource(pathParts[0]);
     if (dataSource === 'from-file') {
       // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
       // be 'from-file' and needs to be redirected to home page.
@@ -1038,10 +1423,9 @@ export function getProfilesFromRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
-    let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
-        shouldSetupInitialUrlState = false;
+      case 'unpublished':
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
@@ -1066,10 +1450,12 @@ export function getProfilesFromRawUrl(
         }
         break;
       }
+      case 'uploaded-recordings':
       case 'none':
       case 'from-file':
       case 'local':
-        throw new Error(`There is no profile to download`);
+        // There is no profile to download for these datasources.
+        break;
       default:
         throw assertExhaustiveCheck(
           dataSource,
@@ -1079,9 +1465,6 @@ export function getProfilesFromRawUrl(
 
     // Profile may be null only for the `from-addon` dataSource since we do
     // not `await` for retrieveProfileFromAddon function.
-    return {
-      profile: getProfileOrNull(getState()),
-      shouldSetupInitialUrlState,
-    };
+    return getProfileOrNull(getState());
   };
 }

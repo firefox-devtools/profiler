@@ -7,19 +7,20 @@ import type {
   Profile,
   Thread,
   IndexIntoRawMarkerTable,
-} from '../../types/profile';
+} from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { commitRange } from '../../actions/profile-view';
-import TrackScreenshots from '../../components/timeline/TrackScreenshots';
-import Timeline from '../../components/timeline';
+import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
+import { Timeline } from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
-import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
+import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -27,9 +28,12 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { getPreviewSelection } from '../../selectors/profile';
+import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
@@ -37,6 +41,9 @@ const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
+  autoMockDomRect();
+  autoMockCanvasContext();
+
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -56,6 +63,56 @@ describe('timeline/TrackScreenshots', function() {
     expect(screenshotHover()).toBeTruthy();
   });
 
+  it('sets a preview selection when clicking with the mouse', () => {
+    const { selectionOverlay, screenshotClick, getState } = setup(
+      undefined,
+      <Timeline />
+    );
+    expect(selectionOverlay).toThrow();
+    screenshotClick(LEFT);
+
+    const expectedPreviewSelection = {
+      hasSelection: true,
+      isModifying: false,
+      selectionEnd: 1,
+      selectionStart: 0,
+    };
+    expect(getPreviewSelection(getState())).toEqual(expectedPreviewSelection);
+    expect(selectionOverlay()).toBeTruthy();
+  });
+
+  it('does not change the preview selection when clicking if a selection is already present', () => {
+    const { selectionOverlay, screenshotTrack, getState } = setup(
+      undefined,
+      <Timeline />
+    );
+
+    const track = screenshotTrack();
+    expect(selectionOverlay).toThrow();
+
+    // Mousedown then Mousemove will do a selection.
+    fireEvent(track, getMouseEvent('mousedown', { pageX: LEFT, pageY: TOP }));
+    fireEvent(
+      track,
+      getMouseEvent('mousemove', { pageX: LEFT + 200, pageY: TOP })
+    );
+
+    expect(selectionOverlay()).toBeTruthy();
+    const selectedPreviewSelection = getPreviewSelection(getState());
+
+    // Mouseup should keep this selection.
+    fireEvent(
+      track,
+      getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
+    );
+    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
+    expect(getPreviewSelection(getState())).toEqual({
+      ...selectedPreviewSelection,
+      isModifying: false,
+    });
+    expect(selectionOverlay()).toBeTruthy();
+  });
+
   it('removes the hover when moving the mouse out', () => {
     const { screenshotHover, screenshotTrack, moveMouse } = setup();
 
@@ -70,9 +127,25 @@ describe('timeline/TrackScreenshots', function() {
 
   it('moves the hover when moving the mouse', () => {
     const { moveMouseAndGetLeft } = setup();
-    const base = moveMouseAndGetLeft(LEFT);
-    expect(moveMouseAndGetLeft(LEFT + 10)).toBe(base + 10);
-    expect(moveMouseAndGetLeft(LEFT + 20)).toBe(base + 20);
+    //Considering base to be 150, this value is big enough as a base
+    const base = moveMouseAndGetLeft(150);
+    // LEFT is 100 and the zoomed in screenshot's width is 350px.
+    // So hovering between 100 and 175px should give a result of left == 0.
+    // As soon as we pass 175px the left value should also move up.
+    expect(moveMouseAndGetLeft(175 + 10)).toBe(base + 10);
+    expect(moveMouseAndGetLeft(175 + 20)).toBe(base + 20);
+  });
+
+  it('places the hover image in the center of the track if there is enough space', () => {
+    const { setBoundingClientRectOffset, moveMouseAndGetTop } = setup();
+    const containerTop = 100;
+    const screenshotHeight = 175; // This is the height of the zoomed-in screenshot.
+    setBoundingClientRectOffset({ left: LEFT, top: containerTop });
+    const pageX = LEFT;
+    const expectedTop = Math.floor(
+      containerTop + FULL_TRACK_SCREENSHOT_HEIGHT / 2 - screenshotHeight / 2
+    );
+    expect(moveMouseAndGetTop(pageX)).toBe(expectedTop);
   });
 
   it('makes sure the hover image does not go off the end of the container', () => {
@@ -83,14 +156,22 @@ describe('timeline/TrackScreenshots', function() {
 
   it('makes sure the hover image does not go off the left side of screen', () => {
     const { moveMouseAndGetLeft } = setup();
-    const pageX = LEFT;
-    expect(moveMouseAndGetLeft(pageX) >= 0).toBe(true);
+
+    // Because the zoomed in hover screenshot's size is 350px, it's stuck at the
+    // left of the window when the mouse is between 100 (the left of
+    // the track) and 175px.
+    expect(moveMouseAndGetLeft(100)).toBe(0);
+    expect(moveMouseAndGetLeft(150)).toBe(0);
+    expect(moveMouseAndGetLeft(175)).toBe(0);
+
+    // Starting at 176px, the hover tooltip starts to move.
+    expect(moveMouseAndGetLeft(176)).toBe(1);
   });
 
   it('makes sure the hover image does not go off the top side of screen', () => {
     const { moveMouseAndGetTop } = setup();
     const pageX = LEFT;
-    expect(moveMouseAndGetTop(pageX) >= 0).toBe(true);
+    expect(moveMouseAndGetTop(pageX)).toBe(0);
   });
 
   it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
@@ -105,8 +186,8 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
 
@@ -129,20 +210,20 @@ describe('timeline/TrackScreenshots', function() {
     const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
-        thread.markers.time[markerIndexA],
-        thread.markers.time[markerIndexB]
+        ensureExists(thread.markers.startTime[markerIndexA]),
+        ensureExists(thread.markers.startTime[markerIndexB])
       )
     );
     expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();
   });
 
   it('is created in the <Timeline /> with a profile with screenshots', function() {
-    const { getByText } = setup(getScreenshotTrackProfile(), <Timeline />);
+    const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
 
-    // The function `getByText` throws already, with a useful Error, if it can't
-    // find the element. But we still use `expect` to keep a "test-like"
+    // The function `getAllByText` throws already if none are found, with a useful Error,
+    // if it can't find any elements. But we still use `expect` to keep a "test-like"
     // assertion, even if it's useless.
-    expect(getByText('Screenshots')).toBeTruthy();
+    expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
   });
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function() {
@@ -153,28 +234,48 @@ describe('timeline/TrackScreenshots', function() {
 
 function setup(
   profile: Profile = getScreenshotTrackProfile(),
-  component = <TrackScreenshots threadIndex={0} windowId="0" />
+  component = <TimelineTrackScreenshots threadIndex={0} windowId="0" />
 ) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
+  let leftOffset = LEFT;
+  let topOffset = TOP;
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
-      const rect = getBoundingBox(TRACK_WIDTH, TRACK_SCREENSHOT_HEIGHT);
+      const rect = getBoundingBox(TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT);
       // Add some arbitrary X offset.
-      rect.left += LEFT;
-      rect.right += LEFT;
-      rect.x += LEFT;
-      rect.y += TOP;
-      rect.top += TOP;
-      rect.bottom += TOP;
+      rect.left += leftOffset;
+      rect.right += leftOffset;
+      rect.x += leftOffset;
+      rect.y += topOffset;
+      rect.top += topOffset;
+      rect.bottom += topOffset;
       return rect;
     });
+
+  jest.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => {
+    return [
+      new DOMRect(
+        LEFT,
+        TOP,
+        LEFT + TRACK_WIDTH,
+        TOP + FULL_TRACK_SCREENSHOT_HEIGHT
+      ),
+    ];
+  });
+
+  function setBoundingClientRectOffset({
+    left,
+    top,
+  }: {
+    left: number,
+    top: number,
+  }) {
+    leftOffset = left;
+    topOffset = top;
+  }
 
   const renderResult = render(<Provider store={store}>{component}</Provider>);
   const { container } = renderResult;
@@ -189,6 +290,17 @@ function setup(
     );
   }
 
+  function selectionOverlay() {
+    return ensureExists(
+      document.querySelector('.timelineSelectionOverlay'),
+      `Couldn't find the selection element, with selector .timelineSelectionOverlay`
+    );
+  }
+
+  function screenshotClick(pageX: number) {
+    fireFullClick(screenshotTrack(), { pageX, pageY: TOP });
+  }
+
   function screenshotTrack() {
     return ensureExists(
       container.querySelector('.timelineTrackScreenshot'),
@@ -199,7 +311,7 @@ function setup(
   function moveMouse(pageX: number) {
     fireEvent(
       screenshotTrack(),
-      getMouseEvent('mousemove', { pageX, pageY: 0 })
+      getMouseEvent('mousemove', { pageX, pageY: TOP })
     );
   }
 
@@ -224,6 +336,9 @@ function setup(
     moveMouse,
     moveMouseAndGetLeft,
     moveMouseAndGetTop,
+    setBoundingClientRectOffset,
+    selectionOverlay,
+    screenshotClick,
   };
 }
 

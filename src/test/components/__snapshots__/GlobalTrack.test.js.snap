@@ -29,31 +29,43 @@ process: \\"tab\\" (222)"
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread"
+        class="timelineTrackThread expanded"
       >
         <div
           class="timelineMarkers timelineMarkersMemory"
           data-testid="TimelineMarkersMemory"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineMarkers timelineMarkersGeckoMain"
           data-testid="TimelineMarkersOverview"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="threadActivityGraph"
@@ -62,7 +74,32 @@ process: \\"tab\\" (222)"
             class="threadActivityGraphCanvas threadActivityGraphCanvas"
             height="400"
             width="400"
-          />
+          >
+            <h2>
+              Activity Graph for 
+              Content Process
+            </h2>
+            <p>
+              This graph shows a visual chart of thread activity.
+            </p>
+          </canvas>
+        </div>
+        <div
+          class="threadSampleGraph"
+        >
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="400"
+            width="400"
+          >
+            <h2>
+              Stack Graph for 
+              Content Process
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
         </div>
         <div
           class="timelineEmptyThreadIndicator"
@@ -95,15 +132,19 @@ process: \\"tab\\" (222)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread"
+            class="timelineTrackThread expanded"
           >
             <div
               class="timelineMarkers selected"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
@@ -112,7 +153,32 @@ process: \\"tab\\" (222)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  DOM Worker
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  DOM Worker
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"
@@ -143,15 +209,19 @@ process: \\"tab\\" (222)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread"
+            class="timelineTrackThread expanded"
           >
             <div
               class="timelineMarkers"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
@@ -160,7 +230,32 @@ process: \\"tab\\" (222)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  Style
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  Style
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"
@@ -195,6 +290,7 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
     >
       <div
         class="timelineTrackThreadBlank"
+        style="--timeline-track-thread-blank-height: 30px;"
       />
     </div>
   </div>
@@ -223,15 +319,19 @@ process: \\"default\\" (5555)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread"
+            class="timelineTrackThread expanded"
           >
             <div
               class="timelineMarkers"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
@@ -240,7 +340,32 @@ process: \\"default\\" (5555)"
                 class="threadActivityGraphCanvas threadActivityGraphCanvas"
                 height="400"
                 width="400"
-              />
+              >
+                <h2>
+                  Activity Graph for 
+                  NoMain
+                </h2>
+                <p>
+                  This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  NoMain
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
+                </p>
+              </canvas>
             </div>
             <div
               class="timelineEmptyThreadIndicator"

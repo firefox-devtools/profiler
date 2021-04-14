@@ -6,30 +6,38 @@
 import queryString from 'query-string';
 import {
   stringifyCommittedRanges,
+  stringifyStartEnd,
   parseCommittedRanges,
-} from '../profile-logic/committed-ranges';
+} from 'firefox-profiler/profile-logic/committed-ranges';
 import {
   stringifyTransforms,
   parseTransforms,
-} from '../profile-logic/transforms';
+} from 'firefox-profiler/profile-logic/transforms';
 import {
   assertExhaustiveCheck,
   toValidTabSlug,
+  coerce,
   ensureExists,
-} from '../utils/flow';
-import { toValidCallTreeSummaryStrategy } from '../profile-logic/profile-data';
+} from 'firefox-profiler/utils/flow';
+import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import type { UrlState } from '../types/state';
-import type { DataSource } from '../types/actions';
 import type {
+  UrlState,
+  TimelineTrackOrganization,
+  DataSource,
   Pid,
   Profile,
   Thread,
   IndexIntoStackTable,
-} from '../types/profile';
-import type { TrackIndex, CallNodePath } from '../types/profile-derived';
+  TabID,
+  TrackIndex,
+  CallNodePath,
+  ThreadIndex,
+  TransformStacksPerThread,
+  TimelineType,
+} from 'firefox-profiler/types';
 
-export const CURRENT_URL_VERSION = 4;
+export const CURRENT_URL_VERSION = 5;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -38,13 +46,53 @@ export const CURRENT_URL_VERSION = 4;
  * to manage this bit of state.
  */
 let _isReplaceState: boolean = false;
+let _replaceHistoryCallCount: number = 0;
+
+function _enableHistoryReplaceState(): void {
+  _replaceHistoryCallCount++;
+  _isReplaceState = true;
+}
 
 /**
- * This function can be called from thunk actions or other components to change the
- * history API's behavior.
+ * Only disable the replace state if the call count is 0.
  */
-export function setHistoryReplaceState(value: boolean): void {
-  _isReplaceState = value;
+function _maybeDisableHistoryReplaceState(): void {
+  _replaceHistoryCallCount--;
+  if (_replaceHistoryCallCount < 0) {
+    throw new Error(
+      '_maybeDisableHistoryReplaceState was called more than _enableHistoryReplaceState which should never happen.'
+    );
+  }
+  if (_replaceHistoryCallCount === 0) {
+    _isReplaceState = false;
+  }
+}
+
+/**
+ * This function changes the behavior of the history API to replace the current state,
+ * rather than pushState. It applies the function synchronously.
+ */
+export function withHistoryReplaceStateSync(fn: () => void): void {
+  _enableHistoryReplaceState();
+  try {
+    fn();
+  } finally {
+    _maybeDisableHistoryReplaceState();
+  }
+}
+
+/**
+ * The asynchronous variant of `withHistoryReplaceStateSync`.
+ */
+export async function withHistoryReplaceStateAsync(
+  fn: () => Promise<void>
+): Promise<void> {
+  _enableHistoryReplaceState();
+  try {
+    await fn();
+  } finally {
+    _maybeDisableHistoryReplaceState();
+  }
 }
 
 /**
@@ -55,29 +103,55 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
-function getDataSourceDirs(
-  urlState: UrlState
-): [] | [DataSource] | [DataSource, string] {
+function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
-    case 'from-addon':
-      return ['from-addon'];
-    case 'from-file':
-      return ['from-file'];
-    case 'local':
-      return ['local', urlState.hash];
-    case 'public':
-      return ['public', urlState.hash];
-    case 'from-url':
-      return ['from-url', encodeURIComponent(urlState.profileUrl)];
-    case 'compare':
-      return ['compare'];
     case 'none':
       return [];
+    case 'compare':
+      return ['compare'];
+    case 'uploaded-recordings':
+      return ['uploaded-recordings'];
+    case 'from-addon':
+    case 'unpublished':
+    case 'from-file':
+      return [dataSource, urlState.selectedTab];
+    case 'public':
+    case 'local':
+      return [dataSource, urlState.hash, urlState.selectedTab];
+    case 'from-url':
+      return [
+        'from-url',
+        encodeURIComponent(urlState.profileUrl),
+        urlState.selectedTab,
+      ];
     default:
       throw assertExhaustiveCheck(dataSource);
   }
 }
+
+// Base query that only applies to full profile view.
+type FullProfileSpecificBaseQuery = {|
+  globalTrackOrder: string, // "3-2-0-1"
+  hiddenGlobalTracks: string, // "0-1"
+  hiddenLocalTracksByPid: string,
+  localTrackOrderByPid: string,
+  timelineType: string,
+  // The following values are legacy, and will be converted to track-based values. These
+  // value can't be upgraded using the typical URL upgrading process, as the full profile
+  // must be fetched to compute the tracks.
+  threadOrder: string, // "3-2-0-1"
+  hiddenThreads: string, // "0-1"
+|};
+
+// Base query that only applies to active tab profile view.
+type ActiveTabProfileSpecificBaseQuery = {|
+  resources: null | void,
+  ctxId: TabID | void,
+|};
+
+// Base query that only applies to origins profile view.
+type OriginsProfileSpecificBaseQuery = {||};
 
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
@@ -85,27 +159,21 @@ type BaseQuery = {|
   v: number,
   range: string, //
   thread: string, // "3"
-  globalTrackOrder: string, // "3-2-0-1"
-  hiddenGlobalTracks: string, // "0-1"
-  hiddenLocalTracksByPid: string,
-  localTrackOrderByPid: string,
   file: string, // Path into a zip file.
   transforms: string,
-  timelineType: string,
-  // The following values are legacy, and will be converted to track-based values. These
-  // value can't be upgraded using the typical URL upgrading process, as the full profile
-  // must be fetched to compute the tracks.
-  threadOrder: string, // "3-2-0-1"
-  hiddenThreads: string, // "0-1"
   profiles: string[],
   profileName: string,
+  view: string,
+  implementation: string,
+  ...FullProfileSpecificBaseQuery,
+  ...ActiveTabProfileSpecificBaseQuery,
+  ...OriginsProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
-  implementation: string,
   ctSummary: string,
 |};
 
@@ -124,7 +192,6 @@ type StackChartQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   showUserTimings: null | void,
-  implementation: string,
   ctSummary: string,
 |};
 
@@ -133,120 +200,206 @@ type JsTracerQuery = {|
   summary: null | void,
 |};
 
-// Use object type spread in the definition of Query rather than unions, so that they
-// are really easy to manipulate. This permissive definition makes it easy to not have
-// to refine the type down to the individual query types when working with them.
-type Query = {|
-  ...CallTreeQuery,
-  ...MarkersQuery,
-  ...NetworkQuery,
-  ...StackChartQuery,
-  ...JsTracerQuery,
-|};
+type Query =
+  | CallTreeQuery
+  | MarkersQuery
+  | NetworkQuery
+  | StackChartQuery
+  | JsTracerQuery;
 
 type $MakeOptional = <T>(T) => T | void;
-type QueryShape = $Shape<$ObjMap<Query, $MakeOptional>>;
+// Base query shape is needed for the typechecking during the URL query initialization.
+type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
+// Full profile view and active tab profile view query shapes are for also
+// typechecking during the query object initialization.
+type FullProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>
+>;
+type ActiveTabProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>
+>;
+type OriginsProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<OriginsProfileSpecificBaseQuery, $MakeOptional>
+>;
 
-type UrlObject = {|
-  pathParts: string[],
-  query: QueryShape,
-|};
+// Query shapes for individual query paths. These are needed for QueryShape union type.
+type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
+type MarkersQueryShape = $Shape<$ObjMap<MarkersQuery, $MakeOptional>>;
+type NetworkQueryShape = $Shape<$ObjMap<NetworkQuery, $MakeOptional>>;
+type StackChartQueryShape = $Shape<$ObjMap<StackChartQuery, $MakeOptional>>;
+type JsTracerQueryShape = $Shape<$ObjMap<JsTracerQuery, $MakeOptional>>;
+
+type QueryShape =
+  | CallTreeQueryShape
+  | MarkersQueryShape
+  | NetworkQueryShape
+  | StackChartQueryShape
+  | JsTracerQueryShape;
 
 /**
- * Take the UrlState and map it into a serializable UrlObject, that represents the
- * target URL.
+ * Take the UrlState and map it into a query string.
  */
-export function urlStateToUrlObject(urlState: UrlState): UrlObject {
+export function getQueryStringFromUrlState(urlState: UrlState): string {
   const { dataSource } = urlState;
-  if (dataSource === 'none') {
-    return {
-      pathParts: [],
-      query: {},
-    };
+  switch (dataSource) {
+    case 'none':
+    case 'uploaded-recordings':
+      return '';
+    case 'compare':
+      // Special handling for CompareHome: we shouldn't append the default
+      // parameters when the user is on the comparison form.
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      break;
+    case 'public':
+    case 'local':
+    case 'from-addon':
+    case 'unpublished':
+    case 'from-file':
+    case 'from-url':
+      break;
+    default:
+      throw assertExhaustiveCheck(dataSource);
   }
 
-  // Special handling for CompareHome: we shouldn't append the default
-  // parameters when the user is on the comparison form.
-  if (dataSource === 'compare' && urlState.profilesToCompare === null) {
-    return {
-      pathParts: ['compare'],
-      query: {},
-    };
+  const { selectedThreads } = urlState.profileSpecific;
+
+  let ctxId;
+  let view;
+  const { timelineTrackOrganization } = urlState;
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      // Dont URL-encode anything.
+      break;
+    case 'active-tab':
+      view = timelineTrackOrganization.type;
+      ctxId = timelineTrackOrganization.tabID;
+      break;
+    case 'origins':
+      view = timelineTrackOrganization.type;
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        'Unhandled TimelineTrackOrganization case'
+      );
   }
 
-  const dataSourceDirs = getDataSourceDirs(urlState);
-  const pathParts = [...dataSourceDirs, urlState.selectedTab];
-  const { selectedThread } = urlState.profileSpecific;
+  // Start with the query parameters that are shown regardless of the active panel.
+  let baseQuery;
+  switch (timelineTrackOrganization.type) {
+    case 'full': {
+      // Add the full profile specific state query here.
+      baseQuery = ({}: FullProfileSpecificBaseQueryShape);
+      baseQuery.globalTrackOrder =
+        urlState.profileSpecific.full.globalTrackOrder.join('-') || undefined;
 
-  // Start with the query parameters that are shown regardless of the active tab.
-  const query: QueryShape = {
+      // Add the parameter hiddenGlobalTracks only when needed.
+      if (urlState.profileSpecific.full.hiddenGlobalTracks.size > 0) {
+        baseQuery.hiddenGlobalTracks = [
+          ...urlState.profileSpecific.full.hiddenGlobalTracks,
+        ].join('-');
+      }
+
+      let hiddenLocalTracksByPid = '';
+      for (const [pid, tracks] of urlState.profileSpecific.full
+        .hiddenLocalTracksByPid) {
+        if (tracks.size > 0) {
+          hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
+        }
+      }
+      if (hiddenLocalTracksByPid.length > 0) {
+        // Only add to the query string if something was actually hidden.
+        // Also, slice off the last '~'.
+        baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+      }
+
+      if (
+        urlState.profileSpecific.full.timelineType === 'stack' ||
+        urlState.profileSpecific.full.timelineType === 'cpu-category'
+      ) {
+        // The default is the category view, so only add it to the URL if it's the
+        // stack or cpu-category view.
+        baseQuery.timelineType = urlState.profileSpecific.full.timelineType;
+      }
+
+      let localTrackOrderByPid = '';
+      for (const [pid, trackOrder] of urlState.profileSpecific.full
+        .localTrackOrderByPid) {
+        if (trackOrder.length > 0) {
+          localTrackOrderByPid +=
+            `${String(pid)}-` + trackOrder.join('-') + '~';
+        }
+      }
+      baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
+      break;
+    }
+    case 'active-tab': {
+      baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
+
+      baseQuery.resources = urlState.profileSpecific.activeTab
+        .isResourcesPanelOpen
+        ? null
+        : undefined;
+      baseQuery.ctxId = ctxId || undefined;
+      break;
+    }
+    case 'origins':
+      baseQuery = ({}: OriginsProfileSpecificBaseQueryShape);
+      break;
+    default:
+      throw assertExhaustiveCheck(
+        timelineTrackOrganization,
+        `Unhandled GlobalTrack type.`
+      );
+  }
+
+  baseQuery = ({
+    ...baseQuery,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
-    thread: selectedThread === null ? undefined : selectedThread.toString(),
-    globalTrackOrder:
-      urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
+    thread:
+      selectedThreads === null ? undefined : [...selectedThreads].join(','),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
+    view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
-  };
+    implementation:
+      urlState.profileSpecific.implementation === 'combined'
+        ? undefined
+        : urlState.profileSpecific.implementation,
+  }: BaseQueryShape);
 
-  // Add the parameter hiddenGlobalTracks only when needed.
-  if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
-    query.hiddenGlobalTracks = [
-      ...urlState.profileSpecific.hiddenGlobalTracks,
-    ].join('-');
-  }
-
-  let hiddenLocalTracksByPid = '';
-  for (const [pid, tracks] of urlState.profileSpecific.hiddenLocalTracksByPid) {
-    if (tracks.size > 0) {
-      hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
-    }
-  }
-  if (hiddenLocalTracksByPid.length > 0) {
-    // Only add to the query string if something was actually hidden.
-    // Also, slice off the last '~'.
-    query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
-  }
-
-  if (urlState.profileSpecific.timelineType === 'stack') {
-    // The default is the category view, so only add it to the URL if it's the
-    // stack view.
-    query.timelineType = 'stack';
-  }
-
-  let localTrackOrderByPid = '';
-  for (const [pid, trackOrder] of urlState.profileSpecific
-    .localTrackOrderByPid) {
-    if (trackOrder.length > 0) {
-      localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
-    }
-  }
-  query.localTrackOrderByPid = localTrackOrderByPid || undefined;
-
-  // Depending on which tab is active, also show tab-specific query parameters.
+  // Depending on which panel is active, also show tab-specific query parameters.
+  let query: QueryShape;
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
     case 'flame-graph':
     case 'calltree': {
+      if (selectedTab === 'stack-chart') {
+        // Stack chart uses all of the CallTree's query strings but also has an
+        // additional query string.
+        query = (baseQuery: StackChartQueryShape);
+        query.showUserTimings = urlState.profileSpecific.showUserTimings
+          ? null
+          : undefined;
+      } else {
+        query = (baseQuery: CallTreeQueryShape);
+      }
+
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
-      query.showUserTimings = urlState.profileSpecific.showUserTimings
-        ? null
-        : undefined;
-      query.implementation =
-        urlState.profileSpecific.implementation === 'combined'
-          ? undefined
-          : urlState.profileSpecific.implementation;
-      if (selectedThread !== null) {
+      if (selectedThreads !== null) {
         query.transforms =
           stringifyTransforms(
-            urlState.profileSpecific.transforms[selectedThread]
+            selectedThreads,
+            urlState.profileSpecific.transforms
           ) || undefined;
       }
       query.ctSummary =
@@ -258,27 +411,50 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
     case 'marker-table':
     case 'marker-chart':
+      query = (baseQuery: MarkersQueryShape);
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
+      query = (baseQuery: NetworkQueryShape);
       query.networkSearch =
         urlState.profileSpecific.networkSearchString || undefined;
       break;
-    case 'js-tracer':
-      // `null` adds the parameter to the query, while `undefined` doesn't.
-      query.summary = urlState.profileSpecific.showJsTracerSummary
-        ? null
-        : undefined;
+    case 'js-tracer': {
+      query = (baseQuery: JsTracerQueryShape);
+      const { timelineTrackOrganization } = urlState;
+      switch (timelineTrackOrganization.type) {
+        case 'full':
+        case 'origins':
+          // `null` adds the parameter to the query, while `undefined` doesn't.
+          query.summary = urlState.profileSpecific.full.showJsTracerSummary
+            ? null
+            : undefined;
+          break;
+        case 'active-tab':
+          // JS Tracer isn't helpful for web developers.
+          break;
+        default:
+          throw assertExhaustiveCheck(
+            timelineTrackOrganization,
+            'Unhandled timelineTrackOrganization case'
+          );
+      }
       break;
+    }
     default:
-      assertExhaustiveCheck(selectedTab);
+      throw assertExhaustiveCheck(selectedTab);
   }
-  return { query, pathParts };
+
+  const qString = queryString.stringify(query, {
+    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+  });
+  return qString;
 }
 
 export function urlFromState(urlState: UrlState): string {
-  const { pathParts, query } = urlStateToUrlObject(urlState);
+  const pathParts = getPathParts(urlState);
+  const qString = getQueryStringFromUrlState(urlState);
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return '/';
@@ -286,26 +462,33 @@ export function urlFromState(urlState: UrlState): string {
   const pathname =
     pathParts.length === 0 ? '/' : '/' + pathParts.join('/') + '/';
 
-  const qString = queryString.stringify(query, {
-    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-  });
   return pathname + (qString ? '?' + qString : '');
 }
 
-export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
-  const str = pathParts[0] || 'none';
-  // With this switch, flow is able to understand that we return a valid value
-  switch (str) {
+export function ensureIsValidDataSource(
+  possibleDataSource: string | void
+): DataSource {
+  // By casting `possibleDataSource` to a DataSource beforehand, we let Flow
+  // enforce that we look at all possible values.
+  const coercedDataSource = coerce<string, DataSource>(
+    possibleDataSource || 'none'
+  );
+  switch (coercedDataSource) {
     case 'none':
     case 'from-addon':
+    case 'unpublished':
     case 'from-file':
     case 'local':
     case 'public':
     case 'from-url':
     case 'compare':
-      return str;
+    case 'uploaded-recordings':
+      return coercedDataSource;
     default:
-      throw new Error(`Unexpected data source ${str}`);
+      throw assertExhaustiveCheck(
+        coercedDataSource,
+        `Unexpected data source ${coercedDataSource}`
+      );
   }
 }
 
@@ -319,9 +502,18 @@ type Location = {
   hash: string,
 };
 
+/**
+ * Parse the window.location string to create the UrlState.
+ *
+ * `profile` parameter is nullable and optional. It's nullable because data sources
+ * like from-addon can't upgrade a url for a freshly captured profile. So we need
+ * to skip upgrading for these sources. It's also optional for both testing
+ * purposes and for places where we would like to do the upgrading without
+ * providing any profile.
+ */
 export function stateFromLocation(
   location: Location,
-  profile?: Profile
+  profile?: Profile | null
 ): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion(
     {
@@ -335,8 +527,10 @@ export function stateFromLocation(
   );
 
   const pathParts = pathname.split('/').filter(d => d);
-  const dataSource = getDataSourceFromPathParts(pathParts);
-  const selectedThread = query.thread !== undefined ? +query.thread : null;
+  const dataSource = ensureIsValidDataSource(pathParts[0]);
+  const selectedThreadsList: ThreadIndex[] =
+    // Either a single thread index, or a list separated by commas.
+    query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
 
   // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -354,11 +548,11 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
-  const transforms = {};
-  if (selectedThread !== null) {
-    transforms[selectedThread] = query.transforms
-      ? parseTransforms(query.transforms)
-      : [];
+  const transforms = parseTransforms(selectedThreadsList, query.transforms);
+
+  let tabID = null;
+  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
+    tabID = Number(query.ctxId);
   }
 
   return {
@@ -369,41 +563,51 @@ export function stateFromLocation(
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileName: query.profileName,
+    timelineTrackOrganization: validateTimelineTrackOrganization(
+      query.view,
+      tabID
+    ),
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
-        query.ctSummary
+        query.ctSummary || undefined
       ),
-      invertCallstack: query.invertCallstack !== undefined,
-      showUserTimings: query.showUserTimings !== undefined,
-      showJsTracerSummary: query.summary !== undefined,
+      invertCallstack: query.invertCallstack === undefined ? false : true,
+      showUserTimings: query.showUserTimings === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
-      selectedThread: selectedThread,
+      selectedThreads:
+        selectedThreadsList.length === 0 ? null : new Set(selectedThreadsList),
       callTreeSearchString: query.search || '',
-      globalTrackOrder: query.globalTrackOrder
-        ? query.globalTrackOrder.split('-').map(index => Number(index))
-        : [],
-      hiddenGlobalTracks: query.hiddenGlobalTracks
-        ? new Set(
-            query.hiddenGlobalTracks.split('-').map(index => Number(index))
-          )
-        : new Set(),
-      hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
-        ? parseHiddenTracks(query.hiddenLocalTracksByPid)
-        : new Map(),
-      localTrackOrderByPid: query.localTrackOrderByPid
-        ? parseLocalTrackOrder(query.localTrackOrderByPid)
-        : new Map(),
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
-      timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
-      legacyThreadOrder: query.threadOrder
-        ? query.threadOrder.split('-').map(index => Number(index))
-        : null,
-      legacyHiddenThreads: query.hiddenThreads
-        ? query.hiddenThreads.split('-').map(index => Number(index))
-        : null,
+      full: {
+        showJsTracerSummary: query.summary === undefined ? false : true,
+        globalTrackOrder: query.globalTrackOrder
+          ? query.globalTrackOrder.split('-').map(index => Number(index))
+          : [],
+        hiddenGlobalTracks: query.hiddenGlobalTracks
+          ? new Set(
+              query.hiddenGlobalTracks.split('-').map(index => Number(index))
+            )
+          : new Set(),
+        hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
+          ? parseHiddenTracks(query.hiddenLocalTracksByPid)
+          : new Map(),
+        localTrackOrderByPid: query.localTrackOrderByPid
+          ? parseLocalTrackOrder(query.localTrackOrderByPid)
+          : new Map(),
+        timelineType: validateTimelineType(query.timelineType),
+        legacyThreadOrder: query.threadOrder
+          ? query.threadOrder.split('-').map(index => Number(index))
+          : null,
+        legacyHiddenThreads: query.hiddenThreads
+          ? query.hiddenThreads.split('-').map(index => Number(index))
+          : null,
+      },
+      activeTab: {
+        isResourcesPanelOpen: query.resources !== undefined,
+      },
     },
   };
 }
@@ -457,6 +661,14 @@ function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
   return localTrackOrderByPid;
 }
 
+// This Error class is used in other codepaths to detect the specific error of
+// URL upgrading and react differently when this happens, compared to other
+// errors.
+// Exported for tests.
+export class UrlUpgradeError extends Error {
+  name = 'UrlUpgradeError';
+}
+
 type ProcessedLocation = {|
   pathname: string,
   hash: string,
@@ -465,20 +677,23 @@ type ProcessedLocation = {|
 
 type ProcessedLocationBeforeUpgrade = {|
   ...ProcessedLocation,
-  query: Object,
+  query: any,
 |};
 
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
-  profile?: Profile
+  profile?: Profile | null
 ): ProcessedLocation {
   const urlVersion = +processedLocation.query.v || 0;
-  if (urlVersion === CURRENT_URL_VERSION) {
+  if (profile === null || urlVersion === CURRENT_URL_VERSION) {
+    // Do not upgrade when either profile data is null or url is on the latest
+    // version already. Profile can be null only when the source could not provide
+    // that for upgrader and therefore upgrading step is not needed (e.g. 'from-addon').
     return processedLocation;
   }
 
   if (urlVersion > CURRENT_URL_VERSION) {
-    throw new Error(
+    throw new UrlUpgradeError(
       `Unable to parse a url of version ${urlVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
         `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_URL_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
@@ -586,17 +801,23 @@ const _upgraders = {
     // callNodePaths. For example,  in a call stack like this: 'C++->JS->relevantForJS->JS'
     // Previous callNodePath was 'JS,JS'. But now it has to be 'JS,relevantForJS,JS'.
     const query = processedLocation.query;
-    const selectedThread = query.thread !== undefined ? +query.thread : null;
-    const transforms = query.transforms
-      ? parseTransforms(query.transforms)
-      : [];
+    const selectedThread: null | number =
+      query.thread === undefined ? null : +query.thread;
 
-    if (transforms.length === 0) {
-      // We don't have any transforms to upgrade.
+    if (selectedThread === null || profile === undefined) {
       return;
     }
 
-    if (selectedThread === null || profile === undefined) {
+    const transformStacksPerThread: TransformStacksPerThread = query.transforms
+      ? parseTransforms([selectedThread], query.transforms)
+      : {};
+
+    // At the time this upgrader was written, there was only one selected thread.
+    // Only upgrade the single transfrom.
+    const transforms = transformStacksPerThread[selectedThread];
+
+    if (!transforms || transforms.length === 0) {
+      // We don't have any transforms to upgrade.
       return;
     }
 
@@ -621,12 +842,55 @@ const _upgraders = {
         // If we can't find the stack index of given call node path, just abort.
         continue;
       }
-      transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
+      // This property is not writable, make it an "any"
+      (transform: any).callNodePath = getVersion4JSCallNodePathFromStackIndex(
         thread,
         callNodeStackIndex
       );
     }
-    processedLocation.query.transforms = stringifyTransforms(transforms);
+
+    processedLocation.query.transforms = stringifyTransforms(
+      new Set([selectedThread]),
+      transformStacksPerThread
+    );
+  },
+  [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // We changed how the ranges are serialized to the URLs. Before it was the
+    // pair of start/end in seconds unit with 4 digits, now this is a pair of
+    // start/duration, where start and duration are both integers expressed with
+    // a specific unit.
+    // For example we'll convert from 1.2345_2.3456 (that is: a range starting
+    // at 1.2345s and ending at 2.3456s) to 1234m1112 (a range starting at
+    // 1234ms and ending after 1112ms). You notice that the range is slightly
+    // bigger, because this accounts for the loss of precision.
+    if (!query.range) {
+      return;
+    }
+
+    query.range = query.range
+      .split('~')
+      .map(committedRange => {
+        // This regexp captures two (positive or negative) numbers, separated by a `_`.
+        const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
+        if (!m) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
+          return null;
+        }
+        const start = Number(m[1]) * 1000;
+        const end = Number(m[2]) * 1000;
+        if (isNaN(start) || isNaN(end)) {
+          console.error(
+            `The range "${committedRange}" couldn't be parsed, ignoring.`
+          );
+          return null;
+        }
+
+        return stringifyStartEnd({ start, end });
+      })
+      .filter(Boolean)
+      .join('~');
   },
 };
 
@@ -703,4 +967,46 @@ function getVersion4JSCallNodePathFromStackIndex(
     nextStackIndex = stackTable.prefix[nextStackIndex];
   }
   return callNodePath;
+}
+
+function validateTimelineTrackOrganization(
+  type: ?string,
+  tabID: number | null
+): TimelineTrackOrganization {
+  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
+  // go through each option.
+  const timelineTrackOrganization: TimelineTrackOrganization = ({ type }: any);
+  switch (timelineTrackOrganization.type) {
+    case 'full':
+      return { type: 'full' };
+    case 'active-tab':
+      return { type: 'active-tab', tabID };
+    case 'origins':
+      return { type: 'origins' };
+    default:
+      // Type assert we've checked everythign:
+      (timelineTrackOrganization: empty);
+
+      return { type: 'full' };
+  }
+}
+
+/**
+ * Validate the timeline type and fall back to the category type if it's not
+ * provided or something else is provided for some reason.
+ */
+function validateTimelineType(type: ?string): TimelineType {
+  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
+  // go through each option.
+  const timelineType: TimelineType = (type: any);
+  switch (timelineType) {
+    case 'stack':
+    case 'cpu-category':
+    case 'category':
+      return timelineType;
+    default:
+      // Type assert we've checked everything:
+      (timelineType: empty);
+      return 'category';
+  }
 }

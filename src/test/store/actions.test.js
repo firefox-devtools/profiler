@@ -22,6 +22,12 @@ import {
   getUserTiming,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from '../../app-logic/constants';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**
@@ -177,13 +183,13 @@ describe('selectors/getFlameGraphTiming', function() {
       store.getState()
     );
 
-    return flameGraphTiming.map(({ selfTimeRelative, callNode, length }) => {
+    return flameGraphTiming.map(({ selfRelative, callNode, length }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
         const funcIndex = callNodeTable.func[callNodeIndex];
         const funcName = funcNames[funcIndex];
-        lines.push(`${funcName} (${selfTimeRelative[i]})`);
+        lines.push(`${funcName} (${selfRelative[i]})`);
       }
       return lines.join(' | ');
     });
@@ -254,7 +260,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('contains totalTime, selfTime and selfTimeRelative', function() {
+  it('contains totalTime, selfTime and selfRelative', function() {
     const {
       profile,
       funcNamesPerThread: [funcNames],
@@ -283,7 +289,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
     `);
 
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -292,7 +298,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
   it('returns zero if there are no samples', function() {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(0);
@@ -493,6 +499,7 @@ describe('selectors/getCombinedTimingRows', function() {
 
     return profile;
   }
+
   it('combined timings includes user and call timings', () => {
     const markerProfile = setupUserTimings();
     const stackProfile = setupSamples();
@@ -529,11 +536,129 @@ describe('selectors/getCombinedTimingRows', function() {
         bucket: 'None',
         length: 1,
       },
+      {
+        bucket: 'None',
+        end: [4],
+        index: [3],
+        label: ['componentC'],
+        length: 1,
+        name: 'A',
+        start: [3],
+      },
       { start: [0], end: [3], callNode: [0], length: 1 },
       { start: [0], end: [3], callNode: [1], length: 1 },
       { start: [0, 2], end: [2, 3], callNode: [2, 7], length: 2 },
       { start: [0, 1, 2], end: [1, 2, 3], callNode: [3, 5, 8], length: 3 },
       { start: [0, 1], end: [1, 2], callNode: [4, 6], length: 2 },
     ]);
+  });
+});
+
+describe('selectors/getThreadRange', function() {
+  it('should compute a thread range based on the number of samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
+  });
+
+  it('should compute a thread range based on markers when no samples are present', function() {
+    const { getState } = storeWithProfile(
+      getProfileWithMarkers([['Marker', 10, 20]])
+    );
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 10,
+      end: 21,
+    });
+  });
+
+  it('should use proper marker start/end times depending on the phase', function() {
+    // Gecko outputs "0" for the unused values.
+    const profile = getProfileWithMarkers([
+      ['Instant', 10, 0], // Only starTime should be taken into account.
+      ['IntervalStart', 15, 0], // Only starTime should be taken into account.
+      ['IntervalEnd', 0, 10], // Only endTime should be taken into account.
+      ['Interval', 10, 20], // Both start and endTime should be taken into account.
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [
+      INSTANT,
+      INTERVAL_START,
+      INTERVAL_END,
+      INTERVAL,
+    ];
+
+    const { getState } = storeWithProfile(profile);
+
+    // Even though we have markers with 0 start and end time, it should only take
+    // Interval marker start/end time into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 10,
+      end: 21,
+    });
+  });
+
+  it('should use the Interval marker start time even if it is zero', function() {
+    // Gecko outputs "0" for the unused values.
+    // Both start and endTime should be taken into account for Interval.
+    const profile = getProfileWithMarkers([
+      ['Interval', 10, 20],
+      ['Interval', 0, 15],
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [INTERVAL, INTERVAL];
+
+    const { getState } = storeWithProfile(profile);
+
+    // It take both Interval marker start/end times into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 21,
+    });
+  });
+
+  it('should use the Instant marker start time even if it is zero', function() {
+    // Gecko outputs "0" for the unused values.
+    // Both startTime should be taken into account for Instant.
+    const profile = getProfileWithMarkers([
+      ['Instant', 0, null],
+      ['Interval', 10, 15],
+    ]);
+
+    // getProfileWithMarkers sets the phase depending on the timings, but we
+    // want to add custom phases for each markers.
+    profile.threads[0].markers.phase = [INSTANT, INTERVAL];
+
+    const { getState } = storeWithProfile(profile);
+
+    // It take both Interval marker start/end times into account while computing the range.
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 16,
+    });
+  });
+
+  it('ignores markers when there are samples', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C');
+    {
+      const markersProfile = getProfileWithMarkers([['Marker', 10, 20]]);
+      // Replace the markers on the samples profile.
+      profile.threads[0].markers = markersProfile.threads[0].markers;
+    }
+
+    const { getState } = storeWithProfile(profile);
+
+    expect(selectedThreadSelectors.getThreadRange(getState())).toEqual({
+      start: 0,
+      end: 3,
+    });
   });
 });

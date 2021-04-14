@@ -5,9 +5,11 @@
 // @flow
 
 import * as React from 'react';
-import ArrowPanel from '../../shared/ArrowPanel';
-import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import * as UrlUtils from '../../../utils/shorten-url';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import * as UrlUtils from 'firefox-profiler/utils/shorten-url';
+
+import './Permalink.css';
+import { Localized } from '@fluent/react';
 
 type Props = {|
   +isNewlyPublished: boolean,
@@ -26,10 +28,10 @@ type State = {|
 export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
   _permalinkButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
-  _takePermalinkButtonRef = (elem: any) => {
+  _takePermalinkButtonRef = (elem: ButtonWithPanel | null) => {
     this._permalinkButton = elem;
   };
-  _takePermalinkTextFieldRef = (elem: any) => {
+  _takePermalinkTextFieldRef = (elem: HTMLInputElement | null) => {
     this._permalinkTextField = elem;
   };
 
@@ -69,17 +71,16 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <ButtonWithPanel
-        className="menuButtonsPermalinkButton"
-        ref={this._takePermalinkButtonRef}
-        label="Permalink"
-        defaultOpen={this.props.isNewlyPublished}
-        panel={
-          <ArrowPanel
-            className="menuButtonsPermalinkPanel"
-            onOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
-            onClose={this._onPermalinkPanelClose}
-          >
+      <Localized id="MenuButtons--permalink--button" attrs={{ label: true }}>
+        <ButtonWithPanel
+          buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsPermalinkButtonButton"
+          ref={this._takePermalinkButtonRef}
+          label="Permalink"
+          initialOpen={this.props.isNewlyPublished}
+          onPanelOpen={this._shortenUrlAndFocusTextFieldOnCompletion}
+          onPanelClose={this._onPermalinkPanelClose}
+          panelClassName="menuButtonsPermalinkPanel"
+          panelContent={
             <input
               data-testid="MenuButtonsPermalink-input"
               type="text"
@@ -88,9 +89,9 @@ export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
               readOnly="readOnly"
               ref={this._takePermalinkTextFieldRef}
             />
-          </ArrowPanel>
-        }
-      />
+          }
+        />
+      </Localized>
     );
   }
 }

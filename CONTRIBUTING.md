@@ -8,27 +8,28 @@ This project is made up of a cross section of different parts of Mozilla, includ
 
 | - | Name | Github Handle | Position |
 | - | ---- | ------------- | -------- |
-| ![][digitarald] | Harald Kirschner | [@digitarald](https://github.com/digitarald) | Firefox DevTools Product Manager |
-| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
 | ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox Frontend Engineer |
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
 | ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
 | ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
 | ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
+| ![][fqueze] | Florian Quèze | [@fqueze](https://github.com/fqueze) | Firefox Profiler Team Manager |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+<!-- mstange's image is differently inserted because its size isn't properly controlled by the size parameter, strangely -->
 
-[digitarald]:https://avatars.githubusercontent.com/digitarald?size=56
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
 [gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
 [brisad]:https://avatars.githubusercontent.com/brisad?size=56
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
+[fqueze]:https://avatars.githubusercontent.com/fqueze?size=56
 
-We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
+We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
 ## Getting started with development
 
-[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/firefox-devtools/Gecko-Profiler-Addon), online storage, and from local files.
+[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including directly imported from Firefox, online storage, and from local files.
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
 version 1.0.1 is known to work correctly.
@@ -44,7 +45,7 @@ chmod a+x install.sh
 To get started clone the repo and get the web application started.
 
  1. Run `git clone git@github.com:firefox-devtools/profiler.git`
- 2. Run `cd firefox-profiler`
+ 2. Run `cd profiler`
  3. Run `yarn install`, this will install all of the dependencies.
  4. Run `yarn start`, this will start up the webpack server.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
@@ -56,20 +57,23 @@ Alternatively, you can also develop the Firefox Profiler online in a pre-configu
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
 
-Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab.
+Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab. Please look at our [gitpod documentation](./docs-user/gitpod.md) for more information.
 
 ## Loading in profiles for development
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
- * Drag in a saved profile to the loading screen (this makes refreshing hard).
- * Record a new profile.
-   - Install the Gecko Profiler addon from the [profiler.firefox.com](https://profiler.firefox.com) loading screen.
-   - Go to `about:addons` in your URL bar.
-   - Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png) next to the Gecko Profiler addon.
-   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://profiler.firefox.com` to `http://localhost:4242`.
-   - Record a profile following the directions on the loading screen, and the profile should open in the local development version.
+ #### 1. Record a profile: 
+ - Open `about:config` in Firefox.
+ - Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242`. Or to the localhost with the proper port you have configured.
+ - Ensure the profiler menu button is active by clicking the button on your local profiler deployment homepage, usually http://localhost:4242, to enable it.
+ - Record a profile using the menu button, and it should open up in your local environment automatically.
+
+ #### 2. Use an existing profile:
+ - On the web, replace the https://profiler.firefox.com with your local server, usually `http://localhost:4242`. Be sure that that the protocol is `http` and not `https` when running the server locally.
+ - Alternatively, if a profile has been previously downloaded, drag and drop it to the loading screen. Compared to the previous solution, refreshing won't work with this particular solution.
+
+For more information on loading a profile, visit its [documentation](loading-in-profiles.md).
 
 ## Running the tests
 
@@ -100,12 +104,12 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 ## Finding something to work on
 
 If this is your first time here, check out the label
-[good first issue](https://github.com/firefox-devtools/profiler/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+-label%3Aassigned).
+[good first issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+-label%3Aassigned).
 We will mentor you through the process of completing a first bug, and these are
 usually pretty good self-contained problems.
 
 After leveling up on a few good first issues, we also have the
-[help wanted](https://github.com/firefox-devtools/profiler/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22good+first+issue%22+-label%3Aassigned+)
+[help wanted](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22good+first+issue%22+-label%3Aassigned)
 tag for bugs that no one is actively working on, but are well-scoped and ready
 to be tackled!
 
@@ -118,10 +122,12 @@ week-ends be aware that our team is working mostly on week days,
 therefore please be patient :-)
 
 
-Feel free to [chat with us on
-slack](https://devtools-html-slack.herokuapp.com/) if you need help finding
-something you might be interested to work on or have any question. You can also
-leave message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
+Feel free to [chat with us on Matrix](https://chat.mozilla.org/#/room/#profiler:mozilla.org)
+if you need help finding something you might be interested to work on or have any question.
+You'll need to login first, and possibly click on the link again to access our
+room directly.
+
+You can also leave a message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
 ## Submitting changes with a pull request (PR)
 

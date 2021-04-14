@@ -8,7 +8,8 @@ import type {
   SamplesTable,
   FrameTable,
   Profile,
-} from '../../../types/profile';
+} from 'firefox-profiler/types';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import {
   getEmptyThread,
@@ -37,13 +38,19 @@ import {
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   const thread = getEmptyThread();
-  const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
-    name => thread.stringTable.indexForString(name)
-  );
+  const funcNames = [
+    'funcA',
+    'funcB',
+    'funcC',
+    'funcD',
+    'funcE',
+    'funcF',
+  ].map(name => thread.stringTable.indexForString(name));
 
-  const categoryOther = profile.meta.categories.findIndex(
-    c => c.name === 'Other'
-  );
+  const categoryOther = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex(c => c.name === 'Other');
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
@@ -120,6 +127,8 @@ export default function getProfile(): Profile {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
+    weightType: 'samples',
+    weight: null,
     length: 2,
   };
 

@@ -12,39 +12,6 @@
   line-height: 1.5;
 }
 
-.homeDrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  align-items: stretch;
-  justify-content: center;
-  padding: 1em;
-  background-color: rgba(255, 255, 255, 0.9);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms;
-}
-
-.homeDropMessage {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #888;
-  border-radius: 10px;
-  color: #666;
-  font-size: 30px;
-  text-align: center;
-}
-
-.homeDrop.dragging {
-  opacity: 1;
-}
-
 .homeSpecialMessage {
   padding: 8px 16px;
   border: 1px solid #000;
@@ -60,7 +27,7 @@
   width: 75%;
   max-width: 1200px;
   box-sizing: border-box;
-  padding: 8em;
+  padding: 4em 8em;
   border: 1px solid #ccc;
   background-color: #fff;
   border-radius: 3px;
@@ -78,32 +45,6 @@
   box-shadow: 0.1em 0.1em 0 #bbb;
 }
 
-.homeTitle {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
-
-  /* Negative margin is here to compensate for the children's margins */
-  margin: 0 -0.2em 0.5em;
-}
-
-.homeTitleSlogan {
-  margin: 0 0.2em;
-}
-
-.homeTitleSubtext {
-  font-weight: normal;
-}
-
-.homeTitleGithubIcon {
-  margin: 0 0.2em;
-}
-
-.homeTitleGithubIcon svg {
-  vertical-align: middle;
-}
-
 .homeSectionItems {
   margin: 1em 0;
 }
@@ -115,10 +56,24 @@
   border: 1px solid #d1d1d1;
   border-radius: 0.4em;
   box-shadow: 0 2px 4px #ddd;
+  place-self: center;
+}
+
+.homeAdditionalContentTitle {
+  margin-top: 0;
+  margin-bottom: 10px;
+  grid-column: 1 / -1; /* from start to end */
+}
+
+.homeActions > p:first-child,
+.homeRecentUploadedRecordingsTitle {
+  margin-top: 0;
 }
 
 .homeSectionButton {
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.5em;
   border: 2px solid var(--blue-60);
   margin: 15px 0;
@@ -127,6 +82,7 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  line-height: 1.5;
   text-align: center;
   text-decoration: none;
   transition: background-color 300ms;
@@ -192,26 +148,12 @@
   filter: grayscale(1) brightness(3);
 }
 
-.homeSectionPerfScreenshot {
-  width: 1346px;
-  max-width: 90%;
-  height: auto;
-  margin-top: 15px;
-  margin-bottom: -40px;
-}
-
-.homeInstructions {
-  display: flex;
+.homeInstructions,
+.homeAdditionalContent {
+  display: grid;
   margin-top: 30px;
-}
-
-.homeInstructionsLeft,
-.homeInstructionsRight {
-  width: 50%;
-}
-
-.homeInstructionsRight {
-  padding-left: 30px;
+  column-gap: 30px;
+  grid-template-columns: 1fr 1fr;
 }
 
 .homeInstructionsTransitionGroup {
@@ -267,18 +209,10 @@ label.homeSectionButton:focus-within {
     max-width: 80%;
     padding: 3em;
   }
+
+  .homeAdditionalContent,
   .homeInstructions {
-    display: block;
-  }
-  .homeInstructionsLeft,
-  .homeInstructionsRight {
-    width: 100%;
-  }
-  .homeInstructionsLeft {
-    text-align: center;
-  }
-  .homeInstructionsRight {
-    padding-left: 0;
+    grid: none;
   }
 }
 

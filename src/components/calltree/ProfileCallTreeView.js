@@ -5,17 +5,11 @@
 // @flow
 
 import React from 'react';
-import CallTree from './CallTree';
-import StackSettings from '../shared/StackSettings';
-import TransformNavigator from '../shared/TransformNavigator';
-import SelectedThreadActivityGraph from '../shared/thread/SelectedActivityGraph';
+import { CallTree } from './CallTree';
+import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
+import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
 
-type Props = {|
-  // Allow tests to not render the thread activity graph.
-  +hideThreadActivityGraph?: boolean,
-|};
-
-const ProfileCallTreeView = (props: Props) => (
+export const ProfileCallTreeView = () => (
   <div
     className="treeAndSidebarWrapper"
     id="calltree-tab"
@@ -24,11 +18,6 @@ const ProfileCallTreeView = (props: Props) => (
   >
     <StackSettings />
     <TransformNavigator />
-    {props && props.hideThreadActivityGraph ? null : (
-      <SelectedThreadActivityGraph />
-    )}
     <CallTree />
   </div>
 );
-
-export default ProfileCallTreeView;

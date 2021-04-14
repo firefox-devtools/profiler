@@ -5,26 +5,39 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+
+import { AppHeader } from './AppHeader';
+import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
+import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
+
+import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
+import FirefoxPopupScreenshot from '../../../res/img/jpg/firefox-profiler-button-2019-12-09.jpg';
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
-} from '../../actions/receive-profile';
+} from 'firefox-profiler/actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import {
+  queryIsMenuButtonEnabled,
+  enableMenuButton,
+} from 'firefox-profiler/app-logic/web-channel';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
+
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
-} from '../../utils/connect';
+} from 'firefox-profiler/utils/connect';
 
-require('./Home.css');
+import { Localized } from '@fluent/react';
+import './Home.css';
 
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
-const LEGACY_ADDON_URL =
-  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+
+import { DragAndDropOverlay } from './DragAndDrop';
 
 type InstallButtonProps = {
   name: string,
@@ -109,25 +122,27 @@ class ActionButtons extends React.PureComponent<
               ref={this._takeInputRef}
               onChange={this._uploadProfileFromFile}
             />
-            Load a profile from file
+            <Localized id="Home--upload-from-file-input-button">
+              Load a profile from file
+            </Localized>
           </label>
-          <button
-            type="button"
-            className={classNames({
-              homeSectionButton: true,
-            })}
-            onClick={this._loadFromUrlPressed}
-            // when the button is clicked it expands to the URL input
-            aria-expanded={this.state.isLoadFromUrlPressed}
-          >
-            Load a profile from a URL
-          </button>
+          <Localized id="Home--upload-from-url-button">
+            <button
+              type="button"
+              className={classNames({
+                homeSectionButton: true,
+              })}
+              onClick={this._loadFromUrlPressed}
+              // when the button is clicked it expands to the URL input
+              aria-expanded={this.state.isLoadFromUrlPressed}
+            >
+              Load a profile from a URL
+            </button>
+          </Localized>
         </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
-        ) : (
-          <p>You can also drag and drop a profile file here to load it.</p>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -166,11 +181,16 @@ class LoadFromUrl extends React.PureComponent<
           onChange={this.handleChange}
           autoFocus
         />
-        <input
-          type="submit"
-          className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
-          value="Load"
-        />
+        <Localized
+          id="Home--load-from-url-submit-button"
+          attrs={{ value: true }}
+        >
+          <input
+            type="submit"
+            className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
+            value="Load"
+          />
+        </Localized>
       </form>
     );
   }
@@ -180,12 +200,12 @@ function DocsButton() {
   return (
     <a href="/docs/" className="homeSectionButton">
       <span className="homeSectionDocsIcon" />
-      Documentation
+      <Localized id="Home--documentation-button">Documentation</Localized>
     </a>
   );
 }
 
-function InstructionTransition(props: {}) {
+function InstructionTransition(props: { children: React.Node }) {
   return (
     <CSSTransition
       {...props}
@@ -220,179 +240,222 @@ type DispatchHomeProps = {|
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
-  isDragging: boolean,
-  isAddonInstalled: boolean,
+  popupAddonInstallPhase: PopupAddonInstallPhase,
 };
 
-class Home extends React.PureComponent<HomeProps, HomeState> {
-  _supportsWebExtensionAPI: boolean = _supportsWebExtensionAPI();
-  _isFirefox: boolean = _isFirefox();
-  state = {
-    isDragging: false,
-    isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
-  };
+type PopupAddonInstallPhase =
+  // Firefox Beta or Relase
+  | 'suggest-install-addon'
+  | 'addon-installed'
+  // Firefox Nightly:
+  | 'popup-enabled'
+  | 'suggest-enable-popup'
+  // Other browsers:
+  | 'other-browser';
 
-  addonInstalled() {
-    this.setState({ isAddonInstalled: true });
-  }
+class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
+  constructor(props: HomeProps) {
+    super(props);
+    // Start by suggesting that we install the add-on.
+    let popupAddonInstallPhase = 'other-browser';
 
-  componentDidMount() {
-    // Prevent dropping files on the document.
-    document.addEventListener('drag', _dragPreventDefault, false);
-    document.addEventListener('dragover', _dragPreventDefault, false);
-    document.addEventListener('drop', _dragPreventDefault, false);
+    if (_isFirefox()) {
+      if (window.isGeckoProfilerAddonInstalled) {
+        popupAddonInstallPhase = 'addon-installed';
+      } else {
+        popupAddonInstallPhase = 'suggest-install-addon';
+      }
+
+      // Query the browser to see if the menu button is available.
+      queryIsMenuButtonEnabled().then(
+        isMenuButtonEnabled => {
+          this.setState({
+            popupAddonInstallPhase: isMenuButtonEnabled
+              ? 'popup-enabled'
+              : 'suggest-enable-popup',
+          });
+        },
+        () => {
+          // Do nothing if this request returns an error. It probably just means
+          // that we're talking to an older version of the browser.
+        }
+      );
+    }
+
+    this.state = {
+      popupAddonInstallPhase,
+    };
+
     // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
     homeInstance = this;
   }
 
-  componentWillUnmount() {
-    document.removeEventListener('drag', _dragPreventDefault, false);
-    document.removeEventListener('dragover', _dragPreventDefault, false);
-    document.removeEventListener('drop', _dragPreventDefault, false);
+  /**
+   * This is a publicly accessible method, that the addon can use to signal
+   * that it is installed. This component races with the frame script installation,
+   * so provide a way for frame script to signal that it was loaded.
+   */
+  addonInstalled() {
+    this.setState(({ popupAddonInstallPhase }) => {
+      if (
+        popupAddonInstallPhase === 'popup-enabled' ||
+        popupAddonInstallPhase === 'suggest-enable-popup'
+      ) {
+        // The popup is available, ignore the addon.
+        return null;
+      }
+      return { popupAddonInstallPhase: 'addon-installed' };
+    });
   }
-
-  _startDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: true });
-  };
-
-  _stopDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: false });
-  };
-
-  _handleProfileDrop = (event: DragEvent) => {
-    event.preventDefault();
-    if (!event.dataTransfer) {
-      return;
-    }
-
-    const { files } = event.dataTransfer;
-    if (files.length > 0) {
-      this.props.retrieveProfileFromFile(files[0]);
-    }
-  };
 
   _renderInstructions() {
-    const { isAddonInstalled } = this.state;
-    if (isAddonInstalled) {
-      return this._renderRecordInstructions();
+    const { popupAddonInstallPhase } = this.state;
+    switch (popupAddonInstallPhase) {
+      case 'suggest-install-addon':
+        return this._renderInstallAddonInstructions();
+      case 'addon-installed':
+        return this._renderRecordInstructions(AddonScreenshot);
+      case 'popup-enabled':
+        return this._renderRecordInstructions(FirefoxPopupScreenshot);
+      case 'suggest-enable-popup':
+        return this._renderEnablePopupInstructions();
+      case 'other-browser':
+        return this._renderOtherBrowserInstructions();
+      default:
+        throw assertExhaustiveCheck(
+          popupAddonInstallPhase,
+          'Unhandled PopupAddonInstallPhase'
+        );
     }
-    if (this._supportsWebExtensionAPI) {
-      return this._renderInstallInstructions();
-    }
-    if (this._isFirefox) {
-      return this._renderLegacyInstructions();
-    }
-    return this._renderOtherBrowserInstructions();
   }
 
-  _renderInstallInstructions() {
+  _enableMenuButton = e => {
+    e.preventDefault();
+    enableMenuButton().then(
+      () => {
+        this.setState({ popupAddonInstallPhase: 'popup-enabled' });
+      },
+      error => {
+        // This error doesn't get surfaced in the UI, but it does in console.
+        console.error('Unable to enable the profiler popup button.', error);
+      }
+    );
+  };
+
+  _renderEnablePopupInstructions() {
     return (
       <InstructionTransition key={0}>
-        <div className="homeInstructions">
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
+        <div
+          className="homeInstructions"
+          data-testid="home-enable-popup-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
+            <button
+              type="button"
+              className="homeSectionButton"
+              onClick={this._enableMenuButton}
+            >
+              <span className="homeSectionPlus">+</span>
+              <Localized id="Home--menu-button">
+                Enable Profiler Menu Button
+              </Localized>
+            </button>
+            <DocsButton />
+            <p>
+              <Localized id="Home--menu-button-instructions">
+                Enable the profiler menu button to start recording a performance
+                profile in Firefox, then analyze it and share it with
+                profiler.firefox.com.
+              </Localized>
+            </p>
           </div>
-          <div className="homeInstructionsRight">
+          {/* end of grid container */}
+        </div>
+      </InstructionTransition>
+    );
+  }
+
+  _renderInstallAddonInstructions() {
+    return (
+      <InstructionTransition key={0}>
+        <div
+          className="homeInstructions"
+          data-testid="home-install-addon-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <InstallButton
               name="Gecko Profiler"
               className="homeSectionButton"
               xpiUrl={ADDON_URL}
             >
               <span className="homeSectionPlus">+</span>
-              Install add-on
+              <Localized id="Home--addon-button">Install add-on</Localized>
             </InstallButton>
             <DocsButton />
             <p>
-              Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with
-              profiler.firefox.com.
+              <Localized id="Home--addon-button-instructions">
+                Install the Gecko Profiler Add-on to start recording a
+                performance profile in Firefox, then analyze it and share it
+                with profiler.firefox.com.
+              </Localized>
             </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
   }
 
-  _renderRecordInstructions() {
+  _renderRecordInstructions(screenshotSrc: string) {
     return (
       <InstructionTransition key={1}>
-        <div className="homeInstructions">
-          <div className="homeInstructionsLeft">
-            <p>
-              <img
-                className="homeSectionScreenshot"
-                src={AddonScreenshot}
-                alt="Screenshot of the Gecko Profiler addon settings"
-              />
-            </p>
-          </div>
-          <div className="homeInstructionsRight">
+        <div
+          className="homeInstructions"
+          data-testid="home-record-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={screenshotSrc}
+            alt="Screenshot of the profiler settings from the Firefox menu."
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
-            <p>
-              To start profiling, click on the profiling button, or use the
-              keyboard shortcuts. The icon is blue when a profile is recording.
-              Hit
-              <kbd>Capture Profile</kbd> to load the data into
-              profiler.firefox.com.
-            </p>
+            <Localized
+              id="Home--record-instructions"
+              elems={{
+                kbd: <kbd />,
+              }}
+            >
+              <p>
+                To start profiling, click on the profiling button, or use the
+                keyboard shortcuts. The icon is blue when a profile is
+                recording. Hit
+                <kbd>Capture Profile</kbd> to load the data into
+                profiler.firefox.com.
+              </p>
+            </Localized>
             {this._renderShortcuts()}
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
           </div>
-        </div>
-      </InstructionTransition>
-    );
-  }
-
-  _renderLegacyInstructions() {
-    return (
-      <InstructionTransition key={2}>
-        <div className="homeInstructions">
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
-            <DocsButton />
-            <p>
-              To start recording a performance profile in Firefox, first install
-              the{' '}
-              <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
-                Gecko Profiler Add-on
-              </InstallButton>
-              . Then use the button added to the browser, or use the following
-              shortcuts to record a profile. The button’s icon is blue when a
-              profile is recording. Hit <kbd>Capture Profile</kbd> to load the
-              data into profiler.firefox.com.
-            </p>
-            {this._renderShortcuts()}
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
-          </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -401,30 +464,38 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   _renderOtherBrowserInstructions() {
     return (
       <InstructionTransition key={0}>
-        <div className="homeInstructions" key={0}>
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
+        <div
+          className="homeInstructions"
+          data-testid="home-other-browser-instructions"
+        >
+          {/* Grid container: homeInstructions */}
+          {/* Left column: img */}
+          <img
+            className="homeSectionScreenshot"
+            src={PerfScreenshot}
+            alt="screenshot of profiler.firefox.com"
+          />
+          {/* Right column: instructions */}
+          <div>
             <DocsButton />
-            <h2>How to view and record profiles</h2>
-            <p>
-              Recording performance profiles requires{' '}
-              <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-              However, existing profiles can be viewed in any modern browser.
-            </p>
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
+            <Localized id="Home--instructions-title">
+              <h2>How to view and record profiles</h2>
+            </Localized>
+            <Localized
+              id="Home--instructions-content"
+              elems={{
+                a: <a href="https://www.mozilla.org/en-US/firefox/new/" />,
+              }}
+            >
+              <p>
+                Recording performance profiles requires{' '}
+                <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
+                . However, existing profiles can be viewed in any modern
+                browser.
+              </p>
+            </Localized>
           </div>
+          {/* end of grid container */}
         </div>
       </InstructionTransition>
     );
@@ -434,94 +505,105 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     return (
       <div>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start profiling
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>{' '}
+          <Localized id="Home--record-instructions-start-stop">
+            Stop and start profiling
+          </Localized>
         </p>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load profile
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>{' '}
+          <Localized id="Home--record-instructions-capture-load">
+            Capture and load profile
+          </Localized>
         </p>
       </div>
     );
   }
 
   render() {
-    const { isDragging } = this.state;
     const { specialMessage } = this.props;
+
     return (
-      <div
-        className="home"
-        onDragEnter={this._startDragging}
-        onDragExit={this._stopDragging}
-        onDrop={this._handleProfileDrop}
-      >
-        <section className="homeSection">
-          <header>
-            <h1 className="homeTitle">
-              <span className="homeTitleSlogan">
-                <span className="homeTitleText">Firefox Profiler</span>
-                <span className="homeTitleSubtext">
-                  {' '}
-                  &mdash; Web app for Firefox performance analysis
-                </span>
-              </span>
-              <a
-                className="homeTitleGithubIcon"
-                href="https://github.com/firefox-devtools/profiler"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Go to our git repository (this opens in a new window)"
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  className="octicon octicon-mark-github"
-                  viewBox="0 0 16 16"
-                  version="1.1"
-                  aria-label="github"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-                  />
-                </svg>
-              </a>
-            </h1>
-            {specialMessage ? (
-              <div className="homeSpecialMessage">{specialMessage}</div>
-            ) : null}
+      <div className="home">
+        <main className="homeSection">
+          <AppHeader />
+          {specialMessage ? (
+            <div className="homeSpecialMessage">{specialMessage}</div>
+          ) : null}
+          <Localized id="Home--profiler-motto">
             <p>
               Capture a performance profile. Analyze it. Share it. Make the web
               faster.
             </p>
-          </header>
+          </Localized>
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
-          <div
-            className={classNames('homeDrop', isDragging ? 'dragging' : false)}
-          >
-            <div className="homeDropMessage">Drop a saved profile here</div>
-          </div>
-        </section>
+          <section className="homeAdditionalContent">
+            {/* Grid container: homeAdditionalContent */}
+            <h2 className="homeAdditionalContentTitle protocol-display-xs">
+              {/* Title: full width */}
+              <Localized id="Home--additional-content-title">
+                Load existing profiles
+              </Localized>
+            </h2>
+            <section className="homeActions">
+              {/* Actions: left column */}
+              <Localized
+                id="Home--additional-content-content"
+                elems={{ strong: <strong /> }}
+              >
+                <p>
+                  You can <strong>drag and drop</strong> a profile file here to
+                  load it, or:
+                </p>
+              </Localized>
+              <ActionButtons
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+                triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+              />
+
+              <Localized
+                id="Home--compare-recordings-info"
+                elems={{
+                  a: (
+                    // $FlowExpectError Flow doesn't know about this fluent rule for react component.
+                    <InnerNavigationLink dataSource="compare"></InnerNavigationLink>
+                  ),
+                }}
+              >
+                <p>
+                  You can also compare recordings.{' '}
+                  <InnerNavigationLink dataSource="compare">
+                    Open the comparing interface.
+                  </InnerNavigationLink>
+                </p>
+              </Localized>
+            </section>
+            <section>
+              {/* Recent recordings: right column */}
+              <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
+                <Localized id="Home--recent-uploaded-recordings-title">
+                  Recent uploaded recordings
+                </Localized>
+              </h2>
+              <ListOfPublishedProfiles limit={3} withActionButtons={false} />
+            </section>
+            {/* End of grid container */}
+          </section>
+          <DragAndDropOverlay />
+        </main>
       </div>
     );
   }
-}
-
-function _dragPreventDefault(event: DragEvent) {
-  event.preventDefault();
-}
-
-function _supportsWebExtensionAPI(): boolean {
-  const matched = navigator.userAgent.match(/Firefox\/(\d+\.\d+)/);
-  const minimumSupportedFirefox = 55;
-  return matched ? parseFloat(matched[1]) >= minimumSupportedFirefox : false;
 }
 
 function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-export default explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
+export const Home = explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
   mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
-  component: Home,
+  component: HomeImpl,
 });

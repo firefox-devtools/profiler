@@ -57,7 +57,7 @@ exports[`app/AppViewRouter renders temporary errors 1`] = `
     <div
       class="rootMessageText"
     >
-      Downloading and processing the profile...
+      Downloading and processing the profile…
     </div>
     <div
       class="rootMessageAdditional"
@@ -127,7 +127,7 @@ exports[`app/AppViewRouter renders the addon loading page, and the profile view 
     <div
       class="rootMessageText"
     >
-      Grabbing the profile from the Gecko Profiler Addon...
+      Importing the profile directly from ⁨Firefox⁩…
     </div>
     <div
       class="loading"
@@ -184,7 +184,7 @@ exports[`app/AppViewRouter renders the profile view 1`] = `
     <div
       class="rootMessageText"
     >
-      Downloading and processing the profile...
+      Downloading and processing the profile…
     </div>
     <div
       class="loading"

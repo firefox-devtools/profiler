@@ -2,7 +2,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const OfflinePlugin = require('@mstange/offline-plugin');
+const OfflinePlugin = require('offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
@@ -15,11 +15,10 @@ const es6modulePaths = es6modules.map(module => {
 const config = {
   resolve: {
     alias: {
-      'redux-devtools/lib': path.join(__dirname, '..', '..', 'src'),
-      'redux-devtools': path.join(__dirname, '..', '..', 'src'),
-      react: path.join(__dirname, 'node_modules', 'react'),
+      // Note: the alias for firefox-profiler is defined at the Babel level, so
+      // that Jest can profit from it too.
+      'firefox-profiler-res': path.resolve(__dirname, 'res'),
     },
-    extensions: ['.js', '.wasm'],
   },
   devtool: 'source-map',
   module: {
@@ -41,9 +40,11 @@ const config = {
           { loader: 'css-loader', options: { importLoaders: 1 } },
           'postcss-loader',
         ],
-        include: includes.concat(
-          path.join(__dirname, 'node_modules', 'photon-colors')
-        ),
+        include: [
+          ...includes,
+          path.join(__dirname, 'node_modules', 'photon-colors'),
+          path.join(__dirname, 'node_modules', 'react-splitter-layout'),
+        ],
       },
       {
         test: /\.jpg$/,
@@ -79,14 +80,17 @@ const config = {
       template: 'res/index.html',
       favicon: 'res/img/favicon.png',
     }),
-    new CopyWebpackPlugin([
-      { from: 'res/_headers' },
-      { from: 'res/_redirects' },
-      { from: 'docs-user', to: 'docs' },
-      { from: 'res/zee-worker.js' },
-      { from: 'res/before-load.js' },
-      { from: 'res/contribute.json' },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'res/_headers' },
+        { from: 'res/_redirects' },
+        { from: 'docs-user', to: 'docs' },
+        { from: 'res/zee-worker.js' },
+        { from: 'res/before-load.js' },
+        { from: 'res/contribute.json' },
+        { from: 'locales', to: 'locales' },
+      ],
+    }),
   ],
   entry: ['./src/index'],
   output: {
@@ -95,18 +99,10 @@ const config = {
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
   },
-  optimization: {
-    // Workaround for https://github.com/webpack/webpack/issues/7760
-    usedExports: false,
-  },
 };
 
 if (process.env.NODE_ENV === 'development') {
   config.mode = 'development';
-  config.devtool = 'source-map';
-  config.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(
-    config.entry
-  );
 }
 
 if (process.env.NODE_ENV === 'production') {

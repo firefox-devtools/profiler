@@ -2,7 +2,7 @@
 
 exports[`calltree/CallNodeContextMenu basic rendering renders a full context menu when open, with many nav items 1`] = `
 <nav
-  class="react-contextmenu"
+  class="react-contextmenu callNodeContextMenu"
   role="menu"
   style="position: fixed; opacity: 0; pointer-events: none;"
   tabindex="-1"
@@ -12,94 +12,171 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
+    title="Merging a function removes it from the profile, and assigns its time to the function that called it. This happens anywhere the function was called in the tree."
   >
     <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
+      class="react-contextmenu-icon callNodeContextMenuIconMerge"
     />
-    Merge node into calling function
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
-    />
-    Merge function into caller across the entire tree
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
-    />
-    Focus on subtree
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
-    />
-    Focus on function
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
-    />
-    Collapse function’s subtree across the entire tree
-  </div>
-  <div
-    aria-disabled="false"
-    class="react-contextmenu-item"
-    role="menuitem"
-    tabindex="-1"
-  >
-    <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
-    />
-    Collapse functions in
-     
-    <span
-      class="callNodeContextMenuLabel"
+    <div
+      class="react-contextmenu-item-content"
     >
-      library
-    </span>
+      Merge function
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      m
+    </kbd>
   </div>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
+    title="Merging a node removes it from the profile, and assigns its time to the function’s node that called it. It only removes the function from that specific part of the tree. Any other places the function was called from will remain in the profile."
   >
     <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+      class="react-contextmenu-icon callNodeContextMenuIconMerge"
     />
-    Collapse direct recursion
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Merge node only
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      M
+    </kbd>
   </div>
   <div
     aria-disabled="false"
     class="react-contextmenu-item"
     role="menuitem"
     tabindex="-1"
+    title="Focusing on a function will remove any sample that does not include that function. In addition, it re-roots the call tree so that the function is the only root of the tree. This can combine multiple function call sites across a profile into one call node."
   >
     <span
-      class="callNodeContextMenuIcon callNodeContextMenuIconDrop"
+      class="react-contextmenu-icon callNodeContextMenuIconFocus"
     />
-    Drop samples with this function
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Focus on function
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      f
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+    title="Focusing on a subtree will remove any sample that does not include that specific part of the call tree. It pulls out a branch of the call tree, however it only does it for that single call node. All other calls of the function are ignored."
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconFocus"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Focus on subtree only
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      F
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+    title="Collapsing a function will remove everything it called, and assign all of the time to the function. This can help simplify a profile that calls into code that does not need to be analyzed."
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconCollapse"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Collapse function
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      c
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+    title="Collapsing a resource will flatten out all the calls to that resource into a single collapsed call node."
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconCollapse"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Collapse 
+      <strong>
+        ⁨XUL⁩
+      </strong>
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      C
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+    title="Collapsing direct recursion removes calls that repeatedly recurse into the same function."
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconCollapse"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Collapse direct recursion
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      r
+    </kbd>
+  </div>
+  <div
+    aria-disabled="false"
+    class="react-contextmenu-item"
+    role="menuitem"
+    tabindex="-1"
+    title="Dropping samples removes their time from the profile. This is useful to eliminate timing information that is not relevant for the analysis."
+  >
+    <span
+      class="react-contextmenu-icon callNodeContextMenuIconDrop"
+    />
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Drop samples with this function
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      d
+    </kbd>
   </div>
   <div
     class="react-contextmenu-separator"

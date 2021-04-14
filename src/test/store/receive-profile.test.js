@@ -3,12 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Profile } from '../../types/profile';
+import type { Profile } from 'firefox-profiler/types';
 
-import sinon from 'sinon';
 import { oneLineTrim } from 'common-tags';
 
-import { getEmptyProfile } from '../../profile-logic/data-structures';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
@@ -28,18 +31,21 @@ import {
   retrieveProfilesToCompare,
   _fetchProfile,
   getProfilesFromRawUrl,
+  changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
+import fakeIndexedDB from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
 import {
   serializeProfile,
-  processProfile,
+  processGeckoProfile,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -80,6 +86,16 @@ function simulateSymbolStoreHasNoCache() {
 }
 
 describe('actions/receive-profile', function() {
+  beforeEach(() => {
+    // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
+    // symbolication can happen.
+    window.indexedDB = fakeIndexedDB;
+  });
+
+  afterEach(() => {
+    delete window.indexedDB;
+  });
+
   /**
    * This function allows to observe all state changes in a Redux store while
    * something's going on.
@@ -99,6 +115,10 @@ describe('actions/receive-profile', function() {
 
     unsubscribe();
     return states;
+  }
+
+  function encode(string) {
+    return new TextEncoder().encode(string);
   }
 
   describe('viewProfile', function() {
@@ -138,8 +158,14 @@ describe('actions/receive-profile', function() {
       );
 
       const [idleThread, workThread] = profile.threads;
-      const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({
+      const idleCategoryIndex = ensureExists(
+        profile.meta.categories,
+        'Expected to find categories'
+      ).length;
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).push({
         name: 'Idle',
         color: '#fff',
         subcategories: ['Other'],
@@ -161,6 +187,31 @@ describe('actions/receive-profile', function() {
         'show [process]',
         '  - hide [thread Idle Thread]',
         '  - show [thread Work Thread] SELECTED',
+      ]);
+    });
+
+    it('will show the thread with no samples and with paint markers', function() {
+      const store = blankStore();
+      const profile = getEmptyProfile();
+
+      profile.threads.push(
+        // This thread shouldn't be hidden because it's the main thread in the main process.
+        getEmptyThread({ name: 'GeckoMain', processType: 'default', pid: 1 }),
+        // This thread shouldn't be hidden because it will have useful markers even if it has no samples.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
+        // This thread will be hidden because it has no samples and no markers.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
+      );
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
+      ]);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
 
@@ -229,7 +280,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
-        `work work work work work`
+        `work  work  work  work  work`
       );
       const [threadA, threadB] = profile.threads;
       threadA.name = 'GeckoMain';
@@ -261,11 +312,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -291,11 +338,7 @@ describe('actions/receive-profile', function() {
       });
 
       addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-        [
-          'RefreshDriverTick',
-          0,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
-        ],
+        ['RefreshDriverTick', 0, null, { type: 'tracing', category: 'Paint' }],
       ]);
 
       store.dispatch(viewProfile(profile));
@@ -309,10 +352,10 @@ describe('actions/receive-profile', function() {
     it('will hide an empty global track when all child tracks are hidden', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
-        `work work work work work`, // pid 1
-        `work work work work work`, // pid 1
-        `idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle]`, // pid 2
-        `work work work work work` // pid 3
+        `work  work  work  work  work`, // pid 1
+        `work  work  work  work  work`, // pid 1
+        `idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]`, // pid 2
+        `work  work  work  work  work` // pid 3
       );
 
       profile.threads[0].name = 'Work A';
@@ -336,11 +379,141 @@ describe('actions/receive-profile', function() {
         '  - show [thread Work E]',
       ]);
     });
+
+    it('will not hide audio tracks if they have at least one sample', function() {
+      const store = blankStore();
+
+      const idleThread: Array<string> = (Array.from({
+        length: 100,
+      }): any).fill('idle[cat:Idle]');
+      const idleThreadString = idleThread.join('  ');
+
+      // We want 1 work sample in 100 samples for each thread.
+      const oneWorkSampleThread = idleThread.slice();
+      oneWorkSampleThread[1] = 'work';
+      const oneWorkSampleThreadString = oneWorkSampleThread.join('  ');
+
+      const { profile } = getProfileFromTextSamples(
+        oneWorkSampleThreadString, // AudioIPC
+        oneWorkSampleThreadString, // MediaPDecoder
+        oneWorkSampleThreadString, // MediaTimer
+        oneWorkSampleThreadString, // MediaPlayback
+        oneWorkSampleThreadString, // MediaDecoderStateMachine
+        idleThreadString, // AudioIPC
+        idleThreadString, // MediaPDecoder
+        idleThreadString, // MediaTimer
+        idleThreadString, // MediaPlayback
+        idleThreadString // MediaDecoderStateMachine
+      );
+
+      profile.threads[0].name = 'AudioIPC work';
+      profile.threads[1].name = 'MediaPDecoder work';
+      profile.threads[2].name = 'MediaTimer work';
+      profile.threads[3].name = 'MediaPlayback work';
+      profile.threads[4].name = 'MediaDecoderStateMachine work';
+      profile.threads[5].name = 'AudioIPC idle';
+      profile.threads[6].name = 'MediaPDecoder idle';
+      profile.threads[7].name = 'MediaTimer idle';
+      profile.threads[8].name = 'MediaPlayback idle';
+      profile.threads[9].name = 'MediaDecoderStateMachine idle';
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread AudioIPC work] SELECTED',
+        '  - show [thread MediaPDecoder work]',
+        '  - show [thread MediaTimer work]',
+        '  - show [thread MediaPlayback work]',
+        '  - show [thread MediaDecoderStateMachine work]',
+        '  - hide [thread AudioIPC idle]',
+        '  - hide [thread MediaPDecoder idle]',
+        '  - hide [thread MediaTimer idle]',
+        '  - hide [thread MediaPlayback idle]',
+        '  - hide [thread MediaDecoderStateMachine idle]',
+      ]);
+    });
+  });
+
+  describe('changeTimelineTrackOrganization', function() {
+    const tabID = 123;
+    const innerWindowID = 111111;
+    function setup(initializeCtxId: boolean = false) {
+      const store = blankStore();
+      const profile = getEmptyProfile();
+
+      profile.threads.push(
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+      );
+
+      profile.meta.configuration = {
+        threads: [],
+        features: [],
+        capacity: 1000000,
+        activeTabID: tabID,
+      };
+      profile.pages = [
+        {
+          tabID: tabID,
+          innerWindowID: innerWindowID,
+          url: 'URL',
+          embedderInnerWindowID: 0,
+        },
+      ];
+
+      store.dispatch(viewProfile(profile));
+      if (initializeCtxId) {
+        store.dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            tabID,
+          })
+        );
+      }
+
+      return { ...store, profile };
+    }
+
+    it('should be able to switch to active tab view from the full view', function() {
+      const { dispatch, getState } = setup();
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
+      });
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          tabID,
+        })
+      );
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        tabID,
+      });
+    });
+
+    it('should be able to switch to full view from the active tab', function() {
+      const { dispatch, getState } = setup(true);
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        tabID,
+      });
+      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
+      });
+    });
   });
 
   describe('retrieveProfileFromAddon', function() {
     function toUint8Array(json) {
-      return new TextEncoder().encode(JSON.stringify(json));
+      return encode(JSON.stringify(json));
     }
 
     function setup(profileAs = 'json') {
@@ -383,8 +556,23 @@ describe('actions/receive-profile', function() {
 
       window.TextDecoder = TextDecoder;
 
-      // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      // Silence the warnings coming from the failed symbolication attempts, and
+      // make sure that the logged error contains our error messages.
+      jest.spyOn(console, 'warn').mockImplementation(error => {
+        expect(error).toBeInstanceOf(SymbolsNotFoundError);
+        expect(error.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              errors: expect.arrayContaining([
+                expect.objectContaining({
+                  message: 'No symbolication API in place',
+                }),
+              ]),
+            }),
+            expect.objectContaining({ message: 'No symbol tables available' }),
+          ])
+        );
+      });
 
       const store = blankStore();
 
@@ -403,9 +591,11 @@ describe('actions/receive-profile', function() {
 
     for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
       const desc = 'can retrieve a profile from the addon as ' + profileAs;
+
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
         await dispatch(retrieveProfileFromAddon());
+        expect(console.warn).toHaveBeenCalledTimes(2);
 
         const state = getState();
         expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
@@ -485,22 +675,24 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      arrayBuffer: () =>
+        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
+      window.TextDecoder = TextDecoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -534,17 +726,16 @@ describe('actions/receive-profile', function() {
       window.fetch = jest.fn().mockResolvedValue(
         (({
           ...fetch200Response,
-          json: () =>
-            Promise.resolve(
-              JSON.parse(serializeProfile(unsymbolicatedProfile))
-            ),
+          json: () => Promise.resolve(), // Used when fetching symbols.
+          arrayBuffer: () =>
+            Promise.resolve(encode(serializeProfile(unsymbolicatedProfile))),
         }: any): Response)
       );
 
       simulateSymbolStoreHasNoCache();
 
       // Silence console logs coming from the previous rejection
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
@@ -553,6 +744,16 @@ describe('actions/receive-profile', function() {
         'https://symbols.mozilla.org/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
+        })
+      );
+
+      expect(console.warn).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          message:
+            'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
+            ' - SymbolsNotFoundError: There was a problem with the JSON returned by the symbolication API.\n' +
+            ' - Error: Expected an object with property `results`\n' +
+            " - Error: There's no connection to the gecko profiler add-on.",
         })
       );
     });
@@ -569,9 +770,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -598,9 +801,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -641,22 +846,34 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      arrayBuffer: () =>
+        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
+    }: any): Response);
+    const fetch200GzippedResponse = (({
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => 'application/json',
+      },
+      arrayBuffer: () => compress(serializeProfile(_getSimpleProfile())),
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
+      window.TextDecoder = TextDecoder;
+      (window: any).TextEncoder = TextEncoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
+      delete (window: any).TextEncoder;
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -664,6 +881,26 @@ describe('actions/receive-profile', function() {
       window.fetch = jest.fn(url =>
         Promise.resolve(
           url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
+
+      const store = blankStore();
+      await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
+
+      const state = store.getState();
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+        start: 0,
+        end: 1,
+      });
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+    });
+
+    it('can retrieve a gzipped profile from the web and save it to state', async function() {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200GzippedResponse : fetch403Response
         )
       );
 
@@ -691,9 +928,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -720,9 +959,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -761,13 +1002,13 @@ describe('actions/receive-profile', function() {
    */
   describe('_fetchProfile', function() {
     beforeEach(function() {
-      window.fetch = sinon.stub();
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      window.TextDecoder = TextDecoder;
+      window.fetch = jest.fn();
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     /**
@@ -797,11 +1038,11 @@ describe('actions/receive-profile', function() {
       }
 
       if (isJSON) {
-        arrayBuffer = () => Promise.reject(new Error('Unhandled mock'));
-        json = () => Promise.resolve(profile);
+        arrayBuffer = () => Promise.resolve(encode(stringProfile));
+        json = () => Promise.reject(new Error('Not implemented'));
       }
 
-      const zippedProfileResponse = {
+      const zippedProfileResponse = (({
         ok: true,
         status: 200,
         json,
@@ -818,8 +1059,15 @@ describe('actions/receive-profile', function() {
             }
           },
         },
-      };
-      window.fetch.withArgs(url).resolves(zippedProfileResponse);
+      }: any): Response);
+      const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+
+      window.fetch = jest.fn(actualUrl =>
+        Promise.resolve(
+          actualUrl === url ? zippedProfileResponse : fetch403Response
+        )
+      );
+
       const reportError = jest.fn();
       const args = {
         url,
@@ -906,10 +1154,11 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a bad profile JSON is passed in', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
         contentType: 'application/json',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -924,9 +1173,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a bad profile JSON is passed in, with no content type', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -941,9 +1191,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a completely unknown file is passed in', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.unknown',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -959,6 +1210,16 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromFile', function() {
+    beforeEach(function() {
+      if ((window: any).TextEncoder) {
+        throw new Error('A TextEncoder was already on the window object.');
+      }
+      (window: any).TextEncoder = TextEncoder;
+    });
+
+    afterEach(async function() {
+      delete (window: any).TextEncoder;
+    });
     /**
      * Bypass all of Flow's checks, and mock out the file interface.
      */
@@ -1011,7 +1272,7 @@ describe('actions/receive-profile', function() {
         .mockRejectedValue(new Error('No symbolication API in place'));
 
       // Silence console logs coming from the previous rejections
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const profile = createGeckoProfile();
 
@@ -1044,7 +1305,26 @@ describe('actions/receive-profile', function() {
       );
     });
 
+    it('can load gzipped json with an empty mime type', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: '',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+    });
+
     it('will give an error when unable to parse json', async function() {
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       const { view } = await setupTestWithFile({
         type: 'application/json',
         payload: '{}',
@@ -1052,21 +1332,58 @@ describe('actions/receive-profile', function() {
       expect(view.phase).toBe('FATAL_ERROR');
 
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can load gzipped json', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
+    it('can load gzipped json', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/gzip',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('will give an error when unable to parse gzipped profiles', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
+    it('can load gzipped json even with incorrect mime type', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/json',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+    });
+
+    it('will give an error when unable to parse gzipped profiles', async function() {
+      window.TextDecoder = TextDecoder;
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      const { view } = await setupTestWithFile({
+        type: 'application/gzip',
+        payload: compress('{}'),
+      });
+      expect(view.phase).toBe('FATAL_ERROR');
+
+      expect(
+        // Coerce into the object to access the error property.
+        (view: any).error
+      ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     async function setupZipTestWithProfile(
@@ -1158,8 +1475,8 @@ describe('actions/receive-profile', function() {
       });
       expect(view.phase).toBe('FATAL_ERROR');
       expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
+        // Coerce into an any to access the error property.
+        (view: any).error
       ).toMatchSnapshot();
     });
   });
@@ -1172,7 +1489,7 @@ describe('actions/receive-profile', function() {
         headers: {
           get: () => 'application/json',
         },
-        json: () => Promise.resolve(JSON.parse(profile)),
+        arrayBuffer: () => Promise.resolve(encode(profile)),
       };
     }
 
@@ -1205,7 +1522,7 @@ describe('actions/receive-profile', function() {
         urlSearch1: 'thread=0',
         urlSearch2: 'thread=0',
       }
-    ): * {
+    ) {
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
 
@@ -1215,7 +1532,7 @@ describe('actions/receive-profile', function() {
     async function setupWithShortUrl(
       profiles: SetupProfileParams,
       { urlSearch1, urlSearch2 }: SetupUrlSearchParams
-    ): * {
+    ) {
       const longUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const longUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
       const shortUrl1 = 'https://perfht.ml/FAKEBITLYHASH1';
@@ -1249,30 +1566,36 @@ describe('actions/receive-profile', function() {
       url2: string,
     |};
 
+    type SetupOptionsParams = $Shape<{|
+      +skipMarkers: boolean,
+    |}>;
+
     async function setup(
       { profile1, profile2 }: SetupProfileParams,
-      { url1, url2 }: SetupUrlParams
-    ): * {
-      profile1.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['A', 1, { startTime: 1, endTime: 3 }],
-          ['A', 1, null],
-          ['B', 2, null],
-          ['C', 3, null],
-          ['D', 4, null],
-          ['E', 5, null],
-        ])
-      );
-      profile2.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['F', 1, { startTime: 1, endTime: 3 }],
-          ['G', 2, null],
-          ['H', 3, null],
-          ['I', 4, null],
-          ['J', 5, null],
-        ])
-      );
-
+      { url1, url2 }: SetupUrlParams,
+      { skipMarkers }: SetupOptionsParams = {}
+    ) {
+      if (skipMarkers !== true) {
+        profile1.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['A', 1, 3],
+            ['A', 1],
+            ['B', 2],
+            ['C', 3],
+            ['D', 4],
+            ['E', 5],
+          ])
+        );
+        profile2.threads.forEach(thread =>
+          addMarkersToThreadWithCorrespondingSamples(thread, [
+            ['F', 1, 3],
+            ['G', 2],
+            ['H', 3],
+            ['I', 4],
+            ['J', 5],
+          ])
+        );
+      }
       window.fetch
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
@@ -1302,9 +1625,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
@@ -1369,6 +1689,23 @@ describe('actions/receive-profile', function() {
       expect(expandUrl).toHaveBeenCalledWith(shortUrl2);
     });
 
+    it('keeps the initial rootRange as default', async function() {
+      //Time sample has been set for 100000ms (100s)
+      const { profile } = getProfileFromTextSamples(`
+        100000
+        A
+      `); //
+      const { rootRange } = await setup(
+        { profile1: profile, profile2: profile },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        },
+        { skipMarkers: true }
+      );
+      expect(rootRange).toEqual({ start: 0, end: 1 });
+    });
+
     it('filters samples and markers, according to the URL', async function() {
       const { resultProfile } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&range=0.0011_0.0043',
@@ -1427,7 +1764,74 @@ describe('actions/receive-profile', function() {
       const callTree = selectors.getCallTree(getState());
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
-      expect(nodeData.selfTime).toBe(4);
+      expect(nodeData.self).toBe(4);
+    });
+
+    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function() {
+      const store = blankStore();
+      const { resultProfile } = await setup(getSomeProfiles(), {
+        url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+      });
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
+    it('includes screenshot track of both profiles if they have screenshot markers', async function() {
+      const store = blankStore();
+      //Get profiles with one screenshot track
+      const profile1 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '0',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [screenshots]',
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
     });
   });
 
@@ -1439,11 +1843,14 @@ describe('actions/receive-profile', function() {
         headers: {
           get: () => 'application/json',
         },
-        json: () => Promise.resolve(JSON.parse(profile)),
+        arrayBuffer: () => Promise.resolve(encode(profile)),
       };
     }
 
-    async function setup(location: Object, requiredProfile: number = 1) {
+    async function setup(
+      location: $Shape<Location>,
+      requiredProfile: number = 1
+    ) {
       const profile = _getSimpleProfile();
       const geckoProfile = createGeckoProfile();
 
@@ -1466,7 +1873,7 @@ describe('actions/receive-profile', function() {
       simulateSymbolStoreHasNoCache();
 
       // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(getProfilesFromRawUrl(location));
@@ -1497,9 +1904,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
@@ -1595,7 +1999,7 @@ describe('actions/receive-profile', function() {
       // Differently, `from-addon` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
-      const processedProfile = processProfile(geckoProfile);
+      const processedProfile = processGeckoProfile(geckoProfile);
       expect(ProfileViewSelectors.getProfile(getState())).toEqual(
         processedProfile
       );
@@ -1615,17 +2019,21 @@ describe('actions/receive-profile', function() {
       return expect(waitUntilSymbolication()).resolves.toBe(undefined);
     });
 
-    it('does not retrieve profile from other data sources', async function() {
-      ['/none/', '/from-file/', 'local'].forEach(async sourcePath => {
-        await expect(
-          setup({
+    ['none', 'from-file', 'local', 'uploaded-recordings', 'compare'].forEach(
+      dataSource => {
+        it(`does not retrieve a profile for the datasource ${dataSource}`, async function() {
+          const sourcePath = `/${dataSource}/`;
+          const { getState } = await setup({
             pathname: sourcePath,
             search: '',
             hash: '',
-          })
-        ).rejects.toThrow();
-      });
-    });
+          });
+          expect(ProfileViewSelectors.getProfileOrNull(getState())).toEqual(
+            null
+          );
+        });
+      }
+    );
   });
 });
 

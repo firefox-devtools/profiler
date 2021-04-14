@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="567px" height="418px" viewBox="0 0 567 418" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>Untitled 2</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="gecko-profiler" transform="translate(0.000000, 1.000000)">
+            <g id="Gecko" transform="translate(188.000000, 0.000000)">
+                <circle id="Oval-Copy-3" stroke="#737373" fill="#D7D7DB" fill-rule="nonzero" cx="87.5" cy="87.5" r="87.5"></circle>
+                <g id="Group" transform="translate(50.000000, 29.000000)" fill="#6F6F6F" font-family="sans-serif" font-size="25" font-weight="bold">
+                    <text id="Gecko">
+                        <tspan x="0.2858887" y="24">Gecko</tspan>
+                    </text>
+                </g>
+            </g>
+            <g id="Group" transform="translate(209.000000, 75.000000)">
+                <g id="Rectangle">
+                    <g id="path-1-link" fill="#FFFFFF">
+                        <rect id="path-1" x="0" y="0" width="138" height="54" rx="8"></rect>
+                    </g>
+                    <rect stroke="#979797" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
+                </g>
+                <g transform="translate(12.000000, 8.000000)" fill="#0A84FF" font-family="sans-serif" font-size="17" font-weight="bold" id="Gecko-Profiler">
+                    <text>
+                        <tspan x="0.8945312" y="16">Gecko Profiler</tspan>
+                    </text>
+                </g>
+                <g id="C++-Native-Code" transform="translate(23.000000, 31.000000)" fill="#000000" font-family="sans-serif" font-size="12" font-weight="normal">
+                    <text>
+                        <tspan x="0.4746094" y="11">C++ Native Code</tspan>
+                    </text>
+                </g>
+            </g>
+            <path d="M277.5,204.5 L277.5,130.5" id="Line-Copy-6" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square"></path>
+            <polygon id="Line-Copy-6-decoration-1" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square" points="277.5 130.5 274.5 141.3 280.5 141.3"></polygon>
+            <path d="M203.5,331.5 L232.5,260.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square"></path>
+            <polygon id="Line-Copy-7-decoration-1" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square" points="232.5 260.5 225.638986 269.363774 231.193513 271.632524"></polygon>
+            <path d="M350.5,329.5 L319.5,260.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square"></path>
+            <polygon id="Line-Copy-7-decoration-1" stroke="#4A4A4A" fill="#4A4A4A" fill-rule="nonzero" stroke-linecap="square" points="319.5 260.5 321.189495 271.580867 326.662507 269.121977"></polygon>
+            <g id="Group-2" transform="translate(0.000000, 330.000000)">
+                <g id="Rectangle-Copy">
+                    <g id="path-2-link" fill="#FFFFFF">
+                        <rect id="path-2" x="0" y="0" width="254" height="87" rx="8"></rect>
+                    </g>
+                    <rect id="Rectangle" stroke="#979797" x="0.5" y="0.5" width="253" height="86" rx="8"></rect>
+                </g>
+                <g id="new:-devtools/server" transform="translate(15.000000, 39.000000)" fill="#000000" font-size="12">
+                    <text id="new:" font-family="sans-serif" font-weight="bold">
+                        <tspan x="20.9697266" y="11">new:</tspan>
+                    </text>
+                    <text id="devtools/server/actors/perf.js" font-family="sans-serif" font-weight="normal">
+                        <tspan x="48.3037109" y="11">devtools/server/actors/perf.js</tspan>
+                    </text>
+                    <text id="old:" font-family="sans-serif" font-weight="bold">
+                        <tspan x="0.2978516" y="31">old:</tspan>
+                    </text>
+                    <text id="devtools/server/actors/performance.js" font-family="sans-serif" font-weight="normal">
+                        <tspan x="25.6220703" y="31">devtools/server/actors/performance.js</tspan>
+                    </text>
+                </g>
+                <g id="DevTools-Server-Acto" transform="translate(32.000000, 10.000000)" fill="#0A84FF" font-family="sans-serif" font-size="17" font-weight="bold">
+                    <text id="DevTools-Server-Actors">
+                        <tspan x="0.565918" y="16">DevTools Server Actors</tspan>
+                    </text>
+                </g>
+            </g>
+            <g id="Group" transform="translate(313.000000, 329.000000)">
+                <g id="Rectangle-Copy-2">
+                    <g id="path-3-link" fill="#FFFFFF">
+                        <rect id="path-3" x="0" y="0" width="254" height="87" rx="8"></rect>
+                    </g>
+                    <rect id="Rectangle" stroke="#979797" x="0.5" y="0.5" width="253" height="86" rx="8"></rect>
+                </g>
+                <g id="Web-Extension" transform="translate(67.000000, 19.000000)" fill="#0A84FF" font-family="sans-serif" font-size="17" font-weight="bold">
+                    <text id="about:profiling">
+                        <tspan x="0.2258301" y="16">about:profiling</tspan>
+                    </text>
+                </g>
+                <g id="Web-Extension-Copy" transform="translate(50.000000, 49.000000)" fill="#0A84FF" font-family="sans-serif" font-size="17" font-weight="bold">
+                    <text id="profiler-menu-button">
+                        <tspan x="0" y="16">profiler menu button</tspan>
+                    </text>
+                </g>
+            </g>
+            <text id="XPIDL" fill="#000000" font-family="sans-serif" font-size="12" font-weight="normal">
+                <tspan x="288.65918" y="194">XPIDL</tspan>
+            </text>
+            <g id="Group-3" transform="translate(209.000000, 205.000000)">
+                <g id="Rectangle">
+                    <g id="path-4-link" fill="#FFFFFF">
+                        <rect id="path-4" x="0" y="0" width="138" height="54" rx="8"></rect>
+                    </g>
+                    <rect stroke="#979797" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
+                </g>
+                <g id="nsIProfiler" transform="translate(28.000000, 9.000000)" fill="#0A84FF" font-family="sans-serif" font-size="17" font-weight="bold">
+                    <text>
+                        <tspan x="0.9606934" y="16">nsIProfiler</tspan>
+                    </text>
+                </g>
+                <g id="JS-Interface" transform="translate(37.000000, 31.000000)" fill="#000000" font-family="sans-serif" font-size="12" font-weight="normal">
+                    <text>
+                        <tspan x="0.484375" y="11">JS Interface</tspan>
+                    </text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

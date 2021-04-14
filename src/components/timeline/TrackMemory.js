@@ -5,23 +5,27 @@
 // @flow
 
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
   getCounterSelectors,
-} from '../../selectors/profile';
+} from 'firefox-profiler/selectors/profile';
 import { TimelineMarkersMemory } from './Markers';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackMemoryGraph } from './TrackMemoryGraph';
 import {
   TRACK_MEMORY_GRAPH_HEIGHT,
   TRACK_MEMORY_MARKERS_HEIGHT,
   TRACK_MEMORY_LINE_WIDTH,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 
-import type { CounterIndex, ThreadIndex } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
-import type { ConnectedProps } from '../../utils/connect';
+import type {
+  CounterIndex,
+  ThreadIndex,
+  Milliseconds,
+} from 'firefox-profiler/types';
+
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackMemory.css';
 
@@ -44,11 +48,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {||};
 
 export class TrackMemoryImpl extends React.PureComponent<Props, State> {
-  _onMarkerSelect = (
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) => {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
@@ -72,7 +72,7 @@ export class TrackMemoryImpl extends React.PureComponent<Props, State> {
         <TimelineMarkersMemory
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          threadIndex={threadIndex}
+          threadsKey={threadIndex}
           onSelect={this._onMarkerSelect}
         />
         <TrackMemoryGraph

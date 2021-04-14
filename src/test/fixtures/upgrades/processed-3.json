@@ -347,13 +347,14 @@
         ]
       },
       "markers": {
-        "length": 9,
+        "length": 10,
         "name": [
           4,
           5,
           10,
           10,
           5,
+          17,
           8,
           8,
           9,
@@ -364,6 +365,7 @@
           2,
           4,
           5,
+          8,
           8,
           9,
           10,
@@ -400,8 +402,13 @@
             "type": "tracing"
           },
           {
+            "category": "WebRender",
+            "type": "tracing"
+          },
+          {
             "type": "tracing",
             "category": "DOMEvent",
+            "timeStamp": 5,
             "interval": "start",
             "eventType": "mouseout",
             "phase": 3,
@@ -442,6 +449,7 @@
           }
         ],
         "category": [
+          4,
           4,
           4,
           4,
@@ -518,7 +526,8 @@
         "frobnicate",
         "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3",
         "DiskIO",
-        "FileIO"
+        "FileIO",
+        "TextureCacheFree"
       ],
       "pid": "Unknown Process 1"
     },

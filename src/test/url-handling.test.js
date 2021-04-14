@@ -5,33 +5,48 @@
 // @flow
 
 import { oneLineTrim } from 'common-tags';
-import * as urlStateReducers from '../selectors/url-state';
+import * as urlStateSelectors from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
+  changeImplementationFilter,
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  commitRange,
+  setDataSource,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
-  urlStateToUrlObject,
+  getQueryStringFromUrlState,
   urlFromState,
   CURRENT_URL_VERSION,
   upgradeLocationToCurrentVersion,
+  UrlUpgradeError,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import { viewProfile } from '../actions/receive-profile';
-import type { Profile } from '../types/profile';
+import {
+  viewProfile,
+  changeTimelineTrackOrganization,
+} from '../actions/receive-profile';
+import type { Profile, StartEndRange } from 'firefox-profiler/types';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addActiveTabInformationToProfile,
+} from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
+import {
+  getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
+} from '../selectors/profile';
+import { getView } from '../selectors/app';
 
 function _getStoreWithURL(
   settings: {
@@ -119,14 +134,18 @@ describe('selectedThread', function() {
 
   it('selects the right thread when receiving a profile from web', function() {
     const { getState } = setup(1);
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(1);
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([1])
+    );
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
     const { getState } = setup(100);
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(2);
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([2])
+    );
   });
 });
 
@@ -146,7 +165,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can reorder global tracks ', function() {
+    it('can reorder global tracks', function() {
       const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain tab]',
@@ -168,21 +187,21 @@ describe('url handling tracks', function() {
 
     it('will not accept invalid tracks in the thread order', function() {
       const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
-      expect(urlStateReducers.getGlobalTrackOrder(getState())).toEqual([1, 0]);
+      expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([1, 0]);
     });
 
     it('will not accept invalid hidden threads', function() {
       const { getState } = initWithSearchParams(
         '?hiddenGlobalTracks=0-8-2-a&thread=1'
       );
-      expect(urlStateReducers.getHiddenGlobalTracks(getState())).toEqual(
+      expect(urlStateSelectors.getHiddenGlobalTracks(getState())).toEqual(
         new Set([0])
       );
     });
   });
 
   describe('local tracks', function() {
-    it('can reorder local tracks ', function() {
+    it('can reorder local tracks', function() {
       const { getState } = initWithSearchParams(
         '?localTrackOrderByPid=222-1-0'
       );
@@ -194,7 +213,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can hide local tracks ', function() {
+    it('can hide local tracks', function() {
       const { getState } = initWithSearchParams(
         '?hiddenLocalTracksByPid=222-1'
       );
@@ -273,18 +292,18 @@ describe('url handling tracks', function() {
 describe('search strings', function() {
   it('properly handles the call tree search string stacks with 1 item', function() {
     const { getState } = _getStoreWithURL({ search: '?search=string' });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+    expect(urlStateSelectors.getCurrentSearchString(getState())).toBe('string');
+    expect(urlStateSelectors.getSearchStrings(getState())).toEqual(['string']);
   });
 
   it('properly handles the call tree search string stacks with several items', function() {
     const { getState } = _getStoreWithURL({
       search: '?search=string,foo,%20bar',
     });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe(
+    expect(urlStateSelectors.getCurrentSearchString(getState())).toBe(
       'string,foo, bar'
     );
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+    expect(urlStateSelectors.getSearchStrings(getState())).toEqual([
       'string',
       'foo',
       'bar',
@@ -295,19 +314,19 @@ describe('search strings', function() {
     const { getState } = _getStoreWithURL({
       search: '?markerSearch=otherString',
     });
-    expect(urlStateReducers.getMarkersSearchString(getState())).toBe(
+    expect(urlStateSelectors.getMarkersSearchString(getState())).toBe(
       'otherString'
     );
   });
 
   it('properly handles showUserTimings strings', function() {
     const { getState } = _getStoreWithURL({ search: '' });
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('defaults to not showing user timings', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('serializes the call tree search strings in the URL', function() {
@@ -319,9 +338,11 @@ describe('search strings', function() {
 
     ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      expect(query.search).toBe(callTreeSearchString);
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(
+        `search=${encodeURIComponent(callTreeSearchString)}`
+      );
     });
   });
 
@@ -334,9 +355,9 @@ describe('search strings', function() {
 
     ['marker-chart', 'marker-table'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      expect(query.markerSearch).toBe(markerSearchString);
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`markerSearch=${markerSearchString}`);
     });
   });
 
@@ -347,44 +368,397 @@ describe('search strings', function() {
 
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
-    const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.networkSearch).toBe(networkSearchString);
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`networkSearch=${networkSearchString}`);
   });
 });
 
 describe('profileName', function() {
-  it('serializes the profileName in the URL ', function() {
+  it('serializes the profileName in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const profileName = 'Good Profile';
 
     dispatch(changeProfileName(profileName));
-    const urlState = urlStateReducers.getUrlState(getState());
-    const { query } = urlStateToUrlObject(urlState);
-    expect(query.profileName).toBe(profileName);
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(
+      `profileName=${encodeURIComponent(profileName)}`
+    );
   });
 
   it('reflects in the state from URL', function() {
     const { getState } = _getStoreWithURL({
       search: '?profileName=XXX',
     });
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
-    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
+    expect(urlStateSelectors.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe('XXX');
   });
 
-  it('returns empty string when profileName is not specified', function() {
+  it('provides default values for when no profile name is given', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
-    expect(urlStateReducers.getProfileName(getState())).toBe('');
+    expect(urlStateSelectors.getProfileNameFromUrl(getState())).toBe(null);
+    expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe(
+      'Firefox'
+    );
+  });
+});
+
+describe('ctxId', function() {
+  it('serializes the ctxId in the URL', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+    const tabID = 123;
+
+    dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`ctxId=${tabID}`);
+  });
+
+  it('reflects in the state from URL', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?ctxId=123&view=active-tab',
+    });
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      tabID: 123,
+    });
+  });
+
+  it('returns the full view when ctxId is not specified', function() {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
+    });
+  });
+
+  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
+    const {
+      profile,
+      parentInnerWindowIDsWithChildren,
+      iframeInnerWindowIDsWithChild,
+    } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
+    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
+    const { getState } = _getStoreWithURL(
+      {
+        search: '?view=active-tab&ctxId=123',
+      },
+      profile
+    );
+    const globalTracks = getActiveTabGlobalTracks(getState());
+    expect(globalTracks.length).toBe(1);
+    expect(globalTracks).toEqual([
+      {
+        type: 'tab',
+        threadIndexes: new Set([0]),
+        threadsKey: 0,
+      },
+    ]);
+    // TODO: Resource track type will be changed soon.
+    const resourceTracks = getActiveTabResourceTracks(getState());
+    expect(resourceTracks).toEqual([
+      {
+        name: 'Page #2',
+        type: 'sub-frame',
+        threadIndex: 1,
+      },
+    ]);
+  });
+
+  it('should remove other full view url states if present', function() {
+    const { getState } = _getStoreWithURL({
+      search:
+        '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+    });
+
+    const newUrl = new URL(
+      urlFromState(urlStateSelectors.getUrlState(getState())),
+      'https://profiler.firefox.com'
+    );
+    // The url states that are relevant to full view should be stripped out.
+    expect(newUrl.search).toEqual(
+      `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
+    );
+  });
+
+  it('if not present in the URL, still manages to load the active tab view', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?view=active-tab',
+    });
+
+    expect(getView(getState()).phase).toEqual('DATA_LOADED');
+    expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      tabID: null,
+    });
+  });
+});
+
+describe('committed ranges', function() {
+  describe('serialization', () => {
+    it('serializes when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).not.toContain(`range=`);
+    });
+
+    it('serializes when there is 1 range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1514m23786`); // 1.514s + 23786ms
+    });
+
+    it('serializes when rounding down the start', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1510.58, 1519.59));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1510m10`); // 1.510s + 10ms
+    });
+
+    it('serializes when the duration is 0', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514, 1514));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      // In the following regexp we want to especially assert that the duration
+      // isn't 0. That's why there's this negative look-ahead assertion.
+      // Therefore here we're matching a start at 1.514s, and a non-zero
+      // duration.
+      expect(queryString).toMatch(/range=1514000000n(?!0)/);
+    });
+
+    it('serializes when there are several ranges', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      dispatch(commitRange(1514.587845, 25300));
+      dispatch(commitRange(1800, 1800.1));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+
+      // 1- 1.5145s + 23786ms
+      // 2- 1.8s + 100µs
+      expect(queryString).toContain(`range=1514m23786~1800000u100`);
+    });
+
+    it('serializes when there is a small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.08, 1000.09));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000080u10`); // 1s and 80µs + 10µs
+    });
+
+    it('serializes when there is a very small range', () => {
+      const { getState, dispatch } = _getStoreWithURL();
+      dispatch(commitRange(1000.00008, 1000.0001));
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      expect(queryString).toContain(`range=1000000080n20`); // 1s and 80ns + 20ns
+    });
+  });
+
+  describe('parsing', () => {
+    it('deserializes when there is no range', () => {
+      const { getState } = _getStoreWithURL();
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
+    });
+
+    it('deserializes when there is 1 range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000',
+      });
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+      ]);
+    });
+
+    it('deserializes when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1600m5000~2245m24',
+      });
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 1600, end: 6600 },
+        { start: 2245, end: 2269 },
+      ]);
+    });
+
+    it('deserializes when there is a small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678900u100',
+      });
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 1678.9, end: 1679 },
+      ]);
+    });
+
+    it('deserializes when there is a very small range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1678123900n100',
+      });
+
+      const [committedRange] = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRange.start).toBeCloseTo(1678.1239);
+      expect(committedRange.end).toBeCloseTo(1678.124);
+    });
+
+    it('is permissive with invalid input', () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getState } = _getStoreWithURL({
+        search: '?range=invalid~2245m24',
+      });
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 2245, end: 2269 },
+      ]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('serializing and parsing', () => {
+    function getQueryStringForRanges(
+      ranges: $ReadOnlyArray<StartEndRange>
+    ): string {
+      const { getState, dispatch } = _getStoreWithURL();
+
+      ranges.forEach(({ start, end }) => dispatch(commitRange(start, end)));
+
+      const urlState = urlStateSelectors.getUrlState(getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      return queryString;
+    }
+
+    function setup(ranges: $ReadOnlyArray<StartEndRange>) {
+      const queryString = getQueryStringForRanges(ranges);
+
+      return _getStoreWithURL({
+        search: '?' + queryString,
+      });
+    }
+
+    it('can parse the serialized values', () => {
+      const { getState } = setup([
+        { start: 1514.587845, end: 25300 },
+        { start: 1800, end: 1800.1 },
+        { start: 1800.00008, end: 1800.0001 },
+      ]);
+
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 1514, end: 25300 },
+        { start: 1800, end: 1800.1 },
+        { start: 1800.00008, end: 1800.0001 },
+      ]);
+    });
+
+    it('will round values near the threshold', () => {
+      const { getState } = setup([{ start: 50000, end: 50009.9 }]);
+
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 50000, end: 50010 },
+      ]);
+    });
+
+    it('supports negative start values', () => {
+      const { getState } = setup([{ start: -1000, end: 1000 }]);
+
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: -1000, end: 1000 },
+      ]);
+    });
+
+    it('supports zero start values', () => {
+      const { getState } = setup([{ start: 0, end: 1000 }]);
+
+      expect(urlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+        { start: 0, end: 1000 },
+      ]);
+    });
+  });
+});
+
+describe('implementation', function() {
+  function setup(settings, profile) {
+    const store = _getStoreWithURL(settings, profile);
+
+    function getQueryString() {
+      const urlState = urlStateSelectors.getUrlState(store.getState());
+      const queryString = getQueryStringFromUrlState(urlState);
+      return queryString;
+    }
+
+    return {
+      ...store,
+      getQueryString,
+    };
+  }
+
+  describe('serializing', () => {
+    it('skips the value "combined"', () => {
+      const { dispatch, getQueryString } = setup();
+
+      expect(getQueryString()).not.toContain('implementation=');
+
+      dispatch(changeImplementationFilter('combined'));
+      expect(getQueryString()).not.toContain('implementation=');
+    });
+
+    it.each(['js', 'cpp'])(
+      'can serialize the value "%s"',
+      implementationFilter => {
+        const { getQueryString, dispatch } = setup();
+        dispatch(changeImplementationFilter(implementationFilter));
+        expect(getQueryString()).toContain(
+          `implementation=${implementationFilter}`
+        );
+      }
+    );
+  });
+
+  describe('parsing', () => {
+    it('deserializes when there is no implementation value', () => {
+      const { getState } = setup();
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
+    });
+
+    it.each(['js', 'cpp'])(
+      'deserializes known value %s',
+      implementationFilter => {
+        const { getState } = setup({
+          search: `?implementation=${implementationFilter}`,
+        });
+        expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+          implementationFilter
+        );
+      }
+    );
+
+    it('deserializes unknown values', () => {
+      const { getState } = setup({
+        search: '?implementation=foobar',
+      });
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe(
+        'combined'
+      );
+    });
   });
 });
 
 describe('url upgrading', function() {
-  /**
-   * Originally transform stacks were called call tree filters. This test asserts that
-   * the upgrade process works correctly.
-   */
   describe('version 1: legacy URL serialized call tree filters', function() {
+    /**
+     * Originally transform stacks were called call tree filters. This test asserts that
+     * the upgrade process works correctly.
+     */
     it('can upgrade callTreeFilters to transforms', function() {
       const { getState } = _getStoreWithURL({
         search:
@@ -427,7 +801,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
         v: 1,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
+      expect(urlStateSelectors.getSelectedTab(getState())).toBe('stack-chart');
     });
 
     it('switches to the marker-table when given a markers tab', function() {
@@ -435,7 +809,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
         v: false,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
+      expect(urlStateSelectors.getSelectedTab(getState())).toBe('marker-table');
     });
   });
 
@@ -446,7 +820,7 @@ describe('url upgrading', function() {
         search: '?hidePlatformDetails',
         v: 2,
       });
-      expect(urlStateReducers.getImplementationFilter(getState())).toBe('js');
+      expect(urlStateSelectors.getImplementationFilter(getState())).toBe('js');
     });
   });
 
@@ -707,8 +1081,75 @@ describe('url upgrading', function() {
     });
   });
 
+  describe('version 5: implement ranges differently', () => {
+    it('does not error when there is no range', () => {
+      const { getState } = _getStoreWithURL({
+        v: 4,
+      });
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([]);
+    });
+
+    it('converts when there is only one range', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
+    });
+
+    it('converts when there are several ranges', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=0.245_18.470~1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([
+        { start: 245, end: 18470 },
+        { start: 1451, end: 1453 },
+      ]);
+    });
+
+    it('supports ranges that start at the zero timestamp too', () => {
+      const { getState } = _getStoreWithURL({
+        search: '?range=0.0000_0.2772',
+        v: 4,
+      });
+
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 0, end: 278 }]);
+    });
+
+    it('is permissive with invalid input', () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { getState } = _getStoreWithURL({
+        // The first range has several dots, the second range is fully invalid,
+        // only the 3rd range is valid.
+        search: '?range=0.24.5_18.470~invalid~1.451_1.453',
+        v: 4,
+      });
+
+      const committedRanges = urlStateSelectors.getAllCommittedRanges(
+        getState()
+      );
+      expect(committedRanges).toEqual([{ start: 1451, end: 1453 }]);
+      expect(console.error).toHaveBeenCalled();
+    });
+  });
+
   // More general checks
-  it("won't run if the version is specified", function() {
+  it("won't run if the current version is specified", function() {
     const { getState } = _getStoreWithURL({
       pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
       v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
@@ -721,9 +1162,17 @@ describe('url upgrading', function() {
     // state of the application, so we won't have 'markers' as result.
     // We should change this to something more meaningful when we have eg
     // converters that reuse query names.
-    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
+    expect(urlStateSelectors.getSelectedTab(getState())).not.toBe(
       'marker-table'
     );
+  });
+
+  it('throws a specific error if a more recent version is specified', function() {
+    expect(() =>
+      _getStoreWithURL({
+        v: CURRENT_URL_VERSION + 1,
+      })
+    ).toThrow(UrlUpgradeError);
   });
 });
 
@@ -790,10 +1239,9 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToUrlObject(
-      urlStateReducers.getUrlState(getState())
-    );
-    expect(query.transforms).toBe(transformString);
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+    expect(queryString).toContain(`transforms=${transformString}`);
   });
 });
 
@@ -828,7 +1276,7 @@ describe('compare', function() {
       /* no profile */ null
     );
 
-    expect(urlStateReducers.getProfilesToCompare(store.getState())).toEqual([
+    expect(urlStateSelectors.getProfilesToCompare(store.getState())).toEqual([
       url1,
       url2,
     ]);
@@ -841,21 +1289,49 @@ describe('compare', function() {
     );
 
     const initialUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(initialUrl).toEqual('/compare/');
 
     store.dispatch(changeProfilesToCompare([url1, url2]));
     const resultingUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
+      urlStateSelectors.getUrlState(store.getState())
     );
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
   });
 });
 
+describe('uploaded-recordings', function() {
+  it('unserializes uploaded-recordings URLs', () => {
+    const store = _getStoreWithURL(
+      { pathname: '/uploaded-recordings' },
+      /* no profile */ null
+    );
+
+    expect(urlStateSelectors.getDataSource(store.getState())).toEqual(
+      'uploaded-recordings'
+    );
+  });
+
+  it('serializes uploaded-recordings URLs', () => {
+    const store = _getStoreWithURL({ pathname: '/' }, /* no profile */ null);
+    const initialUrl = urlFromState(
+      urlStateSelectors.getUrlState(store.getState())
+    );
+    expect(initialUrl).toEqual('/');
+
+    store.dispatch(setDataSource('uploaded-recordings'));
+    const resultingUrl = urlFromState(
+      urlStateSelectors.getUrlState(store.getState())
+    );
+    expect(resultingUrl).toEqual('/uploaded-recordings/');
+  });
+});
+
 describe('last requested call tree summary strategy', function() {
-  const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
+  const { getLastSelectedCallTreeSummaryStrategy } = urlStateSelectors;
+
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(

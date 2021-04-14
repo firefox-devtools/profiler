@@ -8,11 +8,13 @@ import React, { PureComponent } from 'react';
 import {
   getProfileViewOptions,
   getSymbolicationStatus,
-} from '../../selectors/profile';
-import explicitConnect from '../../utils/connect';
+} from 'firefox-profiler/selectors/profile';
+import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { RequestedLib } from '../../types/actions';
-import type { ConnectedProps } from '../../utils/connect';
+import type { RequestedLib } from 'firefox-profiler/types';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+
+import './SymbolicationStatusOverlay.css';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
@@ -38,7 +40,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-class SymbolicationStatusOverlay extends PureComponent<Props> {
+class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
   render() {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
@@ -58,7 +60,7 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
       return (
         <div className="symbolicationStatusOverlay">
           <span className="symbolicationStatusOverlayThrobber" />
-          {'Symbolicating call stacks...'}
+          Symbolicating call stacks...
         </div>
       );
     }
@@ -66,10 +68,14 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, {||}>({
+export const SymbolicationStatusOverlay = explicitConnect<
+  {||},
+  StateProps,
+  {||}
+>({
   mapStateToProps: state => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),
-  component: SymbolicationStatusOverlay,
+  component: SymbolicationStatusOverlayImpl,
 });

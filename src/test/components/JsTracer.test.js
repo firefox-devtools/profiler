@@ -4,22 +4,30 @@
 
 // @flow
 import * as React from 'react';
+import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
-import JsTracer from '../../components/js-tracer';
-import { render, fireEvent } from 'react-testing-library';
-import { Provider } from 'react-redux';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { JsTracer } from '../../components/js-tracer';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
+  fireFullClick,
 } from '../fixtures/utils';
-import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithJsTracerEvents,
+  type TestDefinedJsTracerEvent,
+} from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
 jest.useFakeTimers();
 
@@ -29,6 +37,7 @@ const GRAPH_WIDTH =
 const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -37,14 +46,9 @@ describe('StackChart', function() {
     events,
   }: {
     skipLoadingScreen: boolean,
-    events: Array<*>,
+    events: TestDefinedJsTracerEvent[],
   }) {
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -79,7 +83,6 @@ describe('StackChart', function() {
       ...renderResult,
       dispatch,
       getState,
-      ctx,
       flushRafCalls,
       getJsTracerChartCanvas,
       getChangeJsTracerSummaryCheckbox,
@@ -129,11 +132,11 @@ describe('StackChart', function() {
   });
 
   it('matches the snapshot a simple chart render', () => {
-    const { ctx } = setup({
+    setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can change to a summary view', function() {
@@ -142,16 +145,16 @@ describe('StackChart', function() {
       events: simpleTracerEvents,
     });
     expect(getShowJsTracerSummary(getState())).toEqual(false);
-    fireEvent.click(getChangeJsTracerSummaryCheckbox());
+    fireFullClick(getChangeJsTracerSummaryCheckbox());
     expect(getShowJsTracerSummary(getState())).toEqual(true);
   });
 
   it('matches the snapshot for an inverted draw call', function() {
-    const { getChangeJsTracerSummaryCheckbox, ctx } = setup({
+    const { getChangeJsTracerSummaryCheckbox } = setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    fireEvent.click(getChangeJsTracerSummaryCheckbox());
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    fireFullClick(getChangeJsTracerSummaryCheckbox());
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 });

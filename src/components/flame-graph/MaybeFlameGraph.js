@@ -4,19 +4,20 @@
 
 // @flow
 import * as React from 'react';
+
 import explicitConnect from '../../utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
-import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
-import FlameGraph from './FlameGraph';
+import { FlameGraphEmptyReasons } from './FlameGraphEmptyReasons';
+import { FlameGraph } from './FlameGraph';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-require('./MaybeFlameGraph.css');
+import './MaybeFlameGraph.css';
 
 type StateProps = {|
-  +maxStackDepth: number,
+  +isPreviewSelectionEmpty: boolean,
   +invertCallstack: boolean,
 |};
 type DispatchProps = {|
@@ -24,15 +25,24 @@ type DispatchProps = {|
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MaybeFlameGraph extends React.PureComponent<Props> {
+class MaybeFlameGraphImpl extends React.PureComponent<Props> {
+  _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
+
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
   };
 
-  render() {
-    const { maxStackDepth, invertCallstack } = this.props;
+  componentDidMount() {
+    const flameGraph = this._flameGraph.current;
+    if (flameGraph) {
+      flameGraph.focus();
+    }
+  }
 
-    if (maxStackDepth === 0) {
+  render() {
+    const { isPreviewSelectionEmpty, invertCallstack } = this.props;
+
+    if (isPreviewSelectionEmpty) {
       return <FlameGraphEmptyReasons />;
     }
 
@@ -52,21 +62,23 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
         </div>
       );
     }
-    return <FlameGraph />;
+    return <FlameGraph ref={this._flameGraph} />;
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    return {
-      invertCallstack: getInvertCallstack(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
-    };
-  },
-  mapDispatchToProps: {
-    changeInvertCallstack,
-  },
-  component: MaybeFlameGraph,
-});
+export const MaybeFlameGraph = explicitConnect<{||}, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => {
+      return {
+        invertCallstack: getInvertCallstack(state),
+        isPreviewSelectionEmpty:
+          selectedThreadSelectors.getPreviewFilteredCallNodeMaxDepth(state) ===
+          0,
+      };
+    },
+    mapDispatchToProps: {
+      changeInvertCallstack,
+    },
+    component: MaybeFlameGraphImpl,
+  }
+);

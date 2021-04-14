@@ -4,28 +4,30 @@
 
 // @flow
 
-import type { TrackReference } from '../../types/actions';
-import type { Store } from '../../types/store';
-import type { ThreadIndex } from '../../types/profile';
-import type { LocalTrack } from '../../types/profile-derived';
+import type {
+  TrackReference,
+  Store,
+  ThreadIndex,
+  LocalTrack,
+} from 'firefox-profiler/types';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from 'react-testing-library';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
-  changeSelectedThread,
+  changeSelectedThreads,
   hideLocalTrack,
 } from '../../actions/profile-view';
-import TimelineLocalTrack from '../../components/timeline/LocalTrack';
+import { TimelineLocalTrack } from '../../components/timeline/LocalTrack';
 import {
   getRightClickedTrack,
   getLocalTrackFromReference,
   getProfile,
 } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getNetworkTrackProfile,
   getIPCTrackProfile,
@@ -35,16 +37,20 @@ import {
   getStoreWithMemoryTrack,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
 // local tracks.
 const PID = 222;
-const LEFT_CLICK = 0;
-const RIGHT_CLICK = 2;
 
 describe('timeline/LocalTrack', function() {
+  autoMockCanvasContext();
+
   describe('with a thread track', function() {
     it('matches the snapshot of a local track', () => {
       const { container } = setupThreadTrack();
@@ -53,7 +59,7 @@ describe('timeline/LocalTrack', function() {
 
     it('has the correct selectors into useful parts of the component', function() {
       const { getLocalTrackLabel, getLocalTrackRow } = setupThreadTrack();
-      expect(getLocalTrackLabel().textContent).toBe('DOM Worker');
+      expect(getLocalTrackLabel()).toHaveTextContent('DOM Worker');
       expect(getLocalTrackRow()).toBeTruthy();
     });
 
@@ -65,8 +71,8 @@ describe('timeline/LocalTrack', function() {
         getLocalTrackRow,
       } = setupThreadTrack();
       expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      expect(getLocalTrackRow().classList.contains('selected')).toBe(false);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getLocalTrackRow()).not.toHaveClass('selected');
     });
 
     it('can select a thread by clicking the label', () => {
@@ -76,10 +82,10 @@ describe('timeline/LocalTrack', function() {
         threadIndex,
         getLocalTrackRow,
       } = setupThreadTrack();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireEvent.mouseDown(getLocalTrackLabel(), { button: LEFT_CLICK });
-      expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
-      expect(getLocalTrackRow().classList.contains('selected')).toBe(true);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      fireFullClick(getLocalTrackLabel());
+      expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
+      expect(getLocalTrackRow()).toHaveClass('selected');
     });
 
     it('can right click a thread', () => {
@@ -90,16 +96,16 @@ describe('timeline/LocalTrack', function() {
         trackReference,
       } = setupThreadTrack();
 
-      fireEvent.mouseDown(getLocalTrackLabel(), { button: RIGHT_CLICK });
+      fireFullContextMenu(getLocalTrackLabel());
       expect(getRightClickedTrack(getState())).toEqual(trackReference);
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
 
     it('can select a thread by clicking the row', () => {
       const { getState, getLocalTrackRow, threadIndex } = setupThreadTrack();
-      expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      fireEvent.click(getLocalTrackRow());
-      expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+      expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
+      fireFullClick(getLocalTrackRow());
+      expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 
     it('will render a stub div if the track is hidden', () => {
@@ -113,7 +119,7 @@ describe('timeline/LocalTrack', function() {
   describe('with a network track', function() {
     it('has correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithNetworkProfile();
-      expect(getLocalTrackLabel().textContent).toBe('Network');
+      expect(getLocalTrackLabel()).toHaveTextContent('Network');
     });
 
     it('matches the snapshot of the network track', () => {
@@ -125,7 +131,7 @@ describe('timeline/LocalTrack', function() {
   describe('with a memory track', function() {
     it('correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithMemory();
-      expect(getLocalTrackLabel().textContent).toBe('Memory');
+      expect(getLocalTrackLabel()).toHaveTextContent('Memory');
     });
 
     it('matches the snapshot of the memory track', () => {
@@ -137,7 +143,7 @@ describe('timeline/LocalTrack', function() {
   describe('with an IPC track', function() {
     it('correctly renders the IPC label', function() {
       const { getLocalTrackLabel } = setupWithIPC();
-      expect(getLocalTrackLabel().textContent).toBe('IPC — Empty');
+      expect(getLocalTrackLabel()).toHaveTextContent('IPC — Empty');
     });
 
     it('matches the snapshot of the IPC track', () => {
@@ -154,13 +160,10 @@ function setup(
   threadIndex: ThreadIndex
 ) {
   const { getState, dispatch } = store;
+  const setIsInitialSelectedPane = () => {};
   // The assertions are simpler if this thread is not already selected.
-  dispatch(changeSelectedThread(threadIndex + 1));
+  dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
-  // Some child components render to canvas.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(400, 400));
@@ -171,6 +174,7 @@ function setup(
         pid={PID}
         localTrack={localTrack}
         trackIndex={trackReference.trackIndex}
+        setIsInitialSelectedPane={setIsInitialSelectedPane}
       />
     </Provider>
   );

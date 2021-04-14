@@ -5,17 +5,20 @@
 // @flow
 import React from 'react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipMarker } from '../../components/tooltip/Marker';
-import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
   getNetworkMarkers,
   getProfileWithMarkers,
+  getProfileWithEventDelays,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
+import { getEmptyThread } from '../../profile-logic/data-structures';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
@@ -51,15 +54,31 @@ describe('TooltipMarker', function() {
       nsRefreshDriver::AddStyleFlushObserver
     `);
 
-    // Connect a page to one of the markers so that we render a URL in
-    // its tooltip.
-    const browsingContextID = 123123;
+    // Connect pages to some of the markers so that we render URLs in
+    // some tooltips.
+    // We have 2 pages with the same URL to check that the inner
+    // window id will be displayed in that case to disambiguate, and 1
+    // page with a unique URL, that will be displayed without inner
+    // window id.
+    const tabID = 123123;
     const innerWindowID = 1;
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tabID + 1,
+        innerWindowID: innerWindowID + 1,
+        url: 'about:blank',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tabID + 2,
+        innerWindowID: innerWindowID + 2,
+        url: 'about:blank',
         embedderInnerWindowID: 0,
       },
     ];
@@ -71,33 +90,39 @@ describe('TooltipMarker', function() {
       [
         'DOMEvent',
         10.5,
+        11.3,
         {
-          type: 'tracing',
-          category: 'DOMEvent',
+          type: 'DOMEvent',
           eventType: 'commandupdate',
-          interval: 'start',
-          phase: 2,
           innerWindowID: innerWindowID,
         },
       ],
       [
         'DOMEvent',
-        11.3,
+        10.6,
+        11.1,
         {
-          type: 'tracing',
-          category: 'DOMEvent',
-          eventType: 'commandupdate',
-          interval: 'end',
-          phase: 2,
+          type: 'DOMEvent',
+          eventType: 'load',
+          innerWindowID: innerWindowID + 1,
+        },
+      ],
+      [
+        'DOMEvent',
+        10.7,
+        11.2,
+        {
+          type: 'DOMEvent',
+          eventType: 'load',
+          innerWindowID: innerWindowID + 2,
         },
       ],
       [
         'UserTiming',
         12.5,
+        12.5,
         {
           type: 'UserTiming',
-          startTime: 12.5,
-          endTime: 12.5,
           name: 'foobar',
           entryType: 'mark',
         },
@@ -105,19 +130,18 @@ describe('TooltipMarker', function() {
       [
         'NotifyDidPaint',
         14.5,
+        null,
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
         },
       ],
       [
         'GCMinor',
         15.5,
+        null,
         {
           type: 'GCMinor',
-          startTime: 15.5,
-          endTime: 15.5,
           // nursery is only present in newer profile format.
           nursery: {
             bytes_tenured: 1366368,
@@ -125,6 +149,8 @@ describe('TooltipMarker', function() {
             cells_allocated_nursery: 26578,
             cells_allocated_tenured: 12172,
             cells_tenured: 15853,
+            strings_tenured: 10000,
+            strings_deduplicated: 1234,
             cur_capacity: 16776832,
             phase_times: {
               CancelIonCompilations: 0,
@@ -155,10 +181,9 @@ describe('TooltipMarker', function() {
       [
         'GCMajor',
         16.5,
+        null,
         {
           type: 'GCMajor',
-          startTime: 16.5,
-          endTime: 16.5,
           timings: {
             added_chunks: 50,
             allocated_bytes: 48377856,
@@ -224,7 +249,6 @@ describe('TooltipMarker', function() {
             slices: 2,
             status: 'completed',
             store_buffer_overflows: 1,
-            timestamp: 0,
             total_compartments: 19,
             total_time: 85.578,
             total_zones: 4,
@@ -235,10 +259,9 @@ describe('TooltipMarker', function() {
       [
         'GCSlice',
         17.5,
+        null,
         {
           type: 'GCSlice',
-          startTime: 17.5,
-          endTime: 17.5,
           timings: {
             reason: 'CC_WAITING',
             slice: 1,
@@ -258,47 +281,68 @@ describe('TooltipMarker', function() {
           },
         },
       ],
+      // This bailout marker was present around Firefox 72.
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,
-        null,
       ],
-      ['Invalidate http://mozilla.com/script.js:1234', 10, null],
+      // This bailout marker was present in Firefox 82.
+      [
+        'BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388',
+        10,
+      ],
+      // This is an old-style invalidation marker. This was changed to a Text marker without
+      // a version bump between Gecko profile version 20-21.
+      ['Invalidate http://mozilla.com/script.js:1234', 10],
+      // This is a bailout text marker, as of Gecko profile version 20-21, Firefox 83.
+      [
+        'Bailout',
+        10,
+        null,
+        {
+          type: 'Text',
+          name:
+            'NonObjectInput at JumpTarget on line 27 of https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:27',
+        },
+      ],
+      // This is a Invalidate text marker, as of Gecko profile version 20-21
+      [
+        'Invalidate',
+        10,
+        null,
+        {
+          type: 'Text',
+          name:
+            'https://profiler.firefox.com/701f018d7923ccd65ba7.bundle.js:198:23518',
+        },
+      ],
       [
         'Styles',
         18.5,
+        19,
         {
           type: 'tracing',
           category: 'Paint',
-          interval: 'start',
           cause: {
+            tid: 4444,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
         },
       ],
       [
-        'Styles',
-        19,
-        {
-          type: 'tracing',
-          category: 'Paint',
-          interval: 'end',
-        },
-      ],
-      [
         'TimeToFirstInteractive (TTFI)',
         21.4,
+        null,
         {
           type: 'Text',
           name: 'TTFI after 100.01ms (longTask was 100.001ms)',
-          startTime: 21.4,
-          endTime: 21.4,
         },
       ],
       [
         'Log',
         21.7,
+        null,
         {
           type: 'Log',
           name: 'Random log message',
@@ -307,79 +351,107 @@ describe('TooltipMarker', function() {
       ],
       [
         'Styles',
+        20.0,
         20.5,
         {
           type: 'Styles',
           category: 'Paint',
-          startTime: 20.0,
-          endTime: 20.5,
           elementsTraversed: 100,
           elementsStyled: 50,
           elementsMatched: 10,
           stylesShared: 15,
           stylesReused: 20,
           cause: {
+            tid: 4445,
             time: 19.5,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
         },
       ],
       [
-        'ConstructRootFrame',
+        'NotifyDidPaint',
         112.5,
-        {
-          type: 'tracing',
-          category: 'Frame Construction',
-          interval: 'start',
-        },
-      ],
-      [
-        'ConstructRootFrame',
         113.3,
         {
           type: 'tracing',
-          category: 'Frame Construction',
-          interval: 'end',
+          category: 'Paint',
         },
       ],
       [
         'FileIO',
         114,
+        115,
         {
           type: 'FileIO',
-          startTime: 114,
-          endTime: 115,
           source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
+            tid: 4446,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
         },
       ],
       [
+        'FileIO (non-profiled thread)',
+        114.5,
+        115,
+        {
+          type: 'FileIO',
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            tid: 4447,
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+          threadId: 123,
+        },
+      ],
+      [
         'IPC',
         120,
+        null,
         {
           type: 'IPC',
           startTime: 120,
           endTime: 120,
           otherPid: 2222,
-          messageType: 'PContent::Msg_PreferenceUpdate',
           messageSeqno: 1,
+          messageType: 'PContent::Msg_PreferenceUpdate',
           side: 'parent',
           direction: 'sending',
+          phase: 'endpoint',
           sync: false,
+          niceDirection: 'sending to 2222',
+        },
+      ],
+      [
+        'IPC',
+        121,
+        null,
+        {
+          type: 'IPC',
+          startTime: 121,
+          endTime: 121,
+          otherPid: 2222,
+          messageSeqno: 1,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          side: 'parent',
+          direction: 'sending',
+          phase: 'transferStart',
+          sync: false,
+          niceDirection: 'sending to 2222',
         },
       ],
       [
         'PreferenceRead',
         114.9,
+        null,
         {
           type: 'PreferenceRead',
-          startTime: 114.9,
-          endTime: 114.9,
           prefAccessTime: 114.9,
           prefName: 'layout.css.dpi',
           prefKind: 'User',
@@ -387,10 +459,33 @@ describe('TooltipMarker', function() {
           prefValue: '-1',
         },
       ],
+      [
+        'PlayAudio',
+        115,
+        null,
+        {
+          type: 'MediaSample',
+          sampleStartTimeUs: 3632654500,
+          sampleEndTimeUs: 3632674500,
+        },
+      ],
+      [
+        'RefreshObserver',
+        122,
+        126,
+        {
+          type: 'Text',
+          name: 'Scrollbar fade animation [Style]',
+          cause: {
+            time: 125, // This time is later than the marker's start time
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
-    const threadIndex = getSelectedThreadIndex(state);
+    const threadIndex = getFirstSelectedThreadIndex(state);
     const getMarker = selectedThreadSelectors.getMarkerGetter(state);
     const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
       state
@@ -401,9 +496,11 @@ describe('TooltipMarker', function() {
       const { container } = render(
         <Provider store={store}>
           <TooltipMarker
+            markerIndex={markerIndex}
             marker={marker}
-            threadIndex={threadIndex}
+            threadsKey={threadIndex}
             className="propClass"
+            restrictHeightWidth={true}
           />
         </Provider>
       );
@@ -437,7 +534,13 @@ describe('TooltipMarker', function() {
 
     return render(
       <Provider store={store}>
-        <TooltipMarker marker={marker} threadIndex={0} className="propClass" />
+        <TooltipMarker
+          markerIndex={markerIndexes[0]}
+          marker={marker}
+          threadsKey={0}
+          className="propClass"
+          restrictHeightWidth={true}
+        />
       </Provider>
     );
   }
@@ -457,6 +560,7 @@ describe('TooltipMarker', function() {
           count: 0,
           RedirectURI:
             'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
+          contentType: '',
         },
       })
     );
@@ -486,6 +590,7 @@ describe('TooltipMarker', function() {
           requestStart: 19300.8,
           responseStart: 19400.2,
           responseEnd: 20200,
+          contentType: 'image/jpeg',
         },
       })
     );
@@ -515,6 +620,7 @@ describe('TooltipMarker', function() {
           requestStart: 19300,
           responseStart: 19400,
           responseEnd: 20200,
+          contentType: 'image/jpeg',
         },
       })
     );
@@ -543,6 +649,7 @@ describe('TooltipMarker', function() {
           requestStart: 19300,
           responseStart: 19400,
           responseEnd: 20200,
+          contentType: 'image/jpeg',
         },
       })
     );
@@ -550,6 +657,153 @@ describe('TooltipMarker', function() {
     const preconnectTitle = getByText(/preconnect/i);
     expect(preconnectTitle).toBeTruthy();
     expect(preconnectTitle).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers where content type is blank', () => {
+    const { container } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+          contentType: '',
+        },
+      })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers where content type is missing', () => {
+    const { container } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+          contentType: null,
+        },
+      })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders profiled off-main thread FileIO markers properly', () => {
+    const threadId = 123456;
+    // First, create a profile with one stack, so that the stack table contains
+    // something that we can refer to from the FileIO marker cause.
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      _main
+      XRE_main
+      XREMain::XRE_main
+      mozilla::GeckoRestyleManager::PostRestyleEvent
+      nsRefreshDriver::AddStyleFlushObserver
+    `);
+
+    // Add another thread with the thread Id we are going to refer from the marker.
+    profile.threads.push(getEmptyThread({ name: 'Renderer', tid: threadId }));
+
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      [
+        'FileIO (non-main thread)',
+        114.5,
+        115,
+        {
+          type: 'FileIO',
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            tid: 4448,
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+          threadId: threadId,
+        },
+      ],
+    ]);
+
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+    const threadIndex = getFirstSelectedThreadIndex(state);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
+      state
+    );
+
+    // Render the first marker
+    const marker = getMarker(markerIndexes[0]);
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={markerIndexes[0]}
+          marker={marker}
+          threadsKey={threadIndex}
+          className="propClass"
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('shows a tooltip for Jank markers', function() {
+    const eventDelay = [
+      0,
+      20,
+      40,
+      60,
+      70,
+      // break point
+      0,
+      20,
+      40,
+    ];
+
+    const profile = getProfileWithEventDelays(eventDelay);
+    const store = storeWithProfile(profile);
+    const { getState } = store;
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+    const { container } = render(
+      <Provider store={store}>
+        <TooltipMarker
+          markerIndex={0}
+          marker={getMarker(0)}
+          threadsKey={0}
+          restrictHeightWidth={true}
+        />
+      </Provider>
+    );
+
     expect(container.firstChild).toMatchSnapshot();
   });
 });
