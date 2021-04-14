@@ -14,7 +14,10 @@ import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
@@ -48,11 +51,12 @@ const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
 describe('FlameGraph', function() {
+  autoMockCanvasContext();
   afterEach(removeRootOverlayElement);
   beforeEach(addRootOverlayElement);
 
   it('matches the snapshot', () => {
-    const { container, flushDrawLog } = setupFlameGraph();
+    const { container } = setupFlameGraph();
     const drawCalls = flushDrawLog();
 
     expect(container.firstChild).toMatchSnapshot();
@@ -219,15 +223,10 @@ describe('FlameGraph', function() {
 
 function setupFlameGraph() {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   const {
     profile,
@@ -338,14 +337,13 @@ function setupFlameGraph() {
   }
 
   function findFillTextPosition(fillText: string) {
-    return findFillTextPositionFromDrawLog(ctx.__flushDrawLog(), fillText);
+    return findFillTextPositionFromDrawLog(flushDrawLog(), fillText);
   }
 
   return {
     ...store,
     ...renderResult,
     funcNames,
-    ctx,
     moveMouse,
     rightClick,
     getTooltip,
@@ -353,6 +351,5 @@ function setupFlameGraph() {
     getContextMenu,
     clickMenuItem,
     findFillTextPosition,
-    flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }

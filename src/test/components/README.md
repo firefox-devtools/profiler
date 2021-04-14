@@ -93,21 +93,12 @@ fireEvent(target, getMouseEvent({ pageX: 5 }));
 A lot of our components use the Canvas Context API to draw graphs and display
 data. To test this properly we developed a mock that can be used in this way:
 ```js
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 ...
-
-function setup() {
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
-
-  return { flushDrawLogs: ctx.__flushDrawLogs };
-}
+autoMockCanvasContext();
 
 it('draws the right things to the screen', () => {
-  const { flushDrawLogs } = setup();
-  expect(flushDrawLogs()).toMatchSnapshot();
+  expect(window.__flushDrawLog()).toMatchSnapshot();
 });
 ```
 

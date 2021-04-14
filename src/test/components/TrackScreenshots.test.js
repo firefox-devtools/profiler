@@ -20,7 +20,7 @@ import { Timeline } from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -42,6 +42,7 @@ const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
   autoMockDomRect();
+  autoMockCanvasContext();
 
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -238,10 +239,6 @@ function setup(
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
   let leftOffset = LEFT;
   let topOffset = TOP;
   jest

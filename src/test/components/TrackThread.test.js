@@ -21,7 +21,10 @@ import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -50,6 +53,7 @@ const GRAPH_HEIGHT = 50;
 describe('timeline/TrackThread', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
+  autoMockCanvasContext();
 
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
@@ -79,7 +83,6 @@ describe('timeline/TrackThread', function() {
     const { getState, dispatch } = store;
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
 
     type Coordinate = {| pageX: number, pageY: number |};
 
@@ -96,10 +99,6 @@ describe('timeline/TrackThread', function() {
       const [, x, y, w, h] = call;
       return { pageX: x + w * 0.5, pageY: y + h * 0.5 };
     }
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -150,7 +149,6 @@ describe('timeline/TrackThread', function() {
       threadIndex,
       stackGraphCanvas,
       markerCanvas,
-      ctx,
       getFillRectCenterByIndex,
     };
   }
@@ -161,8 +159,8 @@ describe('timeline/TrackThread', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx } = setup(getSamplesProfile());
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    setup(getSamplesProfile());
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can click a stack in the stack graph in normal call trees', function() {
@@ -170,11 +168,10 @@ describe('timeline/TrackThread', function() {
       getState,
       stackGraphCanvas,
       thread,
-      ctx,
       getFillRectCenterByIndex,
     } = setup(getSamplesProfile());
 
-    const log = ctx.__flushDrawLog();
+    const log = flushDrawLog();
 
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
@@ -203,7 +200,6 @@ describe('timeline/TrackThread', function() {
       getState,
       stackGraphCanvas,
       thread,
-      ctx,
       getFillRectCenterByIndex,
     } = setup(getSamplesProfile());
 
@@ -218,9 +214,9 @@ describe('timeline/TrackThread', function() {
     function changeInvertCallstackAndGetDrawLog(value) {
       // We don't want a selected stack graph to change fillRect ordering.
       dispatch(changeSelectedCallNode(0, []));
-      ctx.__flushDrawLog();
+      flushDrawLog();
       dispatch(changeInvertCallstack(value));
-      return ctx.__flushDrawLog();
+      return flushDrawLog();
     }
 
     // Switch to "inverted" mode to test with this state
@@ -246,14 +242,14 @@ describe('timeline/TrackThread', function() {
   });
 
   it('can click a marker', function() {
-    const { getState, markerCanvas, ctx, getFillRectCenterByIndex } = setup(
+    const { getState, markerCanvas, getFillRectCenterByIndex } = setup(
       getMarkersProfile([
         ['DOMEvent', 0, 4],
         ['DOMEvent', 4, 8],
       ])
     );
 
-    const log = ctx.__flushDrawLog();
+    const log = flushDrawLog();
 
     function clickAndGetMarkerName(event) {
       fireFullClick(markerCanvas(), event);
