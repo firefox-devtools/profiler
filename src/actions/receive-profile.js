@@ -252,10 +252,10 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndexes: Set<ThreadIndex> | null
+  maybeSelectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndexes !== null;
+    const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -304,13 +304,10 @@ export function finalizeFullProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    // Wrap selectedThreadIndexes with ensureExists to pass the CI flow-checks
-    selectedThreadIndexes = ensureExists(
-      initializeSelectedThreadIndex(
-        selectedThreadIndexes,
-        visibleThreadIndexes,
-        profile
-      )
+    const selectedThreadIndexes = initializeSelectedThreadIndex(
+      maybeSelectedThreadIndexes,
+      visibleThreadIndexes,
+      profile
     );
 
     // If all of the local tracks were hidden for a process, and the main thread was
