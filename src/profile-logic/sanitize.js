@@ -63,7 +63,7 @@ export function sanitizePII(
     if (PIIToBeRemoved.shouldRemoveUrls) {
       pages = profile.pages.map((page, pageIndex) =>
         Object.assign({}, page, {
-          url: removeURLs(page.url, true, `<Page #${pageIndex}>`),
+          url: removeURLs(page.url, `<Page #${pageIndex}>`),
         })
       );
     } else {
