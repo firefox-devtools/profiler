@@ -37,6 +37,7 @@ import {
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
+  withHistoryReplaceStateSync,
   stateFromLocation,
   ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
@@ -72,11 +73,8 @@ import type {
   OriginsTimelineRoot,
 } from 'firefox-profiler/types';
 
-import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-} from 'firefox-profiler/utils/flow';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -306,10 +304,13 @@ export function finalizeFullProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    selectedThreadIndexes = initializeSelectedThreadIndex(
-      selectedThreadIndexes,
-      visibleThreadIndexes,
-      profile
+    // Wrap selectedThreadIndexes with ensureExists to pass the CI flow-checks
+    selectedThreadIndexes = ensureExists(
+      initializeSelectedThreadIndex(
+        selectedThreadIndexes,
+        visibleThreadIndexes,
+        profile
+      )
     );
 
     // If all of the local tracks were hidden for a process, and the main thread was
@@ -350,16 +351,18 @@ export function finalizeFullProfileView(
       }
     }
 
-    dispatch({
-      type: 'VIEW_FULL_PROFILE',
-      selectedThreadIndexes,
-      globalTracks,
-      globalTrackOrder,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid,
-      localTrackOrderByPid,
-      timelineType,
+    withHistoryReplaceStateSync(() => {
+      dispatch({
+        type: 'VIEW_FULL_PROFILE',
+        selectedThreadIndexes,
+        globalTracks,
+        globalTrackOrder,
+        hiddenGlobalTracks,
+        localTracksByPid,
+        hiddenLocalTracksByPid,
+        localTrackOrderByPid,
+        timelineType,
+      });
     });
   };
 }
