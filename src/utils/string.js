@@ -4,21 +4,20 @@
 
 // @flow
 
-/**
- * Takes a string and returns the string with public URLs removed.
- * It doesn't remove the URLs like `chrome://..` because they are internal URLs
- * and they shouldn't be removed.
- */
-export function removeURLs(
-  string: string,
-  removeExtensions: boolean = true,
-  redactedText: string = '<URL>'
-): string {
-  const protocols = ['http', 'https', 'ftp', 'file', 'moz-page-thumb'];
-  if (removeExtensions) {
-    protocols.push('moz-extension');
-  }
-  const regExp = new RegExp(
+// Initializing this RegExp outside of removeURLs because that function is in a
+// hot path during sanitization and it's good to avoid the initialization of the
+// RegExp which is costly.
+const REMOVE_URLS_REGEXP = (function() {
+  const protocols = [
+    'http',
+    'https',
+    'ftp',
+    'file',
+    'moz-extension',
+    'moz-page-thumb',
+  ];
+
+  return new RegExp(
     `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`,
     //    ^                              ^          ^
     //    |                              |          Matches any characters except
@@ -30,7 +29,18 @@ export function removeURLs(
     //    Matches URL schemes we need to sanitize.
     'gi'
   );
-  return string.replace(regExp, '$1' + redactedText);
+})();
+
+/**
+ * Takes a string and returns the string with public URLs removed.
+ * It doesn't remove the URLs like `chrome://..` because they are internal URLs
+ * and they shouldn't be removed.
+ */
+export function removeURLs(
+  string: string,
+  redactedText: string = '<URL>'
+): string {
+  return string.replace(REMOVE_URLS_REGEXP, '$1' + redactedText);
 }
 
 /**

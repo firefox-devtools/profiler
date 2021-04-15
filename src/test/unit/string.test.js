@@ -142,12 +142,9 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual('Image Load - moz-page-thumb://<URL>');
     });
 
-    it('should or should not remove moz-extension URLs depending on its parameter', () => {
-      let string = 'moz-extension://foo/bar/index.js';
+    it('should remove moz-extension URLs', () => {
+      const string = 'moz-extension://foo/bar/index.js';
       expect(removeURLs(string)).toEqual('moz-extension://<URL>');
-
-      string = 'moz-extension://foo/bar/index.js';
-      expect(removeURLs(string, false)).toEqual(string);
     });
   });
 
