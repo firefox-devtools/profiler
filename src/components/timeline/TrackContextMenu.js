@@ -15,6 +15,7 @@ import {
   isolateProcessMainThread,
   isolateScreenshot,
   hideLocalTrack,
+  hideAllTracksByType,
   showLocalTrack,
 } from 'firefox-profiler/actions/profile-view';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -69,6 +70,7 @@ type DispatchProps = {|
   +showGlobalTrack: typeof showGlobalTrack,
   +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
+  +hideAllTracksByType: typeof hideAllTracksByType,
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
@@ -142,7 +144,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   _toggleTrackTypeVisibility = (_, data: { type: String }): void => {
-    console.log('Hiding all tracks of type ', data.type);
+    const { hideAllTracksByType, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the process with no right clicked track.'
+      );
+    }
+    hideAllTracksByType(data.type);
   };
 
   _isolateProcess = () => {
@@ -534,7 +542,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
 
     const ALLOWED_TYPES = [
-      'screenshot',
+      'screenshots',
       'memory',
       'network',
       'ipc',
@@ -542,11 +550,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     ];
 
     const track =
-      (localTracksByPid.get(rightClickedTrack.pid) &&
-        localTracksByPid.get(rightClickedTrack.pid)[0]) ||
-      globalTracks.find(t => t.pid === rightClickedTrack.pid);
+      rightClickedTrack.type === 'local'
+        ? localTracksByPid.get(rightClickedTrack.pid)[
+            rightClickedTrack.trackIndex
+          ]
+        : globalTracks[rightClickedTrack.trackIndex];
+    console.log(track.type);
     const type = track.type;
-
     if (ALLOWED_TYPES.includes(type)) {
       return (
         <MenuItem
@@ -555,7 +565,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           data={{ type }}
           onClick={this._toggleTrackTypeVisibility}
         >
-          Hide all {type} type tracks
+          Hide all {`"${type}"`} type tracks
         </MenuItem>
       );
     }
@@ -683,6 +693,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     showAllTracks,
     showGlobalTrack,
     isolateProcess,
+    hideAllTracksByType,
     isolateLocalTrack,
     isolateProcessMainThread,
     isolateScreenshot,

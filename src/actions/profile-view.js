@@ -552,6 +552,47 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   };
 }
 
+export function hideAllTracksByType(trackType: String): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const globalTracks = getGlobalTracks(getState());
+    const globalIdsToHide = [];
+    const localIdsToHide = new Map();
+    for (const [index, track] of globalTracks.entries()) {
+      if (track.type === trackType) {
+        globalIdsToHide.push(index);
+      }
+      if (track.pid) {
+        for (const [localIndex, localTrack] of getLocalTracks(
+          getState(),
+          track.pid
+        ).entries()) {
+          if (localTrack.type === trackType) {
+            localIdsToHide.set(
+              track.pid,
+              localIdsToHide.get(track.pid) &&
+                localIdsToHide.get(track.pid).length
+                ? localIdsToHide.get(track.pid).push(localIndex)
+                : [localIndex]
+            );
+          }
+        }
+      }
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'hide tracks by type',
+    });
+
+    dispatch({
+      type: 'HIDE_TRACK_BY_TYPE',
+      globalIdsToHide,
+      localIdsToHide,
+    });
+  };
+}
+
 /**
  * This action is used to hide a global track.
  * During this process we select a different thread if the hidden track is the

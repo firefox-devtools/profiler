@@ -126,6 +126,7 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     case 'CHANGE_SIDEBAR_OPEN_STATE':
     // Timeline: (fallthrough)
     case 'HIDE_GLOBAL_TRACK':
+    case 'HIDE_TRACK_BY_TYPE':
     case 'SHOW_ALL_TRACKS':
     case 'SHOW_GLOBAL_TRACK':
     case 'ISOLATE_PROCESS':
