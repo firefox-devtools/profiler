@@ -149,8 +149,14 @@ export class ZipFileTree {
   }
 
   getAllDescendants(
-    zipTableIndex: IndexIntoZipFileTable
+    zipTableIndex: IndexIntoZipFileTable | null
   ): Set<IndexIntoZipFileTable> {
+    if (zipTableIndex === null) {
+      // Return all the indexes
+      return new Set(
+        Array.from({ length: this._zipFileTable.length }, (_, i) => i)
+      );
+    }
     const result = new Set();
     for (const child of this.getChildren(zipTableIndex)) {
       result.add(child);
@@ -202,41 +208,6 @@ export class ZipFileTree {
     }
     return displayData;
   }
-}
-
-/**
- * Try and display a nice amount of files in a zip file initially for a user. The amount
- * is an arbitrary choice really.
- */
-export function procureInitialInterestingExpandedNodes(
-  zipFileTree: ZipFileTree,
-  maxExpandedNodes: number = 30
-) {
-  const roots = zipFileTree.getRoots();
-
-  // Get a list of all of the root node's children.
-  const children = [];
-  for (const index of roots) {
-    for (const childIndex of zipFileTree.getChildren(index)) {
-      children.push(childIndex);
-    }
-  }
-
-  // Try to expand as many of these as needed to show more expanded nodes.
-  let nodeCount = roots.length + children.length;
-  const expansions = [...roots];
-  for (const childIndex of children) {
-    if (nodeCount >= maxExpandedNodes) {
-      break;
-    }
-    const subChildren = zipFileTree.getChildren(childIndex);
-    if (subChildren.length > 0) {
-      expansions.push(childIndex);
-      nodeCount += subChildren.length;
-    }
-  }
-
-  return expansions;
 }
 
 // This function extracts a profile name from the path of a file inside a zip.

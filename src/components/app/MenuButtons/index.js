@@ -16,6 +16,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import {
   getDataSource,
+  getProfileUrl,
   getTimelineTrackOrganization,
 } from 'firefox-profiler/selectors/url-state';
 import {
@@ -68,6 +69,7 @@ type OwnProps = {|
 type StateProps = {|
   +rootRange: StartEndRange,
   +dataSource: DataSource,
+  +profileUrl: string,
   +isNewlyPublished: boolean,
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
@@ -96,17 +98,18 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     this.props.dismissNewlyPublished();
   }
 
-  _getUploadedStatus(dataSource: DataSource) {
+  _getUploadedStatus(dataSource: DataSource, profileUrl) {
     switch (dataSource) {
       case 'public':
       case 'compare':
-      case 'from-url':
         return 'uploaded';
       case 'from-addon':
       case 'unpublished':
       case 'from-file':
       case 'local':
         return 'local';
+      case 'from-url':
+        return profileUrl.startsWith('http://127.0.0.1') ? 'local' : 'uploaded';
       case 'none':
       case 'uploaded-recordings':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
@@ -235,17 +238,13 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderMetaInfoButton() {
-    const { dataSource } = this.props;
-    const uploadedStatus = this._getUploadedStatus(dataSource);
-    const labelL10nId =
-      uploadedStatus === 'uploaded'
-        ? 'MenuButtons--index--metaInfo-button-uploaded-profile'
-        : 'MenuButtons--index--metaInfo-button-local-profile';
-
     return (
-      <Localized id={labelL10nId} attrs={{ label: true }}>
+      <Localized
+        id="MenuButtons--index--metaInfo-button"
+        attrs={{ label: true }}
+      >
         <ButtonWithPanel
-          buttonClassName={`menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-${uploadedStatus}`}
+          buttonClassName="menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
           // The empty string value for the label following will be replaced by the <Localized /> wrapper.
           label=""
           onPanelClose={this._resetMetaInfoState}
@@ -278,7 +277,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderPublishPanel() {
-    const { uploadPhase, dataSource, abortFunction } = this.props;
+    const { uploadPhase, dataSource, abortFunction, profileUrl } = this.props;
 
     const isUploading =
       uploadPhase === 'uploading' || uploadPhase === 'compressing';
@@ -297,7 +296,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       );
     }
 
-    const uploadedStatus = this._getUploadedStatus(dataSource);
+    const uploadedStatus = this._getUploadedStatus(dataSource, profileUrl);
     const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
@@ -329,12 +328,15 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderPermalink() {
-    const { dataSource, isNewlyPublished, injectedUrlShortener } = this.props;
+    const {
+      dataSource,
+      isNewlyPublished,
+      injectedUrlShortener,
+      profileUrl,
+    } = this.props;
 
     const showPermalink =
-      dataSource === 'public' ||
-      dataSource === 'from-url' ||
-      dataSource === 'compare';
+      this._getUploadedStatus(dataSource, profileUrl) === 'uploaded';
 
     return showPermalink ? (
       <MenuButtonsPermalink
@@ -389,6 +391,7 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
     mapStateToProps: state => ({
       rootRange: getProfileRootRange(state),
       dataSource: getDataSource(state),
+      profileUrl: getProfileUrl(state),
       isNewlyPublished: getIsNewlyPublished(state),
       uploadPhase: getUploadPhase(state),
       hasPrePublishedState: getHasPrePublishedState(state),

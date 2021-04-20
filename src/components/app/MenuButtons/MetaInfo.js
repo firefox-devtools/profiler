@@ -385,7 +385,7 @@ function _renderRowOfList(labelL10nId: string, data: string[]): React.Node {
     return null;
   }
   return (
-    <div className="metaInfoRow">
+    <div className="metaInfoRow metaInfoListRow">
       <span className="metaInfoLabel">
         <Localized id={labelL10nId} />
       </span>

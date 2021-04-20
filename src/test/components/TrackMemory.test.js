@@ -13,7 +13,10 @@ import { fireEvent } from '@testing-library/react';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackMemory } from '../../components/timeline/TrackMemory';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -58,11 +61,6 @@ describe('TrackMemory', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -105,12 +103,12 @@ describe('TrackMemory', function() {
       canvas,
       getTooltipContents,
       moveMouseAtCounter,
-      ctx,
       flushRafCalls,
       getMemoryDot,
     };
   }
 
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -120,9 +118,9 @@ describe('TrackMemory', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx, flushRafCalls } = setup();
+    const { flushRafCalls } = setup();
     flushRafCalls();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can create a tooltip', function() {
