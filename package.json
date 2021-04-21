@@ -44,8 +44,8 @@
     "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
-    "@fluent/bundle": "^0.16.0",
-    "@fluent/langneg": "^0.5.0",
+    "@fluent/bundle": "^0.16.1",
+    "@fluent/langneg": "^0.5.1",
     "@fluent/react": "^0.13.1",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
@@ -99,7 +99,7 @@
     "copy-webpack-plugin": "^6.3.2",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.0",
-    "cssnano": "^4.1.10",
+    "cssnano": "^4.1.11",
     "devtools-license-check": "^0.9.0",
     "docsify-cli": "^4.4.3",
     "eslint": "^7.23.0",
@@ -108,7 +108,7 @@
     "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-flowtype": "^5.4.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^24.3.2",
+    "eslint-plugin-jest": "^24.3.5",
     "eslint-plugin-jest-dom": "^3.7.0",
     "eslint-plugin-jest-formatting": "^2.0.1",
     "eslint-plugin-prettier": "^3.3.1",
