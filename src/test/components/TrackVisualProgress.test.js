@@ -13,7 +13,10 @@ import { fireEvent } from '@testing-library/react';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackVisualProgress } from '../../components/timeline/TrackVisualProgress';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -58,11 +61,6 @@ describe('TrackVisualProgress', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -104,12 +102,12 @@ describe('TrackVisualProgress', function() {
       canvas,
       getTooltipContents,
       moveMouseAtCounter,
-      ctx,
       flushRafCalls,
       getVisualProgressDot,
     };
   }
 
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -119,9 +117,9 @@ describe('TrackVisualProgress', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx, flushRafCalls } = setup();
+    const { flushRafCalls } = setup();
     flushRafCalls();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can create a tooltip', function() {

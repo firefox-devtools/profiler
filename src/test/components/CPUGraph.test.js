@@ -11,7 +11,10 @@ import { render } from '@testing-library/react';
 import { enableExperimentalCPUGraphs } from 'firefox-profiler/actions/app';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
@@ -36,6 +39,8 @@ const GRAPH_WIDTH = PIXELS_PER_SAMPLE * SAMPLE_COUNT;
 const GRAPH_HEIGHT = 10;
 
 describe('CPUGraph', function() {
+  autoMockCanvasContext();
+
   function getSamplesProfile() {
     const profile = getProfileFromTextSamples(`
       A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]
@@ -60,11 +65,6 @@ describe('CPUGraph', function() {
     const store = storeWithProfile(profile);
     const { dispatch } = store;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -93,7 +93,6 @@ describe('CPUGraph', function() {
 
     return {
       cpuGraphCanvas,
-      ctx,
     };
   }
 
@@ -103,7 +102,7 @@ describe('CPUGraph', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx } = setup();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    setup();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 });

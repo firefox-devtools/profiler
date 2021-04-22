@@ -1467,6 +1467,120 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
 </div>
 `;
 
+exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        500μs
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        load — DOMEvent
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <div
+      class="tooltipDetailsUrl"
+    >
+      <span
+        class="tooltipDetailsDim"
+      />
+      
+      <span
+        class="tooltipDetailsDim"
+      >
+        about:blank
+      </span>
+       (id: 2)
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        500μs
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        load — DOMEvent
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Main Thread
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <div
+      class="tooltipDetailsUrl"
+    >
+      <span
+        class="tooltipDetailsDim"
+      />
+      
+      <span
+        class="tooltipDetailsDim"
+      >
+        about:blank
+      </span>
+       (id: 3)
+    </div>
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profiled thread)-114.5 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -3486,7 +3600,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteractive (TTFI)-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -3500,7 +3614,7 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
       <div
         class="tooltipTitle"
       >
-        TTFI
+        TimeToFirstInteractive (TTFI)
       </div>
     </div>
   </div>

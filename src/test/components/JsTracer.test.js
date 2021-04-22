@@ -12,7 +12,10 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import { JsTracer } from '../../components/js-tracer';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -34,6 +37,7 @@ const GRAPH_WIDTH =
 const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -45,11 +49,6 @@ describe('StackChart', function() {
     events: TestDefinedJsTracerEvent[],
   }) {
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -84,7 +83,6 @@ describe('StackChart', function() {
       ...renderResult,
       dispatch,
       getState,
-      ctx,
       flushRafCalls,
       getJsTracerChartCanvas,
       getChangeJsTracerSummaryCheckbox,
@@ -134,11 +132,11 @@ describe('StackChart', function() {
   });
 
   it('matches the snapshot a simple chart render', () => {
-    const { ctx } = setup({
+    setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   it('can change to a summary view', function() {
@@ -152,11 +150,11 @@ describe('StackChart', function() {
   });
 
   it('matches the snapshot for an inverted draw call', function() {
-    const { getChangeJsTracerSummaryCheckbox, ctx } = setup({
+    const { getChangeJsTracerSummaryCheckbox } = setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
     fireFullClick(getChangeJsTracerSummaryCheckbox());
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 });

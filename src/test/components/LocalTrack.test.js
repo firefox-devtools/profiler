@@ -27,7 +27,7 @@ import {
 } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getNetworkTrackProfile,
   getIPCTrackProfile,
@@ -49,6 +49,8 @@ import {
 const PID = 222;
 
 describe('timeline/LocalTrack', function() {
+  autoMockCanvasContext();
+
   describe('with a thread track', function() {
     it('matches the snapshot of a local track', () => {
       const { container } = setupThreadTrack();
@@ -162,10 +164,6 @@ function setup(
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
-  // Some child components render to canvas.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(400, 400));

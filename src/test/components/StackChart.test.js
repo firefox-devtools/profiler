@@ -32,7 +32,10 @@ import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -62,13 +65,14 @@ const GRAPH_WIDTH =
   GRAPH_BASE_WIDTH + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT;
 const GRAPH_HEIGHT = 300;
 
-describe('StackChart', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
+autoMockCanvasContext();
+beforeEach(addRootOverlayElement);
+afterEach(removeRootOverlayElement);
 
+describe('StackChart', function() {
   it('matches the snapshot', () => {
-    const { container, ctx } = setupSamples();
-    const drawCalls = ctx.__flushDrawLog();
+    const { container } = setupSamples();
+    const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
   });
@@ -136,8 +140,8 @@ describe('StackChart', function() {
     expect(copy).toHaveBeenLastCalledWith('B');
   });
 
-  function getDrawnFrames(ctx) {
-    const drawCalls = ctx.__flushDrawLog();
+  function getDrawnFrames() {
+    const drawCalls = flushDrawLog();
     return drawCalls.filter(([fn]) => fn === 'fillText').map(([, arg]) => arg);
   }
 
@@ -147,10 +151,10 @@ describe('StackChart', function() {
     const frames = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(
       ' '
     );
-    const { dispatch, ctx, funcNames, flushRafCalls } = setupSamples(
+    const { dispatch, funcNames, flushRafCalls } = setupSamples(
       frames.join('\n')
     );
-    ctx.__flushDrawLog();
+    flushDrawLog();
 
     // Select the last frame, 'Z', and then make sure we can "see" the
     // drawn 'Z', but not 'A'.
@@ -162,7 +166,7 @@ describe('StackChart', function() {
     );
     flushRafCalls();
 
-    let drawnFrames = getDrawnFrames(ctx);
+    let drawnFrames = getDrawnFrames();
     expect(drawnFrames).toContain('Z');
     expect(drawnFrames).not.toContain('A');
 
@@ -171,7 +175,7 @@ describe('StackChart', function() {
     dispatch(changeSelectedCallNode(0, [funcNames.indexOf('A')]));
     flushRafCalls();
 
-    drawnFrames = getDrawnFrames(ctx);
+    drawnFrames = getDrawnFrames();
     expect(drawnFrames).toContain('A');
     expect(drawnFrames).not.toContain('Z');
   });
@@ -210,9 +214,6 @@ describe('StackChart', function() {
 });
 
 describe('MarkerChart', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
-
   it('can turn on the show user timings', () => {
     const { getByLabelText, getState } = setupUserTimings({
       isShowUserTimingsClicked: false,
@@ -230,12 +231,12 @@ describe('MarkerChart', function() {
   });
 
   it('matches the snapshots for the component and draw log', () => {
-    const { container, ctx } = setupUserTimings({
+    const { container } = setupUserTimings({
       isShowUserTimingsClicked: true,
     });
 
     expect(container.firstChild).toMatchSnapshot();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   // TODO implement selecting user timing markers #2355
@@ -260,14 +261,11 @@ describe('MarkerChart', function() {
 });
 
 describe('CombinedChart', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
-
   it('renders combined stack chart', () => {
-    const { container, ctx } = setupCombinedTimings();
+    const { container } = setupCombinedTimings();
 
     expect(container.firstChild).toMatchSnapshot();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 });
 
@@ -285,8 +283,8 @@ function getUserTiming(name: string, startTime: number, duration: number) {
   ];
 }
 
-function showUserTimings({ ctx, getByLabelText, flushRafCalls }) {
-  ctx.__flushDrawLog();
+function showUserTimings({ getByLabelText, flushRafCalls }) {
+  flushDrawLog();
   const checkbox = getByLabelText('Show user timing');
   fireFullClick(checkbox);
   flushRafCalls();
@@ -365,11 +363,6 @@ function setupSamples(
  */
 function setup(profile: Profile, funcNames: string[] = []) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -464,14 +457,13 @@ function setup(profile: Profile, funcNames: string[] = []) {
   }
 
   function findFillTextPosition(fillText: string): Position {
-    return findFillTextPositionFromDrawLog(ctx.__flushDrawLog(), fillText);
+    return findFillTextPositionFromDrawLog(flushDrawLog(), fillText);
   }
 
   return {
     ...renderResult,
     ...store,
     funcNames,
-    ctx,
     flushRafCalls,
     stackChartCanvas,
     moveMouse,
