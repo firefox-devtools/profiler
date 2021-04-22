@@ -617,7 +617,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
     )
   );
 
-  // Transpose the table to go from rows to columns.
+  // Transpose the table to go from columns to rows.
   return columnPositions.map((_, columnIndex) => {
     const column = [];
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {

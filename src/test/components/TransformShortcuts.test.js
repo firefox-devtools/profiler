@@ -9,10 +9,13 @@ import { Provider } from 'react-redux';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeSelectedCallNode,
+  changeRightClickedCallNode,
+} from '../../actions/profile-view';
 import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, objectEntries } from '../../utils/flow';
 import { fireFullKeyPress } from '../fixtures/utils';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { StackChart } from 'firefox-profiler/components/stack-chart';
@@ -122,13 +125,13 @@ function setupStore(childrenToRender) {
     profile,
     funcNamesDictPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-    A               A               A
+    A           A           A
     B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
     B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
     B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-    C               C               H
-    D               F               I
-    E               E
+    C           C           H
+    D           F           I
+    E           E
   `);
   const store = storeWithProfile(profile);
   const { getState } = store;
@@ -136,7 +139,7 @@ function setupStore(childrenToRender) {
   render(<Provider store={store}>{childrenToRender}</Provider>);
 
   return {
-    ...store,
+    store,
     funcNames,
     getTransform: () => {
       const stack = selectedThreadSelectors.getTransformStack(getState());
@@ -162,68 +165,118 @@ const pressKeyBuilder = className => (options: KeyPressOptions) => {
   fireFullKeyPress(div, options);
 };
 
-describe('flame graph transform shortcuts', () => {
-  testTransformKeyboardShortcuts(() => {
-    const {
-      dispatch,
-      funcNames: { A, B },
-      getTransform,
-    } = setupStore(<FlameGraph />);
-
+// These actions will be used to generate use cases for each of the supported panels.
+const actions = {
+  'a selected node': ({ dispatch, getState }, { A, B }) => {
     dispatch(changeSelectedCallNode(0, [A, B]));
 
-    return {
-      getTransform,
-      // take either a key as a string, or a full event if we need more
-      // information like modifier keys.
-      pressKey: pressKeyBuilder('flameGraphContent'),
-      expectedCallNodePath: [A, B],
-      expectedFuncIndex: B,
-      expectedResourceIndex: 0,
-    };
-  });
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).toBeNull();
+  },
+  'a right clicked node': ({ dispatch, getState }, { A, B }) => {
+    dispatch(changeSelectedCallNode(0, []));
+    dispatch(changeRightClickedCallNode(0, [A, B]));
+
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).not.toBeNull();
+  },
+  'both a selected and a right clicked node': (
+    { dispatch, getState },
+    { A, B, H }
+  ) => {
+    dispatch(changeSelectedCallNode(0, [A, B, B, B, H]));
+    dispatch(changeRightClickedCallNode(0, [A, B]));
+
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).not.toBeNull();
+  },
+};
+
+describe('flame graph transform shortcuts', () => {
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(<FlameGraph />);
+
+        const { A, B } = funcNames;
+        action(store, funcNames);
+
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('flameGraphContent'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
 });
 
 describe('CallTree transform shortcuts', () => {
-  testTransformKeyboardShortcuts(() => {
-    const {
-      dispatch,
-      funcNames: { A, B },
-      getTransform,
-    } = setupStore(<ProfileCallTreeView />);
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(
+          <ProfileCallTreeView />
+        );
 
-    dispatch(changeSelectedCallNode(0, [A, B]));
+        const { A, B } = funcNames;
+        action(store, funcNames);
 
-    return {
-      getTransform,
-      // take either a key as a string, or a full event if we need more
-      // information like modifier keys.
-      pressKey: pressKeyBuilder('treeViewBody'),
-      expectedCallNodePath: [A, B],
-      expectedFuncIndex: B,
-      expectedResourceIndex: 0,
-    };
-  });
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('treeViewBody'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
 });
 
 describe('stack chart transform shortcuts', () => {
-  testTransformKeyboardShortcuts(() => {
-    const {
-      dispatch,
-      funcNames: { A, B },
-      getTransform,
-    } = setupStore(<StackChart />);
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(<StackChart />);
 
-    dispatch(changeSelectedCallNode(0, [A, B]));
+        const { A, B } = funcNames;
+        action(store, funcNames);
 
-    return {
-      getTransform,
-      // take either a key as a string, or a full event if we need more
-      // information like modifier keys.
-      pressKey: pressKeyBuilder('stackChartContent'),
-      expectedCallNodePath: [A, B],
-      expectedFuncIndex: B,
-      expectedResourceIndex: 0,
-    };
-  });
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('stackChartContent'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
 });
