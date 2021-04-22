@@ -15,6 +15,7 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { ensureExists } from '../../utils/flow';
 import { fireFullKeyPress } from '../fixtures/utils';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
+import { StackChart } from 'firefox-profiler/components/stack-chart';
 import type {
   Transform,
   CallNodePath,
@@ -198,6 +199,28 @@ describe('CallTree transform shortcuts', () => {
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
       pressKey: pressKeyBuilder('treeViewBody'),
+      expectedCallNodePath: [A, B],
+      expectedFuncIndex: B,
+      expectedResourceIndex: 0,
+    };
+  });
+});
+
+describe('stack chart transform shortcuts', () => {
+  testTransformKeyboardShortcuts(() => {
+    const {
+      dispatch,
+      funcNames: { A, B },
+      getTransform,
+    } = setupStore(<StackChart />);
+
+    dispatch(changeSelectedCallNode(0, [A, B]));
+
+    return {
+      getTransform,
+      // take either a key as a string, or a full event if we need more
+      // information like modifier keys.
+      pressKey: pressKeyBuilder('stackChartContent'),
       expectedCallNodePath: [A, B],
       expectedFuncIndex: B,
       expectedResourceIndex: 0,
