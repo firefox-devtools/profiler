@@ -986,10 +986,10 @@
   resolved "https://registry.yarnpkg.com/@fluent/bundle/-/bundle-0.16.1.tgz#2d359eb2eca4c6053335258f6d3e1025f3fd3b1d"
   integrity sha512-l/y8uvAC1vAIEGXfbt97g36s9gJ6wdEFRWCJo4vtoxD1e210MxBAXfLhU+wfzaatlxwh+HjJ15G41ee6V8Y4ww==
 
-"@fluent/langneg@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@fluent/langneg/-/langneg-0.5.1.tgz#da8639bb22b46793feed326114a78610d1bb54a5"
-  integrity sha512-cjaaK6TNt32NaBChZfSDO3nSDzCthNx0rQn0Map52USlHVgbjRK/ReQxh5bE8jyms9KYWXDsLFqJmdsbHlBB/w==
+"@fluent/langneg@^0.5.2":
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/@fluent/langneg/-/langneg-0.5.2.tgz#ae73cd5f3e59b6232715591e7e3f6a2c2da8a5bd"
+  integrity sha512-6l8BfDB9mmNaeRhqu+N5BCWrUU+ZSKouyabMDnG6IDuurf+p2AAIvW0Wxe1saYYJ6vQ5QRdbT9NXtYZFz2ay6Q==
 
 "@fluent/react@^0.13.1":
   version "0.13.1"
