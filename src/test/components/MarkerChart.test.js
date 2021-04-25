@@ -4,12 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -20,7 +21,10 @@ import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMen
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
@@ -89,10 +93,6 @@ const MARKERS: TestDefinedMarkers = [
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
@@ -131,12 +131,12 @@ function setupWithProfile(profile) {
     ...renderResult,
     ...store,
     flushRafCalls,
-    flushDrawLog: () => ctx.__flushDrawLog(),
     fireMouseEvent,
   };
 }
 
 describe('MarkerChart', function() {
+  autoMockCanvasContext();
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -144,12 +144,7 @@ describe('MarkerChart', function() {
     window.devicePixelRatio = 2;
 
     const profile = getProfileWithMarkers([...MARKERS]);
-    const {
-      container,
-      flushRafCalls,
-      dispatch,
-      flushDrawLog,
-    } = setupWithProfile(profile);
+    const { container, flushRafCalls, dispatch } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
@@ -183,7 +178,7 @@ describe('MarkerChart', function() {
     ];
 
     const profile = getProfileWithMarkers(markers);
-    const { flushRafCalls, flushDrawLog } = setupWithProfile(profile);
+    const { flushRafCalls } = setupWithProfile(profile);
     flushRafCalls();
 
     const drawCalls = flushDrawLog();
@@ -214,12 +209,9 @@ describe('MarkerChart', function() {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers(MARKERS);
-    const {
-      flushRafCalls,
-      dispatch,
-      flushDrawLog,
-      fireMouseEvent,
-    } = setupWithProfile(profile);
+    const { flushRafCalls, dispatch, fireMouseEvent } = setupWithProfile(
+      profile
+    );
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
@@ -261,12 +253,9 @@ describe('MarkerChart', function() {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers(MARKERS);
-    const {
-      flushRafCalls,
-      dispatch,
-      flushDrawLog,
-      fireMouseEvent,
-    } = setupWithProfile(profile);
+    const { flushRafCalls, dispatch, fireMouseEvent } = setupWithProfile(
+      profile
+    );
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
@@ -307,7 +296,6 @@ describe('MarkerChart', function() {
       const {
         flushRafCalls,
         dispatch,
-        flushDrawLog,
         fireMouseEvent,
         container,
         getByRole,
@@ -428,7 +416,6 @@ describe('MarkerChart', function() {
       const {
         rightClick,
         mouseOver,
-        flushDrawLog,
         getContextMenu,
         findFillTextPosition,
       } = setupForContextMenus();
@@ -555,7 +542,7 @@ describe('MarkerChart', function() {
 
     it('renders lots of markers initially', function() {
       const profile = getProfileWithMarkers(MARKERS);
-      const { flushRafCalls, flushDrawLog } = setupWithProfile(profile);
+      const { flushRafCalls } = setupWithProfile(profile);
 
       flushRafCalls();
       const text = getFillTextCalls(flushDrawLog());
@@ -566,9 +553,7 @@ describe('MarkerChart', function() {
 
     it('renders only the marker that was searched for', function() {
       const profile = getProfileWithMarkers(MARKERS);
-      const { flushRafCalls, dispatch, flushDrawLog } = setupWithProfile(
-        profile
-      );
+      const { flushRafCalls, dispatch } = setupWithProfile(profile);
 
       // Flush out any existing draw calls.
       flushRafCalls();
@@ -579,7 +564,7 @@ describe('MarkerChart', function() {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text).toEqual(['Dot marker E', 'Idle']);
+      expect(text).toEqual(['Dot marker E', 'Other']);
     });
   });
 
@@ -607,14 +592,14 @@ describe('MarkerChart', function() {
       // Setup the profile data for active tab.
       const {
         profile,
-        firstTabBrowsingContextID,
+        firstTabTabID,
         parentInnerWindowIDsWithChildren,
       } = addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
       profile.meta.configuration = {
         threads: [],
         features: [],
         capacity: 1000000,
-        activeBrowsingContextID: firstTabBrowsingContextID,
+        activeTabID: firstTabTabID,
       };
       addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
         [
@@ -645,7 +630,7 @@ describe('MarkerChart', function() {
       setupResult.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: firstTabBrowsingContextID,
+          tabID: firstTabTabID,
         })
       );
 
@@ -656,12 +641,7 @@ describe('MarkerChart', function() {
 
     it('renders the marker chart and matches the snapshot', () => {
       window.devicePixelRatio = 2;
-      const {
-        dispatch,
-        flushRafCalls,
-        flushDrawLog,
-        container,
-      } = setupForActiveTab();
+      const { dispatch, flushRafCalls, container } = setupForActiveTab();
 
       dispatch(changeSelectedTab('marker-chart'));
       flushRafCalls();
@@ -676,12 +656,7 @@ describe('MarkerChart', function() {
     it('renders the hovered marker properly', () => {
       window.devicePixelRatio = 1;
 
-      const {
-        dispatch,
-        flushRafCalls,
-        flushDrawLog,
-        fireMouseEvent,
-      } = setupForActiveTab();
+      const { dispatch, flushRafCalls, fireMouseEvent } = setupForActiveTab();
 
       dispatch(changeSelectedTab('marker-chart'));
       flushRafCalls();
@@ -723,12 +698,7 @@ describe('MarkerChart', function() {
     it('does not render the hovered label', () => {
       window.devicePixelRatio = 1;
 
-      const {
-        dispatch,
-        flushRafCalls,
-        flushDrawLog,
-        fireMouseEvent,
-      } = setupForActiveTab();
+      const { dispatch, flushRafCalls, fireMouseEvent } = setupForActiveTab();
 
       dispatch(changeSelectedTab('marker-chart'));
       flushRafCalls();

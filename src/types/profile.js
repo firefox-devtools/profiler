@@ -13,6 +13,8 @@ import type {
 } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload, MarkerSchema } from './markers';
+import type { MarkerPhase } from './gecko-profile';
+
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoRawMarkerTable = number;
@@ -28,7 +30,7 @@ export type ThreadIndex = number;
 export type Tid = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
-export type BrowsingContextID = number;
+export type TabID = number;
 export type InnerWindowID = number;
 
 /**
@@ -84,6 +86,7 @@ export type Pid = number | string;
  */
 export type StackTable = {|
   frame: IndexIntoFrameTable[],
+  // Imported profiles may not have categories. In this case fill the array with 0s.
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
@@ -254,7 +257,7 @@ export type RawMarkerTable = {|
   name: IndexIntoStringTable[],
   startTime: Array<number | null>,
   endTime: Array<number | null>,
-  phase: number[],
+  phase: MarkerPhase[],
   category: IndexIntoCategoryList[],
   length: number,
 |};
@@ -397,18 +400,16 @@ export type Category = {|
 export type CategoryList = Array<Category>;
 
 /**
- * A Page describes the page the browser profiled. In Firefox, there exists
- * the idea of a Browsing Context, which a large collection of useful things
- * associated with a particular tab. However, the same Browsing Context can be
- * used to navigate over many pages and they are not unique for frames. The
- * Inner Window IDs represent JS `window` objects in each Document. And they are
- * unique for each frame. That's why it's enough to keep only inner Window IDs
- * inside marker payloads. 0 means null(no embedder) for Embedder Window ID.
+ * A Page describes the page the browser profiled. In Firefox, TabIDs represent the
+ * ID that is shared between multiple frames in a single tab. The Inner Window IDs
+ * represent JS `window` objects in each Document. And they are unique for each frame.
+ * That's why it's enough to keep only inner Window IDs inside marker payloads.
+ * 0 means null(no embedder) for Embedder Window ID.
  *
- * The unique value for a page is innerWindowID.
+ * The unique field for a page is innerWindowID.
  */
 export type Page = {|
-  browsingContextID: BrowsingContextID,
+  tabID: TabID,
   innerWindowID: InnerWindowID,
   url: string,
   // 0 means no embedder
@@ -497,9 +498,9 @@ export type ProfilerConfiguration = {|
   capacity: Bytes,
   duration?: number,
   // Optional because that field is introduced in Firefox 72.
-  // Active BrowsingContext ID indicates a Firefox tab. That field allows us to
+  // Active Tab ID indicates a Firefox tab. That field allows us to
   // create an "active tab view".
-  activeBrowsingContextID?: BrowsingContextID,
+  activeTabID?: TabID,
 |};
 
 /**
@@ -631,13 +632,16 @@ export type VisualMetrics = {|
   VisualComplete99: number,
 |};
 
+// Units of ThreadCPUDelta values for different platforms.
+export type ThreadCPUDeltaUnit = 'ns' | 'µs' | 'variable CPU cycles';
+
 // Object that holds the units of samples table values. Some of the values can be
 // different depending on the platform, e.g. threadCPUDelta.
 // See https://searchfox.org/mozilla-central/rev/851bbbd9d9a38c2785a24c13b6412751be8d3253/tools/profiler/core/platform.cpp#2601-2606
 export type SampleUnits = {|
   +time: 'ms',
   +eventDelay: 'ms',
-  +threadCPUDelta: 'ns' | 'µs' | 'variable CPU cycles',
+  +threadCPUDelta: ThreadCPUDeltaUnit,
 |};
 
 /**
@@ -655,8 +659,11 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
-  // The list of categories as provided by the platform.
-  categories: CategoryList,
+  // The list of categories as provided by the platform. The categories are present for
+  // all Firefox profiles, but imported profiles may not include any category support.
+  // The front-end will provide a default list of categories, but the saved profile
+  // will not include them.
+  categories?: CategoryList,
   // The name of the product, most likely "Firefox".
   product: 'Firefox' | string,
   // This value represents a boolean, but for some reason is written out as an int value.
@@ -747,6 +754,13 @@ export type ProfileMeta = {|
   // The sampleUnits property landed in Firefox 86, and is only optional because
   // older profile versions may not have it. No upgrader was written for this change.
   sampleUnits?: SampleUnits,
+  // Information of the device that profile is captured from.
+  // Currently it's only present for Android devices and it includes brand and
+  // model names of that device.
+  // It's optional because profiles from non-Android devices and from older
+  // Firefox versions may not have it.
+  // This property landed in Firefox 88.
+  device?: string,
 |};
 
 /**

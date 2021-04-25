@@ -5,6 +5,7 @@
 // @flow
 import * as app from './app';
 import * as icons from './icons';
+import * as l10n from './l10n';
 import * as profileView from './profile-view';
 import * as publish from './publish';
 import * as receiveProfile from './receive-profile';
@@ -14,6 +15,7 @@ export default Object.assign(
   {},
   app,
   icons,
+  l10n,
   profileView,
   publish,
   receiveProfile,

@@ -4,6 +4,7 @@
 
 // @flow
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import {
@@ -57,10 +58,18 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
         return (
           <>
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Symbols:</span>
-              {isSymbolicated
-                ? 'Profile is symbolicated'
-                : 'Profile is not symbolicated'}
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--symbols">
+                  Symbols:
+                </Localized>
+              </span>
+              <Localized
+                id={
+                  isSymbolicated
+                    ? 'MenuButtons--metaInfo--profile-symbolicated'
+                    : 'MenuButtons--metaInfo--profile-not-symbolicated'
+                }
+              />
             </div>
             <div className="metaInfoRow">
               <span className="metaInfoLabel"></span>
@@ -69,9 +78,13 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                 type="button"
                 className="photon-button photon-button-micro"
               >
-                {isSymbolicated
-                  ? 'Re-symbolicate profile'
-                  : 'Symbolicate profile'}
+                <Localized
+                  id={
+                    isSymbolicated
+                      ? 'MenuButtons--metaInfo--resymbolicate-profile'
+                      : 'MenuButtons--metaInfo--symbolicate-profile'
+                  }
+                />
               </button>
             </div>
           </>
@@ -79,10 +92,18 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
       case 'SYMBOLICATING':
         return (
           <div className="metaInfoRow">
-            <span className="metaInfoLabel">Symbols:</span>
-            {isSymbolicated
-              ? 'Attempting to re-symbolicate profile'
-              : 'Currently symbolicating profile'}
+            <span className="metaInfoLabel">
+              <Localized id="MenuButtons--metaInfo--symbols">
+                Symbols:
+              </Localized>
+            </span>
+            <Localized
+              id={
+                isSymbolicated
+                  ? 'MenuButtons--metaInfo--attempting-resymbolicate'
+                  : 'MenuButtons--metaInfo--currently-symbolicating'
+              }
+            />
           </div>
         );
       default:
@@ -100,28 +121,29 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
     const platformInformation = formatPlatform(meta);
 
     let cpuCount = null;
-    if (meta.physicalCPUs || meta.logicalCPUs) {
-      let physicalCPUs = null;
-      let logicalCPUs = null;
-      if (meta.physicalCPUs) {
-        physicalCPUs =
-          meta.physicalCPUs +
-          ' physical ' +
-          (meta.physicalCPUs === 1 ? 'core' : 'cores');
-      }
-      if (meta.logicalCPUs) {
-        logicalCPUs =
-          meta.logicalCPUs +
-          ' logical ' +
-          (meta.logicalCPUs === 1 ? 'core' : 'cores');
-      }
+    if (meta.physicalCPUs && meta.logicalCPUs) {
       cpuCount = (
-        <div className="metaInfoRow">
-          <span className="metaInfoLabel">CPU:</span>
-          {physicalCPUs}
-          {physicalCPUs && logicalCPUs ? ', ' : null}
-          {logicalCPUs}
-        </div>
+        <Localized
+          id="MenuButtons--metaInfo--physical-and-logical-cpu"
+          vars={{
+            physicalCPUs: meta.physicalCPUs,
+            logicalCPUs: meta.logicalCPUs,
+          }}
+        />
+      );
+    } else if (meta.physicalCPUs) {
+      cpuCount = (
+        <Localized
+          id="MenuButtons--metaInfo--physical-cpu"
+          vars={{ physicalCPUs: meta.physicalCPUs }}
+        />
+      );
+    } else if (meta.logicalCPUs) {
+      cpuCount = (
+        <Localized
+          id="MenuButtons--metaInfo--logical-cpu"
+          vars={{ logicalCPUs: meta.logicalCPUs }}
+        />
       );
     }
 
@@ -130,59 +152,111 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
         <div className="metaInfoSection">
           {meta.startTime ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Recording started:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--recording-started">
+                  Recording started:
+                </Localized>
+              </span>
               {_formatDate(meta.startTime)}
             </div>
           ) : null}
           {meta.interval ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Interval:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--interval">
+                  Interval:
+                </Localized>
+              </span>
               {formatTimestamp(meta.interval, 4, 1)}
             </div>
           ) : null}
           {meta.preprocessedProfileVersion ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Profile Version:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--profile-version">
+                  Profile Version:
+                </Localized>
+              </span>
               {meta.preprocessedProfileVersion}
             </div>
           ) : null}
           {configuration ? (
             <>
               <div className="metaInfoRow">
-                <span className="metaInfoLabel">Buffer Capacity:</span>
-                {formatBytes(configuration.capacity)}
+                <span className="metaInfoLabel">
+                  <Localized id="MenuButtons--metaInfo--buffer-capacity">
+                    Buffer Capacity:
+                  </Localized>
+                </span>
+                {/* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
+                formatBytes(configuration.capacity * 8, 0)}
               </div>
               <div className="metaInfoRow">
-                <span className="metaInfoLabel">Buffer Duration:</span>
-                {configuration.duration
-                  ? `${configuration.duration} seconds`
-                  : 'Unlimited'}
+                <span className="metaInfoLabel">
+                  <Localized id="MenuButtons--metaInfo--buffer-duration">
+                    Buffer Duration:
+                  </Localized>
+                </span>
+                {configuration.duration ? (
+                  <Localized
+                    id="MenuButtons--metaInfo--buffer-duration-seconds"
+                    vars={{ configurationDuration: configuration.duration }}
+                  >
+                    {'{$configurationDuration} seconds'}
+                  </Localized>
+                ) : (
+                  <Localized id="MenuButtons--metaInfo--buffer-duration-unlimited">
+                    Unlimited
+                  </Localized>
+                )}
               </div>
               <div className="metaInfoSection">
-                {_renderRowOfList('Features', configuration.features)}
-                {_renderRowOfList('Threads Filter', configuration.threads)}
+                {_renderRowOfList(
+                  'MenuButtons--metaInfo-renderRowOfList-label-features',
+                  configuration.features
+                )}
+                {_renderRowOfList(
+                  'MenuButtons--metaInfo-renderRowOfList-label-threads-filter',
+                  configuration.threads
+                )}
               </div>
             </>
           ) : null}
           {this.renderSymbolication()}
         </div>
-        <h2 className="metaInfoSubTitle">Application</h2>
+        <h2 className="metaInfoSubTitle">
+          <Localized id="MenuButtons--metaInfo--application">
+            Application
+          </Localized>
+        </h2>
         <div className="metaInfoSection">
           {meta.product ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Name and version:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--name-and-version">
+                  Name and version:
+                </Localized>
+              </span>
               {formatProductAndVersion(meta)}
             </div>
           ) : null}
           {meta.updateChannel ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Update Channel:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--update-channel">
+                  Update Channel:
+                </Localized>
+              </span>
               {meta.updateChannel}
             </div>
           ) : null}
           {meta.appBuildID ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Build ID:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--build-id">
+                  Build ID:
+                </Localized>
+              </span>
               {meta.sourceURL ? (
                 <a
                   href={meta.sourceURL}
@@ -199,47 +273,95 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
           ) : null}
           {meta.debug !== undefined ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">Build Type:</span>
-              {meta.debug ? 'Debug' : 'Opt'}
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--build-type">
+                  Build Type:
+                </Localized>
+              </span>
+              <Localized
+                id={
+                  meta.debug
+                    ? 'MenuButtons--metaInfo--build-type-debug'
+                    : 'MenuButtons--metaInfo--build-type-opt'
+                }
+              />
             </div>
           ) : null}
           {meta.extensions
-            ? _renderRowOfList('Extensions', meta.extensions.name)
+            ? _renderRowOfList(
+                'MenuButtons--metaInfo-renderRowOfList-label-extensions',
+                meta.extensions.name
+              )
             : null}
         </div>
-        <h2 className="metaInfoSubTitle">Platform</h2>
+        <h2 className="metaInfoSubTitle">
+          <Localized id="MenuButtons--metaInfo--platform">Platform</Localized>
+        </h2>
         <div className="metaInfoSection">
+          {meta.device ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--device">
+                  Device:
+                </Localized>
+              </span>
+              {meta.device}
+            </div>
+          ) : null}
           {platformInformation ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">OS:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--os">OS:</Localized>
+              </span>
               {platformInformation}
             </div>
           ) : null}
           {meta.abi ? (
             <div className="metaInfoRow">
-              <span className="metaInfoLabel">ABI:</span>
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--abi">ABI:</Localized>
+              </span>
               {meta.abi}
             </div>
           ) : null}
-          {cpuCount}
+          {cpuCount ? (
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">
+                <Localized id="MenuButtons--metaInfo--cpu">CPU:</Localized>
+              </span>
+              {cpuCount}
+            </div>
+          ) : null}
         </div>
         {meta.visualMetrics ? (
           <>
-            <h2 className="metaInfoSubTitle">Visual Metrics</h2>
+            <h2 className="metaInfoSubTitle">
+              <Localized id="MenuButtons--metaInfo--visual-metrics">
+                Visual Metrics
+              </Localized>
+            </h2>
             <div className="metaInfoSection">
               <div className="metaInfoRow">
-                <span className="visualMetricsLabel">Speed Index:</span>
+                <span className="visualMetricsLabel">
+                  <Localized id="MenuButtons--metaInfo--speed-index">
+                    Speed Index:
+                  </Localized>
+                </span>
                 {meta.visualMetrics.SpeedIndex}
               </div>
               <div className="metaInfoRow">
                 <span className="visualMetricsLabel">
-                  Perceptual Speed Index:
+                  <Localized id="MenuButtons--metaInfo--perceptual-speed-index">
+                    Perceptual Speed Index:
+                  </Localized>
                 </span>
                 {meta.visualMetrics.PerceptualSpeedIndex}
               </div>
               <div className="metaInfoRow">
                 <span className="visualMetricsLabel">
-                  Contentful Speed Index:
+                  <Localized id="MenuButtons--metaInfo--contentful-speed-Index">
+                    Contentful Speed Index:
+                  </Localized>
                 </span>
                 {meta.visualMetrics.ContentfulSpeedIndex}
               </div>
@@ -258,13 +380,15 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
   }
 }
 
-function _renderRowOfList(label: string, data: string[]): React.Node {
+function _renderRowOfList(labelL10nId: string, data: string[]): React.Node {
   if (!data.length) {
     return null;
   }
   return (
-    <div className="metaInfoRow">
-      <span className="metaInfoLabel">{label}:</span>
+    <div className="metaInfoRow metaInfoListRow">
+      <span className="metaInfoLabel">
+        <Localized id={labelL10nId} />
+      </span>
       <ul className="metaInfoList">
         {data.map(d => (
           <li className="metaInfoListItem" key={d}>

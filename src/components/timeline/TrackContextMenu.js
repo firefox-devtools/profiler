@@ -5,6 +5,8 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
+import { Localized } from '@fluent/react';
+
 import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
@@ -79,7 +81,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class TimelineTrackContextMenu extends PureComponent<Props> {
+class TimelineTrackContextMenuImpl extends PureComponent<Props> {
   _showAllTracks = (): void => {
     const { showAllTracks } = this.props;
     showAllTracks();
@@ -372,7 +374,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return (
       <MenuItem onClick={this._isolateProcess} disabled={isDisabled}>
-        Only show this process group
+        <Localized id="TrackContextMenu--only-show-this-process-group">
+          Only show this process group
+        </Localized>
       </MenuItem>
     );
   }
@@ -419,9 +423,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       // Is there only one visible global track?
       globalTracks.length - hiddenGlobalTracks.size === 1;
 
+    const rightClickedTrackName = this.getRightClickedTrackName(
+      rightClickedTrack
+    );
+
     return (
       <MenuItem onClick={this._isolateProcessMainThread} disabled={isDisabled}>
-        Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+        <Localized
+          id="TrackContextMenu--only-show-track"
+          vars={{ trackName: rightClickedTrackName }}
+        >
+          <>Only show {`“${rightClickedTrackName}”`}</>
+        </Localized>
       </MenuItem>
     );
   }
@@ -459,9 +472,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       // Is there only one local track left?
       localTrackOrder.length - hiddenLocalTracks.size === 1;
 
+    const rightClickedTrackName = this.getRightClickedTrackName(
+      rightClickedTrack
+    );
+
     return (
       <MenuItem onClick={this._isolateLocalTrack} disabled={isDisabled}>
-        Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+        <Localized
+          id="TrackContextMenu--only-show-track"
+          vars={{ trackName: rightClickedTrackName }}
+        >
+          <>Only show {`“rightClickedTrackName}”`}</>
+        </Localized>
       </MenuItem>
     );
   }
@@ -500,7 +522,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const isDisabled = this.getVisibleScreenshotTracks().length <= 1;
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
-        Hide other screenshot tracks
+        <Localized id="TrackContextMenu--hide-other-screenshots-tracks">
+          Hide other Screenshots tracks
+        </Localized>
       </MenuItem>
     );
   }
@@ -511,6 +535,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
     const trackIndex = rightClickedTrack.trackIndex;
+    const rightClickedTrackName = this.getRightClickedTrackName(
+      rightClickedTrack
+    );
+
     if (rightClickedTrack.type === 'global') {
       return (
         <MenuItem
@@ -519,7 +547,12 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           data={rightClickedTrack}
           onClick={this._toggleGlobalTrackVisibility}
         >
-          Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+          <Localized
+            id="TrackContextMenu--hide-track"
+            vars={{ trackName: rightClickedTrackName }}
+          >
+            <>Hide {`“${rightClickedTrackName}”`}</>
+          </Localized>
         </MenuItem>
       );
     }
@@ -530,7 +563,12 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={rightClickedTrack}
         onClick={this._toggleLocalTrackVisibility}
       >
-        Hide {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
+        <Localized
+          id="TrackContextMenu--hide-track"
+          vars={{ trackName: rightClickedTrackName }}
+        >
+          <>Hide {`“${rightClickedTrackName}”`}</>
+        </Localized>
       </MenuItem>
     );
   }
@@ -586,7 +624,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     return (
       <React.Fragment>
         <MenuItem onClick={this._showAllTracks} disabled={isDisabled}>
-          Show all tracks
+          <Localized id="TrackContextMenu--show-all-tracks">
+            Show all tracks
+          </Localized>
         </MenuItem>
         <div className="react-contextmenu-separator" />
       </React.Fragment>
@@ -674,7 +714,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const TimelineTrackContextMenu = explicitConnect<
+  {||},
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -700,5 +744,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     hideLocalTrack,
     showLocalTrack,
   },
-  component: TimelineTrackContextMenu,
+  component: TimelineTrackContextMenuImpl,
 });

@@ -7,6 +7,7 @@ import type { Profile } from 'firefox-profiler/types';
 
 import { oneLineTrim } from 'common-tags';
 
+import { ensureExists } from 'firefox-profiler/utils/flow';
 import {
   getEmptyProfile,
   getEmptyThread,
@@ -38,7 +39,6 @@ import fakeIndexedDB from 'fake-indexeddb';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
 import {
-  makeProfileSerializable,
   serializeProfile,
   processGeckoProfile,
 } from '../../profile-logic/process-profile';
@@ -117,6 +117,10 @@ describe('actions/receive-profile', function() {
     return states;
   }
 
+  function encode(string) {
+    return new TextEncoder().encode(string);
+  }
+
   describe('viewProfile', function() {
     it('can take a profile and view it', function() {
       const store = blankStore();
@@ -154,8 +158,14 @@ describe('actions/receive-profile', function() {
       );
 
       const [idleThread, workThread] = profile.threads;
-      const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({
+      const idleCategoryIndex = ensureExists(
+        profile.meta.categories,
+        'Expected to find categories'
+      ).length;
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).push({
         name: 'Idle',
         color: '#fff',
         subcategories: ['Other'],
@@ -425,7 +435,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('changeTimelineTrackOrganization', function() {
-    const browsingContextID = 123;
+    const tabID = 123;
     const innerWindowID = 111111;
     function setup(initializeCtxId: boolean = false) {
       const store = blankStore();
@@ -439,11 +449,11 @@ describe('actions/receive-profile', function() {
         threads: [],
         features: [],
         capacity: 1000000,
-        activeBrowsingContextID: browsingContextID,
+        activeTabID: tabID,
       };
       profile.pages = [
         {
-          browsingContextID: browsingContextID,
+          tabID: tabID,
           innerWindowID: innerWindowID,
           url: 'URL',
           embedderInnerWindowID: 0,
@@ -455,7 +465,7 @@ describe('actions/receive-profile', function() {
         store.dispatch(
           changeTimelineTrackOrganization({
             type: 'active-tab',
-            browsingContextID,
+            tabID,
           })
         );
       }
@@ -473,14 +483,14 @@ describe('actions/receive-profile', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID,
+          tabID,
         })
       );
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       });
     });
 
@@ -490,7 +500,7 @@ describe('actions/receive-profile', function() {
         UrlStateSelectors.getTimelineTrackOrganization(getState())
       ).toEqual({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       });
       dispatch(changeTimelineTrackOrganization({ type: 'full' }));
       expect(
@@ -503,7 +513,7 @@ describe('actions/receive-profile', function() {
 
   describe('retrieveProfileFromAddon', function() {
     function toUint8Array(json) {
-      return new TextEncoder().encode(JSON.stringify(json));
+      return encode(JSON.stringify(json));
     }
 
     function setup(profileAs = 'json') {
@@ -665,10 +675,12 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () => Promise.resolve(makeProfileSerializable(_getSimpleProfile())),
+      arrayBuffer: () =>
+        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
     }: any): Response);
 
     beforeEach(function() {
+      window.TextDecoder = TextDecoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       // Call the argument of setTimeout asynchronously right away
@@ -679,6 +691,7 @@ describe('actions/receive-profile', function() {
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
       delete window.fetch;
     });
 
@@ -713,8 +726,9 @@ describe('actions/receive-profile', function() {
       window.fetch = jest.fn().mockResolvedValue(
         (({
           ...fetch200Response,
-          json: () =>
-            Promise.resolve(makeProfileSerializable(unsymbolicatedProfile)),
+          json: () => Promise.resolve(), // Used when fetching symbols.
+          arrayBuffer: () =>
+            Promise.resolve(encode(serializeProfile(unsymbolicatedProfile))),
         }: any): Response)
       );
 
@@ -832,10 +846,21 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () => Promise.resolve(makeProfileSerializable(_getSimpleProfile())),
+      arrayBuffer: () =>
+        Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
+    }: any): Response);
+    const fetch200GzippedResponse = (({
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => 'application/json',
+      },
+      arrayBuffer: () => compress(serializeProfile(_getSimpleProfile())),
     }: any): Response);
 
     beforeEach(function() {
+      window.TextDecoder = TextDecoder;
+      (window: any).TextEncoder = TextEncoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       // Call the argument of setTimeout asynchronously right away
@@ -846,6 +871,8 @@ describe('actions/receive-profile', function() {
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
+      delete (window: any).TextEncoder;
       delete window.fetch;
     });
 
@@ -854,6 +881,26 @@ describe('actions/receive-profile', function() {
       window.fetch = jest.fn(url =>
         Promise.resolve(
           url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
+
+      const store = blankStore();
+      await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
+
+      const state = store.getState();
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+        start: 0,
+        end: 1,
+      });
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+    });
+
+    it('can retrieve a gzipped profile from the web and save it to state', async function() {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200GzippedResponse : fetch403Response
         )
       );
 
@@ -955,10 +1002,12 @@ describe('actions/receive-profile', function() {
    */
   describe('_fetchProfile', function() {
     beforeEach(function() {
+      window.TextDecoder = TextDecoder;
       window.fetch = jest.fn();
     });
 
     afterEach(function() {
+      delete window.TextDecoder;
       delete window.fetch;
     });
 
@@ -989,8 +1038,8 @@ describe('actions/receive-profile', function() {
       }
 
       if (isJSON) {
-        arrayBuffer = () => Promise.reject(new Error('Unhandled mock'));
-        json = () => Promise.resolve(profile);
+        arrayBuffer = () => Promise.resolve(encode(stringProfile));
+        json = () => Promise.reject(new Error('Not implemented'));
       }
 
       const zippedProfileResponse = (({
@@ -1105,10 +1154,11 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a bad profile JSON is passed in', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
         contentType: 'application/json',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -1123,9 +1173,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a bad profile JSON is passed in, with no content type', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -1140,9 +1191,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails if a completely unknown file is passed in', async function() {
+      const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.unknown',
-        json: () => Promise.reject(new Error('Invalid JSON')),
+        arrayBuffer: () => Promise.resolve(encode(invalidJSON)),
       });
 
       let userFacingError;
@@ -1253,7 +1305,26 @@ describe('actions/receive-profile', function() {
       );
     });
 
+    it('can load gzipped json with an empty mime type', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: '',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+    });
+
     it('will give an error when unable to parse json', async function() {
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       const { view } = await setupTestWithFile({
         type: 'application/json',
         payload: '{}',
@@ -1264,6 +1335,7 @@ describe('actions/receive-profile', function() {
         // Coerce into an any to access the error property.
         (view: any).error
       ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it('can load gzipped json', async function() {
@@ -1281,8 +1353,26 @@ describe('actions/receive-profile', function() {
       );
     });
 
+    it('can load gzipped json even with incorrect mime type', async function() {
+      window.TextDecoder = TextDecoder;
+      const profile = _getSimpleProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: 'application/json',
+        payload: compress(serializeProfile(profile)),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+    });
+
     it('will give an error when unable to parse gzipped profiles', async function() {
       window.TextDecoder = TextDecoder;
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const { view } = await setupTestWithFile({
         type: 'application/gzip',
         payload: compress('{}'),
@@ -1293,6 +1383,7 @@ describe('actions/receive-profile', function() {
         // Coerce into the object to access the error property.
         (view: any).error
       ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     async function setupZipTestWithProfile(
@@ -1398,7 +1489,7 @@ describe('actions/receive-profile', function() {
         headers: {
           get: () => 'application/json',
         },
-        json: () => Promise.resolve(JSON.parse(profile)),
+        arrayBuffer: () => Promise.resolve(encode(profile)),
       };
     }
 
@@ -1752,7 +1843,7 @@ describe('actions/receive-profile', function() {
         headers: {
           get: () => 'application/json',
         },
-        json: () => Promise.resolve(JSON.parse(profile)),
+        arrayBuffer: () => Promise.resolve(encode(profile)),
       };
     }
 

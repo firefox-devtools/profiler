@@ -1689,11 +1689,64 @@ const _upgraders = {
       },
       {
         // The schema is mostly handled with custom logic.
+        // Note that profiles coming from recent Gecko engines won't have this.
+        // Having this here was a mistake when implementing the upgrader, but
+        // now that it's here we keep it to reduce confusion.
         name: 'Network',
         display: ['marker-table'],
         data: [],
       },
     ];
+  },
+  [34]: profile => {
+    // We were incrementing timestamps for marker' causes only for a few marker
+    // types: 'tracing' and 'Styles'.
+    // See https://github.com/firefox-devtools/profiler/issues/3030
+    // We can also note that DOMEvents were converted from "tracing" to their
+    // own types, but they don't have a "cause" so we don't need to look after
+    // them. They were the only ones being converted so far, we're lucky.
+    for (const thread of profile.threads) {
+      const delta = thread.processStartupTime;
+      const { markers } = thread;
+
+      for (const data of markers.data) {
+        if (
+          data &&
+          data.type !== 'tracing' &&
+          data.type !== 'Styles' &&
+          data.cause
+        ) {
+          data.cause.time += delta;
+        }
+      }
+    }
+  },
+  [35]: profile => {
+    // The browsingContextID inside the pages array and activeBrowsingContextID
+    // have been renamed to tabID and activeTabID.
+    // Previously, we were using the browsingcontextID to figure out which tab
+    // that page belongs to. But that had some shortcomings. For example it
+    // wasn't workig correctly on cross-group navigations, because browsingContext
+    // was being replaced during that. So, we had to get a better number to
+    // indicate the tabIDs. With the back-end work, we are not getting the
+    // browserId, which corresponds to ID of a tab directly. See the back-end
+    // bug for more details: https://bugzilla.mozilla.org/show_bug.cgi?id=1698129
+    if (
+      profile.meta.configuration &&
+      profile.meta.configuration.activeBrowsingContextID
+    ) {
+      profile.meta.configuration.activeTabID =
+        profile.meta.configuration.activeBrowsingContextID;
+      delete profile.meta.configuration.activeBrowsingContextID;
+    }
+
+    if (profile.pages && profile.pages.length > 0) {
+      for (const page of profile.pages) {
+        // Directly copy the value of browsingContextID to tabID.
+        page.tabID = page.browsingContextID;
+        delete page.browsingContextID;
+      }
+    }
   },
 };
 /* eslint-enable no-useless-computed-key */

@@ -5,8 +5,9 @@
 // @flow
 import React from 'react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipMarker } from '../../components/tooltip/Marker';
-import { render } from '@testing-library/react';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
@@ -53,15 +54,31 @@ describe('TooltipMarker', function() {
       nsRefreshDriver::AddStyleFlushObserver
     `);
 
-    // Connect a page to one of the markers so that we render a URL in
-    // its tooltip.
-    const browsingContextID = 123123;
+    // Connect pages to some of the markers so that we render URLs in
+    // some tooltips.
+    // We have 2 pages with the same URL to check that the inner
+    // window id will be displayed in that case to disambiguate, and 1
+    // page with a unique URL, that will be displayed without inner
+    // window id.
+    const tabID = 123123;
     const innerWindowID = 1;
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tabID + 1,
+        innerWindowID: innerWindowID + 1,
+        url: 'about:blank',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tabID + 2,
+        innerWindowID: innerWindowID + 2,
+        url: 'about:blank',
         embedderInnerWindowID: 0,
       },
     ];
@@ -78,6 +95,26 @@ describe('TooltipMarker', function() {
           type: 'DOMEvent',
           eventType: 'commandupdate',
           innerWindowID: innerWindowID,
+        },
+      ],
+      [
+        'DOMEvent',
+        10.6,
+        11.1,
+        {
+          type: 'DOMEvent',
+          eventType: 'load',
+          innerWindowID: innerWindowID + 1,
+        },
+      ],
+      [
+        'DOMEvent',
+        10.7,
+        11.2,
+        {
+          type: 'DOMEvent',
+          eventType: 'load',
+          innerWindowID: innerWindowID + 2,
         },
       ],
       [
@@ -294,7 +331,7 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'TTFI',
+        'TimeToFirstInteractive (TTFI)',
         21.4,
         null,
         {
@@ -430,6 +467,19 @@ describe('TooltipMarker', function() {
           type: 'MediaSample',
           sampleStartTimeUs: 3632654500,
           sampleEndTimeUs: 3632674500,
+        },
+      ],
+      [
+        'RefreshObserver',
+        122,
+        126,
+        {
+          type: 'Text',
+          name: 'Scrollbar fade animation [Style]',
+          cause: {
+            time: 125, // This time is later than the marker's start time
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
         },
       ],
     ]);

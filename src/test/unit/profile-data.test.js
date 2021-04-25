@@ -15,7 +15,7 @@ import {
   getCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
-  getSampleIndexClosestToTime,
+  getSampleIndexClosestToStartTime,
   convertStackToCallNodePath,
   getSampleIndexToCallNodeIndex,
   getCallNodeIndexFromPath,
@@ -413,9 +413,10 @@ describe('process-profile', function() {
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
     const profile = processGeckoProfile(createGeckoProfile());
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -462,7 +463,10 @@ describe('profile-data', function() {
       meta,
       threads: [thread],
     } = getCallNodeProfile();
-    const defaultCategory = meta.categories.findIndex(c => c.name === 'Other');
+    const defaultCategory = ensureExists(
+      meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -665,9 +669,10 @@ describe('symbolication', function() {
 
 describe('filter-by-implementation', function() {
   const profile = processGeckoProfile(createGeckoProfileWithJsTimings());
-  const defaultCategory = profile.meta.categories.findIndex(
-    c => c.name === 'Other'
-  );
+  const defaultCategory = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex(c => c.name === 'Other');
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -727,9 +732,10 @@ describe('get-sample-index-closest-to-time', function() {
         .fill('A')
         .join('  ')
     );
-    const defaultCategory = profile.meta.categories.findIndex(
-      c => c.name === 'Other'
-    );
+    const defaultCategory = ensureExists(
+      profile.meta.categories,
+      'Expected to find categories'
+    ).findIndex(c => c.name === 'Other');
     const thread = profile.threads[0];
     const { samples } = filterThreadByImplementation(
       thread,
@@ -738,12 +744,12 @@ describe('get-sample-index-closest-to-time', function() {
     );
 
     const interval = profile.meta.interval;
-    expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
-    expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
+    expect(getSampleIndexClosestToStartTime(samples, 0, interval)).toBe(0);
+    expect(getSampleIndexClosestToStartTime(samples, 0.9, interval)).toBe(0);
+    expect(getSampleIndexClosestToStartTime(samples, 1.1, interval)).toBe(1);
+    expect(getSampleIndexClosestToStartTime(samples, 1.5, interval)).toBe(1);
+    expect(getSampleIndexClosestToStartTime(samples, 9.9, interval)).toBe(9);
+    expect(getSampleIndexClosestToStartTime(samples, 100, interval)).toBe(9);
   });
 });
 

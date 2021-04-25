@@ -167,16 +167,35 @@ export function ratioToCssPercent(ratio: number): string {
   return (ratio * 100).toFixed(4) + '%';
 }
 
-export function formatBytes(bytes: number): string {
+export function formatBytes(
+  bytes: number,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 2
+): string {
   if (bytes < 10000) {
     // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
-    return formatNumber(bytes) + 'B';
+    // We use "0" for significantDigits because bytes will always be integers.
+    return formatNumber(bytes, 0) + 'B';
   } else if (bytes < 1024 * 1024) {
-    return formatNumber(bytes / 1024, 3, 2) + 'KB';
+    return (
+      formatNumber(bytes / 1024, significantDigits, maxFractionalDigits) + 'KB'
+    );
   } else if (bytes < 1024 * 1024 * 1024) {
-    return formatNumber(bytes / (1024 * 1024), 3, 2) + 'MB';
+    return (
+      formatNumber(
+        bytes / (1024 * 1024),
+        significantDigits,
+        maxFractionalDigits
+      ) + 'MB'
+    );
   }
-  return formatNumber(bytes / (1024 * 1024 * 1024), 3, 2) + 'GB';
+  return (
+    formatNumber(
+      bytes / (1024 * 1024 * 1024),
+      significantDigits,
+      maxFractionalDigits
+    ) + 'GB'
+  );
 }
 
 export function formatSI(num: number): string {

@@ -33,9 +33,11 @@ import {
   getProfile,
   getView,
   getRelevantPagesForActiveTab,
+  getIsCPUUtilizationProvided,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
+  withHistoryReplaceStateSync,
   stateFromLocation,
   ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
@@ -64,18 +66,15 @@ import type {
   TimelineTrackOrganization,
   Profile,
   ThreadIndex,
-  BrowsingContextID,
+  TabID,
   Page,
   InnerWindowID,
   Pid,
   OriginsTimelineRoot,
 } from 'firefox-profiler/types';
 
-import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-} from 'firefox-profiler/utils/flow';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -202,7 +201,7 @@ export function finalizeProfileView(
             finalizeActiveTabProfileView(
               profile,
               selectedThreadIndexes,
-              timelineTrackOrganization.browsingContextID
+              timelineTrackOrganization.tabID
             )
           );
         } else {
@@ -253,10 +252,10 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndexes: Set<ThreadIndex> | null
+  maybeSelectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndexes !== null;
+    const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -305,8 +304,8 @@ export function finalizeFullProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    selectedThreadIndexes = initializeSelectedThreadIndex(
-      selectedThreadIndexes,
+    const selectedThreadIndexes = initializeSelectedThreadIndex(
+      maybeSelectedThreadIndexes,
       visibleThreadIndexes,
       profile
     );
@@ -333,15 +332,34 @@ export function finalizeFullProfileView(
       }
     }
 
-    dispatch({
-      type: 'VIEW_FULL_PROFILE',
-      selectedThreadIndexes,
-      globalTracks,
-      globalTrackOrder,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid,
-      localTrackOrderByPid,
+    // Check the profile to see if we have threadCPUDelta values and switch to
+    // the category view with CPU if we have. This is needed only while we are
+    // still experimenting with the new activity graph. We should remove this
+    // when we have this on by default.
+    let timelineType = null;
+    if (
+      !hasUrlInfo &&
+      profile.meta.sampleUnits &&
+      profile.threads[0].samples.threadCPUDelta
+    ) {
+      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
+      if (hasCPUDeltaValues) {
+        timelineType = 'cpu-category';
+      }
+    }
+
+    withHistoryReplaceStateSync(() => {
+      dispatch({
+        type: 'VIEW_FULL_PROFILE',
+        selectedThreadIndexes,
+        globalTracks,
+        globalTrackOrder,
+        hiddenGlobalTracks,
+        localTracksByPid,
+        hiddenLocalTracksByPid,
+        localTrackOrderByPid,
+        timelineType,
+      });
     });
   };
 }
@@ -536,7 +554,7 @@ export function finalizeOriginProfileView(
 export function finalizeActiveTabProfileView(
   profile: Profile,
   selectedThreadIndexes: Set<ThreadIndex> | null,
-  browsingContextID: BrowsingContextID | null
+  tabID: TabID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
@@ -557,7 +575,7 @@ export function finalizeActiveTabProfileView(
       type: 'VIEW_ACTIVE_TAB_PROFILE',
       activeTabTimeline,
       selectedThreadIndexes,
-      browsingContextID,
+      tabID,
     });
   };
 }
@@ -591,7 +609,7 @@ export function changeTimelineTrackOrganization(
           finalizeActiveTabProfileView(
             profile,
             selectedThreadIndexes,
-            timelineTrackOrganization.browsingContextID
+            timelineTrackOrganization.tabID
           )
         );
         break;
@@ -797,18 +815,7 @@ async function _unpackGeckoProfileFromAddon(profile) {
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    const profileBytes = new Uint8Array(profile);
-    let decompressedProfile;
-    // Check for the gzip magic number in the header. If we find it, decompress
-    // the data first.
-    if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
-      decompressedProfile = await decompress(profileBytes);
-    } else {
-      decompressedProfile = profile;
-    }
-
-    const textDecoder = new TextDecoder();
-    return JSON.parse(textDecoder.decode(decompressedProfile));
+    return _extractJsonFromArrayBuffer(profile);
   }
   return profile;
 }
@@ -1119,6 +1126,22 @@ async function _extractZipFromResponse(
 }
 
 /**
+ * Parse JSON from an optionally gzipped array buffer.
+ */
+async function _extractJsonFromArrayBuffer(
+  arrayBuffer: ArrayBuffer
+): Promise<any> {
+  let profileBytes = new Uint8Array(arrayBuffer);
+  // Check for the gzip magic number in the header.
+  if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+    profileBytes = await decompress(profileBytes);
+  }
+
+  const textDecoder = new TextDecoder();
+  return JSON.parse(textDecoder.decode(profileBytes));
+}
+
+/**
  * Don't trust third party responses, try and handle a variety of responses gracefully.
  */
 async function _extractJsonFromResponse(
@@ -1127,10 +1150,8 @@ async function _extractJsonFromResponse(
   fileType: 'application/json' | null
 ): Promise<any> {
   try {
-    // Don't check the content-type, but attempt to parse the response as JSON.
-    const json = await response.json();
-    // Catch the error if unable to parse the JSON.
-    return json;
+    // await before returning so that we can catch JSON parse errors.
+    return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
@@ -1263,49 +1284,33 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      switch (file.type) {
-        case 'application/gzip':
-        case 'application/x-gzip':
-          // Parse a single profile that has been gzipped.
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const arrayBuffer = new Uint8Array(buffer);
-            const decompressedArrayBuffer = await decompress(arrayBuffer);
-            const textDecoder = new TextDecoder();
-            const text = await textDecoder.decode(decompressedArrayBuffer);
-            const profile = await unserializeProfileOfArbitraryFormat(text);
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
+      if (file.type === 'application/zip') {
+        // Open a zip file in the zip file viewer
+        const buffer = await fileReader(file).asArrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        await dispatch(receiveZipFile(zip));
+      } else {
+        // Profile files can have file names with uncommon extensions
+        // (eg .profile). So we can't rely on the mime type to decide how to
+        // handle them.
+        let arrayBuffer = await fileReader(file).asArrayBuffer();
 
-            await withHistoryReplaceStateAsync(async () => {
-              await dispatch(viewProfile(profile));
-            });
-          }
-          break;
-        case 'application/zip':
-          // Open a zip file in the zip file viewer
-          {
-            const buffer = await fileReader(file).asArrayBuffer();
-            const zip = await JSZip.loadAsync(buffer);
-            await dispatch(receiveZipFile(zip));
-          }
-          break;
-        default: {
-          // Plain uncompressed profile files can have file names with uncommon
-          // extensions (eg .profile). So we can't rely on the mime type to
-          // decide how to handle them. We'll try to parse them as a plain JSON
-          // file.
-          const text = await fileReader(file).asText();
-          const profile = await unserializeProfileOfArbitraryFormat(text);
-          if (profile === undefined) {
-            throw new Error('Unable to parse the profile.');
-          }
-
-          await withHistoryReplaceStateAsync(async () => {
-            await dispatch(viewProfile(profile));
-          });
+        // Check for the gzip magic number in the header. If we find it, decompress
+        // the data first.
+        const profileBytes = new Uint8Array(arrayBuffer);
+        if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+          const decompressedProfile = await decompress(profileBytes);
+          arrayBuffer = decompressedProfile.buffer;
         }
+
+        const profile = await unserializeProfileOfArbitraryFormat(arrayBuffer);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
+
+        await withHistoryReplaceStateAsync(async () => {
+          await dispatch(viewProfile(profile));
+        });
       }
     } catch (error) {
       dispatch(fatalError(error));

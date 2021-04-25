@@ -38,7 +38,7 @@ describe('ActiveTab', function() {
     dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: pageInfo.activeBrowsingContextID,
+        tabID: pageInfo.activeTabID,
       })
     );
 
@@ -46,7 +46,7 @@ describe('ActiveTab', function() {
       // Store:
       dispatch,
       getState,
-      // BrowsingContextIDs and InnerWindowIDs of pages:
+      // TabIDs and InnerWindowIDs of pages:
       ...pageInfo,
     };
   }
@@ -130,7 +130,7 @@ describe('finalizeProfileView', function() {
     expect(getView(getState()).phase).toBe('DATA_LOADED');
     expect(getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
-      browsingContextID: null,
+      tabID: null,
     });
   });
 

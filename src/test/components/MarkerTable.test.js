@@ -4,12 +4,12 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { MarkerTable } from '../../components/marker-table';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {

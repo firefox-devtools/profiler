@@ -122,7 +122,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         >
           Profile Version:
         </span>
-        33
+        35
       </div>
       <div
         class="metaInfoRow"
@@ -251,7 +251,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         >
           Profile Version:
         </span>
-        33
+        35
       </div>
       <div
         class="metaInfoRow"
@@ -354,7 +354,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the
         >
           Profile Version:
         </span>
-        33
+        35
       </div>
       <div
         class="metaInfoRow"
@@ -467,7 +467,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Profile Version:
         </span>
-        33
+        35
       </div>
       <div
         class="metaInfoRow"
@@ -477,7 +477,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Buffer Capacity:
         </span>
-        16.0KB
+        1GB
       </div>
       <div
         class="metaInfoRow"
@@ -487,19 +487,18 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Buffer Duration:
         </span>
-        20 seconds
+        ⁨20⁩ seconds
       </div>
       <div
         class="metaInfoSection"
       >
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
           >
-            Features
-            :
+            Features:
           </span>
           <ul
             class="metaInfoList"
@@ -517,13 +516,12 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           </ul>
         </div>
         <div
-          class="metaInfoRow"
+          class="metaInfoRow metaInfoListRow"
         >
           <span
             class="metaInfoLabel"
           >
-            Threads Filter
-            :
+            Threads Filter:
           </span>
           <ul
             class="metaInfoList"
@@ -614,13 +612,12 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
         >
-          Extensions
-          :
+          Extensions:
         </span>
         <ul
           class="metaInfoList"
@@ -679,9 +676,336 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           CPU:
         </span>
-        4 physical cores
-        , 
-        8 logical cores
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
+      </div>
+    </div>
+    <details>
+      <summary
+        class="arrowPanelSubTitle"
+      >
+        Profiler Overhead
+      </summary>
+      <div
+        class="arrowPanelSection"
+      >
+        <div
+          class="metaInfoGrid"
+        >
+          <div />
+          <div>
+            Mean
+          </div>
+          <div>
+            Max
+          </div>
+          <div>
+            Min
+          </div>
+          <div>
+            Overhead
+          </div>
+          <div>
+            227μs
+          </div>
+          <div>
+            410μs
+          </div>
+          <div>
+            38μs
+          </div>
+          <div>
+            Cleaning
+          </div>
+          <div>
+            54μs
+          </div>
+          <div>
+            100μs
+          </div>
+          <div>
+            7.0μs
+          </div>
+          <div>
+            Counter
+          </div>
+          <div>
+            59μs
+          </div>
+          <div>
+            105μs
+          </div>
+          <div>
+            12μs
+          </div>
+          <div>
+            Interval
+          </div>
+          <div>
+            857μs
+          </div>
+          <div>
+            1,000μs
+          </div>
+          <div>
+            0.000μs
+          </div>
+          <div>
+            Lockings
+          </div>
+          <div>
+            49μs
+          </div>
+          <div>
+            95μs
+          </div>
+          <div>
+            2.0μs
+          </div>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Overhead Durations:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            1,586μs
+          </span>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Overhead Percentage:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            26,433%
+          </span>
+        </div>
+        <div
+          class="metaInfoRow"
+        >
+          <span
+            class="metaInfoWideLabel"
+          >
+            Profiled Duration:
+          </span>
+          <span
+            class="metaInfoValueRight"
+          >
+            6.0μs
+          </span>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device information 1`] = `
+<div
+  class="arrowPanel open metaInfoPanel"
+>
+  <div
+    class="arrowPanelArrow"
+  />
+  <div
+    class="arrowPanelContent"
+  >
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Profile Information
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Recording started:
+        </span>
+        toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Interval:
+        </span>
+        1ms
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Profile Version:
+        </span>
+        35
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Symbols:
+        </span>
+        Profile is not symbolicated
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        />
+        <button
+          class="photon-button photon-button-micro"
+          type="button"
+        >
+          Symbolicate profile
+        </button>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Application
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Name and version:
+        </span>
+        Firefox 48
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Update Channel:
+        </span>
+        nightly
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build ID:
+        </span>
+        20181126165837
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Build Type:
+        </span>
+        Debug
+      </div>
+      <div
+        class="metaInfoRow metaInfoListRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Extensions:
+        </span>
+        <ul
+          class="metaInfoList"
+        >
+          <li
+            class="metaInfoListItem"
+          >
+            Form Autofill
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Firefox Screenshots
+          </li>
+          <li
+            class="metaInfoListItem"
+          >
+            Gecko Profiler
+          </li>
+        </ul>
+      </div>
+    </div>
+    <h2
+      class="metaInfoSubTitle"
+    >
+      Platform
+    </h2>
+    <div
+      class="metaInfoSection"
+    >
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          Device:
+        </span>
+        Android Device
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          OS:
+        </span>
+        macOS 10.11
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          ABI:
+        </span>
+        x86_64-gcc3
+      </div>
+      <div
+        class="metaInfoRow"
+      >
+        <span
+          class="metaInfoLabel"
+        >
+          CPU:
+        </span>
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
       </div>
     </div>
     <details>
@@ -861,7 +1185,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         >
           Profile Version:
         </span>
-        33
+        35
       </div>
       <div
         class="metaInfoRow"
@@ -936,13 +1260,12 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         Debug
       </div>
       <div
-        class="metaInfoRow"
+        class="metaInfoRow metaInfoListRow"
       >
         <span
           class="metaInfoLabel"
         >
-          Extensions
-          :
+          Extensions:
         </span>
         <ul
           class="metaInfoList"
@@ -1001,9 +1324,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         >
           CPU:
         </span>
-        4 physical cores
-        , 
-        8 logical cores
+        ⁨⁨4⁩ physical cores⁩, ⁨⁨8⁩ logical cores⁩
       </div>
     </div>
   </div>
@@ -1024,10 +1345,10 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
     >
       <button
         aria-expanded="false"
-        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
         type="button"
       >
-        Uploaded Profile
+        Profile Info
       </button>
     </div>
     <div
@@ -1124,10 +1445,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Local Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1138,7 +1459,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Upload
+      Upload Local Profile
     </button>
   </div>
   <a
@@ -1162,10 +1483,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-uploaded"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Uploaded Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1223,7 +1544,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       By default, your personal data is removed.
+       
+      By default, your personal data is removed.
     </p>
     <h3>
       Include additional data that may be identifiable
@@ -1324,7 +1646,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       This profile is from Firefox Nightly, so by default all information is included.
+       
+      This profile is from ⁨Firefox Nightly⁩, so by default all information is included.
     </p>
     <h3>
       Include additional data that may be identifiable
@@ -1430,7 +1753,8 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       class="menuButtonsPublishInfoDescription"
     >
       Upload your profile and make it accessible to anyone with the link.
-       By default, your personal data is removed.
+       
+      By default, your personal data is removed.
     </p>
     <h3>
       Include additional data that may be identifiable
@@ -1525,10 +1849,10 @@ exports[`app/MenuButtons Full View Button is present when we are in the active t
   >
     <button
       aria-expanded="false"
-      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon menuButtonsMetaInfoButtonButton-local"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsMetaInfoButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Local Profile
+      Profile Info
     </button>
   </div>
   <div
@@ -1539,7 +1863,7 @@ exports[`app/MenuButtons Full View Button is present when we are in the active t
       class="buttonWithPanelButton menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Upload
+      Upload Local Profile
     </button>
   </div>
   <a

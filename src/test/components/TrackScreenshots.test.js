@@ -11,15 +11,16 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { commitRange } from '../../actions/profile-view';
-import TrackScreenshots from '../../components/timeline/TrackScreenshots';
+import { TimelineTrackScreenshots } from '../../components/timeline/TrackScreenshots';
 import { Timeline } from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -41,6 +42,7 @@ const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
   autoMockDomRect();
+  autoMockCanvasContext();
 
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -232,15 +234,11 @@ describe('timeline/TrackScreenshots', function() {
 
 function setup(
   profile: Profile = getScreenshotTrackProfile(),
-  component = <TrackScreenshots threadIndex={0} windowId="0" />
+  component = <TimelineTrackScreenshots threadIndex={0} windowId="0" />
 ) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
   let leftOffset = LEFT;
   let topOffset = TOP;
   jest

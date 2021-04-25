@@ -4,16 +4,17 @@
 
 // @flow
 import * as React from 'react';
-import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
-import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import {
-  render,
   fireEvent,
   waitFor,
   screen,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { MenuButtons } from 'firefox-profiler/components/app/MenuButtons';
+import { CurrentProfileUploadedInformationLoader } from 'firefox-profiler/components/app/CurrentProfileUploadedInformationLoader';
 import { TextEncoder } from 'util';
 
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
@@ -182,8 +183,10 @@ describe('app/MenuButtons', function() {
 
       const setupResult = setup(storeWithProfile(profile));
 
-      const getPublishButton = () => screen.getByText(/^(Re-upload|Upload)$/);
-      const findPublishButton = () => screen.findByText(/^(Re-upload|Upload)$/);
+      const getPublishButton = () =>
+        screen.getByText(/^(Re-upload|Upload Local Profile)$/);
+      const findPublishButton = () =>
+        screen.findByText(/^(Re-upload|Upload Local Profile)$/);
       const getErrorButton = () => screen.getByText('Error uploading');
       const getCancelButton = () => screen.getByText('Cancel Upload');
       const getPanelForm = () =>
@@ -391,7 +394,7 @@ describe('app/MenuButtons', function() {
       const { clickAndRunTimers } = setupResult;
 
       function displayMetaInfoPanel() {
-        clickAndRunTimers(screen.getByText(/^(Local|Uploaded) Profile$/));
+        clickAndRunTimers(screen.getByText('Profile Info'));
       }
 
       function getMetaInfoPanel() {
@@ -411,7 +414,9 @@ describe('app/MenuButtons', function() {
       profile.meta.configuration = {
         features: ['js', 'threads'],
         threads: ['GeckoMain', 'DOM Worker'],
-        capacity: Math.pow(2, 14),
+        // The capacity is expressed in entries, where 1 entry == 8 bytes.
+        // 128M entries is 1GB.
+        capacity: 128 * 1024 * 1024,
         duration: 20,
       };
 
@@ -420,6 +425,38 @@ describe('app/MenuButtons', function() {
         getMetaInfoPanel,
       } = await setupForMetaInfoPanel(profile);
       displayMetaInfoPanel();
+      const renderedCapacity = ensureExists(
+        screen.getByText(/Buffer Capacity/).nextSibling
+      );
+
+      /* This rule needs to be disabled because `renderedCapacity` is a text
+       * code, and this triggers
+       * https://github.com/testing-library/jest-dom/issues/306 */
+      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      expect(renderedCapacity.textContent).toBe('1GB');
+      expect(getMetaInfoPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot with device information', async () => {
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processGeckoProfile(createGeckoProfile());
+      profile.meta.device = 'Android Device';
+
+      const {
+        displayMetaInfoPanel,
+        getMetaInfoPanel,
+      } = await setupForMetaInfoPanel(profile);
+      displayMetaInfoPanel();
+
+      const renderedDevice = ensureExists(
+        screen.getByText(/Device:/).nextSibling
+      );
+
+      /* This rule needs to be disabled because `renderedDevice` is a text
+       * code, and this triggers
+       * https://github.com/testing-library/jest-dom/issues/306 */
+      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      expect(renderedDevice.textContent).toBe('Android Device');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
@@ -651,7 +688,7 @@ describe('app/MenuButtons', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: null,
+          tabID: null,
         })
       );
 
@@ -672,7 +709,7 @@ describe('app/MenuButtons', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: null,
+          tabID: null,
         })
       );
 

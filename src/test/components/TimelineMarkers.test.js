@@ -8,15 +8,19 @@ import * as React from 'react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TimelineMarkersOverview,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import {
@@ -34,11 +38,6 @@ import type { CssPixels } from 'firefox-profiler/types';
 
 function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
@@ -51,10 +50,6 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
     // will request more code to be run in later animation frames.
     flushRafCalls();
     flushRafCalls();
-  }
-
-  function flushDrawLog() {
-    return ctx.__flushDrawLog();
   }
 
   const profile = getProfileWithMarkers(...markersPerThread);
@@ -141,7 +136,6 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   }
 
   return {
-    flushDrawLog,
     flushRafTwice,
     rightClick,
     mouseOver,
@@ -152,20 +146,19 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
 }
 
 describe('TimelineMarkers', function() {
+  autoMockCanvasContext();
+
   it('renders correctly', () => {
     window.devicePixelRatio = 1;
 
-    const { container, flushDrawLog } = setupWithMarkers(
-      { rangeStart: 0, rangeEnd: 15 },
-      [
-        ['DOMEvent', 0, 10],
-        ['DOMEvent', 0, 10],
-        ['DOMEvent', 5, 15],
-        ['Paint', 2, 13],
-        ['Navigation', 2, 6],
-        ['Layout', 6, 8],
-      ]
-    );
+    const { container } = setupWithMarkers({ rangeStart: 0, rangeEnd: 15 }, [
+      ['DOMEvent', 0, 10],
+      ['DOMEvent', 0, 10],
+      ['DOMEvent', 5, 15],
+      ['Paint', 2, 13],
+      ['Navigation', 2, 6],
+      ['Layout', 6, 8],
+    ]);
 
     const drawCalls = flushDrawLog();
 
@@ -178,16 +171,13 @@ describe('TimelineMarkers', function() {
   it('does not render several dot markers in the same position', () => {
     window.devicePixelRatio = 2;
 
-    const { flushDrawLog } = setupWithMarkers(
-      { rangeStart: 0, rangeEnd: 15000 },
-      [
-        // 2 very close dot markers. They shouldn't be drawn both together.
-        ['DOMEvent', 5000],
-        ['DOMEvent', 5001],
-        // This is a longer marker starting at the same place, it should always be drawn
-        ['DOMEvent', 5001, 7000],
-      ]
-    );
+    setupWithMarkers({ rangeStart: 0, rangeEnd: 15000 }, [
+      // 2 very close dot markers. They shouldn't be drawn both together.
+      ['DOMEvent', 5000],
+      ['DOMEvent', 5001],
+      // This is a longer marker starting at the same place, it should always be drawn
+      ['DOMEvent', 5001, 7000],
+    ]);
 
     const drawCalls = flushDrawLog();
 
@@ -269,15 +259,13 @@ describe('TimelineMarkers', function() {
     });
 
     it('and still highlights other markers when hovering them', () => {
-      const {
-        rightClick,
-        mouseOver,
-        flushDrawLog,
-        getContextMenu,
-      } = setupWithMarkers({ rangeStart: 0, rangeEnd: 10 }, [
-        ['DOMEvent', 0, 3],
-        ['DOMEvent', 6, 10],
-      ]);
+      const { rightClick, mouseOver, getContextMenu } = setupWithMarkers(
+        { rangeStart: 0, rangeEnd: 10 },
+        [
+          ['DOMEvent', 0, 3],
+          ['DOMEvent', 6, 10],
+        ]
+      );
 
       // The "DOMEvent" marker is drawn from 0,0 to 5,60.
       rightClick({ x: 30, y: 2 });

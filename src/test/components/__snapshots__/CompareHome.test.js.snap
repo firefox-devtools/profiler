@@ -15,13 +15,13 @@ exports[`app/CompareHome matches the snapshot 1`] = `
           class="appHeaderLink"
           href="/"
         >
-          Firefox Profiler
+          ⁨Firefox Profiler⁩
         </a>
+         — 
         <span
           class="appHeaderSubtext"
         >
-           
-          — Web app for Firefox performance analysis
+          Web app for ⁨Firefox⁩ performance analysis
         </span>
       </span>
       <a
@@ -55,7 +55,9 @@ exports[`app/CompareHome matches the snapshot 1`] = `
   <p
     class="photon-body-20"
   >
-    The tool will extract the data from the selected track and range for each profile, and put them both on the same view to make them easy to compare.
+    The tool will extract the data from the selected track and range for
+each profile, and put them both on the same view to make them easy to
+compare.
   </p>
   <form
     class="compareHomeForm"

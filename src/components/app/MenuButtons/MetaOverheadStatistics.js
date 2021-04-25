@@ -4,6 +4,8 @@
 
 // @flow
 import * as React from 'react';
+import { Localized } from '@fluent/react';
+
 import {
   formatMicroseconds,
   formatPercent,
@@ -47,6 +49,14 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
       'Interval',
       'Lockings',
     ];
+    //l10nId's for statKeys
+    const statKeysL10nId = {
+      Overhead: 'MenuButtons--metaOverheadStatistics-statkeys-overhead',
+      Cleaning: 'MenuButtons--metaOverheadStatistics-statkeys-cleaning',
+      Counter: 'MenuButtons--metaOverheadStatistics-statkeys-counter',
+      Interval: 'MenuButtons--metaOverheadStatistics-statkeys-interval',
+      Lockings: 'MenuButtons--metaOverheadStatistics-statkeys-lockings',
+    };
 
     for (const overhead of profilerOverhead) {
       const { statistics } = overhead;
@@ -84,16 +94,34 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 
     return calculatedStats.size > 0 ? (
       <details>
-        <summary className="arrowPanelSubTitle">Profiler Overhead</summary>
+        <summary className="arrowPanelSubTitle">
+          <Localized id="MenuButtons--metaOverheadStatistics-subtitle">
+            Profiler Overhead
+          </Localized>
+        </summary>
         <div className="arrowPanelSection">
           <div className="metaInfoGrid">
             <div />
-            <div>Mean</div>
-            <div>Max</div>
-            <div>Min</div>
+            <div>
+              <Localized id="MenuButtons--metaOverheadStatistics-mean">
+                Mean
+              </Localized>
+            </div>
+            <div>
+              <Localized id="MenuButtons--metaOverheadStatistics-max">
+                Max
+              </Localized>
+            </div>
+            <div>
+              <Localized id="MenuButtons--metaOverheadStatistics-min">
+                Min
+              </Localized>
+            </div>
             {[...calculatedStats].map(([key, val]) => (
               <React.Fragment key={key}>
-                <div>{key}</div>
+                <div>
+                  <Localized id={statKeysL10nId[key]} />
+                </div>
                 <div>{formatMicroseconds(val.mean)}</div>
                 <div>{formatMicroseconds(val.max)}</div>
                 <div>{formatMicroseconds(val.min)}</div>
@@ -103,7 +131,11 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 
           {overheadDurations !== 0 ? (
             <div className="metaInfoRow">
-              <span className="metaInfoWideLabel">Overhead Durations:</span>
+              <span className="metaInfoWideLabel">
+                <Localized id="MenuButtons--metaOverheadStatistics-overhead-duration">
+                  Overhead Durations:
+                </Localized>
+              </span>
               <span className="metaInfoValueRight">
                 {formatMicroseconds(overheadDurations / totalSamplingCount)}
               </span>
@@ -111,7 +143,11 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
           ) : null}
           {overheadPercentage !== 0 ? (
             <div className="metaInfoRow">
-              <span className="metaInfoWideLabel">Overhead Percentage:</span>
+              <span className="metaInfoWideLabel">
+                <Localized id="MenuButtons--metaOverheadStatistics-overhead-percentage">
+                  Overhead Percentage:
+                </Localized>
+              </span>
               <span className="metaInfoValueRight">
                 {formatPercent(overheadPercentage / totalSamplingCount)}
               </span>
@@ -119,7 +155,11 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
           ) : null}
           {profiledDuration !== 0 ? (
             <div className="metaInfoRow">
-              <span className="metaInfoWideLabel">Profiled Duration:</span>
+              <span className="metaInfoWideLabel">
+                <Localized id="MenuButtons--metaOverheadStatistics-profiled-duration">
+                  Profiled Duration:
+                </Localized>
+              </span>
               <span className="metaInfoValueRight">
                 {formatMicroseconds(profiledDuration / totalSamplingCount)}
               </span>

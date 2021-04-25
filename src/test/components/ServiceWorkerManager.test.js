@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
@@ -228,7 +228,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(container.firstChild).toMatchSnapshot();
 
       // There's a reload button for the `public` datasource only once we're ready.
-      expect(queryByText(/reload/i)).toBe(null);
+      expect(queryByText(/reload/i)).not.toBeInTheDocument();
 
       dispatch(doneSymbolicating());
       expect(getReloadButton()).not.toBe(null);
@@ -281,7 +281,7 @@ describe('app/ServiceWorkerManager', () => {
         ensureExists(container.querySelector('.photon-message-bar')).className
       ).toMatch(/\bphoton-message-bar-warning\b/);
       // There's no reload button for the `from-addon` datasource.
-      expect(queryByText(/reload/i)).toBe(null);
+      expect(queryByText(/reload/i)).not.toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
 
       // The notice stays if we're getting ready after that.

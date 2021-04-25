@@ -6,10 +6,12 @@
 
 import * as React from 'react';
 import { showMenu } from 'react-contextmenu';
-import TimelineGlobalTrack from './GlobalTrack';
-import TimelineRuler from './Ruler';
-import TimelineSelection from './Selection';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import { Localized } from '@fluent/react';
+
+import { TimelineGlobalTrack } from './GlobalTrack';
+import { TimelineRuler } from './Ruler';
+import { TimelineSelection } from './Selection';
+import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -19,18 +21,19 @@ import {
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
-  getActiveBrowsingContextID,
+  getActiveTabID,
   getTimelineTrackOrganization,
   getGlobalTrackOrder,
   getTimelineType,
   getPanelLayoutGeneration,
+  getIsCPUUtilizationProvided,
 } from 'firefox-profiler/selectors';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
 } from 'firefox-profiler/app-logic/constants';
-import TimelineTrackContextMenu from './TrackContextMenu';
+import { TimelineTrackContextMenu } from './TrackContextMenu';
 
 import './index.css';
 
@@ -44,7 +47,7 @@ import {
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 
 import type {
-  BrowsingContextID,
+  TabID,
   TrackIndex,
   GlobalTrack,
   InitialSelectedTrackReference,
@@ -67,8 +70,9 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
   +hiddenTrackCount: HiddenTrackCount,
-  +activeBrowsingContextID: BrowsingContextID | null,
+  +activeTabID: TabID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
+  +isCPUUtilizationProvided: boolean,
 |};
 
 type DispatchProps = {|
@@ -90,17 +94,33 @@ type State = {|
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
   +changeTimelineType: typeof changeTimelineType,
+  +isCPUUtilizationProvided: boolean,
 |}> {
   _changeToCategories = () => this.props.changeTimelineType('category');
+  _changeToCPUCategories = () => this.props.changeTimelineType('cpu-category');
   _changeToStacks = () => this.props.changeTimelineType('stack');
 
   render() {
-    const { timelineType } = this.props;
+    const { timelineType, isCPUUtilizationProvided } = this.props;
 
     return (
       <form>
         <div className="timelineSettingsToggle">
-          Graph type:{' '}
+          <Localized id="FullTimeline--graph-type">Graph type:</Localized>
+          {isCPUUtilizationProvided ? (
+            <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
+              <input
+                type="radio"
+                name="timelineSettingsToggle"
+                className="photon-radio photon-radio-micro timelineSettingsToggleInput"
+                checked={timelineType === 'cpu-category'}
+                onChange={this._changeToCPUCategories}
+              />
+              <Localized id="FullTimeline--categories-with-cpu">
+                Categories with CPU
+              </Localized>
+            </label>
+          ) : null}
           <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
@@ -109,7 +129,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
               checked={timelineType === 'category'}
               onChange={this._changeToCategories}
             />
-            Categories
+            <Localized id="FullTimeline--categories">Categories</Localized>
           </label>
           <label className="photon-label-micro timelineSettingsToggleLabel">
             <input
@@ -119,7 +139,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
               checked={timelineType === 'stack'}
               onChange={this._changeToStacks}
             />
-            Stack height
+            <Localized id="FullTimeline--stack-height">Stack height</Localized>
           </label>
         </div>
       </form>
@@ -146,26 +166,37 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
     const { hiddenTrackCount } = this.props;
 
     return (
-      <button
-        type="button"
-        onClick={this._showMenu}
-        className="timelineSettingsHiddenTracks"
+      <Localized
+        id="FullTimeline--tracks-visible"
+        elems={{
+          span: <span className="timelineSettingsHiddenTracksNumber" />,
+        }}
+        vars={{
+          visibleTrackCount: hiddenTrackCount.total - hiddenTrackCount.hidden,
+          totalTrackCount: hiddenTrackCount.total,
+        }}
       >
-        <span className="timelineSettingsHiddenTracksNumber">
-          {hiddenTrackCount.total - hiddenTrackCount.hidden}
-        </span>
-        {' / '}
-        <span className="timelineSettingsHiddenTracksNumber">
-          {hiddenTrackCount.total}{' '}
-        </span>
-        tracks visible
-      </button>
+        <button
+          type="button"
+          onClick={this._showMenu}
+          className="timelineSettingsHiddenTracks"
+        >
+          <span className="timelineSettingsHiddenTracksNumber">
+            {hiddenTrackCount.total - hiddenTrackCount.hidden}
+          </span>
+          {' / '}
+          <span className="timelineSettingsHiddenTracksNumber">
+            {hiddenTrackCount.total}{' '}
+          </span>
+          tracks visible
+        </button>
+      </Localized>
     );
   }
 }
 
 class TimelineSettingsActiveTabView extends React.PureComponent<{|
-  +activeBrowsingContextID: BrowsingContextID | null,
+  +activeTabID: TabID | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |}> {
@@ -173,15 +204,12 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
     const {
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
-      activeBrowsingContextID,
+      activeTabID,
     } = this.props;
-    if (
-      timelineTrackOrganization.type === 'full' &&
-      activeBrowsingContextID !== null
-    ) {
+    if (timelineTrackOrganization.type === 'full' && activeTabID !== null) {
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: activeBrowsingContextID,
+        tabID: activeTabID,
       });
     } else {
       changeTimelineTrackOrganization({ type: 'full' });
@@ -189,8 +217,8 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   };
 
   render() {
-    const { activeBrowsingContextID, timelineTrackOrganization } = this.props;
-    if (activeBrowsingContextID === null) {
+    const { activeTabID, timelineTrackOrganization } = this.props;
+    if (activeTabID === null) {
       return null;
     }
 
@@ -211,7 +239,7 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   }
 }
 
-class FullTimeline extends React.PureComponent<Props, State> {
+class FullTimelineImpl extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
   };
@@ -238,9 +266,10 @@ class FullTimeline extends React.PureComponent<Props, State> {
       hiddenTrackCount,
       changeTimelineType,
       changeRightClickedTrack,
-      activeBrowsingContextID,
+      activeTabID,
       timelineTrackOrganization,
       changeTimelineTrackOrganization,
+      isCPUUtilizationProvided,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -257,6 +286,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
           <TimelineSettingsGraphType
             timelineType={timelineType}
             changeTimelineType={changeTimelineType}
+            isCPUUtilizationProvided={isCPUUtilizationProvided}
           />
           <TimelineSettingsHiddenTracks
             hiddenTrackCount={hiddenTrackCount}
@@ -269,7 +299,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
           {/* eslint-disable-next-line no-constant-condition */}
           {true ? null : (
             <TimelineSettingsActiveTabView
-              activeBrowsingContextID={activeBrowsingContextID}
+              activeTabID={activeTabID}
               timelineTrackOrganization={timelineTrackOrganization}
               changeTimelineTrackOrganization={changeTimelineTrackOrganization}
             />
@@ -312,7 +342,7 @@ class FullTimeline extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<{||}, StateProps, DispatchProps>({
+export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -322,8 +352,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     timelineType: getTimelineType(state),
     hiddenTrackCount: getHiddenTrackCount(state),
-    activeBrowsingContextID: getActiveBrowsingContextID(state),
+    activeTabID: getActiveTabID(state),
     timelineTrackOrganization: getTimelineTrackOrganization(state),
+    isCPUUtilizationProvided: getIsCPUUtilizationProvided(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
@@ -331,5 +362,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedTrack,
     changeTimelineTrackOrganization,
   },
-  component: withSize<Props>(FullTimeline),
+  component: withSize<Props>(FullTimelineImpl),
 });

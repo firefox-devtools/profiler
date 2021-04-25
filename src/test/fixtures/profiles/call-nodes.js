@@ -9,6 +9,7 @@ import type {
   FrameTable,
   Profile,
 } from 'firefox-profiler/types';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import {
   getEmptyThread,
@@ -46,9 +47,10 @@ export default function getProfile(): Profile {
     'funcF',
   ].map(name => thread.stringTable.indexForString(name));
 
-  const categoryOther = profile.meta.categories.findIndex(
-    c => c.name === 'Other'
-  );
+  const categoryOther = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories'
+  ).findIndex(c => c.name === 'Other');
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {

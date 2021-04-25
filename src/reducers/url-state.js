@@ -224,8 +224,22 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
 
 const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
+    case 'PROFILE_LOADED':
+      if (!action.profile.meta.categories) {
+        // An imported profile did not provide its own categories. Use the stack view instead.
+        return 'stack';
+      }
+      return state;
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
+    case 'VIEW_FULL_PROFILE':
+      // The timelineType can be set at loadtime from a URL value.
+      // If it's not set from a URL value we provide a default value from this action.
+      // When it's null we don't want to override the value that was set already.
+      if (action.timelineType !== null) {
+        return action.timelineType;
+      }
+      return state;
     default:
       return state;
   }
@@ -466,7 +480,7 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
     case 'VIEW_ACTIVE_TAB_PROFILE':
       return {
         type: 'active-tab',
-        browsingContextID: action.browsingContextID,
+        tabID: action.tabID,
       };
     case 'VIEW_ORIGINS_PROFILE':
       return { type: 'origins' };

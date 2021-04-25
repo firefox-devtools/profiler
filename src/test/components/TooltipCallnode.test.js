@@ -5,8 +5,9 @@
 // @flow
 import React from 'react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
-import { render } from '@testing-library/react';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithUnbalancedNativeAllocations,
@@ -84,7 +85,7 @@ describe('TooltipCallNode', function() {
       // Add items to Pages array.
       profile.pages = [
         {
-          browsingContextID: 1,
+          tabID: 1,
           innerWindowID: 111111,
           url: pageUrl,
           embedderInnerWindowID: 0,
@@ -93,7 +94,7 @@ describe('TooltipCallNode', function() {
 
       if (iframeUrl) {
         profile.pages.push({
-          browsingContextID: 1,
+          tabID: 1,
           innerWindowID: 123123,
           url: iframeUrl,
           embedderInnerWindowID: 111111,

@@ -6,13 +6,7 @@
 import { CallTree } from '../profile-logic/call-tree';
 import { ReactLocalization } from '@fluent/react';
 import type JSZip from 'jszip';
-import type {
-  Profile,
-  Thread,
-  ThreadIndex,
-  Pid,
-  BrowsingContextID,
-} from './profile';
+import type { Profile, Thread, ThreadIndex, Pid, TabID } from './profile';
 import type {
   CallNodePath,
   CallNodeTable,
@@ -54,7 +48,7 @@ export type DataSource =
   | 'compare'
   | 'uploaded-recordings';
 
-export type TimelineType = 'stack' | 'category';
+export type TimelineType = 'stack' | 'category' | 'cpu-category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
@@ -279,6 +273,9 @@ type ProfileAction =
       +type: 'ENABLE_EVENT_DELAY_TRACKS',
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+    |}
+  | {|
+      +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |};
 
 type ReceiveProfileAction =
@@ -314,6 +311,7 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +timelineType: TimelineType | null,
     |}
   | {|
       +type: 'VIEW_ORIGINS_PROFILE',
@@ -324,7 +322,7 @@ type ReceiveProfileAction =
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
-      +browsingContextID: BrowsingContextID | null,
+      +tabID: TabID | null,
     |}
   | {|
       +type: 'DATA_RELOAD',
@@ -510,7 +508,12 @@ type CurrentProfileUploadedInformationAction = {|
 
 type L10nAction =
   | {| +type: 'REQUEST_L10N' |}
-  | {| +type: 'RECEIVE_L10N', +localization: Localization |};
+  | {|
+      +type: 'RECEIVE_L10N',
+      +localization: Localization,
+      +primaryLocale: string,
+      +direction: 'ltr' | 'rtl',
+    |};
 
 export type Action =
   | ProfileAction

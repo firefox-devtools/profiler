@@ -31,7 +31,7 @@ import type {
   CategoryList,
   JsTracerTable,
   Counter,
-  BrowsingContextID,
+  TabID,
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
@@ -39,6 +39,7 @@ import type {
   UserTimingMarkerPayload,
   Milliseconds,
   MarkerPhase,
+  ThreadCPUDeltaUnit,
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
@@ -496,7 +497,10 @@ export function getProfileFromTextSamples(
   const profile = getEmptyProfile();
   // Provide a useful marker schema, rather than an empty one.
   profile.meta.markerSchema = markerSchemaForTests;
-  const categories = profile.meta.categories;
+  const categories = ensureExists(
+    profile.meta.categories,
+    'Expected to find categories.'
+  );
 
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
@@ -947,12 +951,12 @@ export function getNetworkTrackProfile() {
     );
   const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 1;
 
   profile.pages = [
     {
-      browsingContextID: browsingContextID,
+      tabID: tabID,
       innerWindowID: innerWindowID,
       url: 'https://developer.mozilla.org/en-US/',
       embedderInnerWindowID: 0,
@@ -1475,7 +1479,7 @@ export function getProfileWithBalancedNativeAllocations() {
 }
 
 /**
- * Add pages array and activeTabBrowsingContextID to the given profile.
+ * Add pages array and activeTabTabID to the given profile.
  * Pages array has the following relationship:
  * Tab #1                           Tab #2
  * --------------                --------------
@@ -1487,10 +1491,10 @@ export function getProfileWithBalancedNativeAllocations() {
  */
 export function addActiveTabInformationToProfile(
   profile: Profile,
-  activeBrowsingContextID?: BrowsingContextID
+  activeTabID?: TabID
 ) {
-  const firstTabBrowsingContextID = 1;
-  const secondTabBrowsingContextID = 4;
+  const firstTabTabID = 1;
+  const secondTabTabID = 4;
   const parentInnerWindowIDsWithChildren = 11111111111;
   const iframeInnerWindowIDsWithChild = 11111111112;
   const fistTabInnerWindowIDs = [
@@ -1501,62 +1505,59 @@ export function addActiveTabInformationToProfile(
   ];
   const secondTabInnerWindowIDs = [11111111114, 11111111116];
 
-  // Default to first tab browsingContextID if not given
-  activeBrowsingContextID =
-    activeBrowsingContextID === undefined
-      ? firstTabBrowsingContextID
-      : activeBrowsingContextID;
+  // Default to first tab tabID if not given
+  activeTabID = activeTabID === undefined ? firstTabTabID : activeTabID;
 
   // Add the pages array
   profile.pages = [
     // A top most page in the first tab
     {
-      browsingContextID: firstTabBrowsingContextID,
+      tabID: firstTabTabID,
       innerWindowID: parentInnerWindowIDsWithChildren,
       url: 'Page #1',
       embedderInnerWindowID: 0,
     },
     // An iframe page inside the previous page
     {
-      browsingContextID: 2,
+      tabID: 2,
       innerWindowID: iframeInnerWindowIDsWithChild,
       url: 'Page #2',
       embedderInnerWindowID: parentInnerWindowIDsWithChildren,
     },
     // Another iframe page inside the previous iframe
     {
-      browsingContextID: 3,
+      tabID: 3,
       innerWindowID: fistTabInnerWindowIDs[2],
       url: 'Page #3',
       embedderInnerWindowID: iframeInnerWindowIDsWithChild,
     },
     // A top most frame from the second tab
     {
-      browsingContextID: secondTabBrowsingContextID,
+      tabID: secondTabTabID,
       innerWindowID: secondTabInnerWindowIDs[0],
       url: 'Page #4',
       embedderInnerWindowID: 0,
     },
     // Another top most frame from the first tab
-    // Their browsingContextIDs are the same because of that.
+    // Their tabIDs are the same because of that.
     {
-      browsingContextID: firstTabBrowsingContextID,
+      tabID: firstTabTabID,
       innerWindowID: fistTabInnerWindowIDs[3],
       url: 'Page #5',
       embedderInnerWindowID: 0,
     },
     // Another top most frame from the second tab
     {
-      browsingContextID: secondTabBrowsingContextID,
+      tabID: secondTabTabID,
       innerWindowID: secondTabInnerWindowIDs[1],
       url: 'Page #4',
       embedderInnerWindowID: 0,
     },
   ];
 
-  // Set the active BrowsingContext ID.
+  // Set the active Tab ID.
   profile.meta.configuration = {
-    activeBrowsingContextID,
+    activeTabID,
     capacity: 1,
     features: [],
     threads: [],
@@ -1564,12 +1565,74 @@ export function addActiveTabInformationToProfile(
 
   return {
     profile,
-    firstTabBrowsingContextID,
-    secondTabBrowsingContextID,
+    firstTabTabID,
+    secondTabTabID,
     parentInnerWindowIDsWithChildren,
     iframeInnerWindowIDsWithChild,
-    activeBrowsingContextID,
+    activeTabID,
     fistTabInnerWindowIDs,
     secondTabInnerWindowIDs,
   };
+}
+
+/**
+ * Creates a profile that includes a thread with threadCPUDelta values.
+ */
+export function getProfileWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  unit: ThreadCPUDeltaUnit = 'ns',
+  interval: Milliseconds = 1
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+  profile.threads = [getThreadWithThreadCPUDelta(userThreadCPUDelta, interval)];
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: unit,
+  };
+
+  return profile;
+}
+
+/**
+ * Creates a thread with threadCPUDelta values.
+ */
+export function getThreadWithThreadCPUDelta(
+  userThreadCPUDelta?: Array<number | null>,
+  interval: Milliseconds = 1
+): Thread {
+  const thread = getEmptyThread();
+  const samplesLength = userThreadCPUDelta ? userThreadCPUDelta.length : 10;
+
+  // Re-construct the samples table with new threadCPUDelta values.
+  thread.samples = {
+    threadCPUDelta: userThreadCPUDelta,
+    eventDelay: Array(samplesLength).fill(null),
+    stack: Array(samplesLength).fill(null),
+    time: Array.from({ length: samplesLength }, (_, i) => i * interval),
+    weight: null,
+    weightType: 'samples',
+    length: samplesLength,
+  };
+
+  return thread;
+}
+
+/**
+ * Adds the necessary CPU usage values to the given profile.
+ */
+export function addCpuUsageValues(
+  profile: Profile,
+  threadCPUDelta: Array<number | null>,
+  threadCPUDeltaUnit: ThreadCPUDeltaUnit,
+  interval: Milliseconds = 1
+) {
+  profile.meta.interval = interval;
+  profile.meta.sampleUnits = {
+    time: 'ms',
+    eventDelay: 'ms',
+    threadCPUDelta: threadCPUDeltaUnit,
+  };
+  profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
 }

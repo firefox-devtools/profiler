@@ -4,9 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileFilterNavigator } from '../../components/app/ProfileFilterNavigator';
 import * as ProfileView from '../../actions/profile-view';
 import * as ReceiveProfile from '../../actions/receive-profile';
@@ -14,7 +14,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 describe('app/ProfileFilterNavigator', () => {
-  const browsingContextID = 123123;
+  const tabID = 123123;
   function setup() {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -26,7 +26,7 @@ describe('app/ProfileFilterNavigator', () => {
     // Add page for active tab.
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: 1,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
@@ -36,7 +36,7 @@ describe('app/ProfileFilterNavigator', () => {
       threads: [],
       features: [],
       capacity: 1000000,
-      activeBrowsingContextID: browsingContextID,
+      activeTabID: tabID,
     };
 
     // Change the root range for testing.
@@ -87,7 +87,7 @@ describe('app/ProfileFilterNavigator', () => {
     dispatch(
       ReceiveProfile.changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       })
     );
     expect(container.firstChild).toMatchSnapshot();
@@ -98,7 +98,7 @@ describe('app/ProfileFilterNavigator', () => {
     dispatch(
       ReceiveProfile.changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID,
+        tabID,
       })
     );
     expect(queryByText('Full Range')).toBeFalsy();

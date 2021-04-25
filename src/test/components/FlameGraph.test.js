@@ -4,16 +4,20 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent, within } from '@testing-library/react';
+import { fireEvent, within, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
@@ -33,6 +37,7 @@ import {
   changeInvertCallstack,
   changeSelectedCallNode,
   commitRange,
+  updatePreviewSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -46,11 +51,12 @@ const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
 describe('FlameGraph', function() {
+  autoMockCanvasContext();
   afterEach(removeRootOverlayElement);
   beforeEach(addRootOverlayElement);
 
   it('matches the snapshot', () => {
-    const { container, flushDrawLog } = setupFlameGraph();
+    const { container } = setupFlameGraph();
     const drawCalls = flushDrawLog();
 
     expect(container.firstChild).toMatchSnapshot();
@@ -159,7 +165,7 @@ describe('FlameGraph', function() {
   });
 
   describe('EmptyReasons', () => {
-    it('shows reasons when a profile has no samples', () => {
+    it('matches the snapshot when a profile has no samples', () => {
       const profile = getEmptyProfile();
       const thread = getEmptyThread();
       thread.name = 'Empty Thread';
@@ -177,31 +183,50 @@ describe('FlameGraph', function() {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
-    it('shows reasons when samples are out of range', () => {
-      const { dispatch, container } = setupFlameGraph();
+    it('shows reasons when samples are not in the committed range', () => {
+      const { dispatch } = setupFlameGraph();
       dispatch(commitRange(5, 10));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText('Broaden the selected range to view samples.')
+      ).toBeTruthy();
+    });
+
+    it('shows reasons when samples are not in the preview range', () => {
+      const { dispatch } = setupFlameGraph();
+      dispatch(
+        updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 5,
+          selectionEnd: 10,
+        })
+      );
+
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
     });
 
     it('shows reasons when samples have been completely filtered out', function() {
-      const { dispatch, container } = setupFlameGraph();
+      const { dispatch } = setupFlameGraph();
       dispatch(changeImplementationFilter('js'));
-      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+      expect(
+        screen.getByText(
+          'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
+        )
+      ).toBeTruthy();
     });
   });
 });
 
 function setupFlameGraph() {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   const {
     profile,
@@ -312,14 +337,13 @@ function setupFlameGraph() {
   }
 
   function findFillTextPosition(fillText: string) {
-    return findFillTextPositionFromDrawLog(ctx.__flushDrawLog(), fillText);
+    return findFillTextPositionFromDrawLog(flushDrawLog(), fillText);
   }
 
   return {
     ...store,
     ...renderResult,
     funcNames,
-    ctx,
     moveMouse,
     rightClick,
     getTooltip,
@@ -327,6 +351,5 @@ function setupFlameGraph() {
     getContextMenu,
     clickMenuItem,
     findFillTextPosition,
-    flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }

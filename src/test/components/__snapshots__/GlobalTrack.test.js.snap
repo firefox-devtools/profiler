@@ -85,6 +85,23 @@ process: \\"tab\\" (222)"
           </canvas>
         </div>
         <div
+          class="threadSampleGraph"
+        >
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="400"
+            width="400"
+          >
+            <h2>
+              Stack Graph for 
+              Content Process
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
+        <div
           class="timelineEmptyThreadIndicator"
         />
       </div>
@@ -147,6 +164,23 @@ process: \\"tab\\" (222)"
               </canvas>
             </div>
             <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  DOM Worker
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
+                </p>
+              </canvas>
+            </div>
+            <div
               class="timelineEmptyThreadIndicator"
             />
           </div>
@@ -203,6 +237,23 @@ process: \\"tab\\" (222)"
                 </h2>
                 <p>
                   This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  Style
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
                 </p>
               </canvas>
             </div>
@@ -296,6 +347,23 @@ process: \\"default\\" (5555)"
                 </h2>
                 <p>
                   This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="400"
+                width="400"
+              >
+                <h2>
+                  Stack Graph for 
+                  NoMain
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
                 </p>
               </canvas>
             </div>

@@ -210,6 +210,13 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       TEXT_CSS_PIXELS_OFFSET_START * devicePixelRatio;
     const textDevicePixelsOffsetTop =
       TEXT_CSS_PIXELS_OFFSET_TOP * devicePixelRatio;
+    let categoryForUserTiming = categories.findIndex(
+      category => category.name === 'JavaScript'
+    );
+    if (categoryForUserTiming === -1) {
+      // Default to the first item in the categories list.
+      categoryForUserTiming = 0;
+    }
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -318,8 +325,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
             const markerPayload = ((getMarker(markerIndex)
               .data: any): UserTimingMarkerPayload);
             text = markerPayload.name;
-            const categoryIndex = 0;
-            category = categories[categoryIndex];
+            category = categories[categoryForUserTiming];
             isSelected = selectedCallNodeIndex === markerIndex;
           }
 

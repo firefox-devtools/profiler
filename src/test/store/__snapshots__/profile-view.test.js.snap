@@ -7,15 +7,15 @@ Object {
     "appBuildID": "",
     "categories": Array [
       Object {
-        "color": "transparent",
-        "name": "Idle",
+        "color": "grey",
+        "name": "Other",
         "subcategories": Array [
           "Other",
         ],
       },
       Object {
-        "color": "grey",
-        "name": "Other",
+        "color": "transparent",
+        "name": "Idle",
         "subcategories": Array [
           "Other",
         ],
@@ -64,7 +64,7 @@ Object {
       },
     ],
     "configuration": Object {
-      "activeBrowsingContextID": 123123,
+      "activeTabID": 123123,
       "capacity": 1000000,
       "features": Array [],
       "threads": Array [],
@@ -396,19 +396,12 @@ Object {
         ],
         "name": "RefreshDriverTick",
       },
-      Object {
-        "data": Array [],
-        "display": Array [
-          "marker-table",
-        ],
-        "name": "Network",
-      },
     ],
     "misc": "",
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 33,
+    "preprocessedProfileVersion": 35,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -416,13 +409,13 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 22,
+    "version": 23,
   },
   "pages": Array [
     Object {
-      "browsingContextID": 123123,
       "embedderInnerWindowID": 0,
       "innerWindowID": 2,
+      "tabID": 123123,
       "url": "https://developer.mozilla.org/en-US/",
     },
   ],
@@ -829,15 +822,15 @@ Object {
       },
       "stackTable": Object {
         "category": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
         "frame": Array [
           0,
@@ -1497,15 +1490,15 @@ Array [
     },
     "stackTable": Object {
       "category": Array [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ],
       "frame": Array [
         0,
@@ -1907,9 +1900,9 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTimingAndBuckets 1`] = `
 Array [
-  "Idle",
+  "Other",
   Object {
-    "bucket": "Idle",
+    "bucket": "Other",
     "end": Array [
       3,
     ],
@@ -1926,7 +1919,7 @@ Array [
     ],
   },
   Object {
-    "bucket": "Idle",
+    "bucket": "Other",
     "end": Array [
       4,
     ],
@@ -1943,7 +1936,7 @@ Array [
     ],
   },
   Object {
-    "bucket": "Idle",
+    "bucket": "Other",
     "end": Array [
       5,
     ],
@@ -2037,15 +2030,15 @@ Object {
     "totalTime": Object {
       "breakdownByCategory": Array [
         Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
           "entireCategoryValue": 2,
           "subcategoryBreakdown": Array [
             2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
           ],
         },
         Object {
@@ -2100,15 +2093,15 @@ Object {
     "totalTime": Object {
       "breakdownByCategory": Array [
         Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
           "entireCategoryValue": 2,
           "subcategoryBreakdown": Array [
             2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
           ],
         },
         Object {
@@ -2162,14 +2155,14 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "callNodeTable": Object {
     "category": Int32Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "depth": Array [
       0,
@@ -2272,14 +2265,14 @@ CallTree {
   },
   "_callNodeTable": Object {
     "category": Int32Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "depth": Array [
       0,
@@ -2335,15 +2328,15 @@ CallTree {
   },
   "_categories": Array [
     Object {
-      "color": "transparent",
-      "name": "Idle",
+      "color": "grey",
+      "name": "Other",
       "subcategories": Array [
         "Other",
       ],
     },
     Object {
-      "color": "grey",
-      "name": "Other",
+      "color": "transparent",
+      "name": "Idle",
       "subcategories": Array [
         "Other",
       ],
@@ -2768,14 +2761,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "frame": Array [
       0,
@@ -2906,7 +2899,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
 Array [
   Object {
-    "category": 1,
+    "category": 0,
     "data": Object {
       "type": "Jank",
     },
@@ -3155,14 +3148,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "frame": Array [
       0,
@@ -3469,14 +3462,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "frame": Array [
       0,
@@ -3783,15 +3776,15 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "frame": Array [
       0,
@@ -4260,15 +4253,15 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "frame": Array [
       0,

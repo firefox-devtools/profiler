@@ -18,7 +18,7 @@ type Props = {|
   +width: CssPixels,
 |};
 
-class TimelineRuler extends PureComponent<Props> {
+export class TimelineRuler extends PureComponent<Props> {
   _findNiceNumberGreaterOrEqualTo(uglyNumber: number) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
     // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or equal to uglyNumber.
@@ -82,5 +82,3 @@ class TimelineRuler extends PureComponent<Props> {
     );
   }
 }
-
-export default TimelineRuler;

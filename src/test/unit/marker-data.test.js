@@ -528,6 +528,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   // for filterRawMarkerTableToRange.
   it('shifts content process marker times correctly, especially in network markers', function() {
     const { thread, contentThread, markers, contentMarkers } = setup();
+
     expect(thread.processStartupTime).toBe(0);
     expect(contentThread.processStartupTime).toBe(1000);
     expect(markers[10]).toEqual({
@@ -581,6 +582,27 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       incomplete: false,
       name: 'IPCOut',
       start: 30,
+      category: 0,
+    });
+
+    // Test for a marker with a stack
+    expect(markers[11]).toEqual({
+      data: {
+        // Stack property is converted to a cause.
+        cause: {
+          stack: 2,
+          tid: 1111,
+          // The cause's time hasn't been changed.
+          time: 1,
+        },
+        filename: '/foo/bar/',
+        operation: 'create/open',
+        source: 'PoisionOIInterposer',
+        type: 'FileIO',
+      },
+      start: 22,
+      end: 24,
+      name: 'FileIO',
       category: 0,
     });
 
@@ -643,16 +665,20 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         cause: {
           stack: 2,
           tid: 1111,
-          time: 1,
+          // The cause's time has been properly increased of 1000ms (this is the
+          // difference between the start times for the content process and the
+          // parent process, see `contentProcessMeta` in
+          // fixtures/profiles/gecko-profile.js).
+          time: 1 + 1000,
         },
         filename: '/foo/bar/',
         operation: 'create/open',
         source: 'PoisionOIInterposer',
         type: 'FileIO',
       },
+      start: 1022,
       end: 1024,
       name: 'FileIO',
-      start: 1022,
       category: 0,
     });
   });

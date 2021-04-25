@@ -6,18 +6,19 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Timeline } from '../../components/timeline';
-import ActiveTabGlobalTrack from '../../components/timeline/ActiveTabGlobalTrack';
-import ActiveTabResourcesPanel from '../../components/timeline/ActiveTabResourcesPanel';
-import ActiveTabResourceTrack from '../../components/timeline/ActiveTabResourceTrack';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { Timeline } from '../../components/timeline';
+import { TimelineActiveTabGlobalTrack } from '../../components/timeline/ActiveTabGlobalTrack';
+import { TimelineActiveTabResourcesPanel } from '../../components/timeline/ActiveTabResourcesPanel';
+import { TimelineActiveTabResourceTrack } from '../../components/timeline/ActiveTabResourceTrack';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getBoundingBox, fireFullClick } from '../fixtures/utils';
 import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
@@ -27,6 +28,7 @@ import { changeSelectedThreads } from '../../actions/profile-view';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 describe('ActiveTabTimeline', function() {
+  autoMockCanvasContext();
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -40,25 +42,20 @@ describe('ActiveTabTimeline', function() {
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(200, 300));
-
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
   });
 
   it('should be rendered properly from the Timeline component', () => {
     const {
       profile,
       parentInnerWindowIDsWithChildren,
-      firstTabBrowsingContextID,
+      firstTabTabID,
     } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
     profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
     const store = storeWithProfile(profile);
     store.dispatch(
       changeTimelineTrackOrganization({
         type: 'active-tab',
-        browsingContextID: firstTabBrowsingContextID,
+        tabID: firstTabTabID,
       })
     );
 
@@ -81,7 +78,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const trackIndex = 0;
@@ -103,7 +100,7 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabGlobalTrack
+          <TimelineActiveTabGlobalTrack
             trackIndex={trackIndex}
             trackReference={trackReference}
             setInitialSelected={setInitialSelected}
@@ -158,7 +155,7 @@ describe('ActiveTabTimeline', function() {
     it('does not display the resources panel if there are no resource tracks', () => {
       const { getState, queryByText } = setup();
       expect(getActiveTabResourceTracks(getState()).length).toBe(0);
-      expect(queryByText(/Resources/)).toBe(null);
+      expect(queryByText(/Resources/)).not.toBeInTheDocument();
     });
   });
 
@@ -178,7 +175,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;
@@ -186,7 +183,7 @@ describe('ActiveTabTimeline', function() {
 
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourcesPanel
+          <TimelineActiveTabResourcesPanel
             resourceTracks={resourceTracks}
             setInitialSelected={() => {}}
           />
@@ -282,7 +279,7 @@ describe('ActiveTabTimeline', function() {
       store.dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID: pageInfo.firstTabBrowsingContextID,
+          tabID: pageInfo.firstTabTabID,
         })
       );
       const { getState, dispatch } = store;
@@ -290,7 +287,7 @@ describe('ActiveTabTimeline', function() {
       const trackIndex = 1;
       const renderResult = render(
         <Provider store={store}>
-          <ActiveTabResourceTrack
+          <TimelineActiveTabResourceTrack
             resourceTrack={resourceTracks[1]}
             trackIndex={trackIndex}
             setInitialSelected={() => {}}

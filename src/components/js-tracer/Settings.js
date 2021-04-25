@@ -12,6 +12,7 @@ import explicitConnect, {
 } from 'firefox-profiler/utils/connect';
 
 import './Settings.css';
+import { Localized } from '@fluent/react';
 
 type StateProps = {|
   +showJsTracerSummary: boolean,
@@ -41,7 +42,9 @@ class JsTracerSettingsImpl extends PureComponent<Props> {
                 onChange={this._onCheckboxChange}
                 checked={showJsTracerSummary}
               />
-              {' Show only self time'}
+              <Localized id="JsTracerSettings--show-only-self-time">
+                Show only self time
+              </Localized>
             </label>
           </li>
         </ul>

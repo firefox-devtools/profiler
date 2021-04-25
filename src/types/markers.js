@@ -476,7 +476,7 @@ export type FileIoPayload = {|
   cause?: CauseBacktrace,
   source: string,
   operation: string,
-  filename: string,
+  filename?: string,
   // FileIO markers that are happening on the current thread don't have a threadId,
   // but they have threadId field if the markers belong to a different (potentially
   // non-profiled) thread.
@@ -500,6 +500,7 @@ export type UserTimingMarkerPayload = {|
 export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
+  cause?: CauseBacktrace,
 |};
 
 // ph: 'X' in the Trace Event Format
@@ -697,7 +698,6 @@ export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | NetworkPayload
   | UserTimingMarkerPayload
-  | TextMarkerPayload
   | LogMarkerPayload
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -719,5 +719,6 @@ export type MarkerPayload_Gecko =
   | $ReplaceCauseWithStack<FileIoPayload>
   | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
   | $ReplaceCauseWithStack<StyleMarkerPayload>
+  | $ReplaceCauseWithStack<TextMarkerPayload>
   // Payloads can be null.
   | null;

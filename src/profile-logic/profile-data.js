@@ -11,6 +11,20 @@ import {
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
+import {
+  INSTANT,
+  INTERVAL,
+  INTERVAL_START,
+  INTERVAL_END,
+} from 'firefox-profiler/app-logic/constants';
+import { timeCode } from 'firefox-profiler/utils/time-code';
+import { hashPath } from 'firefox-profiler/utils/path';
+import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from 'firefox-profiler/utils/flow';
 
 import type {
   Profile,
@@ -51,18 +65,7 @@ import type {
   EventDelayInfo,
   ThreadsKey,
 } from 'firefox-profiler/types';
-
-import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-  getFirstItemFromSet,
-} from '../utils/flow';
-
-import { timeCode } from '../utils/time-code';
-import { hashPath } from '../utils/path';
-
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -781,22 +784,44 @@ function _getTimeRangeForThread(
     // We need to look at those because it can be a marker only profile(no-sampling mode).
     // Finding start and end times sadly requires looping through all markers :(
     for (let i = 0; i < markers.length; i++) {
-      const startTime = markers.startTime[i];
-      const endTime = markers.endTime[i];
+      const maybeStartTime = markers.startTime[i];
+      const maybeEndTime = markers.endTime[i];
+      const markerPhase = markers.phase[i];
       // The resulting range needs to adjust BOTH the start and end of the range, as
       // each marker type could adjust the total range beyond the current bounds.
       // Note the use of Math.min and Math.max are different for the start and end
       // of the markers.
 
-      if (startTime !== null) {
-        // This is either an Instant, IntervalStart, or Interval marker.
-        result.start = Math.min(result.start, startTime);
-        result.end = Math.max(result.end, startTime + interval);
-      }
-      if (endTime !== null) {
-        // This is either an Interval or IntervalEnd marker.
-        result.start = Math.min(result.start, endTime);
-        result.end = Math.max(result.end, endTime + interval);
+      switch (markerPhase) {
+        case INSTANT:
+        case INTERVAL_START: {
+          const startTime = ensureExists(maybeStartTime);
+
+          result.start = Math.min(result.start, startTime);
+          result.end = Math.max(result.end, startTime + interval);
+          break;
+        }
+        case INTERVAL_END: {
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, endTime);
+          result.end = Math.max(result.end, endTime + interval);
+          break;
+        }
+        case INTERVAL: {
+          const startTime = ensureExists(maybeStartTime);
+          const endTime = ensureExists(maybeEndTime);
+
+          result.start = Math.min(result.start, startTime, endTime);
+          result.end = Math.max(
+            result.end,
+            startTime + interval,
+            endTime + interval
+          );
+          break;
+        }
+        default:
+          throw new Error('Unhandled marker phase type.');
       }
     }
   }
@@ -1759,21 +1784,25 @@ export function convertStackToCallNodePath(
  * Returns the depth of the deepest call node, but with a one-based
  * depth instead of a zero-based.
  *
- * If no samples are found, 0 is returned.
+ * If there are no samples, or the stacks are all filtered out for the samples, then
+ * 0 is returned.
  */
 export function computeCallNodeMaxDepth(
-  thread: Thread,
+  samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo
 ): number {
-  if (
-    thread.samples.length === 0 ||
-    callNodeInfo.callNodeTable.depth.length === 0
-  ) {
-    return 0;
-  }
-
-  let max = 0;
-  for (const depth of callNodeInfo.callNodeTable.depth) {
+  // Compute the depth on a per-sample basis. This is done since the callNodeInfo is
+  // computed for the filtered thread, but a samples-like table can use the preview
+  // filtered thread, which involves a subset of the total call nodes.
+  let max = -1;
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    const depth = callNodeTable.depth[callNodeIndex];
     max = Math.max(max, depth);
   }
 
@@ -1929,7 +1958,7 @@ export function getMapStackUpdater(
   };
 }
 
-export function getSampleIndexClosestToTime(
+export function getSampleIndexClosestToStartTime(
   samples: SamplesTable,
   time: number,
   interval: Milliseconds
@@ -1960,6 +1989,50 @@ export function getSampleIndexClosestToTime(
   const distanceToThis = samples.time[index] + weight / 2 - time;
   const distanceToLast =
     time - (samples.time[previousIndex] + previousWeight / 2);
+  return distanceToThis < distanceToLast ? index : index - 1;
+}
+
+/*
+ * Returns the sample index that is closest to *adjusted* sample time. This is a
+ * very similar function to getSampleIndexClosestToStartTime. The difference is that
+ * the other function uses the raw time values, on the other hand, this function
+ * uses the adjusted time. In this context, adjusted time means that `time` array
+ * represent the "center" of the sample, and raw values represent the "start" of
+ * the sample.
+ */
+export function getSampleIndexClosestToCenteredTime(
+  samples: SamplesTable,
+  time: number
+): IndexIntoSamplesTable {
+  // Bisect to find the index of the first sample after the provided time.
+  const index = bisectionRight(samples.time, time);
+
+  if (index === 0) {
+    return 0;
+  }
+
+  if (index === samples.length) {
+    return samples.length - 1;
+  }
+
+  // Check the distance between the provided time and the center of the bisected sample
+  // and its predecessor.
+  const previousIndex = index - 1;
+  let distanceToThis;
+  let distanceToLast;
+
+  if (samples.weight) {
+    const samplesWeight = samples.weight;
+    const weight = Math.abs(samplesWeight[index]);
+    const previousWeight = Math.abs(samplesWeight[previousIndex]);
+
+    distanceToThis = samples.time[index] + weight / 2 - time;
+    distanceToLast = time - (samples.time[previousIndex] + previousWeight / 2);
+  } else {
+    distanceToThis = samples.time[index] - time;
+    distanceToLast = time - samples.time[previousIndex];
+  }
+
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 

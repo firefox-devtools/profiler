@@ -72,6 +72,46 @@ export function addDataToWindowObject(
         `);
       }
     },
+
+    enableCPUGraphs() {
+      const areExperimentalCPUGraphsEnabled = dispatch(
+        actions.enableExperimentalCPUGraphs()
+      );
+      if (areExperimentalCPUGraphsEnabled) {
+        console.log(stripIndent`
+          ✅ The CPU graphs are now enabled and should be displayed in the timeline.
+          👉 Note that this is an experimental feature that might still have bugs.
+          💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
+        `);
+      }
+    },
+  };
+
+  target.togglePseudoLocalization = function(pseudoStrategy?: string) {
+    if (
+      pseudoStrategy !== undefined &&
+      pseudoStrategy !== 'accented' &&
+      pseudoStrategy !== 'bidi'
+    ) {
+      console.log(stripIndent`
+        ❗ The pseudo strategy "${pseudoStrategy}" is unknown.
+        💡 Valid strategies are: "accented" or "bidi".
+        Please try again 😊
+      `);
+      return;
+    }
+
+    dispatch(actions.setupLocalization(navigator.languages, pseudoStrategy));
+    if (pseudoStrategy) {
+      console.log(stripIndent`
+        ✅ The pseudo strategy "${pseudoStrategy}" is now enabled for the localization.
+        👉 To disable it, you can call togglePseudoLocalization() again without a parameter.
+      `);
+    } else {
+      console.log(stripIndent`
+        ✅ The pseudo strategy is now disabled.
+      `);
+    }
   };
 
   target.getState = getState;
@@ -129,6 +169,7 @@ export function logFriendlyPreamble() {
       %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
+      %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -164,6 +205,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.experimental"
+    bold,
+    reset,
+    // "window.togglePseudoLocalization"
     bold,
     reset,
     // "processed-profile-format.md"

@@ -114,13 +114,13 @@ export function createGeckoSubprocessProfile(
     libs: [contentProcessBinary, ...parentProfile.libs.slice(1)], // libs are stringified in the Gecko profile
     pages: [
       {
-        browsingContextID: 123123,
+        tabID: 123123,
         innerWindowID: 1,
         url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
         embedderInnerWindowID: 0,
       },
       {
-        browsingContextID: 111111,
+        tabID: 111111,
         innerWindowID: 2,
         url: 'chrome://browser/content/browser.xhtml',
         embedderInnerWindowID: 0,
@@ -787,7 +787,7 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
                   time: 1,
                   responsiveness: 2,
                 },
-                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45 / Time: 1
               },
             },
           },

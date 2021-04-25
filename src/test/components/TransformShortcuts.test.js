@@ -4,8 +4,9 @@
 
 // @flow
 import * as React from 'react';
-import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { changeSelectedCallNode } from '../../actions/profile-view';

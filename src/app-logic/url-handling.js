@@ -29,11 +29,12 @@ import type {
   Profile,
   Thread,
   IndexIntoStackTable,
-  BrowsingContextID,
+  TabID,
   TrackIndex,
   CallNodePath,
   ThreadIndex,
   TransformStacksPerThread,
+  TimelineType,
 } from 'firefox-profiler/types';
 
 export const CURRENT_URL_VERSION = 5;
@@ -146,7 +147,7 @@ type FullProfileSpecificBaseQuery = {|
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
   resources: null | void,
-  ctxId: BrowsingContextID | void,
+  ctxId: TabID | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -273,7 +274,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'active-tab':
       view = timelineTrackOrganization.type;
-      ctxId = timelineTrackOrganization.browsingContextID;
+      ctxId = timelineTrackOrganization.tabID;
       break;
     case 'origins':
       view = timelineTrackOrganization.type;
@@ -314,10 +315,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
       }
 
-      if (urlState.profileSpecific.full.timelineType === 'stack') {
+      if (
+        urlState.profileSpecific.full.timelineType === 'stack' ||
+        urlState.profileSpecific.full.timelineType === 'cpu-category'
+      ) {
         // The default is the category view, so only add it to the URL if it's the
-        // stack view.
-        baseQuery.timelineType = 'stack';
+        // stack or cpu-category view.
+        baseQuery.timelineType = urlState.profileSpecific.full.timelineType;
       }
 
       let localTrackOrderByPid = '';
@@ -546,9 +550,9 @@ export function stateFromLocation(
 
   const transforms = parseTransforms(selectedThreadsList, query.transforms);
 
-  let browsingContextId = null;
+  let tabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
-    browsingContextId = Number(query.ctxId);
+    tabID = Number(query.ctxId);
   }
 
   return {
@@ -561,7 +565,7 @@ export function stateFromLocation(
     profileName: query.profileName,
     timelineTrackOrganization: validateTimelineTrackOrganization(
       query.view,
-      browsingContextId
+      tabID
     ),
     profileSpecific: {
       implementation,
@@ -593,7 +597,7 @@ export function stateFromLocation(
         localTrackOrderByPid: query.localTrackOrderByPid
           ? parseLocalTrackOrder(query.localTrackOrderByPid)
           : new Map(),
-        timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
+        timelineType: validateTimelineType(query.timelineType),
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map(index => Number(index))
           : null,
@@ -967,7 +971,7 @@ function getVersion4JSCallNodePathFromStackIndex(
 
 function validateTimelineTrackOrganization(
   type: ?string,
-  browsingContextID: number | null
+  tabID: number | null
 ): TimelineTrackOrganization {
   // Pretend this is a TimelineTrackOrganization so that we can exhaustively
   // go through each option.
@@ -976,7 +980,7 @@ function validateTimelineTrackOrganization(
     case 'full':
       return { type: 'full' };
     case 'active-tab':
-      return { type: 'active-tab', browsingContextID };
+      return { type: 'active-tab', tabID };
     case 'origins':
       return { type: 'origins' };
     default:
@@ -984,5 +988,25 @@ function validateTimelineTrackOrganization(
       (timelineTrackOrganization: empty);
 
       return { type: 'full' };
+  }
+}
+
+/**
+ * Validate the timeline type and fall back to the category type if it's not
+ * provided or something else is provided for some reason.
+ */
+function validateTimelineType(type: ?string): TimelineType {
+  // Pretend this is a TimelineTrackOrganization so that we can exhaustively
+  // go through each option.
+  const timelineType: TimelineType = (type: any);
+  switch (timelineType) {
+    case 'stack':
+    case 'cpu-category':
+    case 'category':
+      return timelineType;
+    default:
+      // Type assert we've checked everything:
+      (timelineType: empty);
+      return 'category';
   }
 }

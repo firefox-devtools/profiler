@@ -1301,6 +1301,9 @@ const _upgraders = {
       },
       {
         // The schema is mostly handled with custom logic.
+        // Note that profiles coming from recent Gecko engines won't have this.
+        // Having this here was a mistake when implementing the upgrader, but
+        // now that it's here we keep it to reduce confusion.
         name: 'Network',
         display: ['marker-table'],
         data: [],
@@ -1312,6 +1315,40 @@ const _upgraders = {
       // de-duplicates each process' schema.
       processes.meta.markerSchema = [];
     }
+  },
+  [23]: profile => {
+    // The browsingContextID inside the pages array and activeBrowsingContextID
+    // have been renamed to tabID and activeTabID.
+    // Previously, we were using the browsingcontextID to figure out which tab
+    // that page belongs to. But that had some shortcomings. For example it
+    // wasn't workig correctly on cross-group navigations, because browsingContext
+    // was being replaced during that. So, we had to get a better number to
+    // indicate the tabIDs. With the back-end work, we are not getting the
+    // browserId, which corresponds to ID of a tab directly. See the back-end
+    // bug for more details: https://bugzilla.mozilla.org/show_bug.cgi?id=1698129
+    function convertToVersion23Recursive(p) {
+      if (
+        profile.meta.configuration &&
+        profile.meta.configuration.activeBrowsingContextID
+      ) {
+        profile.meta.configuration.activeTabID =
+          profile.meta.configuration.activeBrowsingContextID;
+        delete profile.meta.configuration.activeBrowsingContextID;
+      }
+
+      if (p.pages && p.pages.length > 0) {
+        for (const page of p.pages) {
+          // Directly copy the value of browsingContextID to tabID.
+          page.tabID = page.browsingContextID;
+          delete page.browsingContextID;
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion23Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion23Recursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

@@ -5,9 +5,10 @@
 // @flow
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { render } from '@testing-library/react';
 
-import EmptyThreadIndicator, {
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  EmptyThreadIndicator,
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';

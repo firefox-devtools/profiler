@@ -5,13 +5,20 @@
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { LocalizationProvider } from '@fluent/react';
 import * as React from 'react';
-import type { Localization } from 'firefox-profiler/types';
+import {
+  getLocalization,
+  getPrimaryLocale,
+  getDirection,
+} from 'firefox-profiler/selectors/l10n';
 import { setupLocalization } from 'firefox-profiler/actions/l10n';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+import type { Localization } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import { getLocalization } from 'firefox-profiler/selectors/l10n';
 
 type StateProps = {|
   +localization: Localization,
+  +primaryLocale: string | null,
+  +direction: 'ltr' | 'rtl',
 |};
 type OwnProps = {|
   children: React.Node,
@@ -29,8 +36,24 @@ class AppLocalizationProviderImpl extends React.PureComponent<Props> {
     setupLocalization(locales);
   }
 
+  componentDidUpdate() {
+    const { primaryLocale, direction } = this.props;
+    if (!primaryLocale) {
+      // The localization isn't ready.
+      return;
+    }
+
+    ensureExists(document.documentElement).setAttribute('dir', direction);
+    ensureExists(document.documentElement).setAttribute('lang', primaryLocale);
+  }
+
   render() {
-    const { children, localization } = this.props;
+    const { primaryLocale, children, localization } = this.props;
+    if (!primaryLocale) {
+      // The localization isn't ready.
+      return null;
+    }
+
     return (
       <LocalizationProvider l10n={localization}>
         {children}
@@ -45,6 +68,8 @@ export const AppLocalizationProvider = explicitConnect<
 >({
   mapStateToProps: state => ({
     localization: getLocalization(state),
+    primaryLocale: getPrimaryLocale(state),
+    direction: getDirection(state),
   }),
   mapDispatchToProps: {
     setupLocalization,

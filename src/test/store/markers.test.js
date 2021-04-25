@@ -2,11 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { storeWithProfile } from '../fixtures/stores';
 import {
   selectedThreadSelectors,
   getMarkerSchemaByName,
 } from 'firefox-profiler/selectors';
+import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+
 import {
   getUserTiming,
   getProfileWithMarkers,
@@ -14,7 +16,7 @@ import {
   type TestDefinedMarkers,
   getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { storeWithProfile } from '../fixtures/stores';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function() {
   function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
@@ -94,7 +96,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       ) {
         throw new Error('Expected to find marker timing, but found a string');
       }
-      expect(category).toEqual('Idle');
+      expect(category).toEqual('Other');
       expect(markerTimingA.name).toBe('Marker Name A');
       expect(markerTimingB.name).toBe('Marker Name B');
     });
@@ -106,7 +108,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
         ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
       expect(markerTiming).toEqual([
-        'Idle',
+        'Other',
         {
           name: 'Rasterize',
           // First sample is captured at time 1, so this incomplete
@@ -115,7 +117,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
           end: [1],
           index: [0],
           label: [''],
-          bucket: 'Idle',
+          bucket: 'Other',
           length: 1,
         },
       ]);
@@ -226,7 +228,7 @@ describe('selectors/getUserTimingMarkerTiming', function() {
 });
 
 describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
-  const browsingContextID = 123123;
+  const tabID = 123123;
   const innerWindowID = 2;
 
   function setup(ctxId, markers: ?Array<any>) {
@@ -268,7 +270,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     );
     profile.pages = [
       {
-        browsingContextID: browsingContextID,
+        tabID: tabID,
         innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
         embedderInnerWindowID: 0,
@@ -278,7 +280,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       threads: [],
       features: [],
       capacity: 1000000,
-      activeBrowsingContextID: browsingContextID,
+      activeTabID: tabID,
     };
     const { getState, dispatch } = storeWithProfile(profile);
 
@@ -286,7 +288,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
       dispatch(
         changeTimelineTrackOrganization({
           type: 'active-tab',
-          browsingContextID,
+          tabID,
         })
       );
     }
@@ -325,7 +327,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
 });
 
 describe('Marker schema filtering', function() {
-  function getMarkerNames(selector): string[] {
+  function getProfileForMarkerSchema() {
     // prettier-ignore
     const profile = getProfileWithMarkers([
       ['no payload',        0, null, null],
@@ -339,6 +341,10 @@ describe('Marker schema filtering', function() {
       ['RandomTracingMarker', 7, 8,  { type: 'tracing', category: 'RandomTracingMarker' }],
       ...getNetworkMarkers(),
     ]);
+    return profile;
+  }
+
+  function setup(profile) {
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
     const markerSchemaByName = getMarkerSchemaByName(getState());
@@ -351,12 +357,17 @@ describe('Marker schema filtering', function() {
       );
     }
 
-    return selector(getState())
-      .map(getMarker)
-      .map(marker => marker.name);
+    function getMarkerNames(selector): string[] {
+      return selector(getState())
+        .map(getMarker)
+        .map(marker => marker.name);
+    }
+
+    return { getMarkerNames };
   }
 
   it('filters for getMarkerTableMarkerIndexes', function() {
+    const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getMarkerTableMarkerIndexes)
     ).toEqual([
@@ -370,20 +381,374 @@ describe('Marker schema filtering', function() {
   });
 
   it('filters for getMarkerChartMarkerIndexes', function() {
+    const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getMarkerChartMarkerIndexes)
     ).toEqual([
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
+      // Notice: no network markers!
+      'UserTiming',
+      'RandomTracingMarker',
+    ]);
+  });
+
+  it('filters for MarkerChartMarkerIndexes also for profiles upgraded from version 32', async function() {
+    // This is a profile purposefully stuck at version 32.
+    const profile = {
+      meta: {
+        interval: 1,
+        startTime: 0,
+        abi: '',
+        misc: '',
+        oscpu: '',
+        platform: '',
+        processType: 0,
+        extensions: {
+          id: [],
+          name: [],
+          baseURL: [],
+          length: 0,
+        },
+        categories: [
+          {
+            name: 'Idle',
+            color: 'transparent',
+            subcategories: ['Other'],
+          },
+          {
+            name: 'Other',
+            color: 'grey',
+            subcategories: ['Other'],
+          },
+        ],
+        product: 'Firefox',
+        stackwalk: 0,
+        toolkit: '',
+        version: 21,
+        preprocessedProfileVersion: 32,
+        appBuildID: '',
+        sourceURL: '',
+        physicalCPUs: 0,
+        logicalCPUs: 0,
+        symbolicated: true,
+      },
+      pages: [],
+      threads: [
+        {
+          processType: 'default',
+          processStartupTime: 0,
+          processShutdownTime: null,
+          registerTime: 0,
+          unregisterTime: null,
+          pausedRanges: [],
+          name: 'Empty',
+          pid: 0,
+          tid: 0,
+          samples: {
+            weightType: 'samples',
+            weight: null,
+            eventDelay: [],
+            stack: [],
+            time: [],
+            length: 0,
+          },
+          markers: {
+            name: [0, 1, 2, 3, 4, 5, 5],
+            startTime: [0, 0, 0, 5, 7, 0, 0.5],
+            endTime: [null, null, null, 6, 8, 0.5, 1],
+            phase: [0, 0, 0, 1, 1, 1, 1],
+            category: [0, 0, 0, 0, 0, 0, 0],
+            data: [
+              null,
+              {
+                type: 'no schema marker',
+              },
+              {
+                type: 'Text',
+                name: 'RefreshDriverTick',
+              },
+              {
+                type: 'UserTiming',
+                name: 'name',
+                entryType: 'mark',
+              },
+              {
+                type: 'tracing',
+                category: 'RandomTracingMarker',
+              },
+              {
+                type: 'Network',
+                id: 0,
+                startTime: 0,
+                endTime: 0.5,
+                pri: 0,
+                status: 'STATUS_START',
+                URI: 'https://mozilla.org',
+              },
+              {
+                type: 'Network',
+                id: 0,
+                startTime: 0.5,
+                endTime: 1,
+                pri: 0,
+                status: 'STATUS_STOP',
+                URI: 'https://mozilla.org',
+                contentType: 'text/html',
+              },
+            ],
+            length: 7,
+          },
+          stackTable: {
+            frame: [],
+            prefix: [],
+            category: [],
+            subcategory: [],
+            length: 0,
+          },
+          frameTable: {
+            address: [],
+            category: [],
+            subcategory: [],
+            func: [],
+            innerWindowID: [],
+            implementation: [],
+            line: [],
+            column: [],
+            optimizations: [],
+            length: 0,
+          },
+          stringArray: [
+            'no payload',
+            'payload no schema',
+            'RefreshDriverTick',
+            'UserTiming',
+            'RandomTracingMarker',
+            'Load 0: https://mozilla.org',
+          ],
+          libs: [],
+          funcTable: {
+            address: [],
+            isJS: [],
+            relevantForJS: [],
+            name: [],
+            resource: [],
+            fileName: [],
+            lineNumber: [],
+            columnNumber: [],
+            length: 0,
+          },
+          resourceTable: {
+            lib: [],
+            name: [],
+            host: [],
+            type: [],
+            length: 0,
+          },
+        },
+      ],
+    };
+
+    const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
+    const { getMarkerNames } = setup(upgradedProfile);
+
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerTableMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      'Load 0: https://mozilla.org',
+      'UserTiming',
+      'RandomTracingMarker',
+    ]);
+
+    expect(
+      getMarkerNames(selectedThreadSelectors.getMarkerChartMarkerIndexes)
+    ).toEqual([
+      'no payload',
+      'payload no schema',
+      'RefreshDriverTick',
+      // Notice: no network markers!
       'UserTiming',
       'RandomTracingMarker',
     ]);
   });
 
   it('filters for getTimelineOverviewMarkerIndexes', function() {
+    const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)
     ).toEqual(['RefreshDriverTick']);
+  });
+});
+
+describe('profile upgrading and markers', () => {
+  it('upgrades cause timestamps from the processed version 33', async () => {
+    // This is a profile purposefully stuck at version 33.
+    const profile = {
+      meta: {
+        interval: 1,
+        startTime: 0,
+        abi: '',
+        misc: '',
+        oscpu: '',
+        platform: '',
+        processType: 0,
+        extensions: {
+          id: [],
+          name: [],
+          baseURL: [],
+          length: 0,
+        },
+        categories: [
+          {
+            name: 'Idle',
+            color: 'transparent',
+            subcategories: ['Other'],
+          },
+          {
+            name: 'Other',
+            color: 'grey',
+            subcategories: ['Other'],
+          },
+        ],
+        product: 'Firefox',
+        stackwalk: 0,
+        toolkit: '',
+        version: 21,
+        // This is the version right before the marker's cause timestamp update
+        preprocessedProfileVersion: 33,
+        appBuildID: '',
+        sourceURL: '',
+        physicalCPUs: 0,
+        logicalCPUs: 0,
+        symbolicated: true,
+      },
+      pages: [],
+      threads: [
+        {
+          processType: 'default',
+          // We want specifically a value > 0 for this test. The main thread in
+          // the parent process should have 0 usually, but for content processes
+          // this is a non-zero value.
+          processStartupTime: 1000,
+          processShutdownTime: null,
+          registerTime: 0,
+          unregisterTime: null,
+          pausedRanges: [],
+          name: 'Empty',
+          pid: 0,
+          tid: 0,
+          samples: {
+            weightType: 'samples',
+            weight: null,
+            eventDelay: [],
+            stack: [],
+            time: [],
+            length: 0,
+          },
+          markers: {
+            name: [0, 1, 2, 3],
+            startTime: [0, 1, 2, 5],
+            endTime: [null, null, null, 6],
+            phase: [0, 0, 0, 1],
+            category: [0, 0, 0, 0],
+            data: [
+              // One marker without data
+              null,
+              // One marker without cause
+              {
+                type: 'UserTiming',
+                name: 'name',
+                entryType: 'mark',
+              },
+              // One marker with a cause that was already processed in previous versions.
+              {
+                type: 'tracing',
+                category: 'RandomTracingMarker',
+                cause: {
+                  tid: 1111,
+                  time: 1001, // This was already processed
+                  stack: 0, // (root)
+                },
+              },
+              // One marker with a cause that wasn't already processed in
+              // previous versions.
+              {
+                type: 'FileIO',
+                source: 'PoisionOIInterposer',
+                filename: '/foo/bar/',
+                operation: 'create/open',
+                cause: {
+                  tid: 1111,
+                  time: 10, // This wasn't already processed
+                  stack: 0, // (root)
+                },
+              },
+            ],
+            length: 4,
+          },
+          stackTable: {
+            frame: [0], // (root)
+            prefix: [null],
+            category: [0],
+            subcategory: [0],
+            length: 1,
+          },
+          frameTable: {
+            address: [-1],
+            category: [0],
+            subcategory: [0],
+            func: [0], // (root)
+            innerWindowID: [null],
+            implementation: [null],
+            line: [null],
+            column: [null],
+            optimizations: [null],
+            length: 1,
+          },
+          stringArray: [
+            'no payload',
+            'UserTiming',
+            'RandomTracingMarker',
+            'FileIO',
+            '(root)',
+          ],
+          libs: [],
+          funcTable: {
+            address: [-1],
+            isJS: [true],
+            relevantForJS: [false],
+            name: [4], // (root)
+            resource: [-1],
+            fileName: [null],
+            lineNumber: [null],
+            columnNumber: [null],
+            length: 1,
+          },
+          resourceTable: {
+            lib: [],
+            name: [],
+            host: [],
+            type: [],
+            length: 0,
+          },
+        },
+      ],
+    };
+
+    const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
+    const { getState } = storeWithProfile(upgradedProfile);
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const derivedMarkers = selectedThreadSelectors
+      .getFullMarkerListIndexes(getState())
+      .map(getMarker);
+    // $FlowExpectError ignore Flow errors for simplicity.
+    expect(derivedMarkers[2].data.cause.time).toEqual(1001); // This hasn't changed, as expected.
+    // $FlowExpectError
+    expect(derivedMarkers[3].data.cause.time).toEqual(1010); // This changed, as expected.
   });
 });

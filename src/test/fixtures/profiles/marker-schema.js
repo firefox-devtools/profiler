@@ -176,10 +176,4 @@ export const markerSchemaForTests: MarkerSchema[] = [
     display: ['marker-chart', 'marker-table', 'timeline-overview'],
     data: [{ key: 'name', label: 'Tick Reasons', format: 'string' }],
   },
-  {
-    // The schema is mostly handled with custom logic.
-    name: 'Network',
-    display: ['marker-table'],
-    data: [],
-  },
 ];

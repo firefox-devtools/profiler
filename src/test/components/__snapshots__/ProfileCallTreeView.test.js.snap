@@ -88,7 +88,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -427,7 +427,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 aria-label="A, total size is 15 bytes (100%), self size is 0 bytes"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -440,12 +440,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -457,7 +457,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 aria-label="B, total size is 15 bytes (100%), self size is 0 bytes"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -470,12 +470,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -487,7 +487,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 aria-label="Fjs, total size is 12 bytes (80%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -500,12 +500,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Fjs
                 </span>
                 <span
@@ -517,7 +517,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 aria-label="Gjs, total size is 12 bytes (80%), self size is 5 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -530,12 +530,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Gjs
                 </span>
                 <span
@@ -560,12 +560,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Hjs
                 </span>
                 <span
@@ -591,12 +591,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   I
                 </span>
                 <span
@@ -610,7 +610,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                 aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -623,12 +623,12 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -750,7 +750,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -965,7 +965,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="A, total size is -15 bytes (-100%), self size is -3 bytes"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -978,12 +978,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -995,7 +995,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="B, total size is -12 bytes (-80%), self size is -5 bytes"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1008,12 +1008,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -1024,7 +1024,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="C, total size is -7 bytes (-47%), self size is -7 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1037,12 +1037,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -1164,7 +1164,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -1503,7 +1503,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="A, total size is 41 bytes (100%), self size is 0 bytes"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1516,12 +1516,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -1533,7 +1533,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="B, total size is 41 bytes (100%), self size is 0 bytes"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1546,12 +1546,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -1563,7 +1563,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="Fjs, total size is 30 bytes (73%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1576,12 +1576,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Fjs
                 </span>
                 <span
@@ -1593,7 +1593,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="Gjs, total size is 30 bytes (73%), self size is 13 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1606,12 +1606,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Gjs
                 </span>
                 <span
@@ -1636,12 +1636,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Hjs
                 </span>
                 <span
@@ -1667,12 +1667,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   I
                 </span>
                 <span
@@ -1686,7 +1686,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                 aria-label="C, total size is 11 bytes (27%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1699,12 +1699,12 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -1814,7 +1814,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -2153,7 +2153,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="A, total size is 15 bytes (100%), self size is 0 bytes"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2166,12 +2166,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -2183,7 +2183,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="B, total size is 15 bytes (100%), self size is 0 bytes"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2196,12 +2196,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -2213,7 +2213,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="Fjs, total size is 12 bytes (80%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2226,12 +2226,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Fjs
                 </span>
                 <span
@@ -2243,7 +2243,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="Gjs, total size is 12 bytes (80%), self size is 5 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2256,12 +2256,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Gjs
                 </span>
                 <span
@@ -2286,12 +2286,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Hjs
                 </span>
                 <span
@@ -2317,12 +2317,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   I
                 </span>
                 <span
@@ -2336,7 +2336,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2349,12 +2349,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -2464,7 +2464,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -2803,7 +2803,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="A, total size is -41 bytes (-100%), self size is 0 bytes"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2816,12 +2816,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -2833,7 +2833,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="B, total size is -41 bytes (-100%), self size is 0 bytes"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2846,12 +2846,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -2863,7 +2863,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="Fjs, total size is -30 bytes (-73%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2876,12 +2876,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Fjs
                 </span>
                 <span
@@ -2893,7 +2893,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="Gjs, total size is -30 bytes (-73%), self size is -13 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2906,12 +2906,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Gjs
                 </span>
                 <span
@@ -2936,12 +2936,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   Hjs
                 </span>
                 <span
@@ -2967,12 +2967,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
+                  class="colored-square category-color-yellow"
+                  title="JavaScript"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-yellow"
-                    title="JavaScript"
-                  />
                   I
                 </span>
                 <span
@@ -2986,7 +2986,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 aria-label="C, total size is -11 bytes (-27%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2999,12 +2999,12 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -3084,7 +3084,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3217,7 +3217,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3350,7 +3350,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3538,7 +3538,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -3877,7 +3877,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Z, running count is 2 samples (67%), self count is 2 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3890,12 +3890,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   Z
                 </span>
                 <span
@@ -3907,7 +3907,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Y, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3920,12 +3920,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   Y
                 </span>
                 <span
@@ -3950,12 +3950,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   X
                 </span>
                 <span
@@ -3969,7 +3969,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="B, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3982,12 +3982,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -3998,7 +3998,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="A, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4011,12 +4011,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -4028,7 +4028,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="C, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4041,12 +4041,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -4058,7 +4058,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4071,12 +4071,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   E
                 </span>
                 <span
@@ -4156,7 +4156,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -4495,7 +4495,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="A, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4508,12 +4508,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -4525,7 +4525,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="B, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4538,12 +4538,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -4555,7 +4555,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="C, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4568,12 +4568,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -4585,7 +4585,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="D, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4598,12 +4598,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   D
                 </span>
                 <span
@@ -4614,7 +4614,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4627,12 +4627,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   E
                 </span>
                 <span
@@ -4644,7 +4644,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4657,12 +4657,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   F
                 </span>
                 <span
@@ -4687,12 +4687,12 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   H
                 </span>
                 <span
@@ -4774,7 +4774,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -5113,7 +5113,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5126,12 +5126,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -5143,7 +5143,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 3 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5156,12 +5156,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -5173,7 +5173,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 2 samples (67%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5186,12 +5186,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   C
                 </span>
                 <span
@@ -5203,7 +5203,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5216,12 +5216,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   D
                 </span>
                 <span
@@ -5232,7 +5232,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running count is 1 sample (33%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5245,12 +5245,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   E
                 </span>
                 <span
@@ -5262,7 +5262,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (33%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5275,12 +5275,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   F
                 </span>
                 <span
@@ -5305,12 +5305,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   H
                 </span>
                 <span
@@ -5392,7 +5392,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -5700,7 +5700,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5713,12 +5713,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -5732,7 +5732,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5745,12 +5745,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -5764,7 +5764,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5777,12 +5777,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -5802,7 +5802,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5815,12 +5815,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   D
                 </span>
                 <span
@@ -5833,7 +5833,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5846,12 +5846,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   E
                 </span>
                 <span
@@ -5865,7 +5865,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5878,12 +5878,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   F
                 </span>
                 <span
@@ -5965,7 +5965,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -6273,7 +6273,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6286,12 +6286,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -6305,7 +6305,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6318,12 +6318,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -6337,7 +6337,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6350,12 +6350,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -6375,7 +6375,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6388,12 +6388,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   D
                 </span>
                 <span
@@ -6406,7 +6406,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6419,12 +6419,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   E
                 </span>
                 <span
@@ -6438,7 +6438,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6451,12 +6451,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   F
                 </span>
                 <span
@@ -6538,7 +6538,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -6784,7 +6784,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6797,12 +6797,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -6816,7 +6816,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6829,12 +6829,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -6848,7 +6848,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6861,12 +6861,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -6886,7 +6886,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6899,12 +6899,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -6992,7 +6992,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -7238,7 +7238,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7251,12 +7251,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -7270,7 +7270,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7283,12 +7283,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -7302,7 +7302,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7315,12 +7315,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -7340,7 +7340,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (100%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7353,12 +7353,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -7446,7 +7446,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-           Invert call stack
+          Invert call stack
         </label>
       </li>
     </ul>
@@ -7754,7 +7754,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7767,12 +7767,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   A
                 </span>
                 <span
@@ -7786,7 +7786,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7799,12 +7799,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   B
                 </span>
                 <span
@@ -7818,7 +7818,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running count is 2 samples (100%), self count is 0 samples"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even dim"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7831,12 +7831,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -7856,7 +7856,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7869,12 +7869,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton expanded canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   D
                 </span>
                 <span
@@ -7887,7 +7887,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running count is 1 sample (50%), self count is 1 sample"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even isSelected dim"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7900,12 +7900,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   
                   <span
                     class="treeViewHighlighting"
@@ -7925,7 +7925,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running count is 1 sample (50%), self count is 0 samples"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -7938,12 +7938,12 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   class="treeRowToggleButton collapsed canBeExpanded"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
                 >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
                   F
                 </span>
                 <span

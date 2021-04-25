@@ -294,7 +294,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     } else {
       ctx.beginPath();
       ctx.arc(
-        x + w / 2, // x
+        x + uncutWidth / 2, // x
         y + h / 2, // y
         h * MARKER_DOT_RADIUS, // radius
         0, // arc start

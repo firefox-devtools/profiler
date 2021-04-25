@@ -6,6 +6,7 @@
 import clamp from 'clamp';
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import './ActivityGraph.css';
 
@@ -37,6 +38,8 @@ type RenderedComponentSettings = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +xPixelsPerMs: number,
+  +enableCPUUsage: boolean,
+  +maxThreadCPUDelta: number,
   +treeOrderSampleComparator: ?(
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -196,6 +199,7 @@ export class ActivityGraphFillComputer {
       fullThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
+      enableCPUUsage,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -207,6 +211,7 @@ export class ActivityGraphFillComputer {
     let sampleTime = samples.time[0];
 
     // Go through the samples and accumulate the category into the percentageBuffers.
+    const { threadCPUDelta } = samples;
     for (let i = 0; i < samples.length - 1; i++) {
       const nextSampleTime = samples.time[i + 1];
       const stackIndex = samples.stack[i];
@@ -215,13 +220,24 @@ export class ActivityGraphFillComputer {
           ? greyCategoryIndex
           : stackTable.category[stackIndex];
 
+      let cpuBeforeSample = null;
+      if (enableCPUUsage && threadCPUDelta) {
+        // It must be non-null because we are checking this in the processing
+        // step and eliminating all the null values.
+        const cpuDelta = ensureExists(threadCPUDelta[i]);
+        const intervalDistribution =
+          i === 0 ? 1 : (samples.time[i] - samples.time[i - 1]) / interval;
+        cpuBeforeSample = cpuDelta / intervalDistribution;
+      }
+
       // Mutate the percentage buffers.
       this._accumulateInCategory(
         category,
         i,
         prevSampleTime,
         sampleTime,
-        nextSampleTime
+        nextSampleTime,
+        cpuBeforeSample
       );
 
       prevSampleTime = sampleTime;
@@ -229,18 +245,30 @@ export class ActivityGraphFillComputer {
     }
 
     // Handle the last sample, which was not covered by the for loop above.
-    const lastSampleStack = samples.stack[samples.length - 1];
+    const lastIdx = samples.length - 1;
+    const lastSampleStack = samples.stack[lastIdx];
     const lastSampleCategory =
       lastSampleStack !== null
         ? stackTable.category[lastSampleStack]
         : greyCategoryIndex;
+
+    let cpuBeforeSample = null;
+    if (enableCPUUsage && threadCPUDelta && threadCPUDelta[lastIdx] !== null) {
+      const cpuDelta = threadCPUDelta[lastIdx];
+      const intervalDistribution =
+        lastIdx === 0
+          ? 1
+          : (samples.time[lastIdx] - samples.time[lastIdx - 1]) / interval;
+      cpuBeforeSample = cpuDelta / intervalDistribution;
+    }
 
     this._accumulateInCategory(
       lastSampleCategory,
       samples.length - 1,
       prevSampleTime,
       sampleTime,
-      sampleTime + interval
+      sampleTime + interval,
+      cpuBeforeSample
     );
   }
 
@@ -253,7 +281,8 @@ export class ActivityGraphFillComputer {
     sampleIndex: IndexIntoSamplesTable,
     prevSampleTime: Milliseconds,
     sampleTime: Milliseconds,
-    nextSampleTime: Milliseconds
+    nextSampleTime: Milliseconds,
+    cpuBeforeSample: number | null
   ) {
     const {
       rangeEnd,
@@ -261,6 +290,7 @@ export class ActivityGraphFillComputer {
       categoryDrawStyles,
       xPixelsPerMs,
       canvasPixelWidth,
+      maxThreadCPUDelta,
     } = this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
@@ -308,11 +338,18 @@ export class ActivityGraphFillComputer {
       percentageBuffers,
       sampleIndex
     );
+
+    // A number between 0 and 1 for sample percentage. It changes depending on
+    // the CPU usage if it's given. If not, it uses 1 directly.
+    const samplePercentage =
+      cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
     for (let i = intPixelStart; i <= intPixelEnd; i++) {
-      percentageBuffer[i] += 1;
+      percentageBuffer[i] += samplePercentage;
     }
-    percentageBuffer[intPixelStart] -= pixelStart - intPixelStart;
-    percentageBuffer[intPixelEnd] -= 1 - (pixelEnd - intPixelEnd);
+    percentageBuffer[intPixelStart] -=
+      samplePercentage * (pixelStart - intPixelStart);
+    percentageBuffer[intPixelEnd] -=
+      samplePercentage * (1 - (pixelEnd - intPixelEnd));
   }
 
   /**

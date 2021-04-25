@@ -356,9 +356,9 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
       state
     ),
-    maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-      state
-    ),
+    // Use the filtered call node max depth, rather than the preview filtered one, so
+    // that the viewport height is stable across preview selections.
+    maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
     flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
     callTree: selectedThreadSelectors.getCallTree(state),
     timeRange: getCommittedRange(state),
@@ -379,7 +379,9 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     pages: getPageList(state),
-    samples: selectedThreadSelectors.getSamplesForCallTree(state),
+    samples: selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(
+      state
+    ),
     unfilteredSamples: selectedThreadSelectors.getUnfilteredSamplesForCallTree(
       state
     ),

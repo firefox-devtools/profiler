@@ -12,8 +12,8 @@ import { getIsActiveTabResourcesPanelOpen } from 'firefox-profiler/selectors/url
 import { getActiveTabResourcesThreadsKey } from 'firefox-profiler/selectors/profile';
 import { toggleResourcesPanel } from 'firefox-profiler/actions/app';
 import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from 'firefox-profiler/app-logic/constants';
-import ActiveTabTimelineResourceTrack from './ActiveTabResourceTrack';
-import TrackThread from './TrackThread';
+import { TimelineActiveTabResourceTrack } from './ActiveTabResourceTrack';
+import { TimelineTrackThread } from './TrackThread';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import type {
@@ -68,7 +68,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
           })}
         >
           Resources ({resourceTracks.length})
-          <TrackThread
+          <TimelineTrackThread
             threadsKey={resourcesThreadsKey}
             trackType="condensed"
             trackName="Merged resource tracks"
@@ -77,7 +77,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
         {isActiveTabResourcesPanelOpen ? (
           <ol className="timelineResourceTracks">
             {resourceTracks.map((resourceTrack, trackIndex) => (
-              <ActiveTabTimelineResourceTrack
+              <TimelineActiveTabResourceTrack
                 key={trackIndex}
                 resourceTrack={resourceTrack}
                 trackIndex={trackIndex}
@@ -91,7 +91,11 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TimelineActiveTabResourcesPanel = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),
     resourcesThreadsKey: getActiveTabResourcesThreadsKey(state),

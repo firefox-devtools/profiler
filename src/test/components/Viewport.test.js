@@ -5,8 +5,9 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {
   getCommittedRange,
@@ -18,7 +19,7 @@ import { changeSidebarOpenState } from '../../actions/app';
 import explicitConnect from '../../utils/connect';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
@@ -49,6 +50,8 @@ const MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 3;
 const SMALL_MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 0.2;
 
 describe('Viewport', function() {
+  autoMockCanvasContext();
+
   it('matches the component snapshot', () => {
     const { container, unmount } = setup();
     expect(container.firstChild).toMatchSnapshot();
@@ -623,11 +626,6 @@ function getBoundingBoxForViewport(override: $Shape<BoundingBoxOverride> = {}) {
 
 function setup(profileOverrides: MixedObject = {}) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')

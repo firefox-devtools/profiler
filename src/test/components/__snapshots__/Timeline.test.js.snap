@@ -10,7 +10,6 @@ exports[`Timeline renders the header 1`] = `
       class="timelineSettingsToggle"
     >
       Graph type:
-       
       <label
         class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
@@ -41,16 +40,15 @@ exports[`Timeline renders the header 1`] = `
     <span
       class="timelineSettingsHiddenTracksNumber"
     >
-      4
+      ⁨4⁩
     </span>
      / 
     <span
       class="timelineSettingsHiddenTracksNumber"
     >
-      4
-       
+      ⁨4⁩
     </span>
-    tracks visible
+     tracks visible
   </button>
 </div>
 `;
@@ -72,12 +70,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -92,12 +90,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -116,11 +114,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -132,11 +130,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -214,12 +212,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -234,12 +232,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -258,11 +256,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -274,11 +272,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -3314,12 +3312,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -3334,12 +3332,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -3358,11 +3356,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -3374,11 +3372,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -3456,12 +3454,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -3476,12 +3474,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -3500,11 +3498,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -3516,11 +3514,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -5416,12 +5414,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.25,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -5436,12 +5434,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
     0.75,
-    "transparent",
+    "#d7d7db60",
   ],
   Array [
     "addColorStop",
@@ -5460,11 +5458,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.25,
@@ -5476,11 +5474,11 @@ Array [
           ],
           Array [
             0.5,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
-            "transparent",
+            "#d7d7db60",
           ],
           Array [
             0.75,
@@ -5558,12 +5556,12 @@ Array [
   Array [
     "addColorStop",
     0,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.25,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -5578,12 +5576,12 @@ Array [
   Array [
     "addColorStop",
     0.5,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
     0.75,
-    "#d7d7db60",
+    "transparent",
   ],
   Array [
     "addColorStop",
@@ -5602,11 +5600,11 @@ Array [
         "calls": Array [
           Array [
             0,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.25,
@@ -5618,11 +5616,11 @@ Array [
           ],
           Array [
             0.5,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
-            "#d7d7db60",
+            "transparent",
           ],
           Array [
             0.75,
@@ -7502,6 +7500,171 @@ Array [
   Array [
     "set fillStyle",
     Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    17.22222222222222,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    39.44444444444444,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    61.66666666666666,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    83.88888888888889,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    106.11111111111111,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    128.33333333333331,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    150.55555555555554,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    172.77777777777777,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    83.88888888888889,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    106.11111111111111,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    128.33333333333331,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    83.88888888888889,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    106.11111111111111,
+    0,
+    10,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    128.33333333333331,
+    0,
+    10,
+    300,
   ],
   Array [
     "clearRect",

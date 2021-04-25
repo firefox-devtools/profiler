@@ -4,12 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeNetworkSearchString,
   commitRange,
@@ -24,7 +25,10 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
@@ -56,10 +60,6 @@ const NETWORK_MARKERS = (function() {
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
-  const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
@@ -122,7 +122,6 @@ function setupWithProfile(profile) {
     ...renderResult,
     ...store,
     flushRafCalls,
-    flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
     getBarElements,
     getBarElementStyles,
@@ -139,8 +138,10 @@ function setupWithPayload(markers: TestDefinedMarkers) {
 }
 
 describe('NetworkChart', function() {
+  autoMockCanvasContext();
+
   it('renders NetworkChart correctly', () => {
-    const { flushDrawLog, container } = setupWithPayload([...NETWORK_MARKERS]);
+    const { container } = setupWithPayload([...NETWORK_MARKERS]);
 
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();

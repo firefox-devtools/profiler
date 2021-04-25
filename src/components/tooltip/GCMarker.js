@@ -54,7 +54,7 @@ export function getGCMinorDetails(
           <TooltipDetail label="Reason" key="GCMinor-Reason">
             {nursery.reason}
           </TooltipDetail>,
-          <TooltipDetail label="Bytes evicted" key="GCMinor-Bytes evicted">
+          <TooltipDetail label="Bytes tenured" key="GCMinor-Bytes tenured">
             {formatValueTotal(
               nursery.bytes_tenured,
               nursery.bytes_used,
@@ -64,7 +64,7 @@ export function getGCMinorDetails(
         );
         if (nursery.cells_tenured && nursery.cells_allocated_nursery) {
           details.push(
-            <TooltipDetail label="Cells evicted" key="GCMinor-Cells evicted">
+            <TooltipDetail label="Cells tenured" key="GCMinor-Cells tenured">
               {formatValueTotal(
                 nursery.cells_tenured,
                 nursery.cells_allocated_nursery,
@@ -148,7 +148,7 @@ export function getGCMinorDetails(
           if (nursery.strings_tenured && nursery.strings_deduplicated) {
             details.push(
               <TooltipDetail
-                label="Proportion of nursery-allocated strings that were deduplicated"
+                label="Strings deduplicated when tenuring"
                 key="GCMinor-strings_deduped"
               >
                 {formatValueTotal(
@@ -382,30 +382,37 @@ function _makePhaseTimesArray(
 }
 
 /*
- * Return true if the phase 'phaseName' is a leaf phase among the whole
- * array of phases.
+ * Construct a tree of phase timings, in order to display the most expensive
+ * leaf phases.
  *
- * A leaf phase is a phase with no sub-phases.
+ * A leaf phase is a phase with no sub-phases. The phase tree is constructed
+ * from the phaseTimes array, which contains hierarchical path names of each
+ * phase together with its total elapsed time. We construct synthetic leaf
+ * phases for the self-time of each interior node, containing the elapsed time
+ * that is not part of a sub-phase.
  *
  * If the following are phases:
  * marking.mark_roots
  * marking.mark_heap
- * marking.mark_heap.a
+ * marking.mark_heap.objects
  * sweeping.sweep
  *
- * Then marking.mark_roots, marking.mark_heap.a, sweeping.sweep are the only
- * leaves.  We select these since they will give the person looking at the
- * profile the best clue about which (sub-)phases are taking the longest.
- * For example, it isn't useful to say "sweeping took 200ms" but it is
- * useful to say "sweeping.compacting took 20ms" (if compacting has no
- * sub-phases.
+ * Then marking.mark_roots, marking.mark_heap.objects, sweeping.sweep are the
+ * only original leaves. We will add in "marking.mark_roots (self-time)" and
+ * "marking.mark_heap (self-time)". We select from these leaves since they will
+ * give the person looking at the profile the best clue about which
+ * (sub-)phases are taking the longest.
  *
- * We find leaf phases by constructing a tree of phase times and then
- * reading its leaves.
+ * For example, it isn't useful to say "marking.mark_heap took 200ms" but it is
+ * useful to say "marking.mark_heap.objects took 180ms" (if objects has no
+ * sub-phases). However, if marking.mark_heap took 200ms total yet all of its
+ * sub-phases add up to only 20ms, then we would want to say "marking.mark_heap
+ * (self-time) is 180ms".
  */
 
 type PhaseTreeNode = {|
-  value?: PhaseTimeTuple,
+  value: PhaseTimeTuple,
+  leaf: boolean,
   branches: Map<string, PhaseTreeNode>,
 |};
 
@@ -413,38 +420,38 @@ function _treeInsert(
   tree: Map<string, PhaseTreeNode>,
   path: Array<string>,
   phase: PhaseTimeTuple
-) {
+): void {
   const component = path.shift();
   if (component === undefined) {
     // This path is not a leaf, it can be ignored.
     return;
   }
 
+  const uninitializedPhaseTime = { name: '(temp)', time: 0 };
+
   let node = tree.get(component);
   if (!node) {
     // Make a new node and grow the tree in this direction.
-    node = { branches: new Map() };
-
+    const value = { ...uninitializedPhaseTime };
+    node = { branches: new Map(), leaf: false, value };
     tree.set(component, node);
   }
 
   if (path.length > 0) {
     // There are more path components.  This node should be a branch if it
     // isn't one already.
-    if (node.value) {
-      // We delete the value to change this node from a leaf to a branch.
-      delete node.value;
-    }
+    node.leaf = false;
     _treeInsert(node.branches, path, phase);
   } else {
     // Make the new node leaf node.
-    if (node.value) {
+    if (node.value.name !== uninitializedPhaseTime.name) {
       console.error(
-        'Duplicate phases in _treeInsert in MarkerTooltipContents.js'
+        `Duplicate phase ${phase.name} in _treeInsert in MarkerTooltipContents.js`
       );
       return;
     }
     node.value = phase;
+    node.leaf = true;
   }
 }
 
@@ -452,51 +459,78 @@ function _treeGetLeaves(
   tree: Map<string, PhaseTreeNode>
 ): Array<PhaseTimeTuple> {
   const leaves = [];
-  for (const node of tree.values()) {
-    if (node.value) {
-      leaves.push(node.value);
+  for (const { branches, leaf, value } of tree.values()) {
+    if (leaf) {
+      leaves.push(value);
     } else {
-      leaves.push(..._treeGetLeaves(node.branches));
+      leaves.push(..._treeGetLeaves(branches));
     }
   }
   return leaves;
+}
+
+function _forEachTreeNode(
+  tree: Map<string, PhaseTreeNode>,
+  visit: (node: PhaseTreeNode) => void
+): void {
+  for (const node of tree.values()) {
+    visit(node);
+    _forEachTreeNode(node.branches, visit);
+  }
 }
 
 function _filterInterestingPhaseTimes(
   rawPhases: PhaseTimes<Microseconds>,
   numSelect: number
 ): Array<PhaseTimeTuple> {
-  let phaseTimes = _makePhaseTimesArray(rawPhases);
+  const phaseTimes = _makePhaseTimesArray(rawPhases);
+  const selfTimeSuffix = ' (self-time)';
 
   /*
-   * Select only the leaf phases.
+   * Build the tree.
    */
   const tree = new Map();
   for (const phase of phaseTimes) {
     const components = phase.name.split('.');
     _treeInsert(tree, components, phase);
   }
-  phaseTimes = _treeGetLeaves(tree);
 
   /*
-   * Of those N leaf phases, select the M most interesting phases by
-   * determining the threshold we want to stop including phases at.
-   *
-   * Calculate the threshold by sorting the list of times in asscending
-   * order, then slicing off all the low items and looking at the first
-   * item.
+   * For every non-leaf phase, add in a (self-time) leaf with the time not
+   * accounted for by its children.
    */
-  const sortedPhaseTimes = phaseTimes
-    .map(pt => pt.time)
-    // Descending order
-    .sort((a, b) => b - a);
-  const threshold = sortedPhaseTimes[numSelect];
+  _forEachTreeNode(
+    tree,
+    ({ leaf, branches, value: { time: totalTime, name } }) => {
+      if (!leaf) {
+        let remaining = totalTime;
+        for (const { value } of branches.values()) {
+          remaining -= value.time;
+        }
+        const value = { name: name + selfTimeSuffix, time: remaining };
+        branches.set(name, { branches: new Map(), leaf: true, value });
+      }
+    }
+  );
+
+  /* Select the 'numSelect' most costly leaf phases. */
+  const sortedPhaseTimes = _treeGetLeaves(tree)
+    .sort((a, b) => b.time - a.time)
+    .slice(0, numSelect)
+    .filter(pt => pt.time > 0);
 
   /*
-   * And then filtering the original list, which is in execution order which
-   * we'd like to preserve, using the threshold.
+   * Sort by the ordering of the original list, which is in an execution order
+   * that we'd like to preserve.
    */
-  return phaseTimes.filter(pt => pt.time > threshold);
+  const order = {};
+  let i = 0;
+  for (const { name } of phaseTimes) {
+    order[name] = i++;
+    order[name + selfTimeSuffix] = i++;
+  }
+
+  return sortedPhaseTimes.sort((a, b) => order[a.name] - order[b.name]);
 }
 
 function _sumMaybeEntries(

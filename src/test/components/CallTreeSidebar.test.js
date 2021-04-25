@@ -6,8 +6,8 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { CallTreeSidebar } from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
@@ -49,7 +49,10 @@ describe('CallTreeSidebar', function() {
       funcNamesDictPerThread: [{ C, D }],
     } = result;
     const layout = ensureExists(
-      profile.meta.categories.find(category => category.name === 'Layout'),
+      ensureExists(
+        profile.meta.categories,
+        'Expected to find categories.'
+      ).find(category => category.name === 'Layout'),
       'Could not find Layout category.'
     );
     const [{ frameTable, stackTable }] = profile.threads;
@@ -163,7 +166,7 @@ describe('CallTreeSidebar', function() {
     dispatch(changeSelectedThreads(new Set([2])));
     dispatch(changeSelectedCallNode(2, [A]));
 
-    expect(queryByText(/Implementation/)).toBe(null);
+    expect(queryByText(/Implementation/)).not.toBeInTheDocument();
 
     dispatch(changeSelectedCallNode(2, [A, B, D]));
     expect(getAllByText(/Implementation/).length).toBeGreaterThan(0);
@@ -178,7 +181,7 @@ describe('CallTreeSidebar', function() {
       funcNamesDict: { A, B, C },
     } = setup(getProfileWithSubCategories());
     selectNode([A, B, C]);
-    expect(queryByText('FakeSubCategoryC')).toBe(null);
+    expect(queryByText('FakeSubCategoryC')).not.toBeInTheDocument();
 
     const layoutCategory = getByText('Layout');
     fireFullClick(layoutCategory);

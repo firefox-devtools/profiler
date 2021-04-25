@@ -31,6 +31,23 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
           </canvas>
         </div>
         <div
+          class="threadSampleGraph"
+        >
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="300"
+            width="200"
+          >
+            <h2>
+              Stack Graph for 
+              Active Tab
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
+        <div
           class="timelineTrackThreadMarkers"
         >
           <div
@@ -107,6 +124,23 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
           </canvas>
         </div>
         <div
+          class="threadSampleGraph"
+        >
+          <canvas
+            class="threadSampleGraphCanvas threadSampleGraphCanvas"
+            height="300"
+            width="200"
+          >
+            <h2>
+              Stack Graph for 
+              Page #3
+            </h2>
+            <p>
+              This graph charts the stack height of each sample.
+            </p>
+          </canvas>
+        </div>
+        <div
           class="timelineTrackThreadMarkers"
         >
           <div
@@ -163,6 +197,23 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
         </canvas>
       </div>
       <div
+        class="threadSampleGraph"
+      >
+        <canvas
+          class="threadSampleGraphCanvas threadSampleGraphCanvas"
+          height="300"
+          width="200"
+        >
+          <h2>
+            Stack Graph for 
+            Merged resource tracks
+          </h2>
+          <p>
+            This graph charts the stack height of each sample.
+          </p>
+        </canvas>
+      </div>
+      <div
         class="timelineTrackThreadMarkers"
       >
         <div
@@ -214,6 +265,23 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           </h2>
           <p>
             This graph shows a visual chart of thread activity.
+          </p>
+        </canvas>
+      </div>
+      <div
+        class="threadSampleGraph"
+      >
+        <canvas
+          class="threadSampleGraphCanvas threadSampleGraphCanvas"
+          height="300"
+          width="200"
+        >
+          <h2>
+            Stack Graph for 
+            Merged resource tracks
+          </h2>
+          <p>
+            This graph charts the stack height of each sample.
           </p>
         </canvas>
       </div>
@@ -276,6 +344,23 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                 </h2>
                 <p>
                   This graph shows a visual chart of thread activity.
+                </p>
+              </canvas>
+            </div>
+            <div
+              class="threadSampleGraph"
+            >
+              <canvas
+                class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                height="300"
+                width="200"
+              >
+                <h2>
+                  Stack Graph for 
+                  Page #2
+                </h2>
+                <p>
+                  This graph charts the stack height of each sample.
                 </p>
               </canvas>
             </div>
@@ -368,6 +453,23 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       </h2>
                       <p>
                         This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                  <div
+                    class="threadSampleGraph"
+                  >
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="300"
+                      width="200"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        Active Tab
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
                       </p>
                     </canvas>
                   </div>

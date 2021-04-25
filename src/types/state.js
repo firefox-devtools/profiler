@@ -18,7 +18,7 @@ import type {
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange, CssPixels, Milliseconds } from './units';
-import type { Profile, ThreadIndex, Pid, BrowsingContextID } from './profile';
+import type { Profile, ThreadIndex, Pid, TabID } from './profile';
 
 import type {
   CallNodePath,
@@ -172,6 +172,7 @@ export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
  */
 export type ExperimentalFlags = {|
   +eventDelayTracks: boolean,
+  +cpuGraphs: boolean,
 |};
 
 export type AppState = {|
@@ -266,7 +267,7 @@ export type ProfileSpecificUrlState = {|
  */
 export type TimelineTrackOrganization =
   | {| +type: 'full' |}
-  | {| +type: 'active-tab', +browsingContextID: BrowsingContextID | null |}
+  | {| +type: 'active-tab', +tabID: TabID | null |}
   | {| +type: 'origins' |};
 
 export type UrlState = {|
@@ -287,9 +288,16 @@ export type UrlState = {|
 /**
  * Localization State
  */
+export type L10nFetchingPhase =
+  | 'not-fetching'
+  | 'fetching-ftl'
+  | 'done-fetching';
+
 export type L10nState = {|
-  +isL10nFetching: boolean,
+  +l10nFetchingPhase: L10nFetchingPhase,
   +localization: Localization,
+  +primaryLocale: string | null,
+  +direction: 'ltr' | 'rtl',
 |};
 
 export type IconState = Set<string>;

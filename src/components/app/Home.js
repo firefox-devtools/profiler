@@ -31,6 +31,7 @@ import type {
   WrapFunctionInDispatch,
 } from 'firefox-profiler/utils/connect';
 
+import { Localized } from '@fluent/react';
 import './Home.css';
 
 const ADDON_URL =
@@ -121,19 +122,23 @@ class ActionButtons extends React.PureComponent<
               ref={this._takeInputRef}
               onChange={this._uploadProfileFromFile}
             />
-            Load a profile from file
+            <Localized id="Home--upload-from-file-input-button">
+              Load a profile from file
+            </Localized>
           </label>
-          <button
-            type="button"
-            className={classNames({
-              homeSectionButton: true,
-            })}
-            onClick={this._loadFromUrlPressed}
-            // when the button is clicked it expands to the URL input
-            aria-expanded={this.state.isLoadFromUrlPressed}
-          >
-            Load a profile from a URL
-          </button>
+          <Localized id="Home--upload-from-url-button">
+            <button
+              type="button"
+              className={classNames({
+                homeSectionButton: true,
+              })}
+              onClick={this._loadFromUrlPressed}
+              // when the button is clicked it expands to the URL input
+              aria-expanded={this.state.isLoadFromUrlPressed}
+            >
+              Load a profile from a URL
+            </button>
+          </Localized>
         </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
@@ -176,11 +181,16 @@ class LoadFromUrl extends React.PureComponent<
           onChange={this.handleChange}
           autoFocus
         />
-        <input
-          type="submit"
-          className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
-          value="Load"
-        />
+        <Localized
+          id="Home--load-from-url-submit-button"
+          attrs={{ value: true }}
+        >
+          <input
+            type="submit"
+            className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
+            value="Load"
+          />
+        </Localized>
       </form>
     );
   }
@@ -190,7 +200,7 @@ function DocsButton() {
   return (
     <a href="/docs/" className="homeSectionButton">
       <span className="homeSectionDocsIcon" />
-      Documentation
+      <Localized id="Home--documentation-button">Documentation</Localized>
     </a>
   );
 }
@@ -354,13 +364,17 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               onClick={this._enableMenuButton}
             >
               <span className="homeSectionPlus">+</span>
-              Enable Profiler Menu Button
+              <Localized id="Home--menu-button">
+                Enable Profiler Menu Button
+              </Localized>
             </button>
             <DocsButton />
             <p>
-              Enable the profiler menu button to start recording a performance
-              profile in Firefox, then analyze it and share it with
-              profiler.firefox.com.
+              <Localized id="Home--menu-button-instructions">
+                Enable the profiler menu button to start recording a performance
+                profile in Firefox, then analyze it and share it with
+                profiler.firefox.com.
+              </Localized>
             </p>
           </div>
           {/* end of grid container */}
@@ -391,13 +405,15 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               xpiUrl={ADDON_URL}
             >
               <span className="homeSectionPlus">+</span>
-              Install add-on
+              <Localized id="Home--addon-button">Install add-on</Localized>
             </InstallButton>
             <DocsButton />
             <p>
-              Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with
-              profiler.firefox.com.
+              <Localized id="Home--addon-button-instructions">
+                Install the Gecko Profiler Add-on to start recording a
+                performance profile in Firefox, then analyze it and share it
+                with profiler.firefox.com.
+              </Localized>
             </p>
           </div>
           {/* end of grid container */}
@@ -423,13 +439,20 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {/* Right column: instructions */}
           <div>
             <DocsButton />
-            <p>
-              To start profiling, click on the profiling button, or use the
-              keyboard shortcuts. The icon is blue when a profile is recording.
-              Hit
-              <kbd>Capture Profile</kbd> to load the data into
-              profiler.firefox.com.
-            </p>
+            <Localized
+              id="Home--record-instructions"
+              elems={{
+                kbd: <kbd />,
+              }}
+            >
+              <p>
+                To start profiling, click on the profiling button, or use the
+                keyboard shortcuts. The icon is blue when a profile is
+                recording. Hit
+                <kbd>Capture Profile</kbd> to load the data into
+                profiler.firefox.com.
+              </p>
+            </Localized>
             {this._renderShortcuts()}
           </div>
           {/* end of grid container */}
@@ -455,12 +478,22 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {/* Right column: instructions */}
           <div>
             <DocsButton />
-            <h2>How to view and record profiles</h2>
-            <p>
-              Recording performance profiles requires{' '}
-              <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-              However, existing profiles can be viewed in any modern browser.
-            </p>
+            <Localized id="Home--instructions-title">
+              <h2>How to view and record profiles</h2>
+            </Localized>
+            <Localized
+              id="Home--instructions-content"
+              elems={{
+                a: <a href="https://www.mozilla.org/en-US/firefox/new/" />,
+              }}
+            >
+              <p>
+                Recording performance profiles requires{' '}
+                <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
+                . However, existing profiles can be viewed in any modern
+                browser.
+              </p>
+            </Localized>
           </div>
           {/* end of grid container */}
         </div>
@@ -472,10 +505,16 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     return (
       <div>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start profiling
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>{' '}
+          <Localized id="Home--record-instructions-start-stop">
+            Stop and start profiling
+          </Localized>
         </p>
         <p>
-          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load profile
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>{' '}
+          <Localized id="Home--record-instructions-capture-load">
+            Capture and load profile
+          </Localized>
         </p>
       </div>
     );
@@ -491,10 +530,12 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           {specialMessage ? (
             <div className="homeSpecialMessage">{specialMessage}</div>
           ) : null}
-          <p>
-            Capture a performance profile. Analyze it. Share it. Make the web
-            faster.
-          </p>
+          <Localized id="Home--profiler-motto">
+            <p>
+              Capture a performance profile. Analyze it. Share it. Make the web
+              faster.
+            </p>
+          </Localized>
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
@@ -502,30 +543,50 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
             {/* Grid container: homeAdditionalContent */}
             <h2 className="homeAdditionalContentTitle protocol-display-xs">
               {/* Title: full width */}
-              Load existing profiles
+              <Localized id="Home--additional-content-title">
+                Load existing profiles
+              </Localized>
             </h2>
             <section className="homeActions">
               {/* Actions: left column */}
-              <p>
-                You can <strong>drag and drop</strong> a profile file here to
-                load it, or:
-              </p>
+              <Localized
+                id="Home--additional-content-content"
+                elems={{ strong: <strong /> }}
+              >
+                <p>
+                  You can <strong>drag and drop</strong> a profile file here to
+                  load it, or:
+                </p>
+              </Localized>
               <ActionButtons
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 retrieveProfileFromFile={this.props.retrieveProfileFromFile}
                 triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
               />
-              <p>
-                You can also compare recordings.{' '}
-                <InnerNavigationLink dataSource="compare">
-                  Open the comparing interface.
-                </InnerNavigationLink>
-              </p>
+
+              <Localized
+                id="Home--compare-recordings-info"
+                elems={{
+                  a: (
+                    // $FlowExpectError Flow doesn't know about this fluent rule for react component.
+                    <InnerNavigationLink dataSource="compare"></InnerNavigationLink>
+                  ),
+                }}
+              >
+                <p>
+                  You can also compare recordings.{' '}
+                  <InnerNavigationLink dataSource="compare">
+                    Open the comparing interface.
+                  </InnerNavigationLink>
+                </p>
+              </Localized>
             </section>
             <section>
               {/* Recent recordings: right column */}
               <h2 className="homeRecentUploadedRecordingsTitle protocol-display-xxs">
-                Recent uploaded recordings
+                <Localized id="Home--recent-uploaded-recordings-title">
+                  Recent uploaded recordings
+                </Localized>
               </h2>
               <ListOfPublishedProfiles limit={3} withActionButtons={false} />
             </section>

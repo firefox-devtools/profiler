@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CPUGraph matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    0,
+    NaN,
+    10,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    10,
+    6,
+    10,
+    4,
+  ],
+  Array [
+    "fillRect",
+    20,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "fillRect",
+    30,
+    5,
+    10,
+    5,
+  ],
+  Array [
+    "fillRect",
+    40,
+    9,
+    10,
+    1,
+  ],
+  Array [
+    "fillRect",
+    50,
+    8,
+    10,
+    2,
+  ],
+  Array [
+    "fillRect",
+    60,
+    2,
+    10,
+    8,
+  ],
+  Array [
+    "fillRect",
+    70,
+    7,
+    10,
+    3,
+  ],
+  Array [
+    "set fillStyle",
+    "#c5e1fe",
+  ],
+]
+`;
+
+exports[`CPUGraph matches the component snapshot 1`] = `
+<canvas
+  class="threadCPUGraphCanvas threadHeightGraphCanvas"
+  height="10"
+  width="80"
+>
+  <h2>
+    Stack Graph for 
+    Test Track
+  </h2>
+  <p>
+    This graph charts the stack height of each sample.
+  </p>
+</canvas>
+`;

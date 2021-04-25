@@ -6,17 +6,17 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from '@testing-library/react';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   changeSelectedThreads,
   hideGlobalTrack,
 } from '../../actions/profile-view';
-import GlobalTrack from '../../components/timeline/GlobalTrack';
+import { TimelineGlobalTrack } from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
@@ -27,6 +27,8 @@ import {
 } from '../fixtures/utils';
 
 describe('timeline/GlobalTrack', function() {
+  autoMockCanvasContext();
+
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',   // Track index 0
@@ -65,9 +67,6 @@ describe('timeline/GlobalTrack', function() {
 
     // Some child components render to canvas.
     jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-    jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(400, 400));
 
@@ -78,7 +77,7 @@ describe('timeline/GlobalTrack', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <GlobalTrack
+        <TimelineGlobalTrack
           trackIndex={trackIndex}
           trackReference={trackReference}
           setInitialSelected={setInitialSelected}

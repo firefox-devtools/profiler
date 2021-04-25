@@ -4,16 +4,26 @@
 
 // @flow
 
+import { TextDecoder } from 'util';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
+
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import createStore from '../../app-logic/create-store';
 import {
   DragAndDrop,
   DragAndDropOverlay,
 } from '../../components/app/DragAndDrop';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { serializeProfile } from '../../profile-logic/process-profile';
+import { getView } from 'firefox-profiler/selectors';
 
 describe('app/DragAndDrop', () => {
+  afterEach(function() {
+    delete window.TextDecoder;
+  });
+
   it('matches the snapshot with default overlay', () => {
     const { container } = render(
       <Provider store={createStore()}>
@@ -39,12 +49,6 @@ describe('app/DragAndDrop', () => {
   });
 
   it('responds to dragging', () => {
-    // It would be better if we could check that when dropping
-    // something on the area we'd get a call to
-    // `retrieveProfileFromFile`, but jsdom is not supporting
-    // `dataTransfer`. We should improve this test when that support
-    // is added:
-    // https://github.com/firefox-devtools/profiler/issues/2366
     const { container } = render(
       <Provider store={createStore()}>
         <DragAndDrop>Target area here</DragAndDrop>
@@ -58,5 +62,27 @@ describe('app/DragAndDrop', () => {
 
     fireEvent.dragExit(dragAndDrop);
     expect(overlay.classList).not.toContain('dragging');
+  });
+
+  it('receives profile on file drop', async () => {
+    window.TextDecoder = TextDecoder;
+    const store = createStore();
+    const { container } = render(
+      <Provider store={store}>
+        <DragAndDrop>Target area here</DragAndDrop>
+      </Provider>
+    );
+    const [dragAndDrop] = container.children;
+
+    const { profile } = getProfileFromTextSamples('A');
+    const file = new File([serializeProfile(profile)], 'profile.json', {
+      type: 'application/json',
+    });
+    const files = [file];
+
+    fireEvent.drop(dragAndDrop, { dataTransfer: { files } });
+    await waitFor(() =>
+      expect(getView(store.getState()).phase).toBe('DATA_LOADED')
+    );
   });
 });

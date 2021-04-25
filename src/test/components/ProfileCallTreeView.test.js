@@ -5,17 +5,18 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
+import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
 
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
@@ -45,11 +46,8 @@ import {
 
 import type { Profile } from 'firefox-profiler/types';
 
+autoMockCanvasContext();
 beforeEach(() => {
-  // Mock out the 2d canvas for the loupe view.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
   // This makes the bounding box large enough so that we don't trigger
   // VirtualList's virtualization. We assert this above.
   jest
@@ -525,8 +523,8 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
@@ -582,8 +580,8 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
@@ -650,8 +648,8 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
-    expect(queryByText('Total Size (bytes)')).toBe(null);
-    expect(queryByText('Self (bytes)')).toBe(null);
+    expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
+    expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
