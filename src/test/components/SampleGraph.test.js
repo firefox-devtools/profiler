@@ -11,7 +11,10 @@ import { render } from '@testing-library/react';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, fireFullClick } from '../fixtures/utils';
@@ -42,6 +45,8 @@ function getSamplesPixelPosition(
 }
 
 describe('SampleGraph', function() {
+  autoMockCanvasContext();
+
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]
@@ -56,11 +61,6 @@ describe('SampleGraph', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -112,7 +112,6 @@ describe('SampleGraph', function() {
       sampleGraphCanvas,
       clickSampleGraph,
       getCallNodePath,
-      ctx,
     };
   }
 
@@ -122,8 +121,8 @@ describe('SampleGraph', function() {
   });
 
   it('matches the 2d canvas draw snapshot', () => {
-    const { ctx } = setup();
-    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+    setup();
+    expect(flushDrawLog()).toMatchSnapshot();
   });
 
   /**

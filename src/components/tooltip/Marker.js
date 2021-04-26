@@ -108,6 +108,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const page = pages.find(page => page.innerWindowID === innerWindowID);
 
     if (page) {
+      // If multiple pages have the same url, show the innerWindowID to disambiguate.
+      let innerWindowIDSuffix = null;
+      if (pages.filter(p => p.url === page.url).length > 1) {
+        innerWindowIDSuffix = ' (id: ' + innerWindowID + ')';
+      }
       try {
         const { host } = new URL(page.url);
         const hostIndex = page.url.indexOf(host);
@@ -124,12 +129,17 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               <span className="tooltipDetailsDim">{protocol}</span>
               {host}
               <span className="tooltipDetailsDim">{rest}</span>
+              {innerWindowIDSuffix}
             </div>
           </TooltipDetail>
         );
       } catch (error) {
         // Could not parse the URL. Just display the entire thing
-        return <TooltipDetail label="URL">{page.url}</TooltipDetail>;
+        let url = page.url;
+        if (innerWindowIDSuffix) {
+          url += innerWindowIDSuffix;
+        }
+        return <TooltipDetail label="URL">{url}</TooltipDetail>;
       }
     }
     return null;

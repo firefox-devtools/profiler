@@ -18,7 +18,7 @@ import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getBoundingBox, fireFullClick } from '../fixtures/utils';
 import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
@@ -28,6 +28,7 @@ import { changeSelectedThreads } from '../../actions/profile-view';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
 describe('ActiveTabTimeline', function() {
+  autoMockCanvasContext();
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -41,11 +42,6 @@ describe('ActiveTabTimeline', function() {
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(200, 300));
-
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
   });
 
   it('should be rendered properly from the Timeline component', () => {
@@ -159,7 +155,7 @@ describe('ActiveTabTimeline', function() {
     it('does not display the resources panel if there are no resource tracks', () => {
       const { getState, queryByText } = setup();
       expect(getActiveTabResourceTracks(getState()).length).toBe(0);
-      expect(queryByText(/Resources/)).toBe(null);
+      expect(queryByText(/Resources/)).not.toBeInTheDocument();
     });
   });
 

@@ -4,6 +4,33 @@
 
 // @flow
 
+// Initializing this RegExp outside of removeURLs because that function is in a
+// hot path during sanitization and it's good to avoid the initialization of the
+// RegExp which is costly.
+const REMOVE_URLS_REGEXP = (function() {
+  const protocols = [
+    'http',
+    'https',
+    'ftp',
+    'file',
+    'moz-extension',
+    'moz-page-thumb',
+  ];
+
+  return new RegExp(
+    `\\b((?:${protocols.join('|')})://)/?[^\\s/$.?#][^\\s)]*`,
+    //    ^                              ^          ^
+    //    |                              |          Matches any characters except
+    //    |                              |          whitespaces and ')' character.
+    //    |                              |          Other characters are allowed now
+    //    |                              Matches any character except whitespace
+    //    |                              and '/', '$', '.', '?' or '#' characters
+    //    |                              because this is start of the URL
+    //    Matches URL schemes we need to sanitize.
+    'gi'
+  );
+})();
+
 /**
  * Takes a string and returns the string with public URLs removed.
  * It doesn't remove the URLs like `chrome://..` because they are internal URLs
@@ -11,23 +38,9 @@
  */
 export function removeURLs(
   string: string,
-  removeExtensions: boolean = true,
   redactedText: string = '<URL>'
 ): string {
-  const rmExtensions = removeExtensions ? '|moz-extension' : '';
-  const regExp = new RegExp(
-    '\\b((?:https?|ftp|file' + rmExtensions + ')://)/?[^\\s/$.?#][^\\s)]*',
-    //    ^                                           ^          ^
-    //    |                                           |          Matches any characters except
-    //    |                                           |          whitespaces and ')' character.
-    //    |                                           |          Other characters are allowed now
-    //    |                                           Matches any character except whitespace
-    //    |                                           and '/', '$', '.', '?' or '#' characters
-    //    |                                           because this is start of the URL
-    //    Matches 'http', 'https', 'ftp', 'file' and optionally 'moz-extension' protocols.
-    'gi'
-  );
-  return string.replace(regExp, '$1' + redactedText);
+  return string.replace(REMOVE_URLS_REGEXP, '$1' + redactedText);
 }
 
 /**

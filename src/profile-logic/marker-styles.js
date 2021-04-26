@@ -66,7 +66,14 @@ const markerStyles: { +[styleName: string]: MarkerStyle } = {
     height: 18,
     squareCorners: true,
   },
+  // Scripts is renamed to 'requestAnimationFrame callbacks' but keeping this
+  // here for backwards compatibility.
   Scripts: {
+    ...defaultStyle,
+    background: colors.ORANGE_70,
+    top: 6,
+  },
+  'requestAnimationFrame callbacks': {
     ...defaultStyle,
     background: colors.ORANGE_70,
     top: 6,

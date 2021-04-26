@@ -8,7 +8,7 @@ import * as React from 'react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
-import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -17,6 +17,8 @@ import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
 import type { SerializableProfile } from 'firefox-profiler/types';
+
+import { TextEncoder, TextDecoder } from 'util';
 
 // ListOfPublishedProfiles depends on IDB and renders asynchronously, so we'll
 // just test we want to render it, but otherwise test it more fully in a
@@ -37,6 +39,7 @@ describe('Root with history', function() {
   |};
 
   autoMockFullNavigation();
+  autoMockCanvasContext();
 
   function setup(config: TestConfig) {
     const { profileHash } = config;
@@ -60,11 +63,6 @@ describe('Root with history', function() {
           'profile hash. This is needed to complete #1789.'
       );
     }
-
-    const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
 
     const store = blankStore();
     const renderResult = render(<Root store={store} />);
@@ -92,7 +90,12 @@ describe('Root with history', function() {
     };
   }
 
+  beforeEach(function() {
+    window.TextDecoder = TextDecoder;
+  });
+
   afterEach(() => {
+    delete window.TextDecoder;
     delete window.fetch;
   });
 
@@ -162,6 +165,10 @@ function mockFetchProfileAtUrl(
         headers: coerceMatchingShape<Headers>({
           get: () => 'application/json',
         }),
+        arrayBuffer: () =>
+          Promise.resolve(
+            new TextEncoder().encode(JSON.stringify(profile)).buffer
+          ),
         json: () => Promise.resolve(profile),
       });
       responses.push(response);
