@@ -33,6 +33,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-purple"
+          title="Layout"
+        />
         nsRefreshDriver::AddStyleFlushObserver
         <em
           class="backtraceStackFrameOrigin"
@@ -41,6 +45,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::GeckoRestyleManager::PostRestyleEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -49,6 +57,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::GeckoRestyleManager::ContentStateChanged
         <em
           class="backtraceStackFrameOrigin"
@@ -57,6 +69,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::PresShell::ContentStateChanged
         <em
           class="backtraceStackFrameOrigin"
@@ -65,6 +81,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsDocument::ContentStateChanged
         <em
           class="backtraceStackFrameOrigin"
@@ -73,6 +93,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::dom::Element::RemoveStates
         <em
           class="backtraceStackFrameOrigin"
@@ -81,6 +105,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::EventStateManager::UpdateAncestorState
         <em
           class="backtraceStackFrameOrigin"
@@ -89,6 +117,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::EventStateManager::SetContentState
         <em
           class="backtraceStackFrameOrigin"
@@ -97,6 +129,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::EventStateManager::NotifyMouseOut
         <em
           class="backtraceStackFrameOrigin"
@@ -105,6 +141,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::EventStateManager::GenerateMouseEnterExit
         <em
           class="backtraceStackFrameOrigin"
@@ -113,6 +153,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::EventStateManager::PreHandleEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -121,6 +165,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::PresShell::HandleEventInternal
         <em
           class="backtraceStackFrameOrigin"
@@ -129,6 +177,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::PresShell::HandlePositionedEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -137,6 +189,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         mozilla::PresShell::HandleEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -145,6 +201,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsViewManager::DispatchEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -153,6 +213,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsView::HandleEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -161,6 +225,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsChildView::DispatchEvent
         <em
           class="backtraceStackFrameOrigin"
@@ -169,6 +237,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         ChildViewMouseTracker::MouseMoved
         <em
           class="backtraceStackFrameOrigin"
@@ -177,6 +249,10 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsAppShell::Run
         <em
           class="backtraceStackFrameOrigin"
@@ -185,11 +261,18 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         nsAppStartup::Run
         <em
           class="backtraceStackFrameOrigin"
         />
       </li>
+      <span
+        class="colored-border ellipsis"
+      />
       …
     </ul>
   </div>
@@ -241,6 +324,10 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Ejs
         <em
           class="backtraceStackFrameOrigin"
@@ -249,6 +336,10 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         F
         <em
           class="backtraceStackFrameOrigin"
@@ -257,6 +348,10 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Cjs
         <em
           class="backtraceStackFrameOrigin"
@@ -265,6 +360,10 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         B
         <em
           class="backtraceStackFrameOrigin"
@@ -273,6 +372,10 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         A
         <em
           class="backtraceStackFrameOrigin"
@@ -328,6 +431,10 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Ejs
         <em
           class="backtraceStackFrameOrigin"
@@ -336,6 +443,10 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         F
         <em
           class="backtraceStackFrameOrigin"
@@ -344,6 +455,10 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Cjs
         <em
           class="backtraceStackFrameOrigin"
@@ -352,6 +467,10 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         B
         <em
           class="backtraceStackFrameOrigin"
@@ -360,6 +479,10 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         A
         <em
           class="backtraceStackFrameOrigin"
@@ -415,6 +538,10 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Ejs
         <em
           class="backtraceStackFrameOrigin"
@@ -423,6 +550,10 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         F
         <em
           class="backtraceStackFrameOrigin"
@@ -431,6 +562,10 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-yellow"
+          title="JavaScript"
+        />
         Cjs
         <em
           class="backtraceStackFrameOrigin"
@@ -439,6 +574,10 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         B
         <em
           class="backtraceStackFrameOrigin"
@@ -447,6 +586,10 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
       <li
         class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
       >
+        <span
+          class="colored-border category-color-grey"
+          title="Other"
+        />
         A
         <em
           class="backtraceStackFrameOrigin"
