@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { getEmptyRawMarkerTable } from './data-structures';
+import {
+  getEmptyRawMarkerTable,
+  getDefaultCategories,
+} from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs } from '../utils/string';
 import { ensureExists } from '../utils/flow';
@@ -116,14 +119,24 @@ export function getSearchFilteredMarkerIndexes(
   if (!searchRegExp) {
     return markerIndexes;
   }
+  const categoryList = getDefaultCategories();
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
-    const { data, name } = getMarker(markerIndex);
+    const { data, name, category } = getMarker(markerIndex);
 
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
     // sticky.
+
     searchRegExp.lastIndex = 0;
+
+    if (categoryList[category - 1] !== undefined) {
+      const markerCategory = categoryList[category - 1].name;
+      if (searchRegExp.test(markerCategory)) {
+        newMarkers.push(markerIndex);
+        continue;
+      }
+    }
 
     if (searchRegExp.test(name)) {
       newMarkers.push(markerIndex);
