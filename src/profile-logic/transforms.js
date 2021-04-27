@@ -31,6 +31,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
   CallNodePath,
+  CallNodeAndCategoryPath,
   CallNodeTable,
   StackType,
   ImplementationFilter,
@@ -1335,6 +1336,17 @@ export function filterCallNodePathByImplementation(
   const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
   return callNodePath.filter(funcIndex =>
     funcMatchesImplementation(thread, funcIndex)
+  );
+}
+
+export function filterCallNodeAndCategoryPathByImplementation(
+  thread: Thread,
+  implementationFilter: ImplementationFilter,
+  path: CallNodeAndCategoryPath
+): CallNodeAndCategoryPath {
+  const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
+  return path.filter(funcIndex =>
+    funcMatchesImplementation(thread, funcIndex.func)
   );
 }
 

@@ -163,6 +163,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
           stackIndex={stackIndex}
           thread={fullThread}
           implementationFilter="combined"
+          categories={categories}
         />
       </>
     );
