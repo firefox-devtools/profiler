@@ -39,6 +39,7 @@ describe('SampleTooltipContents', function() {
       <Provider store={store}>
         <SampleTooltipContents
           sampleIndex={hoveredSampleIndex}
+          cpuRatioInTimeRange={null}
           fullThread={fullThread}
           categories={categories}
           sampleUnits={sampleUnits}
