@@ -6,6 +6,7 @@ dist/
 public_html/
 flow-coverage
 coverage
+.eslintcache
 webpack.local-config.js
 *.orig
 *.rej
