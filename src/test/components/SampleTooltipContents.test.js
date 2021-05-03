@@ -195,4 +195,28 @@ describe('SampleTooltipContents', function() {
     expect(cpuUsage).toHaveTextContent('89% (average over 1.0ms)');
     expect(getTooltip()).toMatchSnapshot();
   });
+
+  it('renders the CPU usage properly for the first part of the sample', () => {
+    const profile = getProfileWithCPU([null, 460, 1000, 500], 'µs');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the first part of the sample.
+    setup(profile, hoveredSampleIndex, 'before');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('46% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage properly for the second part of the sample', () => {
+    const profile = getProfileWithCPU([null, 400, 580, 1000], 'µs');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the second part of the sample.
+    setup(profile, hoveredSampleIndex, 'after');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('58% (average over 1.0ms)');
+  });
 });
