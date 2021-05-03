@@ -6,13 +6,14 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { filterCallNodePathByImplementation } from 'firefox-profiler/profile-logic/transforms';
+import { filterCallNodeAndCategoryPathByImplementation } from 'firefox-profiler/profile-logic/transforms';
 import {
   getFuncNamesAndOriginsForPath,
-  convertStackToCallNodePath,
+  convertStackToCallNodeAndCategoryPath,
 } from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
+  CategoryList,
   Thread,
   IndexIntoStackTable,
   ImplementationFilter,
@@ -27,14 +28,21 @@ type Props = {|
   +maxStacks: number,
   +stackIndex: IndexIntoStackTable,
   +implementationFilter: ImplementationFilter,
+  +categories: CategoryList,
 |};
 
 export function Backtrace(props: Props) {
-  const { stackIndex, thread, implementationFilter, maxStacks } = props;
-  const callNodePath = filterCallNodePathByImplementation(
+  const {
+    stackIndex,
     thread,
     implementationFilter,
-    convertStackToCallNodePath(thread, stackIndex)
+    maxStacks,
+    categories,
+  } = props;
+  const callNodePath = filterCallNodeAndCategoryPathByImplementation(
+    thread,
+    implementationFilter,
+    convertStackToCallNodeAndCategoryPath(thread, stackIndex)
   );
   const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
     callNodePath,
@@ -47,18 +55,30 @@ export function Backtrace(props: Props) {
         {funcNamesAndOrigins
           // Truncate the stacks
           .slice(0, maxStacks)
-          .map(({ funcName, origin, isFrameLabel }, i) => (
+          .map(({ funcName, origin, isFrameLabel, category }, i) => (
             <li
               key={i}
               className={classNames('backtraceStackFrame', {
                 backtraceStackFrame_isFrameLabel: isFrameLabel,
               })}
             >
+              <span
+                className={`colored-border category-color-${categories[category].color}`}
+                title={categories[category].name}
+              />
               {funcName}
               <em className="backtraceStackFrameOrigin">{origin}</em>
             </li>
           ))}
-        {funcNamesAndOrigins.length > maxStacks ? '…' : null}
+        {funcNamesAndOrigins.length > maxStacks
+          ? [
+              <span
+                key={funcNamesAndOrigins.length}
+                className="colored-border ellipsis"
+              />,
+              '…',
+            ]
+          : null}
       </ul>
     );
   }

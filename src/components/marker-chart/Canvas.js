@@ -12,6 +12,7 @@ import {
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
+import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
@@ -550,36 +551,90 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       timelineTrackOrganization,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
-    if (x < marginLeft - MARKER_DOT_RADIUS) {
+
+    // Note: we may want to increase this value to hit markers that are farther.
+    const dotRadius: CssPixels = MARKER_DOT_RADIUS * rowHeight;
+    if (x < marginLeft - dotRadius) {
       return null;
     }
+
     let markerIndex = null;
     let rowIndexOfLabel = null;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
+
+    // Reminder: this is a value between 0 and 1, and represents a percentage of
+    // the full time range.
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
-    const unitIntervalTime: UnitIntervalOfProfileRange =
+
+    // This is the x position in terms of unit interval (so, between 0 and 1).
+    const xInUnitInterval: UnitIntervalOfProfileRange =
       viewportLeft + viewportLength * ((x - marginLeft) / markerContainerWidth);
-    const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
+
+    const dotRadiusInTime =
+      (dotRadius / markerContainerWidth) * viewportLength * rangeLength;
+
+    const xInTime: Milliseconds = rangeStart + xInUnitInterval * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
-    const minDuration =
-      rangeLength *
-      viewportLength *
-      ((rowHeight * 2 * MARKER_DOT_RADIUS) / markerContainerWidth);
+
     const markerTiming = markerTimingAndBuckets[rowIndex];
 
-    if (!markerTiming || typeof markerTiming === 'string') {
+    if (
+      !markerTiming ||
+      typeof markerTiming === 'string' ||
+      !markerTiming.length
+    ) {
       return null;
     }
 
-    for (let i = 0; i < markerTiming.length; i++) {
-      const start = markerTiming.start[i];
-      // Ensure that really small markers are hoverable with a minDuration.
-      const end = Math.max(start + minDuration, markerTiming.end[i]);
-      if (start < time && end > time) {
-        markerIndex = markerTiming.index[i];
+    // This is a small utility function to define if some marker timing is in
+    // our hit test range.
+    const isMarkerTimingInDotRadius = index =>
+      markerTiming.start[index] < xInTime + dotRadiusInTime &&
+      markerTiming.end[index] > xInTime - dotRadiusInTime;
+
+    // A markerTiming line is ordered.
+    // 1. Let's find a marker reasonably close to our mouse cursor.
+    // The result of this bisection gives the first marker that starts _after_
+    // our mouse cursor. Our result will be either this marker, or the previous
+    // one.
+    const nextStartIndex = bisectionRight(markerTiming.start, xInTime);
+
+    if (nextStartIndex > 0 && nextStartIndex < markerTiming.length) {
+      // 2. This is the common case: 2 markers are candidates. Then we measure
+      // the distance between them and the mouse cursor and chose the smallest
+      // distance.
+      const prevStartIndex = nextStartIndex - 1;
+
+      // Note that these values can be negative if the cursor is _inside_ a
+      // marker. There should be one at most in this case, and we'll want it. So
+      // NO Math.abs here.
+      const distanceToNext = markerTiming.start[nextStartIndex] - xInTime;
+      const distanceToPrev = xInTime - markerTiming.end[prevStartIndex];
+
+      const closest =
+        distanceToPrev < distanceToNext ? prevStartIndex : nextStartIndex;
+
+      // 3. When we found the closest, we still have to check if it's in close
+      // enough!
+      if (isMarkerTimingInDotRadius(closest)) {
+        markerIndex = markerTiming.index[closest];
+      }
+    } else if (nextStartIndex === 0) {
+      // 4. Special case 1: the mouse cursor is at the left of all markers in
+      // this line. Then, we have only 1 candidate, we can check if it's inside
+      // our hit test range right away.
+      if (isMarkerTimingInDotRadius(nextStartIndex)) {
+        markerIndex = markerTiming.index[nextStartIndex];
+      }
+    } else {
+      // 5. Special case 2: the mouse cursor is at the right of all markers in
+      // this line. Then we only have 1 candidate as well, let's check if it's
+      // inside our hit test range.
+      if (isMarkerTimingInDotRadius(nextStartIndex - 1)) {
+        markerIndex = markerTiming.index[nextStartIndex - 1];
       }
     }
 
@@ -611,11 +666,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    // Yes, we are returning a new array all the time when we do the hit testing.
+    // Yes, we are returning a new object all the time when we do the hit testing.
     // I can hear you say "How does equality check work for old and new hovered
     // items then?". Well, on the shared canvas component we have a function
     // called `hoveredItemsAreEqual` that shallowly checks for equality of
-    // objects and arrays. So it's safe to return a new array all the time.
+    // objects and arrays. So it's safe to return a new object all the time.
     return { markerIndex, rowIndexOfLabel };
   };
 

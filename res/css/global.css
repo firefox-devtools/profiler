@@ -14,3 +14,12 @@
   border: 0.5px solid rgba(0, 0, 0, 0.1);
   margin-right: 3px;
 }
+
+.colored-border {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  margin-right: 3px;
+}
+
+.colored-border.ellipsis {
+  opacity: 0;
+}

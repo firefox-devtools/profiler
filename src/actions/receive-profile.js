@@ -37,6 +37,7 @@ import {
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
+  withHistoryReplaceStateSync,
   stateFromLocation,
   ensureIsValidDataSource,
 } from 'firefox-profiler/app-logic/url-handling';
@@ -72,11 +73,8 @@ import type {
   OriginsTimelineRoot,
 } from 'firefox-profiler/types';
 
-import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
-import {
-  assertExhaustiveCheck,
-  ensureExists,
-} from 'firefox-profiler/utils/flow';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -254,10 +252,10 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndexes: Set<ThreadIndex> | null
+  maybeSelectedThreadIndexes: Set<ThreadIndex> | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndexes !== null;
+    const hasUrlInfo = maybeSelectedThreadIndexes !== null;
 
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
@@ -306,8 +304,8 @@ export function finalizeFullProfileView(
       hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
 
-    selectedThreadIndexes = initializeSelectedThreadIndex(
-      selectedThreadIndexes,
+    const selectedThreadIndexes = initializeSelectedThreadIndex(
+      maybeSelectedThreadIndexes,
       visibleThreadIndexes,
       profile
     );
@@ -350,16 +348,18 @@ export function finalizeFullProfileView(
       }
     }
 
-    dispatch({
-      type: 'VIEW_FULL_PROFILE',
-      selectedThreadIndexes,
-      globalTracks,
-      globalTrackOrder,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid,
-      localTrackOrderByPid,
-      timelineType,
+    withHistoryReplaceStateSync(() => {
+      dispatch({
+        type: 'VIEW_FULL_PROFILE',
+        selectedThreadIndexes,
+        globalTracks,
+        globalTrackOrder,
+        hiddenGlobalTracks,
+        localTracksByPid,
+        hiddenLocalTracksByPid,
+        localTrackOrderByPid,
+        timelineType,
+      });
     });
   };
 }
