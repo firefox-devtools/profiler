@@ -6,14 +6,14 @@
 
 import React from 'react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { TabBar } from '../../components/app/TabBar';
 import { fireFullClick } from '../fixtures/utils';
 
 describe('app/TabBar', () => {
   it('renders the TabBar and handles clicks properly', () => {
     const handleTabSelection = jest.fn();
-    const { getByText, container } = render(
+    const { container } = render(
       <TabBar
         selectedTabSlug="flame-graph"
         visibleTabs={[
@@ -29,7 +29,7 @@ describe('app/TabBar', () => {
     );
     expect(container.firstChild).toMatchSnapshot();
 
-    fireFullClick(getByText('Call Tree'));
+    fireFullClick(screen.getByText('Call Tree'));
     expect(handleTabSelection).toHaveBeenCalledWith('calltree');
   });
 });

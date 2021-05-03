@@ -8,14 +8,17 @@ import * as React from 'react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TimelineMarkersOverview,
   MIN_MARKER_WIDTH,
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import {
   autoMockCanvasContext,
@@ -78,7 +81,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   }
 
   function clickOnMenuItem(stringOrRegexp) {
-    fireFullClick(renderResult.getByText(stringOrRegexp));
+    fireFullClick(screen.getByText(stringOrRegexp));
   }
 
   function fireMouseEvent(eventName, options) {

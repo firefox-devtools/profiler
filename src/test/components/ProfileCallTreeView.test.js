@@ -9,7 +9,7 @@ import { fireEvent } from '@testing-library/react';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
@@ -20,7 +20,7 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
-  createSelectChanger,
+  changeSelect,
   fireFullClick,
   fireFullContextMenu,
 } from '../fixtures/utils';
@@ -76,11 +76,11 @@ describe('calltree/ProfileCallTreeView', function() {
         </>
       </Provider>
     );
-    const { container, getByText } = renderResult;
+    const { container } = renderResult;
 
     const getRowElement = functionName =>
       ensureExists(
-        getByText(functionName).closest('.treeViewRow'),
+        screen.getByText(functionName).closest('.treeViewRow'),
         `Couldn't find the row for node ${functionName}.`
       );
     const getContextMenu = () =>
@@ -493,13 +493,11 @@ describe('ProfileCallTreeView with JS Allocations', function() {
         <ProfileCallTreeView />
       </Provider>
     );
-    const changeSelect = createSelectChanger(renderResult);
-
-    return { profile, changeSelect, ...renderResult, ...store };
+    return { profile, ...renderResult, ...store };
   }
 
   it('can switch to JS allocations and back to timing', function() {
-    const { changeSelect, getState } = setup();
+    const { getState } = setup();
 
     // It starts out with timing.
     expect(
@@ -520,7 +518,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   });
 
   it('shows byte related labels for JS allocations', function() {
-    const { getByText, queryByText, changeSelect } = setup();
+    const { getByText, queryByText } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
@@ -534,7 +532,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   });
 
   it('matches the snapshot for JS allocations', function() {
-    const { changeSelect, container } = setup();
+    const { container } = setup();
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -549,13 +547,12 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
         <ProfileCallTreeView />
       </Provider>
     );
-    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, changeSelect, ...store };
+    return { profile, ...renderResult, ...store };
   }
 
   it('can switch to native allocations and back to timing', function() {
-    const { getState, changeSelect } = setup();
+    const { getState } = setup();
 
     // It starts out with timing.
     expect(
@@ -577,7 +574,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
   });
 
   it('shows byte related labels for native allocations', function() {
-    const { getByText, queryByText, changeSelect } = setup();
+    const { getByText, queryByText } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
@@ -596,13 +593,13 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
   });
 
   it('matches the snapshot for native allocations', function() {
-    const { container, changeSelect } = setup();
+    const { container } = setup();
     changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for native deallocations', function() {
-    const { container, changeSelect } = setup();
+    const { container } = setup();
     changeSelect({ from: 'Timing Data', to: 'Deallocation Sites' });
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -617,13 +614,12 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
         <ProfileCallTreeView />
       </Provider>
     );
-    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, changeSelect, ...store };
+    return { profile, ...renderResult, ...store };
   }
 
   it('can switch to retained memory and back to timing', function() {
-    const { getState, changeSelect } = setup();
+    const { getState } = setup();
 
     // It starts out with timing.
     expect(
@@ -645,7 +641,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
   });
 
   it('shows byte related labels for retained allocations', function() {
-    const { getByText, queryByText, changeSelect } = setup();
+    const { getByText, queryByText } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
@@ -659,13 +655,13 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
   });
 
   it('matches the snapshot for retained allocations', function() {
-    const { container, changeSelect } = setup();
+    const { container } = setup();
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for deallocated memory', function() {
-    const { container, changeSelect } = setup();
+    const { container } = setup();
     changeSelect({ from: 'Timing Data', to: 'Deallocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });

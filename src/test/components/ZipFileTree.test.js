@@ -7,7 +7,7 @@ import * as React from 'react';
 import { ZipFileViewer } from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
@@ -54,7 +54,7 @@ describe('calltree/ZipFileTree', function() {
   // getByText is an assertion, but eslint doesn't know that.
   // eslint-disable-next-line jest/expect-expect
   it('contains a list of all the files', async () => {
-    const { getByText } = await setup();
+    await setup();
 
     // We're looping through all expected files and check if we can find an
     // element with the file name as text content.
@@ -66,15 +66,15 @@ describe('calltree/ZipFileTree', function() {
       'profile2.json',
       'baz',
       'profile3.json',
-    ].forEach(fileName => getByText(fileName));
+    ].forEach(fileName => screen.getByText(fileName));
   });
 
   describe('clicking on a profile link', function() {
     const setupClickingTest = async () => {
       const setupResult = await setup();
-      const { getByText, store, container } = setupResult;
+      const { store, container } = setupResult;
 
-      const profile1OpenLink = getByText('profile1.json');
+      const profile1OpenLink = screen.getByText('profile1.json');
 
       const waitUntilDoneProcessingZip = () =>
         waitUntilState(
@@ -104,7 +104,6 @@ describe('calltree/ZipFileTree', function() {
 
     it('kicks off the profile loading process when clicked', async () => {
       const {
-        getByText,
         getState,
         profile1OpenLink,
         waitUntilDoneProcessingZip,
@@ -117,7 +116,9 @@ describe('calltree/ZipFileTree', function() {
 
       // The profile isn't actually viewed yet.
       expect(profileViewer()).toBeFalsy();
-      expect(getByText(/Loading the profile/).textContent).toMatchSnapshot();
+      expect(
+        screen.getByText(/Loading the profile/).textContent
+      ).toMatchSnapshot();
 
       // There is async behavior going on. Wait until it is done or else
       // redux-react will throw an error.
