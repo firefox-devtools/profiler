@@ -251,7 +251,7 @@ export type TransformDefinitions = {
    *      ↓
    *      C
    */
-  'collapse-direction-recursion': {|
+  'collapse-direct-recursion': {|
     +type: 'collapse-direct-recursion',
     +funcIndex: IndexIntoFuncTable,
     +implementation: ImplementationFilter,

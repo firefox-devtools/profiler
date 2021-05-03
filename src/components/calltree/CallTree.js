@@ -233,14 +233,21 @@ class CallTreeImpl extends PureComponent<Props> {
     );
   };
 
-  _onKeyDown = (
-    event: SyntheticKeyboardEvent<>,
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    if (callNodeIndex !== null) {
-      const { handleCallNodeTransformShortcut, threadsKey } = this.props;
-      handleCallNodeTransformShortcut(event, threadsKey, callNodeIndex);
+  _onKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    const {
+      selectedCallNodeIndex,
+      rightClickedCallNodeIndex,
+      handleCallNodeTransformShortcut,
+      threadsKey,
+    } = this.props;
+    const nodeIndex =
+      rightClickedCallNodeIndex !== null
+        ? rightClickedCallNodeIndex
+        : selectedCallNodeIndex;
+    if (nodeIndex === null) {
+      return;
     }
+    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
   procureInterestingInitialSelection() {

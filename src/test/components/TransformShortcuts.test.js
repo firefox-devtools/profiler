@@ -9,174 +9,274 @@ import { Provider } from 'react-redux';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeSelectedCallNode,
+  changeRightClickedCallNode,
+} from '../../actions/profile-view';
 import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
-import { ensureExists } from '../../utils/flow';
+import { ensureExists, objectEntries } from '../../utils/flow';
 import { fireFullKeyPress } from '../fixtures/utils';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
-import type { TransformType } from 'firefox-profiler/types';
+import { StackChart } from 'firefox-profiler/components/stack-chart';
+import type {
+  Transform,
+  CallNodePath,
+  IndexIntoFuncTable,
+  IndexIntoResourceTable,
+} from 'firefox-profiler/types';
 
 type KeyPressOptions = { key: string, ... };
 
 type TestSetup = {|
-  getTransformType: () => null | TransformType,
+  getTransform: () => null | Transform,
   pressKey: (options: KeyPressOptions) => void,
+  expectedCallNodePath: CallNodePath,
+  // This should be expectedCallNodePath[expectedCallNodePath.length - 1], but this simplifies tests a bit.
+  expectedFuncIndex: IndexIntoFuncTable,
+  expectedResourceIndex: IndexIntoResourceTable,
 |};
 
 function testTransformKeyboardShortcuts(setup: () => TestSetup) {
-  it('handles merge function', () => {
-    const { pressKey, getTransformType } = setup();
-    pressKey({ key: 'm' });
-    expect(getTransformType()).toEqual('merge-function');
-  });
-
   it('handles focus subtree', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedCallNodePath } = setup();
     pressKey({ key: 'F' });
-    expect(getTransformType()).toEqual('focus-subtree');
+    expect(getTransform()).toMatchObject({
+      type: 'focus-subtree',
+      callNodePath: expectedCallNodePath,
+    });
   });
 
   it('handles focus-function', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'f' });
-    expect(getTransformType()).toEqual('focus-function');
+    expect(getTransform()).toEqual({
+      type: 'focus-function',
+      funcIndex: expectedFuncIndex,
+    });
   });
 
   it('handles merge call node', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedCallNodePath } = setup();
     pressKey({ key: 'M' });
-    expect(getTransformType()).toEqual('merge-call-node');
+    expect(getTransform()).toMatchObject({
+      type: 'merge-call-node',
+      callNodePath: expectedCallNodePath,
+    });
+  });
+
+  it('handles merge function', () => {
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
+    pressKey({ key: 'm' });
+    const transform = getTransform();
+    expect(transform).toEqual({
+      type: 'merge-function',
+      funcIndex: expectedFuncIndex,
+    });
   });
 
   it('handles drop function', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'd' });
-    expect(getTransformType()).toEqual('drop-function');
+    expect(getTransform()).toEqual({
+      type: 'drop-function',
+      funcIndex: expectedFuncIndex,
+    });
   });
 
   it('handles collapse resource', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedResourceIndex } = setup();
     pressKey({ key: 'C' });
-    expect(getTransformType()).toEqual('collapse-resource');
+    expect(getTransform()).toMatchObject({
+      type: 'collapse-resource',
+      resourceIndex: expectedResourceIndex,
+    });
   });
 
   it('handles collapse direct recursion', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'r' });
-    expect(getTransformType()).toEqual('collapse-direct-recursion');
+    expect(getTransform()).toMatchObject({
+      type: 'collapse-direct-recursion',
+      funcIndex: expectedFuncIndex,
+    });
   });
 
   it('handles collapse function subtree', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform, expectedFuncIndex } = setup();
     pressKey({ key: 'c' });
-    expect(getTransformType()).toEqual('collapse-function-subtree');
+    expect(getTransform()).toEqual({
+      type: 'collapse-function-subtree',
+      funcIndex: expectedFuncIndex,
+    });
   });
 
   it('ignores shortcuts with modifiers', () => {
-    const { pressKey, getTransformType } = setup();
+    const { pressKey, getTransform } = setup();
     pressKey({ key: 'c', ctrlKey: true });
     pressKey({ key: 'c', metaKey: true });
-    expect(getTransformType()).toEqual(null);
+    expect(getTransform()).toEqual(null);
   });
 }
 
-describe('flame graph transform shortcuts', () => {
-  testTransformKeyboardShortcuts(() => {
-    const {
-      profile,
-      funcNamesDictPerThread: [{ A, B }],
-    } = getProfileFromTextSamples(`
-      A               A               A
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      C               C               H
-      D               F               I
-      E               E
-    `);
-    const store = storeWithProfile(profile);
-    const { getState, dispatch } = store;
+// This is a generic setup that's used in all of our testcases.
+function setupStore(childrenToRender) {
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A           A           A
+    B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
+    B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
+    B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
+    C           C           H
+    D           F           I
+    E           E
+  `);
+  const store = storeWithProfile(profile);
+  const { getState } = store;
 
+  render(<Provider store={store}>{childrenToRender}</Provider>);
+
+  return {
+    store,
+    funcNames,
+    getTransform: () => {
+      const stack = selectedThreadSelectors.getTransformStack(getState());
+      switch (stack.length) {
+        case 0:
+          return null;
+        case 1:
+          return stack[0];
+        default:
+          throw new Error('This test assumes there is only one transform.');
+      }
+    },
+  };
+}
+
+// This returns a function that makes it easy to simulate a keypress on a
+// specific element identified by a class name.
+const pressKeyBuilder = className => (options: KeyPressOptions) => {
+  const div = ensureExists(
+    document.querySelector('.' + className),
+    `Couldn't find the content div with selector .${className}`
+  );
+  fireFullKeyPress(div, options);
+};
+
+// These actions will be used to generate use cases for each of the supported panels.
+const actions = {
+  'a selected node': ({ dispatch, getState }, { A, B }) => {
     dispatch(changeSelectedCallNode(0, [A, B]));
 
-    const { container } = render(
-      <Provider store={store}>
-        <FlameGraph />
-      </Provider>
-    );
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).toBeNull();
+  },
+  'a right clicked node': ({ dispatch, getState }, { A, B }) => {
+    dispatch(changeSelectedCallNode(0, []));
+    dispatch(changeRightClickedCallNode(0, [A, B]));
 
-    return {
-      getTransformType: () => {
-        const stack = selectedThreadSelectors.getTransformStack(getState());
-        switch (stack.length) {
-          case 0:
-            return null;
-          case 1:
-            return stack[0].type;
-          default:
-            throw new Error('This test assumes there is only one transform.');
-        }
-      },
-      // take either a key as a string, or a full event if we need more
-      // information like modifier keys.
-      pressKey: (options: KeyPressOptions) => {
-        const div = ensureExists(
-          container.querySelector('.flameGraphContent'),
-          `Couldn't find the content div with selector .flameGraphContent`
-        );
-        fireFullKeyPress(div, options);
-      },
-    };
-  });
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).not.toBeNull();
+  },
+  'both a selected and a right clicked node': (
+    { dispatch, getState },
+    { A, B, H }
+  ) => {
+    dispatch(changeSelectedCallNode(0, [A, B, B, B, H]));
+    dispatch(changeRightClickedCallNode(0, [A, B]));
+
+    // We also check expectations after these dispatch, because if the node path
+    // is invalid, we can have null values, which would give a useless test.
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedCallNodeIndex(getState())
+    ).not.toBeNull();
+  },
+};
+
+describe('flame graph transform shortcuts', () => {
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(<FlameGraph />);
+
+        const { A, B } = funcNames;
+        action(store, funcNames);
+
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('flameGraphContent'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
 });
 
 describe('CallTree transform shortcuts', () => {
-  testTransformKeyboardShortcuts(() => {
-    const {
-      profile,
-      funcNamesDictPerThread: [{ A, B }],
-    } = getProfileFromTextSamples(`
-      A               A               A
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      B[lib:XUL]  B[lib:XUL]  B[lib:XUL]
-      C               C               H
-      D               F               I
-      E               E
-    `);
-    const store = storeWithProfile(profile);
-    const { getState, dispatch } = store;
-
-    dispatch(changeSelectedCallNode(0, [A, B]));
-
-    const { container } = render(
-      <Provider store={store}>
-        <ProfileCallTreeView />
-      </Provider>
-    );
-
-    return {
-      getTransformType: () => {
-        const stack = selectedThreadSelectors.getTransformStack(getState());
-        switch (stack.length) {
-          case 0:
-            return null;
-          case 1:
-            return stack[0].type;
-          default:
-            throw new Error('This test assumes there is only one transform.');
-        }
-      },
-      // take either a key as a string, or a full event if we need more
-      // information like modifier keys.
-      pressKey: (options: KeyPressOptions) => {
-        const treeViewBody = ensureExists(
-          container.querySelector('div.treeViewBody'),
-          `Couldn't find the tree view body with selector div.treeViewBody`
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(
+          <ProfileCallTreeView />
         );
-        fireFullKeyPress(treeViewBody, options);
-      },
-    };
-  });
+
+        const { A, B } = funcNames;
+        action(store, funcNames);
+
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('treeViewBody'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
+});
+
+describe('stack chart transform shortcuts', () => {
+  for (const [name, action] of objectEntries(actions)) {
+    describe(`with ${name}`, () => {
+      testTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(<StackChart />);
+
+        const { A, B } = funcNames;
+        action(store, funcNames);
+
+        return {
+          getTransform,
+          // take either a key as a string, or a full event if we need more
+          // information like modifier keys.
+          pressKey: pressKeyBuilder('stackChartContent'),
+          expectedCallNodePath: [A, B],
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
+        };
+      });
+    });
+  }
 });
