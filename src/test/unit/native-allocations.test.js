@@ -79,9 +79,15 @@ describe('Native allocation call trees', function() {
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
-        '- A (total: -15, self: -3)',
-        '  - B (total: -12, self: -5)',
-        '    - C (total: -7, self: -7)',
+        '- A (total: -15, self: —)',
+        '  - B (total: -15, self: —)',
+        '    - Fjs (total: -12, self: —)',
+        '      - Gjs (total: -12, self: -5)',
+        '        - Hjs (total: -7, self: —)',
+        '          - I (total: -7, self: -7)',
+        '    - C (total: -3, self: —)',
+        '      - D (total: -3, self: —)',
+        '        - E (total: -3, self: -3)',
       ]);
     });
 

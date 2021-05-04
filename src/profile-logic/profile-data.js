@@ -6,6 +6,7 @@
 
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import { oneLine } from 'common-tags';
 import {
   resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
@@ -2533,14 +2534,13 @@ export function filterToDeallocationsSites(
 export function filterToDeallocationsMemory(
   nativeAllocations: BalancedNativeAllocationsTable
 ): NativeAllocationsTable {
+  // This is how the allocation table looks like:
   // A-----D------A-------D
-  type Address = number;
-  type IndexIntoAllocations = number;
-  const memoryAddressToAllocation: Map<
-    Address,
-    IndexIntoAllocations
-  > = new Map();
-  const stackOfOriginalAllocation: Array<IndexIntoAllocations | null> = [];
+
+  // This is like a Map<MemoryAddress, IndexIntoStackTable | null>;
+  const memoryAddressToAllocationSite: Array<IndexIntoStackTable | null> = [];
+  const newDeallocations = getEmptyBalancedNativeAllocationsTable();
+
   for (
     let allocationIndex = 0;
     allocationIndex < nativeAllocations.length;
@@ -2549,39 +2549,39 @@ export function filterToDeallocationsMemory(
     const bytes = nativeAllocations.weight[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
     if (bytes >= 0) {
-      // Handle the allocation.
+      // This is an allocation.
 
       // Provide a map back to this index.
-      memoryAddressToAllocation.set(memoryAddress, allocationIndex);
-      stackOfOriginalAllocation[allocationIndex] = null;
-    } else {
-      // Lookup the previous allocation.
-      const previousAllocationIndex = memoryAddressToAllocation.get(
-        memoryAddress
-      );
-      if (previousAllocationIndex === undefined) {
-        stackOfOriginalAllocation[allocationIndex] = null;
-      } else {
-        // This deallocation matches a previous allocation. Remove the allocation.
-        stackOfOriginalAllocation[allocationIndex] = previousAllocationIndex;
-        // There is a match, so delete this old association.
-        memoryAddressToAllocation.delete(memoryAddress);
+      if (memoryAddress in memoryAddressToAllocationSite) {
+        console.error(oneLine`
+          The address ${memoryAddress} was already present when we wanted to add it.
+          This probably means the deallocation wasn't collected, which may sometimes
+          happen. We will overwrite the previous entry.
+        `);
       }
+      memoryAddressToAllocationSite[memoryAddress] =
+        nativeAllocations.stack[allocationIndex];
+      continue;
     }
-  }
 
-  const newDeallocations = getEmptyBalancedNativeAllocationsTable();
-  for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.weight[i];
-    const stackIndex = stackOfOriginalAllocation[i];
-    if (stackIndex !== null) {
-      newDeallocations.time.push(nativeAllocations.time[i]);
-      newDeallocations.stack.push(stackIndex);
-      newDeallocations.weight.push(duration);
-      newDeallocations.memoryAddress.push(nativeAllocations.memoryAddress[i]);
-      newDeallocations.threadId.push(nativeAllocations.threadId[i]);
-      newDeallocations.length++;
+    // This is a deallocation.
+    // Lookup the previous allocation.
+    const allocationStackIndex = memoryAddressToAllocationSite[memoryAddress];
+    if (allocationStackIndex === undefined) {
+      // This deallocation doesn't match an allocation. Let's bail out.
+      continue;
     }
+
+    // This deallocation matches a previous allocation.
+    newDeallocations.time.push(nativeAllocations.time[allocationIndex]);
+    newDeallocations.stack.push(allocationStackIndex);
+    newDeallocations.weight.push(bytes);
+    newDeallocations.memoryAddress.push(memoryAddress);
+    newDeallocations.threadId.push(nativeAllocations.threadId[allocationIndex]);
+    newDeallocations.length++;
+
+    // Remove the saved allocation
+    delete memoryAddressToAllocationSite[memoryAddress];
   }
 
   return newDeallocations;
