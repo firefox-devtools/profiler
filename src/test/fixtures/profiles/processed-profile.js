@@ -1357,14 +1357,18 @@ export function getProfileWithUnbalancedNativeAllocations() {
   const {
     profile,
     funcNamesDictPerThread: [funcNamesDict],
-  } = getProfileFromTextSamples(`
-    A  A     A
-    B  B     B
-    C  Fjs   Fjs
-    D  Gjs   Gjs
-    E        Hjs[lib:jQuery.js]
-             I[lib:libI.so]
-  `);
+  } = getProfileFromTextSamples(
+    // We need to take care that A, B, Gjs, Gjs has the most samples, because
+    // some tests rely on this.
+    `
+      A  A    A                           A  A  A    A
+      B  B    B                           B  B  B    B
+      C  Fjs  Fjs                         C  C  Fjs  Fjs
+      D  Gjs  Gjs                         J  J  Gjs  Gjs
+      E       Hjs[lib:jQuery.js]             K
+              I[lib:libI.so][cat:Layout]
+    `
+  );
 
   // Now add a NativeAllocationsTable.
   const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
@@ -1372,7 +1376,7 @@ export function getProfileWithUnbalancedNativeAllocations() {
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
-  const { E, I, Gjs } = funcNamesDict;
+  const { E, I, Gjs, J, K } = funcNamesDict;
 
   // Create a list of allocations.
   const allocations = [
@@ -1381,9 +1385,9 @@ export function getProfileWithUnbalancedNativeAllocations() {
     { byteSize: 5, stack: Gjs },
     { byteSize: 7, stack: I },
     // Deallocations:
-    { byteSize: -11, stack: E },
-    { byteSize: -13, stack: Gjs },
-    { byteSize: -17, stack: I },
+    { byteSize: -11, stack: J },
+    { byteSize: -13, stack: K },
+    { byteSize: -17, stack: Gjs },
   ];
 
   // Loop through and add them to the table.

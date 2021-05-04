@@ -2565,8 +2565,8 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="colored-square category-color-yellow"
-                  title="JavaScript"
+                  class="colored-square category-color-purple"
+                  title="Layout"
                 />
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
@@ -2807,7 +2807,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 128px;"
+            style="height: 96px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -2884,15 +2884,15 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="-73%"
+                  title="-59%"
                 >
-                  -73%
+                  -59%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  title="-30"
+                  title="-24"
                 >
-                  -30
+                  -24
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
@@ -2915,21 +2915,21 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="-73%"
+                  title="-41%"
                 >
-                  -73%
+                  -41%
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn total"
-                  title="-30"
+                  title="-17"
                 >
-                  -30
+                  -17
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  title="-13"
+                  title="—"
                 >
-                  -13
+                  —
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -2958,71 +2958,9 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd isSelected"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="-41%"
-                >
-                  -41%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
                   title="-17"
                 >
                   -17
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="-17"
-                >
-                  -17
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalPercent"
-                  title="-27%"
-                >
-                  -27%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn total"
-                  title="-11"
-                >
-                  -11
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn self"
-                  title="—"
-                >
-                  —
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn icon"
@@ -3037,7 +2975,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 128px; min-width: 3000px;"
+            style="height: 96px; min-width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -3107,11 +3045,41 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 />
               </div>
               <div
-                aria-expanded="true"
-                aria-label="Fjs, total size is -30 bytes (-73%), self size is 0 bytes"
+                aria-expanded="false"
+                aria-label="C, total size is -24 bytes (-59%), self size is 0 bytes"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="colored-square category-color-grey"
+                  title="Other"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name dim"
+                >
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Fjs, total size is -17 bytes (-41%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3137,11 +3105,10 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                 />
               </div>
               <div
-                aria-expanded="true"
-                aria-label="Gjs, total size is -30 bytes (-73%), self size is -13 bytes"
+                aria-label="Gjs, total size is -17 bytes (-41%), self size is -17 bytes"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd"
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3151,7 +3118,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   style="width: 30px;"
                 />
                 <span
-                  class="treeRowToggleButton expanded canBeExpanded"
+                  class="treeRowToggleButton collapsed leaf"
                 />
                 <span
                   class="colored-square category-color-yellow"
@@ -3161,99 +3128,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
                   class="treeViewRowColumn treeViewMainColumn name dim"
                 >
                   Gjs
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="Hjs, total size is -17 bytes (-41%), self size is 0 bytes"
-                aria-level="5"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
-                id="treeViewRow-7"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 40px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-yellow"
-                  title="JavaScript"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  Hjs
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                >
-                  jQuery.js
-                </span>
-              </div>
-              <div
-                aria-label="I, total size is -17 bytes (-41%), self size is -17 bytes"
-                aria-level="6"
-                aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns odd isSelected"
-                id="treeViewRow-8"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 50px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed leaf"
-                />
-                <span
-                  class="colored-square category-color-yellow"
-                  title="JavaScript"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  I
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                >
-                  libI.so
-                </span>
-              </div>
-              <div
-                aria-expanded="false"
-                aria-label="C, total size is -11 bytes (-27%), self size is 0 bytes"
-                aria-level="3"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
-                id="treeViewRow-2"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 20px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
-                />
-                <span
-                  class="colored-square category-color-grey"
-                  title="Other"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name dim"
-                >
-                  C
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"

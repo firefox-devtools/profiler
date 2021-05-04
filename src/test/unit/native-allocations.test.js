@@ -134,13 +134,11 @@ describe('Native allocation call trees', function() {
       expect(formatTree(callTree)).toEqual([
         '- A (total: -41, self: —)',
         '  - B (total: -41, self: —)',
-        '    - Fjs (total: -30, self: —)',
-        '      - Gjs (total: -30, self: -13)',
-        '        - Hjs (total: -17, self: —)',
-        '          - I (total: -17, self: -17)',
-        '    - C (total: -11, self: —)',
-        '      - D (total: -11, self: —)',
-        '        - E (total: -11, self: -11)',
+        '    - C (total: -24, self: —)',
+        '      - J (total: -24, self: -11)',
+        '        - K (total: -13, self: -13)',
+        '    - Fjs (total: -17, self: —)',
+        '      - Gjs (total: -17, self: -17)',
       ]);
     });
 
