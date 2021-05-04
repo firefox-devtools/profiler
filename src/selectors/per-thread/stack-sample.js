@@ -12,12 +12,10 @@ import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
-import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   Thread,
   ThreadIndex,
-  SamplesLikeTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
   WeightType,
@@ -28,7 +26,6 @@ import type {
   StartEndRange,
   Selector,
   $ReturnType,
-  CallTreeSummaryStrategy,
   TracedTiming,
   ThreadsKey,
 } from 'firefox-profiler/types';
@@ -168,72 +165,14 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  /**
-   * The CallTreeSummaryStrategy determines how the call tree summarizes the
-   * the current thread. By default, this is done by timing, but other
-   * methods are also available. This selectors also ensures that the current
-   * thread supports the last selected call tree summary strategy.
-   */
-  const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = createSelector(
-    threadSelectors.getThread,
-    UrlState.getLastSelectedCallTreeSummaryStrategy,
-    (thread, lastSelectedCallTreeSummaryStrategy) => {
-      switch (lastSelectedCallTreeSummaryStrategy) {
-        case 'timing':
-          // Timing is valid everywhere.
-          break;
-        case 'js-allocations':
-          if (!thread.jsAllocations) {
-            // Attempting to view a thread with no JS allocations, switch back to timing.
-            return 'timing';
-          }
-          break;
-        case 'native-allocations':
-        case 'native-retained-allocations':
-        case 'native-deallocations-sites':
-        case 'native-deallocations-memory':
-          if (!thread.nativeAllocations) {
-            // Attempting to view a thread with no native allocations, switch back
-            // to timing.
-            return 'timing';
-          }
-          break;
-        default:
-          assertExhaustiveCheck(
-            lastSelectedCallTreeSummaryStrategy,
-            'Unhandled call tree sumary strategy.'
-          );
-      }
-      return lastSelectedCallTreeSummaryStrategy;
-    }
-  );
-
-  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    threadSelectors.getThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
-
-  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
-
-  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
-
   const getFilteredCallNodeMaxDepth: Selector<number> = createSelector(
-    getFilteredSamplesForCallTree,
+    threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileData.computeCallNodeMaxDepth
   );
 
   const getPreviewFilteredCallNodeMaxDepth: Selector<number> = createSelector(
-    getPreviewFilteredSamplesForCallTree,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileData.computeCallNodeMaxDepth
   );
@@ -246,12 +185,12 @@ export function getStackAndSampleSelectorsPerThread(
    */
   const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
     // The weight type is not changed by the filtering done on the profile.
-    getUnfilteredSamplesForCallTree,
+    threadSelectors.getUnfilteredSamplesForCallTree,
     samples => samples.weightType || 'samples'
   );
 
   const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> = createSelector(
-    getPreviewFilteredSamplesForCallTree,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -270,7 +209,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
-    getFilteredSamplesForCallTree,
+    threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -314,16 +253,12 @@ export function getStackAndSampleSelectorsPerThread(
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
     getCallNodeInfo,
-    getUnfilteredSamplesForCallTree,
-    getFilteredSamplesForCallTree,
-    getPreviewFilteredSamplesForCallTree,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
-    getCallTreeSummaryStrategy,
     getCallTree,
     getTracedTiming,
     getStackTimingByDepth,
