@@ -1425,14 +1425,18 @@ export function getProfileWithBalancedNativeAllocations() {
   const {
     profile,
     funcNamesDictPerThread: [funcNamesDict],
-  } = getProfileFromTextSamples(`
-    A  A     A
-    B  B     B
-    C  Fjs   Fjs
-    D  Gjs   Gjs
-    E        Hjs[lib:jQuery.js]
-             I[lib:libI.so]
-  `);
+  } = getProfileFromTextSamples(
+    // We need to take care that A, B, Gjs, Gjs has the most samples, because
+    // some tests rely on this.
+    `
+      A  A    A                   A  A  A    A
+      B  B    B                   B  B  B    B
+      C  Fjs  Fjs                 C  C  Fjs  Fjs
+      D  Gjs  Gjs                 J  J  Gjs  Gjs
+      E       Hjs[lib:jQuery.js]     K
+              I[lib:libI.so]
+    `
+  );
 
   // Now add a NativeAllocationsTable.
   const nativeAllocations = getEmptyBalancedNativeAllocationsTable();
@@ -1445,7 +1449,7 @@ export function getProfileWithBalancedNativeAllocations() {
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
-  const { E, I, Gjs } = funcNamesDict;
+  const { E, I, Gjs, J, K } = funcNamesDict;
 
   // Create a list of allocations.
   const allocations = [
@@ -1457,11 +1461,13 @@ export function getProfileWithBalancedNativeAllocations() {
     { byteSize: 11, stack: E, memoryAddress: 0x20 },
     { byteSize: 13, stack: Gjs, memoryAddress: 0x21 },
     { byteSize: 17, stack: I, memoryAddress: 0x22 },
-    // Deallocations that match the first group.
-    { byteSize: -3, stack: E, memoryAddress: 0x10 },
-    { byteSize: -5, stack: Gjs, memoryAddress: 0x11 },
-    { byteSize: -7, stack: I, memoryAddress: 0x12 },
+    // Deallocations that match the first group. Deallocations don't always
+    // happen at the same stack.
+    { byteSize: -3, stack: J, memoryAddress: 0x10 },
+    { byteSize: -5, stack: K, memoryAddress: 0x11 },
+    { byteSize: -7, stack: Gjs, memoryAddress: 0x12 },
     // Unmatched deallocations:
+    { byteSize: -3, stack: J, memoryAddress: 0x10 }, // This is testing that we don't match it twice.
     { byteSize: -19, stack: E, memoryAddress: 0x30 },
     { byteSize: -23, stack: Gjs, memoryAddress: 0x31 },
     { byteSize: -29, stack: I, memoryAddress: 0x32 },
