@@ -41,7 +41,6 @@ import type {
 
 type OwnProps = {|
   +hideInvertCallstack?: true,
-  +disableCallTreeSummaryButtons?: true,
 |};
 
 type StateProps = {|
@@ -136,7 +135,6 @@ class StackSettingsImpl extends PureComponent<Props> {
       hasJsAllocations,
       hasNativeAllocations,
       canShowRetainedMemory,
-      disableCallTreeSummaryButtons,
       callTreeSummaryStrategy,
     } = this.props;
 
@@ -159,7 +157,7 @@ class StackSettingsImpl extends PureComponent<Props> {
               'cpp'
             )}
           </li>
-          {hasAllocations && !disableCallTreeSummaryButtons ? (
+          {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
                 <Localized id="StackSettings--summarize">Summarize:</Localized>{' '}
