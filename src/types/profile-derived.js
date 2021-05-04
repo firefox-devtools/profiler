@@ -79,6 +79,13 @@ export type CallNodeInfo = {
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
+export type CallNodeAndCategory = {|
+  func: IndexIntoFuncTable,
+  category: IndexIntoCategoryList,
+|};
+
+export type CallNodeAndCategoryPath = CallNodeAndCategory[];
+
 /**
  * This type contains the first derived `Marker[]` information, plus an IndexedArray
  * to get back to the RawMarkerTable.

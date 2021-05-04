@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { fireEvent } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ButtonWithPanel } from '../../components/shared/ButtonWithPanel';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
@@ -50,14 +50,14 @@ describe('shared/ButtonWithPanel', () => {
 
   describe('protecting against mounting expensive panels', function() {
     it('does not render the contents when closed', function() {
-      const { queryByTestId } = render(
+      render(
         <ButtonWithPanel
           className="button"
           label="My Button"
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(queryByTestId('panel-content')).toBeFalsy();
+      expect(screen.queryByTestId('panel-content')).toBeFalsy();
     });
 
     /**
@@ -65,7 +65,7 @@ describe('shared/ButtonWithPanel', () => {
      * not open.
      */
     it('only renders the contents when open', function() {
-      const { getByTestId } = render(
+      render(
         <ButtonWithPanel
           className="button"
           label="My Button"
@@ -73,13 +73,13 @@ describe('shared/ButtonWithPanel', () => {
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(getByTestId('panel-content')).toBeTruthy();
+      expect(screen.getByTestId('panel-content')).toBeTruthy();
     });
   });
 
   it('displays a title only when not open', () => {
-    const { getByText } = setup();
-    const button = getByText('My Button');
+    setup();
+    const button = screen.getByText('My Button');
     expect(button.title).toBe('Click here to open the panel');
     fireFullClick(button);
     jest.runAllTimers();
@@ -87,9 +87,9 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {
-    const { getByText, container } = setup();
+    const { container } = setup();
 
-    fireFullClick(getByText('My Button'));
+    fireFullClick(screen.getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -104,9 +104,9 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking outside the panel', () => {
-    const { getByText, container } = setup();
+    const { container } = setup();
 
-    fireFullClick(getByText('My Button'));
+    fireFullClick(screen.getByText('My Button'));
     jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
@@ -121,28 +121,28 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('opens the panel when the button is clicked and closes the panel by clicking the button again', () => {
-    const { getByText, container } = setup();
+    const { container } = setup();
 
-    fireFullClick(getByText('My Button'));
+    fireFullClick(screen.getByText('My Button'));
     jest.runAllTimers();
 
     ensureExists(container.querySelector('.arrowPanel.open'));
 
-    fireFullClick(getByText('My Button'));
+    fireFullClick(screen.getByText('My Button'));
     jest.runAllTimers();
 
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
 
   it('opens the panel when the button is clicked and does not close the panel by clicking inside the panel', () => {
-    const { getByText, container } = setup();
+    const { container } = setup();
 
-    fireFullClick(getByText('My Button'));
+    fireFullClick(screen.getByText('My Button'));
     jest.runAllTimers();
     ensureExists(container.querySelector('.arrowPanel.open'));
 
     // Clicking on the panel doesn't hide the popup.
-    fireFullClick(getByText('Panel content'));
+    fireFullClick(screen.getByText('Panel content'));
     jest.runAllTimers();
     ensureExists(container.querySelector('.arrowPanel.open'));
 

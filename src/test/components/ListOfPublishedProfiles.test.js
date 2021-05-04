@@ -139,17 +139,19 @@ describe('ListOfPublishedProfiles', () => {
       </Provider>
     );
 
-    const { getByText, getByTitle, container } = renderResult;
+    const { container } = renderResult;
 
     function getAllRecordingsLink() {
       // This regexp should match all possible flavor of this link.
-      return getByText(/manage.*recording/i);
+      return screen.getByText(/manage.*recording/i);
     }
 
     function getDeleteButtonForProfile(
       profileName: string
     ): HTMLInputElement | HTMLButtonElement {
-      const workingButton = getByTitle(new RegExp(`delete.*${profileName}`));
+      const workingButton = screen.getByTitle(
+        new RegExp(`delete.*${profileName}`)
+      );
       if (
         !(workingButton instanceof HTMLInputElement) &&
         !(workingButton instanceof HTMLButtonElement)

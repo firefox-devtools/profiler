@@ -9,7 +9,7 @@ import { stripIndent } from 'common-tags';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { MarkerTable } from '../../components/marker-table';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
@@ -49,7 +49,7 @@ describe('MarkerTable', function() {
         </>
       </Provider>
     );
-    const { container, getByText } = renderResult;
+    const { container } = renderResult;
 
     const fixedRows = () =>
       Array.from(container.querySelectorAll('.treeViewRowFixedColumns'));
@@ -58,7 +58,7 @@ describe('MarkerTable', function() {
 
     const getRowElement = functionName =>
       ensureExists(
-        getByText(functionName).closest('.treeViewRow'),
+        screen.getByText(functionName).closest('.treeViewRow'),
         `Couldn't find the row for node ${String(functionName)}.`
       );
     const getContextMenu = () =>

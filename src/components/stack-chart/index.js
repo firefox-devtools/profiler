@@ -32,6 +32,7 @@ import {
   updatePreviewSelection,
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  handleCallNodeTransformShortcut,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -84,6 +85,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -135,6 +137,24 @@ class StackChartImpl extends React.PureComponent<Props> {
     }
   };
 
+  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+    const {
+      threadsKey,
+      selectedCallNodeIndex,
+      rightClickedCallNodeIndex,
+      handleCallNodeTransformShortcut,
+    } = this.props;
+
+    const nodeIndex =
+      rightClickedCallNodeIndex !== null
+        ? rightClickedCallNodeIndex
+        : selectedCallNodeIndex;
+    if (nodeIndex === null) {
+      return;
+    }
+    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+  };
+
   componentDidMount() {
     this._focusViewport();
   }
@@ -168,6 +188,7 @@ class StackChartImpl extends React.PureComponent<Props> {
         id="stack-chart-tab"
         role="tabpanel"
         aria-labelledby="stack-chart-tab-button"
+        onKeyDown={this._handleKeyDown}
       >
         <StackSettings disableCallTreeSummaryButtons={true} />
         <TransformNavigator />
@@ -260,6 +281,7 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedCallNode,
     changeRightClickedCallNode,
     updatePreviewSelection,
+    handleCallNodeTransformShortcut,
   },
   component: StackChartImpl,
 });
