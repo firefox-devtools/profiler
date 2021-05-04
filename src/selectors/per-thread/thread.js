@@ -293,9 +293,9 @@ export function getThreadSelectorsPerThread(
    * `getThread` or the last `getPreviewFilteredThread`).
    */
   const getSampleIndexOffsetFromCommittedRange: Selector<number> = createSelector(
-    getThread,
+    getUnfilteredSamplesForCallTree,
     ProfileSelectors.getCommittedRange,
-    ({ samples }, { start, end }) => {
+    (samples, { start, end }) => {
       const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
         samples,
         start,
@@ -310,10 +310,10 @@ export function getThreadSelectorsPerThread(
    * base thread, if your thread is the preview filtered thread.
    */
   const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
-    getFilteredThread,
+    getFilteredSamplesForCallTree,
     ProfileSelectors.getPreviewSelection,
     getSampleIndexOffsetFromCommittedRange,
-    ({ samples }, previewSelection, sampleIndexFromCommittedRange) => {
+    (samples, previewSelection, sampleIndexFromCommittedRange) => {
       if (!previewSelection.hasSelection) {
         return sampleIndexFromCommittedRange;
       }
