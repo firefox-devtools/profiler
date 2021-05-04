@@ -505,13 +505,13 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     ).toEqual('timing');
 
     // It switches to JS allocations.
-    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
+    changeSelect({ from: 'Timings', to: 'JavaScript Allocations' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('js-allocations');
 
     // And finally it can be switched back.
-    changeSelect({ from: 'JavaScript Allocations', to: 'Timing Data' });
+    changeSelect({ from: 'JavaScript Allocations', to: 'Timings' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('timing');
@@ -524,7 +524,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
     expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
-    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
+    changeSelect({ from: 'Timings', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
     expect(getByText('Total Size (bytes)')).toBeTruthy();
@@ -533,7 +533,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
 
   it('matches the snapshot for JS allocations', function() {
     const { container } = setup();
-    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
+    changeSelect({ from: 'Timings', to: 'JavaScript Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
@@ -560,14 +560,14 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     ).toEqual('timing');
 
     // Switch to native allocations.
-    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
+    changeSelect({ from: 'Timings', to: 'Allocated Memory' });
 
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('native-allocations');
 
     // And finally it can be switched back.
-    changeSelect({ from: 'Allocated Memory', to: 'Timing Data' });
+    changeSelect({ from: 'Allocated Memory', to: 'Timings' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('timing');
@@ -580,7 +580,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
     expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
-    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
+    changeSelect({ from: 'Timings', to: 'Allocated Memory' });
 
     // After changing to native allocations, they do.
     expect(getByText('Total Size (bytes)')).toBeTruthy();
@@ -594,13 +594,13 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
 
   it('matches the snapshot for native allocations', function() {
     const { container } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
+    changeSelect({ from: 'Timings', to: 'Allocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for native deallocations', function() {
     const { container } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Deallocation Sites' });
+    changeSelect({ from: 'Timings', to: 'Deallocation Sites' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
@@ -627,14 +627,14 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     ).toEqual('timing');
 
     // Switch to retained memory native allocations.
-    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
+    changeSelect({ from: 'Timings', to: 'Retained Memory' });
 
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('native-retained-allocations');
 
     // And finally it can be switched back.
-    changeSelect({ from: 'Retained Memory', to: 'Timing Data' });
+    changeSelect({ from: 'Retained Memory', to: 'Timings' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('timing');
@@ -647,7 +647,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     expect(queryByText('Total Size (bytes)')).not.toBeInTheDocument();
     expect(queryByText('Self (bytes)')).not.toBeInTheDocument();
 
-    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
+    changeSelect({ from: 'Timings', to: 'Retained Memory' });
 
     // After changing to retained allocations, they do.
     expect(getByText('Total Size (bytes)')).toBeTruthy();
@@ -656,13 +656,13 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
 
   it('matches the snapshot for retained allocations', function() {
     const { container } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
+    changeSelect({ from: 'Timings', to: 'Retained Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for deallocated memory', function() {
     const { container } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Deallocated Memory' });
+    changeSelect({ from: 'Timings', to: 'Deallocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -58,7 +58,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label>
-          Summarize:
+          Data source:
            
           <select
             class="stackSettingsSelect"
@@ -67,7 +67,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
               title="Summarize using sampled stacks of executed code over time"
               value="timing"
             >
-              Timing Data
+              Timings
             </option>
             <option
               title="Summarize using bytes of JavaScript allocated (no de-allocations)"
@@ -702,7 +702,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label>
-          Summarize:
+          Data source:
            
           <select
             class="stackSettingsSelect"
@@ -711,7 +711,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
               title="Summarize using sampled stacks of executed code over time"
               value="timing"
             >
-              Timing Data
+              Timings
             </option>
             <option
               title="Summarize using bytes of memory that were allocated, and never freed in the current preview selection"
@@ -1364,7 +1364,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label>
-          Summarize:
+          Data source:
            
           <select
             class="stackSettingsSelect"
@@ -1373,7 +1373,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
               title="Summarize using sampled stacks of executed code over time"
               value="timing"
             >
-              Timing Data
+              Timings
             </option>
             <option
               title="Summarize using bytes of memory that were allocated, and never freed in the current preview selection"
@@ -2026,7 +2026,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label>
-          Summarize:
+          Data source:
            
           <select
             class="stackSettingsSelect"
@@ -2035,7 +2035,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using sampled stacks of executed code over time"
               value="timing"
             >
-              Timing Data
+              Timings
             </option>
             <option
               title="Summarize using bytes of memory allocated"
@@ -2676,7 +2676,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label>
-          Summarize:
+          Data source:
            
           <select
             class="stackSettingsSelect"
@@ -2685,7 +2685,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using sampled stacks of executed code over time"
               value="timing"
             >
-              Timing Data
+              Timings
             </option>
             <option
               title="Summarize using bytes of memory allocated"

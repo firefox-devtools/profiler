@@ -160,7 +160,7 @@ class StackSettingsImpl extends PureComponent<Props> {
           {hasAllocations ? (
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
-                <Localized id="StackSettings--summarize">Summarize:</Localized>{' '}
+                <Localized id="StackSettings--use-data-source-label" />{' '}
                 <select
                   className="stackSettingsSelect"
                   onChange={this._onCallTreeSummaryStrategyChange}
