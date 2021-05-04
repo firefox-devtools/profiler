@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -449,13 +449,13 @@ describe('Timeline', function() {
 
     it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
       const store = storeWithProfile();
-      const { queryByText } = render(
+      render(
         <Provider store={store}>
           <Timeline />
         </Provider>
       );
 
-      expect(queryByText('Show active tab only')).toBeFalsy();
+      expect(screen.queryByText('Show active tab only')).toBeFalsy();
     });
 
     it('can switch between active tab view and advanced view', () => {
@@ -467,7 +467,7 @@ describe('Timeline', function() {
         activeTabID: 123,
       };
       const store = storeWithProfile(profile);
-      const { getByText } = render(
+      render(
         <Provider store={store}>
           <Timeline />
         </Provider>
@@ -477,13 +477,13 @@ describe('Timeline', function() {
         type: 'full',
       });
 
-      fireFullClick(getByText('Show active tab only'));
+      fireFullClick(screen.getByText('Show active tab only'));
       expect(getTimelineTrackOrganization(store.getState())).toEqual({
         type: 'active-tab',
         tabID: 123,
       });
 
-      fireFullClick(getByText('Show active tab only'));
+      fireFullClick(screen.getByText('Show active tab only'));
       expect(getTimelineTrackOrganization(store.getState())).toEqual({
         type: 'full',
       });
@@ -495,7 +495,7 @@ describe('Timeline', function() {
       const profile = _getProfileWithDroppedSamples();
 
       const store = storeWithProfile(profile);
-      const { getByText, getByRole } = render(
+      render(
         <Provider store={store}>
           <Timeline />
         </Provider>
@@ -503,13 +503,13 @@ describe('Timeline', function() {
 
       expect(getRightClickedTrack(store.getState())).toEqual(null);
 
-      fireFullContextMenu(getByRole('button', { name: 'Process 0' }));
+      fireFullContextMenu(screen.getByRole('button', { name: 'Process 0' }));
       expect(getRightClickedTrack(store.getState())).toEqual({
         trackIndex: 0,
         type: 'global',
       });
 
-      fireFullClick(getByText('/ tracks visible'));
+      fireFullClick(screen.getByText('/ tracks visible'));
       expect(getRightClickedTrack(store.getState())).toEqual(null);
     });
   });

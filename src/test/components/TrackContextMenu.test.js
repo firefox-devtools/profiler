@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ensureExists } from '../../utils/flow';
 import {
   changeSelectedThreads,
@@ -62,14 +62,13 @@ describe('timeline/TrackContextMenu', function() {
   describe('showed all tracks', function() {
     function setupAllTracks() {
       const results = setup();
-      const { getByText } = results;
-      const selectAllTracksItem = () => getByText('Show all tracks');
+      const selectAllTracksItem = () => screen.getByText('Show all tracks');
 
       const hideAllTracks = () => {
         // To hide the tracks before testing 'Show all tracks'
-        fireFullClick(getByText('GeckoMain'));
-        fireFullClick(getByText('DOM Worker'));
-        fireFullClick(getByText('Style'));
+        fireFullClick(screen.getByText('GeckoMain'));
+        fireFullClick(screen.getByText('DOM Worker'));
+        fireFullClick(screen.getByText('Style'));
       };
 
       return {
@@ -114,7 +113,7 @@ describe('timeline/TrackContextMenu', function() {
   describe('selected global track', function() {
     function setupGlobalTrack(profile, trackIndex = 1) {
       const results = setup(profile);
-      const { getByText, dispatch, getState } = results;
+      const { dispatch, getState } = results;
 
       const trackReference = {
         type: 'global',
@@ -130,16 +129,17 @@ describe('timeline/TrackContextMenu', function() {
       }
       dispatch(changeRightClickedTrack(trackReference));
 
-      const isolateProcessItem = () => getByText(/Only show this process/);
+      const isolateProcessItem = () =>
+        screen.getByText(/Only show this process/);
       // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
       const isolateProcessMainThreadItem = () =>
-        getByText(/Only show “\u2068Content Process\u2069”/);
-      const trackItem = () => getByText('Content Process');
+        screen.getByText(/Only show “\u2068Content Process\u2069”/);
+      const trackItem = () => screen.getByText('Content Process');
       const isolateScreenshotTrack = () =>
-        getByText(/Hide other Screenshots tracks/);
+        screen.getByText(/Hide other Screenshots tracks/);
       // Fluent adds isolation characters \u2068 and \u2069 around Content Process.
       const hideContentProcess = () =>
-        getByText(/Hide “\u2068Content Process\u2069”/);
+        screen.getByText(/Hide “\u2068Content Process\u2069”/);
 
       return {
         ...results,
@@ -280,7 +280,7 @@ describe('timeline/TrackContextMenu', function() {
   describe('selected local track', function() {
     function setupLocalTrack() {
       const results = setup();
-      const { getByText, dispatch, getState } = results;
+      const { dispatch, getState } = results;
 
       // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
       // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -305,9 +305,10 @@ describe('timeline/TrackContextMenu', function() {
 
       // Fluent adds isolation characters \u2068 and \u2069 around DOM Worker.
       const isolateLocalTrackItem = () =>
-        getByText('Only show “\u2068DOM Worker\u2069”');
-      const hideDOMWorker = () => getByText('Hide “\u2068DOM Worker\u2069”');
-      const trackItem = () => getByText('DOM Worker');
+        screen.getByText('Only show “\u2068DOM Worker\u2069”');
+      const hideDOMWorker = () =>
+        screen.getByText('Hide “\u2068DOM Worker\u2069”');
+      const trackItem = () => screen.getByText('DOM Worker');
 
       return {
         ...results,
@@ -384,7 +385,7 @@ describe('timeline/TrackContextMenu', function() {
   describe('global / local track visibility interplay', function() {
     function setupTracks() {
       const results = setup();
-      const { getByText, dispatch, getState } = results;
+      const { dispatch, getState } = results;
 
       const trackIndex = 1;
       const trackReference = {
@@ -403,8 +404,8 @@ describe('timeline/TrackContextMenu', function() {
       dispatch(changeSelectedThreads(new Set([threadIndex])));
       dispatch(changeRightClickedTrack(trackReference));
 
-      const globalTrackItem = () => getByText('Content Process');
-      const localTrackItem = () => getByText('DOM Worker');
+      const globalTrackItem = () => screen.getByText('Content Process');
+      const localTrackItem = () => screen.getByText('DOM Worker');
 
       return {
         ...results,

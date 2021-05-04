@@ -5,9 +5,12 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { getByTestId, fireEvent } from '@testing-library/react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  screen,
+} from 'firefox-profiler/test/fixtures/testing-library';
 
 import { TrackNetwork } from '../../components/timeline/TrackNetwork';
 import {
@@ -25,7 +28,6 @@ import {
 } from '../fixtures/utils';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
-import { ensureExists } from '../../utils/flow';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
 // mimicks what is computed by the actual component.
@@ -87,7 +89,7 @@ describe('VerticalIndicators', function() {
       })
     );
     // The tooltip is rendered in a portal, so it is not a child of the container.
-    const tooltip = getByTestId(ensureExists(document.body), 'tooltip');
+    const tooltip = screen.getByTestId('tooltip');
     expect(tooltip).toMatchSnapshot();
   });
 });
@@ -109,10 +111,10 @@ function setup() {
     </Provider>
   );
 
-  const verticalIndicators = renderResult.getByTestId('vertical-indicators');
+  const verticalIndicators = screen.getByTestId('vertical-indicators');
 
   const getIndicatorLines = () =>
-    renderResult.getAllByTestId('vertical-indicator-line');
+    screen.getAllByTestId('vertical-indicator-line');
 
   // WithSize uses requestAnimationFrame
   flushRafCalls();

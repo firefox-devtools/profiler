@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
@@ -64,7 +64,7 @@ describe('StackChart', function() {
         <JsTracer />
       </Provider>
     );
-    const { container, getByText } = renderResult;
+    const { container } = renderResult;
 
     if (skipLoadingScreen) {
       // Have React show the loading screen.
@@ -77,7 +77,7 @@ describe('StackChart', function() {
 
     const getJsTracerChartCanvas = () => container.querySelector('canvas');
     const getChangeJsTracerSummaryCheckbox = () =>
-      getByText(/Show only self time/);
+      screen.getByText(/Show only self time/);
 
     return {
       ...renderResult,

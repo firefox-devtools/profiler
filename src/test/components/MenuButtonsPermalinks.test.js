@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { MenuButtons } from '../../components/app/MenuButtons';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
@@ -41,9 +41,8 @@ describe('<Permalink>', function() {
       </Provider>
     );
 
-    const { queryByTestId, getByText } = renderResult;
-    const getPermalinkButton = () => getByText('Permalink');
-    const queryInput = () => queryByTestId('MenuButtonsPermalink-input');
+    const getPermalinkButton = () => screen.getByText('Permalink');
+    const queryInput = () => screen.queryByTestId('MenuButtonsPermalink-input');
     const clickAndRunTimers = where => {
       fireFullClick(where);
       jest.runAllTimers();
