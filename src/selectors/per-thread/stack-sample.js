@@ -217,7 +217,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
-    threadSelectors.getFilteredThread,
+    threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
     getFilteredCallNodeMaxDepth,
     ProfileSelectors.getProfileInterval,
