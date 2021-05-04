@@ -4,13 +4,16 @@
 
 // @flow
 import * as React from 'react';
-import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -298,7 +301,6 @@ describe('MarkerChart', function() {
         dispatch,
         fireMouseEvent,
         container,
-        getByRole,
       } = setupResult;
 
       dispatch(changeSelectedTab('marker-chart'));
@@ -346,7 +348,7 @@ describe('MarkerChart', function() {
       }
 
       function clickOnMenuItem(stringOrRegexp) {
-        const menuItem = getByRole('menuitem', { name: stringOrRegexp });
+        const menuItem = screen.getByRole('menuitem', { name: stringOrRegexp });
         fireFullClick(menuItem);
       }
 

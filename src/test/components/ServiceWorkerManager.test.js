@@ -7,7 +7,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import serviceWorkerRuntime from 'offline-plugin/runtime';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
@@ -100,12 +100,10 @@ describe('app/ServiceWorkerManager', () => {
       </Provider>
     );
 
-    const { getByText, getByLabelText } = renderResult;
-
     return {
       ...renderResult,
-      getReloadButton: () => getByText(/reload/i),
-      getCloseButton: () => getByLabelText(/hide/i),
+      getReloadButton: () => screen.getByText(/reload/i),
+      getCloseButton: () => screen.getByLabelText(/hide/i),
       navigateToStoreLoadingPage,
       navigateToAddonLoadingPage,
       navigateToFileLoadingPage,
