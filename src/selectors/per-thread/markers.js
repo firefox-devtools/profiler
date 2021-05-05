@@ -292,7 +292,7 @@ export function getMarkerSelectorsPerThread(
     getCommittedRangeAndTabFilteredMarkerIndexes,
     UrlState.getMarkersSearchStringsAsRegExp,
     ProfileSelectors.getCategories,
-    MarkerData.getSearchFilteredMarkerIndexes,
+    MarkerData.getSearchFilteredMarkerIndexes
   );
 
   /**
