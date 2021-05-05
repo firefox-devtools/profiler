@@ -105,7 +105,7 @@ describe('AppLocalizationProvider', () => {
 
   it('fetches the en-US FTL strings and renders them', async () => {
     const { store, dispatch, translatedText } = setup();
-    const { findByText } = render(
+    render(
       <Provider store={store}>
         <AppLocalizationProvider>
           <Localized id="test-id">
@@ -115,21 +115,21 @@ describe('AppLocalizationProvider', () => {
       </Provider>
     );
 
-    expect(await findByText(translatedText)).toBeTruthy();
+    expect(await screen.findByText(translatedText)).toBeTruthy();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // Now we're testing the LTR pseudo-localization.
     dispatch(setupLocalization(navigator.languages, 'accented'));
-    expect(await findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
+    expect(await screen.findByText('Ŧħīş īş ḗḗƞ-ŬŞ Ŧḗḗẋŧ')).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');
 
     // And now the RTL pseudo-localization.
     dispatch(setupLocalization(navigator.languages, 'bidi'));
-    expect(await findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
+    expect(await screen.findByText(/⊥ɥıs ıs ǝu-∩S ⊥ǝxʇ/)).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('rtl');

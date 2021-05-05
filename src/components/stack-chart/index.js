@@ -141,12 +141,18 @@ class StackChartImpl extends React.PureComponent<Props> {
     const {
       threadsKey,
       selectedCallNodeIndex,
+      rightClickedCallNodeIndex,
       handleCallNodeTransformShortcut,
     } = this.props;
-    if (selectedCallNodeIndex === null) {
+
+    const nodeIndex =
+      rightClickedCallNodeIndex !== null
+        ? rightClickedCallNodeIndex
+        : selectedCallNodeIndex;
+    if (nodeIndex === null) {
       return;
     }
-    handleCallNodeTransformShortcut(event, threadsKey, selectedCallNodeIndex);
+    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
   };
 
   componentDidMount() {

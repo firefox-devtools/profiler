@@ -8,7 +8,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
 import { TimelineActiveTabGlobalTrack } from '../../components/timeline/ActiveTabGlobalTrack';
 import { TimelineActiveTabResourcesPanel } from '../../components/timeline/ActiveTabResourcesPanel';
@@ -153,9 +153,9 @@ describe('ActiveTabTimeline', function() {
     });
 
     it('does not display the resources panel if there are no resource tracks', () => {
-      const { getState, queryByText } = setup();
+      const { getState } = setup();
       expect(getActiveTabResourceTracks(getState()).length).toBe(0);
-      expect(queryByText(/Resources/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Resources/)).not.toBeInTheDocument();
     });
   });
 
@@ -190,9 +190,8 @@ describe('ActiveTabTimeline', function() {
         </Provider>
       );
 
-      const { getByText, queryByText } = renderResult;
-      const getResourcesPanelHeader = () => getByText(/Resources/);
-      const getResourceFrameTrack = () => queryByText(/IFrame:/);
+      const getResourcesPanelHeader = () => screen.getByText(/Resources/);
+      const getResourceFrameTrack = () => screen.queryByText(/IFrame:/);
 
       return {
         ...renderResult,
@@ -295,9 +294,10 @@ describe('ActiveTabTimeline', function() {
         </Provider>
       );
 
-      const { getByText, container } = renderResult;
+      const { container } = renderResult;
       const resourcePage = ensureExists(profile.pages)[2];
-      const getResourceFrameTrackLabel = () => getByText(resourcePage.url);
+      const getResourceFrameTrackLabel = () =>
+        screen.getByText(resourcePage.url);
       const getResourceTrackRow = () =>
         ensureExists(
           container.querySelector('.timelineTrackResourceRow'),
@@ -328,8 +328,8 @@ describe('ActiveTabTimeline', function() {
       });
 
       it('has the correct track name', function() {
-        const { getByText, resourcePage } = setup();
-        expect(getByText(resourcePage.url)).toBeTruthy();
+        const { resourcePage } = setup();
+        expect(screen.getByText(resourcePage.url)).toBeTruthy();
       });
 
       it('starts out not being selected', function() {
