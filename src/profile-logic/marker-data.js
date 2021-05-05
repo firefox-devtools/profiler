@@ -3,10 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import {
-  getEmptyRawMarkerTable,
-  getDefaultCategories,
-} from './data-structures';
+import { getEmptyRawMarkerTable } from './data-structures';
 import { getFriendlyThreadName } from './profile-data';
 import { removeFilePath, removeURLs } from '../utils/string';
 import { ensureExists } from '../utils/flow';
@@ -25,6 +22,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
+  CategoryList,
   InnerWindowID,
   Marker,
   MarkerIndex,
@@ -114,12 +112,12 @@ export function deriveJankMarkers(
 export function getSearchFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  searchRegExp: RegExp | null
+  searchRegExp: RegExp | null,
+  categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExp) {
     return markerIndexes;
   }
-  const categoryList = getDefaultCategories();
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const { data, name, category } = getMarker(markerIndex);
@@ -130,8 +128,8 @@ export function getSearchFilteredMarkerIndexes(
 
     searchRegExp.lastIndex = 0;
 
-    if (categoryList[category - 1] !== undefined) {
-      const markerCategory = categoryList[category - 1].name;
+    if (categoryList[category] !== undefined) {
+      const markerCategory = categoryList[category].name;
       if (searchRegExp.test(markerCategory)) {
         newMarkers.push(markerIndex);
         continue;

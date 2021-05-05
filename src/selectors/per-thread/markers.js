@@ -291,7 +291,8 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     UrlState.getMarkersSearchStringsAsRegExp,
-    MarkerData.getSearchFilteredMarkerIndexes
+    ProfileSelectors.getCategories,
+    MarkerData.getSearchFilteredMarkerIndexes,
   );
 
   /**
@@ -349,6 +350,7 @@ export function getMarkerSelectorsPerThread(
     getMarkerGetter,
     getNetworkMarkerIndexes,
     UrlState.getNetworkSearchStringsAsRegExp,
+    ProfileSelectors.getCategories,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
