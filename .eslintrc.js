@@ -132,8 +132,11 @@ module.exports = {
     },
     'import/resolver': {
       alias: {
-        map: [['firefox-profiler', './src']],
-        extensions: ['.js'],
+        map: [
+          ['firefox-profiler', './src'],
+          ['firefox-profiler-res', './res'],
+        ],
+        extensions: ['.js', '.jpg'],
       },
     },
   },
