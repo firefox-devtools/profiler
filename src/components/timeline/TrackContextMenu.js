@@ -87,6 +87,19 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     showAllTracks();
   };
 
+  _getRightClickedTrackType = (): string => {
+    const { rightClickedTrack, localTracksByPid, globalTracks } = this.props;
+
+    const track =
+      rightClickedTrack.type === 'local'
+        ? localTracksByPid.get(rightClickedTrack.pid)[
+            rightClickedTrack.trackIndex
+          ]
+        : globalTracks[rightClickedTrack.trackIndex];
+
+    return track.type;
+  };
+
   _toggleGlobalTrackVisibility = (
     _,
     data: { trackIndex: TrackIndex }
@@ -145,14 +158,16 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     }
   };
 
-  _toggleTrackTypeVisibility = (_, data: { type: String }): void => {
+  _hideTracksByType = (_): void => {
     const { hideAllTracksByType, rightClickedTrack } = this.props;
+    const type = this._getRightClickedTrackType();
+
     if (rightClickedTrack === null) {
       throw new Error(
         'Attempted to isolate the process with no right clicked track.'
       );
     }
-    hideAllTracksByType(data.type);
+    hideAllTracksByType(type);
   };
 
   _isolateProcess = () => {
@@ -574,10 +589,16 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
   }
 
   renderHideTrackByType() {
-    const { rightClickedTrack, localTracksByPid, globalTracks } = this.props;
+    const { rightClickedTrack } = this.props;
     if (rightClickedTrack === null) {
       return null;
     }
+
+    //When adding more allowed types, we need to take care that we can't enter one of the following cases:
+    //1. Hiding a global track that still has visible local tracks
+    //2. No more visible tracks
+    //3. One global track without any data is displayed
+    //(all its local track are hidden + it doesn't have any data itself)
 
     const ALLOWED_TYPES = [
       'screenshots',
@@ -587,23 +608,18 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
       'event-delay',
     ];
 
-    const track =
-      rightClickedTrack.type === 'local'
-        ? localTracksByPid.get(rightClickedTrack.pid)[
-            rightClickedTrack.trackIndex
-          ]
-        : globalTracks[rightClickedTrack.trackIndex];
-    console.log(track.type);
-    const type = track.type;
+    const type = this._getRightClickedTrackType();
+
     if (ALLOWED_TYPES.includes(type)) {
       return (
         <MenuItem
           key={rightClickedTrack.pid}
           preventClose={false}
-          data={{ type }}
-          onClick={this._toggleTrackTypeVisibility}
+          onClick={this._hideTracksByType}
         >
-          Hide all {`"${type}"`} type tracks
+          <Localized id="TrackContextMenu--hide-track-by-type" vars={{ type }}>
+            <>Hide all tracks of type “{type}”</>
+          </Localized>
         </MenuItem>
       );
     }
@@ -637,11 +653,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
     const { globalTrackOrder, globalTracks, rightClickedTrack } = this.props;
 
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
-    const hideTrackByType = this.renderHideTrackByType();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
     const isolateScreenshot = this.renderIsolateScreenshot();
     const hideTrack = this.renderHideTrack();
+    const hideTrackByType = this.renderHideTrackByType();
     const showAllTracksMenu = this.renderShowAllTracks();
     const separator =
       isolateProcessMainThread ||
@@ -663,11 +679,11 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
         }
         {showAllTracksMenu}
         {isolateProcessMainThread}
-        {hideTrackByType}
         {isolateProcess}
         {isolateLocalTrack}
         {isolateScreenshot}
         {hideTrack}
+        {hideTrackByType}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];

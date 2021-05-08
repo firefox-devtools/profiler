@@ -547,6 +547,12 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
 
+# This is used as the context menu item to hide the given track by type.
+# Variables:
+#   $typr (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-track-by-type = Hide all tracks of type “{ $type }”
+
+
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/

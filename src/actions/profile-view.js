@@ -552,7 +552,7 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   };
 }
 
-export function hideAllTracksByType(trackType: String): ThunkAction<void> {
+export function hideAllTracksByType(trackType: string): ThunkAction<void> {
   return (dispatch, getState) => {
     const globalTracks = getGlobalTracks(getState());
     const globalIdsToHide = [];
@@ -562,20 +562,15 @@ export function hideAllTracksByType(trackType: String): ThunkAction<void> {
         globalIdsToHide.push(index);
       }
       if (track.pid) {
-        for (const [localIndex, localTrack] of getLocalTracks(
-          getState(),
-          track.pid
-        ).entries()) {
+        const localTracksForPid = getLocalTracks(getState(), track.pid);
+
+        const idsToHideForPid = [];
+        for (const [localIndex, localTrack] of localTracksForPid.entries()) {
           if (localTrack.type === trackType) {
-            localIdsToHide.set(
-              track.pid,
-              localIdsToHide.get(track.pid) &&
-                localIdsToHide.get(track.pid).length
-                ? localIdsToHide.get(track.pid).push(localIndex)
-                : [localIndex]
-            );
+            idsToHideForPid.push(localIndex);
           }
         }
+        localIdsToHide.set(track.pid, idsToHideForPid);
       }
     }
 
