@@ -119,10 +119,7 @@ const selectedThreads: Reducer<Set<ThreadIndex> | null> = (
 ) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
-    case 'SELECT_TRACK': {
-      console.log(state, '123');
-      return state;
-    }
+    case 'SELECT_TRACK':
     case 'VIEW_FULL_PROFILE':
     case 'VIEW_ORIGINS_PROFILE':
     case 'VIEW_ACTIVE_TAB_PROFILE':
