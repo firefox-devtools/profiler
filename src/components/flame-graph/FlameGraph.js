@@ -190,71 +190,82 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       callTree,
       callNodeInfo: { callNodeTable },
       selectedCallNodeIndex,
+      rightClickedCallNodeIndex,
       changeSelectedCallNode,
       handleCallNodeTransformShortcut,
     } = this.props;
 
-    if (selectedCallNodeIndex === null) {
-      if (
-        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)
-      ) {
+    if (
+      // Please do not forget to update the switch/case below if changing the array to allow more keys.
+      ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)
+    ) {
+      if (selectedCallNodeIndex === null) {
         // Just select the "root" node if we've got no prior selection.
         changeSelectedCallNode(
           threadsKey,
           getCallNodePathFromIndex(0, callNodeTable)
         );
+        return;
+      }
+
+      switch (event.key) {
+        case 'ArrowDown': {
+          const prefix = callNodeTable.prefix[selectedCallNodeIndex];
+          if (prefix !== -1) {
+            changeSelectedCallNode(
+              threadsKey,
+              getCallNodePathFromIndex(prefix, callNodeTable)
+            );
+          }
+          break;
+        }
+        case 'ArrowUp': {
+          const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+          // The call nodes returned from getChildren are sorted by
+          // total time in descending order.  The first one in the
+          // array, which is the one we pick, has the longest time and
+          // thus the widest box.
+
+          if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
+            changeSelectedCallNode(
+              threadsKey,
+              getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+            );
+          }
+          break;
+        }
+        case 'ArrowLeft':
+        case 'ArrowRight': {
+          const callNodeIndex = this._nextSelectableInRow(
+            selectedCallNodeIndex,
+            event.key === 'ArrowLeft' ? -1 : 1
+          );
+
+          if (callNodeIndex !== undefined) {
+            changeSelectedCallNode(
+              threadsKey,
+              getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+            );
+          }
+          break;
+        }
+        default:
+          // We shouldn't arrive here, thanks to the if block at the top.
+          console.error(
+            `An unknown key "${event.key}" was pressed, this shouldn't happen.`
+          );
       }
       return;
     }
 
-    switch (event.key) {
-      case 'ArrowDown': {
-        const prefix = callNodeTable.prefix[selectedCallNodeIndex];
-        if (prefix !== -1) {
-          changeSelectedCallNode(
-            threadsKey,
-            getCallNodePathFromIndex(prefix, callNodeTable)
-          );
-        }
-        break;
-      }
-      case 'ArrowUp': {
-        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
-        // The call nodes returned from getChildren are sorted by
-        // total time in descending order.  The first one in the
-        // array, which is the one we pick, has the longest time and
-        // thus the widest box.
+    // Otherwise, handle shortcuts for the call node transforms.
+    const nodeIndex =
+      rightClickedCallNodeIndex !== null
+        ? rightClickedCallNodeIndex
+        : selectedCallNodeIndex;
 
-        if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
-          changeSelectedCallNode(
-            threadsKey,
-            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
-          );
-        }
-        break;
-      }
-      case 'ArrowLeft':
-      case 'ArrowRight': {
-        const callNodeIndex = this._nextSelectableInRow(
-          selectedCallNodeIndex,
-          event.key === 'ArrowLeft' ? -1 : 1
-        );
-
-        if (callNodeIndex !== undefined) {
-          changeSelectedCallNode(
-            threadsKey,
-            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
-          );
-        }
-        break;
-      }
-      default:
-        handleCallNodeTransformShortcut(
-          event,
-          threadsKey,
-          selectedCallNodeIndex
-        );
-        break;
+    if (nodeIndex !== null) {
+      handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
     }
   };
 

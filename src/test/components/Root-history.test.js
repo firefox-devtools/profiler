@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
@@ -67,8 +67,6 @@ describe('Root with history', function() {
     const store = blankStore();
     const renderResult = render(<Root store={store} />);
 
-    const { findByText } = renderResult;
-
     async function waitForTab({
       name,
       selected,
@@ -78,7 +76,7 @@ describe('Root with history', function() {
     |}): Promise<HTMLElement> {
       // This uses `findByText` instead of `findbyRole` because this is a lot
       // faster in our use case where there's a lot of DOM nodes.
-      return findByText(name, {
+      return screen.findByText(name, {
         selector: `button[role~=tab][aria-selected=${String(selected)}]`,
       });
     }

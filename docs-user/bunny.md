@@ -274,8 +274,8 @@ In the analysis, only the functions that were taking the most time were consider
 A good follow-up would be to do more analysis on a variety of different test cases to ensure that these changes didn't regress performance on a different example.
 
 | Metric | Baseline | Fix 1 | Fix 2 | Magnitude Change |
-| ----- | -------- | ------------- | ---------------------------- |
-| Time per frame | ~65fps | ~40fps | ~16ms | 4x (faster) |
+| --- | --- | --- | --- | --- |
+| Time per frame | ~65ms | ~40ms | ~16ms | 4x (faster) |
 | Frames per second | ~15fps | ~25fps | ~60fps | 4x (faster) |
 | non-idle time in `(root)` on the content process | 2107ms | 1613ms | 725ms | 2.9x (faster) |
 | non-idle time in `(root)` on the worker | 666ms | 814ms | 725ms | 0.9x (slower) |

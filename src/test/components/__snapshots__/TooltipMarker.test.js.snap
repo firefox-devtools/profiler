@@ -84,6 +84,10 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -92,6 +96,10 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -100,6 +108,10 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           XREMain::XRE_main
           <em
             class="backtraceStackFrameOrigin"
@@ -108,6 +120,10 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           XRE_main
           <em
             class="backtraceStackFrameOrigin"
@@ -116,6 +132,10 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           _main
           <em
             class="backtraceStackFrameOrigin"
@@ -1665,6 +1685,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -1673,6 +1697,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1681,6 +1709,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1689,6 +1721,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1697,6 +1733,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsDocument::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1705,6 +1745,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::dom::Element::RemoveStates
           <em
             class="backtraceStackFrameOrigin"
@@ -1713,6 +1757,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::UpdateAncestorState
           <em
             class="backtraceStackFrameOrigin"
@@ -1721,6 +1769,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::SetContentState
           <em
             class="backtraceStackFrameOrigin"
@@ -1729,6 +1781,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::NotifyMouseOut
           <em
             class="backtraceStackFrameOrigin"
@@ -1737,6 +1793,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::GenerateMouseEnterExit
           <em
             class="backtraceStackFrameOrigin"
@@ -1745,6 +1805,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::PreHandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1753,6 +1817,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEventInternal
           <em
             class="backtraceStackFrameOrigin"
@@ -1761,6 +1829,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandlePositionedEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1769,6 +1841,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1777,6 +1853,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsViewManager::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1785,6 +1865,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsView::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1793,6 +1877,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsChildView::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1801,6 +1889,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           ChildViewMouseTracker::MouseMoved
           <em
             class="backtraceStackFrameOrigin"
@@ -1809,6 +1901,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppShell::Run
           <em
             class="backtraceStackFrameOrigin"
@@ -1817,11 +1913,18 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppStartup::Run
           <em
             class="backtraceStackFrameOrigin"
           />
         </li>
+        <span
+          class="colored-border ellipsis"
+        />
         …
       </ul>
     </div>
@@ -1906,6 +2009,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -1914,6 +2021,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1922,6 +2033,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1930,6 +2045,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1938,6 +2057,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsDocument::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -1946,6 +2069,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::dom::Element::RemoveStates
           <em
             class="backtraceStackFrameOrigin"
@@ -1954,6 +2081,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::UpdateAncestorState
           <em
             class="backtraceStackFrameOrigin"
@@ -1962,6 +2093,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::SetContentState
           <em
             class="backtraceStackFrameOrigin"
@@ -1970,6 +2105,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::NotifyMouseOut
           <em
             class="backtraceStackFrameOrigin"
@@ -1978,6 +2117,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::GenerateMouseEnterExit
           <em
             class="backtraceStackFrameOrigin"
@@ -1986,6 +2129,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::PreHandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -1994,6 +2141,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEventInternal
           <em
             class="backtraceStackFrameOrigin"
@@ -2002,6 +2153,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandlePositionedEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2010,6 +2165,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2018,6 +2177,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsViewManager::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2026,6 +2189,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsView::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2034,6 +2201,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsChildView::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2042,6 +2213,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           ChildViewMouseTracker::MouseMoved
           <em
             class="backtraceStackFrameOrigin"
@@ -2050,6 +2225,10 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppShell::Run
           <em
             class="backtraceStackFrameOrigin"
@@ -2058,11 +2237,18 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppStartup::Run
           <em
             class="backtraceStackFrameOrigin"
           />
         </li>
+        <span
+          class="colored-border ellipsis"
+        />
         …
       </ul>
     </div>
@@ -2954,6 +3140,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -2962,6 +3152,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -2970,6 +3164,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -2978,6 +3176,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -2986,6 +3188,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsDocument::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -2994,6 +3200,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::dom::Element::RemoveStates
           <em
             class="backtraceStackFrameOrigin"
@@ -3002,6 +3212,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::UpdateAncestorState
           <em
             class="backtraceStackFrameOrigin"
@@ -3010,6 +3224,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::SetContentState
           <em
             class="backtraceStackFrameOrigin"
@@ -3018,6 +3236,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::NotifyMouseOut
           <em
             class="backtraceStackFrameOrigin"
@@ -3026,6 +3248,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::GenerateMouseEnterExit
           <em
             class="backtraceStackFrameOrigin"
@@ -3034,6 +3260,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::PreHandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3042,6 +3272,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEventInternal
           <em
             class="backtraceStackFrameOrigin"
@@ -3050,6 +3284,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandlePositionedEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3058,6 +3296,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3066,6 +3308,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsViewManager::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3074,6 +3320,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsView::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3082,6 +3332,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsChildView::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3090,6 +3344,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           ChildViewMouseTracker::MouseMoved
           <em
             class="backtraceStackFrameOrigin"
@@ -3098,6 +3356,10 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppShell::Run
           <em
             class="backtraceStackFrameOrigin"
@@ -3106,11 +3368,18 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppStartup::Run
           <em
             class="backtraceStackFrameOrigin"
           />
         </li>
+        <span
+          class="colored-border ellipsis"
+        />
         …
       </ul>
     </div>
@@ -3181,6 +3450,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -3189,6 +3462,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3197,6 +3474,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3205,6 +3486,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3213,6 +3498,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsDocument::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3221,6 +3510,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::dom::Element::RemoveStates
           <em
             class="backtraceStackFrameOrigin"
@@ -3229,6 +3522,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::UpdateAncestorState
           <em
             class="backtraceStackFrameOrigin"
@@ -3237,6 +3534,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::SetContentState
           <em
             class="backtraceStackFrameOrigin"
@@ -3245,6 +3546,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::NotifyMouseOut
           <em
             class="backtraceStackFrameOrigin"
@@ -3253,6 +3558,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::GenerateMouseEnterExit
           <em
             class="backtraceStackFrameOrigin"
@@ -3261,6 +3570,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::PreHandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3269,6 +3582,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEventInternal
           <em
             class="backtraceStackFrameOrigin"
@@ -3277,6 +3594,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandlePositionedEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3285,6 +3606,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3293,6 +3618,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsViewManager::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3301,6 +3630,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsView::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3309,6 +3642,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsChildView::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3317,6 +3654,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           ChildViewMouseTracker::MouseMoved
           <em
             class="backtraceStackFrameOrigin"
@@ -3325,6 +3666,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppShell::Run
           <em
             class="backtraceStackFrameOrigin"
@@ -3333,11 +3678,18 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppStartup::Run
           <em
             class="backtraceStackFrameOrigin"
           />
         </li>
+        <span
+          class="colored-border ellipsis"
+        />
         …
       </ul>
     </div>
@@ -3436,6 +3788,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsRefreshDriver::AddStyleFlushObserver
           <em
             class="backtraceStackFrameOrigin"
@@ -3444,6 +3800,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::PostRestyleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3452,6 +3812,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::GeckoRestyleManager::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3460,6 +3824,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3468,6 +3836,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsDocument::ContentStateChanged
           <em
             class="backtraceStackFrameOrigin"
@@ -3476,6 +3848,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::dom::Element::RemoveStates
           <em
             class="backtraceStackFrameOrigin"
@@ -3484,6 +3860,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::UpdateAncestorState
           <em
             class="backtraceStackFrameOrigin"
@@ -3492,6 +3872,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::SetContentState
           <em
             class="backtraceStackFrameOrigin"
@@ -3500,6 +3884,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::NotifyMouseOut
           <em
             class="backtraceStackFrameOrigin"
@@ -3508,6 +3896,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::GenerateMouseEnterExit
           <em
             class="backtraceStackFrameOrigin"
@@ -3516,6 +3908,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::EventStateManager::PreHandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3524,6 +3920,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEventInternal
           <em
             class="backtraceStackFrameOrigin"
@@ -3532,6 +3932,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandlePositionedEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3540,6 +3944,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           mozilla::PresShell::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3548,6 +3956,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsViewManager::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3556,6 +3968,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsView::HandleEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3564,6 +3980,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsChildView::DispatchEvent
           <em
             class="backtraceStackFrameOrigin"
@@ -3572,6 +3992,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           ChildViewMouseTracker::MouseMoved
           <em
             class="backtraceStackFrameOrigin"
@@ -3580,6 +4004,10 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppShell::Run
           <em
             class="backtraceStackFrameOrigin"
@@ -3588,11 +4016,18 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
         <li
           class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
         >
+          <span
+            class="colored-border category-color-grey"
+            title="Other"
+          />
           nsAppStartup::Run
           <em
             class="backtraceStackFrameOrigin"
           />
         </li>
+        <span
+          class="colored-border ellipsis"
+        />
         …
       </ul>
     </div>

@@ -42,7 +42,7 @@ jobs:
     steps:
       - checkout-and-dependencies
       - run: yarn test --coverage --runInBand
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run: yarn codecov
 
   build-prod:
     executor: node

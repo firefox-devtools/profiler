@@ -12,9 +12,9 @@ import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
-import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
-import FirefoxPopupScreenshot from '../../../res/img/jpg/firefox-profiler-button-2019-12-09.jpg';
+import AddonScreenshot from 'firefox-profiler-res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
+import PerfScreenshot from 'firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg';
+import FirefoxPopupScreenshot from 'firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg';
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,

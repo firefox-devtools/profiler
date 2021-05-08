@@ -16,7 +16,7 @@ import {
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToStartTime,
-  convertStackToCallNodePath,
+  convertStackToCallNodeAndCategoryPath,
   getSampleIndexToCallNodeIndex,
   getCallNodeIndexFromPath,
   getTreeOrderComparator,
@@ -775,7 +775,7 @@ describe('funcHasRecursiveCall', function() {
   });
 });
 
-describe('convertStackToCallNodePath', function() {
+describe('convertStackToCallNodeAndCategoryPath', function() {
   it('correctly returns a call node path for a stack', function() {
     const {
       threads: [thread],
@@ -786,10 +786,10 @@ describe('convertStackToCallNodePath', function() {
       // Makes flow happy
       throw new Error("stack shouldn't be null");
     }
-    let callNodePath = convertStackToCallNodePath(thread, stack1);
-    expect(callNodePath).toEqual([0, 1, 2, 3, 4]);
-    callNodePath = convertStackToCallNodePath(thread, stack2);
-    expect(callNodePath).toEqual([0, 1, 2, 3, 5]);
+    let callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack1);
+    expect(callNodePath.map(f => f.func)).toEqual([0, 1, 2, 3, 4]);
+    callNodePath = convertStackToCallNodeAndCategoryPath(thread, stack2);
+    expect(callNodePath.map(f => f.func)).toEqual([0, 1, 2, 3, 5]);
   });
 });
 

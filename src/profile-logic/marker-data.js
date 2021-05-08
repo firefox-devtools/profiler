@@ -22,6 +22,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
+  CategoryList,
   InnerWindowID,
   Marker,
   MarkerIndex,
@@ -111,19 +112,29 @@ export function deriveJankMarkers(
 export function getSearchFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  searchRegExp: RegExp | null
+  searchRegExp: RegExp | null,
+  categoryList: CategoryList
 ): MarkerIndex[] {
   if (!searchRegExp) {
     return markerIndexes;
   }
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
-    const { data, name } = getMarker(markerIndex);
+    const { data, name, category } = getMarker(markerIndex);
 
     // Reset regexp for each iteration. Otherwise state from previous
     // iterations can cause matches to fail if the search is global or
     // sticky.
+
     searchRegExp.lastIndex = 0;
+
+    if (categoryList[category] !== undefined) {
+      const markerCategory = categoryList[category].name;
+      if (searchRegExp.test(markerCategory)) {
+        newMarkers.push(markerIndex);
+        continue;
+      }
+    }
 
     if (searchRegExp.test(name)) {
       newMarkers.push(markerIndex);

@@ -4,10 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+  screen,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import * as UrlStateSelectors from '../../selectors/url-state';
 
 // This module is mocked.
@@ -379,7 +382,7 @@ function setup(profile: Profile, funcNames: string[] = []) {
       </>
     </Provider>
   );
-  const { container, getByText } = renderResult;
+  const { container } = renderResult;
 
   flushRafCalls();
 
@@ -453,7 +456,7 @@ function setup(profile: Profile, funcNames: string[] = []) {
     );
 
   function clickMenuItem(strOrRegexp) {
-    fireFullClick(getByText(strOrRegexp));
+    fireFullClick(screen.getByText(strOrRegexp));
   }
 
   function findFillTextPosition(fillText: string): Position {
