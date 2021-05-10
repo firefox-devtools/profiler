@@ -61,7 +61,8 @@ export function computeMaxThreadCPUDelta(
  */
 export function processThreadCPUDelta(
   thread: Thread,
-  sampleUnits: SampleUnits
+  sampleUnits: SampleUnits,
+  profileInterval: Milliseconds
 ): Thread {
   const { samples } = thread;
   const { threadCPUDelta } = samples;
@@ -121,10 +122,13 @@ export function processThreadCPUDelta(
       // and this issue doesn't occur.
       case 'µs':
       case 'ns': {
-        const intervalUs =
-          (samples.time[i] - samples.time[i - 1]) * cpuDeltaTimeUnitMultiplier;
-        if (threadCPUDeltaValue > intervalUs) {
-          newThreadCPUDelta[i] = intervalUs;
+        const intervalInThreadCPUDeltaUnit =
+          i === 0
+            ? profileInterval * cpuDeltaTimeUnitMultiplier
+            : (samples.time[i] - samples.time[i - 1]) *
+              cpuDeltaTimeUnitMultiplier;
+        if (threadCPUDeltaValue > intervalInThreadCPUDeltaUnit) {
+          newThreadCPUDelta[i] = intervalInThreadCPUDeltaUnit;
         } else {
           newThreadCPUDelta[i] = threadCPUDeltaValue;
         }
