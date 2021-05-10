@@ -30,10 +30,12 @@ import type {
 export type Props = {|
   +className: string,
   +trackName: string,
+  +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +sampleIndexOffset: number,
   +onSampleClick: (
     event: SyntheticMouseEvent<>,
     sampleIndex: IndexIntoSamplesTable
@@ -149,12 +151,14 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
 
   render() {
     const {
+      fullThread,
       rangeFilteredThread,
       categories,
       trackName,
       interval,
       rangeStart,
       rangeEnd,
+      sampleIndexOffset,
       samplesSelectedStates,
       treeOrderSampleComparator,
       maxThreadCPUDelta,
@@ -174,10 +178,12 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
             'threadActivityGraphCanvas'
           )}
           trackName={trackName}
+          fullThread={fullThread}
           rangeFilteredThread={rangeFilteredThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
+          sampleIndexOffset={sampleIndexOffset}
           samplesSelectedStates={samplesSelectedStates}
           treeOrderSampleComparator={treeOrderSampleComparator}
           categories={categories}

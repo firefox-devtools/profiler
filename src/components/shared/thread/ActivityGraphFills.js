@@ -34,10 +34,12 @@ import type { HoveredPixelState } from './ActivityGraph';
 type RenderedComponentSettings = {|
   +canvasPixelWidth: DevicePixels,
   +canvasPixelHeight: DevicePixels,
+  +fullThread: Thread,
   +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +sampleIndexOffset: number,
   +xPixelsPerMs: number,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
@@ -207,10 +209,12 @@ export class ActivityGraphFillComputer {
    */
   _accumulateSampleCategories() {
     const {
+      fullThread,
       rangeFilteredThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
       enableCPUUsage,
+      sampleIndexOffset,
     } = this.renderedComponentSettings;
 
     if (samples.length === 0) {
@@ -220,6 +224,14 @@ export class ActivityGraphFillComputer {
 
     let prevSampleTime = samples.time[0] - interval;
     let sampleTime = samples.time[0];
+
+    if (sampleIndexOffset > 0) {
+      // If sampleIndexOffset is greater than zero, it means that we are zoomed
+      // in the timeline and we are seeing a portion of it. In that case,
+      // rangeFilteredThread will not have the information of the first previous
+      // sample. So we need to get that information from the full thread.
+      prevSampleTime = fullThread.samples.time[sampleIndexOffset - 1];
+    }
 
     // Go through the samples and accumulate the category into the percentageBuffers.
     const { threadCPUDelta } = samples;
@@ -238,10 +250,9 @@ export class ActivityGraphFillComputer {
         // step and eliminating all the null values.
         const cpuDeltaBefore = ensureExists(threadCPUDelta[i]);
         const cpuDeltaAfter = ensureExists(threadCPUDelta[i + 1]);
-        const intervalDistribution =
-          i === 0 ? 1 : (samples.time[i] - samples.time[i - 1]) / interval;
+        const intervalDistribution = (sampleTime - prevSampleTime) / interval;
         const nextIntervalDistribution =
-          (samples.time[i + 1] - samples.time[i]) / interval;
+          (nextSampleTime - sampleTime) / interval;
 
         // Figure out the CPU usage "per interval". This is needed for cases
         // where we have some missing samples. For example:
@@ -281,13 +292,29 @@ export class ActivityGraphFillComputer {
         : greyCategoryIndex;
 
     let cpuBeforeSample = null;
-    if (enableCPUUsage && threadCPUDelta && threadCPUDelta[lastIdx] !== null) {
-      const cpuDelta = threadCPUDelta[lastIdx];
-      const intervalDistribution =
-        lastIdx === 0
-          ? 1
-          : (samples.time[lastIdx] - samples.time[lastIdx - 1]) / interval;
-      cpuBeforeSample = cpuDelta / intervalDistribution;
+    let cpuAfterSample = null;
+    if (enableCPUUsage && threadCPUDelta) {
+      const cpuDeltaBefore = ensureExists(threadCPUDelta[lastIdx]);
+      const intervalDistribution = (sampleTime - prevSampleTime) / interval;
+      cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
+
+      const nextIdxInFullThread = sampleIndexOffset + lastIdx + 1;
+      if (nextIdxInFullThread < fullThread.samples.length) {
+        // Since we are zoomed in the timeline, rangeFilteredThread will not
+        // have the information of the next sample. So we need to get that
+        // information from the full thread.
+        const cpuDeltaAfter = ensureExists(
+          ensureExists(fullThread.samples.threadCPUDelta)[nextIdxInFullThread]
+        );
+        const nextIntervalDistribution =
+          (fullThread.samples.time[nextIdxInFullThread] - sampleTime) /
+          interval;
+        cpuAfterSample = cpuDeltaAfter / nextIntervalDistribution;
+      } else {
+        // If we don't have this information in the full thread, simply use the
+        // previous CPU delta.
+        cpuAfterSample = cpuBeforeSample;
+      }
     }
 
     this._accumulateInCategory(
@@ -297,9 +324,7 @@ export class ActivityGraphFillComputer {
       sampleTime,
       sampleTime + interval,
       cpuBeforeSample,
-      // There is no cpuAfterSample for this since this is the last sample.
-      // Assigning the same CPU delta value to it.
-      cpuBeforeSample
+      cpuAfterSample
     );
   }
 

@@ -258,13 +258,12 @@ describe('ThreadActivityGraph', function() {
       // Make sure that all the lineTo operations are inside the activity graph
       // rectangle. There should not be any sample that starts or ends outside
       // of the graph.
-      // FIXME: This should return `true` instead! The next commit should fix this!
       expect(
         lineToOperations.every(
           ([, x, y]) =>
             x >= 0 && x <= GRAPH_WIDTH && y >= 0 && y <= GRAPH_HEIGHT
         )
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 });
