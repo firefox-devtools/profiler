@@ -76,7 +76,7 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
   +filteredThread: Thread,
   +tabFilteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
@@ -187,7 +187,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
   render() {
     const {
       filteredThread,
-      fullThread,
+      rangeFilteredThread,
       tabFilteredThread,
       threadsKey,
       interval,
@@ -266,7 +266,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               className="threadActivityGraph"
               trackName={trackName}
               interval={interval}
-              fullThread={fullThread}
+              rangeFilteredThread={rangeFilteredThread}
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               onSampleClick={this._onSampleClick}
@@ -290,7 +290,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               onSampleClick={this._onSampleClick}
             />
             {isExperimentalCPUGraphsEnabled &&
-            fullThread.samples.threadCPUDelta !== undefined ? (
+            rangeFilteredThread.samples.threadCPUDelta !== undefined ? (
               <ThreadCPUGraph
                 className="threadCPUGraph"
                 trackName={trackName}
@@ -394,16 +394,16 @@ export const TimelineTrackThread = explicitConnect<
     )
       ? selectors.getSelectedCallNodeIndex(state)
       : null;
-    const fullThread = selectors.getRangeFilteredThread(state);
+    const rangeFilteredThread = selectors.getRangeFilteredThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
       timelineType === 'cpu-category' &&
-      fullThread.samples.threadCPUDelta !== undefined;
+      rangeFilteredThread.samples.threadCPUDelta !== undefined;
 
     return {
       invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
-      fullThread,
+      rangeFilteredThread,
       tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex,

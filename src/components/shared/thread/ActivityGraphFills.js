@@ -34,7 +34,7 @@ import type { HoveredPixelState } from './ActivityGraph';
 type RenderedComponentSettings = {|
   +canvasPixelWidth: DevicePixels,
   +canvasPixelHeight: DevicePixels,
-  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -207,7 +207,7 @@ export class ActivityGraphFillComputer {
    */
   _accumulateSampleCategories() {
     const {
-      fullThread: { samples, stackTable },
+      rangeFilteredThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
       enableCPUUsage,
@@ -486,7 +486,7 @@ export class ActivityFillGraphQuerier {
   ): HoveredPixelState | null {
     const {
       canvasPixelWidth,
-      fullThread: { samples, stackTable },
+      rangeFilteredThread: { samples, stackTable },
       greyCategoryIndex,
     } = this.renderedComponentSettings;
     const devicePixelRatio = canvasPixelWidth / canvasBoundingRect.width;
@@ -550,7 +550,7 @@ export class ActivityFillGraphQuerier {
     samplesAtThisPixel: $ReadOnlyArray<SampleContributionToPixel>
   ): CpuRatioInTimeRange | null {
     const {
-      fullThread: { samples },
+      rangeFilteredThread: { samples },
       interval,
     } = this.renderedComponentSettings;
 
@@ -711,7 +711,7 @@ export class ActivityFillGraphQuerier {
     xPixel: number
   ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
     const {
-      fullThread: { samples },
+      rangeFilteredThread: { samples },
       rangeStart,
       xPixelsPerMs,
     } = this.renderedComponentSettings;
@@ -747,7 +747,7 @@ export class ActivityFillGraphQuerier {
     sample: IndexIntoSamplesTable
   ): number {
     const {
-      fullThread: { samples },
+      rangeFilteredThread: { samples },
       rangeStart,
     } = this.renderedComponentSettings;
     const kernelPos = xPixel - SMOOTHING_RADIUS;

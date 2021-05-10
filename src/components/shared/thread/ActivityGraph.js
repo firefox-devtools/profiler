@@ -30,7 +30,7 @@ import type {
 export type Props = {|
   +className: string,
   +trackName: string,
-  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -149,7 +149,7 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
 
   render() {
     const {
-      fullThread,
+      rangeFilteredThread,
       categories,
       trackName,
       interval,
@@ -174,7 +174,7 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
             'threadActivityGraphCanvas'
           )}
           trackName={trackName}
-          fullThread={fullThread}
+          rangeFilteredThread={rangeFilteredThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -191,7 +191,7 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
             <SampleTooltipContents
               sampleIndex={hoveredPixelState.sample}
               cpuRatioInTimeRange={hoveredPixelState.cpuRatioInTimeRange}
-              fullThread={fullThread}
+              rangeFilteredThread={rangeFilteredThread}
               categories={categories}
             />
           </Tooltip>

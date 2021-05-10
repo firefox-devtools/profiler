@@ -25,7 +25,7 @@ import type { CategoryDrawStyles } from './ActivityGraphFills';
 type CanvasProps = {|
   +className: string,
   +trackName: string,
-  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -89,7 +89,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
 
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
-      fullThread,
+      rangeFilteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -110,7 +110,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     const { fills, fillsQuerier } = computeActivityGraphFills({
       canvasPixelWidth,
       canvasPixelHeight,
-      fullThread,
+      rangeFilteredThread,
       interval,
       rangeStart,
       rangeEnd,
