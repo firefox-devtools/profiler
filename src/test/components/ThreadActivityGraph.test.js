@@ -208,5 +208,63 @@ describe('ThreadActivityGraph', function() {
         'set globalCompositeOperation'
       );
     });
+
+    it('will compute the percentage properly even though it is in a commited range with missing samples', function() {
+      const MS_TO_NS_MULTIPLIER = 1000000;
+      const profile = getSamplesProfile();
+      profile.meta.interval = 1;
+      profile.meta.sampleUnits = {
+        time: 'ms',
+        eventDelay: 'ms',
+        threadCPUDelta: 'ns',
+      };
+
+      // We are creating a profile which has 8ms missing sample area in it.
+      // It's starting between the sample 2 and 3.
+      profile.threads[0].samples.threadCPUDelta = [
+        null,
+        0.4 * MS_TO_NS_MULTIPLIER,
+        0.1 * MS_TO_NS_MULTIPLIER,
+        4 * MS_TO_NS_MULTIPLIER, // It's 50% CPU because the actual interval is 8ms.
+        1 * MS_TO_NS_MULTIPLIER,
+        0.2 * MS_TO_NS_MULTIPLIER,
+        0.8 * MS_TO_NS_MULTIPLIER,
+        0.3 * MS_TO_NS_MULTIPLIER,
+      ];
+      profile.threads[0].samples.time = [
+        0,
+        1,
+        2,
+        10, // For this sample, the interval is 8ms since there are missing samples.
+        11,
+        12,
+        13,
+        14,
+      ];
+
+      const { dispatch } = setup(profile);
+      flushDrawLog();
+
+      // Commit a range that starts right after the missing sample.
+      dispatch(commitRange(9, 14));
+
+      const drawCalls = flushDrawLog();
+      // Activity graph uses lineTo to draw the lines for the samples.
+      const lineToOperations = drawCalls.filter(
+        ([operation]) => operation === 'lineTo'
+      );
+
+      expect(lineToOperations.length).toBeGreaterThan(0);
+      // Make sure that all the lineTo operations are inside the activity graph
+      // rectangle. There should not be any sample that starts or ends outside
+      // of the graph.
+      // FIXME: This should return `true` instead! The next commit should fix this!
+      expect(
+        lineToOperations.every(
+          ([, x, y]) =>
+            x >= 0 && x <= GRAPH_WIDTH && y >= 0 && y <= GRAPH_HEIGHT
+        )
+      ).toBe(false);
+    });
   });
 });
