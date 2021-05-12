@@ -46,9 +46,15 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     const { interval, thread } = this.props;
     const { samples } = thread;
 
-    const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex] || 0;
+    // Because the cpu value for one sample is about the interval between this
+    // sample and the sample before it, in this function we need to look ahead
+    // of one sample.
+    if (sampleIndex >= samples.length - 1) {
+      return 0;
+    }
+    const cpuDelta = ensureExists(samples.threadCPUDelta)[sampleIndex + 1] || 0;
     const intervalFactor =
-      (samples.time[sampleIndex] - samples.time[sampleIndex - 1]) / interval;
+      (samples.time[sampleIndex + 1] - samples.time[sampleIndex]) / interval;
     const currentCPUPerInterval = cpuDelta / intervalFactor;
     return currentCPUPerInterval * yPixelsPerHeight;
   };
