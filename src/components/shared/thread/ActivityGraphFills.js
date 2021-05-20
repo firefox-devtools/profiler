@@ -523,14 +523,14 @@ export class ActivityFillGraphQuerier {
    */
   _getCPURatioAtX(
     deviceX: DevicePixels,
-    candidateSamples: $ReadOnlyArray<SampleContributionToPixel>
+    samplesAtThisPixel: $ReadOnlyArray<SampleContributionToPixel>
   ): CpuRatioInTimeRange | null {
     const {
       fullThread: { samples },
       interval,
     } = this.renderedComponentSettings;
 
-    if (candidateSamples.length === 0) {
+    if (samplesAtThisPixel.length === 0) {
       // Return null if there are no candidate samples.
       return null;
     }
@@ -547,7 +547,7 @@ export class ActivityFillGraphQuerier {
 
     // Get the time range of the contributed samples to the average CPU usage value.
     let timeRange = 0;
-    for (const { sample } of candidateSamples) {
+    for (const { sample } of samplesAtThisPixel) {
       timeRange +=
         sample === 0
           ? interval
