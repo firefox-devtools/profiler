@@ -219,4 +219,20 @@ describe('SampleTooltipContents', function() {
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
     expect(cpuUsage).toHaveTextContent('58% (average over 1.0ms)');
   });
+
+  it('renders the CPU usage properly for the first part of the sample with irregular sample times', () => {
+    // Normally there should be 4 samples in the profile. But second sample
+    // takes spaces for 2 samples.
+    const profile = getProfileWithCPU([null, 800, 1000], 'µs');
+    profile.threads[0].samples.time = [0, 2, 3];
+    profile.threads[0].samples.length = 3;
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the second part of the sample.
+    setup(profile, hoveredSampleIndex, 'before');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
+  });
 });
