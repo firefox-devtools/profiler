@@ -17,8 +17,6 @@ import type {
   IndexIntoSamplesTable,
   CategoryList,
   Thread,
-  SampleUnits,
-  Milliseconds,
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 
@@ -27,9 +25,6 @@ type Props = {|
   +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
   +categories: CategoryList,
   +fullThread: Thread,
-  +sampleUnits: SampleUnits | void,
-  +maxThreadCPUDelta: number,
-  +interval: Milliseconds,
 |};
 
 /**
@@ -39,9 +34,9 @@ type Props = {|
 export class SampleTooltipContents extends React.PureComponent<Props> {
   // Get thread CPU usage if it's present in the profile.
   _maybeRenderCpuUsage() {
-    const { sampleUnits, cpuRatioInTimeRange } = this.props;
+    const { cpuRatioInTimeRange } = this.props;
 
-    if (cpuRatioInTimeRange === null || !sampleUnits) {
+    if (cpuRatioInTimeRange === null) {
       // We have no CPU usage information.
       return null;
     }
