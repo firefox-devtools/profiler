@@ -19,6 +19,7 @@ import type {
   DevicePixels,
   CssPixels,
 } from 'firefox-profiler/types';
+import type { HoveredPixelState } from './ActivityGraph';
 
 /**
  * This type contains the values that were used to render the ThreadActivityGraph's React
@@ -85,6 +86,11 @@ type SelectedPercentageAtPixelBuffers = {|
   +filteredOutByTabPercentageAtPixel: Float32Array,
 |};
 
+export type CpuRatioInTimeRange = {|
+  +cpuRatio: number,
+  +timeRange: Milliseconds,
+|};
+
 const BOX_BLUR_RADII = [3, 2, 2];
 const SMOOTHING_RADIUS = 3 + 2 + 2;
 const SMOOTHING_KERNEL: Float32Array = _getSmoothingKernel(
@@ -108,7 +114,7 @@ export function computeActivityGraphFills(
     mutableFills
   );
 
-  activityGraphFills.run();
+  const upperGraphEdge = activityGraphFills.run();
   // We're done mutating the fills' Float32Array buffers.
   const fills = mutableFills;
 
@@ -116,7 +122,8 @@ export function computeActivityGraphFills(
     fills,
     fillsQuerier: new ActivityFillGraphQuerier(
       renderedComponentSettings,
-      fills
+      fills,
+      upperGraphEdge
     ),
   };
 }
@@ -145,7 +152,7 @@ export class ActivityGraphFillComputer {
    * Run the computation to compute a list of the fills that need to be drawn for the
    * ThreadActivityGraph.
    */
-  run(): void {
+  run(): Float32Array {
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.
     this._accumulateSampleCategories();
@@ -156,7 +163,9 @@ export class ActivityGraphFillComputer {
       _applyGaussianBlur1D(fill.perPixelContribution, BOX_BLUR_RADII);
     }
 
-    this._accumulateUpperEdge();
+    const upperGraphEdge = this._accumulateUpperEdge();
+
+    return upperGraphEdge;
   }
 
   /**
@@ -164,7 +173,7 @@ export class ActivityGraphFillComputer {
    * accumulatedUpperEdge array describes the shape of the "upper edge" after this fill.
    * Fills are stacked on top of each other.
    */
-  _accumulateUpperEdge(): void {
+  _accumulateUpperEdge(): Float32Array {
     const { mutableFills } = this;
     {
       // Only copy the first array, as there is no accumulation.
@@ -186,6 +195,8 @@ export class ActivityGraphFillComputer {
       }
       previousUpperEdge = accumulatedUpperEdge;
     }
+
+    return previousUpperEdge;
   }
 
   /**
@@ -221,13 +232,29 @@ export class ActivityGraphFillComputer {
           : stackTable.category[stackIndex];
 
       let cpuBeforeSample = null;
+      let cpuAfterSample = null;
       if (enableCPUUsage && threadCPUDelta) {
         // It must be non-null because we are checking this in the processing
         // step and eliminating all the null values.
-        const cpuDelta = ensureExists(threadCPUDelta[i]);
+        const cpuDeltaBefore = ensureExists(threadCPUDelta[i]);
+        const cpuDeltaAfter = ensureExists(threadCPUDelta[i + 1]);
         const intervalDistribution =
           i === 0 ? 1 : (samples.time[i] - samples.time[i - 1]) / interval;
-        cpuBeforeSample = cpuDelta / intervalDistribution;
+        const nextIntervalDistribution =
+          (samples.time[i + 1] - samples.time[i]) / interval;
+
+        // Figure out the CPU usage "per interval". This is needed for cases
+        // where we have some missing samples. For example:
+        //
+        // Interval:        1ms                  2ms                 1ms
+        // CPU:          100 cycles           200 cycles          200 cycles
+        // Samples:  [x-------------x--------------------------x-------------x]
+        //
+        // In this case, even though it has the max CPU cycle count, the CPU
+        // usage should be 50% because this cycle count is from 2ms area instead
+        // of 1ms like the latter one.
+        cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
+        cpuAfterSample = cpuDeltaAfter / nextIntervalDistribution;
       }
 
       // Mutate the percentage buffers.
@@ -237,7 +264,8 @@ export class ActivityGraphFillComputer {
         prevSampleTime,
         sampleTime,
         nextSampleTime,
-        cpuBeforeSample
+        cpuBeforeSample,
+        cpuAfterSample
       );
 
       prevSampleTime = sampleTime;
@@ -268,6 +296,9 @@ export class ActivityGraphFillComputer {
       prevSampleTime,
       sampleTime,
       sampleTime + interval,
+      cpuBeforeSample,
+      // There is no cpuAfterSample for this since this is the last sample.
+      // Assigning the same CPU delta value to it.
       cpuBeforeSample
     );
   }
@@ -282,7 +313,8 @@ export class ActivityGraphFillComputer {
     prevSampleTime: Milliseconds,
     sampleTime: Milliseconds,
     nextSampleTime: Milliseconds,
-    cpuBeforeSample: number | null
+    cpuBeforeSample: number | null,
+    cpuAfterSample: number | null
   ) {
     const {
       rangeEnd,
@@ -311,6 +343,7 @@ export class ActivityGraphFillComputer {
     pixelEnd = Math.min(canvasPixelWidth - 1, pixelEnd);
     const intPixelStart = Math.floor(pixelStart);
     const intPixelEnd = Math.floor(pixelEnd);
+    const intPixelCenter = Math.floor((intPixelStart + intPixelEnd) / 2);
 
     // For every sample, we have a fractional interval of this sample's
     // contribution to the graph's pixels.
@@ -339,17 +372,59 @@ export class ActivityGraphFillComputer {
       sampleIndex
     );
 
-    // A number between 0 and 1 for sample percentage. It changes depending on
+    // A number between 0 and 1 for sample ratio. It changes depending on
     // the CPU usage if it's given. If not, it uses 1 directly.
-    const samplePercentage =
+    const sampleFirstHalfRatio =
       cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
-    for (let i = intPixelStart; i <= intPixelEnd; i++) {
-      percentageBuffer[i] += samplePercentage;
+    const sampleSecondHalfRatio =
+      cpuAfterSample === null ? 1 : cpuAfterSample / maxThreadCPUDelta;
+
+    // Samples have two parts to be able to present the CPU utilizations properly.
+    // The first half of the sample will use the CPU delta number that belongs to
+    // this sample.
+    for (let i = intPixelStart; i <= intPixelCenter; i++) {
+      percentageBuffer[i] += sampleFirstHalfRatio;
     }
+    // The second half of the sample will use the CPU delta number that belongs to
+    // the next sample.
+    // For the samples that are consist of only one pixel, this loop will not be
+    // executed. It will only be executed if sample has 2 or more pixels.
+    for (let i = intPixelCenter + 1; i <= intPixelEnd; i++) {
+      percentageBuffer[i] += sampleSecondHalfRatio;
+    }
+
+    // If a sample is only one pixel, then only the first for loop in is being
+    // run. If a sample has more than one pixel, then both the first and the
+    // second loop is being run. If there is only one pixel, which is
+    // intPixelStart === intPixelEnd case, we should use the first half ratio to
+    // compute the sub pixel subtraction. This is because we only use the first
+    // half ratio to compute in that case. If there are 2 or more
+    // pixels, then we use the second half ratio as the ending.
+    let sampleEndRatio;
+    if (intPixelStart === intPixelEnd) {
+      // Sample has only one pixel in the activity graph. Therefore use the
+      // first half ratio as the end ratio.
+      sampleEndRatio = sampleFirstHalfRatio;
+    } else {
+      // Sample has more than one pixel in the activity graph. Therefore use the
+      // second half ratio as the end ratio.
+      sampleEndRatio = sampleSecondHalfRatio;
+    }
+
+    // After going through all the pixels, we should now remove all the parts in
+    // the first and last pixels that don't belong to this sample. Because a
+    // sample can start and end in sub-pixel values.
+    // The algorithm works like this:
+    //  - When one sample has several pixels, start and end pixels will be
+    //    different and they will be reduced independently.
+    //  - When one pixel has several samples, start and end pixels of every sample
+    //    will be the same. Ratios of different samples will accumulate and form
+    //    the 100% of a sample.
+
     percentageBuffer[intPixelStart] -=
-      samplePercentage * (pixelStart - intPixelStart);
+      sampleFirstHalfRatio * (pixelStart - intPixelStart);
     percentageBuffer[intPixelEnd] -=
-      samplePercentage * (1 - (pixelEnd - intPixelEnd));
+      sampleEndRatio * (1 - (pixelEnd - intPixelEnd));
   }
 
   /**
@@ -388,30 +463,36 @@ export class ActivityGraphFillComputer {
 export class ActivityFillGraphQuerier {
   renderedComponentSettings: RenderedComponentSettings;
   fills: CategoryFill[];
+  upperGraphEdge: Float32Array;
 
   constructor(
     renderedComponentSettings: RenderedComponentSettings,
-    fills: CategoryFill[]
+    fills: CategoryFill[],
+    upperGraphEdge: Float32Array
   ) {
     this.renderedComponentSettings = renderedComponentSettings;
     this.fills = fills;
+    this.upperGraphEdge = upperGraphEdge;
   }
 
   /**
    * Given a click in CssPixels coordinates, look up the sample in the graph.
    */
-  getSampleAtClick(
+  getSampleAndCpuRatioAtClick(
     cssX: CssPixels,
     cssY: CssPixels,
     time: Milliseconds,
     canvasBoundingRect: ClientRect
-  ): IndexIntoSamplesTable | null {
-    const { canvasPixelWidth } = this.renderedComponentSettings;
+  ): HoveredPixelState | null {
+    const {
+      canvasPixelWidth,
+      fullThread: { samples, stackTable },
+      greyCategoryIndex,
+    } = this.renderedComponentSettings;
     const devicePixelRatio = canvasPixelWidth / canvasBoundingRect.width;
-    const categoryUnderMouse = this._categoryAtDevicePixel(
-      Math.round(cssX * devicePixelRatio),
-      Math.round(cssY * devicePixelRatio)
-    );
+    const deviceX = Math.round(cssX * devicePixelRatio);
+    const deviceY = Math.round(cssY * devicePixelRatio);
+    const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);
     if (categoryUnderMouse === null) {
       return null;
     }
@@ -419,7 +500,9 @@ export class ActivityFillGraphQuerier {
     // Get all samples that contribute pixels to the clicked category in this
     // pixel column of the graph.
     const { category, categoryLowerEdge, yPercentage } = categoryUnderMouse;
-    const candidateSamples = this._getCategoriesSamplesAtTime(time, category);
+    const candidateSamples = this._getSamplesAtTime(time);
+
+    const cpuRatioInTimeRange = this._getCPURatioAtX(deviceX, candidateSamples);
 
     // The candidate samples are sorted by gravity, bottom to top.
     // Each sample occupies a non-empty subrange of the [0, 1] range. The height
@@ -435,16 +518,67 @@ export class ActivityFillGraphQuerier {
     // (In fact, yPercentage > upperEdgeOfPreviousSample except during the first
     // iteration - in the first iteration, yPercentage can be == categoryLowerEdge.)
     for (const { sample, contribution } of candidateSamples) {
+      const stackIndex = samples.stack[sample];
+      const sampleCategory =
+        stackIndex !== null
+          ? stackTable.category[stackIndex]
+          : greyCategoryIndex;
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
-      if (yPercentage <= upperEdgeOfThisSample) {
+      // Checking the sample category here because there are samples with different
+      // categories that has y percentage is lower than the upperEdgeOfThisSample.
+      // It's possible to pick the wrong value otherwise.
+      if (sampleCategory === category && yPercentage <= upperEdgeOfThisSample) {
         // We use <= rather than < here so that we don't return null if
         // yPercentage is equal to the upper edge of the last sample.
-        return sample;
+        return { sample, cpuRatioInTimeRange };
       }
       upperEdgeOfPreviousSample = upperEdgeOfThisSample;
     }
 
     return null;
+  }
+
+  /**
+   * Determine the CPU usage ratio and the time range that contributes to this
+   * ratio at that X. `upperGraphEdge` is the array we use to determine the CPU
+   * ratio because this is the height of the whole activity graph, and it's a
+   * number between 0 and 1 which is perfect for being used to determine the
+   * percentage of the average CPU usage.
+   */
+  _getCPURatioAtX(
+    deviceX: DevicePixels,
+    samplesAtThisPixel: $ReadOnlyArray<SampleContributionToPixel>
+  ): CpuRatioInTimeRange | null {
+    const {
+      fullThread: { samples },
+      interval,
+    } = this.renderedComponentSettings;
+
+    if (samplesAtThisPixel.length === 0) {
+      // Return null if there are no candidate samples.
+      return null;
+    }
+
+    const threadCPUDelta = samples.threadCPUDelta;
+    if (!threadCPUDelta) {
+      // There is no threadCPUDelta information in the array. Return null.
+      return null;
+    }
+
+    // This is the height of the graph and it directly corresponds to the average
+    // CPU usage number.
+    const cpuRatio = this.upperGraphEdge[deviceX];
+
+    // Get the time range of the contributed samples to the average CPU usage value.
+    let timeRange = 0;
+    for (const { sample } of samplesAtThisPixel) {
+      timeRange +=
+        sample === 0
+          ? interval
+          : samples.time[sample] - samples.time[sample - 1];
+    }
+
+    return { cpuRatio, timeRange };
   }
 
   /**
@@ -526,19 +660,14 @@ export class ActivityFillGraphQuerier {
   }
 
   /**
-   * Determine which samples contributed to a given categoy at a specific time. The result
+   * Determine which samples contributed to a given height at a specific time. The result
    * is an array of all candidate samples, with their contribution amount.
    */
-  _getCategoriesSamplesAtTime(
-    time: number,
-    category: IndexIntoCategoryList
-  ): $ReadOnlyArray<SampleContributionToPixel> {
+  _getSamplesAtTime(time: number): $ReadOnlyArray<SampleContributionToPixel> {
     const {
       rangeStart,
       rangeEnd,
       treeOrderSampleComparator,
-      greyCategoryIndex,
-      fullThread: { samples, stackTable },
       canvasPixelWidth,
     } = this.renderedComponentSettings;
 
@@ -552,23 +681,16 @@ export class ActivityFillGraphQuerier {
 
     const sampleContributions = [];
     for (let sample = sampleRangeStart; sample < sampleRangeEnd; sample++) {
-      const stackIndex = samples.stack[sample];
-      const sampleCategory =
-        stackIndex !== null
-          ? stackTable.category[stackIndex]
-          : greyCategoryIndex;
-      if (sampleCategory === category) {
-        const contribution = this._getSmoothedContributionFromSampleToPixel(
-          xPixel,
-          xPixelsPerMs,
-          sample
-        );
-        if (contribution > 0) {
-          sampleContributions.push({
-            sample,
-            contribution,
-          });
-        }
+      const contribution = this._getSmoothedContributionFromSampleToPixel(
+        xPixel,
+        xPixelsPerMs,
+        sample
+      );
+      if (contribution > 0) {
+        sampleContributions.push({
+          sample,
+          contribution,
+        });
       }
     }
     if (treeOrderSampleComparator) {
