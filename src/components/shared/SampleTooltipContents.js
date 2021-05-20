@@ -20,28 +20,26 @@ import type {
 } from 'firefox-profiler/types';
 import type { CpuRatioInTimeRange } from './thread/ActivityGraphFills';
 
-type Props = {|
+type CPUProps = CpuRatioInTimeRange;
+
+type RestProps = {|
   +sampleIndex: IndexIntoSamplesTable,
-  +cpuRatioInTimeRange: CpuRatioInTimeRange | null,
   +categories: CategoryList,
   +fullThread: Thread,
 |};
 
+type Props = {|
+  +cpuRatioInTimeRange: CPUProps | null,
+  ...RestProps,
+|};
+
 /**
- * This class displays the tooltip contents for a given sample. Typically the user
- * will want to know what the function is, and its category.
+ * Render thread CPU usage if it's present in the profile.
+ * This is split to reduce the rerender of the SampleTooltipRestContents component.
  */
-export class SampleTooltipContents extends React.PureComponent<Props> {
-  // Get thread CPU usage if it's present in the profile.
-  _maybeRenderCpuUsage() {
-    const { cpuRatioInTimeRange } = this.props;
-
-    if (cpuRatioInTimeRange === null) {
-      // We have no CPU usage information.
-      return null;
-    }
-
-    const { cpuRatio, timeRange } = cpuRatioInTimeRange;
+class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
+  render() {
+    const { cpuRatio, timeRange } = this.props;
 
     const percentageText = formatPercent(cpuRatio);
     const cpuUsageAndPercentage = `${percentageText} (average over ${formatMilliseconds(
@@ -56,7 +54,12 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
       </div>
     );
   }
+}
 
+/**
+ * Render the non-CPU related parts of the SampleTooltipContents.
+ */
+class SampleTooltipRestContents extends React.PureComponent<RestProps> {
   render() {
     const { sampleIndex, fullThread, categories } = this.props;
     const { samples, stackTable } = fullThread;
@@ -70,7 +73,6 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
 
     return (
       <>
-        {this._maybeRenderCpuUsage()}
         <div className="tooltipDetails">
           <div className="tooltipLabel">Category:</div>
           <div>
@@ -88,6 +90,36 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
           stackIndex={stackIndex}
           thread={fullThread}
           implementationFilter="combined"
+          categories={categories}
+        />
+      </>
+    );
+  }
+}
+
+/**
+ * This class displays the tooltip contents for a given sample. Typically the user
+ * will want to know what the function is, and its category.
+ */
+export class SampleTooltipContents extends React.PureComponent<Props> {
+  render() {
+    const {
+      cpuRatioInTimeRange,
+      sampleIndex,
+      fullThread,
+      categories,
+    } = this.props;
+    return (
+      <>
+        {cpuRatioInTimeRange === null ? null : (
+          <SampleTooltipCPUContents
+            cpuRatio={cpuRatioInTimeRange.cpuRatio}
+            timeRange={cpuRatioInTimeRange.timeRange}
+          />
+        )}
+        <SampleTooltipRestContents
+          sampleIndex={sampleIndex}
+          fullThread={fullThread}
           categories={categories}
         />
       </>
