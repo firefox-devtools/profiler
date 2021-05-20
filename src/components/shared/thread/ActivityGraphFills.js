@@ -243,6 +243,16 @@ export class ActivityGraphFillComputer {
         const nextIntervalDistribution =
           (samples.time[i + 1] - samples.time[i]) / interval;
 
+        // Figure out the CPU usage "per interval". This is needed for cases
+        // where we have some missing samples. For example:
+        //
+        // Interval:        1ms                  2ms                 1ms
+        // CPU:          100 cycles           200 cycles          200 cycles
+        // Samples:  [x-------------x--------------------------x-------------x]
+        //
+        // In this case, even though it has the max CPU cycle count, the CPU
+        // usage should be 50% because this cycle count is from 2ms area instead
+        // of 1ms like the latter one.
         cpuBeforeSample = cpuDeltaBefore / intervalDistribution;
         cpuAfterSample = cpuDeltaAfter / nextIntervalDistribution;
       }
@@ -400,6 +410,17 @@ export class ActivityGraphFillComputer {
       // second half ratio as the end ratio.
       sampleEndRatio = sampleSecondHalfRatio;
     }
+
+    // After going through all the pixels, we should now remove all the parts in
+    // the first and last pixels that don't belong to this sample. Because a
+    // sample can start and end in sub-pixel values.
+    // The algorithm works like this:
+    //  - When one sample has several pixels, start and end pixels will be
+    //    different and they will be reduced independently.
+    //  - When one pixel has several samples, start and end pixels of every sample
+    //    will be the same. Ratios of different samples will accumulate and form
+    //    the 100% of a sample.
+
     percentageBuffer[intPixelStart] -=
       sampleFirstHalfRatio * (pixelStart - intPixelStart);
     percentageBuffer[intPixelEnd] -=
@@ -503,6 +524,9 @@ export class ActivityFillGraphQuerier {
           ? stackTable.category[stackIndex]
           : greyCategoryIndex;
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
+      // Checking the sample category here because there are samples with different
+      // categories that has y percentage is lower than the upperEdgeOfThisSample.
+      // It's possible to pick the wrong value otherwise.
       if (sampleCategory === category && yPercentage <= upperEdgeOfThisSample) {
         // We use <= rather than < here so that we don't return null if
         // yPercentage is equal to the upper edge of the last sample.
