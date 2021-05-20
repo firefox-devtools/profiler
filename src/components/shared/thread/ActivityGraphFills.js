@@ -377,7 +377,7 @@ export class ActivityGraphFillComputer {
     }
     // The second half of the sample will use the CPU delta number that belongs to
     // the next sample.
-    // For the samples that are consist of only one sample, this loop will not be
+    // For the samples that are consist of only one pixel, this loop will not be
     // executed. It will only be executed if sample has 2 or more pixels.
     for (let i = intPixelCenter + 1; i <= intPixelEnd; i++) {
       percentageBuffer[i] += sampleSecondHalfRatio;
@@ -385,10 +385,10 @@ export class ActivityGraphFillComputer {
 
     // If a sample is only one pixel, then only the first for loop in is being
     // run. If a sample has more than one pixel, then both the first and the
-    // second loop is being run. If there is only one sample,
-    // which is intPixelStart === intPixelEnd case, we should use the first half
-    // ratio to compute the sub pixel subtraction. This is because we only use
-    // the first half ratio to compute in that case. If there are 2 or more
+    // second loop is being run. If there is only one pixel, which is
+    // intPixelStart === intPixelEnd case, we should use the first half ratio to
+    // compute the sub pixel subtraction. This is because we only use the first
+    // half ratio to compute in that case. If there are 2 or more
     // pixels, then we use the second half ratio as the ending.
     let sampleEndRatio;
     if (intPixelStart === intPixelEnd) {
