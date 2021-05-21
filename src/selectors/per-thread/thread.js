@@ -9,9 +9,15 @@ import MixedTupleMap from 'mixedtuplemap';
 import * as Transforms from '../../profile-logic/transforms';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
+import * as CallTree from '../../profile-logic/call-tree';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 import * as Cpu from '../../profile-logic/cpu';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getFirstItemFromSet,
+} from '../../utils/flow';
 
 import type {
   Thread,
@@ -19,6 +25,7 @@ import type {
   JsTracerTable,
   SamplesTable,
   NativeAllocationsTable,
+  SamplesLikeTable,
   Selector,
   ThreadViewOptions,
   TransformStack,
@@ -28,10 +35,11 @@ import type {
   WeightType,
   EventDelayInfo,
   ThreadsKey,
+  CallTreeSummaryStrategy,
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
-import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
+
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
 
@@ -222,14 +230,72 @@ export function getThreadSelectorsPerThread(
   );
 
   /**
+   * The CallTreeSummaryStrategy determines how the call tree summarizes the
+   * the current thread. By default, this is done by timing, but other
+   * methods are also available. This selectors also ensures that the current
+   * thread supports the last selected call tree summary strategy.
+   */
+  const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = createSelector(
+    getThread,
+    UrlState.getLastSelectedCallTreeSummaryStrategy,
+    (thread, lastSelectedCallTreeSummaryStrategy) => {
+      switch (lastSelectedCallTreeSummaryStrategy) {
+        case 'timing':
+          // Timing is valid everywhere.
+          break;
+        case 'js-allocations':
+          if (!thread.jsAllocations) {
+            // Attempting to view a thread with no JS allocations, switch back to timing.
+            return 'timing';
+          }
+          break;
+        case 'native-allocations':
+        case 'native-retained-allocations':
+        case 'native-deallocations-sites':
+        case 'native-deallocations-memory':
+          if (!thread.nativeAllocations) {
+            // Attempting to view a thread with no native allocations, switch back
+            // to timing.
+            return 'timing';
+          }
+          break;
+        default:
+          assertExhaustiveCheck(
+            lastSelectedCallTreeSummaryStrategy,
+            'Unhandled call tree sumary strategy.'
+          );
+      }
+      return lastSelectedCallTreeSummaryStrategy;
+    }
+  );
+
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    getThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    getFilteredThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
+    getPreviewFilteredThread,
+    getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  /**
    * This selector returns the offset to add to a sampleIndex when accessing the
    * base thread, if your thread is a range filtered thread (all but the base
    * `getThread` or the last `getPreviewFilteredThread`).
    */
   const getSampleIndexOffsetFromCommittedRange: Selector<number> = createSelector(
-    getThread,
+    getUnfilteredSamplesForCallTree,
     ProfileSelectors.getCommittedRange,
-    ({ samples }, { start, end }) => {
+    (samples, { start, end }) => {
       const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
         samples,
         start,
@@ -244,10 +310,10 @@ export function getThreadSelectorsPerThread(
    * base thread, if your thread is the preview filtered thread.
    */
   const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
-    getFilteredThread,
+    getFilteredSamplesForCallTree,
     ProfileSelectors.getPreviewSelection,
     getSampleIndexOffsetFromCommittedRange,
-    ({ samples }, previewSelection, sampleIndexFromCommittedRange) => {
+    (samples, previewSelection, sampleIndexFromCommittedRange) => {
       if (!previewSelection.hasSelection) {
         return sampleIndexFromCommittedRange;
       }
@@ -374,6 +440,9 @@ export function getThreadSelectorsPerThread(
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
     getPreviewFilteredThread,
+    getUnfilteredSamplesForCallTree,
+    getFilteredSamplesForCallTree,
+    getPreviewFilteredSamplesForCallTree,
     getSampleIndexOffsetFromCommittedRange,
     getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
@@ -391,5 +460,6 @@ export function getThreadSelectorsPerThread(
     getTabFilteredThread,
     getActiveTabFilteredThread,
     getProcessedEventDelays,
+    getCallTreeSummaryStrategy,
   };
 }

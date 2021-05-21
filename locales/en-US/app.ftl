@@ -498,8 +498,8 @@ StackSettings--implementation-all-stacks = All stacks
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Native
 
-StackSettings--summarize = Summarize:
-StackSettings--call-tree-strategy-timing = Timing Data
+StackSettings--use-data-source-label = Data source:
+StackSettings--call-tree-strategy-timing = Timings
     .title = Summarize using sampled stacks of executed code over time
 StackSettings--call-tree-strategy-js-allocations = JavaScript Allocations
     .title = Summarize using bytes of JavaScript allocated (no de-allocations)
