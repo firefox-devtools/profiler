@@ -147,8 +147,12 @@ async function _getDemangleCallback(): Promise<DemangleFunction> {
     // therefore `import` can throw. Also some browsers might refuse to load a
     // wasm module because of our CSP.
     // See webpack bug https://github.com/webpack/webpack/issues/8517
-    const demangleModule = await import('gecko-profiler-demangle');
-    return demangleModule.demangle_any;
+
+    // See https://github.com/benmosher/eslint-plugin-import/issues/2098 about
+    // the eslint disabling.
+    // eslint-disable-next-line import/no-unresolved
+    const { demangle_any } = await import('gecko-profiler-demangle');
+    return demangle_any;
   } catch (error) {
     // Module loading can fail (for example in browsers without WebAssembly
     // support, or due to bad server configuration), so we will fall back

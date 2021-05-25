@@ -123,7 +123,7 @@ describe('TooltipCallNode', function() {
       const pageUrl = 'https://developer.mozilla.org/en-US/';
       const { getByText, container } = setupWithPageInformation(pageUrl);
 
-      expect(getByText(pageUrl)).toBeTruthy();
+      expect(getByText(pageUrl)).toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
     });
 
@@ -135,8 +135,8 @@ describe('TooltipCallNode', function() {
         iframeUrl
       );
 
-      expect(getByText(iframeUrl)).toBeTruthy();
-      expect(getByText(pageUrl)).toBeTruthy();
+      expect(getByText(iframeUrl)).toBeInTheDocument();
+      expect(getByText(pageUrl)).toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
     });
   });
