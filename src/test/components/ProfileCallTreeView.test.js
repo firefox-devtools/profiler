@@ -527,8 +527,8 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     changeSelect({ from: 'Timings', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
-    expect(getByText('Total Size (bytes)')).toBeTruthy();
-    expect(getByText('Self (bytes)')).toBeTruthy();
+    expect(getByText('Total Size (bytes)')).toBeInTheDocument();
+    expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
   it('matches the snapshot for JS allocations', function() {
@@ -583,13 +583,13 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     changeSelect({ from: 'Timings', to: 'Allocated Memory' });
 
     // After changing to native allocations, they do.
-    expect(getByText('Total Size (bytes)')).toBeTruthy();
-    expect(getByText('Self (bytes)')).toBeTruthy();
+    expect(getByText('Total Size (bytes)')).toBeInTheDocument();
+    expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
   it('does not have the retained memory option', function() {
     const { queryByText } = setup();
-    expect(queryByText('Retained Memory')).toBeFalsy();
+    expect(queryByText('Retained Memory')).not.toBeInTheDocument();
   });
 
   it('matches the snapshot for native allocations', function() {
@@ -650,8 +650,8 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     changeSelect({ from: 'Timings', to: 'Retained Memory' });
 
     // After changing to retained allocations, they do.
-    expect(getByText('Total Size (bytes)')).toBeTruthy();
-    expect(getByText('Self (bytes)')).toBeTruthy();
+    expect(getByText('Total Size (bytes)')).toBeInTheDocument();
+    expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
   it('matches the snapshot for retained allocations', function() {

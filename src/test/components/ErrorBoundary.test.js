@@ -46,12 +46,12 @@ describe('app/ErrorBoundary', function() {
 
   it('shows the component children when there is no error', () => {
     const { getByText } = setupComponent(childComponentText);
-    expect(getByText(childComponentText)).toBeTruthy();
+    expect(getByText(childComponentText)).toBeInTheDocument();
   });
 
   it('shows the error message children when the component throws error', () => {
     const { getByText } = setupComponent(<ThrowingComponent />);
-    expect(getByText(friendlyErrorMessage)).toBeTruthy();
+    expect(getByText(friendlyErrorMessage)).toBeInTheDocument();
   });
 
   it('surfaces the error via console.error', () => {

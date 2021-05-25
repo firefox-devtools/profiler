@@ -188,7 +188,7 @@ describe('FlameGraph', function() {
       dispatch(commitRange(5, 10));
       expect(
         screen.getByText('Broaden the selected range to view samples.')
-      ).toBeTruthy();
+      ).toBeInTheDocument();
     });
 
     it('shows reasons when samples are not in the preview range', () => {
@@ -206,7 +206,7 @@ describe('FlameGraph', function() {
         screen.getByText(
           'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
         )
-      ).toBeTruthy();
+      ).toBeInTheDocument();
     });
 
     it('shows reasons when samples have been completely filtered out', function() {
@@ -216,7 +216,7 @@ describe('FlameGraph', function() {
         screen.getByText(
           'Try broadening the selected range, removing search terms, or call tree transforms to view samples.'
         )
-      ).toBeTruthy();
+      ).toBeInTheDocument();
     });
   });
 });
