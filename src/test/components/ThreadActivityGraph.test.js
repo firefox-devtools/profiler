@@ -259,11 +259,16 @@ describe('ThreadActivityGraph', function() {
       // rectangle. There should not be any sample that starts or ends outside
       // of the graph.
       expect(
-        lineToOperations.every(
+        lineToOperations.filter(
           ([, x, y]) =>
-            x >= 0 && x <= GRAPH_WIDTH && y >= 0 && y <= GRAPH_HEIGHT
+            x < 0 ||
+            x > GRAPH_WIDTH ||
+            y < 0 ||
+            y > GRAPH_HEIGHT ||
+            isNaN(x) ||
+            isNaN(y)
         )
-      ).toBe(true);
+      ).toEqual([]);
     });
   });
 });
