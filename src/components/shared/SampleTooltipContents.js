@@ -25,7 +25,7 @@ type CPUProps = CpuRatioInTimeRange;
 type RestProps = {|
   +sampleIndex: IndexIntoSamplesTable,
   +categories: CategoryList,
-  +fullThread: Thread,
+  +rangeFilteredThread: Thread,
 |};
 
 type Props = {|
@@ -61,8 +61,8 @@ class SampleTooltipCPUContents extends React.PureComponent<CPUProps> {
  */
 class SampleTooltipRestContents extends React.PureComponent<RestProps> {
   render() {
-    const { sampleIndex, fullThread, categories } = this.props;
-    const { samples, stackTable } = fullThread;
+    const { sampleIndex, rangeFilteredThread, categories } = this.props;
+    const { samples, stackTable } = rangeFilteredThread;
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex === null) {
       return 'No stack information';
@@ -88,7 +88,7 @@ class SampleTooltipRestContents extends React.PureComponent<RestProps> {
         <Backtrace
           maxStacks={20}
           stackIndex={stackIndex}
-          thread={fullThread}
+          thread={rangeFilteredThread}
           implementationFilter="combined"
           categories={categories}
         />
@@ -106,7 +106,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
     const {
       cpuRatioInTimeRange,
       sampleIndex,
-      fullThread,
+      rangeFilteredThread,
       categories,
     } = this.props;
     return (
@@ -119,7 +119,7 @@ export class SampleTooltipContents extends React.PureComponent<Props> {
         )}
         <SampleTooltipRestContents
           sampleIndex={sampleIndex}
-          fullThread={fullThread}
+          rangeFilteredThread={rangeFilteredThread}
           categories={categories}
         />
       </>

@@ -116,12 +116,13 @@ export function getThreadSelectorsPerThread(
   const getCPUProcessedThread: Selector<Thread> = createSelector(
     getThread,
     ProfileSelectors.getSampleUnits,
-    (thread, sampleUnits) =>
+    ProfileSelectors.getProfileInterval,
+    (thread, sampleUnits, profileInterval) =>
       thread.samples === null ||
       thread.samples.threadCPUDelta === undefined ||
       !sampleUnits
         ? thread
-        : Cpu.processThreadCPUDelta(thread, sampleUnits)
+        : Cpu.processThreadCPUDelta(thread, sampleUnits, profileInterval)
   );
 
   const getTabFilteredThread: Selector<Thread> = createSelector(

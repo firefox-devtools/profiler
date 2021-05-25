@@ -77,6 +77,7 @@ type OwnProps = {|
 
 type StateProps = {|
   +fullThread: Thread,
+  +rangeFilteredThread: Thread,
   +filteredThread: Thread,
   +tabFilteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
@@ -85,6 +86,7 @@ type StateProps = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +sampleIndexOffset: number,
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
@@ -186,13 +188,15 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 
   render() {
     const {
-      filteredThread,
       fullThread,
+      filteredThread,
+      rangeFilteredThread,
       tabFilteredThread,
       threadsKey,
       interval,
       rangeStart,
       rangeEnd,
+      sampleIndexOffset,
       callNodeInfo,
       selectedCallNodeIndex,
       unfilteredSamplesRange,
@@ -267,8 +271,10 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               trackName={trackName}
               interval={interval}
               fullThread={fullThread}
+              rangeFilteredThread={rangeFilteredThread}
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
+              sampleIndexOffset={sampleIndexOffset}
               onSampleClick={this._onSampleClick}
               categories={categories}
               samplesSelectedStates={samplesSelectedStates}
@@ -290,7 +296,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               onSampleClick={this._onSampleClick}
             />
             {isExperimentalCPUGraphsEnabled &&
-            fullThread.samples.threadCPUDelta !== undefined ? (
+            rangeFilteredThread.samples.threadCPUDelta !== undefined ? (
               <ThreadCPUGraph
                 className="threadCPUGraph"
                 trackName={trackName}
@@ -394,7 +400,7 @@ export const TimelineTrackThread = explicitConnect<
     )
       ? selectors.getSelectedCallNodeIndex(state)
       : null;
-    const fullThread = selectors.getRangeFilteredThread(state);
+    const fullThread = selectors.getCPUProcessedThread(state);
     const timelineType = getTimelineType(state);
     const enableCPUUsage =
       timelineType === 'cpu-category' &&
@@ -402,8 +408,9 @@ export const TimelineTrackThread = explicitConnect<
 
     return {
       invertCallstack: getInvertCallstack(state),
-      filteredThread: selectors.getFilteredThread(state),
       fullThread,
+      filteredThread: selectors.getFilteredThread(state),
+      rangeFilteredThread: selectors.getRangeFilteredThread(state),
       tabFilteredThread: selectors.getTabFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex,
@@ -411,6 +418,9 @@ export const TimelineTrackThread = explicitConnect<
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
+      sampleIndexOffset: selectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
       categories: getCategories(state),
       timelineType,
       hasFileIoMarkers:
