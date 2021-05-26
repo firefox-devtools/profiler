@@ -650,13 +650,13 @@ describe('Network Chart/tooltip behavior', () => {
       getNetworkMarkers()
     );
 
-    expect(queryByTestId('tooltip')).toBeFalsy();
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
     // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
     // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
     fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
-    expect(getByTestId('tooltip')).toBeTruthy();
+    expect(getByTestId('tooltip')).toBeInTheDocument();
     fireEvent(rowItem(), getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
-    expect(queryByTestId('tooltip')).toBeFalsy();
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
   });
 
   it('does not show tooltips when a context menu is displayed', () => {
@@ -678,7 +678,7 @@ describe('Network Chart/tooltip behavior', () => {
     // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
     // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
     fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
-    expect(queryByTestId('tooltip')).toBeFalsy();
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
   });
 });
 

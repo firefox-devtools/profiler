@@ -31,15 +31,15 @@ describe('app/KeyboardShortcut', function() {
   it('can open and close when hitting ? and Escape respectively', () => {
     const { getByText, queryByText } = setup();
 
-    expect(queryByText('Keyboard shortcuts')).toBeFalsy();
+    expect(queryByText('Keyboard shortcuts')).not.toBeInTheDocument();
 
     // Show the dialog.
     fireFullKeyPress(coerce<Window, HTMLElement>(window), { key: '?' });
-    expect(getByText('Keyboard shortcuts')).toBeTruthy();
+    expect(getByText('Keyboard shortcuts')).toBeInTheDocument();
 
     // Hide the dialog.
     fireFullKeyPress(coerce<Window, HTMLElement>(window), { key: 'Escape' });
-    expect(queryByText('Keyboard shortcuts')).toBeFalsy();
+    expect(queryByText('Keyboard shortcuts')).not.toBeInTheDocument();
   });
 
   it('matches the snapshot when closed', () => {

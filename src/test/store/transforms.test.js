@@ -1382,38 +1382,35 @@ describe('transform native deallocations', function() {
     ).toEqual([
       '- A (total: -41, self: —)',
       '  - B (total: -41, self: —)',
-      '    - Fjs (total: -30, self: —)',
-      '      - Gjs (total: -30, self: -13)',
-      '        - Hjs (total: -17, self: —)',
-      '          - I (total: -17, self: -17)',
-      '    - C (total: -11, self: —)',
-      '      - D (total: -11, self: —)',
-      '        - E (total: -11, self: -11)',
+      '    - C (total: -24, self: —)',
+      '      - J (total: -24, self: -11)',
+      '        - K (total: -13, self: -13)',
+      '    - Fjs (total: -17, self: —)',
+      '      - Gjs (total: -17, self: -17)',
     ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
     const {
       profile,
-      funcNamesDict: { Fjs },
+      funcNamesDict: { J },
     } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-deallocations-sites'));
     dispatch(
       addTransformToStack(threadIndex, {
         type: 'focus-function',
-        funcIndex: Fjs,
+        funcIndex: J,
       })
     );
 
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- Fjs (total: -30, self: —)',
-      '  - Gjs (total: -30, self: -13)',
-      '    - Hjs (total: -17, self: —)',
-      '      - I (total: -17, self: -17)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        // This comment so that prettier doesn't reformat this array.
+        '- J (total: -24, self: -11)',
+        '  - K (total: -13, self: -13)',
+      ]
+    );
   });
 });
 

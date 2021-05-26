@@ -626,7 +626,7 @@ describe('TooltipMarker', function() {
     );
 
     const preconnectTitle = getByText(/preconnect/i);
-    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toBeInTheDocument();
     expect(preconnectTitle).toMatchSnapshot();
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -655,7 +655,7 @@ describe('TooltipMarker', function() {
     );
 
     const preconnectTitle = getByText(/preconnect/i);
-    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toBeInTheDocument();
     expect(preconnectTitle).toMatchSnapshot();
     expect(container.firstChild).toMatchSnapshot();
   });

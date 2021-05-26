@@ -627,39 +627,53 @@ describe('app/MenuButtons', function() {
       it('handles successfully symbolicated profiles', async () => {
         await setupSymbolicationTest({ symbolicated: true });
 
-        expect(screen.getByText('Profile is symbolicated')).toBeTruthy();
+        expect(screen.getByText('Profile is symbolicated')).toBeInTheDocument();
         fireFullClick(screen.getByText('Re-symbolicate profile'));
 
         expect(symbolicateProfile).toHaveBeenCalled();
         expect(
           screen.getByText('Attempting to re-symbolicate profile')
-        ).toBeTruthy();
+        ).toBeInTheDocument();
         // No symbolicate button is available.
-        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+        expect(
+          screen.queryByText('Symbolicate profile')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Re-symbolicate profile')
+        ).not.toBeInTheDocument();
 
         // After a while, we get a result
-        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+        expect(
+          await screen.findByText('Profile is symbolicated')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Re-symbolicate profile')).toBeInTheDocument();
       });
 
       it('handles the contradictory state of non-symbolicated profiles that are done', async () => {
         await setupSymbolicationTest({ symbolicated: false });
 
-        expect(screen.getByText('Profile is not symbolicated')).toBeTruthy();
+        expect(
+          screen.getByText('Profile is not symbolicated')
+        ).toBeInTheDocument();
         fireFullClick(screen.getByText('Symbolicate profile'));
         expect(symbolicateProfile).toHaveBeenCalled();
 
         expect(
           screen.getByText('Currently symbolicating profile')
-        ).toBeTruthy();
+        ).toBeInTheDocument();
         // No symbolicate button is available.
-        expect(screen.queryByText('Symbolicate profile')).toBeFalsy();
-        expect(screen.queryByText('Re-symbolicate profile')).toBeFalsy();
+        expect(
+          screen.queryByText('Symbolicate profile')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Re-symbolicate profile')
+        ).not.toBeInTheDocument();
 
         // After a while, we get a result
-        expect(await screen.findByText('Profile is symbolicated')).toBeTruthy();
-        expect(screen.getByText('Re-symbolicate profile')).toBeTruthy();
+        expect(
+          await screen.findByText('Profile is symbolicated')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Re-symbolicate profile')).toBeInTheDocument();
       });
     });
   });
@@ -674,7 +688,7 @@ describe('app/MenuButtons', function() {
 
       // Make sure that we are in the full view and the button is not there.
       expect(getTimelineTrackOrganization(getState()).type).toBe('full');
-      expect(queryByText('Full View')).toBeFalsy();
+      expect(queryByText('Full View')).not.toBeInTheDocument();
     });
 
     it('is present when we are in the active tab view', () => {
@@ -694,7 +708,7 @@ describe('app/MenuButtons', function() {
 
       // Make sure that we are in the active tab view and the button is there.
       expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
-      expect(getByText('Full View')).toBeTruthy();
+      expect(getByText('Full View')).toBeInTheDocument();
       expect(container).toMatchSnapshot();
     });
 
@@ -715,14 +729,14 @@ describe('app/MenuButtons', function() {
 
       // Make sure that we are in the active tab view already.
       expect(getTimelineTrackOrganization(getState()).type).toBe('active-tab');
-      expect(getByText('Full View')).toBeTruthy();
+      expect(getByText('Full View')).toBeInTheDocument();
 
       // Switch to the full view by clicking on the Full View button
       fireFullClick(getByText('Full View'));
 
       // Make sure that we are in the full view and the button is no longer there
       expect(getTimelineTrackOrganization(getState()).type).toBe('full');
-      expect(queryByText('Full View')).toBeFalsy();
+      expect(queryByText('Full View')).not.toBeInTheDocument();
     });
   });
 });

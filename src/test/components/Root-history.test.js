@@ -104,8 +104,10 @@ describe('Root with history', function() {
 
     expect(window.history.length).toBe(1);
 
-    expect(getByText('Downloading and processing the profile…')).toBeTruthy();
-    expect(queryByText('Call Tree')).toBeFalsy();
+    expect(
+      getByText('Downloading and processing the profile…')
+    ).toBeInTheDocument();
+    expect(queryByText('Call Tree')).not.toBeInTheDocument();
 
     await Promise.all((window: any).fetch.mock.results.map(n => n.value));
 

@@ -44,6 +44,15 @@
       }
     ],
     [
+      "@babel/plugin-proposal-private-methods",
+      {
+        // Like `plugin-proposal-class-properties`, `loose` option is being used
+        // inside of this plugin as well. These plugins must have the same value,
+        // therefore it's set to true here.
+        "loose": true
+      }
+    ],
+    [
       "module-resolver",
       {
         "alias": {

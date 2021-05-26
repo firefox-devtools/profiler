@@ -186,7 +186,7 @@ describe('CallTreeSidebar', function() {
     const layoutCategory = getByText('Layout');
     fireFullClick(layoutCategory);
 
-    expect(getByText('FakeSubCategoryC')).toBeTruthy();
+    expect(getByText('FakeSubCategoryC')).toBeInTheDocument();
 
     expect(container.firstChild).toMatchSnapshot();
   });
