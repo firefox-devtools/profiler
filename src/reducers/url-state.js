@@ -488,6 +488,13 @@ const isResourcesPanelOpen: Reducer<boolean> = (state = false, action) => {
 };
 
 /**
+ * This value is only set from the URL and never changed.
+ */
+const symbolServerUrl: Reducer<string | null> = (state = null) => {
+  return state;
+};
+
+/**
  * These values are specific to an individual full profile.
  */
 const fullProfileSpecific = combineReducers({
@@ -572,6 +579,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     profileSpecific,
     profileName,
     timelineTrackOrganization,
+    symbolServerUrl,
   })
 );
 

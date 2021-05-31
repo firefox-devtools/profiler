@@ -97,6 +97,18 @@ export const PROFILER_SERVER_ORIGIN = 'https://api.profiler.firefox.com';
 // This is your local server:
 // export const PROFILER_SERVER_ORIGIN = 'http://localhost:5252';
 
+// SYMBOL_SERVER_URL
+// -----------------
+// Can be overridden with the URL parameter `symbolServer=SERVERURL`.
+// You can change this to the staging server `https://symbolication.stage.mozaws.net`,
+// or run a local symbol server (for example using profiler-symbol-server [1])
+// and set it to e.g. 'http://localhost:8000/'.
+//
+// [1] https://github.com/mstange/profiler-symbol-server/
+
+// This is the default server.
+export const SYMBOL_SERVER_URL = 'https://symbols.mozilla.org';
+
 // See the MarkerPhase type for more information.
 export const INSTANT: MarkerPhase = 0;
 export const INTERVAL: MarkerPhase = 1;
