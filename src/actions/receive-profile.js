@@ -34,6 +34,7 @@ import {
   getView,
   getRelevantPagesForActiveTab,
   getIsCPUUtilizationProvided,
+  getSymbolServerUrl,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -234,7 +235,11 @@ export function finalizeProfileView(
     // that they weren't symbolicated.
     // We can skip the symbolication in tests if needed.
     if (!skipSymbolication && profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
+      const symbolStore = getSymbolStore(
+        dispatch,
+        getSymbolServerUrl(getState()),
+        geckoProfiler
+      );
       if (symbolStore) {
         // Only symbolicate if a symbol store is available. In tests we may not
         // have access to IndexedDB.
@@ -639,7 +644,10 @@ export function changeTimelineTrackOrganization(
  */
 export function resymbolicateProfile(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    const symbolStore = getSymbolStore(dispatch);
+    const symbolStore = getSymbolStore(
+      dispatch,
+      getSymbolServerUrl(getState())
+    );
     const profile = getProfile(getState());
     if (!symbolStore) {
       throw new Error(
@@ -837,6 +845,7 @@ async function getProfileFromAddon(
 
 function getSymbolStore(
   dispatch: Dispatch,
+  symbolServerUrl: string,
   geckoProfiler?: $GeckoProfiler
 ): SymbolStore | null {
   if (!window.indexedDB) {
@@ -851,18 +860,19 @@ function getSymbolStore(
       for (const { lib } of requests) {
         dispatch(requestingSymbolTable(lib));
       }
-      return MozillaSymbolicationAPI.requestSymbols(requests).map(
-        async (libPromise, i) => {
-          try {
-            const result = libPromise;
-            dispatch(receivedSymbolTableReply(requests[i].lib));
-            return result;
-          } catch (error) {
-            dispatch(receivedSymbolTableReply(requests[i].lib));
-            throw error;
-          }
+      return MozillaSymbolicationAPI.requestSymbols(
+        requests,
+        symbolServerUrl
+      ).map(async (libPromise, i) => {
+        try {
+          const result = libPromise;
+          dispatch(receivedSymbolTableReply(requests[i].lib));
+          return result;
+        } catch (error) {
+          dispatch(receivedSymbolTableReply(requests[i].lib));
+          throw error;
         }
-      );
+      });
     },
     requestSymbolTableFromAddon: async lib => {
       if (!geckoProfiler) {
