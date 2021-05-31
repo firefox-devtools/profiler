@@ -47,6 +47,7 @@ import {
   getActiveTabResourceTracks,
 } from '../selectors/profile';
 import { getView } from '../selectors/app';
+import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 
 function _getStoreWithURL(
   settings: {
@@ -1364,5 +1365,112 @@ describe('last requested call tree summary strategy', function() {
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
       'timing'
     );
+  });
+});
+
+describe('symbolServerUrl', function() {
+  function setup(search: string) {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { getState } = _getStoreWithURL({ search });
+    const symbolServerUrl = urlStateSelectors.getSymbolServerUrl(getState());
+    const urlState = urlStateSelectors.getUrlState(getState());
+    const queryString = getQueryStringFromUrlState(urlState);
+
+    return {
+      symbolServerUrl,
+      queryString,
+    };
+  }
+
+  it('defaults to the Mozilla symbol server', function() {
+    const { symbolServerUrl, queryString } = setup('');
+    expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
+    expect(symbolServerUrl.substr(-1)).not.toEqual('/');
+    expect(queryString).not.toContain('symbolServer=');
+  });
+
+  it('can be switch to a custom localhost server', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=http://localhost:1234/symbols'
+    );
+    expect(symbolServerUrl).toEqual('http://localhost:1234/symbols');
+    expect(queryString).toContain(
+      'symbolServer=http%3A%2F%2Flocalhost%3A1234%2Fsymbols'
+    );
+  });
+
+  it('removes any trailing slash', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=http://localhost:1234/'
+    );
+    expect(symbolServerUrl).toEqual('http://localhost:1234');
+    expect(queryString).toContain(
+      'symbolServer=http%3A%2F%2Flocalhost%3A1234%2F'
+    );
+  });
+
+  it('will error when switching to an unknown host', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=https://symbols.mozilla.org.example.com/symbols'
+    );
+    expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
+    expect(queryString).toContain(
+      'symbolServer=https%3A%2F%2Fsymbols.mozilla.org.example.com%2Fsymbols'
+    );
+    expect(console.error.mock.calls).toMatchSnapshot();
+  });
+
+  it('will error when switching to an invalid host', function() {
+    const { symbolServerUrl, queryString } = setup('?symbolServer=invalid');
+    expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
+    expect(queryString).toContain('symbolServer=invalid');
+    expect(console.error.mock.calls).toMatchSnapshot();
+  });
+
+  it('will error when switching to an allowed but non-https host', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=http://symbols.mozilla.org/'
+    );
+    expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
+    expect(queryString).toContain(
+      'symbolServer=http%3A%2F%2Fsymbols.mozilla.org%2F'
+    );
+    expect(console.error.mock.calls).toMatchSnapshot();
+  });
+
+  it('will allow an allowed https host', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=https://symbolication.stage.mozaws.net'
+    );
+    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(queryString).toContain(
+      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net'
+    );
+    expect(console.error.mock.calls).toMatchSnapshot();
+  });
+
+  it('will strip the trailing slash on an allowed https host', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=https://symbolication.stage.mozaws.net/'
+    );
+    expect(symbolServerUrl).toEqual('https://symbolication.stage.mozaws.net');
+    expect(queryString).toContain(
+      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2F'
+    );
+    expect(console.error.mock.calls).toMatchSnapshot();
+  });
+
+  it('will allow a a subdirectory path on an allowed https host', function() {
+    const { symbolServerUrl, queryString } = setup(
+      '?symbolServer=https://symbolication.stage.mozaws.net/subdir/'
+    );
+    expect(symbolServerUrl).toEqual(
+      'https://symbolication.stage.mozaws.net/subdir'
+    );
+    expect(queryString).toContain(
+      'symbolServer=https%3A%2F%2Fsymbolication.stage.mozaws.net%2Fsubdir%2F'
+    );
+    expect(console.error.mock.calls).toMatchSnapshot();
   });
 });
