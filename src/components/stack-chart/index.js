@@ -190,7 +190,7 @@ class StackChartImpl extends React.PureComponent<Props> {
         aria-labelledby="stack-chart-tab-button"
         onKeyDown={this._handleKeyDown}
       >
-        <StackSettings disableCallTreeSummaryButtons={true} />
+        <StackSettings />
         <TransformNavigator />
         {maxStackDepth === 0 && userTimings.length === 0 ? (
           <StackChartEmptyReasons />

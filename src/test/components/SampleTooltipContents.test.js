@@ -6,47 +6,121 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
-import { render, screen } from '@testing-library/react';
-import {
-  getCategories,
-  getThreadSelectorsFromThreadsKey,
-  getMaxThreadCPUDelta,
-  getSampleUnits,
-  getProfileInterval,
-} from 'firefox-profiler/selectors';
+import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ensureExists } from 'firefox-profiler/utils/flow';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileFromTextSamples,
   addCpuUsageValues,
 } from '../fixtures/profiles/processed-profile';
+import {
+  getMouseEvent,
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 
-import type { Profile } from 'firefox-profiler/types';
+import type {
+  Profile,
+  IndexIntoSamplesTable,
+  CssPixels,
+  ThreadCPUDeltaUnit,
+} from 'firefox-profiler/types';
+
+// The following constants determine the size of the drawn graph.
+const SAMPLE_COUNT = 4;
+const PIXELS_PER_SAMPLE = 40;
+const GRAPH_WIDTH = Math.floor(PIXELS_PER_SAMPLE * SAMPLE_COUNT);
+const GRAPH_HEIGHT = 10;
+function getSamplesPixelPosition(
+  sampleIndex: IndexIntoSamplesTable,
+  samplePosition: 'before' | 'after' = 'before'
+): CssPixels {
+  const quarterSample = PIXELS_PER_SAMPLE / 4;
+  // Compute the pixel position of either first or the second part of the sample.
+  // "sampleIndex * PIXELS_PER_SAMPLE" corresponds to the center of the sample,
+  //  we need to +/- quarter sample to find these places in the sample:
+  //
+  //                       before     after
+  //                       50% CPU    100% CPU
+  //                           v         v
+  // +--------------------+--------------------+--------------------+
+  // |                    |          //////////|                    |
+  // +--------------------+////////////////////+--------------------+
+  const beforeOrAfter =
+    samplePosition === 'before' ? -quarterSample : +quarterSample;
+  return sampleIndex * PIXELS_PER_SAMPLE + beforeOrAfter;
+}
 
 describe('SampleTooltipContents', function() {
-  function setup(profile: Profile, hoveredSampleIndex: number) {
-    const store = storeWithProfile(profile);
-    const state = store.getState();
-    const threadSelectors = getThreadSelectorsFromThreadsKey(0);
-    const fullThread = threadSelectors.getRangeFilteredThread(state);
-    const categories = getCategories(state);
-    const sampleUnits = getSampleUnits(state);
-    const maxThreadCPUDelta = getMaxThreadCPUDelta(state);
-    const interval = getProfileInterval(state);
+  autoMockCanvasContext();
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
-    render(
+  function getProfileWithCPU(
+    threadCPUDelta: Array<number | null>,
+    threadCPUDeltaUnit: ThreadCPUDeltaUnit
+  ): Profile {
+    const { profile } = getProfileFromTextSamples(`
+      A    A    A              A
+      B    B    B              B
+      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+      D    F    I[cat:Idle]
+      Ejs  Ejs
+    `);
+    // Let's put some values for CPU usage.
+    addCpuUsageValues(profile, threadCPUDelta, threadCPUDeltaUnit);
+
+    return profile;
+  }
+
+  function setup(
+    profile: Profile,
+    hoveredSampleIndex: number,
+    hoveredSamplePosition: 'before' | 'after' = 'before'
+  ) {
+    const store = storeWithProfile(profile);
+    const threadsKey = 0;
+
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+
+    const { container } = render(
       <Provider store={store}>
-        <SampleTooltipContents
-          sampleIndex={hoveredSampleIndex}
-          fullThread={fullThread}
-          categories={categories}
-          sampleUnits={sampleUnits}
-          maxThreadCPUDelta={maxThreadCPUDelta}
-          interval={interval}
+        <TimelineTrackThread
+          threadsKey={threadsKey}
+          trackType="expanded"
+          trackName="Test Track"
         />
       </Provider>
     );
+
+    const canvas = ensureExists(
+      container.querySelector('.threadActivityGraphCanvas'),
+      `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
+    );
+
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: getSamplesPixelPosition(
+          hoveredSampleIndex,
+          hoveredSamplePosition
+        ),
+        pageY: GRAPH_HEIGHT * 0.9,
+      })
+    );
+
+    const getTooltip = () =>
+      ensureExists(
+        document.querySelector('.tooltip'),
+        `Couldn't find the tooltip element, with selector .tooltip`
+      );
+
+    return { getTooltip };
   }
 
   it('renders the sample tooltip properly', () => {
@@ -79,75 +153,86 @@ describe('SampleTooltipContents', function() {
     // There is only one sample in the profile
     const hoveredSampleIndex = 0;
 
-    setup(profile, hoveredSampleIndex);
-    expect(document.body).toMatchSnapshot();
+    const { getTooltip } = setup(profile, hoveredSampleIndex, 'after');
+    expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the sample with µs CPU usage information properly', () => {
-    const { profile } = getProfileFromTextSamples(`
-      A    A    A              A
-      B    B    B              B
-      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
-      D    F    I[cat:Idle]
-      Ejs  Ejs
-    `);
-    // Let's put some values for CPU usage.
-    addCpuUsageValues(profile, [null, 400, 1000, 500], 'µs');
+    const profile = getProfileWithCPU([null, 400, 1000, 500], 'µs');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    setup(profile, hoveredSampleIndex);
+    const { getTooltip } = setup(profile, hoveredSampleIndex);
 
-    const cpuUsage = ensureExists(
-      screen.getByText(/CPU Usage/).nextElementSibling
-    );
-    expect(cpuUsage).toHaveTextContent('40% (400 µs over 1,000μs)');
-    expect(document.body).toMatchSnapshot();
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
+    expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the sample with ns CPU usage information properly', () => {
-    const { profile } = getProfileFromTextSamples(`
-      A    A    A              A
-      B    B    B              B
-      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
-      D    F    I[cat:Idle]
-      Ejs  Ejs
-    `);
-    // Let's put some values for CPU usage.
-    addCpuUsageValues(profile, [null, 600000, 1000000, 500000], 'ns');
+    const profile = getProfileWithCPU([null, 600000, 1000000, 500000], 'ns');
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    setup(profile, hoveredSampleIndex);
+    const { getTooltip } = setup(profile, hoveredSampleIndex);
 
-    const cpuUsage = ensureExists(
-      screen.getByText(/CPU Usage/).nextElementSibling
-    );
-    expect(cpuUsage).toHaveTextContent('60% (600 µs over 1,000μs)');
-    expect(document.body).toMatchSnapshot();
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('60% (average over 1.0ms)');
+    expect(getTooltip()).toMatchSnapshot();
   });
 
   it('renders the sample with "variable CPU cycles" CPU usage information properly', () => {
-    const { profile } = getProfileFromTextSamples(`
-      A    A    A              A
-      B    B    B              B
-      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
-      D    F    I[cat:Idle]
-      Ejs  Ejs
-    `);
-    // Let's put some values for CPU usage.
-    addCpuUsageValues(profile, [null, 800, 900, 500], 'variable CPU cycles');
+    const profile = getProfileWithCPU(
+      [null, 800, 900, 500],
+      'variable CPU cycles'
+    );
 
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
-    setup(profile, hoveredSampleIndex);
+    const { getTooltip } = setup(profile, hoveredSampleIndex);
 
-    const cpuUsage = ensureExists(
-      screen.getByText(/CPU Usage/).nextElementSibling
-    );
-    expect(cpuUsage).toHaveTextContent(
-      '89% (800 variable CPU cycles over 1,000μs)'
-    );
-    expect(document.body).toMatchSnapshot();
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('89% (average over 1.0ms)');
+    expect(getTooltip()).toMatchSnapshot();
+  });
+
+  it('renders the CPU usage properly for the first part of the sample', () => {
+    const profile = getProfileWithCPU([null, 460, 1000, 500], 'µs');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the first part of the sample.
+    setup(profile, hoveredSampleIndex, 'before');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('46% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage properly for the second part of the sample', () => {
+    const profile = getProfileWithCPU([null, 400, 580, 1000], 'µs');
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the second part of the sample.
+    setup(profile, hoveredSampleIndex, 'after');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('58% (average over 1.0ms)');
+  });
+
+  it('renders the CPU usage properly for the first part of the sample with irregular sample times', () => {
+    // Normally there should be 4 samples in the profile. But second sample
+    // takes spaces for 2 samples.
+    const profile = getProfileWithCPU([null, 800, 1000], 'µs');
+    profile.threads[0].samples.time = [0, 2, 3];
+    profile.threads[0].samples.length = 3;
+
+    // Let's check the second threadCPUDelta value
+    const hoveredSampleIndex = 1;
+    // Hovering the second part of the sample.
+    setup(profile, hoveredSampleIndex, 'before');
+
+    const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
+    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
   });
 });

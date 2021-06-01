@@ -455,7 +455,9 @@ describe('Timeline', function() {
         </Provider>
       );
 
-      expect(screen.queryByText('Show active tab only')).toBeFalsy();
+      expect(
+        screen.queryByText('Show active tab only')
+      ).not.toBeInTheDocument();
     });
 
     it('can switch between active tab view and advanced view', () => {

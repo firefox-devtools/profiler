@@ -9,6 +9,9 @@ import { getProfileWithThreadCPUDelta } from '../fixtures/profiles/processed-pro
 
 import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 
+const MS_TO_US_MULTIPLIER = 1000;
+const MS_TO_NS_MULTIPLIER = 1000000;
+
 describe('processThreadCPUDelta', function() {
   function setup(
     threadCPUDelta?: Array<number | null>,
@@ -28,7 +31,8 @@ describe('processThreadCPUDelta', function() {
 
     const processedThread = processThreadCPUDelta(
       thread,
-      profile.meta.sampleUnits
+      profile.meta.sampleUnits,
+      profile.meta.interval
     );
 
     return { profile, thread, processedThread };
@@ -84,7 +88,6 @@ describe('processThreadCPUDelta', function() {
 
   it('processes Linux timing values and caps them to 100% if they are more than the interval values', function() {
     // Interval is in the ms values and Linux uses ns for threadCPUDelta values.
-    const MS_TO_NS_MULTIPLIER = 1000000;
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
       [
@@ -109,7 +112,6 @@ describe('processThreadCPUDelta', function() {
 
   it('processes macOS timing values and caps them to 100% if they are more than the interval values', function() {
     // Interval is in the ms values and macOS uses µs for threadCPUDelta values.
-    const MS_TO_US_MULTIPLIER = 1000;
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
       [
@@ -134,7 +136,6 @@ describe('processThreadCPUDelta', function() {
 
   it('does not process the Windows values for 100% capping because they are not timing values', function() {
     // Use the ns conversion multiplier to imitate the worst case.
-    const MS_TO_NS_MULTIPLIER = 1000000;
     const intervalMs = 1;
     const threadCPUDelta = [
       0.5 * MS_TO_NS_MULTIPLIER,
@@ -152,5 +153,20 @@ describe('processThreadCPUDelta', function() {
 
     // It shouldn't change the values!
     expect(processedThread1.samples.threadCPUDelta).toEqual(threadCPUDelta);
+  });
+
+  it('processes the timing values and caps the first element correctly if it exceeds the interval', function() {
+    // Testing the case where only the values in the middle are null.
+    const interval = 1;
+    const { processedThread: processedThread1 } = setup(
+      [2 * MS_TO_NS_MULTIPLIER, 0.5 * MS_TO_NS_MULTIPLIER],
+      'ns',
+      interval
+    );
+
+    expect(processedThread1.samples.threadCPUDelta).toEqual([
+      interval * MS_TO_NS_MULTIPLIER,
+      0.5 * MS_TO_NS_MULTIPLIER,
+    ]);
   });
 });

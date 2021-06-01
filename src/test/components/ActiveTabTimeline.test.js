@@ -329,7 +329,7 @@ describe('ActiveTabTimeline', function() {
 
       it('has the correct track name', function() {
         const { resourcePage } = setup();
-        expect(screen.getByText(resourcePage.url)).toBeTruthy();
+        expect(screen.getByText(resourcePage.url)).toBeInTheDocument();
       });
 
       it('starts out not being selected', function() {

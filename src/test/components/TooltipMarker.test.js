@@ -6,7 +6,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 import { TooltipMarker } from '../../components/tooltip/Marker';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -599,7 +599,7 @@ describe('TooltipMarker', function() {
   });
 
   it('renders properly network markers with a preconnect part', () => {
-    const { container, getByText } = setupWithPayload(
+    const { container } = setupWithPayload(
       getNetworkMarkers({
         startTime: 19000,
         fetchStart: 19201,
@@ -625,14 +625,14 @@ describe('TooltipMarker', function() {
       })
     );
 
-    const preconnectTitle = getByText(/preconnect/i);
-    expect(preconnectTitle).toBeTruthy();
+    const preconnectTitle = screen.getByText(/preconnect/i);
+    expect(preconnectTitle).toBeInTheDocument();
     expect(preconnectTitle).toMatchSnapshot();
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders properly network markers with a preconnect part containing only the domain lookup', () => {
-    const { container, getByText } = setupWithPayload(
+    const { container } = setupWithPayload(
       getNetworkMarkers({
         startTime: 19000,
         fetchStart: 19201,
@@ -654,8 +654,8 @@ describe('TooltipMarker', function() {
       })
     );
 
-    const preconnectTitle = getByText(/preconnect/i);
-    expect(preconnectTitle).toBeTruthy();
+    const preconnectTitle = screen.getByText(/preconnect/i);
+    expect(preconnectTitle).toBeInTheDocument();
     expect(preconnectTitle).toMatchSnapshot();
     expect(container.firstChild).toMatchSnapshot();
   });

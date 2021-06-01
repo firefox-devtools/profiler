@@ -4,7 +4,7 @@
 
 // @flow
 import type {
-  Thread,
+  SamplesLikeTable,
   Milliseconds,
   CallNodeInfo,
   CallNodeTable,
@@ -66,7 +66,7 @@ type LastSeen = {
  * Build a StackTimingByDepth table from a given thread.
  */
 export function getStackTimingByDepth(
-  thread: Thread,
+  samples: SamplesLikeTable,
   callNodeInfo: CallNodeInfo,
   maxDepth: number,
   interval: Milliseconds
@@ -87,9 +87,9 @@ export function getStackTimingByDepth(
   // Go through each sample, and push/pop it on the stack to build up
   // the stackTimingByDepth.
   let previousDepth = -1;
-  for (let i = 0; i < thread.samples.length; i++) {
-    const stackIndex = thread.samples.stack[i];
-    const sampleTime = thread.samples.time[i];
+  for (let i = 0; i < samples.length; i++) {
+    const stackIndex = samples.stack[i];
+    const sampleTime = samples.time[i];
 
     // If this stack index is null (for instance if it was filtered out) then pop back
     // down to the base stack.
@@ -114,21 +114,14 @@ export function getStackTimingByDepth(
         previousDepth,
         sampleTime
       );
-      _pushStacks(
-        thread,
-        callNodeTable,
-        lastSeen,
-        depth,
-        callNodeIndex,
-        sampleTime
-      );
+      _pushStacks(callNodeTable, lastSeen, depth, callNodeIndex, sampleTime);
       previousDepth = depth;
     }
   }
 
   // Pop the remaining stacks
-  const lastIndex = thread.samples.length - 1;
-  const endingTime = thread.samples.time[lastIndex] + interval;
+  const lastIndex = samples.length - 1;
+  const endingTime = samples.time[lastIndex] + interval;
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;
@@ -176,7 +169,6 @@ function _popStacks(
 }
 
 function _pushStacks(
-  thread: Thread,
   callNodeTable: CallNodeTable,
   lastSeen: LastSeen,
   depth: number,

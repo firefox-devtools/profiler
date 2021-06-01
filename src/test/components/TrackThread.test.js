@@ -279,7 +279,7 @@ describe('timeline/TrackThread', function() {
   it('does not add disk io markers if none are present', function() {
     const noMarkers = [];
     const { queryByTestId } = setup(getMarkersProfile(noMarkers));
-    expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
+    expect(queryByTestId('TimelineMarkersFileIo')).not.toBeInTheDocument();
   });
 
   it('adds file io markers if they are present', function() {
@@ -297,7 +297,7 @@ describe('timeline/TrackThread', function() {
       ],
     ];
     const { getByTestId } = setup(getMarkersProfile(fileIoMarker));
-    expect(getByTestId('TimelineMarkersFileIo')).toBeTruthy();
+    expect(getByTestId('TimelineMarkersFileIo')).toBeInTheDocument();
   });
 
   it('does not add off-thread file io markers even if they are present', function() {
@@ -316,6 +316,6 @@ describe('timeline/TrackThread', function() {
       ],
     ];
     const { queryByTestId } = setup(getMarkersProfile(fileIoMarker));
-    expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
+    expect(queryByTestId('TimelineMarkersFileIo')).not.toBeInTheDocument();
   });
 });

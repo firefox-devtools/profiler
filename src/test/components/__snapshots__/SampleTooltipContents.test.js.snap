@@ -1,601 +1,618 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
-<body>
-  <div>
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 21px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
     <div
-      class="tooltipDetails"
+      class="tooltipLabel"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Category:
-      </div>
-      <div>
-        <span
-          class="colored-square category-color-purple"
-        />
-        Layout
-      </div>
+      Category:
     </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Stack:
-      </div>
-    </div>
-    <ul
-      class="backtrace"
-    >
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-purple"
-          title="Layout"
-        />
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::PresShell::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsDocument::ContentStateChanged
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::dom::Element::RemoveStates
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::EventStateManager::SetContentState
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::PresShell::HandleEventInternal
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        mozilla::PresShell::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsViewManager::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsView::HandleEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsChildView::DispatchEvent
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        ChildViewMouseTracker::MouseMoved
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsAppShell::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        nsAppStartup::Run
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
+    <div>
       <span
-        class="colored-border ellipsis"
+        class="colored-square category-color-purple"
       />
-      …
-    </ul>
+      Layout
+    </div>
   </div>
-</body>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-purple"
+        title="Layout"
+      />
+      nsRefreshDriver::AddStyleFlushObserver
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::GeckoRestyleManager::PostRestyleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::GeckoRestyleManager::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::PresShell::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsDocument::ContentStateChanged
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::dom::Element::RemoveStates
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::EventStateManager::UpdateAncestorState
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::EventStateManager::SetContentState
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::EventStateManager::NotifyMouseOut
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::EventStateManager::GenerateMouseEnterExit
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::EventStateManager::PreHandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::PresShell::HandleEventInternal
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::PresShell::HandlePositionedEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      mozilla::PresShell::HandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsViewManager::DispatchEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsView::HandleEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsChildView::DispatchEvent
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      ChildViewMouseTracker::MouseMoved
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsAppShell::Run
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      nsAppStartup::Run
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <span
+      class="colored-border ellipsis"
+    />
+    …
+  </ul>
+</div>
 `;
 
 exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU usage information properly 1`] = `
-<body>
-  <div>
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 41px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
     <div
-      class="tooltipDetails"
+      class="tooltipLabel"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Category:
-      </div>
-      <div>
-        <span
-          class="colored-square category-color-yellow"
-        />
-        JavaScript
-      </div>
+      CPU:
+    </div>
+    <div>
+      89% (average over 1.0ms)
     </div>
     <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        CPU Usage:
-      </div>
-      <div>
-        89% (800 variable CPU cycles over 1,000μs)
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Stack:
-      </div>
-    </div>
-    <ul
-      class="backtrace"
-    >
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Ejs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        F
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Cjs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        B
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        A
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ul>
+      class="tooltipDetailSeparator"
+    />
   </div>
-</body>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-yellow"
+      />
+      JavaScript
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Ejs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      F
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Cjs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      B
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      A
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+  </ul>
+</div>
 `;
 
 exports[`SampleTooltipContents renders the sample with ns CPU usage information properly 1`] = `
-<body>
-  <div>
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 41px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
     <div
-      class="tooltipDetails"
+      class="tooltipLabel"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Category:
-      </div>
-      <div>
-        <span
-          class="colored-square category-color-yellow"
-        />
-        JavaScript
-      </div>
+      CPU:
+    </div>
+    <div>
+      60% (average over 1.0ms)
     </div>
     <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        CPU Usage:
-      </div>
-      <div>
-        60% (600 µs over 1,000μs)
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Stack:
-      </div>
-    </div>
-    <ul
-      class="backtrace"
-    >
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Ejs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        F
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Cjs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        B
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        A
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ul>
+      class="tooltipDetailSeparator"
+    />
   </div>
-</body>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-yellow"
+      />
+      JavaScript
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Ejs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      F
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Cjs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      B
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      A
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+  </ul>
+</div>
 `;
 
 exports[`SampleTooltipContents renders the sample with µs CPU usage information properly 1`] = `
-<body>
-  <div>
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 41px; top: 10px;"
+>
+  <div
+    class="tooltipDetails"
+  >
     <div
-      class="tooltipDetails"
+      class="tooltipLabel"
     >
-      <div
-        class="tooltipLabel"
-      >
-        Category:
-      </div>
-      <div>
-        <span
-          class="colored-square category-color-yellow"
-        />
-        JavaScript
-      </div>
+      CPU:
+    </div>
+    <div>
+      40% (average over 1.0ms)
     </div>
     <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        CPU Usage:
-      </div>
-      <div>
-        40% (400 µs over 1,000μs)
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Stack:
-      </div>
-    </div>
-    <ul
-      class="backtrace"
-    >
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Ejs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        F
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-yellow"
-          title="JavaScript"
-        />
-        Cjs
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        B
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-      <li
-        class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
-      >
-        <span
-          class="colored-border category-color-grey"
-          title="Other"
-        />
-        A
-        <em
-          class="backtraceStackFrameOrigin"
-        />
-      </li>
-    </ul>
+      class="tooltipDetailSeparator"
+    />
   </div>
-</body>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Category:
+    </div>
+    <div>
+      <span
+        class="colored-square category-color-yellow"
+      />
+      JavaScript
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Stack:
+    </div>
+  </div>
+  <ul
+    class="backtrace"
+  >
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Ejs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      F
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-yellow"
+        title="JavaScript"
+      />
+      Cjs
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      B
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+    <li
+      class="backtraceStackFrame backtraceStackFrame_isFrameLabel"
+    >
+      <span
+        class="colored-border category-color-grey"
+        title="Other"
+      />
+      A
+      <em
+        class="backtraceStackFrameOrigin"
+      />
+    </li>
+  </ul>
+</div>
 `;

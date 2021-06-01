@@ -228,7 +228,7 @@ describe('timeline/TrackScreenshots', function() {
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function() {
     const { queryByText } = setup(getProfileWithNiceTracks(), <Timeline />);
-    expect(queryByText('Screenshots')).toBeFalsy();
+    expect(queryByText('Screenshots')).not.toBeInTheDocument();
   });
 });
 

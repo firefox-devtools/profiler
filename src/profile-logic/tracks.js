@@ -837,7 +837,10 @@ export function isMainThread(thread: Thread): boolean {
     thread.name === 'GeckoMain' ||
     // If the pid is a string, then it's not one that came from the system.
     // These threads should all be treated as main threads.
-    typeof thread.pid === 'string'
+    typeof thread.pid === 'string' ||
+    // On Linux the tid of the main thread is the pid. This is useful for
+    // profiles imported from the Linux 'perf' tool.
+    String(thread.pid) === thread.tid
   );
 }
 

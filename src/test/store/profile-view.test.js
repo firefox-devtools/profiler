@@ -2955,6 +2955,59 @@ describe('getTimingsForSidebar', () => {
       });
     });
   });
+
+  describe('for native allocations', function() {
+    function setupForNativeAllocations() {
+      const {
+        profile,
+        funcNamesDict,
+      } = getProfileWithUnbalancedNativeAllocations();
+      // This profile has 7 samples but only 6 native allocation entries.
+      // The first 3 entries are allocations, the last 3 are deallocations.
+      const store = storeWithProfile(profile);
+
+      // Committing a range exercizes the offset code for committed ranges.
+      // Note that we'll exercize the offset code for preview selections in a
+      // specific test below.
+      // We just exclude the first entry.
+      const threadLength = profile.threads[0].samples.length;
+      store.dispatch(ProfileView.commitRange(1, threadLength));
+      store.dispatch(
+        ProfileView.changeCallTreeSummaryStrategy('native-allocations')
+      );
+
+      const getTimingsForPath = path => {
+        store.dispatch(ProfileView.changeSelectedCallNode(0, path));
+        return selectedNodeSelectors.getTimingsForSidebar(store.getState());
+      };
+
+      return {
+        ...store,
+        funcNamesDict,
+        getTimingsForPath,
+      };
+    }
+
+    it('provides good values for native allocations', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { A },
+      } = setupForNativeAllocations();
+
+      const timings = getTimingsForPath([A]);
+      expect(timings.forPath).toEqual({
+        selfTime: EMPTY_TIMING,
+        totalTime: {
+          breakdownByCategory: withSingleSubcategory([0, 0, 7, 5, 0, 0, 0, 0]), // Other, Idle, Layout, JavaScript, etc
+          breakdownByImplementation: {
+            native: 7,
+            interpreter: 5,
+          },
+          value: 12,
+        },
+      });
+    });
+  });
 });
 
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.

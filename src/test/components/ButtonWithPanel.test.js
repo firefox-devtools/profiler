@@ -57,7 +57,7 @@ describe('shared/ButtonWithPanel', () => {
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(screen.queryByTestId('panel-content')).toBeFalsy();
+      expect(screen.queryByTestId('panel-content')).not.toBeInTheDocument();
     });
 
     /**
@@ -73,7 +73,7 @@ describe('shared/ButtonWithPanel', () => {
           panelContent={<div data-testid="panel-content">Panel content</div>}
         />
       );
-      expect(screen.getByTestId('panel-content')).toBeTruthy();
+      expect(screen.getByTestId('panel-content')).toBeInTheDocument();
     });
   });
 

@@ -62,15 +62,17 @@ describe('Native allocation call trees', function() {
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
-        '- A (total: -86, self: —)',
-        '  - B (total: -86, self: —)',
-        '    - Fjs (total: -64, self: —)',
-        '      - Gjs (total: -64, self: -28)',
-        '        - Hjs (total: -36, self: —)',
-        '          - I (total: -36, self: -36)',
-        '    - C (total: -22, self: —)',
-        '      - D (total: -22, self: —)',
-        '        - E (total: -22, self: -22)',
+        '- A (total: -89, self: —)',
+        '  - B (total: -89, self: —)',
+        '    - Fjs (total: -59, self: —)',
+        '      - Gjs (total: -59, self: -30)',
+        '        - Hjs (total: -29, self: —)',
+        '          - I (total: -29, self: -29)',
+        '    - C (total: -30, self: —)',
+        '      - D (total: -19, self: —)',
+        '        - E (total: -19, self: -19)',
+        '      - J (total: -11, self: -6)',
+        '        - K (total: -5, self: -5)',
       ]);
     });
 
@@ -79,9 +81,15 @@ describe('Native allocation call trees', function() {
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
-        '- A (total: -15, self: -3)',
-        '  - B (total: -12, self: -5)',
-        '    - C (total: -7, self: -7)',
+        '- A (total: -15, self: —)',
+        '  - B (total: -15, self: —)',
+        '    - Fjs (total: -12, self: —)',
+        '      - Gjs (total: -12, self: -5)',
+        '        - Hjs (total: -7, self: —)',
+        '          - I (total: -7, self: -7)',
+        '    - C (total: -3, self: —)',
+        '      - D (total: -3, self: —)',
+        '        - E (total: -3, self: -3)',
       ]);
     });
 
@@ -128,13 +136,11 @@ describe('Native allocation call trees', function() {
       expect(formatTree(callTree)).toEqual([
         '- A (total: -41, self: —)',
         '  - B (total: -41, self: —)',
-        '    - Fjs (total: -30, self: —)',
-        '      - Gjs (total: -30, self: -13)',
-        '        - Hjs (total: -17, self: —)',
-        '          - I (total: -17, self: -17)',
-        '    - C (total: -11, self: —)',
-        '      - D (total: -11, self: —)',
-        '        - E (total: -11, self: -11)',
+        '    - C (total: -24, self: —)',
+        '      - J (total: -24, self: -11)',
+        '        - K (total: -13, self: -13)',
+        '    - Fjs (total: -17, self: —)',
+        '      - Gjs (total: -17, self: -17)',
       ]);
     });
 

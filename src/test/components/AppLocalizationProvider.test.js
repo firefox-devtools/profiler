@@ -115,7 +115,7 @@ describe('AppLocalizationProvider', () => {
       </Provider>
     );
 
-    expect(await screen.findByText(translatedText)).toBeTruthy();
+    expect(await screen.findByText(translatedText)).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en-US');
     // $FlowExpectError Our version of flow doesn't know about document.dir
     expect(document.dir).toBe('ltr');

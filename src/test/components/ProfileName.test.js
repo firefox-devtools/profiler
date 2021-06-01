@@ -63,7 +63,7 @@ describe('ProfileName', function() {
 
   it('has a default name', function() {
     const { getByText } = setup();
-    expect(getByText(defaultName)).toBeTruthy();
+    expect(getByText(defaultName)).toBeInTheDocument();
   });
 
   it('can edit the name', function() {
@@ -71,20 +71,20 @@ describe('ProfileName', function() {
     const button = getByText(defaultName);
 
     // Test the default state.
-    expect(getByText(defaultName)).toBeTruthy();
+    expect(getByText(defaultName)).toBeInTheDocument();
     expect(getProfileNameFromUrl(getState())).toBe(null);
 
     // Click the button to activate it.
     button.click();
     const input = getByDisplayValue(defaultName);
 
-    expect(queryByText('Custom name')).toBeFalsy();
+    expect(queryByText('Custom name')).not.toBeInTheDocument();
 
     // Change the input, and blur it.
     fireEvent.change(input, { target: { value: 'Custom name' } });
     fireEvent.blur(input);
 
-    expect(getByText('Custom name')).toBeTruthy();
+    expect(getByText('Custom name')).toBeInTheDocument();
     expect(getProfileNameFromUrl(getState())).toBe('Custom name');
   });
 
@@ -108,12 +108,12 @@ describe('ProfileName', function() {
   it('will use a url-provided profile name', function() {
     const { getByText } = setup('Custom name from URL');
 
-    expect(getByText('Custom name from URL')).toBeTruthy();
+    expect(getByText('Custom name from URL')).toBeInTheDocument();
   });
 
   it('shows UnitledProfile when profile has no name', () => {
     const { getByText } = nullProfile();
 
-    expect(getByText('Untitled profile')).toBeTruthy();
+    expect(getByText('Untitled profile')).toBeInTheDocument();
   });
 });
