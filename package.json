@@ -55,7 +55,7 @@
     "copy-to-clipboard": "^3.1.0",
     "core-js": "^3.12.1",
     "escape-string-regexp": "^4.0.0",
-    "gecko-profiler-demangle": "^0.2.0",
+    "gecko-profiler-demangle": "^0.3.2",
     "idb": "^6.1.1",
     "intl-pluralrules": "^1.2.2",
     "jszip": "^3.6.0",

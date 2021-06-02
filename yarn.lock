@@ -5779,10 +5779,10 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-gecko-profiler-demangle@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/gecko-profiler-demangle/-/gecko-profiler-demangle-0.2.0.tgz#d0ebdd40c9dfd402a6c28e05b2c757396683e75d"
-  integrity sha512-dIamdbOrBCNNXHbJaNnAElxqcBBcNoHkekKi/at+z88lu4x2/tVGKPLKiF9El5kFiWNYDjou4ykEL+5+W8CxQw==
+gecko-profiler-demangle@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/gecko-profiler-demangle/-/gecko-profiler-demangle-0.3.2.tgz#bec8b4479ebdf52dfe3211c4c9b2ced885e8a456"
+  integrity sha512-RH4q0XhomQRJEYSZM8oAJbxHw+a4NTBVantpxV/g7IVZgTdHbAtFfocUSGM40tvYVUCbibqow8OKN9apB506zw==
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
