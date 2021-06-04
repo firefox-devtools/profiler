@@ -163,6 +163,7 @@ type BaseQuery = {|
   transforms: string,
   profiles: string[],
   profileName: string,
+  symbolServer: string,
   view: string,
   implementation: string,
   ...FullProfileSpecificBaseQuery,
@@ -367,6 +368,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
+    symbolServer: urlState.symbolServerUrl || undefined,
     implementation:
       urlState.profileSpecific.implementation === 'combined'
         ? undefined
@@ -563,6 +565,7 @@ export function stateFromLocation(
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileName: query.profileName,
+    symbolServerUrl: query.symbolServer || null,
     timelineTrackOrganization: validateTimelineTrackOrganization(
       query.view,
       tabID
