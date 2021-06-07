@@ -294,9 +294,20 @@ async function getResultForLibRequestFromV6Response(
     const address = addressArray[i];
     const info = addressInfo[i];
     if (info.function !== undefined && info.function_offset !== undefined) {
+      let inlineFrames;
+      if (info.inline_stack !== undefined) {
+        inlineFrames = info.inline_stack.map(
+          ({ function_name, file_path, line_number }) => ({
+            functionName: function_name,
+            fileName: file_path,
+            lineNumber: line_number,
+          })
+        );
+      }
       results.set(address, {
         name: info.function,
         functionOffset: parseInt(info.function_offset.substr(2), 16),
+        inlineFrames,
       });
     } else {
       throw new SymbolsNotFoundError(

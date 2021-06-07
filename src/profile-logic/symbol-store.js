@@ -21,6 +21,15 @@ export type AddressResult = {|
   name: string,
   // The offset (in bytes) between the start of the function and the address.
   functionOffset: number,
+  // An optional inline callstack, ordered from inside to outside. The outermost
+  // function usually matches `name`.
+  inlineFrames?: Array<AddressInlineFrame>,
+|};
+
+type AddressInlineFrame = {|
+  functionName?: string,
+  fileName?: string,
+  lineNumber?: number,
 |};
 
 interface SymbolProvider {
