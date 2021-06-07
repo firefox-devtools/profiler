@@ -17,6 +17,8 @@ import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
 } from '../../app-logic/constants';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -35,6 +37,9 @@ const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
 
 autoMockCanvasContext();
+
+beforeEach(addRootOverlayElement);
+afterEach(removeRootOverlayElement);
 
 describe('timeline/TrackNetwork', function() {
   it('matches the component snapshot', () => {
@@ -66,12 +71,32 @@ describe('timeline/TrackNetwork', function() {
     window.dispatchEvent(new Event('resize'));
     expect(getContextDrawCalls().length > 0).toBe(true);
   });
+
+  it('draws differently a request and displays a tooltip when hovered', () => {
+    const { getContextDrawCalls } = setup();
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+
+    const canvas = ensureExists(document.querySelector('canvas'));
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        pageY: 2,
+      })
+    );
+
+    const tooltip = screen.getByTestId('tooltip');
+    expect(tooltip).toMatchSnapshot();
+
+    const drawCalls = getContextDrawCalls();
+    // We draw at least one hovered request with a different stroke style.
+    expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
+    expect(drawCalls).toMatchSnapshot();
+  });
 });
 
 describe('VerticalIndicators', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
-
   it('creates the vertical indicators', function() {
     const { getIndicatorLines, getState } = setup();
     const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
