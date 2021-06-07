@@ -683,8 +683,7 @@ export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
       return _emptyRelevantPagesForActiveTab;
     }
 
-    const pages = pagesMap.get(activeTabID);
-    return pages !== undefined ? pages : _emptyRelevantPagesForActiveTab;
+    return pagesMap.get(activeTabID) ?? _emptyRelevantPagesForActiveTab;
   }
 );
 
@@ -737,7 +736,7 @@ export const getRelevantInnerWindowIDsForActiveTab: Selector<
     }
 
     const pageSet = pagesMap.get(activeTabID);
-    return pageSet !== undefined ? pageSet : new Set();
+    return pageSet ?? new Set();
   }
 );
 
