@@ -91,11 +91,11 @@ describe('extract functions and resource from location strings', function() {
   };
 
   it('extracts the information for all different types of locations', function() {
-    const [
+    const {
       funcTable,
       resourceTable,
       frameFuncs,
-    ] = extractFuncsAndResourcesFromFrameLocations(
+    } = extractFuncsAndResourcesFromFrameLocations(
       locationIndexes,
       locationIndexes.map(() => false),
       stringTable,
@@ -110,7 +110,6 @@ describe('extract functions and resource from location strings', function() {
 
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
         const resourceIndex = funcTable.resource[funcIndex];
-        const address = funcTable.address[funcIndex];
         const isJS = funcTable.isJS[funcIndex];
         const fileNameIndex = funcTable.fileName[funcIndex];
         const fileName =
@@ -146,7 +145,6 @@ describe('extract functions and resource from location strings', function() {
             funcName,
             isJS,
             resourceIndex,
-            address,
             fileName,
             lineNumber,
             columnNumber,

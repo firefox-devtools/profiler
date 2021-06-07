@@ -580,7 +580,6 @@ async function processTracingEvents(
           if (funcId === undefined) {
             // The function did not exist.
             funcId = funcTable.length++;
-            funcTable.address.push(-1);
             funcTable.isJS.push(isJS);
             funcTable.relevantForJS.push(relevantForJS);
             const name = functionName !== '' ? functionName : '(anonymous)';
@@ -619,6 +618,8 @@ async function processTracingEvents(
           frameTable.category[frameIndex] = category;
           frameTable.subcategory[frameIndex] = 0;
           frameTable.func[frameIndex] = funcId;
+          frameTable.nativeSymbol[frameIndex] = null;
+          frameTable.inlineDepth[frameIndex] = 0;
           frameTable.innerWindowID[frameIndex] = 0;
           frameTable.implementation[frameIndex] = null;
           frameTable.line[frameIndex] =

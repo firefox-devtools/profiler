@@ -818,6 +818,10 @@ export function collapseResource(
             newFrameTable.category.push(frameTable.category[frameIndex]);
             newFrameTable.subcategory.push(frameTable.subcategory[frameIndex]);
             newFrameTable.func.push(collapsedFuncIndex);
+            newFrameTable.nativeSymbol.push(
+              frameTable.nativeSymbol[frameIndex]
+            );
+            newFrameTable.inlineDepth.push(frameTable.inlineDepth[frameIndex]);
             newFrameTable.line.push(frameTable.line[frameIndex]);
             newFrameTable.column.push(frameTable.column[frameIndex]);
             newFrameTable.innerWindowID.push(
@@ -831,7 +835,6 @@ export function collapseResource(
             );
 
             // Add the psuedo-func
-            newFuncTable.address.push(funcTable.address[funcIndex]);
             newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
             newFuncTable.name.push(resourceNameIndex);
             newFuncTable.resource.push(funcTable.resource[funcIndex]);

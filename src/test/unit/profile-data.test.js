@@ -258,11 +258,6 @@ describe('process-profile', function() {
       );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
-      expect(thread.funcTable.address[0]).toEqual(-1);
-      expect(thread.funcTable.address[1]).toEqual(3972);
-      expect(thread.funcTable.address[2]).toEqual(6725);
-      expect(thread.funcTable.address[3]).toEqual(-1);
-      expect(thread.funcTable.address[4]).toEqual(-1);
     });
 
     it('should create one resource per used library', function() {

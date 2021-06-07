@@ -1748,5 +1748,49 @@ const _upgraders = {
       }
     }
   },
+  [36]: profile => {
+    // Threads now have a nativeSymbols table.
+    // The frame table gains three fields: nativeSymbol, inlineDepth and fileName.
+    // The function table loses one field: address. (This field moves to the nativeSymbols table.)
+    // The NativeSymbolsTable has the fields libIndex, address, and name.
+    for (const thread of profile.threads) {
+      const nativeSymbols = {
+        libIndex: [],
+        address: [],
+        name: [],
+        length: 0,
+      };
+      const { frameTable, funcTable, resourceTable } = thread;
+      const funcToNativeSymbolMap = new Map();
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        const resourceIndex = funcTable.resource[funcIndex];
+        if (resourceIndex === -1) {
+          continue;
+        }
+        const resourceType = resourceTable.type[resourceIndex];
+        if (resourceType !== resourceTypes.library) {
+          continue;
+        }
+        const libIndex = resourceTable.lib[resourceIndex];
+        if (libIndex === null || libIndex === undefined || libIndex === -1) {
+          continue;
+        }
+        const address = funcTable.address[funcIndex];
+        const nativeSymbolIndex = nativeSymbols.length;
+        nativeSymbols.libIndex.push(libIndex);
+        nativeSymbols.address.push(address === -1 ? null : address);
+        nativeSymbols.name.push(funcTable.name[funcIndex]);
+        nativeSymbols.length++;
+        funcToNativeSymbolMap.set(funcIndex, nativeSymbolIndex);
+      }
+      delete funcTable.address;
+      frameTable.nativeSymbol = frameTable.func.map(
+        f => funcToNativeSymbolMap.get(f) ?? null
+      );
+      frameTable.inlineDepth = Array(frameTable.length).fill(0);
+      frameTable.fileName = frameTable.func.map(f => funcTable.fileName[f]);
+      thread.nativeSymbols = nativeSymbols;
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

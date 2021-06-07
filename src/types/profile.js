@@ -23,6 +23,7 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
+export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
@@ -275,6 +276,8 @@ export type FrameTable = {|
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
+  inlineDepth: number[], // 0 for "this is the outer function at the address"
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[],
   // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
   // It's used to determine which JS frame belongs to which web page so we can display
   // that information and filter for single tab profiling.
@@ -334,14 +337,19 @@ export type FuncTable = {|
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
 
-  // This is relevant for functions of the 'native' stackType only (functions
-  // whose resource is a library).
-  // Stores the library-relative offset of the start of the function, i.e. the
-  // address of the symbol that gave this function its name.
-  // Prior to initial symbolication, it stores the same address as the single
-  // frame that refers to this func, because at that point the actual boundaries
-  // of the true functions are not known.
-  address: Array<Address | -1>,
+  length: number,
+|};
+
+export type NativeSymbolTable = {|
+  // The library that this native symbol is in.
+  libIndex: Array<IndexIntoLibs>,
+  // The library-relative offset of this symbol.
+  address: Array<Address>,
+  // The symbol name, demangled.
+  name: Array<IndexIntoStringTable>,
+
+  // This would be a good spot for a "size" field. But the symbolication API does
+  // not give us information about the size of a function.
 
   length: number,
 |};
@@ -574,6 +582,7 @@ export type Thread = {|
   libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
 |};
 

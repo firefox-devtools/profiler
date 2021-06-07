@@ -20,6 +20,7 @@ import type {
   UnbalancedNativeAllocationsTable,
   BalancedNativeAllocationsTable,
   ResourceTable,
+  NativeSymbolTable,
   Profile,
   ExtensionTable,
   CategoryList,
@@ -94,6 +95,8 @@ export function getEmptyFrameTable(): FrameTable {
     category: [],
     subcategory: [],
     func: [],
+    nativeSymbol: [],
+    inlineDepth: [],
     innerWindowID: [],
     implementation: [],
     line: [],
@@ -113,6 +116,8 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
     func: frameTable.func.slice(),
+    nativeSymbol: frameTable.nativeSymbol.slice(),
+    inlineDepth: frameTable.inlineDepth.slice(),
     innerWindowID: frameTable.innerWindowID.slice(),
     implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
@@ -128,7 +133,6 @@ export function getEmptyFuncTable(): FuncTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    address: [],
     isJS: [],
     relevantForJS: [],
     name: [],
@@ -146,7 +150,6 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    address: funcTable.address.slice(),
     isJS: funcTable.isJS.slice(),
     relevantForJS: funcTable.relevantForJS.slice(),
     name: funcTable.name.slice(),
@@ -168,6 +171,19 @@ export function getEmptyResourceTable(): ResourceTable {
     name: [],
     host: [],
     type: [],
+    length: 0,
+  };
+}
+
+export function getEmptyNativeSymbolTable(): NativeSymbolTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    libIndex: [],
+    address: [],
+    name: [],
     length: 0,
   };
 }
@@ -343,6 +359,7 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     libs: [],
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
+    nativeSymbols: getEmptyNativeSymbolTable(),
   };
 
   return {

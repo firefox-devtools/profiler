@@ -425,9 +425,7 @@ export function applySymbolicationStep(
     if (addressResult === undefined) {
       const oldSymbol = stringTable.getString(oldFuncTable.name[oldFrameFunc]);
       addressResult = {
-        functionOffset:
-          oldFrameTable.address[frameIndex] -
-          oldFuncTable.address[oldFrameFunc],
+        functionOffset: 0,
         name: oldSymbol,
       };
     }
@@ -517,7 +515,6 @@ export function applySymbolicationStep(
       funcAddressToCanonicalFuncIndexMap.set(funcAddress, funcIndex);
     }
     // Update the func properties.
-    funcTable.address[funcIndex] = funcAddress;
     funcTable.name[funcIndex] = symbolStringIndex;
   }
 

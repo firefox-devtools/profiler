@@ -10,7 +10,7 @@ import type { MarkerPhase } from 'firefox-profiler/types';
 export const GECKO_PROFILE_VERSION = 23;
 
 // The current version of the "processed" profile format.
-export const PROCESSED_PROFILE_VERSION = 35;
+export const PROCESSED_PROFILE_VERSION = 36;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
