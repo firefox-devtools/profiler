@@ -96,6 +96,60 @@ function _ensureIsAPIResult(result: any): APIResult {
   return result;
 }
 
+async function getV5ResultForLibRequest(
+  jsonPromise,
+  request,
+  libIndex,
+  addressArray
+) {
+  const { lib } = request;
+  const { debugName, breakpadId } = lib;
+
+  let json;
+  try {
+    json = _ensureIsAPIResult(await jsonPromise).results[0];
+  } catch (error) {
+    throw new SymbolsNotFoundError(
+      'There was a problem with the JSON returned by the symbolication API.',
+      lib,
+      error
+    );
+  }
+
+  if (!json.found_modules[`${debugName}/${breakpadId}`]) {
+    throw new SymbolsNotFoundError(
+      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
+      lib
+    );
+  }
+
+  const addressInfo = json.stacks[libIndex];
+  if (addressInfo.length !== addressArray.length) {
+    throw new SymbolsNotFoundError(
+      'The result from the symbol server has an unexpected length.',
+      lib
+    );
+  }
+
+  const results = new Map();
+  for (let i = 0; i < addressInfo.length; i++) {
+    const address = addressArray[i];
+    const info = addressInfo[i];
+    if (info.function !== undefined && info.function_offset !== undefined) {
+      results.set(address, {
+        name: info.function,
+        functionOffset: parseInt(info.function_offset.substr(2), 16),
+      });
+    } else {
+      throw new SymbolsNotFoundError(
+        `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
+        lib
+      );
+    }
+  }
+  return results;
+}
+
 export type QueryAPICallback = (url: string, requestJSON: string) => Object;
 
 // Request symbols for the given addresses and libraries using the Mozilla
@@ -133,53 +187,7 @@ export function requestSymbols(
 
   const jsonPromise = queryAPICallback('/symbolicate/v5', JSON.stringify(body));
 
-  return requests.map(async function(request, libIndex) {
-    const { lib } = request;
-    const { debugName, breakpadId } = lib;
-
-    let json;
-    try {
-      json = _ensureIsAPIResult(await jsonPromise).results[0];
-    } catch (error) {
-      throw new SymbolsNotFoundError(
-        'There was a problem with the JSON returned by the symbolication API.',
-        lib,
-        error
-      );
-    }
-
-    if (!json.found_modules[`${debugName}/${breakpadId}`]) {
-      throw new SymbolsNotFoundError(
-        `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
-        lib
-      );
-    }
-
-    const addressInfo = json.stacks[libIndex];
-    const addressArray = addressArrays[libIndex];
-    if (addressInfo.length !== addressArray.length) {
-      throw new SymbolsNotFoundError(
-        'The result from the symbol server has an unexpected length.',
-        lib
-      );
-    }
-
-    const results = new Map();
-    for (let i = 0; i < addressInfo.length; i++) {
-      const address = addressArray[i];
-      const info = addressInfo[i];
-      if (info.function !== undefined && info.function_offset !== undefined) {
-        results.set(address, {
-          name: info.function,
-          functionOffset: parseInt(info.function_offset.substr(2), 16),
-        });
-      } else {
-        throw new SymbolsNotFoundError(
-          `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
-          lib
-        );
-      }
-    }
-    return results;
-  });
+  return requests.map((request, i) =>
+    getV5ResultForLibRequest(jsonPromise, request, i, addressArrays[i])
+  );
 }
