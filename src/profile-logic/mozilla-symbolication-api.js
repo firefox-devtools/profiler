@@ -96,25 +96,9 @@ function _ensureIsAPIResult(result: any): APIResult {
   return result;
 }
 
-async function getV5ResultForLibRequest(
-  jsonPromise,
-  request,
-  libIndex,
-  addressArray
-) {
+async function getV5ResultForLibRequest(request, addressArray, json) {
   const { lib } = request;
   const { debugName, breakpadId } = lib;
-
-  let json;
-  try {
-    json = _ensureIsAPIResult(await jsonPromise).results[0];
-  } catch (error) {
-    throw new SymbolsNotFoundError(
-      'There was a problem with the JSON returned by the symbolication API.',
-      lib,
-      error
-    );
-  }
 
   if (!json.found_modules[`${debugName}/${breakpadId}`]) {
     throw new SymbolsNotFoundError(
@@ -123,7 +107,7 @@ async function getV5ResultForLibRequest(
     );
   }
 
-  const addressInfo = json.stacks[libIndex];
+  const addressInfo = json.stacks[0];
   if (addressInfo.length !== addressArray.length) {
     throw new SymbolsNotFoundError(
       'The result from the symbol server has an unexpected length.',
@@ -150,7 +134,29 @@ async function getV5ResultForLibRequest(
   return results;
 }
 
-export type QueryAPICallback = (url: string, requestJSON: string) => Object;
+export type QueryAPICallback = (
+  url: string,
+  requestJSON: string
+) => Promise<Object>;
+
+// This function returns an APIResult.
+// However, adding ": APIResult" causes flow to give an error, probably by mistake.
+async function queryAPIAndTypeCheckResult(
+  queryAPICallback: QueryAPICallback,
+  body: Object
+) {
+  try {
+    const json = await queryAPICallback(
+      '/symbolicate/v5',
+      JSON.stringify(body)
+    );
+    return _ensureIsAPIResult(json);
+  } catch (error) {
+    throw new Error(
+      `There was a problem with the JSON returned by the symbolication API: ${error}.`
+    );
+  }
+}
 
 // Request symbols for the given addresses and libraries using the Mozilla
 // symbolication API.
@@ -165,29 +171,43 @@ export function requestSymbols(
   symbolsUrl: string,
   queryAPICallback?: QueryAPICallback
 ): Array<Promise<Map<number, AddressResult>>> {
-  const addressArrays = requests.map(({ addresses }) => Array.from(addresses));
+  // For each request, turn its set of addresses into an array.
+  // We need there to be a defined order in each addressArray so that we can
+  // match the results to the request.
+  const requestsWithAddressArrays = requests.map(request => ({
+    request,
+    addressArray: Array.from(request.addresses),
+  }));
+
+  // Construct the API request body. We make one "job" per LibSymbolicatioRequest.
+  // Each "job" has a module list with just one "module" (the lib), and a list
+  // of stacks with just one "stack", which contains all addresses for that lib.
   const body = {
-    memoryMap: requests.map(({ lib: { debugName, breakpadId } }) => [
-      debugName,
-      breakpadId,
-    ]),
-    stacks: addressArrays.map((addressArray, libIndex) =>
-      addressArray.map(addr => [libIndex, addr])
-    ),
+    jobs: requestsWithAddressArrays.map(({ request, addressArray }) => {
+      const { debugName, breakpadId } = request.lib;
+      return {
+        memoryMap: [[debugName, breakpadId]],
+        stacks: [addressArray.map(addr => [0, addr])],
+      };
+    }),
   };
 
   if (!queryAPICallback) {
-    queryAPICallback = (url, requestJSON) =>
-      fetch(symbolsUrl + url, {
+    queryAPICallback = async (url, requestJSON) => {
+      const response = await fetch(symbolsUrl + url, {
         body: requestJSON,
         method: 'POST',
         mode: 'cors',
-      }).then(response => response.json());
+      });
+      return response.json();
+    };
   }
 
-  const jsonPromise = queryAPICallback('/symbolicate/v5', JSON.stringify(body));
+  const apiResultPromise = queryAPIAndTypeCheckResult(queryAPICallback, body);
 
-  return requests.map((request, i) =>
-    getV5ResultForLibRequest(jsonPromise, request, i, addressArrays[i])
-  );
+  return requestsWithAddressArrays.map(async ({ request, addressArray }, i) => {
+    const apiResult: APIResult = await apiResultPromise;
+    const jobResult = apiResult.results[i];
+    return getV5ResultForLibRequest(request, addressArray, jobResult);
+  });
 }
