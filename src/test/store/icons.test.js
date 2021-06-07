@@ -42,6 +42,7 @@ describe('actions/icons', function() {
       selfWithUnit: '0 ms',
       name: 'icon',
       lib: 'icon',
+      badge: { type: 'none' },
       isFrameLabel: false,
       categoryName: 'Other',
       categoryColor: 'grey',

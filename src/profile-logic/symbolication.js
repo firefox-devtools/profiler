@@ -852,7 +852,14 @@ export function applySymbolicationStep(
       `funcTable: +${funcTable.length - oldFuncTable.length}`
   );
 
-  return { ...thread, frameTable, funcTable, stackTable, stringTable };
+  return {
+    ...thread,
+    nativeSymbols,
+    frameTable,
+    funcTable,
+    stackTable,
+    stringTable,
+  };
 }
 
 /**

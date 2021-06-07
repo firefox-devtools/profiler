@@ -297,6 +297,14 @@ class TreeViewRowScrolledColumns<
             title={displayData.categoryName}
           />
         ) : null}
+        {displayData.badge.type === 'badge' ? (
+          <span
+            className={`treeBadge ${displayData.badge.name}`}
+            title={displayData.badge.title}
+          >
+            {displayData.badge.alt}
+          </span>
+        ) : null}
         <span
           className={classNames(
             'treeViewRowColumn',

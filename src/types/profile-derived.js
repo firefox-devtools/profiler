@@ -131,6 +131,10 @@ export type CallNodeData = {
   selfRelative: number,
 };
 
+export type ExtraBadgeInfo =
+  | { type: 'none' }
+  | { type: 'badge', name: string, alt: string, title: string };
+
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
     total: string,
@@ -144,6 +148,7 @@ export type CallNodeDisplayData = $Exact<
     categoryName: string,
     categoryColor: string,
     iconSrc: string | null,
+    badge: ExtraBadgeInfo,
     icon: string | null,
     ariaLabel: string,
   }>

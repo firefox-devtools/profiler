@@ -17,6 +17,7 @@ import type {
   Thread,
   FuncTable,
   ResourceTable,
+  NativeSymbolTable,
   IndexIntoFuncTable,
   SamplesLikeTable,
   WeightType,
@@ -28,13 +29,13 @@ import type {
   Milliseconds,
   TracedTiming,
   SamplesTable,
+  ExtraBadgeInfo,
 } from 'firefox-profiler/types';
-
+import type { CallTreeSummaryStrategy } from '../types/actions';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import * as ProfileData from './profile-data';
-import type { CallTreeSummaryStrategy } from '../types/actions';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeSummary = {
@@ -72,6 +73,7 @@ export class CallTree {
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
   _funcTable: FuncTable;
   _resourceTable: ResourceTable;
+  _nativeSymbols: NativeSymbolTable;
   _stringTable: UniqueStringArray;
   _rootTotalSummary: number;
   _rootCount: number;
@@ -85,7 +87,7 @@ export class CallTree {
   _weightType: WeightType;
 
   constructor(
-    { funcTable, resourceTable, stringTable }: Thread,
+    { funcTable, resourceTable, nativeSymbols, stringTable }: Thread,
     categories: CategoryList,
     callNodeTable: CallNodeTable,
     callNodeSummary: CallNodeSummary,
@@ -103,6 +105,7 @@ export class CallTree {
     this._callNodeChildCount = callNodeChildCount;
     this._funcTable = funcTable;
     this._resourceTable = resourceTable;
+    this._nativeSymbols = nativeSymbols;
     this._stringTable = stringTable;
     this._rootTotalSummary = rootTotalSummary;
     this._rootCount = rootCount;
@@ -210,6 +213,36 @@ export class CallTree {
     };
   }
 
+  _getInliningBadge(
+    callNodeIndex: IndexIntoCallNodeTable,
+    funcName: string
+  ): ExtraBadgeInfo {
+    const inlinedIntoNativeSymbol = this._callNodeTable
+      .sourceFramesInlinedIntoSymbol[callNodeIndex];
+    if (inlinedIntoNativeSymbol === null) {
+      return { type: 'none' };
+    }
+
+    if (inlinedIntoNativeSymbol === -1) {
+      return {
+        type: 'badge',
+        name: 'divergent-inlining',
+        alt: '',
+        title: `Some calls to ${funcName} were inlined by the compiler.`,
+      };
+    }
+
+    const symbolName = this._stringTable.getString(
+      this._nativeSymbols.name[inlinedIntoNativeSymbol]
+    );
+    return {
+      type: 'badge',
+      name: 'inlined',
+      alt: '(inlined)',
+      title: `Calls to ${funcName} were inlined into ${symbolName} by the compiler.`,
+    };
+  }
+
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData: CallNodeDisplayData | void = this._displayDataByIndex.get(
       callNodeIndex
@@ -221,6 +254,7 @@ export class CallTree {
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
+      const badge = this._getInliningBadge(callNodeIndex, funcName);
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isFrameLabel = resourceIndex === -1;
@@ -307,6 +341,7 @@ export class CallTree {
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
         isFrameLabel,
+        badge,
         categoryName: getCategoryPairLabel(
           this._categories,
           categoryIndex,
