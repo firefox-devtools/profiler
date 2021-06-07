@@ -12,7 +12,7 @@ import { SymbolsNotFoundError } from './errors';
 // Specifically, it uses version 5 of the API, which was implemented in
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1377479 .
 
-type APIFoundModules = {
+type APIFoundModulesV5 = {
   // For every requested library in the memoryMap, this object contains a string
   // key of the form `${debugName}/${breakpadId}`. The value is null if no
   // address with the module index was requested, and otherwise a boolean that
@@ -20,7 +20,7 @@ type APIFoundModules = {
   [string]: null | boolean,
 };
 
-type APIFrameInfo = {
+type APIFrameInfoV5 = {
   // The hex version of the address that we requested (e.g. "0x5ab").
   module_offset: string,
   // The debugName of the library that this frame was in.
@@ -34,20 +34,20 @@ type APIFrameInfo = {
   function_offset?: string,
 };
 
-type APIStack = APIFrameInfo[];
+type APIStackV5 = APIFrameInfoV5[];
 
-type APIJobResult = {
-  found_modules: APIFoundModules,
-  stacks: APIStack[],
+type APIJobResultV5 = {
+  found_modules: APIFoundModulesV5,
+  stacks: APIStackV5[],
 };
 
-type APIResult = {
-  results: APIJobResult[],
+type APIResultV5 = {
+  results: APIJobResultV5[],
 };
 
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
-function _ensureIsAPIResult(result: any): APIResult {
+function _ensureIsAPIResultV5(result: any): APIResultV5 {
   if (!(result instanceof Object) || !('results' in result)) {
     throw new Error('Expected an object with property `results`');
   }
@@ -139,8 +139,8 @@ export type QueryAPICallback = (
   requestJSON: string
 ) => Promise<Object>;
 
-// This function returns an APIResult.
-// However, adding ": APIResult" causes flow to give an error, probably by mistake.
+// This function returns an APIResultV5.
+// However, adding ": APIResultV5" causes flow to give an error, probably by mistake.
 async function queryAPIAndTypeCheckResult(
   queryAPICallback: QueryAPICallback,
   body: Object
@@ -150,7 +150,7 @@ async function queryAPIAndTypeCheckResult(
       '/symbolicate/v5',
       JSON.stringify(body)
     );
-    return _ensureIsAPIResult(json);
+    return _ensureIsAPIResultV5(json);
   } catch (error) {
     throw new Error(
       `There was a problem with the JSON returned by the symbolication API: ${error}.`
@@ -206,7 +206,7 @@ export function requestSymbols(
   const apiResultPromise = queryAPIAndTypeCheckResult(queryAPICallback, body);
 
   return requestsWithAddressArrays.map(async ({ request, addressArray }, i) => {
-    const apiResult: APIResult = await apiResultPromise;
+    const apiResult: APIResultV5 = await apiResultPromise;
     const jobResult = apiResult.results[i];
     return getV5ResultForLibRequest(request, addressArray, jobResult);
   });
