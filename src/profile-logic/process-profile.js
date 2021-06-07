@@ -15,6 +15,8 @@ import {
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyNativeSymbolTable,
+  getEmptyStackTable,
+  shallowCloneFrameTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
@@ -28,6 +30,8 @@ import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
   getOrCreateURIResource,
+  gatherStackReferences,
+  replaceStackReferences,
 } from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -1108,7 +1112,112 @@ function _processThread(
 
   processJsTracer();
 
-  return newThread;
+  return nudgeReturnAddresses(newThread);
+}
+
+function nudgeReturnAddresses(thread: Thread): Thread {
+  // Make a new stack table where 1 byte is subtracted from all return addresses,
+  // i.e. the addresses of alle frames that are used as stack prefixes.
+  // But not from the addresses of the top of the stack (instruction pointer).
+  // Frames that are used as both prefixes and as leaves need to be duplicated.
+  const { stackTable, frameTable } = thread;
+  const stackNodesUsedAsLeaves = Array.from(gatherStackReferences(thread));
+  stackNodesUsedAsLeaves.sort((a, b) => a - b);
+
+  const mapForLeafFrames = new Uint32Array(frameTable.length);
+  const framesUsedAsNativeLeaves = new Set();
+  for (let i = 0; i < stackNodesUsedAsLeaves.length; i++) {
+    const stack = stackNodesUsedAsLeaves[i];
+    const frame = stackTable.frame[stack];
+    const address = frameTable.address[frame];
+    if (address !== null) {
+      framesUsedAsNativeLeaves.add(frame);
+      mapForLeafFrames[frame] = frame;
+    }
+  }
+
+  const framesUsedAsReturnAddresses = new Map();
+  for (let i = 0; i < stackTable.length; i++) {
+    const prefix = stackTable.prefix[i];
+    if (prefix === null) {
+      continue;
+    }
+    const prefixFrame = stackTable.frame[prefix];
+    const prefixAddress = frameTable.address[prefixFrame];
+    if (prefixAddress !== null) {
+      framesUsedAsReturnAddresses.set(prefixFrame, prefixAddress);
+    }
+  }
+
+  if (
+    framesUsedAsNativeLeaves.size === 0 &&
+    framesUsedAsReturnAddresses.size === 0
+  ) {
+    return thread;
+  }
+
+  const newFrameTable = shallowCloneFrameTable(frameTable);
+  for (const [frame, address] of framesUsedAsReturnAddresses) {
+    if (framesUsedAsNativeLeaves.has(frame)) {
+      const leafFrameIndex = newFrameTable.length;
+      newFrameTable.address.push(address);
+      newFrameTable.category.push(frameTable.category[frame]);
+      newFrameTable.subcategory.push(frameTable.subcategory[frame]);
+      newFrameTable.func.push(frameTable.func[frame]);
+      newFrameTable.inlineDepth.push(frameTable.inlineDepth[frame]);
+      newFrameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+      newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+      newFrameTable.implementation.push(frameTable.implementation[frame]);
+      newFrameTable.line.push(frameTable.line[frame]);
+      newFrameTable.column.push(frameTable.column[frame]);
+      newFrameTable.optimizations.push(frameTable.optimizations[frame]);
+      newFrameTable.length++;
+      mapForLeafFrames[frame] = leafFrameIndex;
+    }
+    // Subtract 1 byte from the return address.
+    newFrameTable.address[frame] = address - 1;
+  }
+
+  const newStackTable = getEmptyStackTable();
+  const mapForLeafStacks = new Uint32Array(stackTable.length);
+  const mapForPrefixStacks = new Uint32Array(stackTable.length);
+  for (let i = 0; i < stackTable.length; i++) {
+    const frame = stackTable.frame[i];
+    const category = stackTable.category[i];
+    const subcategory = stackTable.subcategory[i];
+    const prefix = stackTable.prefix[i];
+
+    const newPrefix = prefix === null ? null : mapForPrefixStacks[prefix];
+
+    // First, add a stack that can be used as a prefix for the other stacks.
+    const newStackIndex = newStackTable.length;
+    newStackTable.frame.push(frame);
+    newStackTable.category.push(category);
+    newStackTable.subcategory.push(subcategory);
+    newStackTable.prefix.push(newPrefix);
+    newStackTable.length++;
+    mapForPrefixStacks[i] = newStackIndex;
+
+    // Now add a stack node if this frame is used as a leaf frame.
+    if (framesUsedAsNativeLeaves.has(frame)) {
+      const leafFrame = mapForLeafFrames[frame];
+      const leafStackIndex = newStackTable.length;
+      newStackTable.frame.push(leafFrame);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.prefix.push(newPrefix);
+      newStackTable.length++;
+      mapForLeafStacks[i] = leafStackIndex;
+    }
+  }
+
+  const newThread = {
+    ...thread,
+    frameTable: newFrameTable,
+    stackTable: newStackTable,
+  };
+
+  return replaceStackReferences(newThread, mapForLeafStacks);
 }
 
 /**
