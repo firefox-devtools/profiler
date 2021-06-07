@@ -45,6 +45,54 @@ type APIResultV5 = {
   results: APIJobResultV5[],
 };
 
+// v6
+
+type APIModuleStatusV6 = Array<{
+  found: boolean,
+  errors: Array<APIModuleErrorV6>,
+  symbol_count: number,
+}>;
+
+type APIModuleErrorV6 = {
+  name: string,
+  message: string,
+  filename?: string,
+  line?: number,
+};
+
+type APIFrameInfoV6 = {
+  // The hex version of the address that we requested (e.g. "0x5ab").
+  module_offset: string,
+  // The debugName of the library that this frame was in.
+  module: string,
+  // The index of this APIFrameInfo in its enclosing APIStack.
+  frame: number,
+  // The name of the function this frame was in, if symbols were found.
+  function?: string,
+  // The hex offset between the requested address and the start of the function,
+  // e.g. "0x3c".
+  function_offset?: string,
+  // An array of frames that were inlined into this function at the given address.
+  inline_stack: Array<APIInlineStackFrameV6>,
+};
+
+type APIInlineStackFrameV6 = {
+  function_name?: string,
+  file_path?: string,
+  line_number?: number,
+};
+
+type APIStackV6 = APIFrameInfoV6[];
+
+type APIJobResultV6 = {
+  module_status: APIModuleStatusV6,
+  stacks: APIStackV6[],
+};
+
+type APIResultV6 = {
+  results: APIJobResultV6[],
+};
+
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
 function _ensureIsAPIResultV5(result: any): APIResultV5 {
@@ -89,6 +137,78 @@ function _ensureIsAPIResultV5(result: any): APIResultV5 {
           throw new Error(
             'Expected frameInfo to have `module_offset`, `module` and `frame` properties'
           );
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function _ensureIsAPIResultV6(result: any): APIResultV6 {
+  if (!(result instanceof Object) || !('results' in result)) {
+    throw new Error('Expected an object with property `results`');
+  }
+  const results = result.results;
+  if (!Array.isArray(results)) {
+    throw new Error('Expected `results` to be an array');
+  }
+  for (const jobResult of results) {
+    if (
+      !(jobResult instanceof Object) ||
+      !('module_status' in jobResult) ||
+      !('stacks' in jobResult)
+    ) {
+      throw new Error(
+        'Expected jobResult to have `module_status` and `stacks` properties'
+      );
+    }
+    const module_status = jobResult.module_status;
+    if (!Array.isArray(module_status)) {
+      throw new Error('Expected `module_status` to be an array');
+    }
+    for (const moduleStatus of module_status) {
+      if (
+        !(moduleStatus instanceof Object) ||
+        !('found' in moduleStatus) ||
+        !('errors' in moduleStatus) ||
+        !('symbol_count' in moduleStatus)
+      ) {
+        throw new Error(
+          'Expected moduleStatus to have `found`, `errors` and `symbol_count` properties.'
+        );
+      }
+    }
+    const stacks = jobResult.stacks;
+    if (!Array.isArray(stacks)) {
+      throw new Error('Expected `stacks` to be an array');
+    }
+    for (const stack of stacks) {
+      if (!Array.isArray(stack)) {
+        throw new Error('Expected `stack` to be an array');
+      }
+      for (const frameInfo of stack) {
+        if (!(frameInfo instanceof Object)) {
+          throw new Error('Expected `frameInfo` to be an object');
+        }
+        if (
+          !('module_offset' in frameInfo) ||
+          !('module' in frameInfo) ||
+          !('frame' in frameInfo)
+        ) {
+          throw new Error(
+            'Expected frameInfo to have `module_offset`, `module` and `frame` properties'
+          );
+        }
+        if ('inline_stack' in frameInfo) {
+          const inlineStack = frameInfo.inline_stack;
+          if (!Array.isArray(inlineStack)) {
+            throw new Error('Expected `inlineStack` to be an array');
+          }
+          for (const inlineFrame of inlineStack) {
+            if (!(inlineFrame instanceof Object)) {
+              throw new Error('Expected `inlineFrame` to be an object');
+            }
+          }
         }
       }
     }
