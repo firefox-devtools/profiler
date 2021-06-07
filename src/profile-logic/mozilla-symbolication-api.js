@@ -216,7 +216,11 @@ function _ensureIsAPIResultV6(result: any): APIResultV6 {
   return result;
 }
 
-async function getV5ResultForLibRequest(request, addressArray, json) {
+async function getResultForLibRequestFromV5Response(
+  request,
+  addressArray,
+  json
+) {
   const { lib } = request;
   const { debugName, breakpadId } = lib;
 
@@ -254,27 +258,93 @@ async function getV5ResultForLibRequest(request, addressArray, json) {
   return results;
 }
 
+async function getResultForLibRequestFromV6Response(
+  request,
+  addressArray,
+  json: APIJobResultV6
+) {
+  const { lib } = request;
+  const { debugName, breakpadId } = lib;
+
+  if (!json.module_status[0].found) {
+    const errors = json.module_status[0].errors.map(e => {
+      const error = new Error(e.message);
+      error.name = e.name;
+      error.fileName = e.filename;
+      error.lineNumber = e.line;
+      return error;
+    });
+    throw new SymbolsNotFoundError(
+      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
+      lib,
+      ...errors
+    );
+  }
+
+  const addressInfo = json.stacks[0];
+  if (addressInfo.length !== addressArray.length) {
+    throw new SymbolsNotFoundError(
+      'The result from the symbol server has an unexpected length.',
+      lib
+    );
+  }
+
+  const results = new Map();
+  for (let i = 0; i < addressInfo.length; i++) {
+    const address = addressArray[i];
+    const info = addressInfo[i];
+    if (info.function !== undefined && info.function_offset !== undefined) {
+      results.set(address, {
+        name: info.function,
+        functionOffset: parseInt(info.function_offset.substr(2), 16),
+      });
+    } else {
+      throw new SymbolsNotFoundError(
+        `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
+        lib
+      );
+    }
+  }
+  return results;
+}
+
 export type QueryAPICallback = (
   url: string,
   requestJSON: string
 ) => Promise<Object>;
 
-// This function returns an APIResultV5.
-// However, adding ": APIResultV5" causes flow to give an error, probably by mistake.
+type ResponseV5OrV6 =
+  | {
+      type: 'v5',
+      result: APIResultV5,
+    }
+  | {
+      type: 'v6',
+      result: APIResultV6,
+    };
+
 async function queryAPIAndTypeCheckResult(
   queryAPICallback: QueryAPICallback,
   body: Object
 ) {
   try {
     const json = await queryAPICallback(
-      '/symbolicate/v5',
+      '/symbolicate/v6a1',
       JSON.stringify(body)
     );
-    return _ensureIsAPIResultV5(json);
+    return { type: 'v6', result: _ensureIsAPIResultV6(json) };
   } catch (error) {
-    throw new Error(
-      `There was a problem with the JSON returned by the symbolication API: ${error}.`
-    );
+    try {
+      const json = await queryAPICallback(
+        '/symbolicate/v5',
+        JSON.stringify(body)
+      );
+      return { type: 'v5', result: _ensureIsAPIResultV5(json) };
+    } catch (error) {
+      throw new Error(
+        `There was a problem with the JSON returned by the symbolication API: ${error}.`
+      );
+    }
   }
 }
 
@@ -326,8 +396,20 @@ export function requestSymbols(
   const apiResultPromise = queryAPIAndTypeCheckResult(queryAPICallback, body);
 
   return requestsWithAddressArrays.map(async ({ request, addressArray }, i) => {
-    const apiResult: APIResultV5 = await apiResultPromise;
-    const jobResult = apiResult.results[i];
-    return getV5ResultForLibRequest(request, addressArray, jobResult);
+    const response: ResponseV5OrV6 = await apiResultPromise;
+    if (response.type === 'v6') {
+      const jobResult = response.result.results[i];
+      return getResultForLibRequestFromV6Response(
+        request,
+        addressArray,
+        jobResult
+      );
+    }
+    const jobResult = response.result.results[i];
+    return getResultForLibRequestFromV5Response(
+      request,
+      addressArray,
+      jobResult
+    );
   });
 }
