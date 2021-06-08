@@ -74,6 +74,8 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     const row = Math.floor(y / TRACK_NETWORK_ROW_HEIGHT);
     const rangeLength = rangeEnd - rangeStart;
     const time = rangeStart + (x / width) * rangeLength;
+    const minimumSize: CssPixels = 5;
+    const minimumDuration: Milliseconds = (minimumSize / width) * rangeLength;
 
     // Row i matches network timing's rows i, i + TRACK_NETWORK_ROW_REPEAT, i +
     // TRACK_NETWORK_ROW_REPEAT * 2, etc
@@ -96,7 +98,12 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
       }
 
       const start = timingRow.start[indexInRow];
-      const end = timingRow.end[indexInRow];
+      let end = timingRow.end[indexInRow];
+
+      // Make it possible to hit the small markers.
+      if (end - start < minimumDuration) {
+        end = start + minimumDuration;
+      }
 
       if (end < time) {
         // The marker we found ends before this time.
