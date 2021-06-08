@@ -108,6 +108,9 @@ export function requestSymbols(
   requests: LibSymbolicationRequest[],
   symbolsUrl: string
 ): Array<Promise<Map<number, AddressResult>>> {
+  // For each request, turn its set of addresses into an array.
+  // We need there to be a defined order in each addressArray so that we can
+  // match the results to the request.
   const addressArrays = requests.map(({ addresses }) => Array.from(addresses));
   const body = {
     memoryMap: requests.map(({ lib: { debugName, breakpadId } }) => [
