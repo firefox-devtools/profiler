@@ -413,6 +413,12 @@ export type GCSliceMarkerPayload_Gecko = {|
  * that redirects are logged as well.
  */
 
+export type NetworkStatus =
+  | 'STATUS_START'
+  | 'STATUS_STOP'
+  | 'STATUS_REDIRECT'
+  | 'STATUS_ABORT';
+export type NetworkRedirectType = 'permanent' | 'temporary' | 'internal';
 export type NetworkPayload = {|
   type: 'Network',
   URI: string,
@@ -421,7 +427,11 @@ export type NetworkPayload = {|
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
   // See all possible values in tools/profiler/core/platform.cpp
-  status: 'STATUS_START' | 'STATUS_STOP' | 'STATUS_REDIRECT',
+  status: NetworkStatus,
+  // The following property is present since Gecko v91.
+  redirectType?: NetworkRedirectType,
+  // The following property is present since Gecko v91.
+  isHttpToHttpsRedirect?: boolean,
   cache?: string,
   cause?: CauseBacktrace,
 
