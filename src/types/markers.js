@@ -420,7 +420,8 @@ export type NetworkPayload = {|
   id: number,
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
-  status: string,
+  // See all possible values in tools/profiler/core/platform.cpp
+  status: 'STATUS_START' | 'STATUS_STOP' | 'STATUS_REDIRECT',
   cache?: string,
   cause?: CauseBacktrace,
 
