@@ -115,14 +115,18 @@ export function requestSymbols(
     request,
     addressArray: Array.from(request.addresses),
   }));
+
+  // Construct the API request body. We make one "job" per LibSymbolicatioRequest.
+  // Each "job" has a module list with just one "module" (the lib), and a list
+  // of stacks with just one "stack", which contains all addresses for that lib.
   const body = {
-    memoryMap: requestsWithAddressArrays.map(({ request: { lib } }) => [
-      lib.debugName,
-      lib.breakpadId,
-    ]),
-    stacks: requestsWithAddressArrays.map((request, requestIndex) =>
-      request.addressArray.map(addr => [requestIndex, addr])
-    ),
+    jobs: requestsWithAddressArrays.map(({ request, addressArray }) => {
+      const { debugName, breakpadId } = request.lib;
+      return {
+        memoryMap: [[debugName, breakpadId]],
+        stacks: [addressArray.map(addr => [0, addr])],
+      };
+    }),
   };
 
   const jsonPromise = fetch(symbolsUrl + '/symbolicate/v5', {
@@ -142,7 +146,7 @@ export function requestSymbols(
 
     let json;
     try {
-      json = (await jsonPromise).results[0];
+      json = (await jsonPromise).results[requestIndex];
     } catch (error) {
       throw new SymbolsNotFoundError(
         'There was a problem with the JSON returned by the symbolication API.',
@@ -158,7 +162,7 @@ export function requestSymbols(
       );
     }
 
-    const addressInfo = json.stacks[requestIndex];
+    const addressInfo = json.stacks[0];
     if (addressInfo.length !== addressArray.length) {
       throw new SymbolsNotFoundError(
         'The result from the symbol server has an unexpected length.',
