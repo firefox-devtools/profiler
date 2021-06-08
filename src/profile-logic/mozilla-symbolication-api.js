@@ -123,7 +123,9 @@ export function requestSymbols(
     body: JSON.stringify(body),
     method: 'POST',
     mode: 'cors',
-  }).then(response => response.json());
+  })
+    .then(response => response.json())
+    .then(_ensureIsAPIResult);
 
   return requests.map(async function(request, libIndex) {
     const { lib } = request;
@@ -131,7 +133,7 @@ export function requestSymbols(
 
     let json;
     try {
-      json = _ensureIsAPIResult(await jsonPromise).results[0];
+      json = (await jsonPromise).results[0];
     } catch (error) {
       throw new SymbolsNotFoundError(
         'There was a problem with the JSON returned by the symbolication API.',
