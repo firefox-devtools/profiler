@@ -114,8 +114,8 @@ export function requestSymbols(
       debugName,
       breakpadId,
     ]),
-    stacks: addressArrays.map((addressArray, libIndex) =>
-      addressArray.map(addr => [libIndex, addr])
+    stacks: addressArrays.map((addressArray, requestIndex) =>
+      addressArray.map(addr => [requestIndex, addr])
     ),
   };
 
@@ -127,7 +127,7 @@ export function requestSymbols(
     .then(response => response.json())
     .then(_ensureIsAPIResult);
 
-  return requests.map(async function(request, libIndex) {
+  return requests.map(async function(request, requestIndex) {
     const { lib } = request;
     const { debugName, breakpadId } = lib;
 
@@ -149,8 +149,8 @@ export function requestSymbols(
       );
     }
 
-    const addressInfo = json.stacks[libIndex];
-    const addressArray = addressArrays[libIndex];
+    const addressInfo = json.stacks[requestIndex];
+    const addressArray = addressArrays[requestIndex];
     if (addressInfo.length !== addressArray.length) {
       throw new SymbolsNotFoundError(
         'The result from the symbol server has an unexpected length.',
