@@ -56,11 +56,12 @@ describe('timeline/TrackScreenshots', function() {
   });
 
   it('shows a hover when moving the mouse', () => {
-    const { screenshotHover, moveMouse } = setup();
+    const { screenshotHover, moveMouseAndGetImageSize } = setup();
 
     expect(screenshotHover).toThrow();
-    moveMouse(LEFT + 0);
+    const size = moveMouseAndGetImageSize(LEFT + 0);
     expect(screenshotHover()).toBeTruthy();
+    expect(size).toEqual({ width: 350, height: 175 });
   });
 
   it('sets a preview selection when clicking with the mouse', () => {
@@ -81,36 +82,43 @@ describe('timeline/TrackScreenshots', function() {
     expect(selectionOverlay()).toBeTruthy();
   });
 
-  it('does not change the preview selection when clicking if a selection is already present', () => {
-    const { selectionOverlay, screenshotTrack, getState } = setup(
-      undefined,
-      <Timeline />
-    );
+  it(`displays a smaller screenshot when preview selecting, and doesn't change it when clicking if a selection is already present`, () => {
+    const {
+      selectionOverlay,
+      screenshotTrack,
+      moveMouseAndGetImageSize,
+      getState,
+    } = setup(undefined, <Timeline />);
 
     const track = screenshotTrack();
     expect(selectionOverlay).toThrow();
 
     // Mousedown then Mousemove will do a selection.
     fireEvent(track, getMouseEvent('mousedown', { pageX: LEFT, pageY: TOP }));
-    fireEvent(
-      track,
-      getMouseEvent('mousemove', { pageX: LEFT + 200, pageY: TOP })
-    );
+    const screenShotSize = moveMouseAndGetImageSize(LEFT + 200);
 
     expect(selectionOverlay()).toBeTruthy();
-    const selectedPreviewSelection = getPreviewSelection(getState());
 
-    // Mouseup should keep this selection.
+    // And we should see a small screenshot hover while preview selecting.
+    expect(screenShotSize).toEqual({ width: 100, height: 50 });
+
+    // Mouseup should keep this existing selection
+    const previouslySelectedPreviewSelection = getPreviewSelection(getState());
     fireEvent(
       track,
       getMouseEvent('mouseup', { pageX: LEFT + 200, pageY: TOP })
     );
-    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 200, pageY: TOP }));
+    fireEvent(track, getMouseEvent('click', { pageX: LEFT + 210, pageY: TOP }));
+
     expect(getPreviewSelection(getState())).toEqual({
-      ...selectedPreviewSelection,
+      ...previouslySelectedPreviewSelection,
       isModifying: false,
     });
     expect(selectionOverlay()).toBeTruthy();
+
+    // but the screenshot hover size should now be bigger
+    const screenshotSize = moveMouseAndGetImageSize(LEFT + 210);
+    expect(screenshotSize).toEqual({ width: 350, height: 175 });
   });
 
   it('removes the hover when moving the mouse out', () => {
@@ -290,6 +298,13 @@ function setup(
     );
   }
 
+  function screenshotHoverImage() {
+    return ensureExists(
+      document.querySelector('.timelineTrackScreenshotHoverImg'),
+      `Couldn't find the screenshot hover element, with selector .timelineTrackScreenshotHoverImg`
+    );
+  }
+
   function selectionOverlay() {
     return ensureExists(
       document.querySelector('.timelineSelectionOverlay'),
@@ -325,6 +340,17 @@ function setup(
     return parseInt(screenshotHover().style.top);
   }
 
+  function moveMouseAndGetImageSize(
+    pageX: number
+  ): {| width: number, height: number |} {
+    moveMouse(pageX);
+    const style = screenshotHoverImage().style;
+    return {
+      width: parseInt(style.width),
+      height: parseInt(style.height),
+    };
+  }
+
   return {
     ...renderResult,
     dispatch,
@@ -336,6 +362,7 @@ function setup(
     moveMouse,
     moveMouseAndGetLeft,
     moveMouseAndGetTop,
+    moveMouseAndGetImageSize,
     setBoundingClientRectOffset,
     selectionOverlay,
     screenshotClick,
