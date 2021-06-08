@@ -111,14 +111,17 @@ export function requestSymbols(
   // For each request, turn its set of addresses into an array.
   // We need there to be a defined order in each addressArray so that we can
   // match the results to the request.
-  const addressArrays = requests.map(({ addresses }) => Array.from(addresses));
+  const requestsWithAddressArrays = requests.map(request => ({
+    request,
+    addressArray: Array.from(request.addresses),
+  }));
   const body = {
-    memoryMap: requests.map(({ lib: { debugName, breakpadId } }) => [
-      debugName,
-      breakpadId,
+    memoryMap: requestsWithAddressArrays.map(({ request: { lib } }) => [
+      lib.debugName,
+      lib.breakpadId,
     ]),
-    stacks: addressArrays.map((addressArray, requestIndex) =>
-      addressArray.map(addr => [requestIndex, addr])
+    stacks: requestsWithAddressArrays.map((request, requestIndex) =>
+      request.addressArray.map(addr => [requestIndex, addr])
     ),
   };
 
@@ -130,7 +133,10 @@ export function requestSymbols(
     .then(response => response.json())
     .then(_ensureIsAPIResult);
 
-  return requests.map(async function(request, requestIndex) {
+  return requestsWithAddressArrays.map(async function(
+    { request, addressArray },
+    requestIndex
+  ) {
     const { lib } = request;
     const { debugName, breakpadId } = lib;
 
@@ -153,7 +159,6 @@ export function requestSymbols(
     }
 
     const addressInfo = json.stacks[requestIndex];
-    const addressArray = addressArrays[requestIndex];
     if (addressInfo.length !== addressArray.length) {
       throw new SymbolsNotFoundError(
         'The result from the symbol server has an unexpected length.',
