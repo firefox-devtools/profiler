@@ -21,6 +21,14 @@ export type AddressResult = {|
   name: string,
   // The offset (in bytes) between the start of the function and the address.
   functionOffset: number,
+  // The path of the file that contains the source code of the function that contains this address.
+  // Optional because the information may not be known by the symbolication source, or because
+  // the symbolication method does not expose it.
+  file?: string,
+  // The line number that contains the source code that generated the instructions at the address, optional.
+  // Optional because the information may not be known by the symbolication source, or because
+  // the symbolication method does not expose it.
+  line?: number,
 |};
 
 interface SymbolProvider {

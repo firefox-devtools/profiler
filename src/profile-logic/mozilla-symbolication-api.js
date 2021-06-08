@@ -32,6 +32,15 @@ type APIFrameInfoV5 = {
   // The hex offset between the requested address and the start of the function,
   // e.g. "0x3c".
   function_offset?: string,
+  // The path of the file that contains the function this frame was in, optional.
+  // As of June 2021, this is only supported on the staging symbolication server
+  // ("Eliot") but not on the implementation that's currently in production ("Tecken").
+  // e.g. "hg:hg.mozilla.org/mozilla-central:js/src/vm/Interpreter.cpp:24938c537a55f9db3913072d33b178b210e7d6b5"
+  file?: string,
+  // The line number that contains the source code that generated the instructions at the address, optional.
+  // (Same support as file.)
+  // e.g. 543
+  line?: number,
 };
 
 type APIStackV5 = APIFrameInfoV5[];
@@ -90,6 +99,12 @@ function _ensureIsAPIResultV5(result: any): APIResultV5 {
             'Expected frameInfo to have `module_offset`, `module` and `frame` properties'
           );
         }
+        if ('file' in frameInfo && typeof frameInfo.file !== 'string') {
+          throw new Error('Expected frameInfo.file to be a string, if present');
+        }
+        if ('line' in frameInfo && typeof frameInfo.line !== 'number') {
+          throw new Error('Expected frameInfo.line to be a number, if present');
+        }
       }
     }
   }
@@ -127,6 +142,8 @@ function getV5ResultForLibRequest(
       results.set(address, {
         name: info.function,
         functionOffset: parseInt(info.function_offset.substr(2), 16),
+        file: info.file,
+        line: info.line,
       });
     } else {
       throw new SymbolsNotFoundError(
