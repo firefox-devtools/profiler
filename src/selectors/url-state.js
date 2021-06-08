@@ -10,6 +10,7 @@ import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { getProfileNameFromZipPath } from 'firefox-profiler/profile-logic/zip-files';
+import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -340,4 +341,54 @@ export const getProfileNameForStorage: Selector<string> = createSelector(
 export const getCommittedRangeLabels: Selector<string[]> = createSelector(
   getAllCommittedRanges,
   CommittedRanges.getCommittedRangeLabels
+);
+
+function _shouldAllowSymbolServerUrl(symbolServerUrl) {
+  try {
+    const localhostHostnames = ['localhost', '127.0.0.1'];
+    const url = new URL(symbolServerUrl);
+    if (localhostHostnames.includes(url.hostname)) {
+      return true;
+    }
+
+    // For non-localhost hosts, we require HTTPS.
+    const otherAllowedHostnames = [
+      'symbols.mozilla.org',
+      'symbolication.stage.mozaws.net',
+    ];
+    if (!otherAllowedHostnames.includes(url.hostname)) {
+      console.error(
+        `The symbol server URL was not in the list of allowed domains. Rejecting ${symbolServerUrl} and defaulting to ${SYMBOL_SERVER_URL}.`
+      );
+      return false;
+    }
+    if (url.protocol !== 'https:') {
+      console.error(
+        `HTTPS is required for non-localhost symbol servers. Rejecting ${symbolServerUrl} and defaulting to ${SYMBOL_SERVER_URL}.`
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(
+      `The symbol server URL was not valid. Rejecting ${symbolServerUrl} and defaulting to ${SYMBOL_SERVER_URL}.`,
+      error
+    );
+    return false;
+  }
+}
+
+export const getSymbolServerUrl: Selector<string> = createSelector(
+  getUrlState,
+  ({ symbolServerUrl }) => {
+    if (!symbolServerUrl || !_shouldAllowSymbolServerUrl(symbolServerUrl)) {
+      return SYMBOL_SERVER_URL;
+    }
+
+    // Strip off the trailing slash, if present.
+    if (symbolServerUrl.endsWith('/')) {
+      return symbolServerUrl.slice(0, -1);
+    }
+    return symbolServerUrl;
+  }
 );

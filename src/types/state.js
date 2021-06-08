@@ -283,6 +283,7 @@ export type UrlState = {|
   +profileName: string | null,
   +timelineTrackOrganization: TimelineTrackOrganization,
   +profileSpecific: ProfileSpecificUrlState,
+  +symbolServerUrl: string | null,
 |};
 
 /**
