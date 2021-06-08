@@ -96,6 +96,48 @@ function _ensureIsAPIResult(result: any): APIResult {
   return result;
 }
 
+function getV5ResultForLibRequest(
+  request: LibSymbolicationRequest,
+  addressArray: number[],
+  json: APIJobResult
+): Map<number, AddressResult> {
+  const { lib } = request;
+  const { debugName, breakpadId } = lib;
+
+  if (!json.found_modules[`${debugName}/${breakpadId}`]) {
+    throw new SymbolsNotFoundError(
+      `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
+      lib
+    );
+  }
+
+  const addressInfo = json.stacks[0];
+  if (addressInfo.length !== addressArray.length) {
+    throw new SymbolsNotFoundError(
+      'The result from the symbol server has an unexpected length.',
+      lib
+    );
+  }
+
+  const results = new Map();
+  for (let i = 0; i < addressInfo.length; i++) {
+    const address = addressArray[i];
+    const info = addressInfo[i];
+    if (info.function !== undefined && info.function_offset !== undefined) {
+      results.set(address, {
+        name: info.function,
+        functionOffset: parseInt(info.function_offset.substr(2), 16),
+      });
+    } else {
+      throw new SymbolsNotFoundError(
+        `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
+        lib
+      );
+    }
+  }
+  return results;
+}
+
 // Request symbols for the given addresses and libraries using the Mozilla
 // symbolication API.
 // Returns an array of promises, one promise per LibSymbolicationRequest in
@@ -142,7 +184,6 @@ export function requestSymbols(
     requestIndex
   ) {
     const { lib } = request;
-    const { debugName, breakpadId } = lib;
 
     let json;
     try {
@@ -155,37 +196,6 @@ export function requestSymbols(
       );
     }
 
-    if (!json.found_modules[`${debugName}/${breakpadId}`]) {
-      throw new SymbolsNotFoundError(
-        `The symbol server does not have symbols for ${debugName}/${breakpadId}.`,
-        lib
-      );
-    }
-
-    const addressInfo = json.stacks[0];
-    if (addressInfo.length !== addressArray.length) {
-      throw new SymbolsNotFoundError(
-        'The result from the symbol server has an unexpected length.',
-        lib
-      );
-    }
-
-    const results = new Map();
-    for (let i = 0; i < addressInfo.length; i++) {
-      const address = addressArray[i];
-      const info = addressInfo[i];
-      if (info.function !== undefined && info.function_offset !== undefined) {
-        results.set(address, {
-          name: info.function,
-          functionOffset: parseInt(info.function_offset.substr(2), 16),
-        });
-      } else {
-        throw new SymbolsNotFoundError(
-          `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
-          lib
-        );
-      }
-    }
-    return results;
+    return getV5ResultForLibRequest(request, addressArray, json);
   });
 }
