@@ -12,7 +12,7 @@ import { SymbolsNotFoundError } from './errors';
 // Specifically, it uses version 5 of the API, which was implemented in
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1377479 .
 
-type APIFoundModules = {
+type APIFoundModulesV5 = {
   // For every requested library in the memoryMap, this object contains a string
   // key of the form `${debugName}/${breakpadId}`. The value is null if no
   // address with the module index was requested, and otherwise a boolean that
@@ -20,7 +20,7 @@ type APIFoundModules = {
   [string]: null | boolean,
 };
 
-type APIFrameInfo = {
+type APIFrameInfoV5 = {
   // The hex version of the address that we requested (e.g. "0x5ab").
   module_offset: string,
   // The debugName of the library that this frame was in.
@@ -34,20 +34,20 @@ type APIFrameInfo = {
   function_offset?: string,
 };
 
-type APIStack = APIFrameInfo[];
+type APIStackV5 = APIFrameInfoV5[];
 
-type APIJobResult = {
-  found_modules: APIFoundModules,
-  stacks: APIStack[],
+type APIJobResultV5 = {
+  found_modules: APIFoundModulesV5,
+  stacks: APIStackV5[],
 };
 
-type APIResult = {
-  results: APIJobResult[],
+type APIResultV5 = {
+  results: APIJobResultV5[],
 };
 
 // Make sure that the JSON blob we receive from the API conforms to our flow
 // type definition.
-function _ensureIsAPIResult(result: any): APIResult {
+function _ensureIsAPIResultV5(result: any): APIResultV5 {
   if (!(result instanceof Object) || !('results' in result)) {
     throw new Error('Expected an object with property `results`');
   }
@@ -99,7 +99,7 @@ function _ensureIsAPIResult(result: any): APIResult {
 function getV5ResultForLibRequest(
   request: LibSymbolicationRequest,
   addressArray: number[],
-  json: APIJobResult
+  json: APIJobResultV5
 ): Map<number, AddressResult> {
   const { lib } = request;
   const { debugName, breakpadId } = lib;
@@ -177,7 +177,7 @@ export function requestSymbols(
     mode: 'cors',
   })
     .then(response => response.json())
-    .then(_ensureIsAPIResult);
+    .then(_ensureIsAPIResultV5);
 
   return requestsWithAddressArrays.map(async function(
     { request, addressArray },
