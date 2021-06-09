@@ -44,7 +44,7 @@ export class FakeSymbolStore {
           const index = bisectionRight(symbolTable.addrs, address) - 1;
           results.set(address, {
             name: symbolTable.syms[index],
-            functionOffset: address - symbolTable.addrs[index],
+            symbolAddress: symbolTable.addrs[index],
           });
         }
         successCb(request, results);
