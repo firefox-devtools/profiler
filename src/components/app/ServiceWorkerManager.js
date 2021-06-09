@@ -212,7 +212,12 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   }
 
   componentDidMount() {
-    if (process.env.NODE_ENV === 'production') {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      // Do not install the service worker for l10n branch so localizers can see
+      // the changes easily with a single refresh.
+      !AVAILABLE_STAGING_LOCALES
+    ) {
       this._installServiceWorker();
     }
   }

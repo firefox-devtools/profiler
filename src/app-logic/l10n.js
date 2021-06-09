@@ -10,9 +10,14 @@ import {
   PSEUDO_STRATEGIES_DIRECTION,
 } from 'firefox-profiler/utils/l10n-pseudo';
 
-// This contains the locales we support. Don't forget to update the array
-// RTL_LOCALES when adding a RTL locale, if necessary.
-export const AVAILABLE_LOCALES: Array<string> = ['en-US'];
+// This contains the locales we support in the production. Don't forget to update
+// the array RTL_LOCALES when adding a RTL locale, if necessary.
+// If AVAILABLE_STAGING_LOCALES is present, it means that we are in the l10n
+// branch and can see all the staging locales. If you want to enable the locale
+// in production, you should add it to the array instead.
+export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
+  'en-US',
+];
 export const DEFAULT_LOCALE = 'en-US';
 
 // This array contains only the locales that are RTL (Right-To-Left).

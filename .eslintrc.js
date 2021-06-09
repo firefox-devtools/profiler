@@ -140,4 +140,7 @@ module.exports = {
       },
     },
   },
+  globals: {
+    AVAILABLE_STAGING_LOCALES: true,
+  },
 };
