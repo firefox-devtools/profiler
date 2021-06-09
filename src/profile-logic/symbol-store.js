@@ -19,8 +19,9 @@ export type LibSymbolicationRequest = {
 export type AddressResult = {|
   // The name of the function that this address belongs to.
   name: string,
-  // The offset (in bytes) between the start of the function and the address.
-  functionOffset: number,
+  // The address (relative to the library) where the function that
+  // contains this address starts, i.e. the address of the function symbol.
+  symbolAddress: number,
   // The path of the file that contains the source code of the function that contains this address.
   // Optional because the information may not be known by the symbolication source, or because
   // the symbolication method does not expose it.
@@ -98,12 +99,12 @@ export function readSymbolsFromSymbolTable(
         currentSymbolIndex = symbolIndex;
       }
       results.set(address, {
-        functionOffset: address - symbolTableAddrs[symbolIndex],
+        symbolAddress: symbolTableAddrs[symbolIndex],
         name: currentSymbol,
       });
     } else {
       results.set(address, {
-        functionOffset: address,
+        symbolAddress: 0,
         name: '<before first symbol>',
       });
     }

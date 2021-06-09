@@ -139,9 +139,11 @@ function getV5ResultForLibRequest(
     const address = addressArray[i];
     const info = addressInfo[i];
     if (info.function !== undefined && info.function_offset !== undefined) {
+      const name = info.function;
+      const functionOffset = parseInt(info.function_offset.substr(2), 16);
       results.set(address, {
-        name: info.function,
-        functionOffset: parseInt(info.function_offset.substr(2), 16),
+        name,
+        symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
       });

@@ -413,10 +413,8 @@ export function applySymbolicationStep(
   // to the same funcAddress.
   // We obtain the funcAddress from the symbolication information in resultsForLib:
   // resultsForLib does not only contain the name of the function; it also contains,
-  // for each address, the functionOffset:
-  // functionOffset = frameAddress - funcAddress.
-  // So we can do the inverse calculation: funcAddress = frameAddress - functionOffset.
-  // All frames with the same funcAddress are grouped into the same function.
+  // for each address, the symbolAddress.
+  // All frames with the same symbolAddress are grouped into the same function.
 
   for (const frameIndex of allFramesForThisLib) {
     const oldFrameFunc = oldFrameTable.func[frameIndex];
@@ -425,20 +423,16 @@ export function applySymbolicationStep(
     if (addressResult === undefined) {
       const oldSymbol = stringTable.getString(oldFuncTable.name[oldFrameFunc]);
       addressResult = {
-        functionOffset:
-          oldFrameTable.address[frameIndex] -
-          oldFuncTable.address[oldFrameFunc],
+        symbolAddress: oldFuncTable.address[oldFrameFunc],
         name: oldSymbol,
       };
     }
 
     // |address| is the original frame address that we found during
     // stackwalking, as a library-relative offset.
-    // |addressResult.functionOffset| is the offset between the start of
-    // the function and |address|.
     // |funcAddress| is the start of the function, as a library-relative
     // offset.
-    const funcAddress = address - addressResult.functionOffset;
+    const funcAddress = addressResult.symbolAddress;
     frameToFuncAddressMap.set(frameIndex, funcAddress);
     funcAddressToSymbolNameMap.set(funcAddress, addressResult.name);
 
