@@ -470,7 +470,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
 keyboard shortcuts. The icon is blue when a profile is recording.
 Hit 
             <kbd>
-              Capture Profile
+              Capture
             </kbd>
              to load the data into profiler.firefox.com.
           </p>
@@ -610,7 +610,7 @@ exports[`app/Home renders the usage instructions for when the popup is enabled 1
 keyboard shortcuts. The icon is blue when a profile is recording.
 Hit 
       <kbd>
-        Capture Profile
+        Capture
       </kbd>
        to load the data into profiler.firefox.com.
     </p>

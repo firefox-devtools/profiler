@@ -189,7 +189,7 @@ Home--addon-button-instructions =
 Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
-    Hit <kbd>Capture Profile</kbd> to load the data into profiler.firefox.com.
+    Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
 
 Home--instructions-title = How to view and record profiles
 Home--instructions-content =
