@@ -71,7 +71,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
-          title="Go to our git repository (this opens in a new window)"
+          title="Go to our Git repository (this opens in a new window)"
         >
           <svg
             aria-label="github"
@@ -243,7 +243,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
-          title="Go to our git repository (this opens in a new window)"
+          title="Go to our Git repository (this opens in a new window)"
         >
           <svg
             aria-label="github"
@@ -417,7 +417,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
-          title="Go to our git repository (this opens in a new window)"
+          title="Go to our Git repository (this opens in a new window)"
         >
           <svg
             aria-label="github"

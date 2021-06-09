@@ -49,7 +49,7 @@ export class AppHeader extends React.PureComponent<{||}> {
               href="https://github.com/firefox-devtools/profiler"
               target="_blank"
               rel="noopener noreferrer"
-              title="Go to our git repository (this opens in a new window)"
+              title="Go to our Git repository (this opens in a new window)"
             >
               <svg
                 width="22"
