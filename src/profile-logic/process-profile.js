@@ -169,10 +169,10 @@ type ExtractionInfo = {
  * FuncTable and ResourceTable for easily accesing this information in a structred format.
  *
  * The returned IndexIntoFuncTable[] value maps the index of each element in the
- * locationStringIndexes array to a func from the returned FuncTable.
+ * frameLocations array to a func from the returned FuncTable.
  */
 export function extractFuncsAndResourcesFromFrameLocations(
-  locationStringIndexes: IndexIntoStringTable[],
+  frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
@@ -208,47 +208,45 @@ export function extractFuncsAndResourcesFromFrameLocations(
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
-  const locationFuncs = locationStringIndexes.map(
-    (locationIndex, frameIndex) => {
-      const locationString = stringTable.getString(locationIndex);
-      const relevantForJS = relevantForJSPerFrame[frameIndex];
-      let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
-      if (funcIndex !== undefined) {
-        // The location string was already processed.
-        return funcIndex;
-      }
-
-      // These nested `if` branches check for 3 cases for constructing function and
-      // resource information.
-      funcIndex = _extractUnsymbolicatedFunction(
-        extractionInfo,
-        locationString,
-        locationIndex
-      );
-      if (funcIndex === null) {
-        funcIndex = _extractCppFunction(extractionInfo, locationString);
-        if (funcIndex === null) {
-          funcIndex = _extractJsFunction(extractionInfo, locationString);
-          if (funcIndex === null) {
-            funcIndex = _extractUnknownFunctionType(
-              extractionInfo,
-              locationIndex,
-              relevantForJS
-            );
-          }
-        }
-      }
-
-      // Cache the above results.
-      extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
+  const frameFuncs = frameLocations.map((locationIndex, frameIndex) => {
+    const locationString = stringTable.getString(locationIndex);
+    const relevantForJS = relevantForJSPerFrame[frameIndex];
+    let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
+    if (funcIndex !== undefined) {
+      // The location string was already processed.
       return funcIndex;
     }
-  );
+
+    // These nested `if` branches check for 3 cases for constructing function and
+    // resource information.
+    funcIndex = _extractUnsymbolicatedFunction(
+      extractionInfo,
+      locationString,
+      locationIndex
+    );
+    if (funcIndex === null) {
+      funcIndex = _extractCppFunction(extractionInfo, locationString);
+      if (funcIndex === null) {
+        funcIndex = _extractJsFunction(extractionInfo, locationString);
+        if (funcIndex === null) {
+          funcIndex = _extractUnknownFunctionType(
+            extractionInfo,
+            locationIndex,
+            relevantForJS
+          );
+        }
+      }
+    }
+
+    // Cache the above results.
+    extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
+    return funcIndex;
+  });
 
   return {
     funcTable: extractionInfo.funcTable,
     resourceTable: extractionInfo.resourceTable,
-    frameFuncs: locationFuncs,
+    frameFuncs,
   };
 }
 
