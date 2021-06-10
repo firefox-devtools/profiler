@@ -29,7 +29,7 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         href="https://github.com/firefox-devtools/profiler"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository (this opens in a new window)"
+        title="Go to our Git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"
@@ -375,7 +375,7 @@ exports[`UploadedRecordingsHome matches a snapshot when there is no published pr
         href="https://github.com/firefox-devtools/profiler"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository (this opens in a new window)"
+        title="Go to our Git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"

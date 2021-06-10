@@ -683,7 +683,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
       <summary
         class="arrowPanelSubTitle"
       >
-        Profiler Overhead
+        ⁨Profiler⁩ Overhead
       </summary>
       <div
         class="arrowPanelSection"
@@ -1012,7 +1012,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
       <summary
         class="arrowPanelSubTitle"
       >
-        Profiler Overhead
+        ⁨Profiler⁩ Overhead
       </summary>
       <div
         class="arrowPanelSection"
