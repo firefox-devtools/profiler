@@ -147,6 +147,110 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
 </div>
 `;
 
+exports[`TooltipMarker renders properly network markers that were aborted 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        1.4s
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Load 1235: https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Status
+      :
+    </div>
+    Request was aborted
+    <div
+      class="tooltipLabel"
+    >
+      Cache
+      :
+    </div>
+    Unresolved
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Priority
+      :
+    </div>
+    Normal(0)
+    <div
+      class="tooltipLabel"
+    >
+      Guessed MIME type
+      :
+    </div>
+    <div
+      class="tooltipNetworkMimeType"
+    >
+      <span
+        class="tooltipNetworkMimeTypeSwatch colored-square network-color-img"
+        title="image/jpeg"
+      />
+      image/jpeg
+    </div>
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-img"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 1,433 milliseconds"
+    >
+      1,433ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
+</div>
+`;
+
 exports[`TooltipMarker renders properly network markers where content type is blank 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -1219,7 +1323,463 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders properly redirect network markers 1`] = `
+exports[`TooltipMarker renders properly redirect network markers for a internal redirection 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        18.7s
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Load 1234: http://www.wikia.com/
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Status
+      :
+    </div>
+    Redirecting request
+    <div
+      class="tooltipLabel"
+    >
+      Redirection type
+      :
+    </div>
+    internal
+    <div
+      class="tooltipLabel"
+    >
+      Cache
+      :
+    </div>
+    any string could be here
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Redirect URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Priority
+      :
+    </div>
+    Highest(-20)
+    <div
+      class="tooltipLabel"
+    >
+      Requested bytes
+      :
+    </div>
+    0.000B
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-other"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+    >
+      18,726ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders properly redirect network markers for a permanent redirection 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        18.7s
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Load 1234: http://www.wikia.com/
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Status
+      :
+    </div>
+    Redirecting request
+    <div
+      class="tooltipLabel"
+    >
+      Redirection type
+      :
+    </div>
+    permanent
+    <div
+      class="tooltipLabel"
+    >
+      Cache
+      :
+    </div>
+    any string could be here
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Redirect URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Priority
+      :
+    </div>
+    Highest(-20)
+    <div
+      class="tooltipLabel"
+    >
+      Requested bytes
+      :
+    </div>
+    0.000B
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-other"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+    >
+      18,726ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders properly redirect network markers for a temporary redirection 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        18.7s
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Load 1234: http://www.wikia.com/
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Status
+      :
+    </div>
+    Redirecting request
+    <div
+      class="tooltipLabel"
+    >
+      Redirection type
+      :
+    </div>
+    temporary
+    <div
+      class="tooltipLabel"
+    >
+      Cache
+      :
+    </div>
+    any string could be here
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Redirect URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Priority
+      :
+    </div>
+    Highest(-20)
+    <div
+      class="tooltipLabel"
+    >
+      Requested bytes
+      :
+    </div>
+    0.000B
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-other"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+    >
+      18,726ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders properly redirect network markers for an internal redirection from a HSTS header 1`] = `
+<div
+  class="tooltipMarker propClass"
+  style="--tooltip-detail-max-width: 600px;"
+>
+  <div
+    class="tooltipHeader"
+  >
+    <div
+      class="tooltipOneLine"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        18.7s
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        Load 1234: http://www.wikia.com/
+      </div>
+    </div>
+  </div>
+  <div
+    class="tooltipDetails"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      Status
+      :
+    </div>
+    Redirecting request
+    <div
+      class="tooltipLabel"
+    >
+      Redirection type
+      :
+    </div>
+    permanent (HTTP to HTTPS)
+    <div
+      class="tooltipLabel"
+    >
+      Cache
+      :
+    </div>
+    any string could be here
+    <div
+      class="tooltipLabel"
+    >
+      URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Redirect URL
+      :
+    </div>
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
+    <div
+      class="tooltipLabel"
+    >
+      Priority
+      :
+    </div>
+    Highest(-20)
+    <div
+      class="tooltipLabel"
+    >
+      Requested bytes
+      :
+    </div>
+    0.000B
+    <div
+      class="tooltipLabel"
+    >
+      Thread
+      :
+    </div>
+    Empty
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-other"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+    >
+      18,726ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
+</div>
+`;
+
+exports[`TooltipMarker renders properly redirect network markers without additional redirection information 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
