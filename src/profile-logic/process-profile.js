@@ -177,7 +177,11 @@ export function extractFuncsAndResourcesFromFrameLocations(
   stringTable: UniqueStringArray,
   libs: Lib[],
   extensions: ExtensionTable = getEmptyExtensions()
-): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
+): {
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  frameFuncs: IndexIntoFuncTable[],
+} {
   // Important! If the flow type for the FuncTable was changed, update all the functions
   // in this file that start with the word "extract".
   const funcTable = getEmptyFuncTable();
@@ -241,11 +245,11 @@ export function extractFuncsAndResourcesFromFrameLocations(
     }
   );
 
-  return [
-    extractionInfo.funcTable,
-    extractionInfo.resourceTable,
-    locationFuncs,
-  ];
+  return {
+    funcTable: extractionInfo.funcTable,
+    resourceTable: extractionInfo.resourceTable,
+    frameFuncs: locationFuncs,
+  };
 }
 
 /**
@@ -986,11 +990,11 @@ function _processThread(
   const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
-  const [
+  const {
     funcTable,
     resourceTable,
     frameFuncs,
-  ] = extractFuncsAndResourcesFromFrameLocations(
+  } = extractFuncsAndResourcesFromFrameLocations(
     geckoFrameStruct.location,
     geckoFrameStruct.relevantForJS,
     stringTable,
