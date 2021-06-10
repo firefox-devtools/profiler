@@ -258,11 +258,18 @@ describe('process-profile', function() {
       );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
       expect(thread.funcTable.columnNumber[4]).toEqual(35);
-      expect(thread.funcTable.address[0]).toEqual(-1);
-      expect(thread.funcTable.address[1]).toEqual(3972);
-      expect(thread.funcTable.address[2]).toEqual(6725);
-      expect(thread.funcTable.address[3]).toEqual(-1);
-      expect(thread.funcTable.address[4]).toEqual(-1);
+    });
+
+    it('should create no entries in nativeSymbols before symbolication', function() {
+      const thread = profile.threads[0];
+      expect(thread.frameTable.length).toEqual(5);
+      expect('nativeSymbol' in thread.frameTable).toBeTruthy();
+      expect(thread.nativeSymbols.length).toEqual(0);
+      expect(thread.frameTable.nativeSymbol[0]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[1]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[2]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[3]).toEqual(null);
+      expect(thread.frameTable.nativeSymbol[4]).toEqual(null);
     });
 
     it('should create one resource per used library', function() {

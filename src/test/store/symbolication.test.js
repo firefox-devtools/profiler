@@ -356,18 +356,28 @@ describe('doSymbolicateProfile', function() {
     ]);
 
     const thread = profile.threads[0];
-    const { frameTable, funcTable } = thread;
+    const { frameTable, funcTable, nativeSymbols } = thread;
     expect(funcTable.length).toBeGreaterThanOrEqual(2);
+    expect(nativeSymbols.length).toBeGreaterThanOrEqual(2);
 
-    // Only func 0 and 1 should be in use. These are the funcs for the first and
+    // Only nativeSymbol 0 and 1 should be in use. These are the funcs for the first and
     // last symbol.
+    expect(frameTable.nativeSymbol).toContain(0);
+    expect(frameTable.nativeSymbol).toContain(1);
+    expect(new Set(frameTable.nativeSymbol).size).toBe(2);
+    // The same should be true for the funcs.
     expect(frameTable.func).toContain(0);
     expect(frameTable.func).toContain(1);
     expect(new Set(frameTable.func).size).toBe(2);
 
-    // Now forcefully truncate the funcTable.
+    // Now forcefully truncate nativeSymbols and funcTable.
     const newFuncTable = { ...funcTable, length: 2 };
-    const newThread = { ...thread, funcTable: newFuncTable };
+    const newNativeSymbols = { ...nativeSymbols, length: 2 };
+    const newThread = {
+      ...thread,
+      funcTable: newFuncTable,
+      nativeSymbols: newNativeSymbols,
+    };
     const newProfile = { ...profile, threads: [newThread] };
     dispatch({
       type: 'PROFILE_LOADED',

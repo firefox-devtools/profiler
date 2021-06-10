@@ -1748,5 +1748,50 @@ const _upgraders = {
       }
     }
   },
+  [36]: profile => {
+    // Threads now have a nativeSymbols table.
+    // The frame table has a new field: nativeSymbol.
+    // The function table loses one field: address. (This field moves to the nativeSymbols table.)
+    // The NativeSymbolsTable has the fields libIndex, address, and name.
+    for (const thread of profile.threads) {
+      const nativeSymbols = {
+        libIndex: [],
+        address: [],
+        name: [],
+        length: 0,
+      };
+      const { frameTable, funcTable, resourceTable } = thread;
+      const funcToNativeSymbolMap = new Map();
+      // Find functions for native code, and create native symbols for them.
+      // Functions for native code are identified by the fact that their
+      // resource is a library. The func's address is the symbol address.
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        const resourceIndex = funcTable.resource[funcIndex];
+        if (resourceIndex === -1) {
+          continue;
+        }
+        const resourceType = resourceTable.type[resourceIndex];
+        if (resourceType !== resourceTypes.library) {
+          continue;
+        }
+        const libIndex = resourceTable.lib[resourceIndex];
+        if (libIndex === null || libIndex === undefined || libIndex === -1) {
+          continue;
+        }
+        const address = funcTable.address[funcIndex];
+        const nativeSymbolIndex = nativeSymbols.length;
+        nativeSymbols.libIndex.push(libIndex);
+        nativeSymbols.address.push(address === -1 ? null : address);
+        nativeSymbols.name.push(funcTable.name[funcIndex]);
+        nativeSymbols.length++;
+        funcToNativeSymbolMap.set(funcIndex, nativeSymbolIndex);
+      }
+      delete funcTable.address;
+      frameTable.nativeSymbol = frameTable.func.map(
+        f => funcToNativeSymbolMap.get(f) ?? null
+      );
+      thread.nativeSymbols = nativeSymbols;
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

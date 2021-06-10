@@ -55,7 +55,6 @@ export default function getProfile(): Profile {
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
     name: funcNames,
-    address: Array(funcNames.length).fill(-1),
     isJS: Array(funcNames.length).fill(false),
     resource: Array(funcNames.length).fill(-1),
     relevantForJS: Array(funcNames.length).fill(false),
@@ -88,6 +87,7 @@ export default function getProfile(): Profile {
   const frameTable: FrameTable = {
     func: frameFuncs.map(stringIndex => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
+    nativeSymbol: Array(frameFuncs.length).fill(null),
     category: Array(frameFuncs.length).fill(null),
     subcategory: Array(frameFuncs.length).fill(null),
     innerWindowID: Array(frameFuncs.length).fill(null),
