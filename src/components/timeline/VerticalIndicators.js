@@ -26,6 +26,7 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +zeroAt: Milliseconds,
   +width: CssPixels,
+  +onRightClick: MarkerIndex => mixed,
 |};
 
 /**
@@ -33,6 +34,15 @@ type Props = {|
  * in the timeline.
  */
 export class VerticalIndicators extends React.PureComponent<Props> {
+  _onMouseDown = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+    if (e.button === 2 && this.props.onRightClick && e.currentTarget) {
+      this.props.onRightClick(parseInt(e.currentTarget.dataset.markerIndex));
+    }
+    // We handled this event here, so let's avoid that it's handled also in the
+    // main canvas code and empty the state.
+    e.stopPropagation();
+  };
+
   render() {
     const {
       getMarker,
@@ -97,6 +107,8 @@ export class VerticalIndicators extends React.PureComponent<Props> {
           data-testid="vertical-indicator-line"
           style={{ '--vertical-indicator-color': color, left }}
           className="timelineVerticalIndicatorsLine"
+          onMouseDown={this._onMouseDown}
+          data-marker-index={markerIndex}
           tooltip={
             <>
               <div>
