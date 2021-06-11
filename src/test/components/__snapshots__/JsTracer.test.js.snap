@@ -353,7 +353,11 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
             class="jsTracerSettingsCheckbox"
             type="checkbox"
           />
-          Show only self time
+          <span
+            title="Show only the time spent in that call node, ignoring its children."
+          >
+            Show only self time
+          </span>
         </label>
       </li>
     </ul>
@@ -410,7 +414,11 @@ exports[`StackChart matches the snapshot for the loading screen 1`] = `
             class="jsTracerSettingsCheckbox"
             type="checkbox"
           />
-          Show only self time
+          <span
+            title="Show only the time spent in that call node, ignoring its children."
+          >
+            Show only self time
+          </span>
         </label>
       </li>
     </ul>
