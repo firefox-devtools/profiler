@@ -51,7 +51,7 @@ CallNodeContextMenu--transform-merge-call-node = Unisci solo il nodo
     .title = Unendo un nodo (merge), questo verrà rimosso dal profilo, e il suo tempo di esecuzione verrà assegnato al nodo di funzione chiamante. Questa operazione rimuove la funzione sono nella parte specifica dell’albero. Qualsiasi altro posto in cui la funzione viene chiamata rimarrà nel profilo.
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
-CallNodeContextMenu--transform-focus-function-title = Il focus su una funzione rimuoverà tutti i campioni che non includono quella funzione. In aggiunta, l’albero delle chiamate viene riorganizzato in modo che la funzione sia l'unico nodo radice dell’albero. Questo permette di combinare più siti di chiamata di una funzione attraverso il profilo in un unico nodo di chiamata.
+CallNodeContextMenu--transform-focus-function-title = Il focus su una funzione rimuoverà tutti i campioni che non includono quella funzione. In aggiunta, l’albero delle chiamate viene riorganizzato in modo che la funzione sia l’unico nodo radice dell’albero. Questo permette di combinare più siti di chiamata di una funzione attraverso il profilo in un unico nodo di chiamata.
 CallNodeContextMenu--transform-focus-function = Focus sulla funzione
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (invertita)
@@ -147,7 +147,7 @@ Home--record-instructions-capture-load = Cattura e carica profilo
 Home--profiler-motto = Cattura un profilo delle prestazioni. Analizzalo. Condividilo. Rendi il Web più veloce.
 Home--additional-content-title = Carica profili esistenti
 Home--additional-content-content = È possibile <strong>trascinare e rilasciare</strong> qui un profilo per caricarlo, oppure:
-Home--compare-recordings-info = È anche possibile confrontare registrazioni. <a>Apri l'interfaccia per il confronto</a>.
+Home--compare-recordings-info = È anche possibile confrontare registrazioni. <a>Apri l’interfaccia per il confronto</a>.
 Home--recent-uploaded-recordings-title = Registrazioni caricate di recente
 
 ## IdleSearchField
@@ -289,14 +289,21 @@ MenuButtons--metaInfo--buffer-duration-seconds =
         [one] { $configurationDuration } secondo
        *[other] { $configurationDuration } secondi
     }
+# Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitata
 MenuButtons--metaInfo--application = Applicazione
 MenuButtons--metaInfo--name-and-version = Nome e versione:
 MenuButtons--metaInfo--update-channel = Canale di aggiornamento:
 MenuButtons--metaInfo--build-id = ID build:
 MenuButtons--metaInfo--build-type = Tipo di build:
+
+## Strings refer to specific types of builds, and should be kept in English.
+
 MenuButtons--metaInfo--build-type-debug = Debug
 MenuButtons--metaInfo--build-type-opt = Opt
+
+##
+
 MenuButtons--metaInfo--platform = Piattaforma
 MenuButtons--metaInfo--device = Dispositivo:
 # OS means Operating System. This describes the platform a profile was captured on.
@@ -305,12 +312,18 @@ MenuButtons--metaInfo--os = Sistema operativo:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Metriche visive
 MenuButtons--metaInfo--speed-index = Indice di velocità:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Indice di velocità percettiva:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--contentful-speed-Index = Indice di velocità contenuti:
 MenuButtons--metaInfo-renderRowOfList-label-features = Caratteristiche:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro thread:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Estensioni:
-MenuButtons--metaOverheadStatistics-subtitle = Risorse aggiuntive (overhead) profiler
+
+## Overhead refers to the additional resources used to run the profiler.
+## These strings are displayed at the bottom of the "Profile Info" panel.
+
+MenuButtons--metaOverheadStatistics-subtitle = Risorse aggiuntive (overhead) { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Media
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
@@ -402,7 +415,7 @@ ServiceWorkerManager--installing-button = Installazione in corso…
 ServiceWorkerManager--pending-button = Applica e ricarica
 ServiceWorkerManager--installed-button = Ricarica l’applicazione
 ServiceWorkerManager--updated-while-not-ready = È stata applicata una nuova versione dell’applicazione prima che la pagina fosse completamente caricata. Potrebbero verificarsi dei malfunzionamenti.
-ServiceWorkerManager--new-version-is-ready = È stata scaricata una nuova versione dell’applicazione ed è pronta per l'uso.
+ServiceWorkerManager--new-version-is-ready = È stata scaricata una nuova versione dell’applicazione ed è pronta per l’uso.
 ServiceWorkerManager--hide-notice-button =
     .title = Nascondi l’avviso di ricarica
     .aria-label = Nascondi l’avviso di ricarica
