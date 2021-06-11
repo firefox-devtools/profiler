@@ -214,7 +214,7 @@ IdleSearchField--search-input =
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
 JsTracerSettings--show-only-self-time = Show only self time
-    .title = Show only the time spent in that call node, ignoring its children.
+    .title = Show only the time spent in a call node, ignoring its children.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -533,6 +533,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
     .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
 
 StackSettings--invert-call-stack = Invert call stack
+    .title = Show only the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
 
 StackSettings--panel-search =

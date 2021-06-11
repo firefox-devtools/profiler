@@ -64,7 +64,11 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          Invert call stack
+          <span
+            title="Show only the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
         </label>
       </li>
       <li
@@ -579,7 +583,11 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          Invert call stack
+          <span
+            title="Show only the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
         </label>
       </li>
       <li
@@ -1042,7 +1050,11 @@ exports[`StackChart matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          Invert call stack
+          <span
+            title="Show only the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
         </label>
       </li>
       <li
