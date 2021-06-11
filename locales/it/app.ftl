@@ -16,6 +16,7 @@
 
 -firefox-brand-name = Firefox
 -profiler-brand-name = Firefox Profiler
+-profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
@@ -83,10 +84,10 @@ CallNodeContextMenu--copy-stack = Copia stack
 
 CompareHome--instruction-title = Inserire gli URL dei profili che si vogliono confrontare
 CompareHome--instruction-content = Questo strumento estrarrà i dati dalla traccia e dall’intervallo selezionati per ciascuno profilo, e li posizionerà nella stessa vista per rendere il confronto più semplice.
-CompareHome--form-label-profile1 = Profile 1:
-CompareHome--form-label-profile2 = Profile 2:
+CompareHome--form-label-profile1 = Profilo 1:
+CompareHome--form-label-profile2 = Profilo 2:
 CompareHome--submit-button =
-    .value = Recupera profili
+    .value = Carica profili
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -130,8 +131,8 @@ FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $to
 
 ## Home page
 
-Home--upload-from-file-input-button = Carica un profilo da file
-Home--upload-from-url-button = Carica un profilo da un URL
+Home--upload-from-file-input-button = Carica profilo da file
+Home--upload-from-url-button = Carica profilo da un URL
 Home--load-from-url-submit-button =
     .value = Carica
 Home--documentation-button = Documentazione
@@ -160,6 +161,7 @@ IdleSearchField--search-input =
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
 JsTracerSettings--show-only-self-time = Mostra solo “self time’”
+    .title = Mostra solo il tempo trascorso in un nodo di chiamata, ignorando i nodi figlio.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -328,10 +330,14 @@ MenuButtons--metaOverheadStatistics-mean = Media
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Tempo utilizzato per campionare tutti i thread.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Pulizia
+    .title = Tempo utilizzato per rimuovere i dati scaduti.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Contatore
+    .title = Tempo utilizzato per raccogliere tutti i contatori.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervallo
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Locking
+    .title = Tempo utilizzato per acquisire il lock prima del campionamento.
 MenuButtons--metaOverheadStatistics-overhead-duration = Durata complessiva overhead:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Percentuale overhead:
 MenuButtons--metaOverheadStatistics-profiled-duration = Durata profilata:
@@ -343,7 +349,7 @@ MenuButtons--publish--renderCheckbox-label-hidden-threads = Includi thread nasco
 MenuButtons--publish--renderCheckbox-label-hidden-time = Includi intervallo di tempo nascosto
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Includi screenshot
 MenuButtons--publish--renderCheckbox-label-resource = Includi URL e percorsi delle risorse
-MenuButtons--publish--renderCheckbox-label-extension = Includi informazioni sull’estensione
+MenuButtons--publish--renderCheckbox-label-extension = Includi informazioni sulle estensioni
 MenuButtons--publish--renderCheckbox-label-preference = Includi valori delle impostazioni
 MenuButtons--publish--reupload-performance-profile = Ricarica il profilo delle prestazioni
 MenuButtons--publish--share-performance-profile = Condividi il profilo delle prestazioni
@@ -441,6 +447,7 @@ StackSettings--call-tree-strategy-native-deallocations-memory = Deallocazione me
 StackSettings--call-tree-strategy-native-deallocations-sites = Deallocazione siti
     .title = Sintetizza usando i byte di memoria deallocati, in base dal sito in cui la memoria è stata deallocata
 StackSettings--invert-call-stack = Inverti stack di chiamata
+    .title = Mostra solo il tempo trascorso in un nodo di chiamata, ignorando i nodi figlio.
 StackSettings--show-user-timing = Mostra tempo utente
 StackSettings--panel-search =
     .label = Filtra stack:
