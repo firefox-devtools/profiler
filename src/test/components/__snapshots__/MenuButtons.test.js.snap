@@ -758,7 +758,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
             0.000μs
           </div>
           <div
-            title="Time to take the lock before sampling."
+            title="Time to acquire the lock before sampling."
           >
             Lockings
           </div>
@@ -1097,7 +1097,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
             0.000μs
           </div>
           <div
-            title="Time to take the lock before sampling."
+            title="Time to acquire the lock before sampling."
           >
             Lockings
           </div>
