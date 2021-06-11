@@ -6,6 +6,9 @@
     "build": "yarn build:quiet --progress",
     "build-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
+    "build-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 webpack --progress",
+    "build-l10n-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack",
+    "build-l10n-prod": "yarn build-l10n-prod:quiet --progress",
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "lint": "run-p lint-js lint-css",
     "lint-js": "eslint *.js bin src --report-unused-disable-directives --cache --cache-strategy content",
@@ -25,6 +28,8 @@
     "serve-static": "ws -d dist/ -s index.html -p 4242",
     "start": "yarn build:clean && cross-env NODE_ENV=development node server.js",
     "start-prod": "yarn build-prod && yarn serve-static",
+    "start-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 node server.js",
+    "start-l10n-prod": "yarn build-l10n-prod && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
     "start-docs": "docsify serve ./docs-user",
     "start-photon": "node res/photon/server",
@@ -165,6 +170,9 @@
     "setupFilesAfterEnv": [
       "./src/test/setup.js"
     ],
+    "globals": {
+      "AVAILABLE_STAGING_LOCALES": null
+    },
     "verbose": false
   },
   "husky": {
