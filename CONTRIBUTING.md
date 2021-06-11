@@ -91,6 +91,10 @@ When working on a new feature and code changes, it's important that things work 
  * Continuous integration for pull requests
    - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
 
+### Updating snapshots
+
+We have snapshot tests to ensure that components output correct markup. If you change a `render` function, it will likely produce snapshot failures when running `yarn test`. If the snapshot changes are what you expect, you can run `yarn test -u` to update the snapshots. Don't forget to include them in your commit as well.
+
 ## Exposing the web application publicly
 
 If you'd like to use [profiler.firefox.com](https://profiler.firefox.com) via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
