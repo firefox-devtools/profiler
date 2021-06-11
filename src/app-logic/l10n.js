@@ -12,9 +12,10 @@ import {
 
 // This contains the locales we support in the production. Don't forget to update
 // the array RTL_LOCALES when adding a RTL locale, if necessary.
-// If AVAILABLE_STAGING_LOCALES is present, it means that we are in the l10n
-// branch and can see all the staging locales. If you want to enable the locale
-// in production, you should add it to the array instead.
+// AVAILABLE_STAGING_LOCALES is replaced, using webpack's DefinePlugin, by all
+// available locales, when running with L10N=1, using the "l10n" versions of the
+// yarn scripts. Especially this is done when building and deploying the l10n
+// branch in netlify.
 export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
   'en-US',
 ];
