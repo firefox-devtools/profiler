@@ -701,7 +701,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <div>
             Min
           </div>
-          <div>
+          <div
+            title="Time to sample all threads."
+          >
             Overhead
           </div>
           <div>
@@ -713,7 +715,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <div>
             38μs
           </div>
-          <div>
+          <div
+            title="Time to discard expired data."
+          >
             Cleaning
           </div>
           <div>
@@ -725,7 +729,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <div>
             7.0μs
           </div>
-          <div>
+          <div
+            title="Time to gather all counters."
+          >
             Counter
           </div>
           <div>
@@ -737,7 +743,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <div>
             12μs
           </div>
-          <div>
+          <div
+            title="Observed interval between two samples."
+          >
             Interval
           </div>
           <div>
@@ -749,7 +757,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <div>
             0.000μs
           </div>
-          <div>
+          <div
+            title="Time to acquire the lock before sampling."
+          >
             Lockings
           </div>
           <div>
@@ -1030,7 +1040,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <div>
             Min
           </div>
-          <div>
+          <div
+            title="Time to sample all threads."
+          >
             Overhead
           </div>
           <div>
@@ -1042,7 +1054,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <div>
             38μs
           </div>
-          <div>
+          <div
+            title="Time to discard expired data."
+          >
             Cleaning
           </div>
           <div>
@@ -1054,7 +1068,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <div>
             7.0μs
           </div>
-          <div>
+          <div
+            title="Time to gather all counters."
+          >
             Counter
           </div>
           <div>
@@ -1066,7 +1082,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <div>
             12μs
           </div>
-          <div>
+          <div
+            title="Observed interval between two samples."
+          >
             Interval
           </div>
           <div>
@@ -1078,7 +1096,9 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <div>
             0.000μs
           </div>
-          <div>
+          <div
+            title="Time to acquire the lock before sampling."
+          >
             Lockings
           </div>
           <div>

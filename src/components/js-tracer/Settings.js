@@ -42,8 +42,11 @@ class JsTracerSettingsImpl extends PureComponent<Props> {
                 onChange={this._onCheckboxChange}
                 checked={showJsTracerSummary}
               />
-              <Localized id="JsTracerSettings--show-only-self-time">
-                Show only self time
+              <Localized
+                id="JsTracerSettings--show-only-self-time"
+                attrs={{ title: true }}
+              >
+                <span>Show only self time</span>
               </Localized>
             </label>
           </li>

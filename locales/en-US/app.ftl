@@ -214,6 +214,7 @@ IdleSearchField--search-input =
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
 JsTracerSettings--show-only-self-time = Show only self time
+    .title = Show only the time spent in a call node, ignoring its children.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -402,10 +403,15 @@ MenuButtons--metaOverheadStatistics-mean = Mean
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Time to sample all threads.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Cleaning
+    .title = Time to discard expired data.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Counter
+    .title = Time to gather all counters.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
+    .title = Observed interval between two samples.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
+    .title = Time to acquire the lock before sampling.
 MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
@@ -527,6 +533,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
     .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
 
 StackSettings--invert-call-stack = Invert call stack
+    .title = Show only the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
 
 StackSettings--panel-search =
