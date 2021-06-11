@@ -132,7 +132,7 @@ FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $to
 ## Home page
 
 Home--upload-from-file-input-button = Carica profilo da file
-Home--upload-from-url-button = Carica profilo da un URL
+Home--upload-from-url-button = Carica profilo da URL
 Home--load-from-url-submit-button =
     .value = Carica
 Home--documentation-button = Documentazione
