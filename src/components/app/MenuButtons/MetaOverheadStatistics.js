@@ -119,9 +119,9 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
             </div>
             {[...calculatedStats].map(([key, val]) => (
               <React.Fragment key={key}>
-                <div>
-                  <Localized id={statKeysL10nId[key]} />
-                </div>
+                <Localized id={statKeysL10nId[key]} attrs={{ title: true }}>
+                  <div></div>
+                </Localized>
                 <div>{formatMicroseconds(val.mean)}</div>
                 <div>{formatMicroseconds(val.max)}</div>
                 <div>{formatMicroseconds(val.min)}</div>

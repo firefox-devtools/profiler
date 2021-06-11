@@ -29,7 +29,7 @@ exports[`app/CompareHome matches the snapshot 1`] = `
         href="https://github.com/firefox-devtools/profiler"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository (this opens in a new window)"
+        title="Go to our Git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"

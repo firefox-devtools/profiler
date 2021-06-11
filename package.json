@@ -6,6 +6,9 @@
     "build": "yarn build:quiet --progress",
     "build-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
+    "build-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 webpack --progress",
+    "build-l10n-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production L10N=1 webpack",
+    "build-l10n-prod": "yarn build-l10n-prod:quiet --progress",
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "lint": "run-p lint-js lint-css",
     "lint-js": "eslint *.js bin src --report-unused-disable-directives --cache --cache-strategy content",
@@ -25,6 +28,8 @@
     "serve-static": "ws -d dist/ -s index.html -p 4242",
     "start": "yarn build:clean && cross-env NODE_ENV=development node server.js",
     "start-prod": "yarn build-prod && yarn serve-static",
+    "start-l10n": "yarn build:clean && cross-env NODE_ENV=development L10N=1 node server.js",
+    "start-l10n-prod": "yarn build-l10n-prod && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
     "start-docs": "docsify serve ./docs-user",
     "start-photon": "node res/photon/server",
@@ -84,10 +89,10 @@
     "@babel/core": "^7.14.3",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.1",
-    "@babel/preset-env": "^7.14.1",
+    "@babel/preset-env": "^7.14.4",
     "@babel/preset-flow": "^7.13.13",
     "@babel/preset-react": "^7.13.13",
-    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/jest-dom": "^5.13.0",
     "@testing-library/react": "^11.2.7",
     "alex": "^9.1.0",
     "babel-eslint": "^10.0.1",
@@ -114,7 +119,7 @@
     "eslint-plugin-jest-dom": "^3.9.0",
     "eslint-plugin-jest-formatting": "^3.0.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-testing-library": "^4.6.0",
     "fake-indexeddb": "^3.1.2",
     "file-loader": "^6.2.0",
@@ -165,6 +170,9 @@
     "setupFilesAfterEnv": [
       "./src/test/setup.js"
     ],
+    "globals": {
+      "AVAILABLE_STAGING_LOCALES": null
+    },
     "verbose": false
   },
   "husky": {

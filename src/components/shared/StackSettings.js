@@ -213,8 +213,11 @@ class StackSettingsImpl extends PureComponent<Props> {
                   onChange={this._onInvertCallstackClick}
                   checked={invertCallstack}
                 />
-                <Localized id="StackSettings--invert-call-stack">
-                  Invert call stack
+                <Localized
+                  id="StackSettings--invert-call-stack"
+                  attrs={{ title: true }}
+                >
+                  <span>Invert call stack</span>
                 </Localized>
               </label>
             </li>

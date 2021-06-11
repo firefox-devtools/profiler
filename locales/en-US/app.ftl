@@ -13,6 +13,7 @@
 
 -firefox-brand-name = Firefox
 -profiler-brand-name = Firefox Profiler
+-profiler-brand-short-name = Profiler
 -firefox-nightly-brand-name = Firefox Nightly
 
 ## AppHeader
@@ -20,7 +21,7 @@
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app for { -firefox-brand-name } performance analysis</subheader>
 AppHeader--github-icon =
-    .title = Go to our git repository (this opens in a new window)
+    .title = Go to our Git repository (this opens in a new window)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -188,7 +189,7 @@ Home--addon-button-instructions =
 Home--record-instructions =
     To start profiling, click on the profiling button, or use the
     keyboard shortcuts. The icon is blue when a profile is recording.
-    Hit <kbd>Capture Profile</kbd> to load the data into profiler.firefox.com.
+    Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
 
 Home--instructions-title = How to view and record profiles
 Home--instructions-content =
@@ -213,6 +214,7 @@ IdleSearchField--search-input =
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
 JsTracerSettings--show-only-self-time = Show only self time
+    .title = Show only the time spent in a call node, ignoring its children.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -359,14 +361,21 @@ MenuButtons--metaInfo--buffer-duration-seconds =
        *[other] { $configurationDuration } seconds
     }
 
+# Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Unlimited
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Name and version:
 MenuButtons--metaInfo--update-channel = Update Channel:
 MenuButtons--metaInfo--build-id = Build ID:
 MenuButtons--metaInfo--build-type = Build Type:
+
+## Strings refer to specific types of builds, and should be kept in English.
+
 MenuButtons--metaInfo--build-type-debug = Debug
 MenuButtons--metaInfo--build-type-opt = Opt
+
+##
+
 MenuButtons--metaInfo--platform = Platform
 MenuButtons--metaInfo--device = Device:
 
@@ -377,21 +386,32 @@ MenuButtons--metaInfo--os = OS:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Visual Metrics
 MenuButtons--metaInfo--speed-index = Speed Index:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Perceptual Speed Index:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--contentful-speed-Index = Contentful Speed Index:
+
 MenuButtons--metaInfo-renderRowOfList-label-features = Features:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threads Filter:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensions:
 
-MenuButtons--metaOverheadStatistics-subtitle = Profiler Overhead
+## Overhead refers to the additional resources used to run the profiler.
+## These strings are displayed at the bottom of the "Profile Info" panel.
+
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } Overhead
 MenuButtons--metaOverheadStatistics-mean = Mean
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Time to sample all threads.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Cleaning
+    .title = Time to discard expired data.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Counter
+    .title = Time to gather all counters.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
+    .title = Observed interval between two samples.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Lockings
+    .title = Time to acquire the lock before sampling.
 MenuButtons--metaOverheadStatistics-overhead-duration = Overhead Durations:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Overhead Percentage:
 MenuButtons--metaOverheadStatistics-profiled-duration = Profiled Duration:
@@ -513,6 +533,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
     .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
 
 StackSettings--invert-call-stack = Invert call stack
+    .title = Show only the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
 
 StackSettings--panel-search =
