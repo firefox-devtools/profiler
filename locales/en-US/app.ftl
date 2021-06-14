@@ -279,6 +279,10 @@ MarkerSettings--panel-search =
     .label = Filter Markers:
     .title = Only display markers that match a certain name
 
+## MarkerSidebar
+## This is the sidebar component that is used in Marker Table panel.
+
+MarkerSidebar--select-a-marker = Select a marker to display some information about it.
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
