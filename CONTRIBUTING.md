@@ -93,7 +93,7 @@ When working on a new feature and code changes, it's important that things work 
 
 ### Updating snapshots
 
-We have snapshot tests to ensure that components output correct markup. If you change a `render` function, it will likely produce snapshot failures when running `yarn test`. If the snapshot changes are what you expect, you can run `yarn test -u` to update the snapshots. Don't forget to include them in your commit as well.
+We have snapshot tests to ensure that components output the expected markup. If you change a `render` function, it will likely produce some snapshot failures when running `yarn test`. If the snapshot changes are what you expect, you can run `yarn test -u` to update the snapshots. Don't forget to include them in your commit as well.
 
 ## Exposing the web application publicly
 
