@@ -58,7 +58,7 @@
     "classnames": "^2.3.1",
     "common-tags": "^1.8.0",
     "copy-to-clipboard": "^3.1.0",
-    "core-js": "^3.12.1",
+    "core-js": "^3.14.0",
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.2.0",
     "idb": "^6.1.1",
