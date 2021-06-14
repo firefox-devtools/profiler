@@ -500,6 +500,10 @@ export type ProfilerConfiguration = {|
   // Optional because that field is introduced in Firefox 72.
   // Active Tab ID indicates a Firefox tab. That field allows us to
   // create an "active tab view".
+  // `0` means null value. Firefox only outputs `0` and not null, that's why we
+  // should take care of this case while we are consuming it. If it's `0`, we
+  // should revert back to the full view since there isn't enough data to show
+  // the active tab view.
   activeTabID?: TabID,
 |};
 
