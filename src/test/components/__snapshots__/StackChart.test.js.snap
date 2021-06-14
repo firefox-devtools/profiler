@@ -65,7 +65,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -584,7 +584,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -1051,7 +1051,7 @@ exports[`StackChart matches the snapshot 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>

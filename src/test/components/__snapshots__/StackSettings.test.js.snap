@@ -60,7 +60,7 @@ exports[`StackSettings matches the snapshot 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>

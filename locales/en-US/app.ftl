@@ -533,7 +533,7 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
     .title = Summarize using bytes of memory deallocated, by the site where the memory was deallocated
 
 StackSettings--invert-call-stack = Invert call stack
-    .title = Show only the time spent in a call node, ignoring its children.
+    .title = Sort by the time spent in a call node, ignoring its children.
 StackSettings--show-user-timing = Show user timing
 
 StackSettings--panel-search =
