@@ -185,7 +185,6 @@ export function finalizeProfileView(
     // encoded into the URL.
     const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
     const pages = profile.pages;
-    const activeTabID = getActiveTabID(getState());
     if (!timelineTrackOrganization) {
       // Most likely we'll need to load the timeline track organization, as requested
       // by the URL, but tests can pass in a value.
@@ -198,8 +197,14 @@ export function finalizeProfileView(
         // the state relevant to that state.
         dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         break;
-      case 'active-tab':
+      case 'active-tab': {
+        const activeTabID = getActiveTabID(getState());
         if (pages && activeTabID !== null) {
+          // Initialize the active tab view only if pages array is present and
+          // activeTabID is not null. Pages array might be missing on the older
+          // profiles. And activeTabID can be null when Firefox fails to get
+          // this information from the platform. For example, it will be null
+          // when users capture a startup profile.
           dispatch(
             finalizeActiveTabProfileView(
               profile,
@@ -214,6 +219,7 @@ export function finalizeProfileView(
         }
 
         break;
+      }
       case 'origins': {
         if (pages) {
           dispatch(
