@@ -6,6 +6,8 @@
 
 import * as React from 'react';
 import memoize from 'memoize-immutable';
+import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 import {
@@ -348,9 +350,11 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     if (selectedNodeIndex === null) {
       return (
         <div className="sidebar sidebar-calltree">
-          <div className="sidebar-contents-wrapper">
-            Select a node to display some information about it.
-          </div>
+          <Localized id="CallTreeSidebar--select-a-node">
+            <div className="sidebar-contents-wrapper">
+              Select a node to display some information about it.
+            </div>
+          </Localized>
         </div>
       );
     }

@@ -109,6 +109,12 @@ CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
 
+
+## CallTreeSidebar
+## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+
+CallTreeSidebar--select-a-node = Select a node to display some information about it.
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
