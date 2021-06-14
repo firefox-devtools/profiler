@@ -98,7 +98,15 @@ describe('ActiveTab', function() {
 });
 
 describe('finalizeProfileView', function() {
-  function setup({ search, noPages }: { search: string, noPages?: boolean }) {
+  function setup({
+    search,
+    noPages,
+    activeTabID,
+  }: {
+    search: string,
+    noPages?: boolean,
+    activeTabID?: number | null,
+  }) {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -110,6 +118,15 @@ describe('finalizeProfileView', function() {
 
     if (noPages) {
       delete profile.pages;
+    }
+
+    if (activeTabID !== undefined) {
+      // Update the activeTabID if it's explicitly provided.
+      profile.meta.configuration = {
+        ...profile.meta.configuration,
+        // null is represented by 0 for activeTab in the back-end.
+        activeTabID: activeTabID ?? 0,
+      };
     }
 
     // Create the store and dispatch the url state.
@@ -139,6 +156,33 @@ describe('finalizeProfileView', function() {
     const { getState } = setup({
       search: '?view=active-tab&v=5',
       noPages: true,
+    });
+
+    // Check if we can successfully finalized the profile view for full view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
+    });
+  });
+
+  it('switches back to full view if there is no `activeTabID` value', function() {
+    const { getState } = setup({
+      search: '?view=active-tab&v=5',
+      activeTabID: null,
+    });
+
+    // Check if we can successfully finalized the profile view for full view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
+    });
+  });
+
+  it('switches back to full view if there is no relevant page with the given `activeTabID` value', function() {
+    const activeTabIDWithNoRelevantPage = 99999;
+    const { getState } = setup({
+      search: '?view=active-tab&v=5',
+      activeTabID: activeTabIDWithNoRelevantPage,
     });
 
     // Check if we can successfully finalized the profile view for full view.
