@@ -109,6 +109,46 @@ CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
 
+## CallTree
+## This is the component for Call Tree panel.
+
+CallTree--tracing-ms-total = Running Time (ms)
+    .title =
+        The "total" running time includes a summary of all the time where this
+        function was observed to be on the stack. This includes the time where
+        the function was actually running, and the time spent in the callers from
+        this function.
+CallTree--tracing-ms-self = Self (ms)
+    .title =
+        The "self" time only includes the time where the function was
+        the leaf-most one on the stack. If this function called into other functions,
+        then the "other" functions' time is not included. The "self" time is useful
+        for understanding where time was actually spent in a program.
+CallTree--samples-total = Total (samples)
+    .title =
+        The "total" sample count includes a summary of every sample where this
+        function was observed to be on the stack. This includes the time where the
+        function was actually running, and the time spent in the callers from this
+        function.
+CallTree--samples-self = Self
+    .title =
+        The "self" sample count only includes the samples where the function was
+        the leaf-most one on the stack. If this function called into other functions,
+        then the "other" functions' counts are not included. The "self" count is useful
+        for understanding where time was actually spent in a program.
+CallTree--bytes-total = Total Size (bytes)
+    .title =
+        The "total size" includes a summary of all of the bytes allocated or
+        deallocated while this function was observed to be on the stack. This
+        includes both the bytes where the function was actually running, and the
+        bytes of the callers from this function.
+CallTree--bytes-self = Self (bytes)
+    .title =
+        The "self" bytes includes the bytes allocated or deallocated while this
+        function was the leaf-most one on the stack. If this function called into
+        other functions, then the "other" functions' bytes are not included.
+        The "self" bytes are useful for understanding where memory was actually
+        allocated or deallocated in the program.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -283,6 +323,14 @@ MarkerSettings--panel-search =
 ## This is the sidebar component that is used in Marker Table panel.
 
 MarkerSidebar--select-a-marker = Select a marker to display some information about it.
+
+## MarkerTable
+## This is the component for Marker Table panel.
+
+MarkerTable--start = Start
+MarkerTable--duration = Duration
+MarkerTable--type = Type
+MarkerTable--description = Description
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
