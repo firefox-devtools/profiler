@@ -39,6 +39,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
+import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
@@ -340,11 +341,13 @@ export function getThreadSelectorsPerThread(
     ProfileData.getThreadProcessDetails
   );
 
-  const getTransformLabels: Selector<string[]> = createSelector(
+  const getTransformLabelL10nIds: Selector<
+    TransformLabeL10nIds[]
+  > = createSelector(
     getRangeAndTransformFilteredThread,
     getFriendlyThreadName,
     getTransformStack,
-    Transforms.getTransformLabels
+    Transforms.getTransformLabelL10nIds
   );
 
   const getViewOptions: Selector<ThreadViewOptions> = state =>
@@ -448,7 +451,7 @@ export function getThreadSelectorsPerThread(
     getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
     getThreadProcessDetails,
-    getTransformLabels,
+    getTransformLabelL10nIds,
     getTransformStack,
     getViewOptions,
     getJsTracerTable,

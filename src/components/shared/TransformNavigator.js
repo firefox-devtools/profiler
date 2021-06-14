@@ -4,6 +4,9 @@
 
 // @flow
 
+import React from 'react';
+import { Localized } from '@fluent/react';
+
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { FilterNavigatorBar } from './FilterNavigatorBar';
@@ -26,11 +29,24 @@ export const TransformNavigator = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state: State) => {
-    const items = selectedThreadSelectors.getTransformLabels(state);
+    const transformL10nIds = selectedThreadSelectors.getTransformLabelL10nIds(
+      state
+    );
+    const transformLabels = transformL10nIds.map(transform => {
+      return {
+        content: (
+          <Localized
+            id={transform.l10nId}
+            vars={{ item: transform.item }}
+          ></Localized>
+        ),
+      };
+    });
+
     return {
       className: 'calltreeTransformNavigator',
-      items,
-      selectedItem: items.length - 1,
+      items: transformLabels,
+      selectedItem: transformLabels.length - 1,
     };
   },
   mapDispatchToProps: { onPop: popTransformsFromStack },
