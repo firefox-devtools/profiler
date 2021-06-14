@@ -15,7 +15,6 @@ import {
   getScreenshotTrackProfile,
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
-  getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { getView } from '../../selectors/app';
@@ -100,7 +99,9 @@ describe('ActiveTab', function() {
 
 describe('finalizeProfileView', function() {
   function setup({ search, noPages }: { search: string, noPages?: boolean }) {
-    const { profile } = getProfileFromTextSamples('A');
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
     const newUrlState = stateFromLocation({
       pathname: '/public/FAKEHASH/calltree/',
       search: '?' + search,

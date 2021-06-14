@@ -36,10 +36,12 @@ import { ensureExists } from '../../utils/flow';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { fireFullClick } from '../fixtures/utils';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -680,7 +682,10 @@ describe('app/MenuButtons', function() {
 
   describe('Full View Button', function() {
     function setupForFullViewButton() {
-      return setup(storeWithProfile(createSimpleProfile().profile));
+      const { profile } = addActiveTabInformationToProfile(
+        getProfileWithNiceTracks()
+      );
+      return setup(storeWithProfile(profile));
     }
 
     it('is not present when we are in the full view already', () => {

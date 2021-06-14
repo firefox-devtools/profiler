@@ -35,6 +35,7 @@ import {
   getRelevantPagesForActiveTab,
   getIsCPUUtilizationProvided,
   getSymbolServerUrl,
+  getActiveTabID,
 } from 'firefox-profiler/selectors';
 import {
   withHistoryReplaceStateAsync,
@@ -184,6 +185,7 @@ export function finalizeProfileView(
     // encoded into the URL.
     const selectedThreadIndexes = getSelectedThreadIndexesOrNull(getState());
     const pages = profile.pages;
+    const activeTabID = getActiveTabID(getState());
     if (!timelineTrackOrganization) {
       // Most likely we'll need to load the timeline track organization, as requested
       // by the URL, but tests can pass in a value.
@@ -197,7 +199,7 @@ export function finalizeProfileView(
         dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
         break;
       case 'active-tab':
-        if (pages) {
+        if (pages && activeTabID !== null) {
           dispatch(
             finalizeActiveTabProfileView(
               profile,
@@ -563,6 +565,15 @@ export function finalizeActiveTabProfileView(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
+
+    if (relevantPages.length === 0) {
+      // If no relevant pages found, it doesn't make sense for us to continue
+      // with the active tab view anymore. No relevant page means empty view in
+      // the active tab view.
+      dispatch(finalizeFullProfileView(profile, selectedThreadIndexes));
+      return;
+    }
+
     const activeTabTimeline = computeActiveTabTracks(
       profile,
       relevantPages,

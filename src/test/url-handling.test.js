@@ -407,7 +407,10 @@ describe('profileName', function() {
 
 describe('ctxId', function() {
   it('serializes the ctxId in the URL', function() {
-    const { getState, dispatch } = _getStoreWithURL();
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    const { getState, dispatch } = _getStoreWithURL({}, profile);
     const tabID = 123;
 
     dispatch(changeTimelineTrackOrganization({ type: 'active-tab', tabID }));
@@ -417,9 +420,15 @@ describe('ctxId', function() {
   });
 
   it('reflects in the state from URL', function() {
-    const { getState } = _getStoreWithURL({
-      search: '?ctxId=123&view=active-tab',
-    });
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    const { getState } = _getStoreWithURL(
+      {
+        search: '?ctxId=123&view=active-tab',
+      },
+      profile
+    );
     expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
       tabID: 123,
@@ -427,7 +436,10 @@ describe('ctxId', function() {
   });
 
   it('returns the full view when ctxId is not specified', function() {
-    const { getState } = _getStoreWithURL();
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    const { getState } = _getStoreWithURL({}, profile);
     expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
       type: 'full',
     });
@@ -468,10 +480,16 @@ describe('ctxId', function() {
   });
 
   it('should remove other full view url states if present', function() {
-    const { getState } = _getStoreWithURL({
-      search:
-        '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
-    });
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    const { getState } = _getStoreWithURL(
+      {
+        search:
+          '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+      },
+      profile
+    );
 
     const newUrl = new URL(
       urlFromState(urlStateSelectors.getUrlState(getState())),
@@ -484,9 +502,15 @@ describe('ctxId', function() {
   });
 
   it('if not present in the URL, still manages to load the active tab view', function() {
-    const { getState } = _getStoreWithURL({
-      search: '?view=active-tab',
-    });
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithNiceTracks()
+    );
+    const { getState } = _getStoreWithURL(
+      {
+        search: '?view=active-tab',
+      },
+      profile
+    );
 
     expect(getView(getState()).phase).toEqual('DATA_LOADED');
     expect(urlStateSelectors.getTimelineTrackOrganization(getState())).toEqual({
