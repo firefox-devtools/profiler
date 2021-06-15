@@ -59,7 +59,11 @@ exports[`StackSettings matches the snapshot 1`] = `
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
-          Invert call stack
+          <span
+            title="Sort by the time spent in a call node, ignoring its children."
+          >
+            Invert call stack
+          </span>
         </label>
       </li>
     </ul>

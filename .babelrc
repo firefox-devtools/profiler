@@ -53,6 +53,17 @@
       }
     ],
     [
+      // This plugin is configured by preset-env when needed... however because
+      // Webpack v4 doesn't understand this new syntaxe we need to
+      // unconditionally transpile it even for platforms that don't support it.
+      "@babel/plugin-proposal-nullish-coalescing-operator",
+      {
+        // The loose operation is when assuming that we don't use document.all.
+        // We should probably use the "assumptions" object in preset-env.
+        "loose": true
+      }
+    ],
+    [
       "module-resolver",
       {
         "alias": {

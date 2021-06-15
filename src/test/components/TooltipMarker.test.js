@@ -19,6 +19,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { getEmptyThread } from '../../profile-logic/data-structures';
+import type { NetworkPayload } from 'firefox-profiler/types';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
@@ -545,9 +546,9 @@ describe('TooltipMarker', function() {
     );
   }
 
-  it('renders properly redirect network markers', () => {
-    const { container } = setupWithPayload(
-      getNetworkMarkers({
+  describe('renders properly redirect network markers', () => {
+    function redirectMarker(payloadOverrides?: $Shape<NetworkPayload>) {
+      return {
         id: 1234,
         startTime: 10.5,
         fetchStart: 111.0,
@@ -560,12 +561,44 @@ describe('TooltipMarker', function() {
           count: 0,
           RedirectURI:
             'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
-          contentType: '',
+          contentType: ('': null | string),
+          ...payloadOverrides,
         },
-      })
-    );
+      };
+    }
 
-    expect(container.firstChild).toMatchSnapshot();
+    it('without additional redirection information', () => {
+      const { container } = setupWithPayload(
+        getNetworkMarkers(redirectMarker())
+      );
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    ['permanent', 'internal', 'temporary'].forEach(redirectType => {
+      it(`for a ${redirectType} redirection`, () => {
+        const { container } = setupWithPayload(
+          getNetworkMarkers(
+            redirectMarker({ redirectType, isHttpToHttpsRedirect: false })
+          )
+        );
+
+        expect(container.firstChild).toMatchSnapshot();
+      });
+    });
+
+    it('for an internal redirection from a HSTS header', () => {
+      const { container } = setupWithPayload(
+        getNetworkMarkers(
+          redirectMarker({
+            redirectType: 'permanent',
+            isHttpToHttpsRedirect: true,
+          })
+        )
+      );
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
   });
 
   it('renders properly normal network markers', () => {
@@ -705,6 +738,26 @@ describe('TooltipMarker', function() {
           responseStart: 19400,
           responseEnd: 20200,
           contentType: null,
+        },
+      })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers that were aborted', () => {
+    const { container } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          contentType: null,
+          cache: 'Unresolved',
+          status: 'STATUS_ABORT',
         },
       })
     );

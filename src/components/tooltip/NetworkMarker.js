@@ -17,8 +17,13 @@ import {
   formatNumber,
   formatMilliseconds,
 } from 'firefox-profiler/utils/format-numbers';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
-import type { NetworkPayload, Milliseconds } from 'firefox-profiler/types';
+import type {
+  NetworkPayload,
+  NetworkStatus,
+  Milliseconds,
+} from 'firefox-profiler/types';
 
 import './NetworkMarker.css';
 
@@ -49,18 +54,18 @@ function _getHumanReadablePriority(priority: number): string | null {
   return prioLabel + '(' + priority + ')';
 }
 
-function _getHumanReadableDataStatus(str: string): string {
-  switch (str) {
+function _getHumanReadableDataStatus(status: NetworkStatus): string {
+  switch (status) {
     case 'STATUS_START':
       return 'Waiting for response';
-    case 'STATUS_READ':
-      return 'Reading request';
     case 'STATUS_STOP':
       return 'Response received';
     case 'STATUS_REDIRECT':
       return 'Redirecting request';
+    case 'STATUS_ABORT':
+      return 'Request was aborted';
     default:
-      return 'other';
+      throw assertExhaustiveCheck(status);
   }
 }
 
@@ -360,7 +365,18 @@ export function getNetworkMarkerDetails(
   details.push(
     <TooltipDetail label="Status" key="Network-Status">
       {_getHumanReadableDataStatus(payload.status)}
-    </TooltipDetail>,
+    </TooltipDetail>
+  );
+  if (payload.redirectType !== undefined) {
+    details.push(
+      <TooltipDetail label="Redirection type" key="Redirection-Type">
+        {payload.redirectType +
+          (payload.isHttpToHttpsRedirect ? ' (HTTP to HTTPS)' : '')}
+      </TooltipDetail>
+    );
+  }
+
+  details.push(
     <TooltipDetail label="Cache" key="Network-Cache">
       {payload.cache}
     </TooltipDetail>,

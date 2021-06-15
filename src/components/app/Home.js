@@ -448,8 +448,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               <p>
                 To start profiling, click on the profiling button, or use the
                 keyboard shortcuts. The icon is blue when a profile is
-                recording. Hit
-                <kbd>Capture Profile</kbd> to load the data into
+                recording. Hit <kbd>Capture</kbd> to load the data into
                 profiler.firefox.com.
               </p>
             </Localized>

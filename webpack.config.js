@@ -1,6 +1,7 @@
 // @noflow
 const path = require('path');
 const webpack = require('webpack');
+const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -11,6 +12,13 @@ const es6modules = ['pretty-bytes'];
 const es6modulePaths = es6modules.map(module => {
   return path.join(__dirname, 'node_modules', module);
 });
+
+// If L10N env variable is set, we read all the locale directories and use
+// whatever we have there. This is done to make the l10n branch work with staging
+// locales, so localizers can see the result of their translations immediately.
+const availableStagingLocales = process.env.L10N
+  ? JSON.stringify(fs.readdirSync('./locales'))
+  : JSON.stringify(undefined);
 
 const config = {
   resolve: {
@@ -74,6 +82,9 @@ const config = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+    }),
+    new webpack.DefinePlugin({
+      AVAILABLE_STAGING_LOCALES: availableStagingLocales,
     }),
     new HtmlWebpackPlugin({
       title: 'Firefox Profiler',

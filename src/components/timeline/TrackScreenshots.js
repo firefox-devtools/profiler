@@ -231,6 +231,7 @@ type HoverPreviewProps = {|
 |};
 
 const MAXIMUM_HOVER_SIZE = 350;
+const MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE = 100;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
   _overlayElement = ensureExists(
@@ -250,16 +251,23 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       payload,
     } = this.props;
 
-    if (isMakingPreviewSelection || offsetX === null || pageX === null) {
+    if (offsetX === null || pageX === null) {
       return null;
     }
     const { url, windowWidth, windowHeight } = payload;
     // Compute the hover image's thumbnail size.
+
+    // When making a selection, we'd like that the hover is still displayed,
+    // but much smaller
+    const maximumHoverSize = isMakingPreviewSelection
+      ? MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE
+      : MAXIMUM_HOVER_SIZE;
+
     // Coefficient should be according to bigger side.
     const coefficient =
       windowHeight > windowWidth
-        ? MAXIMUM_HOVER_SIZE / windowHeight
-        : MAXIMUM_HOVER_SIZE / windowWidth;
+        ? maximumHoverSize / windowHeight
+        : maximumHoverSize / windowWidth;
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
 

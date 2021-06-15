@@ -450,7 +450,7 @@ export function deriveMarkersFromRawMarkerTable(
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
   // we keep it here.
-  let previousScreenshotMarker: MarkerIndex | null = null;
+  const previousScreenshotMarkers: Map<string, MarkerIndex> = new Map();
   for (
     let rawMarkerIndex = 0;
     rawMarkerIndex < rawMarkers.length;
@@ -493,7 +493,7 @@ export function deriveMarkersFromRawMarkerTable(
             openNetworkMarkers.set(data.id, rawMarkerIndex);
           } else {
             // End status can be any status other than 'STATUS_START'. They are
-            // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
+            // either 'STATUS_STOP', 'STATUS_REDIRECT' or 'STATUS_ABORT'.
             const endData = data;
 
             const startIndex = openNetworkMarkers.get(data.id);
@@ -558,10 +558,15 @@ export function deriveMarkersFromRawMarkerTable(
         case 'CompositorScreenshot': {
           // Screenshot markers are already ordered. In the raw marker table,
           // they're Instant markers, but since they're valid until the following
-          // raw marker of the same type, we convert them to Interval markers with a
-          // a start and end time.
+          // raw marker of the same type and the same window, we convert them to
+          // Interval markers with a a start and end time.
 
-          if (previousScreenshotMarker !== null) {
+          const { windowID } = data;
+          const previousScreenshotMarker = previousScreenshotMarkers.get(
+            windowID
+          );
+          if (previousScreenshotMarker !== undefined) {
+            previousScreenshotMarkers.delete(windowID);
             const previousStartTime = ensureExists(
               rawMarkers.startTime[previousScreenshotMarker],
               'Expected to find a start time for a screenshot marker.'
@@ -580,7 +585,7 @@ export function deriveMarkersFromRawMarkerTable(
             });
           }
 
-          previousScreenshotMarker = rawMarkerIndex;
+          previousScreenshotMarkers.set(windowID, rawMarkerIndex);
 
           continue;
         }
@@ -794,8 +799,8 @@ export function deriveMarkersFromRawMarkerTable(
     });
   }
 
-  // And we also need to add the "last screenshot marker".
-  if (previousScreenshotMarker !== null) {
+  // And we also need to add the "last screenshot markers".
+  for (const previousScreenshotMarker of previousScreenshotMarkers.values()) {
     const start = ensureExists(
       rawMarkers.startTime[previousScreenshotMarker],
       'Expected to find a CompositorScreenshot marker with a start time.'

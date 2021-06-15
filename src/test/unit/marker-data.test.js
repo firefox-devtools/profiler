@@ -254,56 +254,96 @@ describe('Derive markers from Gecko phase markers', function() {
   });
 
   it('has special handling for CompositorScreenshot', function() {
-    const payload1 = {
+    const basePayload = {
       type: 'CompositorScreenshot',
       url: 16,
-      windowID: '0x136888400',
       windowWidth: 1280,
       windowHeight: 1000,
     };
-    const payload2 = {
-      ...payload1,
-      windowWidth: 500,
-    };
+    const payloadsForWindowA = [
+      {
+        ...basePayload,
+        windowID: '0xAAAAAAAAA',
+      },
+      {
+        ...basePayload,
+        windowWidth: 500,
+        windowID: '0xAAAAAAAAA',
+      },
+    ];
+    const payloadsForWindowB = payloadsForWindowA.map(payload => ({
+      ...payload,
+      windowID: '0xBBBBBBBBB',
+    }));
 
-    const startTimeA = 2;
-    const startTimeB = 5;
+    const startTimesForWindowA = [2, 5];
+    const startTimesForWindowB = [3, 6];
 
     const { markers, getState } = setupWithTestDefinedMarkers([
       {
         name: 'CompositorScreenshot',
-        startTime: startTimeA,
+        startTime: startTimesForWindowA[0],
         endTime: null,
         phase: INTERVAL_START,
-        data: payload1,
+        data: payloadsForWindowA[0],
       },
       {
         name: 'CompositorScreenshot',
-        startTime: startTimeB,
+        startTime: startTimesForWindowB[0],
         endTime: null,
         phase: INTERVAL_START,
-        data: payload2,
+        data: payloadsForWindowB[0],
+      },
+      {
+        name: 'CompositorScreenshot',
+        startTime: startTimesForWindowA[1],
+        endTime: null,
+        phase: INTERVAL_START,
+        data: payloadsForWindowA[1],
+      },
+      {
+        name: 'CompositorScreenshot',
+        startTime: startTimesForWindowB[1],
+        endTime: null,
+        phase: INTERVAL_START,
+        data: payloadsForWindowB[1],
       },
     ]);
 
     const threadRange = selectedThreadSelectors.getThreadRange(getState());
 
     expect(markers).toEqual([
-      // The first has a duration from the first screenshot to the next.
+      // The two firsts have a duration from the first screenshot to the next in
+      // the same window.
       {
-        category: 0,
-        data: payload1,
-        end: startTimeB,
         name: 'CompositorScreenshot',
-        start: 2,
+        data: payloadsForWindowA[0],
+        start: startTimesForWindowA[0],
+        end: startTimesForWindowA[1],
+        category: 0,
       },
-      // The last has a duration until the end of the thread range.
       {
-        category: 0,
-        data: payload2,
-        end: threadRange.end,
         name: 'CompositorScreenshot',
-        start: startTimeB,
+        data: payloadsForWindowB[0],
+        start: startTimesForWindowB[0],
+        end: startTimesForWindowB[1],
+        category: 0,
+      },
+
+      // The 2 lasts have a duration until the end of the thread range.
+      {
+        name: 'CompositorScreenshot',
+        data: payloadsForWindowA[1],
+        start: startTimesForWindowA[1],
+        end: threadRange.end,
+        category: 0,
+      },
+      {
+        name: 'CompositorScreenshot',
+        data: payloadsForWindowB[1],
+        start: startTimesForWindowB[1],
+        end: threadRange.end,
+        category: 0,
       },
     ]);
   });

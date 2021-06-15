@@ -10,9 +10,15 @@ import {
   PSEUDO_STRATEGIES_DIRECTION,
 } from 'firefox-profiler/utils/l10n-pseudo';
 
-// This contains the locales we support. Don't forget to update the array
-// RTL_LOCALES when adding a RTL locale, if necessary.
-export const AVAILABLE_LOCALES: Array<string> = ['en-US'];
+// This contains the locales we support in the production. Don't forget to update
+// the array RTL_LOCALES when adding a RTL locale, if necessary.
+// AVAILABLE_STAGING_LOCALES is replaced, using webpack's DefinePlugin, by all
+// available locales, when running with L10N=1, using the "l10n" versions of the
+// yarn scripts. Especially this is done when building and deploying the l10n
+// branch in netlify.
+export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
+  'en-US',
+];
 export const DEFAULT_LOCALE = 'en-US';
 
 // This array contains only the locales that are RTL (Right-To-Left).

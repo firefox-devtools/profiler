@@ -1128,8 +1128,7 @@ export function focusSubtree(
         if (stackMatchesUpTo === prefixDepth) {
           const newStackIndex = newStackTable.length++;
           const newStackPrefix = oldStackToNewStack.get(prefix);
-          newStackTable.prefix[newStackIndex] =
-            newStackPrefix !== undefined ? newStackPrefix : null;
+          newStackTable.prefix[newStackIndex] = newStackPrefix ?? null;
           newStackTable.frame[newStackIndex] = frame;
           newStackTable.category[newStackIndex] = category;
           newStackTable.subcategory[newStackIndex] = subcategory;

@@ -67,7 +67,8 @@ export class Draggable extends React.PureComponent<Props, State> {
         e.pageY - mouseDownY,
         true
       );
-      e.stopPropagation();
+      // Note: no stopPropagation, so that other handlers (eg: screenshot
+      // hovers) can also get the event and handle it.
       e.preventDefault();
     };
 

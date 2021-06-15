@@ -413,10 +413,8 @@ export function applySymbolicationStep(
   // to the same funcAddress.
   // We obtain the funcAddress from the symbolication information in resultsForLib:
   // resultsForLib does not only contain the name of the function; it also contains,
-  // for each address, the functionOffset:
-  // functionOffset = frameAddress - funcAddress.
-  // So we can do the inverse calculation: funcAddress = frameAddress - functionOffset.
-  // All frames with the same funcAddress are grouped into the same function.
+  // for each address, the symbolAddress.
+  // All frames with the same symbolAddress are grouped into the same function.
 
   for (const frameIndex of allFramesForThisLib) {
     const oldFrameFunc = oldFrameTable.func[frameIndex];
@@ -425,20 +423,16 @@ export function applySymbolicationStep(
     if (addressResult === undefined) {
       const oldSymbol = stringTable.getString(oldFuncTable.name[oldFrameFunc]);
       addressResult = {
-        functionOffset:
-          oldFrameTable.address[frameIndex] -
-          oldFuncTable.address[oldFrameFunc],
+        symbolAddress: oldFuncTable.address[oldFrameFunc],
         name: oldSymbol,
       };
     }
 
     // |address| is the original frame address that we found during
     // stackwalking, as a library-relative offset.
-    // |addressResult.functionOffset| is the offset between the start of
-    // the function and |address|.
     // |funcAddress| is the start of the function, as a library-relative
     // offset.
-    const funcAddress = address - addressResult.functionOffset;
+    const funcAddress = addressResult.symbolAddress;
     frameToFuncAddressMap.set(frameIndex, funcAddress);
     funcAddressToSymbolNameMap.set(funcAddress, addressResult.name);
 
@@ -475,18 +469,7 @@ export function applySymbolicationStep(
   // If this is a re-symbolication, then some funcAddresses may not have
   // a canonical func yet, because oldFrameFunc might already have become
   // the canonical func for a different funcAddress.
-
-  // Build oldFuncToFuncAddressMap.
-  // If (oldFunc, funcAddress) is in oldFuncToFuncAddressMap, this means
-  // that all frames that used to belong to oldFunc have been resolved to
-  // the same funcAddress.
-  const oldFuncToFuncAddressEntries = [];
-  for (const [frameIndex, funcAddress] of frameToFuncAddressMap) {
-    const oldFrameFunc = oldFrameTable.func[frameIndex];
-    oldFuncToFuncAddressEntries.push([oldFrameFunc, funcAddress]);
-  }
-  const oldFuncToFuncAddressMap = makeConsensusMap(oldFuncToFuncAddressEntries);
-
+  //
   // We need to do the following:
   //  - Find a canonical func for every funcAddress
   //  - give funcs the new symbols and the funcAddress as their address
@@ -521,27 +504,11 @@ export function applySymbolicationStep(
     funcTable.name[funcIndex] = symbolStringIndex;
   }
 
-  // Now we have a canonical func for every funcAddress, so we have enough
-  // information to build the oldFuncToNewFuncMap.
-  // If (oldFunc, newFunc) is in oldFuncToNewFuncMap, this means that all
-  // frames that used to belong to oldFunc or newFunc have been resolved to
-  // the same funcAddress, and that newFunc has been chosen as the canonical
-  // func for that funcAddress.
-  for (const [oldFunc, funcAddress] of oldFuncToFuncAddressMap) {
-    const newFunc = funcAddressToCanonicalFuncIndexMap.get(funcAddress);
-    if (newFunc === undefined) {
-      throw new Error(
-        'Impossible, all funcAddresses have a canonical func index at this point.'
-      );
-    }
-    if (oldFuncToFuncAddressMap.get(newFunc) === funcAddress) {
-      oldFuncToNewFuncMap.set(oldFunc, newFunc);
-    }
-  }
-
   // Make a new frameTable with the updated frame -> func assignments.
   const newFrameTableFuncColumn: Array<IndexIntoFuncTable> = oldFrameTable.func.slice();
+  const oldFuncToNewFuncEntries = [];
   for (const [frameIndex, funcAddress] of frameToFuncAddressMap) {
+    const oldFuncIndex = oldFrameTable.func[frameIndex];
     const funcIndex = funcAddressToCanonicalFuncIndexMap.get(funcAddress);
     if (funcIndex === undefined) {
       throw new Error(
@@ -549,6 +516,18 @@ export function applySymbolicationStep(
       );
     }
     newFrameTableFuncColumn[frameIndex] = funcIndex;
+    oldFuncToNewFuncEntries.push([oldFuncIndex, funcIndex]);
+  }
+
+  // Build oldFuncToNewFuncMapForThisLib.
+  // If (oldFunc, newFunc) is in oldFuncToNewFuncMapForThisLib, this means
+  // that all frames that used to belong to oldFunc have been resolved to
+  // the same func newFunc.
+  const oldFuncToNewFuncMapForThisLib = makeConsensusMap(
+    oldFuncToNewFuncEntries
+  );
+  for (const [oldFunc, newFunc] of oldFuncToNewFuncMapForThisLib) {
+    oldFuncToNewFuncMap.set(oldFunc, newFunc);
   }
 
   const frameTable = { ...oldFrameTable, func: newFrameTableFuncColumn };
