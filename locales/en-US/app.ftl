@@ -629,10 +629,14 @@ TrackContextMenu--show-all-tracks = Show all tracks
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
 ## Chart components.
+## These messages are displayed above the table / graph once the user selects to
+## apply a specific transformation function to a node in the call tree. It's the
+## name of the function, followed by the node's name.
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
 # Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
