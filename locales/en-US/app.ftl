@@ -121,7 +121,7 @@ CallTree--tracing-ms-total = Running Time (ms)
 CallTree--tracing-ms-self = Self (ms)
     .title =
         The “self” time only includes the time where the function was
-        the leaf-most one on the stack. If this function called into other functions,
+        the end of the stack. If this function called into other functions,
         then the “other” functions’ time is not included. The “self” time is useful
         for understanding where time was actually spent in a program.
 CallTree--samples-total = Total (samples)
@@ -133,7 +133,7 @@ CallTree--samples-total = Total (samples)
 CallTree--samples-self = Self
     .title =
         The “self” sample count only includes the samples where the function was
-        the leaf-most one on the stack. If this function called into other functions,
+        the end of the stack. If this function called into other functions,
         then the “other” functions’ counts are not included. The “self” count is useful
         for understanding where time was actually spent in a program.
 CallTree--bytes-total = Total Size (bytes)
@@ -145,7 +145,7 @@ CallTree--bytes-total = Total Size (bytes)
 CallTree--bytes-self = Self (bytes)
     .title =
         The “self” bytes includes the bytes allocated or deallocated while this
-        function was the leaf-most one on the stack. If this function called into
+        function was the end of the stack. If this function called into
         other functions, then the “other” functions’ bytes are not included.
         The “self” bytes are useful for understanding where memory was actually
         allocated or deallocated in the program.

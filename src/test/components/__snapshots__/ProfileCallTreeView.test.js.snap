@@ -154,7 +154,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or
+        title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
 bytes of the callers from this function."
@@ -163,10 +163,10 @@ bytes of the callers from this function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this
-function was the leaf-most one on the stack. If this function called into
-other functions, then the \\"other\\" functions' bytes are not included.
-The \\"self\\" bytes are useful for understanding where memory was actually
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
 allocated or deallocated in the program."
       >
         Self (bytes)
@@ -826,7 +826,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or
+        title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
 bytes of the callers from this function."
@@ -835,10 +835,10 @@ bytes of the callers from this function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this
-function was the leaf-most one on the stack. If this function called into
-other functions, then the \\"other\\" functions' bytes are not included.
-The \\"self\\" bytes are useful for understanding where memory was actually
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
 allocated or deallocated in the program."
       >
         Self (bytes)
@@ -1498,7 +1498,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or
+        title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
 bytes of the callers from this function."
@@ -1507,10 +1507,10 @@ bytes of the callers from this function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this
-function was the leaf-most one on the stack. If this function called into
-other functions, then the \\"other\\" functions' bytes are not included.
-The \\"self\\" bytes are useful for understanding where memory was actually
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
 allocated or deallocated in the program."
       >
         Self (bytes)
@@ -2158,7 +2158,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or
+        title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
 bytes of the callers from this function."
@@ -2167,10 +2167,10 @@ bytes of the callers from this function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this
-function was the leaf-most one on the stack. If this function called into
-other functions, then the \\"other\\" functions' bytes are not included.
-The \\"self\\" bytes are useful for understanding where memory was actually
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
 allocated or deallocated in the program."
       >
         Self (bytes)
@@ -2818,7 +2818,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or
+        title="The “total size” includes a summary of all of the bytes allocated or
 deallocated while this function was observed to be on the stack. This
 includes both the bytes where the function was actually running, and the
 bytes of the callers from this function."
@@ -2827,10 +2827,10 @@ bytes of the callers from this function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this
-function was the leaf-most one on the stack. If this function called into
-other functions, then the \\"other\\" functions' bytes are not included.
-The \\"self\\" bytes are useful for understanding where memory was actually
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
 allocated or deallocated in the program."
       >
         Self (bytes)
@@ -3781,7 +3781,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -3790,9 +3790,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -4408,7 +4408,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -4417,9 +4417,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -5035,7 +5035,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -5044,9 +5044,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -5662,7 +5662,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -5671,9 +5671,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -6244,7 +6244,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -6253,9 +6253,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -6826,7 +6826,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -6835,9 +6835,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -7289,7 +7289,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -7298,9 +7298,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
@@ -7752,7 +7752,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this
+        title="The “total” sample count includes a summary of every sample where this
 function was observed to be on the stack. This includes the time where the
 function was actually running, and the time spent in the callers from this
 function."
@@ -7761,9 +7761,9 @@ function."
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was
-the leaf-most one on the stack. If this function called into other functions,
-then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
 for understanding where time was actually spent in a program."
       >
         Self
