@@ -160,7 +160,10 @@ type ExtractionInfo = {
   libToResourceIndex: Map<Lib, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
-  stringToNewFuncIndex: Map<string, IndexIntoFuncTable>,
+  stringToNewFuncIndexAndFrameAddress: Map<
+    string,
+    { funcIndex: IndexIntoFuncTable, frameAddress: Address | null }
+  >,
 };
 
 /**
@@ -169,15 +172,20 @@ type ExtractionInfo = {
  * FuncTable and ResourceTable for easily accesing this information in a structred format.
  *
  * The returned IndexIntoFuncTable[] value maps the index of each element in the
- * locationStringIndexes array to a func from the returned FuncTable.
+ * frameLocations array to a func from the returned FuncTable.
  */
 export function extractFuncsAndResourcesFromFrameLocations(
-  locationStringIndexes: IndexIntoStringTable[],
+  frameLocations: IndexIntoStringTable[],
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
   extensions: ExtensionTable = getEmptyExtensions()
-): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
+): {
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  frameFuncs: IndexIntoFuncTable[],
+  frameAddresses: (Address | null)[],
+} {
   // Important! If the flow type for the FuncTable was changed, update all the functions
   // in this file that start with the word "extract".
   const funcTable = getEmptyFuncTable();
@@ -195,7 +203,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     libToResourceIndex: new Map(),
     originToResourceIndex: new Map(),
     libNameToResourceIndex: new Map(),
-    stringToNewFuncIndex: new Map(),
+    stringToNewFuncIndexAndFrameAddress: new Map(),
   };
 
   for (let i = 0; i < extensions.length; i++) {
@@ -204,61 +212,85 @@ export function extractFuncsAndResourcesFromFrameLocations(
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
-  const locationFuncs = locationStringIndexes.map(
-    (locationIndex, frameIndex) => {
-      const locationString = stringTable.getString(locationIndex);
-      const relevantForJS = relevantForJSPerFrame[frameIndex];
-      let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
-      if (funcIndex !== undefined) {
-        // The location string was already processed.
-        return funcIndex;
-      }
+  const frameFuncs = [];
+  const frameAddresses = [];
+  for (let frameIndex = 0; frameIndex < frameLocations.length; frameIndex++) {
+    const locationIndex = frameLocations[frameIndex];
+    const locationString = stringTable.getString(locationIndex);
+    const relevantForJS = relevantForJSPerFrame[frameIndex];
+    const info = extractionInfo.stringToNewFuncIndexAndFrameAddress.get(
+      locationString
+    );
+    if (info !== undefined) {
+      // The location string was already processed.
+      const { funcIndex, frameAddress } = info;
+      frameFuncs.push(funcIndex);
+      frameAddresses.push(frameAddress);
+      continue;
+    }
 
-      // These nested `if` branches check for 3 cases for constructing function and
-      // resource information.
-      funcIndex = _extractUnsymbolicatedFunction(
-        extractionInfo,
-        locationString,
-        locationIndex
-      );
+    // These nested `if` branches check for 3 cases for constructing function and
+    // resource information.
+    let funcIndex = null;
+    let frameAddress = null;
+    const unsymbolicatedInfo = _extractUnsymbolicatedFunction(
+      extractionInfo,
+      locationString,
+      locationIndex
+    );
+    if (unsymbolicatedInfo !== null) {
+      funcIndex = unsymbolicatedInfo.funcIndex;
+      frameAddress = unsymbolicatedInfo.frameAddress;
+    } else {
+      funcIndex = _extractCppFunction(extractionInfo, locationString);
       if (funcIndex === null) {
-        funcIndex = _extractCppFunction(extractionInfo, locationString);
+        funcIndex = _extractJsFunction(extractionInfo, locationString);
         if (funcIndex === null) {
-          funcIndex = _extractJsFunction(extractionInfo, locationString);
-          if (funcIndex === null) {
-            funcIndex = _extractUnknownFunctionType(
-              extractionInfo,
-              locationIndex,
-              relevantForJS
-            );
-          }
+          funcIndex = _extractUnknownFunctionType(
+            extractionInfo,
+            locationIndex,
+            relevantForJS
+          );
         }
       }
-
-      // Cache the above results.
-      extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
-      return funcIndex;
     }
-  );
 
-  return [
-    extractionInfo.funcTable,
-    extractionInfo.resourceTable,
-    locationFuncs,
-  ];
+    // Cache the above results.
+    extractionInfo.stringToNewFuncIndexAndFrameAddress.set(locationString, {
+      funcIndex,
+      frameAddress,
+    });
+
+    frameFuncs.push(funcIndex);
+    frameAddresses.push(frameAddress);
+  }
+
+  return {
+    funcTable: extractionInfo.funcTable,
+    resourceTable: extractionInfo.resourceTable,
+    frameFuncs,
+    frameAddresses,
+  };
 }
 
 /**
  * Given a location string that looks like a memory address, e.g. "0xfe9a097e0", treat
- * it as an unsymblicated memory address, add a single function to the function table,
- * as a single function, and then look up the library information based on the memory
- * offset obtained from the location string.
+ * it as an unsymblicated memory address and add a new function for it to the function table.
+ * This happens before we have any symbol info, so we do not know which addresses fall
+ * into the same function, so cannot do any function grouping. So we get one "function" per
+ * address.
+ * We also associate the address with the library that contains it, and convert the address
+ * into a library-relative offset. This association is established via the function's
+ * "resource": The function points to the resource (of type resourceTypes.library), and the
+ * resource has the index to the library in thread.libs.
+ * We return the index of the newly-added function, and the address as a library-relative
+ * offset.
  */
 function _extractUnsymbolicatedFunction(
   extractionInfo: ExtractionInfo,
   locationString: string,
   locationIndex: IndexIntoStringTable
-): IndexIntoFuncTable | null {
+): { funcIndex: IndexIntoFuncTable, frameAddress: Address } | null {
   if (!locationString.startsWith('0x')) {
     return null;
   }
@@ -309,7 +341,7 @@ function _extractUnsymbolicatedFunction(
   funcTable.fileName[funcIndex] = null;
   funcTable.lineNumber[funcIndex] = null;
   funcTable.columnNumber[funcIndex] = null;
-  return funcIndex;
+  return { funcIndex, frameAddress: addressRelativeToLib };
 }
 
 /**
@@ -340,7 +372,7 @@ function _extractCppFunction(
   const {
     funcTable,
     stringTable,
-    stringToNewFuncIndex,
+    stringToNewFuncIndexAndFrameAddress,
     libNameToResourceIndex,
     resourceTable,
   } = extractionInfo;
@@ -349,10 +381,10 @@ function _extractCppFunction(
   const funcName = _cleanFunctionName(funcNameRaw);
   const funcNameIndex = stringTable.indexForString(funcName);
   const libraryNameStringIndex = stringTable.indexForString(libraryNameString);
-  const funcIndex = stringToNewFuncIndex.get(funcName);
-  if (funcIndex !== undefined) {
+  const frameInfo = stringToNewFuncIndexAndFrameAddress.get(funcName);
+  if (frameInfo !== undefined) {
     // Do not insert a new function.
-    return funcIndex;
+    return frameInfo.funcIndex;
   }
   let resourceIndex = libNameToResourceIndex.get(libraryNameStringIndex);
   if (resourceIndex === undefined) {
@@ -498,11 +530,11 @@ function _extractUnknownFunctionType(
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
-  funcTable: FuncTable,
-  frameFuncs: IndexIntoFuncTable[]
+  frameFuncs: IndexIntoFuncTable[],
+  frameAddresses: (Address | null)[]
 ): FrameTable {
   return {
-    address: frameFuncs.map(funcIndex => funcTable.address[funcIndex]),
+    address: frameAddresses.map(a => a ?? -1),
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
@@ -986,11 +1018,12 @@ function _processThread(
   const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
-  const [
+  const {
     funcTable,
     resourceTable,
     frameFuncs,
-  ] = extractFuncsAndResourcesFromFrameLocations(
+    frameAddresses,
+  } = extractFuncsAndResourcesFromFrameLocations(
     geckoFrameStruct.location,
     geckoFrameStruct.relevantForJS,
     stringTable,
@@ -999,8 +1032,8 @@ function _processThread(
   );
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
-    funcTable,
-    frameFuncs
+    frameFuncs,
+    frameAddresses
   );
   const stackTable = _processStackTable(
     geckoStackTable,
