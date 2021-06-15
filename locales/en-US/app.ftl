@@ -291,7 +291,6 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
-
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
