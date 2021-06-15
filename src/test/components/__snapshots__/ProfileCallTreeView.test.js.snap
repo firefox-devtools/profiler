@@ -89,7 +89,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -755,7 +755,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -1421,7 +1421,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -2075,7 +2075,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -2729,7 +2729,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3227,7 +3227,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3364,7 +3364,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3501,7 +3501,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3693,7 +3693,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -4315,7 +4315,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -4937,7 +4937,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -5559,7 +5559,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -6136,7 +6136,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -6713,7 +6713,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -7171,7 +7171,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -7629,7 +7629,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
