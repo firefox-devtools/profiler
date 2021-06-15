@@ -153,7 +153,7 @@ CallTree--bytes-self = Self (bytes)
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
-CallTreeSidebar--select-a-node = Select a node to display some information about it.
+CallTreeSidebar--select-a-node = Select a node to display information about it.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -322,7 +322,7 @@ MarkerSettings--panel-search =
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
-MarkerSidebar--select-a-marker = Select a marker to display some information about it.
+MarkerSidebar--select-a-marker = Select a marker to display information about it.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
