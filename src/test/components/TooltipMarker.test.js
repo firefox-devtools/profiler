@@ -575,7 +575,7 @@ describe('TooltipMarker', function() {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    ['permanent', 'internal', 'temporary'].forEach(redirectType => {
+    ['Permanent', 'Internal', 'Temporary'].forEach(redirectType => {
       it(`for a ${redirectType} redirection`, () => {
         const { container } = setupWithPayload(
           getNetworkMarkers(
@@ -591,7 +591,7 @@ describe('TooltipMarker', function() {
       const { container } = setupWithPayload(
         getNetworkMarkers(
           redirectMarker({
-            redirectType: 'permanent',
+            redirectType: 'Permanent',
             isHttpToHttpsRedirect: true,
           })
         )
