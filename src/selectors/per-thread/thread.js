@@ -6,6 +6,9 @@
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import * as React from 'react';
+import { Localized } from '@fluent/react';
+
 import * as Transforms from '../../profile-logic/transforms';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
@@ -350,6 +353,18 @@ export function getThreadSelectorsPerThread(
     Transforms.getTransformLabelL10nIds
   );
 
+  const getLocalizedTransformLabels: Selector<
+    React.Node[]
+  > = createSelector(getTransformLabelL10nIds, transformL10nIds =>
+    transformL10nIds.map(transform => (
+      <Localized
+        id={transform.l10nId}
+        vars={{ item: transform.item }}
+        key={transform.item}
+      ></Localized>
+    ))
+  );
+
   const getViewOptions: Selector<ThreadViewOptions> = state =>
     ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
     defaultThreadViewOptions;
@@ -452,6 +467,7 @@ export function getThreadSelectorsPerThread(
     getFriendlyThreadName,
     getThreadProcessDetails,
     getTransformLabelL10nIds,
+    getLocalizedTransformLabels,
     getTransformStack,
     getViewOptions,
     getJsTracerTable,
