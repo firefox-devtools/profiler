@@ -32,6 +32,297 @@ exports[`VerticalIndicators displays tooltips 1`] = `
 </div>
 `;
 
+exports[`timeline/TrackNetwork draws differently a request and displays a tooltip when hovered 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="--tooltip-detail-max-width: 600px; left: 23px; top: 13px;"
+>
+  <div
+    class="tooltipMarker"
+    style="--tooltip-detail-max-width: 600px;"
+  >
+    <div
+      class="tooltipHeader"
+    >
+      <div
+        class="tooltipOneLine"
+      >
+        <div
+          class="tooltipTiming"
+        >
+          1ms
+        </div>
+        <div
+          class="tooltipTitle"
+        >
+          Load 0: https://mozilla.org
+        </div>
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Status
+        :
+      </div>
+      Response received
+      <div
+        class="tooltipLabel"
+      >
+        URL
+        :
+      </div>
+      <span
+        class="tooltipNetworkUrl"
+      >
+        https://mozilla.org
+      </span>
+      <div
+        class="tooltipLabel"
+      >
+        Priority
+        :
+      </div>
+      Normal(0)
+      <div
+        class="tooltipLabel"
+      >
+        MIME type
+        :
+      </div>
+      <div
+        class="tooltipNetworkMimeType"
+      >
+        <span
+          class="tooltipNetworkMimeTypeSwatch colored-square network-color-html"
+          title="text/html"
+        />
+        text/html
+      </div>
+      <div
+        class="tooltipLabel"
+      >
+        Thread
+        :
+      </div>
+      Empty
+    </div>
+    <div
+      class="tooltipNetworkPhases network-color-html"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        HTTP response
+        :
+      </div>
+      <div
+        aria-label="Starting at 0.000 milliseconds, duration is 1.0 milliseconds"
+      >
+        1.0ms
+      </div>
+      <div
+        aria-hidden="true"
+        class="tooltipNetworkPhase"
+        style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`timeline/TrackNetwork draws differently a request and displays a tooltip when hovered 2`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    400,
+    35,
+  ],
+  Array [
+    "set strokeStyle",
+    "rgba(0, 127, 255, 0.3)",
+  ],
+  Array [
+    "set lineCap",
+    "round",
+  ],
+  Array [
+    "set lineWidth",
+    3.75,
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    6.666666666666673,
+    7.5,
+  ],
+  Array [
+    "lineTo",
+    73.33333333333331,
+    7.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    13.333333333333346,
+    12.5,
+  ],
+  Array [
+    "lineTo",
+    80.00000000000001,
+    12.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    19.99999999999999,
+    17.5,
+  ],
+  Array [
+    "lineTo",
+    86.66666666666666,
+    17.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    26.666666666666664,
+    22.5,
+  ],
+  Array [
+    "lineTo",
+    93.33333333333336,
+    22.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    33.333333333333336,
+    27.5,
+  ],
+  Array [
+    "lineTo",
+    100,
+    27.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    40.00000000000001,
+    32.5,
+  ],
+  Array [
+    "lineTo",
+    106.66666666666666,
+    32.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    46.66666666666668,
+    2.5,
+  ],
+  Array [
+    "lineTo",
+    113.33333333333336,
+    2.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    53.33333333333333,
+    7.5,
+  ],
+  Array [
+    "lineTo",
+    120,
+    7.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    60,
+    12.5,
+  ],
+  Array [
+    "lineTo",
+    126.6666666666667,
+    12.5,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "set strokeStyle",
+    "#0069aa",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    2.5,
+  ],
+  Array [
+    "lineTo",
+    66.66666666666667,
+    2.5,
+  ],
+  Array [
+    "stroke",
+  ],
+]
+`;
+
 exports[`timeline/TrackNetwork matches the 2d context snapshot 1`] = `
 Array [
   Array [
@@ -406,34 +697,29 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
     width="0"
   />
   <div
-    class="timelineVerticalIndicators"
-    data-testid="vertical-indicators"
-  >
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: #000; left: 200px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--blue-50); left: 200px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
-    />
-    <div
-      class="timelineVerticalIndicatorsLine"
-      data-testid="vertical-indicator-line"
-      style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
-    />
-  </div>
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: #000; left: 200px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--blue-50); left: 200px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
+  />
+  <div
+    class="timelineVerticalIndicatorsLine"
+    data-testid="vertical-indicator-line"
+    style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
+  />
 </div>
 `;

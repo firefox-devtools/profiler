@@ -17,6 +17,8 @@ import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
 } from '../../app-logic/constants';
+import { ensureExists } from 'firefox-profiler/utils/flow';
+
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -35,6 +37,9 @@ const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
 
 autoMockCanvasContext();
+
+beforeEach(addRootOverlayElement);
+afterEach(removeRootOverlayElement);
 
 describe('timeline/TrackNetwork', function() {
   it('matches the component snapshot', () => {
@@ -57,16 +62,41 @@ describe('timeline/TrackNetwork', function() {
     // Ensure we start out with 0.
     expect(getContextDrawCalls().length).toEqual(0);
 
-    // Send out the resize, and ensure we are drawing.
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    HTMLElement.prototype.getBoundingClientRect.mockImplementation(() =>
+      getBoundingBox(GRAPH_WIDTH - 100, GRAPH_HEIGHT)
+    );
     window.dispatchEvent(new Event('resize'));
     expect(getContextDrawCalls().length > 0).toBe(true);
+  });
+
+  it('draws differently a request and displays a tooltip when hovered', () => {
+    const { getContextDrawCalls } = setup();
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+
+    const canvas = ensureExists(document.querySelector('canvas'));
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        pageY: 2,
+      })
+    );
+
+    const tooltip = screen.getByTestId('tooltip');
+    expect(tooltip).toMatchSnapshot();
+
+    const drawCalls = getContextDrawCalls();
+    // We draw at least one hovered request with a different stroke style.
+    expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
+    expect(drawCalls).toMatchSnapshot();
   });
 });
 
 describe('VerticalIndicators', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
-
   it('creates the vertical indicators', function() {
     const { getIndicatorLines, getState } = setup();
     const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
@@ -111,8 +141,6 @@ function setup() {
     </Provider>
   );
 
-  const verticalIndicators = screen.getByTestId('vertical-indicators');
-
   const getIndicatorLines = () =>
     screen.getAllByTestId('vertical-indicator-line');
 
@@ -134,7 +162,6 @@ function setup() {
     thread: profile.threads[0],
     store,
     getContextDrawCalls,
-    verticalIndicators,
     getIndicatorLines,
   };
 }
