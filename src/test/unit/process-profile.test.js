@@ -91,11 +91,11 @@ describe('extract functions and resource from location strings', function() {
   };
 
   it('extracts the information for all different types of locations', function() {
-    const [
+    const {
       funcTable,
       resourceTable,
       frameFuncs,
-    ] = extractFuncsAndResourcesFromFrameLocations(
+    } = extractFuncsAndResourcesFromFrameLocations(
       locationIndexes,
       locationIndexes.map(() => false),
       stringTable,
