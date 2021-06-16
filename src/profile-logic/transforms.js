@@ -318,13 +318,24 @@ export function stringifyTransforms(
     .join(';');
 }
 
-export function getTransformLabels(
+export type TransformLabeL10nIds = {|
+  +l10nId: string,
+  +item: string,
+|};
+
+/**
+ * Gets all applied transforms and returns their labels as l10n Ids with the
+ * items associated to them. The `item`s can be a resource, function, or thread
+ * name. They are being passed in the `Localized` component to create the
+ * transform strings as desired.
+ */
+export function getTransformLabelL10nIds(
   thread: Thread,
   threadName: string,
   transforms: Transform[]
-) {
+): Array<TransformLabeL10nIds> {
   const { funcTable, libs, stringTable, resourceTable } = thread;
-  const labels: string[] = transforms.map(transform => {
+  const labels: TransformLabeL10nIds[] = transforms.map(transform => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
       const libIndex = resourceTable.lib[transform.resourceIndex];
@@ -338,7 +349,10 @@ export function getTransformLabels(
       } else {
         resourceName = libs[libIndex].name;
       }
-      return `Collapse: ${resourceName}`;
+      return {
+        l10nId: 'TransformNavigator--collapse-resource',
+        item: resourceName,
+      };
     }
 
     // Lookup function name.
@@ -363,24 +377,36 @@ export function getTransformLabels(
 
     switch (transform.type) {
       case 'focus-subtree':
-        return `Focus Node: ${funcName}`;
+        return { l10nId: 'TransformNavigator--focus-subtree', item: funcName };
       case 'focus-function':
-        return `Focus: ${funcName}`;
+        return { l10nId: 'TransformNavigator--focus-function', item: funcName };
       case 'merge-call-node':
-        return `Merge Node: ${funcName}`;
+        return {
+          l10nId: 'TransformNavigator--merge-call-node',
+          item: funcName,
+        };
       case 'merge-function':
-        return `Merge: ${funcName}`;
+        return { l10nId: 'TransformNavigator--merge-function', item: funcName };
       case 'drop-function':
-        return `Drop: ${funcName}`;
+        return { l10nId: 'TransformNavigator--drop-function', item: funcName };
       case 'collapse-direct-recursion':
-        return `Collapse recursion: ${funcName}`;
+        return {
+          l10nId: 'TransformNavigator--collapse-direct-recursion',
+          item: funcName,
+        };
       case 'collapse-function-subtree':
-        return `Collapse subtree: ${funcName}`;
+        return {
+          l10nId: 'TransformNavigator--collapse-function-subtree',
+          item: funcName,
+        };
       default:
         throw assertExhaustiveCheck(transform);
     }
   });
-  labels.unshift(`Complete "${threadName}"`);
+  labels.unshift({
+    l10nId: 'TransformNavigator--complete',
+    item: threadName,
+  });
   return labels;
 }
 

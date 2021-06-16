@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -29,9 +30,11 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
     if (marker === null || markerIndex === null) {
       return (
         <div className="sidebar sidebar-marker-table">
-          <div className="sidebar-contents-wrapper">
-            Select a marker to display some information about it.
-          </div>
+          <Localized id="MarkerSidebar--select-a-marker">
+            <div className="sidebar-contents-wrapper">
+              Select a marker to display some information about it.
+            </div>
+          </Localized>
         </div>
       );
     }

@@ -11,13 +11,7 @@ import './FilterNavigatorBar.css';
 
 type Props = {|
   +className: string,
-  +items: $ReadOnlyArray<
-    | {
-        title?: string,
-        content: React.Node,
-      }
-    | string
-  >,
+  +items: $ReadOnlyArray<React.Node | string>,
   +onPop: number => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
@@ -51,16 +45,13 @@ export class FilterNavigatorBar extends React.PureComponent<Props> {
                 filterNavigatorBarSelectedItem: i === selectedItem,
                 filterNavigatorBarLeafItem: i === items.length - 1,
               })}
-              title={typeof item === 'string' ? item : item.title}
               onClick={this._onLiClick}
             >
               {i === items.length - 1 ? (
-                <span className="filterNavigatorBarItemContent">
-                  {typeof item === 'string' ? item : item.content}
-                </span>
+                <span className="filterNavigatorBarItemContent">{item}</span>
               ) : (
                 <button type="button" className="filterNavigatorBarItemContent">
-                  {typeof item === 'string' ? item : item.content}
+                  {item}
                 </button>
               )}
             </li>
