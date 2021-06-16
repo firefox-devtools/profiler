@@ -33,14 +33,12 @@ export const TransformNavigator = explicitConnect<
       state
     );
     const transformLabels = transformL10nIds.map(transform => {
-      return {
-        content: (
-          <Localized
-            id={transform.l10nId}
-            vars={{ item: transform.item }}
-          ></Localized>
-        ),
-      };
+      return (
+        <Localized
+          id={transform.l10nId}
+          vars={{ item: transform.item }}
+        ></Localized>
+      );
     });
 
     return {
