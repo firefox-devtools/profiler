@@ -49,18 +49,18 @@ AppViewRouter--route-not-found--home =
 CallNodeContextMenu--transform-merge-function = Unisci funzione
     .title = Unendo una funzione (merge), questa verrà rimossa dal profilo e il suo tempo di esecuzione verrà assegnato alla funzione chiamante. Questo avviene in qualsiasi punto dell’albero in cui la funzione viene chiamata.
 CallNodeContextMenu--transform-merge-call-node = Unisci solo il nodo
-    .title = Unendo un nodo (merge), questo verrà rimosso dal profilo, e il suo tempo di esecuzione verrà assegnato al nodo di funzione chiamante. Questa operazione rimuove la funzione sono nella parte specifica dell’albero. Qualsiasi altro posto in cui la funzione viene chiamata rimarrà nel profilo.
+    .title = Unendo un nodo (merge), questo verrà rimosso dal profilo e il suo tempo di esecuzione verrà assegnato al nodo di funzione chiamante. Questa operazione rimuove la funzione sono nella parte specifica dell’albero. Qualsiasi altra posizione in cui la funzione viene chiamata verrà mantenuta nel profilo.
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
-CallNodeContextMenu--transform-focus-function-title = Il focus su una funzione rimuoverà tutti i campioni che non includono quella funzione. In aggiunta, l’albero delle chiamate viene riorganizzato in modo che la funzione sia l’unico nodo radice dell’albero. Questo permette di combinare più siti di chiamata di una funzione attraverso il profilo in un unico nodo di chiamata.
+CallNodeContextMenu--transform-focus-function-title = Il focus su una funzione rimuove tutti i campioni che non includono quella funzione. L’albero delle chiamate viene anche riorganizzato in modo che la funzione sia l’unico nodo radice. Questo permette di combinare più siti di chiamata di una funzione attraverso il profilo in un unico nodo di chiamata.
 CallNodeContextMenu--transform-focus-function = Focus sulla funzione
     .title = { CallNodeContextMenu--transform-focus-function-title }
-CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (invertita)
+CallNodeContextMenu--transform-focus-function-inverted = Focus sulla funzione (invertito)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = Focus solo sul sottoalbero
-    .title = Il focus sul sottoalbero rimuoverà tutti i campioni che non includono quella specifica parte dell’albero delle chiamate. Estrae un ramo dell’albero, ma solo per quel singolo nodo di chiamata. Tutte le altre chiamate di quella funzione vengono ignorate.
+    .title = Il focus sul sottoalbero rimuoverà tutti i campioni che non includono quella specifica parte dell’albero delle chiamate. Estrae un ramo dell’albero, ma solo per quel singolo nodo di chiamata. Tutte le altre chiamate a quella funzione vengono ignorate.
 CallNodeContextMenu--transform-collapse-function-subtree = Comprimi funzione
-    .title = Comprimendo una funzione verrà rimosso tutto ciò che ha chiamato, e il tempo di esecuzione verrà assegnato alla funzione. Questo permette di semplificare un profilo con chiamate a codice che non deve essere analizzato.
+    .title = Comprimendo una funzione verrà rimosso tutto ciò che ha chiamato e il tempo di esecuzione verrà assegnato alla funzione stessa. Questo permette di semplificare un profilo con chiamate a codice che non deve essere analizzato.
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
@@ -69,7 +69,7 @@ CallNodeContextMenu--transform-collapse-resource = Comprimi <strong>{ $nameForRe
 CallNodeContextMenu--transform-collapse-direct-recursion = Comprimi ricorsione diretta
     .title = Comprimendo la ricorsione diretta, verranno rimosse tutte le chiamate ricorsive a quella stessa funzione.
 CallNodeContextMenu--transform-drop-function = Scarta campioni con questa funzione
-    .title = Rimuovendo campioni, i tempi di esecuzione associati verranno rimossi dal profilo. Questo è utile per eliminare informazioni sui tempi che non sono rilevanti per l’analisi.
+    .title = Rimuovendo i campioni, i tempi di esecuzione associati verranno rimossi dal profilo. Questo è utile per eliminare informazioni sui tempi che non sono rilevanti per l’analisi.
 CallNodeContextMenu--expand-all = Espandi tutto
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -142,13 +142,13 @@ Home--addon-button = Installa componente aggiuntivo
 Home--addon-button-instructions = Installa il componente aggiuntivo Gecko Profiler Add-on per avviare la registrazione di un profilo delle prestazioni di { -firefox-brand-name }, poi analizzalo e condividilo su profiler.firefox.com.
 Home--record-instructions = Per avviare la profilazione, fai clic sul pulsante per avviare la registrazione oppure utilizza le scorciatoie da tastiera. L’icona diventa blu quando è attiva la registrazione di un profilo. Premi <kbd>Cattura</kbd> per caricare i dati su profiler.firefox.com.
 Home--instructions-title = Come visualizzare e registrare profili
-Home--instructions-content = La registrazione dei profili è possibile solo con <a>{ -firefox-brand-name }</a>. I profili esistenti possono essere visti con qualsiasi browser.
+Home--instructions-content = La registrazione dei profili è possibile solo con <a>{ -firefox-brand-name }</a>. I profili esistenti possono essere visualizzati con qualsiasi browser.
 Home--record-instructions-start-stop = Interrompi e avvia la profilatura
 Home--record-instructions-capture-load = Cattura e carica profilo
 Home--profiler-motto = Cattura un profilo delle prestazioni. Analizzalo. Condividilo. Rendi il Web più veloce.
 Home--additional-content-title = Carica profili esistenti
 Home--additional-content-content = È possibile <strong>trascinare e rilasciare</strong> qui un profilo per caricarlo, oppure:
-Home--compare-recordings-info = È anche possibile confrontare registrazioni. <a>Apri l’interfaccia per il confronto</a>.
+Home--compare-recordings-info = È anche possibile confrontare diverse registrazioni. <a>Apri l’interfaccia per il confronto</a>.
 Home--recent-uploaded-recordings-title = Registrazioni caricate di recente
 
 ## IdleSearchField
