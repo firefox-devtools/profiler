@@ -315,9 +315,9 @@ MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Metriche visive
 MenuButtons--metaInfo--speed-index = Indice di velocità:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--perceptual-speed-index = Indice di velocità percettiva:
+MenuButtons--metaInfo--perceptual-speed-index = Indice “Perceptual Speed":
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
-MenuButtons--metaInfo--contentful-speed-Index = Indice di velocità contenuti:
+MenuButtons--metaInfo--contentful-speed-Index = Indice “Contentful Speed”:
 MenuButtons--metaInfo-renderRowOfList-label-features = Caratteristiche:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro thread:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Estensioni:
@@ -384,7 +384,7 @@ PanelSearch--search-field-hint = Lo sapevi che è possibile utilizzare una virgo
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ProfileDeleteButton--delete-button =
     .label = Elimina
-    .title = Fare click qui per eliminare il profilo { $smallProfileName }
+    .title = Fare clic qui per eliminare il profilo { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
