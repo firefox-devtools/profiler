@@ -418,7 +418,7 @@ export type NetworkStatus =
   | 'STATUS_STOP'
   | 'STATUS_REDIRECT'
   | 'STATUS_ABORT';
-export type NetworkRedirectType = 'permanent' | 'temporary' | 'internal';
+export type NetworkRedirectType = 'Permanent' | 'Temporary' | 'Internal';
 export type NetworkPayload = {|
   type: 'Network',
   URI: string,
@@ -428,9 +428,11 @@ export type NetworkPayload = {|
   count?: number, // Total size of transfer, if any
   // See all possible values in tools/profiler/core/platform.cpp
   status: NetworkStatus,
-  // The following property is present since Gecko v91.
+  // The following property is present only when this marker is for a
+  // redirection. Note it is present since Gecko v91 only.
   redirectType?: NetworkRedirectType,
-  // The following property is present since Gecko v91.
+  // The following property is present only when this marker is for a
+  // redirection. Note it is present since Gecko v91 only.
   isHttpToHttpsRedirect?: boolean,
   cache?: string,
   cause?: CauseBacktrace,

@@ -156,11 +156,11 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerTableImpl extends PureComponent<Props> {
   _fixedColumns = [
-    { propName: 'start', title: 'Start' },
-    { propName: 'duration', title: 'Duration' },
-    { propName: 'type', title: 'Type' },
+    { propName: 'start', titleL10nId: 'MarkerTable--start' },
+    { propName: 'duration', titleL10nId: 'MarkerTable--duration' },
+    { propName: 'type', titleL10nId: 'MarkerTable--type' },
   ];
-  _mainColumn = { propName: 'name', title: 'Description' };
+  _mainColumn = { propName: 'name', titleL10nId: 'MarkerTable--description' };
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;

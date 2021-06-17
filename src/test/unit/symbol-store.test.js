@@ -80,11 +80,11 @@ describe('SymbolStore', function() {
     expect(errorCallback).not.toHaveBeenCalled();
     expect(secondAndThirdSymbol.get(0xf01)).toEqual({
       name: 'second symbol',
-      functionOffset: 1,
+      symbolAddress: 0xf00,
     });
     expect(secondAndThirdSymbol.get(0x1a50)).toEqual({
       name: 'third symbol',
-      functionOffset: 0x50,
+      symbolAddress: 0x1a00,
     });
 
     const lib2 = { debugName: 'firefox2', breakpadId: 'dont-care2' };
@@ -101,11 +101,11 @@ describe('SymbolStore', function() {
     expect(errorCallback).not.toHaveBeenCalled();
     expect(firstAndLastSymbol.get(0x33)).toEqual({
       name: 'first symbol',
-      functionOffset: 0x33,
+      symbolAddress: 0,
     });
     expect(firstAndLastSymbol.get(0x2000)).toEqual({
       name: 'last symbol',
-      functionOffset: 0,
+      symbolAddress: 0x2000,
     });
 
     const libWithEmptyBreakpadId = {
@@ -238,19 +238,19 @@ describe('SymbolStore', function() {
     const lib2Symbols = ensureExists(symbolsPerLibrary.get(lib2));
     expect(lib1Symbols.get(0xf01)).toEqual({
       name: 'second symbol',
-      functionOffset: 1,
+      symbolAddress: 0xf00,
     });
     expect(lib1Symbols.get(0x1a50)).toEqual({
       name: 'third symbol',
-      functionOffset: 0x50,
+      symbolAddress: 0x1a00,
     });
     expect(lib2Symbols.get(0x33)).toEqual({
       name: 'first symbol',
-      functionOffset: 0x33,
+      symbolAddress: 0,
     });
     expect(lib2Symbols.get(0x2000)).toEqual({
       name: 'last symbol',
-      functionOffset: 0,
+      symbolAddress: 0x2000,
     });
 
     // Using another symbol store simulates a page reload

@@ -89,7 +89,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -135,12 +135,11 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -155,13 +154,20 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
+        title="The “total size” includes a summary of all of the bytes allocated or
+deallocated while this function was observed to be on the stack. This
+includes both the bytes where the function was actually running, and the
+bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
+allocated or deallocated in the program."
       >
         Self (bytes)
       </span>
@@ -755,7 +761,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -801,12 +807,11 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -821,13 +826,20 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
+        title="The “total size” includes a summary of all of the bytes allocated or
+deallocated while this function was observed to be on the stack. This
+includes both the bytes where the function was actually running, and the
+bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
+allocated or deallocated in the program."
       >
         Self (bytes)
       </span>
@@ -1421,7 +1433,7 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -1467,12 +1479,11 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -1487,13 +1498,20 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
+        title="The “total size” includes a summary of all of the bytes allocated or
+deallocated while this function was observed to be on the stack. This
+includes both the bytes where the function was actually running, and the
+bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
+allocated or deallocated in the program."
       >
         Self (bytes)
       </span>
@@ -2075,7 +2093,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -2121,12 +2139,11 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -2141,13 +2158,20 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
+        title="The “total size” includes a summary of all of the bytes allocated or
+deallocated while this function was observed to be on the stack. This
+includes both the bytes where the function was actually running, and the
+bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
+allocated or deallocated in the program."
       >
         Self (bytes)
       </span>
@@ -2729,7 +2753,7 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -2775,12 +2799,11 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -2795,13 +2818,20 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total size\\" includes a summary of all of the bytes allocated or deallocated while this function was observed to be on the stack. This includes both the bytes where the function was actually running, and the bytes of the callers from this function."
+        title="The “total size” includes a summary of all of the bytes allocated or
+deallocated while this function was observed to be on the stack. This
+includes both the bytes where the function was actually running, and the
+bytes of the callers from this function."
       >
         Total Size (bytes)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" bytes includes the bytes allocated or deallocated while this function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' bytes are not included. The \\"self\\" bytes are useful for understanding where memory was actually allocated or deallocated in the program."
+        title="The “self” bytes includes the bytes allocated or deallocated while this
+function was the end of the stack. If this function called into
+other functions, then the “other” functions’ bytes are not included.
+The “self” bytes are useful for understanding where memory was actually
+allocated or deallocated in the program."
       >
         Self (bytes)
       </span>
@@ -3227,7 +3257,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3273,12 +3303,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty Thread\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty Thread"
+        Complete “⁨Empty Thread⁩”
       </span>
     </li>
   </ol>
@@ -3364,7 +3393,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3410,12 +3439,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Thread with samples\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Thread with samples"
+        Complete “⁨Thread with samples⁩”
       </span>
     </li>
   </ol>
@@ -3501,7 +3529,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3547,12 +3575,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Thread with samples\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Thread with samples"
+        Complete “⁨Thread with samples⁩”
       </span>
     </li>
   </ol>
@@ -3580,48 +3607,44 @@ exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple t
   <li
     class="filterNavigatorBarItem filterNavigatorBarRootItem"
     data-index="0"
-    title="Complete \\"Thread with samples\\""
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
     >
-      Complete "Thread with samples"
+      Complete “⁨Thread with samples⁩”
     </button>
   </li>
   <li
     class="filterNavigatorBarItem"
     data-index="1"
-    title="Focus Node: A"
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
     >
-      Focus Node: A
+      Focus Node: ⁨A⁩
     </button>
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarBeforeSelectedItem"
     data-index="2"
-    title="Focus Node: B"
   >
     <button
       class="filterNavigatorBarItemContent"
       type="button"
     >
-      Focus Node: B
+      Focus Node: ⁨B⁩
     </button>
   </li>
   <li
     class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
     data-index="3"
-    title="Focus Node: C"
   >
     <span
       class="filterNavigatorBarItemContent"
     >
-      Focus Node: C
+      Focus Node: ⁨C⁩
     </span>
   </li>
 </ol>
@@ -3693,7 +3716,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -3739,12 +3762,11 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -3759,13 +3781,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -4315,7 +4343,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -4361,12 +4389,11 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -4381,13 +4408,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -4937,7 +4970,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -4983,12 +5016,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -5003,13 +5035,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -5559,7 +5597,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -5605,12 +5643,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -5625,13 +5662,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -6136,7 +6179,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -6182,12 +6225,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -6202,13 +6244,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -6713,7 +6761,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -6759,12 +6807,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -6779,13 +6826,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -7171,7 +7224,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -7217,12 +7270,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -7237,13 +7289,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
@@ -7629,7 +7687,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
           <span
-            title="Show only the time spent in a call node, ignoring its children."
+            title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
           </span>
@@ -7675,12 +7733,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>
@@ -7695,13 +7752,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       />
       <span
         class="treeViewHeaderColumn treeViewFixedColumn total"
-        title="The \\"total\\" sample count includes a summary of every sample where this function was observed to be on the stack. This includes the time where the function was actually running, and the time spent in the callers from this function."
+        title="The “total” sample count includes a summary of every sample where this
+function was observed to be on the stack. This includes the time where the
+function was actually running, and the time spent in the callers from this
+function."
       >
         Total (samples)
       </span>
       <span
         class="treeViewHeaderColumn treeViewFixedColumn self"
-        title="The \\"self\\" sample count only includes the samples where the function was the leaf-most one on the stack. If this function called into other functions, then the \\"other\\" functions' counts are not included. The \\"self\\" count is useful for understanding where time was actually spent in a program."
+        title="The “self” sample count only includes the samples where the function was
+the end of the stack. If this function called into other functions,
+then the “other” functions’ counts are not included. The “self” count is useful
+for understanding where time was actually spent in a program."
       >
         Self
       </span>
