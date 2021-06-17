@@ -81,6 +81,18 @@ CallNodeContextMenu--copy-stack = Copia stack
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Tempo di esecuzione (ms)
+    .title = Il tempo di esecuzione “totale” include un sommario di tutto il tempo in cui questa funzione è stata rilevata sullo stack. Questo include il tempo in cui la funzione era effettivamente in esecuzione, ma anche il tempo trascorso nelle funzioni chiamate da questa funzione.
+CallTree--tracing-ms-self = Self (ms)
+    .title = Il tempo “self” include il tempo in cui la funzione si trovava alla fine dello stack. Se questa funzione ha chiamato altre funzioni, il tempo "altro" di queste funzioni non è incluso. Il tempo “self” è utile per capire dove il tempo viene realmente speso all’interno di un programma.
+CallTree--samples-total = Totale (campioni)
+    .title = Il conteggio “totale” dei campioni include un sommario di qualsiasi campione in cui questa funzione è stata osservata sullo stack. Questo include il tempo in cui la funzione era effettivamente in esecuzione, ma anche il tempo trascorso nelle funzioni chiamate da questa funzione.
+CallTree--samples-self = Self
+    .title = Il conteggio dei campioni “self” include tutti i campioni in cui la funzione si trovava alla fine dello stack. Se questa funzione ha chiamato altre funzioni, il conteggio "altro" di queste funzioni non è incluso. Il conteggio “self” è utile per capire dove il tempo viene realmente speso all’interno di un programma.
+CallTree--bytes-total = Dimensione totale (byte)
+    .title = La “dimensione totale“ include un sommario di tutti i byte allocati o deallocati quando questa funzione è stata osservata sullo stack. Questo include i byte consumati quando la funzione era effettivamente in esecuzione, ma anche il tempo trascorso nelle funzioni chiamate da questa funzione.
+CallTree--bytes-self = Self (bytes)
+    .title = “Self“ include i byte allocati o deallocati quando questa funzione si trovava alla fine dello stack. Se questa funzione ha chiamato altre funzioni, il conteggio dei byte "altro" di queste funzioni non è incluso. Il conteggio “self” è utile per capire come la memoria viene realmente allocata e deallocata all’interno di un programma.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -459,7 +471,7 @@ StackSettings--use-data-source-label = Sorgente dati:
 StackSettings--call-tree-strategy-timing = Tempi
     .title = Sintetizza usando gli stack campionati del codice eseguito nel tempo
 StackSettings--call-tree-strategy-js-allocations = Allocazioni JavaScript
-    .title = Sintetizza usando i byte JavaScript allocati (ignora de-allocazioni)
+    .title = Sintetizza usando i byte JavaScript allocati (ignora deallocazioni)
 StackSettings--call-tree-strategy-native-retained-allocations = Memoria mantenuta
     .title = Sintetizza usando i byte di memoria che sono stati allocati ma mai liberati nella selezione corrente di anteprima
 StackSettings--call-tree-native-allocations = Memoria allocata
