@@ -78,6 +78,15 @@ CallNodeContextMenu--copy-function-name = Copia nome della funzione
 CallNodeContextMenu--copy-script-url = Copia URL dello script
 CallNodeContextMenu--copy-stack = Copia stack
 
+## CallTree
+## This is the component for Call Tree panel.
+
+
+## CallTreeSidebar
+## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+
+CallTreeSidebar--select-a-node = Seleziona un nodo per visualizzare informazioni su di esso.
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
@@ -214,6 +223,19 @@ MarkerContextMenu--copy-full-payload = Copia payload completo
 MarkerSettings--panel-search =
     .label = Filtra marker:
     .title = Visualizza solo marker che corrispondono a un determinato nome
+
+## MarkerSidebar
+## This is the sidebar component that is used in Marker Table panel.
+
+MarkerSidebar--select-a-marker = Seleziona un marker per visualizzare informazioni su di esso.
+
+## MarkerTable
+## This is the component for Marker Table panel.
+
+MarkerTable--start = Inizio
+MarkerTable--duration = Durata
+MarkerTable--type = Tipo
+MarkerTable--description = Descrizione
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -478,6 +500,62 @@ TrackContextMenu--hide-other-screenshots-tracks = Nascondi altre tracce Screensh
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Nascondi “{ $trackName } ”
 TrackContextMenu--show-all-tracks = Mostra tutte le tracce
+
+## TransformNavigator
+## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
+## Chart components.
+## These messages are displayed above the table / graph once the user selects to
+## apply a specific transformation function to a node in the call tree. It's the
+## name of the function, followed by the node's name.
+## To learn more about them, visit:
+## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
+
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = “{ $item }” completo
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Comprimi: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Focus sul nodo: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Focus: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Unisci nodo: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Unisci: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Scarta: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Comprimi ricorsione: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Comprimi sottoalbero: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
