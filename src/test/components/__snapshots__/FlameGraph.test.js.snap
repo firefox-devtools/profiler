@@ -253,12 +253,11 @@ exports[`FlameGraph matches the snapshot 1`] = `
     <li
       class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
       data-index="0"
-      title="Complete \\"Empty\\""
     >
       <span
         class="filterNavigatorBarItemContent"
       >
-        Complete "Empty"
+        Complete “⁨Empty⁩”
       </span>
     </li>
   </ol>

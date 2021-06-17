@@ -1732,11 +1732,15 @@ describe('snapshots of selectors/profile', function() {
     ]);
   });
 
-  it('matches the last stored run of selectedThreadSelector.getTransformLabels', function() {
+  it('matches the last stored run of selectedThreadSelector.getTransformLabelL10nIds', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getTransformLabels(getState())).toEqual([
-      'Complete "Thread with samples"',
-      'Merge: C',
+    expect(
+      selectedThreadSelectors.getTransformLabelL10nIds(getState())
+    ).toEqual([
+      // 'Complete "Thread with samples"'
+      { l10nId: 'TransformNavigator--complete', item: 'Thread with samples' },
+      // 'Merge: C'
+      { l10nId: 'TransformNavigator--merge-function', item: 'C' },
     ]);
   });
 

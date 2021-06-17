@@ -6,6 +6,9 @@
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import * as React from 'react';
+import { Localized } from '@fluent/react';
+
 import * as Transforms from '../../profile-logic/transforms';
 import * as UrlState from '../url-state';
 import * as ProfileData from '../../profile-logic/profile-data';
@@ -39,6 +42,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { UniqueStringArray } from '../../utils/unique-string-array';
+import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
 import { defaultThreadViewOptions } from '../../reducers/profile-view';
@@ -340,11 +344,25 @@ export function getThreadSelectorsPerThread(
     ProfileData.getThreadProcessDetails
   );
 
-  const getTransformLabels: Selector<string[]> = createSelector(
+  const getTransformLabelL10nIds: Selector<
+    TransformLabeL10nIds[]
+  > = createSelector(
     getRangeAndTransformFilteredThread,
     getFriendlyThreadName,
     getTransformStack,
-    Transforms.getTransformLabels
+    Transforms.getTransformLabelL10nIds
+  );
+
+  const getLocalizedTransformLabels: Selector<
+    React.Node[]
+  > = createSelector(getTransformLabelL10nIds, transformL10nIds =>
+    transformL10nIds.map(transform => (
+      <Localized
+        id={transform.l10nId}
+        vars={{ item: transform.item }}
+        key={transform.item}
+      ></Localized>
+    ))
   );
 
   const getViewOptions: Selector<ThreadViewOptions> = state =>
@@ -448,7 +466,8 @@ export function getThreadSelectorsPerThread(
     getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
     getThreadProcessDetails,
-    getTransformLabels,
+    getTransformLabelL10nIds,
+    getLocalizedTransformLabels,
     getTransformStack,
     getViewOptions,
     getJsTracerTable,
