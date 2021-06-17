@@ -219,7 +219,7 @@ export function convertPerfScriptProfile(
       if (stackFrameMatch) {
         // const pc = stackFrameMatch[1];
         let rawFunc = stackFrameMatch[2];
-        // const mod = stackFrameMatch[3];
+        const mod = stackFrameMatch[3];
 
         // Linux 4.8 included symbol offsets in perf script output by default, eg:
         // 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
@@ -228,6 +228,14 @@ export function convertPerfScriptProfile(
 
         if (rawFunc.startsWith('(')) {
           continue; // skip process names
+        }
+
+        if (mod) {
+          // If we have a module name, provide it.
+          // The code processing the profile will search for
+          // "functionName (in libraryName)" using a regexp,
+          // and automatically create the library information.
+          rawFunc += ` (in ${mod})`;
         }
 
         stack.push(rawFunc);
