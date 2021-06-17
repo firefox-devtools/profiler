@@ -22,7 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
-AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app per l’analisi delle prestazioni  di { -firefox-brand-name }</subheader>
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Web app per l’analisi delle prestazioni di { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Visita il nostro repository Git (il link verrà aperto in una nuova finestra)
 
@@ -32,7 +32,7 @@ AppHeader--github-icon =
 AppViewRouter--error-message-unpublished =
     .message = Impossibile recuperare il profilo da { -firefox-brand-name }.
 AppViewRouter--error-message-from-file =
-    .message = Impossibile leggere il file o analizzare il profilo contenuto.
+    .message = Impossibile leggere il file o analizzare il profilo in esso contenuto.
 AppViewRouter--error-message-local =
     .message = Non ancora implementato.
 AppViewRouter--error-message-public =
@@ -47,7 +47,7 @@ AppViewRouter--route-not-found--home =
 ## panels.
 
 CallNodeContextMenu--transform-merge-function = Unisci funzione
-    .title = Unendo una funzione (merge), questa verrà rimossa dal profilo, e il suo tempo di esecuzione verrà assegnato alla funzione chiamante. Questo avviene ovunque la funzione è stata chiamata nell’albero.
+    .title = Unendo una funzione (merge), questa verrà rimossa dal profilo e il suo tempo di esecuzione verrà assegnato alla funzione chiamante. Questo avviene in qualsiasi punto dell’albero in cui la funzione viene chiamata.
 CallNodeContextMenu--transform-merge-call-node = Unisci solo il nodo
     .title = Unendo un nodo (merge), questo verrà rimosso dal profilo, e il suo tempo di esecuzione verrà assegnato al nodo di funzione chiamante. Questa operazione rimuove la funzione sono nella parte specifica dell’albero. Qualsiasi altro posto in cui la funzione viene chiamata rimarrà nel profilo.
 # This is used as the context menu item title for "Focus on function" and "Focus
