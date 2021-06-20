@@ -562,10 +562,15 @@ export function applySymbolicationStep(
 
   // Now it is time to look at funcs.
   // For funcs belonging to a native library, we group frames into funcs based
-  // on the function name string.
+  // on the function name string and the file name. (We don't expect there to
+  // be multiple functions with the same name in the same file. If there are,
+  // then they'll be treated as the same function.)
   const funcTable = shallowCloneFuncTable(oldFuncTable);
   const availableFuncIter = availableFuncs.values();
-  const funcStringIndexToFuncMap = new Map();
+
+  // funcKey -> funcIndex, where funcKey = `${nameStringIndex}:${fileStringIndex}`
+  const funcKeyToFuncMap = new Map();
+
   const oldFuncToNewFuncEntries = [];
 
   const newFrameTableFuncColumn = oldFrameTable.func.slice();
@@ -575,8 +580,30 @@ export function applySymbolicationStep(
     if (nativeSymbolIndex === null) {
       throw new Error('Impossible, all frames now have native symbols.');
     }
-    const functionStringIndex = nativeSymbols.name[nativeSymbolIndex];
-    let funcIndex = funcStringIndexToFuncMap.get(functionStringIndex);
+    const address = oldFrameTable.address[frameIndex];
+    let addressResult = resultsForLib.get(address);
+    if (addressResult === undefined) {
+      const symbolName = nativeSymbols.name[nativeSymbolIndex];
+      const fileNameIndex = funcTable.fileName[oldFunc];
+      addressResult = {
+        symbolAddress: nativeSymbols.address[nativeSymbolIndex],
+        name: stringTable.getString(symbolName),
+        file:
+          fileNameIndex !== null
+            ? stringTable.getString(fileNameIndex)
+            : undefined,
+        line: oldFrameTable.line[frameIndex] ?? undefined,
+      };
+    }
+    const functionStringIndex = stringTable.indexForString(addressResult.name);
+    const fileNameStringIndex =
+      addressResult.file !== undefined
+        ? stringTable.indexForString(addressResult.file)
+        : null;
+    // Group frames into the same function if the have the same function name
+    // and the same file.
+    const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
+    let funcIndex = funcKeyToFuncMap.get(funcKey);
     if (funcIndex === undefined) {
       funcIndex = availableFuncIter.next().value;
       if (funcIndex === undefined) {
@@ -585,14 +612,14 @@ export function applySymbolicationStep(
         funcTable.isJS[funcIndex] = false;
         funcTable.relevantForJS[funcIndex] = false;
         funcTable.resource[funcIndex] = resourceIndex;
-        funcTable.fileName[funcIndex] = null;
         funcTable.lineNumber[funcIndex] = null;
         funcTable.columnNumber[funcIndex] = null;
-        // The name field will be filled below.
+        // The name and fileName fields will be filled below.
         funcTable.length++;
       }
       funcTable.name[funcIndex] = functionStringIndex;
-      funcStringIndexToFuncMap.set(functionStringIndex, funcIndex);
+      funcTable.fileName[funcIndex] = fileNameStringIndex;
+      funcKeyToFuncMap.set(funcKey, funcIndex);
     }
 
     newFrameTableFuncColumn[frameIndex] = funcIndex;
