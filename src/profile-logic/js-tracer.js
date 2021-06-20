@@ -585,7 +585,6 @@ export function convertJsTracerToThreadWithoutSamples(
       if (generatedFuncIndex === undefined) {
         // Create a new function only if the event string is different.
         funcIndex = funcTable.length++;
-        funcTable.address.push(0);
         funcTable.name.push(eventStringIndex);
         funcTable.isJS.push(false);
         funcTable.resource.push(-1);
@@ -635,6 +634,7 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.address.push(blankStringIndex);
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
+    frameTable.nativeSymbol.push(null);
     frameTable.innerWindowID.push(0);
     frameTable.implementation.push(implementation);
     frameTable.line.push(line);

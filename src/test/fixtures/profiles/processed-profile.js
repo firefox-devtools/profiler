@@ -710,9 +710,6 @@ function _buildThreadFromTextOnlyStacks(
   // Create the FuncTable.
   funcNames.forEach(funcName => {
     funcTable.name.push(stringTable.indexForString(funcName));
-    funcTable.address.push(
-      funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1
-    );
     funcTable.fileName.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
     funcTable.isJS.push(_isJsFunctionName(funcName));
@@ -793,10 +790,13 @@ function _buildThreadFromTextOnlyStacks(
 
       if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
-        frameTable.address.push(funcTable.address[funcIndex]);
+        frameTable.address.push(
+          funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1
+        );
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
+        frameTable.nativeSymbol.push(null);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);

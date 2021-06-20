@@ -110,7 +110,6 @@ describe('extract functions and resource from location strings', function() {
 
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
         const resourceIndex = funcTable.resource[funcIndex];
-        const address = funcTable.address[funcIndex];
         const isJS = funcTable.isJS[funcIndex];
         const fileNameIndex = funcTable.fileName[funcIndex];
         const fileName =
@@ -146,7 +145,6 @@ describe('extract functions and resource from location strings', function() {
             funcName,
             isJS,
             resourceIndex,
-            address,
             fileName,
             lineNumber,
             columnNumber,

@@ -23,6 +23,7 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
+export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
@@ -269,12 +270,18 @@ export type RawMarkerTable = {|
 export type FrameTable = {|
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
-  // The library is given by the frame's func: frame -> func -> resource -> lib.
+  // The library is given by the frame's nativeSymbol: frame -> nativeSymbol -> lib.
   address: Array<Address | -1>,
 
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
+
+  // The symbol index (referring into this thread's nativeSymbols table) corresponding
+  // to symbol that covers the frame address of this frame. Only non-null for native
+  // frames (e.g. C / C++ / Rust code). Null before symbolication.
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[],
+
   // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
   // It's used to determine which JS frame belongs to which web page so we can display
   // that information and filter for single tab profiling.
@@ -283,6 +290,7 @@ export type FrameTable = {|
   // something bad happens during that process. It's not `null` or `-1` because that information
   // is being stored as `uint64_t` there.
   innerWindowID: (InnerWindowID | null)[],
+
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
@@ -297,9 +305,8 @@ export type FrameTable = {|
  * represents which part of a function was being executed at a given moment, and
  * the function groups all frames that occurred inside that function.
  * Concretely, for native code, each encountered instruction address is a separate
- * frame, and the function groups the instruction addresses inside that native
- * function. (The address range of a native function is the range between the
- * address of its function symbol and the next symbol in the library.)
+ * frame, and the function groups all instruction addresses which were symbolicated
+ * with the same function name.
  * For JS code, each encountered line/column in a JS file is a separate frame, and
  * the function represents an entire JS function which can span multiple lines.
  *
@@ -334,14 +341,30 @@ export type FuncTable = {|
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
 
-  // This is relevant for functions of the 'native' stackType only (functions
-  // whose resource is a library).
-  // Stores the library-relative offset of the start of the function, i.e. the
-  // address of the symbol that gave this function its name.
-  // Prior to initial symbolication, it stores the same address as the single
-  // frame that refers to this func, because at that point the actual boundaries
-  // of the true functions are not known.
-  address: Array<Address | -1>,
+  length: number,
+|};
+
+/**
+ * The nativeSymbols table stores the addresses and symbol names for all symbols
+ * that were encountered by frame addresses in this thread. This table can
+ * contain symbols from multiple libraries, and the symbols are in arbitrary
+ * order.
+ * Note: Despite the similarity in name, this table is not what's usually
+ * considered a "symbol table" - normally, a "symbol table" is something that
+ * contains *all* symbols of a given library. But this table only contains a
+ * subset of those symbols, and mixes symbols from multiple libraries.
+ */
+export type NativeSymbolTable = {|
+  // The library that this native symbol is in.
+  libIndex: Array<IndexIntoLibs>,
+  // The library-relative offset of this symbol.
+  address: Array<Address>,
+  // The symbol name, demangled.
+  name: Array<IndexIntoStringTable>,
+
+  // This would be a good spot for a "size" field. But the symbolication API does
+  // not give us information about the size of a function.
+  // https://github.com/mstange/profiler-get-symbols/issues/17
 
   length: number,
 |};
@@ -578,6 +601,7 @@ export type Thread = {|
   libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
+  nativeSymbols: NativeSymbolTable,
   jsTracer?: JsTracerTable,
 |};
 
