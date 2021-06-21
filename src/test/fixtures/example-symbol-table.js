@@ -5,6 +5,48 @@
 // @flow
 import { TextEncoder } from 'util';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
+import type { AddressResult } from '../../profile-logic/symbol-store';
+
+export type ExampleSymbolTableSymbols = Array<{|
+  address: number,
+  name: string,
+|}>;
+
+export type ExampleSymbolTable = {|
+  symbols: ExampleSymbolTableSymbols,
+  asTuple: SymbolTableAsTuple,
+  getAddressResult: number => AddressResult | null,
+|};
+
+function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
+  const index = [0];
+  let accum = 0;
+  for (const { name } of syms) {
+    accum += name.length;
+    index.push(accum);
+  }
+
+  return [
+    new Uint32Array(syms.map(({ address }) => address)),
+    new Uint32Array(index),
+    new TextEncoder().encode(syms.map(({ name }) => name).join('')),
+  ];
+}
+
+function _makeGetAddressResultFunction(
+  syms: ExampleSymbolTableSymbols
+): number => AddressResult | null {
+  return function getAddressResult(address) {
+    for (let i = syms.length - 1; i >= 0; i--) {
+      const symbolAddress = syms[i].address;
+      const name = syms[i].name;
+      if (address >= symbolAddress) {
+        return { name, symbolAddress };
+      }
+    }
+    return null;
+  };
+}
 
 const completeSyms = [
   {
@@ -36,22 +78,17 @@ const partialSyms = [
   },
 ];
 
-function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
-  const index = [0];
-  let accum = 0;
-  for (const { name } of syms) {
-    accum += name.length;
-    index.push(accum);
-  }
+export const completeSymbolTable: ExampleSymbolTable = {
+  symbols: completeSyms,
+  asTuple: _makeSymbolTableAsTuple(completeSyms),
+  getAddressResult: _makeGetAddressResultFunction(completeSyms),
+};
 
-  return [
-    new Uint32Array(syms.map(({ address }) => address)),
-    new Uint32Array(index),
-    new TextEncoder().encode(syms.map(({ name }) => name).join('')),
-  ];
-}
+export const partialSymbolTable: ExampleSymbolTable = {
+  symbols: partialSyms,
+  asTuple: _makeSymbolTableAsTuple(partialSyms),
+  getAddressResult: _makeGetAddressResultFunction(partialSyms),
+};
 
-export const completeSymbolTable = _makeSymbolTableAsTuple(completeSyms);
-export const partialSymbolTable = _makeSymbolTableAsTuple(partialSyms);
-
-export default completeSymbolTable;
+export const completeSymbolTableAsTuple = completeSymbolTable.asTuple;
+export const partialSymbolTableAsTuple = partialSymbolTable.asTuple;

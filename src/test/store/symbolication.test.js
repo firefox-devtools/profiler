@@ -8,10 +8,8 @@ import {
   completeSymbolTable,
   partialSymbolTable,
 } from '../fixtures/example-symbol-table';
-import {
-  SymbolStore,
-  readSymbolsFromSymbolTable,
-} from '../../profile-logic/symbol-store.js';
+import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
+import { SymbolStore } from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { resourceTypes } from '../../profile-logic/data-structures';
@@ -59,7 +57,7 @@ describe('doSymbolicateProfile', function() {
     const store = storeWithProfile(profile);
 
     let symbolTable = completeSymbolTable;
-    function switchSymbolTable(otherSymbolTable: SymbolTableAsTuple) {
+    function switchSymbolTable(otherSymbolTable: ExampleSymbolTable) {
       symbolTable = otherSymbolTable;
     }
     let symbolicationProviderMode: 'from-server' | 'from-addon' = 'from-addon';
@@ -83,11 +81,14 @@ describe('doSymbolicateProfile', function() {
             );
           }
 
-          return readSymbolsFromSymbolTable(
-            request.addresses,
-            symbolTable,
-            s => s
-          );
+          const map = new Map();
+          for (const address of request.addresses) {
+            const addressResult = symbolTable.getAddressResult(address);
+            if (addressResult !== null) {
+              map.set(address, addressResult);
+            }
+          }
+          return map;
         }),
 
       requestSymbolTableFromAddon: async lib => {
@@ -103,7 +104,7 @@ describe('doSymbolicateProfile', function() {
           );
         }
 
-        return symbolTable;
+        return symbolTable.asTuple;
       },
     };
 
