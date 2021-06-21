@@ -169,6 +169,7 @@ describe('doSymbolicateProfile', function() {
         profile,
         symbolStore,
         switchSymbolProviderMode,
+        funcNamesToFuncIndexes,
       } = init();
       expect(formatTree(getCallTree(getState()))).toEqual([
         '- 0x000a (total: 1, self: —)',
@@ -189,6 +190,47 @@ describe('doSymbolicateProfile', function() {
         '- third symbol (total: 1, self: 1)',
         '- second symbol (total: 1, self: 1)',
       ]);
+
+      const symbolicatedProfile = ProfileViewSelectors.getProfile(getState());
+      const thread = symbolicatedProfile.threads[0];
+      const { funcTable, stringTable } = thread;
+      expect(funcTable.length).toBeGreaterThanOrEqual(4);
+
+      const [
+        firstSymbolFuncIndex,
+        secondSymbolFuncIndex,
+        thirdSymbolFuncIndex,
+        lastSymbolFuncIndex,
+      ] = funcNamesToFuncIndexes([
+        'first symbol',
+        'second symbol',
+        'third symbol',
+        'last symbol',
+      ]);
+
+      // The first and last symbol function should have the filename first_and_last.cpp.
+      expect(funcTable.fileName[firstSymbolFuncIndex]).toBe(
+        funcTable.fileName[lastSymbolFuncIndex]
+      );
+      let fileNameStringIndex = funcTable.fileName[firstSymbolFuncIndex];
+      expect(fileNameStringIndex).not.toBeNull();
+      let fileName =
+        fileNameStringIndex !== null
+          ? stringTable.getString(fileNameStringIndex)
+          : '<null>';
+      expect(fileName).toBe('first_and_last.cpp');
+
+      // The second and third symbol function should have the filename second_and_third.rs.
+      expect(funcTable.fileName[secondSymbolFuncIndex]).toBe(
+        funcTable.fileName[thirdSymbolFuncIndex]
+      );
+      fileNameStringIndex = funcTable.fileName[secondSymbolFuncIndex];
+      expect(fileNameStringIndex).not.toBeNull();
+      fileName =
+        fileNameStringIndex !== null
+          ? stringTable.getString(fileNameStringIndex)
+          : '<null>';
+      expect(fileName).toBe('second_and_third.rs');
     });
 
     it('updates the symbolication status', async () => {

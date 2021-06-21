@@ -10,6 +10,7 @@ import type { AddressResult } from '../../profile-logic/symbol-store';
 export type ExampleSymbolTableSymbols = Array<{|
   address: number,
   name: string,
+  file?: string,
 |}>;
 
 export type ExampleSymbolTable = {|
@@ -38,10 +39,9 @@ function _makeGetAddressResultFunction(
 ): number => AddressResult | null {
   return function getAddressResult(address) {
     for (let i = syms.length - 1; i >= 0; i--) {
-      const symbolAddress = syms[i].address;
-      const name = syms[i].name;
+      const { address: symbolAddress, name, file } = syms[i];
       if (address >= symbolAddress) {
-        return { name, symbolAddress };
+        return { name, symbolAddress, file };
       }
     }
     return null;
@@ -52,18 +52,22 @@ const completeSyms = [
   {
     address: 0,
     name: 'first symbol',
+    file: 'first_and_last.cpp',
   },
   {
     address: 0xf00,
     name: 'second symbol',
+    file: 'second_and_third.rs',
   },
   {
     address: 0x1a00,
     name: 'third symbol',
+    file: 'second_and_third.rs',
   },
   {
     address: 0x2000,
     name: 'last symbol',
+    file: 'first_and_last.cpp',
   },
 ];
 
