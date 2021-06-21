@@ -7,10 +7,16 @@ import { TextEncoder } from 'util';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { AddressResult } from '../../profile-logic/symbol-store';
 
+export type LineRange = {|
+  startAddress: number,
+  line: number,
+|};
+
 export type ExampleSymbolTableSymbols = Array<{|
   address: number,
   name: string,
   file?: string,
+  lineRanges?: Array<LineRange>,
 |}>;
 
 export type ExampleSymbolTable = {|
@@ -39,9 +45,20 @@ function _makeGetAddressResultFunction(
 ): number => AddressResult | null {
   return function getAddressResult(address) {
     for (let i = syms.length - 1; i >= 0; i--) {
-      const { address: symbolAddress, name, file } = syms[i];
+      const { address: symbolAddress, name, file, lineRanges } = syms[i];
       if (address >= symbolAddress) {
-        return { name, symbolAddress, file };
+        // We found the right symbol. See if we can find a line number for this address.
+        let line = undefined;
+        if (lineRanges) {
+          for (let j = lineRanges.length - 1; j >= 0; j--) {
+            const lineRange = lineRanges[j];
+            if (address >= lineRange.startAddress) {
+              line = lineRange.line;
+              break;
+            }
+          }
+        }
+        return { name, symbolAddress, file, line };
       }
     }
     return null;
@@ -53,6 +70,20 @@ const completeSyms = [
     address: 0,
     name: 'first symbol',
     file: 'first_and_last.cpp',
+    lineRanges: [
+      {
+        startAddress: 0x0,
+        line: 12,
+      },
+      {
+        startAddress: 0x8,
+        line: 14,
+      },
+      {
+        startAddress: 0xc,
+        line: 15,
+      },
+    ],
   },
   {
     address: 0xf00,

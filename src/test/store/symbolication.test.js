@@ -193,7 +193,7 @@ describe('doSymbolicateProfile', function() {
 
       const symbolicatedProfile = ProfileViewSelectors.getProfile(getState());
       const thread = symbolicatedProfile.threads[0];
-      const { funcTable, stringTable } = thread;
+      const { frameTable, funcTable, stringTable } = thread;
       expect(funcTable.length).toBeGreaterThanOrEqual(4);
 
       const [
@@ -231,6 +231,22 @@ describe('doSymbolicateProfile', function() {
           ? stringTable.getString(fileNameStringIndex)
           : '<null>';
       expect(fileName).toBe('second_and_third.rs');
+
+      // Check line numbers.
+
+      // First, find the frame for 0x0000, and make sure there's only one.
+      const frameAt0x0000 = frameTable.address.indexOf(0x0000);
+      expect(frameAt0x0000).not.toBe(-1);
+      expect(frameTable.address.indexOf(0x0000, frameAt0x0000 + 1)).toBe(-1);
+      // 0x0000 should be at line 12.
+      expect(frameTable.line[frameAt0x0000]).toBe(12);
+
+      // Now, find the frame for 0x000a, and make sure there's only one.
+      const frameAt0x000a = frameTable.address.indexOf(0x000a);
+      expect(frameAt0x000a).not.toBe(-1);
+      expect(frameTable.address.indexOf(0x000a, frameAt0x000a + 1)).toBe(-1);
+      // 0x000a should be at line 14.
+      expect(frameTable.line[frameAt0x000a]).toBe(14);
     });
 
     it('updates the symbolication status', async () => {
