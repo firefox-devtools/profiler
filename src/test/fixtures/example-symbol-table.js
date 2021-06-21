@@ -6,28 +6,48 @@
 import { TextEncoder } from 'util';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 
-const completeSyms = {
-  addresses: [0, 0xf00, 0x1a00, 0x2000],
-  symbols: ['first symbol', 'second symbol', 'third symbol', 'last symbol'],
-};
+const completeSyms = [
+  {
+    address: 0,
+    name: 'first symbol',
+  },
+  {
+    address: 0xf00,
+    name: 'second symbol',
+  },
+  {
+    address: 0x1a00,
+    name: 'third symbol',
+  },
+  {
+    address: 0x2000,
+    name: 'last symbol',
+  },
+];
 
-const partialSyms = {
-  addresses: [0, 0x2000],
-  symbols: ['overencompassing first symbol', 'last symbol'],
-};
+const partialSyms = [
+  {
+    address: 0,
+    name: 'overencompassing first symbol',
+  },
+  {
+    address: 0x2000,
+    name: 'last symbol',
+  },
+];
 
 function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
   const index = [0];
   let accum = 0;
-  for (const sym of syms.symbols) {
-    accum += sym.length;
+  for (const { name } of syms) {
+    accum += name.length;
     index.push(accum);
   }
 
   return [
-    new Uint32Array(syms.addresses),
+    new Uint32Array(syms.map(({ address }) => address)),
     new Uint32Array(index),
-    new TextEncoder().encode(syms.symbols.join('')),
+    new TextEncoder().encode(syms.map(({ name }) => name).join('')),
   ];
 }
 
