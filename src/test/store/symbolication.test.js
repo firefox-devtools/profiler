@@ -67,6 +67,46 @@ describe('doSymbolicateProfile', function() {
       symbolicationProviderMode = newMode;
     }
 
+    const symbolProvider = {
+      requestSymbolsFromServer: requests =>
+        requests.map(async request => {
+          if (request.lib.debugName !== 'firefox.pdb') {
+            throw new SymbolsNotFoundError(
+              'Should only have lib called firefox.pdb',
+              request.lib
+            );
+          }
+          if (symbolicationProviderMode !== 'from-server') {
+            throw new SymbolsNotFoundError(
+              'Not in from-server mode, try requestSymbolTableFromAddon.',
+              request.lib
+            );
+          }
+
+          return readSymbolsFromSymbolTable(
+            request.addresses,
+            symbolTable,
+            s => s
+          );
+        }),
+
+      requestSymbolTableFromAddon: async lib => {
+        if (lib.debugName !== 'firefox.pdb') {
+          throw new SymbolsNotFoundError(
+            'Should only have libs called firefox.pdb',
+            lib
+          );
+        }
+        if (symbolicationProviderMode !== 'from-addon') {
+          throw new Error(
+            'should not call requestSymbolTableFromAddon if requestSymbolsFromServer is successful'
+          );
+        }
+
+        return symbolTable;
+      },
+    };
+
     return {
       profile,
       store,
@@ -82,42 +122,7 @@ describe('doSymbolicateProfile', function() {
         }),
       switchSymbolTable,
       switchSymbolProviderMode,
-      symbolStore: new SymbolStore(symbolStoreName, {
-        requestSymbolsFromServer: requests =>
-          requests.map(async request => {
-            if (request.lib.debugName === 'firefox.pdb') {
-              if (symbolicationProviderMode === 'from-server') {
-                return readSymbolsFromSymbolTable(
-                  request.addresses,
-                  symbolTable,
-                  s => s
-                );
-              }
-              throw new SymbolsNotFoundError(
-                'Not in from-server mode, try requestSymbolTableFromAddon.',
-                request.lib
-              );
-            }
-            throw new SymbolsNotFoundError(
-              'Should only have lib called firefox.pdb',
-              request.lib
-            );
-          }),
-        requestSymbolTableFromAddon: async lib => {
-          if (lib.debugName === 'firefox.pdb') {
-            if (symbolicationProviderMode === 'from-addon') {
-              return symbolTable;
-            }
-            throw new Error(
-              'should not call requestSymbolTableFromAddon if requestSymbolsFromServer is successful'
-            );
-          }
-          throw new SymbolsNotFoundError(
-            'Should only have libs called firefox.pdb',
-            lib
-          );
-        },
-      }),
+      symbolStore: new SymbolStore(symbolStoreName, symbolProvider),
     };
   }
 
