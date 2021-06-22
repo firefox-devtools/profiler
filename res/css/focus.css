@@ -8,20 +8,20 @@ button::-moz-focus-inner {
   border: 0;
 }
 
-input[type='radio']:focus,
-input[type='checkbox']:focus,
-input[type='button']:focus,
-input[type='submit']:focus,
-input[type='reset']:focus,
-input[type='image']:focus,
-input[type='range']:focus,
-button:focus {
+input[type='radio']:focus-visible,
+input[type='checkbox']:focus-visible,
+input[type='button']:focus-visible,
+input[type='submit']:focus-visible,
+input[type='reset']:focus-visible,
+input[type='image']:focus-visible,
+input[type='range']:focus-visible,
+button:focus-visible {
   box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
     0 0 0 4px var(--blue-50-a30);
   outline: 0;
 }
 
-a:focus {
+a:focus-visible {
   box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 6px var(--blue-50-a30);
   outline: 0;
 }

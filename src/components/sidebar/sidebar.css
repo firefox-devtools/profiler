@@ -79,7 +79,7 @@
   text-overflow: ellipsis;
 }
 
-.can-select-content-input:focus {
+.can-select-content-input:focus-visible {
   text-overflow: unset;
 }
 
@@ -149,7 +149,7 @@
 
 /* Opt out of the default photon styling, as it doesn't look very nice with the
    overflow: hidden of the container */
-.sidebar-toggle:focus {
+.sidebar-toggle:focus-visible {
   border: 0;
   border-radius: 2px;
   box-shadow: none;
