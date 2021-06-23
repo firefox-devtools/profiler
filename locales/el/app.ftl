@@ -27,6 +27,10 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Δεν ήταν δυνατή η ανάκτηση του προφίλ από το { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Δεν ήταν δυνατή η ανάγνωση του αρχείου ή η ανάλυση του προφίλ σε αυτό.
 AppViewRouter--error-message-local =
     .message = Δεν έχει υλοποιηθεί ακόμη.
 AppViewRouter--error-message-public =
@@ -38,6 +42,8 @@ AppViewRouter--error-message-from-url =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--expand-all = Ανάπτυξη όλων
+CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -74,6 +80,8 @@ Details--open-sidebar-button =
     .title = Άνοιγμα πλευρικής στήλης
 Details--close-sidebar-button =
     .title = Κλείσιμο πλευρικής στήλης
+Details--error-boundary-message =
+    .message = Ωχ, προέκυψε άγνωστο σφάλμα σε αυτόν τον πίνακα.
 
 ## Footer Links
 
@@ -132,7 +140,13 @@ IdleSearchField--search-input =
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Διαγραφή
+    .title = Δεν είναι δυνατή η διαγραφή αυτού του προφίλ επειδή μας λείπουν πληροφορίες εξουσιοδότησης.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Δεν έχει μεταφορτωθεί ακόμη κανένα προφίλ!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Προβολή και διαχείριση όλων των καταγραφών σας ({ $profilesRestCount } ακόμη)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -146,6 +160,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Ορισμός επιλογής από τη διάρκεια δείκτη
 MarkerContextMenu--start-selection-here = Έναρξη επιλογής εδώ
 MarkerContextMenu--end-selection-here = Διακοπή επιλογής εδώ
 MarkerContextMenu--start-selection-at-marker-start = Έναρξη επιλογής στην <strong>αρχή</strong> του δείκτη
@@ -259,6 +274,11 @@ MenuButtons--metaInfo--device = Συσκευή:
 MenuButtons--metaInfo--os = ΛΣ:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--speed-index = Δείκτης ταχύτητας:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed":
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Δείκτης "Contentful Speed":
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 
@@ -288,9 +308,16 @@ NetworkSettings--panel-search =
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Ξέρατε ότι μπορείτε να χρησιμοποιήσετε το κόμμα (,) για αναζήτηση με πολλαπλούς όρους;
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Διαγραφή
+    .title = Κάντε κλικ εδώ για να διαγράψετε το προφίλ { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
