@@ -36,7 +36,7 @@
 .tabBarTab {
   position: relative;
   overflow: hidden;
-  width: 8em;
+  min-width: 8em;
   padding: 6px 4px;
   border: solid transparent;
   border-width: 0 1px 0 1px;
