@@ -60,7 +60,7 @@
     "copy-to-clipboard": "^3.1.0",
     "core-js": "^3.14.0",
     "escape-string-regexp": "^4.0.0",
-    "gecko-profiler-demangle": "^0.2.0",
+    "gecko-profiler-demangle": "^0.3.3",
     "idb": "^6.1.2",
     "intl-pluralrules": "^1.2.2",
     "jszip": "^3.6.0",
