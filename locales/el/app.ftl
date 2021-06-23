@@ -51,6 +51,11 @@ AppViewRouter--error-message-from-url =
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Εισαγάγετε τα URL των προφίλ που θέλετε να συγκρίνετε
+CompareHome--instruction-content =
+    Το εργαλείο θα εξαγάγει τα δεδομένα από το επιλεγμένο κομμάτι και εύρος για
+    κάθε προφίλ και θα τα τοποθετήσει στην ίδια προβολή για ευκολότερη
+    σύγκριση.
 CompareHome--form-label-profile1 = Προφίλ 1:
 CompareHome--form-label-profile2 = Προφίλ 2:
 CompareHome--submit-button =
@@ -94,16 +99,30 @@ FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $to
 
 ## Home page
 
+Home--upload-from-file-input-button = Φόρτωση προφίλ από αρχείο
+Home--upload-from-url-button = Φόρτωση προφίλ από URL
 Home--load-from-url-submit-button =
     .value = Φόρτωση
 Home--documentation-button = Τεκμηρίωση
+Home--menu-button = Ενεργοποίηση κουμπιού μενού του { -profiler-brand-name }
 Home--addon-button = Εγκατάσταση προσθέτου
+Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
+Home--instructions-content =
+    Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
+    Ωστόσο, τα υπάρχοντα προφίλ μπορούν να προβληθούν σε όλα τα σύγχρονα προγράμματα περιήγησης.
+Home--record-instructions-start-stop = Διακοπή και έναρξη δημιουργίας προφίλ
+Home--record-instructions-capture-load = Καταγραφή και φόρτωση προφίλ
 Home--profiler-motto = Καταγράψτε ένα προφίλ επιδόσεων. Αναλύστε το. Μοιραστείτε το. Κάντε ταχύτερο τον ιστό.
 Home--additional-content-title = Φόρτωση υπαρχόντων προφίλ
+Home--additional-content-content = Μπορείτε να <strong>σύρετε και να εναποθέσετε</strong> ένα αρχείο προφίλ εδώ για φόρτωση, ή:
+Home--compare-recordings-info = Μπορείτε επίσης να συγκρίνετε καταγραφές. <a>Άνοιγμα περιβάλλοντος σύγκρισης.</a>
+Home--recent-uploaded-recordings-title = Πρόσφατα μεταφορτωμένες καταγραφές
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Εισαγάγετε όρους φίλτρου
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -114,6 +133,14 @@ Home--additional-content-title = Φόρτωση υπαρχόντων προφί�
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Δεν έχει μεταφορτωθεί ακόμη κανένα προφίλ!
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Διαχείριση καταγραφής
+       *[other] Διαχείριση καταγραφών
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
@@ -121,6 +148,10 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Δεν έχε
 
 MarkerContextMenu--start-selection-here = Έναρξη επιλογής εδώ
 MarkerContextMenu--end-selection-here = Διακοπή επιλογής εδώ
+MarkerContextMenu--start-selection-at-marker-start = Έναρξη επιλογής στην <strong>αρχή</strong> του δείκτη
+MarkerContextMenu--start-selection-at-marker-end = Έναρξη επιλογής στο <strong>τέλος</strong> του δείκτη
+MarkerContextMenu--end-selection-at-marker-start = Διακοπή επιλογής στην <strong>αρχή</strong> του δείκτη
+MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής στο <strong>τέλος</strong> του δείκτη
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
 MarkerContextMenu--copy-url = Αντιγραφή URL
 
@@ -147,7 +178,14 @@ MenuButtons--index--metaInfo-button =
     .label = Πληροφορίες προφίλ
 MenuButtons--index--full-view = Πλήρης προβολή
 MenuButtons--index--cancel-upload = Ακύρωση μεταφόρτωσης
+MenuButtons--index--share-upload =
+    .label = Μεταφόρτωση τοπικού προφίλ
+MenuButtons--index--share-error-uploading =
+    .label = Σφάλμα μεταφόρτωσης
+MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
 MenuButtons--index--docs = Έγγραφα
+MenuButtons--permalink--button =
+    .label = Μόνιμος σύνδεσμος
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -157,6 +195,18 @@ MenuButtons--index--profile-info-uploaded-actions = Διαγραφή
 MenuButtons--index--metaInfo-subtitle = Πληροφορίες προφίλ
 MenuButtons--metaInfo--symbols = Σύμβολα:
 MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } φυσικός πυρήνας
+       *[other] { $physicalCPUs } φυσικοί πυρήνες
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } λογικός πυρήνας
+       *[other] { $logicalCPUs } λογικοί πυρήνες
+    }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
 # Variable:
@@ -175,8 +225,10 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
+MenuButtons--metaInfo--recording-started = Έναρξη καταγραφής:
 MenuButtons--metaInfo--interval = Διάστημα:
 MenuButtons--metaInfo--profile-version = Έκδοση προφίλ:
+MenuButtons--metaInfo--buffer-capacity = Χωρητικότητα buffer:
 MenuButtons--metaInfo--buffer-duration = Διάρκεια buffer:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
@@ -205,6 +257,8 @@ MenuButtons--metaInfo--platform = Πλατφόρμα
 MenuButtons--metaInfo--device = Συσκευή:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = ΛΣ:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 
@@ -215,6 +269,8 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
+MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
 MenuButtons--publish--button-upload = Μεταφόρτωση
 MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
 MenuButtons--publish--cancel-upload = Ακύρωση μεταφόρτωσης
@@ -225,6 +281,9 @@ MenuButtons--publish--compressing = Συμπίεση…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Φιλτράρισμα δικτύων:
+    .title = Προβολή μόνο των αιτημάτων δικτύου που ταιριάζουν με συγκεκριμένο όνομα
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
@@ -272,6 +331,7 @@ ServiceWorkerManager--installed-button = Επαναφόρτωση εφαρμογ
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
 
 ## Tab Bar for the bottom half of the analysis UI.
@@ -286,6 +346,10 @@ TabBar--network-tab = Δίκτυο
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Εμφάνιση μόνο του “{ $trackName }”
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
@@ -320,3 +384,4 @@ TransformNavigator--merge-function = Συγχώνευση: { $item }
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Μεταφορτωμένες καταγραφές
