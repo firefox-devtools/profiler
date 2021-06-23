@@ -66,6 +66,7 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
+  resourceTypeEnum,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -2125,9 +2126,34 @@ export function getThreadProcessDetails(thread: Thread): string {
   return label;
 }
 
+// Determines which information to show in the "origin annotation" if both an
+// origin name and a filename are present.
+// A return value of true means "show both", false means "only show filename."
+function _shouldShowBothOriginAndFileName(
+  fileName: string,
+  origin: string,
+  resourceType: resourceTypeEnum
+): boolean {
+  // If the origin string is just a URL prefix that's part of the
+  // filename, it doesn't add any useful information, so only show
+  // the filename.
+  if (fileName.startsWith(origin)) {
+    return false;
+  }
+
+  // For native code (resource type "library"), if we have the filename of the
+  // source code, only show the filename and not the library name.
+  if (resourceType === resourceTypes.library) {
+    return false;
+  }
+
+  // If the resource is something else (e.g., an extension), show origin and filename.
+  return true;
+}
+
 /**
  * This function returns the source origin for a function. This can be:
- * - a filename (javascript or object file)
+ * - a filename (javascript or object file or c++ source file)
  * - a URL (if the source is a website)
  */
 export function getOriginAnnotationForFunc(
@@ -2138,6 +2164,7 @@ export function getOriginAnnotationForFunc(
 ): string {
   const resourceIndex = funcTable.resource[funcIndex];
   const resourceNameIndex = resourceTable.name[resourceIndex];
+  const resourceType = resourceTable.type[resourceIndex];
 
   let origin;
   if (resourceNameIndex !== undefined) {
@@ -2159,11 +2186,10 @@ export function getOriginAnnotationForFunc(
   }
 
   if (fileName) {
-    // If the origin string is just a URL prefix that's part of the
-    // filename, it doesn't add any useful information, so just return
-    // the filename. If it's something else (e.g., an extension or
-    // library name), prepend it to the filename.
-    if (origin && !fileName.startsWith(origin)) {
+    if (
+      origin &&
+      _shouldShowBothOriginAndFileName(fileName, origin, resourceType)
+    ) {
       return `${origin}: ${fileName}`;
     }
     return fileName;
