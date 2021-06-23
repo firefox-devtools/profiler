@@ -22,10 +22,13 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Διαδικτυακή εφαρμογή για την ανάλυση των επιδόσεων του { -firefox-brand-name }</subheader>
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-local =
+    .message = Δεν έχει υλοποιηθεί ακόμη.
 AppViewRouter--error-message-public =
     .message = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-message-from-url =
@@ -62,6 +65,10 @@ CompareHome--submit-button =
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Άνοιγμα πλευρικής στήλης
+Details--close-sidebar-button =
+    .title = Κλείσιμο πλευρικής στήλης
 
 ## Footer Links
 
@@ -76,6 +83,14 @@ FooterLinks--Cookies = Cookies
 FullTimeline--graph-type = Τύπος γραφήματος:
 FullTimeline--categories-with-cpu = Κατηγορίες με CPU
 FullTimeline--categories = Κατηγορίες
+FullTimeline--stack-height = Ύψος στοίβας
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> ορατά κομμάτια
 
 ## Home page
 
@@ -83,6 +98,7 @@ Home--load-from-url-submit-button =
     .value = Φόρτωση
 Home--documentation-button = Τεκμηρίωση
 Home--addon-button = Εγκατάσταση προσθέτου
+Home--profiler-motto = Καταγράψτε ένα προφίλ επιδόσεων. Αναλύστε το. Μοιραστείτε το. Κάντε ταχύτερο τον ιστό.
 Home--additional-content-title = Φόρτωση υπαρχόντων προφίλ
 
 ## IdleSearchField
@@ -159,6 +175,9 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } λογικός πυρήνας
        *[other] { $logicalCPUs } λογικοί πυρήνες
     }
+MenuButtons--metaInfo--interval = Διάστημα:
+MenuButtons--metaInfo--profile-version = Έκδοση προφίλ:
+MenuButtons--metaInfo--buffer-duration = Διάρκεια buffer:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -167,6 +186,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
         [one] { $configurationDuration } δευτερόλεπτο
        *[other] { $configurationDuration } δευτερόλεπτα
     }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Απεριόριστη
 MenuButtons--metaInfo--application = Εφαρμογή
 MenuButtons--metaInfo--name-and-version = Όνομα και έκδοση:
 MenuButtons--metaInfo--update-channel = Κανάλι ενημερώσεων:
@@ -175,7 +196,8 @@ MenuButtons--metaInfo--build-type = Τύπος δομής:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
-MenuButtons--metaInfo--build-type-debug = Έλεγχος σφαλμάτων
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -183,6 +205,7 @@ MenuButtons--metaInfo--platform = Πλατφόρμα
 MenuButtons--metaInfo--device = Συσκευή:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = ΛΣ:
+MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -217,6 +240,18 @@ ProfileFilterNavigator--full-range = Πλήρες εύρος
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Εισαγωγή προφίλ απευθείας από το { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Ανάγνωση αρχείου και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-message-local =
+    .message = Δεν έχει υλοποιηθεί ακόμη.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Λήψη και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Λήψη και επεξεργασία προφίλ…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Ανάγνωση και επεξεργασία προφίλ…
 ProfileLoaderAnimation--loading-message-view-not-found =
     .message = Η προβολή δεν βρέθηκε
 
@@ -230,6 +265,7 @@ ProfileRootMessage--additional = Πίσω στην αρχική
 ## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Εγκατάσταση…
+ServiceWorkerManager--pending-button = Εφαρμογή και επαναφόρτωση
 ServiceWorkerManager--installed-button = Επαναφόρτωση εφαρμογής
 
 ## StackSettings
@@ -241,6 +277,9 @@ StackSettings--implementation-javascript = JavaScript
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Δέντρο κλήσεων
+TabBar--stack-chart-tab = Διάγραμμα στοιβών
+TabBar--marker-chart-tab = Διάγραμμα δεικτών
+TabBar--marker-table-tab = Πίνακας δεικτών
 TabBar--network-tab = Δίκτυο
 
 ## TrackContextMenu
@@ -261,6 +300,21 @@ TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Σύμπτυξη: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Εστίαση: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Συγχώνευση: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
