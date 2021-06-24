@@ -22,15 +22,34 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 效能分析網頁應用程式</subheader>
+AppHeader--github-icon =
+    .title = 前往我們的 Git 儲存庫（開啟新視窗）
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = 無法從 { -firefox-brand-name } 取得效能檢測檔。
+AppViewRouter--error-message-from-file =
+    .message = 無法讀取檔案或剖析檔案當中的效能檢測資訊。
+AppViewRouter--error-message-local =
+    .message = 尚未實作。
+AppViewRouter--error-message-public =
+    .message = 無法下載效能檢測檔。
+AppViewRouter--error-message-from-url =
+    .message = 無法下載效能檢測檔。
+AppViewRouter--route-not-found--home =
+    .specialMessage = 無法處理您嘗試開啟的網址。
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = 合併函數
+    .title = 合併函數後會將其從效能檢測檔移除，並將時間歸入呼叫該函數的函數。此函數在效能樹中所有發生之處都會被合併。
+CallNodeContextMenu--transform-merge-call-node = 只合併節點
+    .title = 合併節點後會將其從效能檢測檔移除，並將時間歸入呼叫該節點的函數節點。只會移除效能樹當中特定部分的函數，其他對該函數呼叫的部分將保留在檢測檔中。
 
 ## CallTree
 ## This is the component for Call Tree panel.
