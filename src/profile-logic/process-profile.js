@@ -14,6 +14,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyNativeSymbolTable,
 } from './data-structures';
 import { immutableUpdate, ensureExists, coerce } from '../utils/flow';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
@@ -336,7 +337,6 @@ function _extractUnsymbolicatedFunction(
   funcTable.name[funcIndex] = locationIndex;
   funcTable.resource[funcIndex] = resourceIndex;
   funcTable.relevantForJS[funcIndex] = false;
-  funcTable.address[funcIndex] = addressRelativeToLib;
   funcTable.isJS[funcIndex] = false;
   funcTable.fileName[funcIndex] = null;
   funcTable.lineNumber[funcIndex] = null;
@@ -400,7 +400,6 @@ function _extractCppFunction(
   funcTable.name[newFuncIndex] = funcNameIndex;
   funcTable.resource[newFuncIndex] = resourceIndex;
   funcTable.relevantForJS[newFuncIndex] = false;
-  funcTable.address[newFuncIndex] = -1;
   funcTable.isJS[newFuncIndex] = false;
   funcTable.fileName[newFuncIndex] = null;
   funcTable.lineNumber[newFuncIndex] = null;
@@ -496,7 +495,6 @@ function _extractJsFunction(
   funcTable.name[funcIndex] = funcNameIndex;
   funcTable.resource[funcIndex] = resourceIndex;
   funcTable.relevantForJS[funcIndex] = false;
-  funcTable.address[funcIndex] = -1;
   funcTable.isJS[funcIndex] = true;
   funcTable.fileName[funcIndex] = fileName;
   funcTable.lineNumber[funcIndex] = lineNumber;
@@ -517,7 +515,6 @@ function _extractUnknownFunctionType(
   funcTable.name[index] = locationIndex;
   funcTable.resource[index] = -1;
   funcTable.relevantForJS[index] = relevantForJS;
-  funcTable.address[index] = -1;
   funcTable.isJS[index] = false;
   funcTable.fileName[index] = null;
   funcTable.lineNumber[index] = null;
@@ -538,6 +535,7 @@ function _processFrameTable(
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
+    nativeSymbol: Array(geckoFrameStruct.length).fill(null),
     innerWindowID: geckoFrameStruct.innerWindowID,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
@@ -1030,6 +1028,7 @@ function _processThread(
     libs,
     extensions
   );
+  const nativeSymbols = getEmptyNativeSymbolTable();
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
     frameFuncs,
@@ -1060,6 +1059,7 @@ function _processThread(
     pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
+    nativeSymbols,
     resourceTable,
     stackTable,
     markers,

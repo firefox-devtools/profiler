@@ -5,7 +5,6 @@ Array [
   Array [
     "0xc0ff33",
     Object {
-      "address": 65331,
       "columnNumber": null,
       "fileName": null,
       "funcName": "0xc0ff33",
@@ -32,7 +31,6 @@ Array [
   Array [
     "0xe0ff33",
     Object {
-      "address": 65331,
       "columnNumber": null,
       "fileName": null,
       "funcName": "0xe0ff33",
@@ -59,7 +57,6 @@ Array [
   Array [
     "cppFunction1 (in c++ resource name1) + 123",
     Object {
-      "address": -1,
       "columnNumber": null,
       "fileName": null,
       "funcName": "cppFunction1",
@@ -76,7 +73,6 @@ Array [
   Array [
     "cppFunction2 (in c++ resource name2) (234:345)",
     Object {
-      "address": -1,
       "columnNumber": null,
       "fileName": null,
       "funcName": "cppFunction2",
@@ -93,7 +89,6 @@ Array [
   Array [
     "cppFunction3 (in c++ resource name2)",
     Object {
-      "address": -1,
       "columnNumber": null,
       "fileName": null,
       "funcName": "cppFunction3",
@@ -110,7 +105,6 @@ Array [
   Array [
     "jsFunction1 (http://script.com/one.js:456:1)",
     Object {
-      "address": -1,
       "columnNumber": 1,
       "fileName": "http://script.com/one.js",
       "funcName": "jsFunction1",
@@ -127,7 +121,6 @@ Array [
   Array [
     "http://script.com/one.js:456:1",
     Object {
-      "address": -1,
       "columnNumber": 1,
       "fileName": "http://script.com/one.js",
       "funcName": "(root scope) http://script.com/one.js",
@@ -144,7 +137,6 @@ Array [
   Array [
     "moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:1:0",
     Object {
-      "address": -1,
       "columnNumber": 0,
       "fileName": "moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js",
       "funcName": "(root scope) moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js",
@@ -161,7 +153,6 @@ Array [
   Array [
     "moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:1:0",
     Object {
-      "address": -1,
       "columnNumber": 0,
       "fileName": "moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js",
       "funcName": "(root scope) moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js",
@@ -178,7 +169,6 @@ Array [
   Array [
     "backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:1)",
     Object {
-      "address": -1,
       "columnNumber": 1,
       "fileName": "moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js",
       "funcName": "backgroundFunction",
@@ -195,7 +185,6 @@ Array [
   Array [
     "contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:1)",
     Object {
-      "address": -1,
       "columnNumber": 1,
       "fileName": "moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js",
       "funcName": "contentfunction",
@@ -212,7 +201,6 @@ Array [
   Array [
     "mysterious location",
     Object {
-      "address": -1,
       "columnNumber": null,
       "fileName": null,
       "funcName": "mysterious location",

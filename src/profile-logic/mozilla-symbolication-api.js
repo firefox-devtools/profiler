@@ -138,21 +138,25 @@ function getV5ResultForLibRequest(
   for (let i = 0; i < addressInfo.length; i++) {
     const address = addressArray[i];
     const info = addressInfo[i];
+    let addressResult;
     if (info.function !== undefined && info.function_offset !== undefined) {
       const name = info.function;
       const functionOffset = parseInt(info.function_offset.substr(2), 16);
-      results.set(address, {
+      addressResult = {
         name,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
-      });
+      };
     } else {
-      throw new SymbolsNotFoundError(
-        `The result from the symbol server did not contain function information for address ${address}, even though found_modules was true for the library that this address belongs to`,
-        lib
-      );
+      // This can happen if the address is between functions, or before the first
+      // or after the last function.
+      addressResult = {
+        name: `<unknown at ${info.module_offset}>`,
+        symbolAddress: address,
+      };
     }
+    results.set(address, addressResult);
   }
   return results;
 }

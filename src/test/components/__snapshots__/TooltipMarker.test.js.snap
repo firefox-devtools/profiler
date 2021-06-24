@@ -1323,7 +1323,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders properly redirect network markers for a internal redirection 1`] = `
+exports[`TooltipMarker renders properly redirect network markers for a Internal redirection 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -1362,7 +1362,7 @@ exports[`TooltipMarker renders properly redirect network markers for a internal 
       Redirection type
       :
     </div>
-    internal
+    Internal
     <div
       class="tooltipLabel"
     >
@@ -1437,7 +1437,7 @@ exports[`TooltipMarker renders properly redirect network markers for a internal 
 </div>
 `;
 
-exports[`TooltipMarker renders properly redirect network markers for a permanent redirection 1`] = `
+exports[`TooltipMarker renders properly redirect network markers for a Permanent redirection 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -1476,7 +1476,7 @@ exports[`TooltipMarker renders properly redirect network markers for a permanent
       Redirection type
       :
     </div>
-    permanent
+    Permanent
     <div
       class="tooltipLabel"
     >
@@ -1551,7 +1551,7 @@ exports[`TooltipMarker renders properly redirect network markers for a permanent
 </div>
 `;
 
-exports[`TooltipMarker renders properly redirect network markers for a temporary redirection 1`] = `
+exports[`TooltipMarker renders properly redirect network markers for a Temporary redirection 1`] = `
 <div
   class="tooltipMarker propClass"
   style="--tooltip-detail-max-width: 600px;"
@@ -1590,7 +1590,7 @@ exports[`TooltipMarker renders properly redirect network markers for a temporary
       Redirection type
       :
     </div>
-    temporary
+    Temporary
     <div
       class="tooltipLabel"
     >
@@ -1704,7 +1704,7 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       Redirection type
       :
     </div>
-    permanent (HTTP to HTTPS)
+    Permanent (HTTP to HTTPS)
     <div
       class="tooltipLabel"
     >

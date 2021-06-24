@@ -17,6 +17,7 @@ import {
 import {
   getEmptyProfile,
   getEmptyResourceTable,
+  getEmptyNativeSymbolTable,
   getEmptyFrameTable,
   getEmptyFuncTable,
   getEmptyStackTable,
@@ -45,11 +46,13 @@ import type {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
   IndexIntoLibs,
+  IndexIntoNativeSymbolTable,
   IndexIntoStackTable,
   IndexIntoSamplesTable,
   FuncTable,
   FrameTable,
   Lib,
+  NativeSymbolTable,
   ResourceTable,
   StackTable,
   SamplesTable,
@@ -273,6 +276,10 @@ type TranslationMapForResources = Map<
   IndexIntoResourceTable,
   IndexIntoResourceTable
 >;
+type TranslationMapForNativeSymbols = Map<
+  IndexIntoNativeSymbolTable,
+  IndexIntoNativeSymbolTable
+>;
 type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
 type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
 type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
@@ -377,6 +384,7 @@ function adjustNullableCategories(
  * This combines the library tables for a list of threads. It returns a merged
  * Lib array, along with a translation maps that can be used in other functions
  * when merging lib references in other tables.
+ * The address ranges in the combined lib table are meaningless.
  */
 function combineLibTables(
   threads: $ReadOnlyArray<Thread>
@@ -488,6 +496,69 @@ function combineResourceTables(
 }
 
 /**
+ * This combines the nativeSymbols tables for the threads.
+ */
+function combineNativeSymbolTables(
+  translationMapsForLibs: TranslationMapForLibs[],
+  newStringTable: UniqueStringArray,
+  threads: $ReadOnlyArray<Thread>
+): {
+  nativeSymbols: NativeSymbolTable,
+  translationMaps: TranslationMapForNativeSymbols[],
+} {
+  const mapOfInsertedNativeSymbols: Map<
+    string,
+    IndexIntoNativeSymbolTable
+  > = new Map();
+  const translationMaps = [];
+  const newNativeSymbols = getEmptyNativeSymbolTable();
+
+  threads.forEach((thread, threadIndex) => {
+    const translationMap = new Map();
+    const { nativeSymbols, stringTable } = thread;
+    const libTranslationMap = translationMapsForLibs[threadIndex];
+
+    for (let i = 0; i < nativeSymbols.length; i++) {
+      const libIndex = nativeSymbols.libIndex[i];
+      const newLibIndex = libTranslationMap.get(libIndex);
+      if (newLibIndex === undefined) {
+        throw new Error(stripIndent`
+        We couldn't find the lib of nativeSymbol ${i} in the translation map.
+        This is a programming error.
+        `);
+      }
+
+      const nameIndex = nativeSymbols.name[i];
+      const newName = stringTable.getString(nameIndex);
+      const address = nativeSymbols.address[i];
+
+      // Duplicate search.
+      const nativeSymbolKey = [newLibIndex, newName, address].join('#');
+      const insertedNativeSymbolIndex = mapOfInsertedNativeSymbols.get(
+        nativeSymbolKey
+      );
+      if (insertedNativeSymbolIndex !== undefined) {
+        translationMap.set(i, insertedNativeSymbolIndex);
+        continue;
+      }
+
+      translationMap.set(i, newNativeSymbols.length);
+      mapOfInsertedNativeSymbols.set(nativeSymbolKey, newNativeSymbols.length);
+
+      newNativeSymbols.libIndex.push(newLibIndex);
+      newNativeSymbols.name.push(newStringTable.indexForString(newName));
+      newNativeSymbols.address.push(address);
+
+      newNativeSymbols.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { nativeSymbols: newNativeSymbols, translationMaps };
+}
+
+/**
  * This combines the function tables for a list of threads. It returns the new
  * function table with the translation maps to be used in subsequent merging
  * functions.
@@ -543,7 +614,6 @@ function combineFuncTables(
       mapOfInsertedFuncs.set(funcKey, newFuncTable.length);
       translationMap.set(i, newFuncTable.length);
 
-      newFuncTable.address.push(funcTable.address[i]);
       newFuncTable.isJS.push(funcTable.isJS[i]);
       newFuncTable.name.push(newStringTable.indexForString(name));
       newFuncTable.resource.push(newResourceIndex);
@@ -573,6 +643,7 @@ function combineFuncTables(
 function combineFrameTables(
   translationMapsForCategories: TranslationMapForCategories[] | null,
   translationMapsForFuncs: TranslationMapForFuncs[],
+  translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   newStringTable: UniqueStringArray,
   threads: $ReadOnlyArray<Thread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
@@ -591,6 +662,8 @@ function combineFrameTables(
       const categoryTranslationMap = translationMapsForCategories[threadIndex];
       return categoryTranslationMap.get(category);
     };
+    const nativeSymbolTranslationMap =
+      translationMapsForNativeSymbols[threadIndex];
 
     for (let i = 0; i < frameTable.length; i++) {
       const category = frameTable.category[i];
@@ -616,12 +689,25 @@ function combineFrameTables(
           ? stringTable.getString(implementationIndex)
           : null;
 
+      const nativeSymbol = frameTable.nativeSymbol[i];
+      const newNativeSymbol =
+        nativeSymbol === null
+          ? null
+          : nativeSymbolTranslationMap.get(nativeSymbol);
+      if (newNativeSymbol === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the nativeSymbol of frame ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
       newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.category.push(newCategory);
       // TODO issue #2151: we assume that subcategory strings are the same if
       // the category is the same, and have no translation maps. But we should
       // really implement one.
       newFrameTable.subcategory.push(frameTable.subcategory[i]);
+      newFrameTable.nativeSymbol.push(newNativeSymbol);
       newFrameTable.func.push(newFunc);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.implementation.push(
@@ -841,6 +927,14 @@ function getComparisonThread(
     translationMaps: translationMapsForResources,
   } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
   const {
+    nativeSymbols: newNativeSymbols,
+    translationMaps: translationMapsForNativeSymbols,
+  } = combineNativeSymbolTables(
+    translationMapsForLibs,
+    newStringTable,
+    threads
+  );
+  const {
     funcTable: newFuncTable,
     translationMaps: translationMapsForFuncs,
   } = combineFuncTables(translationMapsForResources, newStringTable, threads);
@@ -850,6 +944,7 @@ function getComparisonThread(
   } = combineFrameTables(
     translationMapsForCategories,
     translationMapsForFuncs,
+    translationMapsForNativeSymbols,
     newStringTable,
     threads
   );
@@ -895,6 +990,7 @@ function getComparisonThread(
     libs: newLibTable,
     funcTable: newFuncTable,
     resourceTable: newResourceTable,
+    nativeSymbols: newNativeSymbols,
   };
 
   return mergedThread;
@@ -919,6 +1015,14 @@ export function mergeThreads(threads: Thread[]): Thread {
     translationMaps: translationMapsForResources,
   } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
   const {
+    nativeSymbols: newNativeSymbols,
+    translationMaps: translationMapsForNativeSymbols,
+  } = combineNativeSymbolTables(
+    translationMapsForLibs,
+    newStringTable,
+    threads
+  );
+  const {
     funcTable: newFuncTable,
     translationMaps: translationMapsForFuncs,
   } = combineFuncTables(translationMapsForResources, newStringTable, threads);
@@ -928,6 +1032,7 @@ export function mergeThreads(threads: Thread[]): Thread {
   } = combineFrameTables(
     null,
     translationMapsForFuncs,
+    translationMapsForNativeSymbols,
     newStringTable,
     threads
   );
@@ -982,6 +1087,7 @@ export function mergeThreads(threads: Thread[]): Thread {
     stringTable: newStringTable,
     libs: newLibTable,
     funcTable: newFuncTable,
+    nativeSymbols: newNativeSymbols,
     resourceTable: newResourceTable,
   };
 

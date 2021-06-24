@@ -238,7 +238,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   <div
     class="sidebar-contents-wrapper"
   >
-    Select a node to display some information about it.
+    Select a node to display information about it.
   </div>
 </div>
 `;
@@ -985,7 +985,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   <div
     class="sidebar-contents-wrapper"
   >
-    Select a node to display some information about it.
+    Select a node to display information about it.
   </div>
 </div>
 `;

@@ -17,8 +17,8 @@
 
 /* The second selector is only here to have a specificity higher than the one in
  * `.photon-input:invalid:not(:placeholder-shown)`. */
-.photon-input:focus,
-.photon-input:focus:invalid {
+.photon-input:focus-visible,
+.photon-input:focus-visible:invalid {
   border: 1px solid var(--blue-50);
   box-shadow: 0 0 0 1px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
   outline: 0;

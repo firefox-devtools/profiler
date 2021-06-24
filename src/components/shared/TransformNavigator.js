@@ -26,7 +26,8 @@ export const TransformNavigator = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state: State) => {
-    const items = selectedThreadSelectors.getTransformLabels(state);
+    const items = selectedThreadSelectors.getLocalizedTransformLabels(state);
+
     return {
       className: 'calltreeTransformNavigator',
       items,

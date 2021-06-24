@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.timelineVerticalIndicators {
+.timelineVerticalIndicatorsLine {
   --active-area-width: 4px;
 
   /* Setting the width to 1.5 makes it so that these indicators have slightly more visual
@@ -10,13 +10,6 @@
    * that is 3 device pixels wide. */
   --visible-width: 1.5px;
 
-  position: absolute;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
-
-.timelineVerticalIndicatorsLine {
   position: absolute;
   top: 0;
   bottom: 0;

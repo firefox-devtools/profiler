@@ -159,15 +159,16 @@ However, existing profiles can be viewed in any modern browser.
           <div
             class="homeSectionActionButtons"
           >
-            <label
+            <input
+              class="homeSectionUploadFromFileInput"
+              type="file"
+            />
+            <button
               class="homeSectionButton"
+              type="button"
             >
-              <input
-                class="homeSectionUploadFromFileInput"
-                type="file"
-              />
               Load a profile from file
-            </label>
+            </button>
             <button
               aria-expanded="false"
               class="homeSectionButton"
@@ -333,15 +334,16 @@ profile in ⁨Firefox⁩, then analyze it and share it with profiler.firefox.com
           <div
             class="homeSectionActionButtons"
           >
-            <label
+            <input
+              class="homeSectionUploadFromFileInput"
+              type="file"
+            />
+            <button
               class="homeSectionButton"
+              type="button"
             >
-              <input
-                class="homeSectionUploadFromFileInput"
-                type="file"
-              />
               Load a profile from file
-            </label>
+            </button>
             <button
               aria-expanded="false"
               class="homeSectionButton"
@@ -533,15 +535,16 @@ Hit
           <div
             class="homeSectionActionButtons"
           >
-            <label
+            <input
+              class="homeSectionUploadFromFileInput"
+              type="file"
+            />
+            <button
               class="homeSectionButton"
+              type="button"
             >
-              <input
-                class="homeSectionUploadFromFileInput"
-                type="file"
-              />
               Load a profile from file
-            </label>
+            </button>
             <button
               aria-expanded="false"
               class="homeSectionButton"

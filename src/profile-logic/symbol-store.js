@@ -50,6 +50,10 @@ export interface AbstractSymbolStore {
   ): Promise<void>;
 }
 
+// The Mozilla symbolication API has a limit of 10 jobs per request, so limit
+// the number of libraries we request in each chunk to that same number.
+const MAX_JOB_COUNT_PER_CHUNK = 10;
+
 // Look up the symbols for the given addresses in the symbol table.
 // The symbol table is given in the [addrs, index, buffer] format.
 // This format is documented at the SymbolTableAsTuple flow type definition.
@@ -120,9 +124,12 @@ export function readSymbolsFromSymbolTable(
 // sum(chunk.map(computeValue)) <= maxValue or chunk.length == 1.
 // The array is allowed to contain elements which are larger than the maximum
 // value on their own; such elements will get a single chunk for themselves.
+// Additionally, each chunk is limited to contain no more than maxChunkLength
+// elements.
 function _partitionIntoChunksOfMaxValue<T>(
   array: T[],
   maxValue: number,
+  maxChunkLength: number,
   computeValue: T => number
 ): T[][] {
   const chunks = [];
@@ -130,7 +137,11 @@ function _partitionIntoChunksOfMaxValue<T>(
     const elementValue = computeValue(element);
     // Find an existing chunk that still has enough "value space" left to
     // accomodate this element.
-    let chunk = chunks.find(({ value }) => value + elementValue <= maxValue);
+    let chunk = chunks.find(
+      ({ value, elements }) =>
+        value + elementValue <= maxValue &&
+        elements.length + 1 <= maxChunkLength
+    );
     if (chunk === undefined) {
       // If no chunk was found, create a new chunk.
       chunk = { value: 0, elements: [] };
@@ -156,10 +167,6 @@ async function _getDemangleCallback(): Promise<DemangleFunction> {
     // therefore `import` can throw. Also some browsers might refuse to load a
     // wasm module because of our CSP.
     // See webpack bug https://github.com/webpack/webpack/issues/8517
-
-    // See https://github.com/benmosher/eslint-plugin-import/issues/2098 about
-    // the eslint disabling.
-    // eslint-disable-next-line import/no-unresolved
     const { demangle_any } = await import('gecko-profiler-demangle');
     return demangle_any;
   } catch (error) {
@@ -285,9 +292,11 @@ export class SymbolStore {
     // all libraries is blocked on getting symbols for libxul, latency suffers.
     // On the other hand, if we fire off a separate request for each library,
     // latency also suffers because of per-request overhead and pipelining limits.
+    // We also limit each chunk to at most MAX_JOB_COUNT_PER_CHUNK libraries.
     const chunks = _partitionIntoChunksOfMaxValue(
       requestsForNonCachedLibs,
       10000,
+      MAX_JOB_COUNT_PER_CHUNK,
       ({ addresses }) => addresses.size
     );
 

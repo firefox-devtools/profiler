@@ -5,7 +5,6 @@
 
 import React, { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
-import { oneLine } from 'common-tags';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
@@ -74,10 +73,13 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeImpl extends PureComponent<Props> {
-  _mainColumn: Column<CallNodeDisplayData> = { propName: 'name', title: '' };
+  _mainColumn: Column<CallNodeDisplayData> = {
+    propName: 'name',
+    titleL10nId: '',
+  };
   _appendageColumn: Column<CallNodeDisplayData> = {
     propName: 'lib',
-    title: '',
+    titleL10nId: '',
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
@@ -91,79 +93,42 @@ class CallTreeImpl extends PureComponent<Props> {
       switch (weightType) {
         case 'tracing-ms':
           return [
-            { propName: 'totalPercent', title: '' },
+            { propName: 'totalPercent', titleL10nId: '' },
             {
               propName: 'total',
-              title: 'Running Time (ms)',
-              tooltip: oneLine`
-                The "total" running time includes a summary of all the time where this
-                function was observed to be on the stack. This includes the time where
-                the function was actually running, and the time spent in the callers from
-                this function.
-            `,
+              titleL10nId: 'CallTree--tracing-ms-total',
             },
             {
               propName: 'self',
-              title: 'Self (ms)',
-              tooltip: oneLine`
-                The "self" time only includes the time where the function was
-                the leaf-most one on the stack. If this function called into other functions,
-                then the "other" functions' time is not included. The "self" time is useful
-                for understanding where time was actually spent in a program.
-            `,
+              titleL10nId: 'CallTree--tracing-ms-self',
             },
-            { propName: 'icon', title: '', component: Icon },
+            { propName: 'icon', titleL10nId: '', component: Icon },
           ];
         case 'samples':
           return [
-            { propName: 'totalPercent', title: '' },
+            { propName: 'totalPercent', titleL10nId: '' },
             {
               propName: 'total',
-              title: 'Total (samples)',
-              tooltip: oneLine`
-                The "total" sample count includes a summary of every sample where this
-                function was observed to be on the stack. This includes the time where the
-                function was actually running, and the time spent in the callers from this
-                function.
-            `,
+              titleL10nId: 'CallTree--samples-total',
             },
             {
               propName: 'self',
-              title: 'Self',
-              tooltip: oneLine`
-                The "self" sample count only includes the samples where the function was
-                the leaf-most one on the stack. If this function called into other functions,
-                then the "other" functions' counts are not included. The "self" count is useful
-                for understanding where time was actually spent in a program.
-            `,
+              titleL10nId: 'CallTree--samples-self',
             },
-            { propName: 'icon', title: '', component: Icon },
+            { propName: 'icon', titleL10nId: '', component: Icon },
           ];
         case 'bytes':
           return [
-            { propName: 'totalPercent', title: '' },
+            { propName: 'totalPercent', titleL10nId: '' },
             {
               propName: 'total',
-              title: 'Total Size (bytes)',
-              tooltip: oneLine`
-                The "total size" includes a summary of all of the bytes allocated or
-                deallocated while this function was observed to be on the stack. This
-                includes both the bytes where the function was actually running, and the
-                bytes of the callers from this function.
-            `,
+              titleL10nId: 'CallTree--bytes-total',
             },
             {
               propName: 'self',
-              title: 'Self (bytes)',
-              tooltip: oneLine`
-                The "self" bytes includes the bytes allocated or deallocated while this
-                function was the leaf-most one on the stack. If this function called into
-                other functions, then the "other" functions' bytes are not included.
-                The "self" bytes are useful for understanding where memory was actually
-                allocated or deallocated in the program.
-            `,
+              titleL10nId: 'CallTree--bytes-self',
             },
-            { propName: 'icon', title: '', component: Icon },
+            { propName: 'icon', titleL10nId: '', component: Icon },
           ];
         default:
           throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');

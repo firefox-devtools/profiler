@@ -109,6 +109,52 @@ CallNodeContextMenu--copy-function-name = Copy function name
 CallNodeContextMenu--copy-script-url = Copy script URL
 CallNodeContextMenu--copy-stack = Copy stack
 
+## CallTree
+## This is the component for Call Tree panel.
+
+CallTree--tracing-ms-total = Running Time (ms)
+    .title =
+        The “total” running time includes a summary of all the time where this
+        function was observed to be on the stack. This includes the time where
+        the function was actually running, and the time spent in the callers from
+        this function.
+CallTree--tracing-ms-self = Self (ms)
+    .title =
+        The “self” time only includes the time where the function was
+        the end of the stack. If this function called into other functions,
+        then the “other” functions’ time is not included. The “self” time is useful
+        for understanding where time was actually spent in a program.
+CallTree--samples-total = Total (samples)
+    .title =
+        The “total” sample count includes a summary of every sample where this
+        function was observed to be on the stack. This includes the time where the
+        function was actually running, and the time spent in the callers from this
+        function.
+CallTree--samples-self = Self
+    .title =
+        The “self” sample count only includes the samples where the function was
+        the end of the stack. If this function called into other functions,
+        then the “other” functions’ counts are not included. The “self” count is useful
+        for understanding where time was actually spent in a program.
+CallTree--bytes-total = Total Size (bytes)
+    .title =
+        The “total size” includes a summary of all of the bytes allocated or
+        deallocated while this function was observed to be on the stack. This
+        includes both the bytes where the function was actually running, and the
+        bytes of the callers from this function.
+CallTree--bytes-self = Self (bytes)
+    .title =
+        The “self” bytes includes the bytes allocated or deallocated while this
+        function was the end of the stack. If this function called into
+        other functions, then the “other” functions’ bytes are not included.
+        The “self” bytes are useful for understanding where memory was actually
+        allocated or deallocated in the program.
+
+## CallTreeSidebar
+## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+
+CallTreeSidebar--select-a-node = Select a node to display information about it.
+
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
@@ -245,7 +291,6 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
        *[other] Manage these recordings
     }
 
-
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
@@ -273,6 +318,18 @@ MarkerSettings--panel-search =
     .label = Filter Markers:
     .title = Only display markers that match a certain name
 
+## MarkerSidebar
+## This is the sidebar component that is used in Marker Table panel.
+
+MarkerSidebar--select-a-marker = Select a marker to display information about it.
+
+## MarkerTable
+## This is the component for Marker Table panel.
+
+MarkerTable--start = Start
+MarkerTable--duration = Duration
+MarkerTable--type = Type
+MarkerTable--description = Description
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -567,6 +624,70 @@ TrackContextMenu--hide-other-screenshots-tracks = Hide other Screenshots tracks
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Hide “{ $trackName }”
 TrackContextMenu--show-all-tracks = Show all tracks
+
+## TransformNavigator
+## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
+## Chart components.
+## These messages are displayed above the table / graph once the user selects to
+## apply a specific transformation function to a node in the call tree. It's the
+## name of the function, followed by the node's name.
+## To learn more about them, visit:
+## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
+
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Complete “{ $item }”
+
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Collapse: { $item }
+
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Focus Node: { $item }
+
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Focus: { $item }
+
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Merge Node: { $item }
+
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Merge: { $item }
+
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Drop: { $item }
+
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Collapse recursion: { $item }
+
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Collapse subtree: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
