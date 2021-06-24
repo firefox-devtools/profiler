@@ -106,7 +106,7 @@ CallNodeContextMenu--copy-stack = Stapel kopieren
 
 CallTree--tracing-ms-total = Laufzeit (ms)
     .title =
-        Die „gesamte“ Laufzeit schließt eine Zusammenfassung der Zeit ein, in der
+        Zur „gesamten“ Laufzeit gehört eine Zusammenfassung der Zeit, in der
         diese Funktion im Stack auffindbar war. Dazu gehört auch die Zeit,
         in der die Funktion ausgeführt wurde und die Zeit, die die Aufrufer
         dieser Funktion gebraucht haben.
@@ -117,7 +117,7 @@ CallTree--tracing-ms-self = Eigene (ms)
         „eigene“ Zeit ist hilfreich, um zu verstehen, wie viel Zeit wirklich in einem Programm verbraucht wurde.
 CallTree--samples-total = Gesamt (Teilmengen)
     .title =
-        Die „gesamte“ Laufzeit der Teilmengen schließt eine Zusammenfassung aller Teilmengen ein, in der
+        Zur „gesamten“ Laufzeit der Teilmengen gehört eine Zusammenfassung aller Teilmengen, in der
         diese Funktion im Stack auffindbar war. Dazu gehört auch die Zeit,
         in der die Funktion ausgeführt wurde und die Zeit, die die Aufrufer
         dieser Funktion gebraucht haben.
@@ -126,54 +126,159 @@ CallTree--samples-self = Eigene
         Die „eigene“ Zeit sind nur die Teilmengen, in denen die Funktion das Ende
         des Stacks war. Wenn diese Funktion andere Funktionen aufgerufen hat, wird die Zeit der „anderen“ Funktionen nicht mitgezählt. Die
         „eigene“ Zeit ist hilfreich, um zu verstehen, wie viel Zeit wirklich in einem Programm verbraucht wurde.
+CallTree--bytes-total = Gesamtgröße (Bytes)
+    .title =
+        Zur „Gesamtgröße“ gehört eine Zusammenfassung alles Bytes, die alloziert oder freigegeben wurden, während diese Funktion sich im Stack befand. Dazu
+        gehören die Bytes von der Ausführung der Funktion und die
+        Bytes der Funktionen, die sie aufgerufen haben.
+CallTree--bytes-self = Eigene (Bytes)
+    .title =
+        Zu den „eigenen“ Bytes gehören die Bytes, die alloziert oder freigegeben wurden, während diese Funktion sich am Ende des Stacks befand. Wenn diese Funktion
+        andere Funktionen aufgerufen hat, werden die Bytes diese „anderen“ Funktionen nicht mitgezählt.
+        Die „eigenen“ Bytes sind hilfreich, um zu verstehen, wo Speicherplatz im Programm alloziert oder freigegeben wurde.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Wählen Sie einen Knoten aus, um Informationen darüber anzuzeigen.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Geben Sie die Profil-URLs ein, die Sie vergleichen möchten
+CompareHome--instruction-content =
+    Das Werkzeug extrahiert die Daten aus dem ausgewählten Track und Bereich für
+    jedes Profil und stellt beide gleichartig dar, um den Vergleich zu vereinfachen.
+CompareHome--form-label-profile1 = Profil 1:
+CompareHome--form-label-profile2 = Profil 2:
+CompareHome--submit-button =
+    .value = Profile abrufen
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Dieses Profil wurde in einem Build ohne Release-Optimierungen aufgezeichnet.
+        Leistungsmessungen gelten möglicherweise nicht für die Release-Population.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Sidebar öffnen
+Details--close-sidebar-button =
+    .title = Sidebar schließen
+Details--error-boundary-message =
+    .message = Oh, oh, in diesem Panel ist ein unbekannter Fehler aufgetreten.
 
 ## Footer Links
 
+FooterLinks--legal = Rechtliches
+FooterLinks--Privacy = Datenschutz
+FooterLinks--Cookies = Cookies
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Graphentyp:
+FullTimeline--categories-with-cpu = Kategorien mit CPU
+FullTimeline--categories = Kategorien
+FullTimeline--stack-height = Höhe des Stacks
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> Tracks sichtbar
 
 ## Home page
 
+Home--upload-from-file-input-button = Profil aus Datei laden
+Home--upload-from-url-button = Profil von URL laden
+Home--load-from-url-submit-button =
+    .value = Laden
+Home--documentation-button = Dokumentation
+Home--menu-button = { -profiler-brand-name }-Menüschaltfläche aktivieren
+Home--menu-button-instructions =
+    Aktivieren Sie die Profiler-Menüschaltfläche, um Leistung in einem Profil von { -firefox-brand-name }
+    aufzuzeichnen, dann analysieren Sie sie und teilen Sie das Ergebnis auf profiler.firefox.com.
+Home--addon-button = Add-on installieren
+Home--addon-button-instructions =
+    Installieren Sie das Gecko-Profiler-Add-on, um Leistung in einem Profil von { -firefox-brand-name }
+    aufzuzeichnen, dann analysieren Sie sie und teilen Sie das Ergebnis auf profiler.firefox.com.
+Home--record-instructions =
+    Um die Profilerstellung zu starten, klicken Sie auf die Schaltfläche Profilerstellung oder verwenden Sie die
+    Tastatürkürzel. Das Symbol ist blau, wenn ein Profil aufzeichnet.
+    Drücken Sie <kbd>Aufzeichnen</kbd>, um die Daten in profiler.firefox.com zu laden.
+Home--instructions-title = So können Sie Profile anzeigen und aufzeichnen
+Home--instructions-content =
+    Das Aufzeichnen von Leistungsprofilen benötigt <a>{ -firefox-brand-name }</a>.
+    Vorhandene Profile können jedoch in jedem modernen Browser angezeigt werden.
+Home--record-instructions-start-stop = Profilerstellung stoppen und starten
+Home--record-instructions-capture-load = Profil aufzeichnen und laden
+Home--profiler-motto = Zeichnen Sie ein Leistungsprofil auf. Analysieren Sie es. Teilen Sie es. Machen Sie das Web schneller.
+Home--additional-content-title = Bestehende Profile laden
+Home--additional-content-content = Sie können eine Profildatei per <strong>Ziehen und Ablegen</strong> hierher bewegen, um sie zu laden, oder:
+Home--compare-recordings-info = Sie können auch Aufnahmen vergleichen. <a>Öffnen Sie die Vergleichsschnittstelle.</a>
+Home--recent-uploaded-recordings-title = Kürzlich hochgeladene Aufzeichnungen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Filterbegriffe eingeben
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Nur eigene Zeit anzeigen
+    .title = Zeigt nur die Zeit in einem Aufrufknoten an, ohne seine Unterpunkte
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Klicken Sie hier, um das Profil „{ $smallProfileName }“ zu laden
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Löschen
+    .title = Dieses Profil kann nicht gelöscht werden, weil die Berechtigung fehlt.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Es wurde noch kein Profil hochgeladen!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Sehen und verwalten Sie alle Ihre Aufzeichnungen ({ $profilesRestCount } weitere)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Dieses Aufzeichnung verwalten
+       *[other] Dieses Aufzeichnungen verwalten
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Auswahl aus Markierdauer festlegen
+MarkerContextMenu--start-selection-here = Auswahl hier beginnen
+MarkerContextMenu--end-selection-here = Auswahl hier beenden
+MarkerContextMenu--start-selection-at-marker-start = Auswahl am <strong>Beginn</strong> der Markierung beginnen
+MarkerContextMenu--start-selection-at-marker-end = Auswahl am <strong>Ende</strong> der Markierung beginnen
+MarkerContextMenu--end-selection-at-marker-start = Auswahl am <strong>Beginn</strong> der Markierung beenden
+MarkerContextMenu--end-selection-at-marker-end = Auswahl am <strong>Ende</strong> der Markierung beenden
+MarkerContextMenu--copy-description = Beschreibung kopieren
+MarkerContextMenu--copy-call-stack = Aufrufstack kopieren
+MarkerContextMenu--copy-url = URL kopieren
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
