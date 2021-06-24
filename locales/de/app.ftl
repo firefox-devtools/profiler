@@ -78,10 +78,54 @@ CallNodeContextMenu--transform-collapse-function-subtree = Funktion einklappen
         Wenn eine Funktion eingeklappt wird, werden alle Aufrufe durch diese Funktion entfernt
         und die Zeit wird komplett der Funktion zugewiesen. Dies kann helfen, ein Profil zu vereinfachen,
         das Code aufruft, der nicht analysiert werden muss.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }</strong> einklappen
+    .title =
+        Wenn eine Ressource eingeklappt wird, werden alle Aufrufe dieser 
+        Ressource in einen einzigen eingeklappten Aufrufknoten umgewandelt.
+CallNodeContextMenu--transform-collapse-direct-recursion = Direkte Rekursion einklappen
+    .title =
+        Einklappen der direkten Rekursion entfernt Aufrufe, die wiederholt
+        in dieselbe Funktion rekurrieren.
+CallNodeContextMenu--transform-drop-function = Teilmengen mit dieser Funktion verwerfen
+    .title =
+        Wenn Teilmengen verworfen werden, wird ihre Zeit aus dem Profil entfernt. Dies ist hilfreich,
+        wenn Laufzeitinformationen entfernt werden sollen, die für die Analyse nicht relevant sind.
+CallNodeContextMenu--expand-all = Alle ausklappen
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Name der Funktion auf Searchfox nachschlagen
+CallNodeContextMenu--copy-function-name = Funktionsname kopieren
+CallNodeContextMenu--copy-script-url = Skript-URL kopieren
+CallNodeContextMenu--copy-stack = Stapel kopieren
 
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Laufzeit (ms)
+    .title =
+        Die „gesamte“ Laufzeit schließt eine Zusammenfassung der Zeit ein, in der
+        diese Funktion im Stack auffindbar war. Dazu gehört auch die Zeit,
+        in der die Funktion ausgeführt wurde und die Zeit, die die Aufrufer
+        dieser Funktion gebraucht haben.
+CallTree--tracing-ms-self = Eigene (ms)
+    .title =
+        Die „eigene“ Zeit ist nur die Zeit, in der die Funktion das Ende
+        des Stacks war. Wenn diese Funktion andere Funktionen aufgerufen hat, wird die Zeit der „anderen“ Funktionen nicht mitgezählt. Die
+        „eigene“ Zeit ist hilfreich, um zu verstehen, wie viel Zeit wirklich in einem Programm verbraucht wurde.
+CallTree--samples-total = Gesamt (Teilmengen)
+    .title =
+        Die „gesamte“ Laufzeit der Teilmengen schließt eine Zusammenfassung aller Teilmengen ein, in der
+        diese Funktion im Stack auffindbar war. Dazu gehört auch die Zeit,
+        in der die Funktion ausgeführt wurde und die Zeit, die die Aufrufer
+        dieser Funktion gebraucht haben.
+CallTree--samples-self = Eigene
+    .title =
+        Die „eigene“ Zeit sind nur die Teilmengen, in denen die Funktion das Ende
+        des Stacks war. Wenn diese Funktion andere Funktionen aufgerufen hat, wird die Zeit der „anderen“ Funktionen nicht mitgezählt. Die
+        „eigene“ Zeit ist hilfreich, um zu verstehen, wie viel Zeit wirklich in einem Programm verbraucht wurde.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
