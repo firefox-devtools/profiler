@@ -476,22 +476,63 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Vollständiger Bereich
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Das Profil wird direkt von { -firefox-brand-name } importiert...
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Datei lesen und Profil verarbeiten…
+ProfileLoaderAnimation--loading-message-local =
+    .message = Noch nicht implementiert.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Profil herunterladen und verarbeiten…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Profil herunterladen und bearbeiten…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Profile lesen und verarbeiten...
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Ansicht nicht gefunden
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Zurück zur Startseite
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Installieren…
+ServiceWorkerManager--pending-button = Anwenden und neu laden
+ServiceWorkerManager--installed-button = Anwendung neu laden
+ServiceWorkerManager--updated-while-not-ready =
+    Eine neue Version dieser Anwendung wurde installiert, bevor
+    die Seite vollständig geladen war. Es kann zu Fehlfunktionen kommen.
+ServiceWorkerManager--new-version-is-ready = Eine neue Version der Anwendung wurde heruntergeladen und ist einsatzbereit.
+ServiceWorkerManager--hide-notice-button =
+    .title = Hinweis zum erneuten Laden ausblenden
+    .aria-label = Hinweis zum erneuten Laden ausblenden
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Alle Stacks
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Nativ
+StackSettings--use-data-source-label = Datenquelle:
+StackSettings--call-tree-strategy-timing = Zeiten
+    .title = Zusammenfassung erstellen mit einzelnen Stacks von im Zeitverlauf ausgeführtem Code
+StackSettings--call-tree-strategy-js-allocations = JavaScript-Allokationen
+    .title = Zusammenfassung erstellen mit von JavaScript-allozierten Bytes (keine Freigaben)
+StackSettings--call-tree-strategy-native-retained-allocations = Zurückbehaltener Speicher
+    .title = Zusammenfassung erstellen mit Speicherbytes, die alloziert wurden und in der aktuell gewählten Vorschau nie freigegeben wurden
+StackSettings--call-tree-native-allocations = Allozierter Speicher
+    .title = Zusammenfassung erstellen mit allozierten Speicherbytes
+StackSettings--call-tree-strategy-native-deallocations-memory = Freigegebener Speicher
+    .title = Zusammenfassung erstellen mit freigegebenen Speicherbytes, von der Website, auf der der Speicher alloziert wurde
 
 ## Tab Bar for the bottom half of the analysis UI.
 
