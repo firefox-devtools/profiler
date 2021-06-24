@@ -39,11 +39,45 @@ AppViewRouter--error-message-public =
     .message = Das Profil konnte nicht heruntergeladen werden.
 AppViewRouter--error-message-from-url =
     .message = Das Profil konnte nicht heruntergeladen werden.
+AppViewRouter--route-not-found--home =
+    .specialMessage = Die URL, die Sie erreichen wollten, wurde nicht erkannt.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Funktion zusammenführen
+    .title =
+        Wenn Sie eine Funktion zusammenführen, wird sie aus dem Profil entfernt und ihre Laufzeit wird der
+        Funktion hinzugefügt, von der sie aufgerufen wurde. Dies geschieht überall da, wo die Funktion
+        im Baum aufgerufen wurde.
+CallNodeContextMenu--transform-merge-call-node = Nur Knoten zusammenführen
+    .title =
+        Wenn Sie einen Knoten zusammenführen, wird sie aus dem Profil entfernt und ihre Laufzeit wird dem Knoten der
+        Funktion hinzugefügt, von der sie aufgerufen wurde. Die Funktion wird nur aus diesem Teil
+        des Baums entfernt. Alle anderen Orten, von denen aus die Funktion aufgerufen wurde,
+        verbleiben im Profil.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Der Fokus auf eine Funktion entfernt jede Teilmenge, die diese Funktion nicht enthält.
+    Außerdem wird eine neue Wurzel für den Aufrufbau festgelegt, sodass die Funktion
+    die einzige Wurzel des Baumes ist. dies kann mehrere Aufruforte einer Funktion
+    in einem Profil zu einem Aufrufknoten vereinen.
+CallNodeContextMenu--transform-focus-function = Auf Funktion fokussieren
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Auf Funktion fokussieren (invertiert)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Nur auf Unterbaum konzentrieren
+    .title =
+        Der Fokus auf einen Unterbaum entfernt jede Teilmenge, die diesen
+        Teil des Aufrufbaums nicht enthält. Es wird ein Ast aus dem Aufrufbaum gezogen, jedoch nur für diesen einen Aufrufknoten. Alle
+        anderen Aufrufe der Funktion werden ignoriert.
+CallNodeContextMenu--transform-collapse-function-subtree = Funktion einklappen
+    .title =
+        Wenn eine Funktion eingeklappt wird, werden alle Aufrufe durch diese Funktion entfernt
+        und die Zeit wird komplett der Funktion zugewiesen. Dies kann helfen, ein Profil zu vereinfachen,
+        das Code aufruft, der nicht analysiert werden muss.
 
 ## CallTree
 ## This is the component for Call Tree panel.
