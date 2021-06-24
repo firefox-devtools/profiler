@@ -533,14 +533,39 @@ StackSettings--call-tree-native-allocations = Allozierter Speicher
     .title = Zusammenfassung erstellen mit allozierten Speicherbytes
 StackSettings--call-tree-strategy-native-deallocations-memory = Freigegebener Speicher
     .title = Zusammenfassung erstellen mit freigegebenen Speicherbytes, von der Website, auf der der Speicher alloziert wurde
+StackSettings--call-tree-strategy-native-deallocations-sites = Freigegebene Websites
+    .title = Zusammenfassung erstellen mit freigegebenen Speicherbytes, von der Website, auf der der Speicher alloziert wurde
+StackSettings--invert-call-stack = Aufrufstack umkehren
+    .title = Sortieren nach in einem Aufrufknoten, die Unterpunkte werden ignoriert.
+StackSettings--show-user-timing = Nutzer-Zeitrechnung anzeigen
+StackSettings--panel-search =
+    .label = Stacks filtern:
+    .title = Nur Stacks anzeigen, die eine Funktion enthalten, deren Namen zu diesem Unterstring passen
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Aufrufbau
+TabBar--flame-graph-tab = Flammendiagramm
+TabBar--stack-chart-tab = Stack-Diagramm
+TabBar--marker-chart-tab = Markierungsdiagramm
+TabBar--marker-table-tab = Markierungstabelle
+TabBar--network-tab = Netzwerk
+TabBar--js-tracer-tab = JS-Aufzeichnung
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Nur diese Prozessgruppe anzeigen
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Nur „{ $trackName }“ anzeigen
+TrackContextMenu--hide-other-screenshots-tracks = Andere Screenshots-Tracks ausblenden
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = „{ $trackName }“ verbergen
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
