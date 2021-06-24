@@ -574,6 +574,7 @@ export function applySymbolicationStep(
   const oldFuncToNewFuncEntries = [];
 
   const newFrameTableFuncColumn = oldFrameTable.func.slice();
+  const newFrameTableLineColumn = oldFrameTable.line.slice();
   for (const frameIndex of allFramesForThisLib) {
     const oldFunc = oldFrameTable.func[frameIndex];
     const nativeSymbolIndex = newFrameTableNativeSymbolsColumn[frameIndex];
@@ -623,12 +624,14 @@ export function applySymbolicationStep(
     }
 
     newFrameTableFuncColumn[frameIndex] = funcIndex;
+    newFrameTableLineColumn[frameIndex] = addressResult.line ?? null;
     oldFuncToNewFuncEntries.push([oldFunc, funcIndex]);
   }
   const frameTable = {
     ...oldFrameTable,
     func: newFrameTableFuncColumn,
     nativeSymbol: newFrameTableNativeSymbolsColumn,
+    line: newFrameTableLineColumn,
   };
 
   // Build oldFuncToNewFuncMapForThisLib.
