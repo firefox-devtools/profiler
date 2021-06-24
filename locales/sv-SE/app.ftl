@@ -103,6 +103,8 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Dokumentation
 Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--addon-button = Installera tillägg
+Home--record-instructions-capture-load = Spela in och ladda profil
+Home--profiler-motto = Spela in en prestandaprofil. Analysera den. Dela den. Gör webben snabbare.
 Home--additional-content-title = Ladda befintliga profiler
 Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
 
