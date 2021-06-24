@@ -22,10 +22,17 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Webbapp för prestationsanalys av { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Gå till vårt Git-repository (detta öppnas i ett nytt fönster)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Det gick inte att hämta profilen från { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Det gick inte att läsa filen eller analysera profilen i den.
 AppViewRouter--error-message-local =
     .message = Inte implementerat än.
 AppViewRouter--error-message-public =
@@ -75,14 +82,29 @@ Details--open-sidebar-button =
 
 ## Footer Links
 
+FooterLinks--legal = Juridisk information
+FooterLinks--Privacy = Sekretesspolicy
+FooterLinks--Cookies = Kakor
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Diagramtyp:
+FullTimeline--categories-with-cpu = Kategorier med CPU
+FullTimeline--categories = Kategorier
 
 ## Home page
 
+Home--upload-from-file-input-button = Ladda en profil från fil
+Home--upload-from-url-button = Ladda en profil från en URL
+Home--load-from-url-submit-button =
+    .value = Ladda
+Home--documentation-button = Dokumentation
+Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
+Home--addon-button = Installera tillägg
+Home--additional-content-title = Ladda befintliga profiler
+Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -96,11 +118,31 @@ Details--open-sidebar-button =
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Klicka här för att ladda profil { $smallProfileName }
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ingen profil har laddats upp än!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Se och hantera alla dina inspelningar ({ $profilesRestCount } till)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Hantera denna inspelning
+       *[other] Hantera dessa inspelningar
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = Kopiera beskrivning
+MarkerContextMenu--copy-url = Kopiera URL
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -113,15 +155,85 @@ Details--open-sidebar-button =
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--duration = Längd
+MarkerTable--type = Typ
+MarkerTable--description = Beskrivning
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Profilinfo
+MenuButtons--index--cancel-upload = Avbryt uppladdning
+MenuButtons--index--share-upload =
+    .label = Ladda upp lokal profil
+MenuButtons--index--share-re-upload =
+    .label = Ladda upp igen
+MenuButtons--index--share-error-uploading =
+    .label = Fel vid uppladdning
+MenuButtons--index--revert = Återgå till originalprofil
+MenuButtons--index--docs = Dokument
+MenuButtons--permalink--button =
+    .label = Permalänk
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Uppladdad:
+MenuButtons--index--profile-info-uploaded-actions = Ta bort
+MenuButtons--index--metaInfo-subtitle = Profilinformation
+MenuButtons--metaInfo--symbols = Symboler:
+MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } fysisk kärna
+       *[other] { $physicalCPUs } fysiska kärnor
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } logisk kärna
+       *[other] { $logicalCPUs } logiska kärnor
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } fysisk kärna
+       *[other] { $physicalCPUs } fysiska kärnor
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } logisk kärna
+       *[other] { $logicalCPUs } logiska kärnor
+    }
+MenuButtons--metaInfo--interval = Intervall:
+MenuButtons--metaInfo--profile-version = Profilversion:
+MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
+MenuButtons--metaInfo--buffer-duration = Buffertlängd:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } sekund
+       *[other] { $configurationDuration } sekunder
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Obegränsat
+MenuButtons--metaInfo--application = Applikation
+MenuButtons--metaInfo--name-and-version = Namn och version:
+MenuButtons--metaInfo--update-channel = Uppdateringskanal:
+MenuButtons--metaInfo--build-id = Bygg-ID:
+MenuButtons--metaInfo--build-type = Byggtyp:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -129,6 +241,7 @@ MenuButtons--metaInfo--build-type-debug = Felsök
 
 ##
 
+MenuButtons--metaInfo--platform = Plattform
 MenuButtons--metaInfo--device = Enhet:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = OS:
@@ -146,6 +259,9 @@ MenuButtons--metaOverheadStatistics-min = Min
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Ladda upp
+MenuButtons--publish--upload-title = Laddar upp profil...
+MenuButtons--publish--cancel-upload = Avbryt uppladdning
 MenuButtons--publish--message-try-again = Försök igen
 MenuButtons--publish--download = Hämta
 MenuButtons--publish--compressing = Komprimerar...
@@ -167,29 +283,59 @@ MenuButtons--publish--compressing = Komprimerar...
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importerar profilen direkt från { -firefox-brand-name }...
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Läser fil och bearbetar profil...
+ProfileLoaderAnimation--loading-message-local =
+    .message = Inte implementerat än.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Laddar ner och bearbetar profil...
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Läser och bearbetar profil...
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Vy hittades inte
 
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Tillbaka till hem
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Installerar…
+ServiceWorkerManager--pending-button = Applicera och ladda om
+ServiceWorkerManager--installed-button = Ladda om applikationen
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
 StackSettings--implementation-javascript = JavaScript
+StackSettings--use-data-source-label = Datakälla:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--network-tab = Nätverk
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Visa endast denna processgrupp
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Visa endast "{ $trackName }"
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Dölj "{ $trackName }"
+TrackContextMenu--show-all-tracks = Visa alla spår
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -200,8 +346,29 @@ StackSettings--implementation-javascript = JavaScript
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Fokusnod: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Fokus: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Sammanfoga nod: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Sammanfoga: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Uppladdade inspelningar
