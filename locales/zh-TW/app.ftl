@@ -53,6 +53,9 @@ CallNodeContextMenu--transform-merge-call-node = 只合併節點
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
 CallNodeContextMenu--transform-focus-function-title = 聚焦於函數，將移除該函數之外所有紀錄到的項目。除此之外，還會重新將呼叫樹的根指定為該函數。此功能可以將檢測檔中的多個函數呼叫點合併為單一呼叫節點。
+CallNodeContextMenu--copy-function-name = 複製函數名稱
+CallNodeContextMenu--copy-script-url = 複製指令碼網址
+CallNodeContextMenu--copy-stack = 複製堆疊
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -61,11 +64,13 @@ CallNodeContextMenu--transform-focus-function-title = 聚焦於函數，將移�
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = 選擇節點來顯示該節點的相關資訊。
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = 輸入您想要用來比較的檢測檔網址
 CompareHome--form-label-profile1 = 檢測檔 1:
 CompareHome--form-label-profile2 = 檢測檔 2:
 CompareHome--submit-button =
@@ -158,6 +163,12 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = 從此處開始選擇
+MarkerContextMenu--end-selection-here = 至此結束選擇
+MarkerContextMenu--start-selection-at-marker-start = 從標記的<strong>起點</strong>開始選擇
+MarkerContextMenu--start-selection-at-marker-end = 從標記的<strong>終點</strong>開始選擇
+MarkerContextMenu--end-selection-at-marker-start = 選擇到標記的<strong>起點</strong>為止
+MarkerContextMenu--end-selection-at-marker-end = 選擇到標記的<strong>終點</strong>為止
 MarkerContextMenu--copy-description = 複製描述
 MarkerContextMenu--copy-call-stack = 複製呼叫堆疊
 MarkerContextMenu--copy-url = 複製網址
@@ -397,14 +408,37 @@ StackSettings--implementation-all-stacks = 所有堆疊
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 資料來源:
+StackSettings--call-tree-strategy-timing = 計時
+    .title = 使用紀錄到已執行的程式碼顯示摘要
+StackSettings--call-tree-strategy-js-allocations = JavaScript 分配
+    .title = 顯示 JavaScript 分配到的位元組摘要（不含解除分配）
+StackSettings--show-user-timing = 顯示使用者計時
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = 呼叫數
+TabBar--flame-graph-tab = 火焰圖
+TabBar--stack-chart-tab = 堆疊圖
+TabBar--marker-chart-tab = 標記圖
+TabBar--marker-table-tab = 標記表
+TabBar--network-tab = 網路
+TabBar--js-tracer-tab = JS 追蹤器
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = 只顯示此處理程序群組
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = 只顯示「{ $trackName }」
+TrackContextMenu--hide-other-screenshots-tracks = 隱藏其他畫面擷圖軌
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = 隱藏「{ $trackName }」
+TrackContextMenu--show-all-tracks = 顯示所有軌道
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -415,8 +449,55 @@ StackSettings--use-data-source-label = 資料來源:
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = 完成「{ $item }」
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = 折疊: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = 聚焦節點: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = 聚焦: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = 合併節點: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = 合併: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = 丟棄: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = 摺疊遞迴: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = 摺疊子樹: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = 已上傳的紀錄檔
