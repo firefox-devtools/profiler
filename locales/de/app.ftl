@@ -279,52 +279,199 @@ MarkerContextMenu--end-selection-at-marker-end = Auswahl am <strong>Ende</strong
 MarkerContextMenu--copy-description = Beschreibung kopieren
 MarkerContextMenu--copy-call-stack = Aufrufstack kopieren
 MarkerContextMenu--copy-url = URL kopieren
+MarkerContextMenu--copy-full-payload = Vollständige Nutzlast kopieren
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Filtermarkierungen:
+    .title = Nur Markierungen anzeigen, die zu einem bestimmten Namen passen
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Wählen Sie eine Markierung aus, um Informationen darüber anzuzeigen.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Beginn
+MarkerTable--duration = Dauer
+MarkerTable--type = Typ
+MarkerTable--description = Beschreibung
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Profilinformationen
+MenuButtons--index--full-view = Vollständige Ansicht
+MenuButtons--index--cancel-upload = Hochladen abbrechen
+MenuButtons--index--share-upload =
+    .label = Lokales Profil hochladen
+MenuButtons--index--share-re-upload =
+    .label = Erneut hochladen
+MenuButtons--index--share-error-uploading =
+    .label = Fehler beim Hochladen
+MenuButtons--index--revert = Auf Originalprofil zurücksetzen
+MenuButtons--index--docs = Dokumentation
+MenuButtons--permalink--button =
+    .label = Permalink
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Hochgeladen:
+MenuButtons--index--profile-info-uploaded-actions = Löschen
+MenuButtons--index--metaInfo-subtitle = Profilinformationen
+MenuButtons--metaInfo--symbols = Symbole:
+MenuButtons--metaInfo--profile-symbolicated = Profil ist symbolisiert
+MenuButtons--metaInfo--profile-not-symbolicated = Profil ist nicht symbolisiert
+MenuButtons--metaInfo--resymbolicate-profile = Profil erneut symbolisieren
+MenuButtons--metaInfo--symbolicate-profile = Profil symbolisieren
+MenuButtons--metaInfo--attempting-resymbolicate = Versuch, das Profil erneut zu symbolisieren
+MenuButtons--metaInfo--currently-symbolicating = Profil wird aktuell symbolisiert
+MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } physischer Kern
+       *[other] { $physicalCPUs } physische Kerne
+    },{ $logicalCPUs ->
+        [one] { $logicalCPUs } logischer Kern
+       *[other] { $logicalCPUs } logische Kerne
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } physischer Kern
+       *[other] { $physicalCPUs } physische Kerne
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } logischer Kern
+       *[other] { $logicalCPUs } logische Kerne
+    }
+MenuButtons--metaInfo--recording-started = Aufzeichnungsbeginn:
+MenuButtons--metaInfo--interval = Intervall:
+MenuButtons--metaInfo--profile-version = Profilversion:
+MenuButtons--metaInfo--buffer-capacity = Pufferkapazität:
+MenuButtons--metaInfo--buffer-duration = Pufferdauer:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } Sekunde
+       *[other] { $configurationDuration } Sekunden
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Unbegrenzt
+MenuButtons--metaInfo--application = Anwendung
+MenuButtons--metaInfo--name-and-version = Name und Version:
+MenuButtons--metaInfo--update-channel = Update-Kanal:
+MenuButtons--metaInfo--build-id = Build-ID:
+MenuButtons--metaInfo--build-type = Build-Typ:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debuggen
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Betriebssystem
+MenuButtons--metaInfo--device = Gerät:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = Betriebssystem:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Visuelle Messwerte
+MenuButtons--metaInfo--speed-index = Geschwindigkeitsindex:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual-Geschwindigkeitsindex:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Consentful-Geschwindigkeitsindex:
+MenuButtons--metaInfo-renderRowOfList-label-features = Funktionen:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Threads-Filter:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Erweiterungen:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Eigenverbrauch (Overhead) von { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Mittelwert
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Eigenverbrauch
+    .title = Zeit, um alle Threads zu erfassen
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Aufräumen
+    .title = Zeit, um abgelaufene Daten zu verwerfen.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Zähler
+    .title = Zeit, um alle Zähler zu sammeln
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
+    .title = Abstand zwischen zwei Teilmengen.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Sperrungen
+    .title = Zeit, um vor dem Erfassen die Ressource zu sperren
+MenuButtons--metaOverheadStatistics-overhead-duration = Dauer des Eigenverbrauchs:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Prozentualer Anteil des Eigenverbrauchs:
+MenuButtons--metaOverheadStatistics-profiled-duration = Dauer der Messung:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Einschließlich verborgener Threads
+MenuButtons--publish--renderCheckbox-label-hidden-time = Dauer eingeschlossener verborgener Threads
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Bildschirmfotos einschließen
+MenuButtons--publish--renderCheckbox-label-resource = URLs und Pfade von Ressourcen einschließen
+MenuButtons--publish--renderCheckbox-label-extension = Erweiterungsinformationen einschließen
+MenuButtons--publish--renderCheckbox-label-preference = Einstellungswerte einschließen
+MenuButtons--publish--reupload-performance-profile = Leistungsprofil erneut hochladen
+MenuButtons--publish--share-performance-profile = Leistungsprofil teilen
+MenuButtons--publish--info-description = Laden Sie Ihr Profil hoch und machen Sie es mit dem Link für jeden zugänglich.
+MenuButtons--publish--info-description-default = Standardmäßig werden Ihre persönlichen Daten entfernt.
+MenuButtons--publish--info-description-firefox-nightly = Dieses Profil stammt von { -firefox-nightly-brand-name }, daher sind standardmäßig alle Daten enthalten.
+MenuButtons--publish--include-additional-data = Zusätzliche Daten einschließen, die möglicherweise identifizierbar sind
+MenuButtons--publish--button-upload = Hochladen
+MenuButtons--publish--upload-title = Profil wird hochgeladen…
+MenuButtons--publish--cancel-upload = Hochladen abbrechen
+MenuButtons--publish--message-something-went-wrong = Oh, oh, beim Hochladen des Profils ist etwas schiefgegangen.
+MenuButtons--publish--message-try-again = Erneut versuchen
+MenuButtons--publish--download = Herunterladen
+MenuButtons--publish--compressing = Komprimieren…
 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Netzwerke filtern:
+    .title = Nur Netzwerkanfragen anzeigen, die zu einem bestimmten Namen passen
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Wussten Sie, dass Sie das Komma (,) verwenden können, um mit mehreren Begriffen zu suchen?
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Löschen
+    .title = Klicken Sie hier, um das Profil „{ $smallProfileName }“ zu löschen
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
