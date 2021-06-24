@@ -101,7 +101,7 @@
   margin: 5px 0;
 }
 
-.homeSectionActionButtons button {
+.homeSectionActionButtons button:not(:first-of-type) {
   border-left: none;
 }
 
@@ -171,15 +171,8 @@
   transition: opacity 300ms ease-out, transform 300ms ease-out;
 }
 
-/* This code comes from https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/ */
-
 .homeSectionUploadFromFileInput {
-  position: absolute;
-  z-index: -1;
-  overflow: hidden;
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
+  display: none;
 }
 
 .homeSectionLoadFromUrlInput {
@@ -189,13 +182,6 @@
 
 .homeSectionLoadFromUrlSubmitButton {
   margin: 0;
-}
-
-/* because the button is hidden, the focus indicator styling
-is applied to the parent label */
-label.homeSectionButton:focus-within {
-  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
-    0 0 0 4px var(--blue-50-a30);
 }
 
 @media (max-width: 1300px) {
