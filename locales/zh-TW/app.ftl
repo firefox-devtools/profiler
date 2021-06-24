@@ -145,11 +145,23 @@ IdleSearchField--search-input =
 ListOfPublishedProfiles--published-profiles-link =
     .title = 點擊此處載入檢測檔 { $smallProfileName }
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上傳任何檢測檔！
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] 管理此紀錄
+       *[other] 管理下列紀錄
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = 複製描述
+MarkerContextMenu--copy-call-stack = 複製呼叫堆疊
+MarkerContextMenu--copy-url = 複製網址
+MarkerContextMenu--copy-full-payload = 複製完整酬載
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -162,29 +174,141 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上�
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = 開始
+MarkerTable--duration = 持續時間
+MarkerTable--type = 類型
+MarkerTable--description = 描述
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = 檢測檔資訊
+MenuButtons--index--full-view = 完整畫面
+MenuButtons--index--cancel-upload = 取消上傳
+MenuButtons--index--share-upload =
+    .label = 上傳本機檢測檔
+MenuButtons--index--share-re-upload =
+    .label = 重新上傳
+MenuButtons--index--share-error-uploading =
+    .label = 上傳時發生錯誤
+MenuButtons--index--revert = 回復到原始檢測檔
+MenuButtons--index--docs = 文件
+MenuButtons--permalink--button =
+    .label = 永久鏈結
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = 上傳於:
+MenuButtons--index--profile-info-uploaded-actions = 刪除
+MenuButtons--index--metaInfo-subtitle = 檢測檔資訊
+MenuButtons--metaInfo--symbols = 符號:
+MenuButtons--metaInfo--profile-symbolicated = 檢測檔已符號化
+MenuButtons--metaInfo--profile-not-symbolicated = 檢測檔未符號化
+MenuButtons--metaInfo--resymbolicate-profile = 重新將檢測檔符號化
+MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
+MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
+MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
+MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+       *[other] { $physicalCPUs } 顆實體核心
+    }、{ $logicalCPUs ->
+       *[other] { $logicalCPUs } 顆邏輯核心
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+       *[other] { $physicalCPUs } 顆實體核心
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+       *[other] { $logicalCPUs } 顆邏輯核心
+    }
+MenuButtons--metaInfo--recording-started = 紀錄開始於:
+MenuButtons--metaInfo--interval = 間隔:
+MenuButtons--metaInfo--profile-version = 檢測檔版本:
+MenuButtons--metaInfo--buffer-capacity = 緩衝容量:
+MenuButtons--metaInfo--buffer-duration = 緩衝間隔:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+       *[other] { $configurationDuration } 秒
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = 無限制
+MenuButtons--metaInfo--application = 應用程式
+MenuButtons--metaInfo--name-and-version = 名稱與版本:
+MenuButtons--metaInfo--update-channel = 更新頻道:
+MenuButtons--metaInfo--build-id = Build ID:
+MenuButtons--metaInfo--build-type = Build Type:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = 除錯
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = 平台
+MenuButtons--metaInfo--device = 裝置:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = OS:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = 視覺指標
+MenuButtons--metaInfo--speed-index = Speed Index:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual Speed Index:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Contentful Speed Index:
+MenuButtons--metaInfo-renderRowOfList-label-features = 功能:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = 執行緒過濾器:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = 擴充套件:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } 額外負荷
+MenuButtons--metaOverheadStatistics-mean = 平均
+MenuButtons--metaOverheadStatistics-max = 最大值
+MenuButtons--metaOverheadStatistics-min = 最小值
+MenuButtons--metaOverheadStatistics-statkeys-overhead = 額外負荷
+    .title = 用來計量所有執行緒的時間。
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = 清理
+    .title = 用來清理過期資料的時間。
+MenuButtons--metaOverheadStatistics-statkeys-counter = 計數
+    .title = 用來取得所有計數器的時間。
+MenuButtons--metaOverheadStatistics-statkeys-interval = 間隔
+    .title = 兩次計量間的間隔。
+MenuButtons--metaOverheadStatistics-statkeys-lockings = 鎖定
+    .title = 進行計量前取得鎖定所需的時間。
+MenuButtons--metaOverheadStatistics-overhead-duration = 額外負荷持續時間:
+MenuButtons--metaOverheadStatistics-overhead-percentage = 額外負荷比例:
+MenuButtons--metaOverheadStatistics-profiled-duration = 檢測的持續時間:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隱藏的執行緒
+MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隱藏的時間範圍
+MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含畫面擷圖
+MenuButtons--publish--renderCheckbox-label-resource = 包含資源網址與路徑
 
 ## NetworkSettings
 ## This is used in the network chart.
