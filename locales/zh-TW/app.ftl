@@ -320,37 +320,83 @@ MenuButtons--publish--include-additional-data = 包含其他資料後，可能�
 MenuButtons--publish--button-upload = 上傳
 MenuButtons--publish--upload-title = 正在上傳檢測檔…
 MenuButtons--publish--cancel-upload = 取消上傳
+MenuButtons--publish--message-something-went-wrong = 哇喔，上傳檢測檔時發生某些錯誤。
+MenuButtons--publish--message-try-again = 再試一次
+MenuButtons--publish--download = 下載
+MenuButtons--publish--compressing = 壓縮中…
 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = 過濾網路請求:
+    .title = 只顯示符合某些名稱的網路請求
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = 您知道可以使用半形逗號（,）搜尋多個詞彙嗎？
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = 刪除
+    .title = 點擊此處刪除檢測檔 { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = 完整範圍
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = 正在直接從 { -firefox-brand-name } 匯入檢測檔…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = 正在讀取檔案並處理檢測檔…
+ProfileLoaderAnimation--loading-message-local =
+    .message = 尚未實作。
+ProfileLoaderAnimation--loading-message-public =
+    .message = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = 正在下載處理檢測檔…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = 正在讀取與處理檢測檔…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = 找不到畫面
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = 回到首頁
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = 安裝中…
+ServiceWorkerManager--pending-button = 套用並重新載入
+ServiceWorkerManager--installed-button = 重新載入應用程式
+ServiceWorkerManager--updated-while-not-ready =
+    在此頁面完整載入前，已有新版應用程式生效。
+    
+    您可能會遇到某些不正常的部分。
+ServiceWorkerManager--new-version-is-ready = 已下載新版本的應用程式，準備好可以使用。
+ServiceWorkerManager--hide-notice-button =
+    .title = 隱藏重新載入通知
+    .aria-label = 隱藏重新載入通知
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = 所有堆疊
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = 原生
+StackSettings--use-data-source-label = 資料來源:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
