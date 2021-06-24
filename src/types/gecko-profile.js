@@ -376,7 +376,6 @@ export type GeckoProfileWithMeta<Meta> = {|
   pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
-  tasktracer?: MixedObject,
   processes: GeckoSubprocessProfile[],
   jsTracerDictionary?: string[],
 |};

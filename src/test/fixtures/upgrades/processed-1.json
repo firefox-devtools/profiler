@@ -449,37 +449,5 @@
         "frameNumber": [null, null, null, null, null, null, null]
       }
     }
-  ],
-  "tasktracer": {
-    "taskTable": {
-      "length": 0,
-      "dispatchTime": [],
-      "sourceEventId": [],
-      "sourceEventType": [],
-      "parentTaskId": [],
-      "beginTime": [],
-      "processId": [],
-      "threadIndex": [],
-      "endTime": [],
-      "ipdlMsg": [],
-      "label": [],
-      "address": []
-    },
-    "tasksIdToTaskIndexMap": [],
-    "stringArray": [],
-    "addressTable": {
-      "length": 0,
-      "address": [],
-      "className": [],
-      "lib": []
-    },
-    "addressIndicesByLib": [],
-    "threadTable": {
-      "length": 0,
-      "tid": [],
-      "name": [],
-      "start": []
-    },
-    "tidToThreadIndexMap": []
-  }
+  ]
 }
