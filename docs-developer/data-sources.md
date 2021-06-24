@@ -28,15 +28,6 @@ The Gecko Profiler records marker data, but it doesn't include all of the marker
 * [Timeline C++ Implementation](https://dxr.mozilla.org/mozilla-central/source/docshell/base/timeline)
 * [Timeline Devtools JS Server](https://dxr.mozilla.org/mozilla-central/source/devtools/server/performance/timeline.js)
 
-## Task Tracer
-
-TaskTracer provides a way to trace the correlation between different Runnables across threads and processes. These Runnables are defined by `mozilla::Runnable`, and represent a task which can be dispatched to a thread for execution. Unlike sampling based profilers, TaskTracer can tell you where a Runnable is dispatched from, what its original source was, how long it waited in the event queue, and how long it took to execute.
-
-Source Events are usually some kinds of I/O events we're interested in, such as touch events, timer events, network events, etc. When a source event is created, TaskTracer records the entire chain of Runnables as they are dispatched to different threads and processes. It records latency, execution time, etc. for each Runnable that chains back to the original source event. There was an initial prototype of integrating this information into the Firefox Profiler, but it has since been removed and is available under the git tag [tasktracer-removal](https://github.com/firefox-devtools/profiler/releases/tag/tasktracer-removal).
-
-* [GeckoTaskTracer.h](https://dxr.mozilla.org/mozilla-central/source/tools/profiler/tasktracer/GeckoTaskTracer.h)
-* [Wiki](https://wiki.mozilla.org/TaskTracer)
-
 ## Tracelogger (unused in the Firefox Profiler)
 
 While the previous performance tools collect information about how Gecko runs as a whole, Tracelogger is specific to the SpiderMonkey engine. Tracelogger is not sample based, therefore it records every step that the SpiderMonkey engine performs to run a given chunk of JavaScript code. It's primarily used by JavaScript engineers, and includes a firehose of information often reaching into the several gigs of information. There is no current integration of this information with the Firefox Profiler.

@@ -557,37 +557,5 @@
         "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/4"
       ]
     }
-  ],
-  "tasktracer": {
-    "taskTable": {
-      "length": 0,
-      "dispatchTime": [],
-      "sourceEventId": [],
-      "sourceEventType": [],
-      "parentTaskId": [],
-      "beginTime": [],
-      "processId": [],
-      "threadIndex": [],
-      "endTime": [],
-      "ipdlMsg": [],
-      "label": [],
-      "address": []
-    },
-    "tasksIdToTaskIndexMap": [],
-    "addressTable": {
-      "length": 0,
-      "address": [],
-      "className": [],
-      "lib": []
-    },
-    "addressIndicesByLib": [],
-    "threadTable": {
-      "length": 0,
-      "tid": [],
-      "name": [],
-      "start": []
-    },
-    "tidToThreadIndexMap": [],
-    "stringArray": []
-  }
+  ]
 }
