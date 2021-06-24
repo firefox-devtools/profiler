@@ -309,6 +309,17 @@ MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隱藏的執�
 MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隱藏的時間範圍
 MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含畫面擷圖
 MenuButtons--publish--renderCheckbox-label-resource = 包含資源網址與路徑
+MenuButtons--publish--renderCheckbox-label-extension = 包含擴充套件資訊
+MenuButtons--publish--renderCheckbox-label-preference = 包含偏好設定值
+MenuButtons--publish--reupload-performance-profile = 重新上傳效能檢測檔
+MenuButtons--publish--share-performance-profile = 分享效能檢測檔
+MenuButtons--publish--info-description = 上傳您的檢測檔並透過鏈結分享，讓任何取得該鏈結的人都能存取。
+MenuButtons--publish--info-description-default = 預設情況下，將會移除您的個人資料。
+MenuButtons--publish--info-description-firefox-nightly = 此檢測檔來自 { -firefox-nightly-brand-name }，預設情況下將包含所有資訊。
+MenuButtons--publish--include-additional-data = 包含其他資料後，可能造成檢測檔可被識別。
+MenuButtons--publish--button-upload = 上傳
+MenuButtons--publish--upload-title = 正在上傳檢測檔…
+MenuButtons--publish--cancel-upload = 取消上傳
 
 ## NetworkSettings
 ## This is used in the network chart.
