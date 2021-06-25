@@ -46,6 +46,17 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Sammanfogningsfunktion
+    .title =
+        Sammanfoga en funktion tar bort det från profilen och tilldelar sin tid till
+        den funktion som anropade den. Detta händer var som helst funktionen
+        anropades i trädet.
+CallNodeContextMenu--transform-merge-call-node = Sammanfoga endast nod
+    .title =
+        Sammanfoga en nod tar bort den från profilen och tilldelar sin tid till
+        funktionens nod som anropade den. Den tar bara bort funktionen från
+        den specifika delen av trädet. Alla andra platser där funktionen
+        anropades kommer att förbli i profilen.
 CallNodeContextMenu--expand-all = Expandera alla
 CallNodeContextMenu--copy-function-name = Kopiera funktionsnamn
 CallNodeContextMenu--copy-script-url = Kopiera skript-URL
