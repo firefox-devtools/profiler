@@ -41,7 +41,7 @@ import {
   addActiveTabInformationToProfile,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
-import { uintArrayToString } from '../utils/uintarray-encoding';
+import { encodeUintArrayForUrlComponent } from '../utils/uintarray-encoding';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
@@ -167,7 +167,7 @@ describe('url handling tracks', function() {
     });
 
     it('can reorder global tracks', function() {
-      const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
+      const { getState } = initWithSearchParams('?globalTrackOrder=10');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
@@ -187,13 +187,13 @@ describe('url handling tracks', function() {
     });
 
     it('will not accept invalid tracks in the thread order', function() {
-      const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
+      const { getState } = initWithSearchParams('?globalTrackOrder=10');
       expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([1, 0]);
     });
 
     it('will not accept invalid hidden threads', function() {
       const { getState } = initWithSearchParams(
-        '?hiddenGlobalTracks=0-8-2-a&thread=1'
+        '?hiddenGlobalTracks=089&thread=1'
       );
       expect(urlStateSelectors.getHiddenGlobalTracks(getState())).toEqual(
         new Set([0])
@@ -203,9 +203,7 @@ describe('url handling tracks', function() {
 
   describe('local tracks', function() {
     it('can reorder local tracks', function() {
-      const { getState } = initWithSearchParams(
-        '?localTrackOrderByPid=222-1-0'
-      );
+      const { getState } = initWithSearchParams('?localTrackOrderByPid=222-10');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
         'show [thread GeckoMain tab]',
@@ -486,7 +484,7 @@ describe('ctxId', function() {
     const { getState } = _getStoreWithURL(
       {
         search:
-          '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+          '?ctxId=123&view=active-tab&globalTrackOrder=3w0&hiddenGlobalTracks=45&hiddenLocalTracksByPid=111-1&thread=0',
       },
       profile
     );
@@ -875,7 +873,7 @@ describe('url upgrading', function() {
       ];
 
       // Upgrader
-      const callNodeString = uintArrayToString(callNodePathBefore);
+      const callNodeString = encodeUintArrayForUrlComponent(callNodePathBefore);
       // focus-subtree transform with js implementation filter.
       const transformString = 'f-js-' + callNodeString;
       const { query } = upgradeLocationToCurrentVersion(
@@ -900,7 +898,7 @@ describe('url upgrading', function() {
       ];
 
       const newTransformNodeString =
-        'f-js-' + uintArrayToString(callNodePathAfter);
+        'f-js-' + encodeUintArrayForUrlComponent(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
@@ -926,7 +924,7 @@ describe('url upgrading', function() {
       ];
 
       // Upgrader
-      const callNodeString = uintArrayToString(callNodePathBefore);
+      const callNodeString = encodeUintArrayForUrlComponent(callNodePathBefore);
       // focus-subtree transform with js implementation filter.
       const transformString = 'f-js-' + callNodeString;
       const { query } = upgradeLocationToCurrentVersion(
@@ -950,7 +948,7 @@ describe('url upgrading', function() {
       ];
 
       const newTransformNodeString =
-        'f-js-' + uintArrayToString(callNodePathAfter);
+        'f-js-' + encodeUintArrayForUrlComponent(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
@@ -977,7 +975,7 @@ describe('url upgrading', function() {
       ];
 
       // Upgrader
-      const callNodeString = uintArrayToString(callNodePathBefore);
+      const callNodeString = encodeUintArrayForUrlComponent(callNodePathBefore);
       // focus-subtree transform with js implementation filter.
       const transformString = 'f-js-' + callNodeString;
       const { query } = upgradeLocationToCurrentVersion(
@@ -1001,7 +999,7 @@ describe('url upgrading', function() {
       ];
 
       const newTransformNodeString =
-        'f-js-' + uintArrayToString(callNodePathAfter);
+        'f-js-' + encodeUintArrayForUrlComponent(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
@@ -1027,7 +1025,7 @@ describe('url upgrading', function() {
       ];
 
       // Upgrader
-      const callNodeString = uintArrayToString(callNodePathBefore);
+      const callNodeString = encodeUintArrayForUrlComponent(callNodePathBefore);
       // focus-subtree transform with js implementation filter.
       const transformString = 'f-js-' + callNodeString;
       const { query } = upgradeLocationToCurrentVersion(
@@ -1051,7 +1049,7 @@ describe('url upgrading', function() {
       ];
 
       const newTransformNodeString =
-        'f-js-' + uintArrayToString(callNodePathAfter);
+        'f-js-' + encodeUintArrayForUrlComponent(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
@@ -1077,7 +1075,7 @@ describe('url upgrading', function() {
       ];
 
       // Upgrader
-      const callNodeString = uintArrayToString(callNodePathBefore);
+      const callNodeString = encodeUintArrayForUrlComponent(callNodePathBefore);
       // focus-subtree transform with js implementation filter.
       const transformString = 'f-js-' + callNodeString;
       const { query } = upgradeLocationToCurrentVersion(
@@ -1101,7 +1099,7 @@ describe('url upgrading', function() {
       ];
 
       const newTransformNodeString =
-        'f-js-' + uintArrayToString(callNodePathAfter);
+        'f-js-' + encodeUintArrayForUrlComponent(callNodePathAfter);
       expect(query.transforms).toEqual(newTransformNodeString);
     });
   });
@@ -1173,6 +1171,48 @@ describe('url upgrading', function() {
     });
   });
 
+  describe('version 6: change encoding of fields with TrackIndex lists', function() {
+    it('parses version 5 correctly', function() {
+      const { getState } = _getStoreWithURL(
+        {
+          pathname:
+            '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+          search:
+            '?globalTrackOrder=5-0-1-2-3-4&hiddenGlobalTracks=5-3-4&localTrackOrderByPid=1234-1-0~345-2-0-1&hiddenLocalTracksByPid=678-2-3-0',
+          v: 5,
+        },
+        null
+      );
+      const state = getState();
+      expect(urlStateSelectors.getGlobalTrackOrder(state)).toEqual([
+        5,
+        0,
+        1,
+        2,
+        3,
+        4,
+      ]);
+      expect(urlStateSelectors.getHiddenGlobalTracks(state)).toEqual(
+        new Set([3, 4, 5])
+      );
+      expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
+        new Map([
+          [1234, [1, 0]],
+          [345, [2, 0, 1]],
+        ])
+      );
+      expect(urlStateSelectors.getLocalTrackOrderByPid(state)).toEqual(
+        new Map([
+          [1234, [1, 0]],
+          [345, [2, 0, 1]],
+        ])
+      );
+      expect(urlStateSelectors.getHiddenLocalTracksByPid(state)).toEqual(
+        new Map([[678, new Set([0, 2, 3])]])
+      );
+    });
+  });
+
   // More general checks
   it("won't run if the current version is specified", function() {
     const { getState } = _getStoreWithURL({
@@ -1203,7 +1243,7 @@ describe('url upgrading', function() {
 
 describe('URL serialization of the transform stack', function() {
   const transformString =
-    'f-combined-012~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9~' +
+    'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~cr-combined-8-9~' +
     'rec-combined-10~df-11~cfs-12';
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
