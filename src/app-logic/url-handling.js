@@ -704,7 +704,7 @@ export function upgradeLocationToCurrentVersion(
   }
   // Convert to CURRENT_URL_VERSION, one step at a time.
   for (
-    let destVersion = urlVersion;
+    let destVersion = urlVersion + 1;
     destVersion <= CURRENT_URL_VERSION;
     destVersion++
   ) {
@@ -721,8 +721,9 @@ export function upgradeLocationToCurrentVersion(
 // Every "upgrader" takes the processedLocation as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders = {
-  [0]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
-    // Version 1 is the first versioned url.
+  [1]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
+    // Version 1 is the first versioned url. Do some best-effort upgrading from
+    // un-versioned URLs.
 
     // If the pathname is '/', this could be a very old URL that has its information
     // stored in the hash.
@@ -746,8 +747,7 @@ const _upgraders = {
       delete processedLocation.query.jsOnly;
       processedLocation.query.implementation = 'js';
     }
-  },
-  [1]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
+
     // The transform stack was added. Convert the callTreeFilters into the new
     // transforms format.
     if (processedLocation.query.callTreeFilters) {
@@ -897,11 +897,21 @@ const _upgraders = {
   },
 };
 
-if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
-  throw new Error(oneLine`
-    CURRENT_URL_VERSION does not match the number of URL upgraders. If you added a
-    new upgrader, make sure and bump the CURRENT_URL_VERSION variable.
-  `);
+for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {
+  if (!_upgraders[destVersion]) {
+    throw new Error(`There is no upgrader for version ${destVersion}.`);
+  }
+}
+
+for (const destVersionStr of Object.keys(_upgraders)) {
+  const destVersion = +destVersionStr;
+  if (destVersion > CURRENT_URL_VERSION) {
+    throw new Error(oneLine`
+      There is an upgrader for version ${destVersion}, which is larger than
+      CURRENT_URL_VERSION (${CURRENT_URL_VERSION}). If you added a new upgrader,
+      make sure and bump the CURRENT_URL_VERSION variable.
+    `);
+  }
 }
 
 // This function returns the stack index of the first occurrence of the given
