@@ -33,8 +33,13 @@
 
 .appHeaderGithubIcon {
   margin: 0 0.2em;
+  transition: opacity 250ms var(--animation-curve);
 }
 
 .appHeaderGithubIcon svg {
   vertical-align: middle;
+}
+
+.appHeaderGithubIcon:hover {
+  opacity: 0.5;
 }
