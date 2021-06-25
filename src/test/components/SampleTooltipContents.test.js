@@ -243,31 +243,22 @@ describe('SampleTooltipContents', function() {
     profile.threads[0].samples.time = [0, 1, 3];
     profile.threads[0].samples.length = 3;
 
-    // Currently this is rendered wrong. 100% area should stop at the first sample's location
+    // We should make sure that the CPU heights are rendered correctly even
+    // though we have missing samples:
     //                          this is the checked location
     //        100%              v
-    //  /////////////////////////            40%
+    //  //////////////////                40%
     //  //////////////////////////////////////////////////////
     // +-----------------+-----------------+-----------------+
     //                   ^100% CPU         ^ missing sample  ^ 40% CPU
     //                    sample                               sample
 
-    // It should be like this instead:
-    //                          this is the checked location
-    //        100%              v
-    //  //////////////////                 40%
-    //  //////////////////////////////////////////////////////
-    // +-----------------+-----------------+-----------------+
-    //                   ^100% CPU         ^ missing sample  ^ 40% CPU
-    //                    sample                               sample
     // Let's check the second threadCPUDelta value
     const hoveredSampleIndex = 1;
     // Hovering the second part of the sample.
     setup(profile, hoveredSampleIndex, 'after');
 
     const cpuUsage = ensureExists(screen.getByText(/CPU/).nextElementSibling);
-    // This is 74% right now because of the smooth transition we are doing.
-    // It's in the middle of 100% and 40%. But it should be 40% instead.
-    expect(cpuUsage).toHaveTextContent('74% (average over 1.0ms)');
+    expect(cpuUsage).toHaveTextContent('40% (average over 1.0ms)');
   });
 });

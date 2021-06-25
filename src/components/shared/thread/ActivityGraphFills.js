@@ -366,9 +366,10 @@ export class ActivityGraphFillComputer {
     let pixelEnd = (sampleEnd - rangeStart) * xPixelsPerMs;
     pixelStart = Math.max(0, pixelStart);
     pixelEnd = Math.min(canvasPixelWidth - 1, pixelEnd);
+    const pixelCenter = (sampleTime - rangeStart) * xPixelsPerMs;
     const intPixelStart = Math.floor(pixelStart);
     const intPixelEnd = Math.floor(pixelEnd);
-    const intPixelCenter = Math.floor((intPixelStart + intPixelEnd) / 2);
+    const intPixelCenter = Math.floor(pixelCenter);
 
     // For every sample, we have a fractional interval of this sample's
     // contribution to the graph's pixels.
