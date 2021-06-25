@@ -58,6 +58,7 @@ CallNodeContextMenu--copy-stack = Kopiera stack
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Välj en nod för att visa information om den.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -217,6 +218,7 @@ MenuButtons--metaInfo--logical-cpu =
         [one] { $logicalCPUs } logisk kärna
        *[other] { $logicalCPUs } logiska kärnor
     }
+MenuButtons--metaInfo--recording-started = Inspelningen startade:
 MenuButtons--metaInfo--interval = Intervall:
 MenuButtons--metaInfo--profile-version = Profilversion:
 MenuButtons--metaInfo--buffer-capacity = Buffertkapacitet:
