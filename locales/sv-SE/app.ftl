@@ -80,6 +80,8 @@ CompareHome--submit-button =
 
 Details--open-sidebar-button =
     .title = Öppna sidofältet
+Details--close-sidebar-button =
+    .title = Stäng sidofältet
 
 ## Footer Links
 
@@ -104,9 +106,15 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Dokumentation
 Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--addon-button = Installera tillägg
+Home--instructions-title = Hur man visar och spelar in profiler
+Home--instructions-content =
+    För att spela in prestandaprofiler krävs <a>{ -firefox-brand-name }</a>.
+    Befintliga profiler kan dock visas i vilken modern webbläsare som helst.
+Home--record-instructions-start-stop = Stoppa och börja profilera
 Home--record-instructions-capture-load = Spela in och ladda profil
 Home--profiler-motto = Spela in en prestandaprofil. Analysera den. Dela den. Gör webben snabbare.
 Home--additional-content-title = Ladda befintliga profiler
+Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
 Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
 
 ## IdleSearchField
@@ -158,6 +166,7 @@ MarkerContextMenu--copy-url = Kopiera URL
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Börja
 MarkerTable--duration = Längd
 MarkerTable--type = Typ
 MarkerTable--description = Beskrivning
@@ -257,6 +266,7 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Medel
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 
@@ -370,6 +380,16 @@ TransformNavigator--merge-call-node = Sammanfoga nod: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Sammanfoga: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Dölj rekursion: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Dölj underträd: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
