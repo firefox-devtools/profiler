@@ -18,7 +18,7 @@
   text-decoration: none;
 }
 
-/* Note that :focus styles are defined in focus.css */
+/* Note that :focus-visible styles are defined in focus.css */
 .appHeaderLink:hover {
   text-decoration: underline;
 }

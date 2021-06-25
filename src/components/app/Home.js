@@ -11,7 +11,6 @@ import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNav
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import classNames from 'classnames';
 import AddonScreenshot from 'firefox-profiler-res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from 'firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg';
 import FirefoxPopupScreenshot from 'firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg';
@@ -104,6 +103,13 @@ class ActionButtons extends React.PureComponent<
     }
   };
 
+  _loadFromFilePressed = () => {
+    // Open the file picker.
+    if (this._fileInput) {
+      this._fileInput.click();
+    }
+  };
+
   _loadFromUrlPressed = (event: SyntheticEvent<>) => {
     event.preventDefault();
     this.setState(prevState => {
@@ -115,23 +121,25 @@ class ActionButtons extends React.PureComponent<
     return (
       <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
-          <label className="homeSectionButton">
-            <input
-              className="homeSectionUploadFromFileInput"
-              type="file"
-              ref={this._takeInputRef}
-              onChange={this._uploadProfileFromFile}
-            />
-            <Localized id="Home--upload-from-file-input-button">
+          <input
+            className="homeSectionUploadFromFileInput"
+            type="file"
+            ref={this._takeInputRef}
+            onChange={this._uploadProfileFromFile}
+          />
+          <Localized id="Home--upload-from-file-input-button">
+            <button
+              type="button"
+              className="homeSectionButton"
+              onClick={this._loadFromFilePressed}
+            >
               Load a profile from file
-            </Localized>
-          </label>
+            </button>
+          </Localized>
           <Localized id="Home--upload-from-url-button">
             <button
               type="button"
-              className={classNames({
-                homeSectionButton: true,
-              })}
+              className="homeSectionButton"
               onClick={this._loadFromUrlPressed}
               // when the button is clicked it expands to the URL input
               aria-expanded={this.state.isLoadFromUrlPressed}

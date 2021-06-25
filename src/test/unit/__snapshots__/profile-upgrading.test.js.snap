@@ -11261,38 +11261,6 @@ Object {
     "toolkit": "cocoa",
     "version": 3,
   },
-  "tasktracer": Object {
-    "addressIndicesByLib": Array [],
-    "addressTable": Object {
-      "address": Array [],
-      "className": Array [],
-      "length": 0,
-      "lib": Array [],
-    },
-    "stringArray": Array [],
-    "taskTable": Object {
-      "address": Array [],
-      "beginTime": Array [],
-      "dispatchTime": Array [],
-      "endTime": Array [],
-      "ipdlMsg": Array [],
-      "label": Array [],
-      "length": 0,
-      "parentTaskId": Array [],
-      "processId": Array [],
-      "sourceEventId": Array [],
-      "sourceEventType": Array [],
-      "threadIndex": Array [],
-    },
-    "tasksIdToTaskIndexMap": Array [],
-    "threadTable": Object {
-      "length": 0,
-      "name": Array [],
-      "start": Array [],
-      "tid": Array [],
-    },
-    "tidToThreadIndexMap": Array [],
-  },
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -12880,38 +12848,6 @@ Object {
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
     "version": 4,
-  },
-  "tasktracer": Object {
-    "addressIndicesByLib": Array [],
-    "addressTable": Object {
-      "address": Array [],
-      "className": Array [],
-      "length": 0,
-      "lib": Array [],
-    },
-    "stringArray": Array [],
-    "taskTable": Object {
-      "address": Array [],
-      "beginTime": Array [],
-      "dispatchTime": Array [],
-      "endTime": Array [],
-      "ipdlMsg": Array [],
-      "label": Array [],
-      "length": 0,
-      "parentTaskId": Array [],
-      "processId": Array [],
-      "sourceEventId": Array [],
-      "sourceEventType": Array [],
-      "threadIndex": Array [],
-    },
-    "tasksIdToTaskIndexMap": Array [],
-    "threadTable": Object {
-      "length": 0,
-      "name": Array [],
-      "start": Array [],
-      "tid": Array [],
-    },
-    "tidToThreadIndexMap": Array [],
   },
   "threads": Array [
     Object {
@@ -14679,38 +14615,6 @@ Object {
       "url": "about:blank",
     },
   ],
-  "tasktracer": Object {
-    "addressIndicesByLib": Array [],
-    "addressTable": Object {
-      "address": Array [],
-      "className": Array [],
-      "length": 0,
-      "lib": Array [],
-    },
-    "stringArray": Array [],
-    "taskTable": Object {
-      "address": Array [],
-      "beginTime": Array [],
-      "dispatchTime": Array [],
-      "endTime": Array [],
-      "ipdlMsg": Array [],
-      "label": Array [],
-      "length": 0,
-      "parentTaskId": Array [],
-      "processId": Array [],
-      "sourceEventId": Array [],
-      "sourceEventType": Array [],
-      "threadIndex": Array [],
-    },
-    "tasksIdToTaskIndexMap": Array [],
-    "threadTable": Object {
-      "length": 0,
-      "name": Array [],
-      "start": Array [],
-      "tid": Array [],
-    },
-    "tidToThreadIndexMap": Array [],
-  },
   "threads": Array [
     Object {
       "frameTable": Object {
