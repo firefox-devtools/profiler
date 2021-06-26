@@ -86,6 +86,10 @@ CallTreeSidebar--select-a-node = Välj en nod för att visa information om den.
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Ange URL:en till den profil som du vill jämföra
+CompareHome--instruction-content =
+    Verktyget extraherar data från det valda spåret och intervallet för
+    varje profil och lägger dem båda i samma vy för att göra dem enkla
+    att jämföra.
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
@@ -104,6 +108,8 @@ Details--open-sidebar-button =
     .title = Öppna sidofältet
 Details--close-sidebar-button =
     .title = Stäng sidofältet
+Details--error-boundary-message =
+    .message = Oj, några okända fel inträffade i den här panelen.
 
 ## Footer Links
 
@@ -118,6 +124,14 @@ FooterLinks--Cookies = Kakor
 FullTimeline--graph-type = Diagramtyp:
 FullTimeline--categories-with-cpu = Kategorier med CPU
 FullTimeline--categories = Kategorier
+FullTimeline--stack-height = Stackens höjd
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> synliga spår
 
 ## Home page
 
@@ -127,7 +141,13 @@ Home--load-from-url-submit-button =
     .value = Ladda
 Home--documentation-button = Dokumentation
 Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
+Home--menu-button-instructions =
+    Aktivera profil-menyknappen för att börja spela in en prestandaprofil
+    i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
 Home--addon-button = Installera tillägg
+Home--addon-button-instructions =
+    Installera tillägget Gecko Profiler för att börja spela in en prestandaprofil
+    i { -firefox-brand-name }, analysera den sedan och dela den med profiler.firefox.com.
 Home--instructions-title = Hur man visar och spelar in profiler
 Home--instructions-content =
     För att spela in prestandaprofiler krävs <a>{ -firefox-brand-name }</a>.
