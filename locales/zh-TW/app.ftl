@@ -53,6 +53,14 @@ CallNodeContextMenu--transform-merge-call-node = 只合併節點
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
 CallNodeContextMenu--transform-focus-function-title = 聚焦於函數，將移除該函數之外所有紀錄到的項目。除此之外，還會重新將呼叫樹的根指定為該函數。此功能可以將檢測檔中的多個函數呼叫點合併為單一呼叫節點。
+CallNodeContextMenu--transform-focus-function = 聚焦於函數
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反向）
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--expand-all = 全部展開
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = 用 Searchfox 搜尋函數名稱
 CallNodeContextMenu--copy-function-name = 複製函數名稱
 CallNodeContextMenu--copy-script-url = 複製指令碼網址
 CallNodeContextMenu--copy-stack = 複製堆疊
