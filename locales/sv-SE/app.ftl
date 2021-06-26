@@ -57,6 +57,16 @@ CallNodeContextMenu--transform-merge-call-node = Sammanfoga endast nod
         funktionens nod som anropade den. Den tar bara bort funktionen från
         den specifika delen av trädet. Alla andra platser där funktionen
         anropades kommer att förbli i profilen.
+CallNodeContextMenu--transform-focus-function = Fokusera på funktion
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Fokus på funktion (inverterad)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
+    .title =
+        Genom att fokusera på ett underträd kommer alla prov tas bort som inte
+        innehåller den specifika delen av anropsträdet. Den tar ut en gren av
+        anropsträdet, men det gör det endast för den anropsnoden. Alla andra
+        anrop från funktionen ignoreras.
 CallNodeContextMenu--expand-all = Expandera alla
 CallNodeContextMenu--copy-function-name = Kopiera funktionsnamn
 CallNodeContextMenu--copy-script-url = Kopiera skript-URL
