@@ -397,6 +397,7 @@ ServiceWorkerManager--installed-button = Ladda om applikationen
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
 StackSettings--use-data-source-label = Datakälla:
 
