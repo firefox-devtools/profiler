@@ -85,6 +85,7 @@ CallTreeSidebar--select-a-node = Välj en nod för att visa information om den.
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Ange URL:en till den profil som du vill jämföra
 CompareHome--form-label-profile1 = Profil 1:
 CompareHome--form-label-profile2 = Profil 2:
 CompareHome--submit-button =
