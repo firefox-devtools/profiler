@@ -148,6 +148,10 @@ Home--addon-button = Installera tillägg
 Home--addon-button-instructions =
     Installera tillägget Gecko Profiler för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den sedan och dela den med profiler.firefox.com.
+Home--record-instructions =
+    För att starta profilering, klicka på profileringsknappen eller använd
+    kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
+    <kbd>Fånga</kbd> för att ladda data till profiler.firefox.com.
 Home--instructions-title = Hur man visar och spelar in profiler
 Home--instructions-content =
     För att spela in prestandaprofiler krävs <a>{ -firefox-brand-name }</a>.
@@ -157,11 +161,14 @@ Home--record-instructions-capture-load = Spela in och ladda profil
 Home--profiler-motto = Spela in en prestandaprofil. Analysera den. Dela den. Gör webben snabbare.
 Home--additional-content-title = Ladda befintliga profiler
 Home--additional-content-content = Du kan <strong>dra och släppa</strong> en profilfil här för att ladda den, eller:
+Home--compare-recordings-info = Du kan också jämföra inspelningar.<a>Öppna gränssnitt för att jämföra.</a>
 Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Ange filtervillkor
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -176,6 +183,8 @@ Home--recent-uploaded-recordings-title = Senast uppladdade inspelningar
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Klicka här för att ladda profil { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Ta bort
+    .title = Den här profilen kan inte tas bort eftersom vi saknar behörighetsinformation.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ingen profil har laddats upp än!
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
@@ -195,7 +204,9 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## panels.
 
 MarkerContextMenu--copy-description = Kopiera beskrivning
+MarkerContextMenu--copy-call-stack = Kopiera anropsstack
 MarkerContextMenu--copy-url = Kopiera URL
+MarkerContextMenu--copy-full-payload = Kopiera full nyttolast
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -218,6 +229,7 @@ MarkerTable--description = Beskrivning
 
 MenuButtons--index--metaInfo-button =
     .label = Profilinfo
+MenuButtons--index--full-view = Helbild
 MenuButtons--index--cancel-upload = Avbryt uppladdning
 MenuButtons--index--share-upload =
     .label = Ladda upp lokal profil
@@ -238,6 +250,10 @@ MenuButtons--index--profile-info-uploaded-label = Uppladdad:
 MenuButtons--index--profile-info-uploaded-actions = Ta bort
 MenuButtons--index--metaInfo-subtitle = Profilinformation
 MenuButtons--metaInfo--symbols = Symboler:
+MenuButtons--metaInfo--profile-symbolicated = Profilen är symboliserad
+MenuButtons--metaInfo--profile-not-symbolicated = Profilen är inte symboliserad
+MenuButtons--metaInfo--resymbolicate-profile = Symbolisera profilen igen
+MenuButtons--metaInfo--symbolicate-profile = Symbolisera profil
 MenuButtons--metaInfo--cpu = CPU:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
