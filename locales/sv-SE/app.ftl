@@ -254,6 +254,8 @@ MenuButtons--metaInfo--profile-symbolicated = Profilen är symboliserad
 MenuButtons--metaInfo--profile-not-symbolicated = Profilen är inte symboliserad
 MenuButtons--metaInfo--resymbolicate-profile = Symbolisera profilen igen
 MenuButtons--metaInfo--symbolicate-profile = Symbolisera profil
+MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera profilen på nytt
+MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
 MenuButtons--metaInfo--cpu = CPU:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -309,6 +311,7 @@ MenuButtons--metaInfo--build-type = Byggtyp:
 ## Strings refer to specific types of builds, and should be kept in English.
 
 MenuButtons--metaInfo--build-type-debug = Felsök
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -318,7 +321,14 @@ MenuButtons--metaInfo--device = Enhet:
 MenuButtons--metaInfo--os = OS:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Visuella mätvärden
+MenuButtons--metaInfo--speed-index = Hastighetsindex:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Perceptual hastighetsindex:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Contentful hastighetsindex:
 MenuButtons--metaInfo-renderRowOfList-label-features = Funktioner:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Trådfilter:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 
 ## Overhead refers to the additional resources used to run the profiler.
