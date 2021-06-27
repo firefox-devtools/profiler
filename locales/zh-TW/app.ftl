@@ -57,6 +57,17 @@ CallNodeContextMenu--transform-focus-function = 聚焦於函數
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦於函數（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = 只聚焦於子樹
+    .title = 聚焦於子樹，將從呼叫樹中拉出分支，並移除不屬於該分支的內容。然而此功能只對單一呼叫節點有效，將忽略其他呼叫該函數的部分。
+CallNodeContextMenu--transform-collapse-function-subtree = 摺疊函數
+    .title = 將函數摺疊後，將移除所有呼叫內容，並將所有執行時間併入該函數中。這樣做可簡化檢測檔內容，將不需要分析的程式合併為單一呼叫。
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = 摺疊<strong>{ $nameForResource }</strong>
+    .title = 摺疊資源可將所有對該資源的呼叫，壓平成已摺疊的單一呼叫節點。
+CallNodeContextMenu--transform-collapse-direct-recursion = 摺疊直接遞迴
+    .title = 摺疊直接遞迴可移除對相同函數的重複遞迴呼叫。
 CallNodeContextMenu--expand-all = 全部展開
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
