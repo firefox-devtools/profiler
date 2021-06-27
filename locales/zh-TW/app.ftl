@@ -96,6 +96,7 @@ CallTreeSidebar--select-a-node = 選擇節點來顯示該節點的相關資訊�
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = 輸入您想要用來比較的檢測檔網址
+CompareHome--instruction-content = 此工具將從每個效能檢測檔當中抽出選擇的軌道與範圍相關資料，並將它們放到相同的畫面上，方便比較。
 CompareHome--form-label-profile1 = 檢測檔 1:
 CompareHome--form-label-profile2 = 檢測檔 2:
 CompareHome--submit-button =
@@ -105,6 +106,8 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message = 此檢測檔是使用未經發行最佳化的編譯版本紀錄的。所作效能觀察可能不適用於使用一般發行版的使用者。
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -147,7 +150,10 @@ Home--load-from-url-submit-button =
     .value = 載入
 Home--documentation-button = 文件
 Home--menu-button = 開啟 { -profiler-brand-name } 選單按鈕
+Home--menu-button-instructions = 開啟 { -firefox-brand-name } 當中的檢測器選單按鈕開始紀錄效能，然後進行分析並分享到 profiler.firefox.com。
 Home--addon-button = 安裝附加元件
+Home--addon-button-instructions = 安裝 Gecko Profiler 附加元件，即可在 { -firefox-brand-name } 當中紀錄效能，然後進行分析並分享到 profiler.firefox.com。
+Home--record-instructions = 請點擊檢測按鈕或按下鍵盤快速鍵即可開始進行檢測。進行效能紀錄時，此圖示將會顯示成藍色。按下<kbd>捕捉</kbd>即可將資料載入到 profiler.firefox.com。
 Home--instructions-title = 如何檢視並記錄檢測檔
 Home--instructions-content = 需要使用 <a>{ -firefox-brand-name }</a> 紀錄效能檢測檔。但可以使用任何現代瀏覽器檢視現有的檢測檔。
 Home--record-instructions-start-stop = 停止並開始檢測
@@ -182,6 +188,10 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 刪除
     .title = 由於缺少授權資訊，無法刪除此效能檢測檔。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上傳任何檢測檔！
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = 檢視並管理您的所有紀錄檔（還有 { $profilesRestCount } 筆）
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -195,6 +205,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = 根據標記的持續時間選擇
 MarkerContextMenu--start-selection-here = 從此處開始選擇
 MarkerContextMenu--end-selection-here = 至此結束選擇
 MarkerContextMenu--start-selection-at-marker-start = 從標記的<strong>起點</strong>開始選擇
