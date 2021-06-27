@@ -358,6 +358,12 @@ MenuButtons--publish--compressing = Komprimerar...
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Ta bort
+    .title = Klicka här för att ta bort profil { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -392,6 +398,7 @@ ProfileRootMessage--additional = Tillbaka till hem
 ServiceWorkerManager--installing-button = Installerar…
 ServiceWorkerManager--pending-button = Applicera och ladda om
 ServiceWorkerManager--installed-button = Ladda om applikationen
+ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -403,6 +410,7 @@ StackSettings--use-data-source-label = Datakälla:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Anropsträd
 TabBar--network-tab = Nätverk
 
 ## TrackContextMenu
