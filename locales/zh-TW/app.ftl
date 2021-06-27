@@ -81,12 +81,18 @@ CallNodeContextMenu--copy-stack = 複製堆疊
 ## CallTree
 ## This is the component for Call Tree panel.
 
-CallTree--tracing-ms-total = 執行時間（ms）
-    .title = 「總執行時間」包含此函數被觀測到位於堆疊上的總時間長度摘要。包含函數實際執行、以及此函數的呼叫者所花費的時間。
+CallTree--tracing-ms-total = 總執行時間（ms）
+    .title = 此函數在堆疊上被觀察到出現的「總計」時間長度摘要。包含函數實際執行的時間長度，以及此函數中所呼叫的時間長度。
 CallTree--tracing-ms-self = Self（ms）
     .title = 「Self」時間只包含函數在堆疊底部結束時的時間。若此函數是透過其他函數呼叫的，則不會包含「該函數」的時間。「self」時間適合用來了解程式當中實際花費了多少時間在哪些函數上。
 CallTree--samples-total = 總計（樣本數）
-    .title = 此函數在堆疊上被觀察到出現的「總計」次數。包含函數實際執行的次數，以及此函數中所呼叫的次數。
+    .title = 此函數在堆疊上被觀察到出現的「總計」次數摘要。包含函數實際執行的次數，以及此函數中所呼叫的次數。
+CallTree--samples-self = Self
+    .title = 「Self」樣本數只包含函數在堆疊底部結束的次數。若此函數是透過其他函數呼叫的，則不會包含「該函數」的次數。「self」次數適合用來了解程式當中實際花費了多少時間在哪些函數上。
+CallTree--bytes-total = 總大小（位元組數）
+    .title = 此函數在堆疊上被觀察到分配或取消分配的「總計」位元組摘要。包含函數實際執行時使用的大小，以及此函數中所呼叫其他函數所使用的記憶體大小。
+CallTree--bytes-self = Self（位元組）
+    .title = 「Self」位元組數只包含函數在堆疊底部分配到或取消分配到的記憶體用量。若此函數是透過其他函數呼叫的，則不會包含「該函數」的用量。「self」位元組數適合用來了解程式當中實際花費了多少記憶體在哪些函數上。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
