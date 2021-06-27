@@ -68,6 +68,8 @@ CallNodeContextMenu--transform-collapse-resource = 摺疊<strong>{ $nameForResou
     .title = 摺疊資源可將所有對該資源的呼叫，壓平成已摺疊的單一呼叫節點。
 CallNodeContextMenu--transform-collapse-direct-recursion = 摺疊直接遞迴
     .title = 摺疊直接遞迴可移除對相同函數的重複遞迴呼叫。
+CallNodeContextMenu--transform-drop-function = 丟棄與此函數的相關檢測樣本
+    .title = 丟棄樣本後將會從檢測檔移除該樣本所執行的時間。需要清除與分析無關的計時資訊時，此功能相當有用。
 CallNodeContextMenu--expand-all = 全部展開
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -79,6 +81,10 @@ CallNodeContextMenu--copy-stack = 複製堆疊
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = 執行時間（ms）
+    .title = 「總執行時間」包含此函數被觀測到位於堆疊上的總時間長度摘要。包含函數實際執行、以及此函數的呼叫者所花費的時間。
+CallTree--tracing-ms-self = Self（ms）
+    .title = 「Self」時間只包含函數在堆疊底部結束時的時間。若此函數是透過其他函數呼叫的，則不會包含「該函數」的時間。「self」時間適合用來了解程式當中實際花費了多少時間在哪些函數上。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -143,10 +149,13 @@ Home--documentation-button = 文件
 Home--menu-button = 開啟 { -profiler-brand-name } 選單按鈕
 Home--addon-button = 安裝附加元件
 Home--instructions-title = 如何檢視並記錄檢測檔
+Home--instructions-content = 需要使用 <a>{ -firefox-brand-name }</a> 紀錄效能檢測檔。但可以使用任何現代瀏覽器檢視現有的檢測檔。
 Home--record-instructions-start-stop = 停止並開始檢測
 Home--record-instructions-capture-load = 捕捉並載入檢測檔
 Home--profiler-motto = 捕捉效能檢測檔。分析、分享、讓網站運作更快。
 Home--additional-content-title = 載入現有檢測檔
+Home--additional-content-content = 您可以將效能檢測檔<strong>拖曳</strong>到此處，或:
+Home--compare-recordings-info = 您也可以比較紀錄內容。<a>開啟比較介面。</a>
 Home--recent-uploaded-recordings-title = 近期上傳的紀錄
 
 ## IdleSearchField
@@ -158,6 +167,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = 只顯示 self 時間
+    .title = 只顯示呼叫節點所花的時間，而忽略其 children。
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -168,6 +179,8 @@ IdleSearchField--search-input =
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = 點擊此處載入檢測檔 { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = 刪除
+    .title = 由於缺少授權資訊，無法刪除此效能檢測檔。
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = 還沒有上傳任何檢測檔！
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
@@ -196,10 +209,14 @@ MarkerContextMenu--copy-full-payload = 複製完整酬載
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = 過濾標記:
+    .title = 只顯示符合特定名稱的標記
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = 選擇標記來顯示該標記的相關資訊。
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -431,7 +448,12 @@ StackSettings--call-tree-strategy-timing = 計時
     .title = 使用紀錄到已執行的程式碼顯示摘要
 StackSettings--call-tree-strategy-js-allocations = JavaScript 分配
     .title = 顯示 JavaScript 分配到的位元組摘要（不含解除分配）
+StackSettings--invert-call-stack = 反轉呼叫堆疊
+    .title = 依照呼叫節點當中花費的時間排序，並忽略其 children。
 StackSettings--show-user-timing = 顯示使用者計時
+StackSettings--panel-search =
+    .label = 過濾堆疊:
+    .title = 只顯示包含符合的子字串的函數名稱的相關堆疊
 
 ## Tab Bar for the bottom half of the analysis UI.
 
