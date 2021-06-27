@@ -85,6 +85,8 @@ CallTree--tracing-ms-total = 執行時間（ms）
     .title = 「總執行時間」包含此函數被觀測到位於堆疊上的總時間長度摘要。包含函數實際執行、以及此函數的呼叫者所花費的時間。
 CallTree--tracing-ms-self = Self（ms）
     .title = 「Self」時間只包含函數在堆疊底部結束時的時間。若此函數是透過其他函數呼叫的，則不會包含「該函數」的時間。「self」時間適合用來了解程式當中實際花費了多少時間在哪些函數上。
+CallTree--samples-total = 總計（樣本數）
+    .title = 此函數在堆疊上被觀察到出現的「總計」次數。包含函數實際執行的次數，以及此函數中所呼叫的次數。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -459,6 +461,14 @@ StackSettings--call-tree-strategy-timing = 計時
     .title = 使用紀錄到已執行的程式碼顯示摘要
 StackSettings--call-tree-strategy-js-allocations = JavaScript 分配
     .title = 顯示 JavaScript 分配到的位元組摘要（不含解除分配）
+StackSettings--call-tree-strategy-native-retained-allocations = 保留的記憶體
+    .title = 根據分配到且於目前選擇的預覽範圍中，從未釋放的記憶體位元組數進行摘要
+StackSettings--call-tree-native-allocations = 分配到的記憶體
+    .title = 根據分配到的記憶體位元組數量進行摘要
+StackSettings--call-tree-strategy-native-deallocations-memory = 取消分配的記憶體
+    .title = 依照分配到記憶體的位置，根據取消分配的記憶體位元組數進行摘要
+StackSettings--call-tree-strategy-native-deallocations-sites = 取消分配的位置
+    .title = 依照取消分配記憶體的位置，根據取消分配的記憶體位元組數進行摘要
 StackSettings--invert-call-stack = 反轉呼叫堆疊
     .title = 依照呼叫節點當中花費的時間排序，並忽略其 children。
 StackSettings--show-user-timing = 顯示使用者計時
