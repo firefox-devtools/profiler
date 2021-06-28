@@ -301,10 +301,15 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Πρόσθετοι πόροι (overhead) του { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Πρόσθετοι πόροι
+    .title = Χρόνος δειγματοληψίας όλων των νημάτων.
+MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Συμπερίληψη κρυφών νημάτων
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερίληψη στιγμιότυπων οθόνης
 MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
 MenuButtons--publish--renderCheckbox-label-extension = Συμπερίληψη πληροφοριών επέκτασης
@@ -316,6 +321,7 @@ MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφ�
 MenuButtons--publish--button-upload = Μεταφόρτωση
 MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
 MenuButtons--publish--cancel-upload = Ακύρωση μεταφόρτωσης
+MenuButtons--publish--message-something-went-wrong = Ωχ όχι, κάτι πήγε στραβά κατά τη μεταφόρτωση του προφίλ.
 MenuButtons--publish--message-try-again = Δοκιμή ξανά
 MenuButtons--publish--download = Λήψη
 MenuButtons--publish--compressing = Συμπίεση…
@@ -375,6 +381,9 @@ ProfileRootMessage--additional = Πίσω στην αρχική
 ServiceWorkerManager--installing-button = Εγκατάσταση…
 ServiceWorkerManager--pending-button = Εφαρμογή και επαναφόρτωση
 ServiceWorkerManager--installed-button = Επαναφόρτωση εφαρμογής
+ServiceWorkerManager--updated-while-not-ready =
+    Εφαρμόστηκε μια νέα έκδοση της εφαρμογής προτού φορτωθεί πλήρως
+    αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
 
 ## StackSettings
