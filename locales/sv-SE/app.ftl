@@ -406,6 +406,7 @@ ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har 
 
 StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
 
 ## Tab Bar for the bottom half of the analysis UI.
