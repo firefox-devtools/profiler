@@ -341,6 +341,12 @@ MenuButtons--metaOverheadStatistics-min = Min
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-extension = Inkludera tilläggsinformation
+MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärden
+MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
+MenuButtons--publish--share-performance-profile = Dela prestandaprofil
+MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
+MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
 MenuButtons--publish--button-upload = Ladda upp
 MenuButtons--publish--upload-title = Laddar upp profil...
 MenuButtons--publish--cancel-upload = Avbryt uppladdning
