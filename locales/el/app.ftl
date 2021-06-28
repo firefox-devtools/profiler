@@ -23,6 +23,8 @@
 ## This is used at the top of the homepage and other content pages.
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Διαδικτυακή εφαρμογή για την ανάλυση των επιδόσεων του { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Μετάβαση στο αποθετήριο Git μας (ανοίγει σε νέο παράθυρο)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -37,12 +39,15 @@ AppViewRouter--error-message-public =
     .message = Δεν ήταν δυνατή η λήψη του προφίλ.
 AppViewRouter--error-message-from-url =
     .message = Δεν ήταν δυνατή η λήψη του προφίλ.
+AppViewRouter--route-not-found--home =
+    .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
+CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 
 ## CallTree
@@ -71,6 +76,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Το προφίλ καταγράφηκε σε έκδοση χωρίς βελτιστοποιήσεις κανονικής κυκλοφορίας.
+        Οι παρατηρήσεις επιδόσεων ενδέχεται να μην ισχύουν για τους χρήστες της κανονικής έκδοσης.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -140,6 +149,11 @@ IdleSearchField--search-input =
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Κάντε κλικ εδώ για φόρτωση του προφίλ { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Διαγραφή
     .title = Δεν είναι δυνατή η διαγραφή αυτού του προφίλ επειδή μας λείπουν πληροφορίες εξουσιοδότησης.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Δεν έχει μεταφορτωθεί ακόμη κανένα προφίλ!
@@ -195,6 +209,8 @@ MenuButtons--index--full-view = Πλήρης προβολή
 MenuButtons--index--cancel-upload = Ακύρωση μεταφόρτωσης
 MenuButtons--index--share-upload =
     .label = Μεταφόρτωση τοπικού προφίλ
+MenuButtons--index--share-re-upload =
+    .label = Νέα μεταφόρτωση
 MenuButtons--index--share-error-uploading =
     .label = Σφάλμα μεταφόρτωσης
 MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
@@ -289,6 +305,12 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερίληψη στιγμιότυπων οθόνης
+MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
+MenuButtons--publish--renderCheckbox-label-extension = Συμπερίληψη πληροφοριών επέκτασης
+MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη τιμών προτιμήσεων
+MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
+MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
 MenuButtons--publish--button-upload = Μεταφόρτωση
@@ -353,6 +375,7 @@ ProfileRootMessage--additional = Πίσω στην αρχική
 ServiceWorkerManager--installing-button = Εγκατάσταση…
 ServiceWorkerManager--pending-button = Εφαρμογή και επαναφόρτωση
 ServiceWorkerManager--installed-button = Επαναφόρτωση εφαρμογής
+ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -360,6 +383,7 @@ ServiceWorkerManager--installed-button = Επαναφόρτωση εφαρμογ
 
 StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
+StackSettings--use-data-source-label = Πηγή δεδομένων:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
