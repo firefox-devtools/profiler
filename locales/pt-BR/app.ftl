@@ -104,6 +104,9 @@ Home--load-from-url-submit-button =
     .value = Carregar
 Home--documentation-button = Documentação
 Home--menu-button = Ativar botão de menu do { -profiler-brand-name }
+Home--menu-button-instructions =
+    Ativar o botão de menu do profiler, que inicia a gravação um profile de desempenho
+    no { -firefox-brand-name }, depois analisa e compartilha com profiler.firefox.com.
 Home--addon-button = Instalar extensão
 Home--instructions-title = Como ver e gravar profiles
 Home--record-instructions-start-stop = Interrompa e inicie a gravação de profile
