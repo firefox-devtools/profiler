@@ -22,12 +22,25 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Aplicativo web para análise de desempenho do { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Ir para nosso repositório Git (é aberto em uma nova janela)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Não foi possível recuperar o profile do { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Não foi possível ler o arquivo ou analisar o profile dele.
 AppViewRouter--error-message-local =
     .message = Ainda não implementado.
+AppViewRouter--error-message-public =
+    .message = Não foi possível baixar o profile.
+AppViewRouter--error-message-from-url =
+    .message = Não foi possível baixar o profile.
+AppViewRouter--route-not-found--home =
+    .specialMessage = A URL que você tentou acessar não foi reconhecida.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -51,6 +64,8 @@ CallNodeContextMenu--copy-script-url = Copiar URL do script
 
 CompareHome--form-label-profile1 = Profile 1:
 CompareHome--form-label-profile2 = Profile 2:
+CompareHome--submit-button =
+    .value = Recuperar profiles
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -88,6 +103,7 @@ Home--upload-from-url-button = Carregar um profile de uma URL
 Home--load-from-url-submit-button =
     .value = Carregar
 Home--documentation-button = Documentação
+Home--menu-button = Ativar botão de menu do { -profiler-brand-name }
 Home--addon-button = Instalar extensão
 Home--instructions-title = Como ver e gravar profiles
 Home--record-instructions-start-stop = Interrompa e inicie a gravação de profile
@@ -181,7 +197,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
     }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
-MenuButtons--metaInfo--application = Aplicação
+MenuButtons--metaInfo--application = Aplicativo
 MenuButtons--metaInfo--name-and-version = Nome e versão:
 MenuButtons--metaInfo--update-channel = Canal de atualização:
 MenuButtons--metaInfo--build-id = ID da compilação:
@@ -299,11 +315,11 @@ ProfileRootMessage--additional = Voltar ao início
 
 ServiceWorkerManager--installing-button = Instalando…
 ServiceWorkerManager--pending-button = Aplicar e recarregar
-ServiceWorkerManager--installed-button = Recarregar a aplicação
+ServiceWorkerManager--installed-button = Recarregar o aplicativo
 ServiceWorkerManager--updated-while-not-ready =
-    Uma nova versão da aplicação foi aplicada antes desta página
+    Uma nova versão do aplicativo foi aplicada antes desta página
     ter sido totalmente carregada. Pode não funcionar direito.
-ServiceWorkerManager--new-version-is-ready = Uma nova versão da aplicação foi baixada e está pronta para uso.
+ServiceWorkerManager--new-version-is-ready = Uma nova versão do aplicativo foi baixada e está pronta para uso.
 ServiceWorkerManager--hide-notice-button =
     .title = Ocultar o aviso de recarga
     .aria-label = Ocultar o aviso de recarga
@@ -318,11 +334,22 @@ StackSettings--implementation-native = Nativo
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Árvore de chamadas
+TabBar--network-tab = Rede
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Mostrar apenas este grupo de processos
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Mostrar apenas “{ $trackName }”
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -338,3 +365,4 @@ StackSettings--implementation-native = Nativo
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Gravações enviadas
