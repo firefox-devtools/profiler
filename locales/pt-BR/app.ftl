@@ -90,6 +90,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Documentação
 Home--addon-button = Instalar extensão
 Home--instructions-title = Como ver e gravar profiles
+Home--record-instructions-start-stop = Interrompa e inicie a gravação de profile
 Home--record-instructions-capture-load = Capture e carregue um profile
 
 ## IdleSearchField
@@ -104,6 +105,8 @@ Home--record-instructions-capture-load = Capture e carregue um profile
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Excluir
+    .title = Este profile não pode ser excluído por falta de informações de autorização.
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
