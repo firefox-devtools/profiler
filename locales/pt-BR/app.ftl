@@ -168,16 +168,60 @@ MenuButtons--index--metaInfo-subtitle = Informações do profile
 MenuButtons--metaInfo--symbols = Símbolos:
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--interval = Intervalo:
+MenuButtons--metaInfo--profile-version = Versão do profile:
+MenuButtons--metaInfo--buffer-capacity = Capacidade do buffer:
+MenuButtons--metaInfo--buffer-duration = Duração do buffer:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } segundo
+       *[other] { $configurationDuration } segundos
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
+MenuButtons--metaInfo--application = Aplicação
+MenuButtons--metaInfo--name-and-version = Nome e versão:
+MenuButtons--metaInfo--update-channel = Canal de atualização:
+MenuButtons--metaInfo--build-id = ID da compilação:
+MenuButtons--metaInfo--build-type = Tipo de compilação:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
 
 ##
 
+MenuButtons--metaInfo--platform = Plataforma
+MenuButtons--metaInfo--device = Dispositivo:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = Sistema operacional:
+MenuButtons--metaInfo--visual-metrics = Métricas visuais
+MenuButtons--metaInfo--speed-index = Índice de velocidade:
+MenuButtons--metaInfo-renderRowOfList-label-features = Recursos:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro de threads:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensões:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Sobrecarga do { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Média
+MenuButtons--metaOverheadStatistics-max = Máx
+MenuButtons--metaOverheadStatistics-min = Mín
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Sobrecarga
+    .title = Tempo para amostrar todos os threads.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Limpeza
+    .title = Tempo para descartar dados expirados.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Contador
+    .title = Tempo para acumular todos os contadores.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalo
+    .title = Intervalo observado entre duas amostragens.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Bloqueios
+    .title = Tempo para obter o bloqueio antes de amostrar.
+MenuButtons--metaOverheadStatistics-overhead-duration = Durações de sobrecarga:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Porcentagem de sobrecarga:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
