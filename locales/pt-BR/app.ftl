@@ -226,32 +226,80 @@ MenuButtons--metaOverheadStatistics-overhead-percentage = Porcentagem de sobreca
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir threads ocultos
+MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir intervalo de tempo oculto
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de tela
+MenuButtons--publish--renderCheckbox-label-resource = Incluir URLs e caminhos de recursos
+MenuButtons--publish--renderCheckbox-label-extension = Incluir informações da extensão
+MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de preferências
+MenuButtons--publish--reupload-performance-profile = Reenviar profile de desempenho
+MenuButtons--publish--share-performance-profile = Compartilhar profile de desempenho
+MenuButtons--publish--info-description = Enviar seu profile e tornar acessível a qualquer pessoa que tenha o link.
+MenuButtons--publish--info-description-default = Por padrão, seus dados pessoais são removidos.
+MenuButtons--publish--info-description-firefox-nightly = Este profile é do { -firefox-nightly-brand-name }, portanto, por padrão, todas as informações são incluídas.
+MenuButtons--publish--include-additional-data = Incluir dados adicionais que podem ser identificáveis
+MenuButtons--publish--button-upload = Enviar
+MenuButtons--publish--upload-title = Enviando profile…
+MenuButtons--publish--cancel-upload = Cancelar envio
+MenuButtons--publish--message-try-again = Tentar novamente
+MenuButtons--publish--download = Baixar
+MenuButtons--publish--compressing = Compactando…
 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrar redes:
+    .title = Só exibir requisições de rede que correspondem a um determinado nome
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Você sabia que pode usar vírgula (,) para pesquisar usando vários termos?
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Excluir
+    .title = Clique aqui para excluir o profile { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Intervalo completo
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importando o profile diretamente do { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Lendo o arquivo e processando o profile…
+ProfileLoaderAnimation--loading-message-local =
+    .message = Ainda não implementado.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Baixando e processando o profile…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Baixando e processando o profile…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Lendo e processando profiles…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Vista não encontrada
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Voltar ao início
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Instalando…
+ServiceWorkerManager--pending-button = Aplicar e recarregar
+ServiceWorkerManager--installed-button = Recarregar a aplicação
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
