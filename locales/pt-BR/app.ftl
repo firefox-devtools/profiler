@@ -46,6 +46,14 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Merge de função
+    .title = Fazer merge de uma função a remove do profile e atribui seu tempo à função que a chamou. Isso acontece na árvore em qualquer lugar onde a função foi chamada.
+CallNodeContextMenu--transform-merge-call-node = Merge de node apenas
+    .title = Fazer merge de um node o remove do profile e atribui seu tempo ao node da função que o chamou. Só remove a função daquela parte específica da árvore. Qualquer outro lugar de onde a função foi chamada permanece no profile.
+CallNodeContextMenu--transform-focus-function = Foco na função
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Foco na função (invertido)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Expandir tudo
 CallNodeContextMenu--copy-function-name = Copiar nome da função
 CallNodeContextMenu--copy-script-url = Copiar URL do script
