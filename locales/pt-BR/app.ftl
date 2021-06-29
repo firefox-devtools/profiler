@@ -107,11 +107,25 @@ Home--record-instructions-capture-load = Capture e carregue um profile
 
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Excluir
     .title = Este profile não pode ser excluído por falta de informações de autorização.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nenhum profile foi carregado ainda!
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gerenciar esta gravação
+       *[other] Gerenciar estas gravações
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Iniciar a seleção aqui
+MarkerContextMenu--end-selection-here = Finalizar a seleção aqui
+MarkerContextMenu--copy-description = Copiar descrição
+MarkerContextMenu--copy-call-stack = Copiar pilha de chamadas
+MarkerContextMenu--copy-url = Copiar URL
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -124,15 +138,36 @@ ListOfPublishedProfiles--published-profiles-delete-button-disabled = Excluir
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Início
+MarkerTable--duration = Duração
+MarkerTable--type = Tipo
+MarkerTable--description = Descrição
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Informações do profile
+MenuButtons--index--full-view = Vista completa
+MenuButtons--index--cancel-upload = Cancelar envio
+MenuButtons--index--share-upload =
+    .label = Enviar profile local
+MenuButtons--index--share-re-upload =
+    .label = Reenviar
+MenuButtons--index--share-error-uploading =
+    .label = Erro ao enviar
+MenuButtons--index--revert = Reverter para o profile original
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Enviado:
+MenuButtons--index--profile-info-uploaded-actions = Excluir
+MenuButtons--index--metaInfo-subtitle = Informações do profile
+MenuButtons--metaInfo--symbols = Símbolos:
+MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--interval = Intervalo:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
