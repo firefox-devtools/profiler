@@ -234,6 +234,9 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Erro ao enviar
 MenuButtons--index--revert = Reverter para o profile original
+MenuButtons--index--docs = Documentação
+MenuButtons--permalink--button =
+    .label = Link permanente
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -243,7 +246,44 @@ MenuButtons--index--profile-info-uploaded-label = Enviado:
 MenuButtons--index--profile-info-uploaded-actions = Excluir
 MenuButtons--index--metaInfo-subtitle = Informações do profile
 MenuButtons--metaInfo--symbols = Símbolos:
+MenuButtons--metaInfo--profile-symbolicated = O profile está com simbólicos
+MenuButtons--metaInfo--profile-not-symbolicated = O profile não está com simbólicos
+MenuButtons--metaInfo--resymbolicate-profile = Recriar simbólicos no profile
+MenuButtons--metaInfo--symbolicate-profile = Criar simbólicos no profile
+MenuButtons--metaInfo--attempting-resymbolicate = Tentando recriar simbólicos no profile
+MenuButtons--metaInfo--currently-symbolicating = Criando simbólicos no profile
 MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } core físico
+       *[other] { $physicalCPUs } cores físicos
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } core lógico
+       *[other] { $logicalCPUs } cores lógicos
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } core físico
+       *[other] { $physicalCPUs } cores físicos
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } core lógico
+       *[other] { $logicalCPUs } cores lógicos
+    }
+MenuButtons--metaInfo--recording-started = Gravação iniciada:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--profile-version = Versão do profile:
 MenuButtons--metaInfo--buffer-capacity = Capacidade do buffer:
@@ -299,6 +339,7 @@ MenuButtons--metaOverheadStatistics-statkeys-lockings = Bloqueios
     .title = Tempo para obter o bloqueio antes de amostrar.
 MenuButtons--metaOverheadStatistics-overhead-duration = Durações de sobrecarga:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Porcentagem de sobrecarga:
+MenuButtons--metaOverheadStatistics-profiled-duration = Duração da gravação de profile:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -318,6 +359,7 @@ MenuButtons--publish--include-additional-data = Incluir dados adicionais que pod
 MenuButtons--publish--button-upload = Enviar
 MenuButtons--publish--upload-title = Enviando profile…
 MenuButtons--publish--cancel-upload = Cancelar envio
+MenuButtons--publish--message-something-went-wrong = Ops, algo deu errado ao enviar o profile.
 MenuButtons--publish--message-try-again = Tentar novamente
 MenuButtons--publish--download = Baixar
 MenuButtons--publish--compressing = Compactando…
@@ -392,6 +434,8 @@ ServiceWorkerManager--hide-notice-button =
 StackSettings--implementation-all-stacks = Todas as pilhas
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Nativo
+StackSettings--call-tree-strategy-timing = Tempos
+    .title = Resumir usando pilhas de amostras de código executado ao longo do tempo
 
 ## Tab Bar for the bottom half of the analysis UI.
 
