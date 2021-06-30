@@ -65,9 +65,15 @@ CallNodeContextMenu--transform-collapse-resource = Recolher <strong>{ $nameForRe
     .title = Recolher um recurso achata todas as chamadas àquele recurso em um único node de chamadas recolhido.
 CallNodeContextMenu--transform-collapse-direct-recursion = Recolher recursão direta
     .title = Recolher recursão direta remove chamadas repetidamente recursivas para a mesma função.
+CallNodeContextMenu--transform-drop-function = Descartar amostras com esta função
+    .title = Descartar amostras remove o tempo delas do profile. Útil para eliminar informação de tempo que não é relevante para a análise.
 CallNodeContextMenu--expand-all = Expandir tudo
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Procurar o nome da função no Searchfox
 CallNodeContextMenu--copy-function-name = Copiar nome da função
 CallNodeContextMenu--copy-script-url = Copiar URL do script
+CallNodeContextMenu--copy-stack = Copiar pilha
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -76,11 +82,13 @@ CallNodeContextMenu--copy-script-url = Copiar URL do script
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selecione um node para exibir informações sobre ele.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Insira as URLs de profile que você quer comparar
 CompareHome--form-label-profile1 = Profile 1:
 CompareHome--form-label-profile2 = Profile 2:
 CompareHome--submit-button =
@@ -99,6 +107,8 @@ Details--open-sidebar-button =
     .title = Abrir painel lateral
 Details--close-sidebar-button =
     .title = Fechar painel lateral
+Details--error-boundary-message =
+    .message = Ops, ocorreu um erro desconhecido neste painel.
 
 ## Footer Links
 
@@ -114,6 +124,13 @@ FullTimeline--graph-type = Tipo de gráfico:
 FullTimeline--categories-with-cpu = Categorias com CPU
 FullTimeline--categories = Categorias
 FullTimeline--stack-height = Altura da pilha
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> trilhas visíveis
 
 ## Home page
 
