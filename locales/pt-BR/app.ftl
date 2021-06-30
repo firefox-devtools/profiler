@@ -141,11 +141,12 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Documentação
 Home--menu-button = Ativar botão de menu do { -profiler-brand-name }
 Home--menu-button-instructions =
-    Ativar o botão de menu do profiler, que inicia a gravação um profile de desempenho
-    no { -firefox-brand-name }, depois analisa e compartilha com profiler.firefox.com.
+    Ative o botão de menu do profiler para iniciar a gravação de um profile de desempenho
+    no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
 Home--addon-button = Instalar extensão
+Home--addon-button-instructions = Instale a extensão Gecko Profiler para iniciar a gravação de um profile de desempenho no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
 Home--instructions-title = Como ver e gravar profiles
-Home--record-instructions-start-stop = Interrompa e inicie a gravação de profile
+Home--record-instructions-start-stop = Interrompa e inicie a gravação de profiles
 Home--record-instructions-capture-load = Capture e carregue um profile
 
 ## IdleSearchField
