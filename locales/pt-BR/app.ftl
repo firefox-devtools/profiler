@@ -145,25 +145,46 @@ Home--menu-button-instructions =
     no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
 Home--addon-button = Instalar extensão
 Home--addon-button-instructions = Instale a extensão Gecko Profiler para iniciar a gravação de um profile de desempenho no { -firefox-brand-name }, depois analisar e compartilhar com profiler.firefox.com.
+Home--record-instructions = Para iniciar a gravação de um profile, clique no botão de gravação de profile ou use os atalhos de teclado. O ícone fica azul quando um profile está sendo gravado. Use <kbd>Capturar</kbd> para carregar os dados no profiler.firefox.com.
 Home--instructions-title = Como ver e gravar profiles
+Home--instructions-content =
+    A gravação de profiles de desempenho requer o <a>{ -firefox-brand-name }</a>.
+    No entanto, profiles existentes podem ser vistos em qualquer navegador moderno.
 Home--record-instructions-start-stop = Interrompa e inicie a gravação de profiles
 Home--record-instructions-capture-load = Capture e carregue um profile
+Home--additional-content-title = Carregar profiles existentes
+Home--additional-content-content = Você pode <strong>arrastar e soltar</strong> aqui um arquivo de profile para carregar, ou:
+Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra a interface de comparação.</a>
+Home--recent-uploaded-recordings-title = Gravações enviadas recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Insira termos de filtragem
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Mostrar apenas o próprio tempo
+    .title = Mostrar somente o tempo gasto em um node de chamadas, ignorando seus filhos.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Clique aqui para carregar o profile { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Excluir
     .title = Este profile não pode ser excluído por falta de informações de autorização.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nenhum profile foi carregado ainda!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Veja e gerencie todas as suas gravações (mais { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
