@@ -58,6 +58,13 @@ CallNodeContextMenu--transform-focus-subtree = Foco em subárvore apenas
     .title = Focar em uma subárvore remove amostras que não incluem aquela parte específica da árvore de chamadas. É retirado um ramo da árvore de chamadas, mas o faz somente naquele único node de chamadas. Todas as outras chamadas da função são ignoradas.
 CallNodeContextMenu--transform-collapse-function-subtree = Recolher função
     .title = Recolher uma função remove tudo o que ela chamou e atribui todo esse tempo para a função. Pode ajudar a simplificar um profile que faz chamada para código que não precisa ser analisado.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Recolher <strong>{ $nameForResource }</strong>
+    .title = Recolher um recurso achata todas as chamadas àquele recurso em um único node de chamadas recolhido.
+CallNodeContextMenu--transform-collapse-direct-recursion = Recolher recursão direta
+    .title = Recolher recursão direta remove chamadas repetidamente recursivas para a mesma função.
 CallNodeContextMenu--expand-all = Expandir tudo
 CallNodeContextMenu--copy-function-name = Copiar nome da função
 CallNodeContextMenu--copy-script-url = Copiar URL do script
