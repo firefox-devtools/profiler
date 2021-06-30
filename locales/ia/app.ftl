@@ -66,14 +66,21 @@ Details--close-sidebar-button =
 
 FooterLinks--legal = Legal
 FooterLinks--Privacy = Confidentialitate
+FooterLinks--Cookies = Cookies
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--categories-with-cpu = Categorias con CPU
+FullTimeline--categories = Categorias
 
 ## Home page
 
+Home--load-from-url-submit-button =
+    .value = Cargar
+Home--documentation-button = Documentation
+Home--addon-button = Installar additivo
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -92,6 +99,9 @@ FooterLinks--Privacy = Confidentialitate
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = Copiar le description
+MarkerContextMenu--copy-call-stack = Copiar pila de appellos
+MarkerContextMenu--copy-url = Copiar URL
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -104,15 +114,42 @@ FooterLinks--Privacy = Confidentialitate
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Initiar
+MarkerTable--duration = Duration
+MarkerTable--type = Typo
+MarkerTable--description = Description
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Informationes de profilo
+MenuButtons--index--full-view = Vista complete
+MenuButtons--index--cancel-upload = Cancellar le cargamento
+MenuButtons--index--share-upload =
+    .label = Cargar profilo local
+MenuButtons--index--share-re-upload =
+    .label = Recargar
+MenuButtons--index--share-error-uploading =
+    .label = Error al cargar
+MenuButtons--index--docs = Documentos
+MenuButtons--permalink--button =
+    .label = Ligamine permanente
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Cargate:
+MenuButtons--index--profile-info-uploaded-actions = Deler
+MenuButtons--index--metaInfo-subtitle = Informationes de profilo
+MenuButtons--metaInfo--symbols = Symbolos:
+MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--interval = Intervallo:
+MenuButtons--metaInfo--profile-version = Version de profilo:
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Sin limite
+MenuButtons--metaInfo--application = Application
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -148,19 +185,24 @@ FooterLinks--Privacy = Confidentialitate
 
 ## ProfileRootMessage
 
+ProfileRootMessage--additional = Receder a casa
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Installation…
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Native
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--network-tab = Rete
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
