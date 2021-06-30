@@ -156,14 +156,20 @@ MenuButtons--metaInfo--application = Application
 
 ##
 
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Media
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Cargar
+MenuButtons--publish--download = Discargar
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -185,6 +191,7 @@ MenuButtons--metaInfo--application = Application
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Receder a casa
 
 ## ServiceWorkerManager
