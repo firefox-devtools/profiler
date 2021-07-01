@@ -78,6 +78,8 @@ CallNodeContextMenu--copy-stack = Copiar pilha
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Tempo de execução (ms)
+    .title = O tempo de execução “total” inclui um resumo de todo o tempo onde esta função foi observada estar na pilha. Inclui o tempo em que a função estava realmente sendo executada e o tempo gasto nas chamadas a partir desta função.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
