@@ -50,6 +50,9 @@ CallNodeContextMenu--transform-merge-function = Merge de função
     .title = Fazer merge de uma função a remove do profile e atribui seu tempo à função que a chamou. Isso acontece na árvore em qualquer lugar onde a função foi chamada.
 CallNodeContextMenu--transform-merge-call-node = Merge de node apenas
     .title = Fazer merge de um node o remove do profile e atribui seu tempo ao node da função que o chamou. Só remove a função daquela parte específica da árvore. Qualquer outro lugar de onde a função foi chamada permanece no profile.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title = Focar em uma função remove amostras que não incluem aquela função. Além disso, muda a raiz da árvore de chamadas, de modo que a função seja a única raiz da árvore. Isso pode combinar vários locais de chamada de funções ao longo de um profile em um único node de chamadas.
 CallNodeContextMenu--transform-focus-function = Foco na função
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Foco na função (invertido)
@@ -319,6 +322,7 @@ MenuButtons--metaInfo--build-type = Tipo de compilação:
 ## Strings refer to specific types of builds, and should be kept in English.
 
 MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -326,6 +330,8 @@ MenuButtons--metaInfo--platform = Plataforma
 MenuButtons--metaInfo--device = Dispositivo:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = Sistema operacional:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Métricas visuais
 MenuButtons--metaInfo--speed-index = Índice de velocidade:
 MenuButtons--metaInfo-renderRowOfList-label-features = Recursos:
@@ -463,6 +469,7 @@ StackSettings--show-user-timing = Mostrar tempo do usuário
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Árvore de chamadas
+TabBar--stack-chart-tab = Gráfico de pilha
 TabBar--network-tab = Rede
 
 ## TrackContextMenu
@@ -494,6 +501,26 @@ TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
 TransformNavigator--complete = “{ $item }” completo
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Recolher: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Foco: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Merge: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Recolher subárvore: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
