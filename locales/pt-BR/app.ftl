@@ -84,6 +84,10 @@ CallTree--tracing-ms-self = Próprio (ms)
     .title = O tempo “próprio” inclui somente o tempo em que a função estava no final da pilha. Se esta função chamou outras funções, então o tempo das “outras” funções não é incluído. O tempo “próprio” é útil para saber onde o tempo foi realmente gasto em um programa.
 CallTree--samples-total = Total (amostras)
     .title = O contador “total” de amostras inclui um resumo de cada amostra em que esta função foi observada estar na pilha. Inclui o tempo em que a função estava realmente sendo executada e o tempo gasto nas chamadas a partir desta função.
+CallTree--samples-self = Próprio
+    .title = A contagem de amostras “próprio” inclui somente as amostras em que a função estava no final da pilha. Se esta função chamou outras funções, então a contagem de “outras” funções não é incluída. A contagem “próprio” é útil para saber onde o tempo foi realmente gasto em um programa.
+CallTree--bytes-total = Tamanho total (bytes)
+    .title = O “tamanho total” inclui um resumo de todos os bytes alocados ou desalocados enquanto esta função foi observada estar na pilha. Inclui tanto os bytes onde a função estava realmente sendo executada quanto os bytes das funções chamadas a partir desta função.
 CallTree--bytes-self = Próprio (bytes)
     .title = Os bytes de “próprio” inclui os bytes alocados ou desalocados enquanto esta função estava no final da pilha. Se esta função chamou outras funções, então os bytes das “outras” funções não são incluídos. A informação de bytes de “próprio” é útil para saber onde a memória foi realmente alocada ou desalocada no programa.
 
@@ -444,6 +448,10 @@ StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Nativo
 StackSettings--call-tree-strategy-timing = Tempos
     .title = Resumir usando pilhas de amostras de código executado ao longo do tempo
+StackSettings--call-tree-native-allocations = Memória alocada
+    .title = Resumir usando bytes de memória alocada
+StackSettings--call-tree-strategy-native-deallocations-memory = Memória desalocada
+    .title = Resumir usando bytes de memória desalocada, com base no local onde a memória foi alocada
 
 ## Tab Bar for the bottom half of the analysis UI.
 
