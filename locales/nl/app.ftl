@@ -64,10 +64,49 @@ CallNodeContextMenu--transform-focus-function-title =
     verwijderd. Daarbij wordt de aanroepboom opnieuw geroot, zodat de functie
     de enige root van de boom is. Dit kan meerdere functie-aanroepsites in een profiel
     combineren in één aanroepnode.
+CallNodeContextMenu--transform-focus-function = Focussen op functie
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Focussen op functie (omgekeerd)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Alleen focussen op substructuur
+    .title =
+        Als u op een substructuur focust, wordt elk voorbeeld dat dat specifieke deel
+        van de aanroepboom niet bevat verwijderd. Het selecteert een tak van de aanroepboom,
+        echter dit gebeurt alleen voor die enkele aanroepnode. Alle andere aanroepen
+        van de functie worden genegeerd.
+CallNodeContextMenu--transform-collapse-function-subtree = Functie samenvouwen
+    .title =
+        Als u een functie samenvouwt, wordt alles dat deze heeft aangeroepen verwijderd en alle
+        tijd aan de functie toegewezen. Dit kan helpen een profiel dat code aanroept die niet
+        hoeft te worden geanalyseerd te vereenvoudigen.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = <strong>{ $nameForResource }</strong> samenvouwen
+    .title =
+        Als u een bron samenvouwt, worden alle aanroepen van die bron
+        afgevlakt tot een enkele samengevouwen aanroepnode.
+CallNodeContextMenu--transform-collapse-direct-recursion = Directe recursie samenvouwen
+    .title =
+        Als u directe recursie samenvouwt, worden alle aanroepen die herhaaldelijk naar
+        dezelfde functie terugvallen verwijderd.
+CallNodeContextMenu--expand-all = Alles uitbreiden
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = De functienaam op Searchfox opzoeken
+CallNodeContextMenu--copy-function-name = Functienaam kopiëren
+CallNodeContextMenu--copy-script-url = Script-URL kopiëren
+CallNodeContextMenu--copy-stack = Stack kopiëren
 
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Looptijd (ms)
+    .title =
+        De ‘totale’ looptijd bevat een samenvatting van alle tijd waarin deze
+        functie zich on de stack bevond. Dit omvat de tijd waarin de
+        functie daadwerkelijk werd uitgevoerd en de tijd die werd gespendeerd
+        aan aanroepen vanuit deze functie.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
