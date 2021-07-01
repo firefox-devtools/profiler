@@ -79,7 +79,13 @@ CallNodeContextMenu--copy-stack = Copiar pilha
 ## This is the component for Call Tree panel.
 
 CallTree--tracing-ms-total = Tempo de execução (ms)
-    .title = O tempo de execução “total” inclui um resumo de todo o tempo onde esta função foi observada estar na pilha. Inclui o tempo em que a função estava realmente sendo executada e o tempo gasto nas chamadas a partir desta função.
+    .title = O tempo de execução “total” inclui um resumo de todo o tempo em que esta função foi observada estar na pilha. Inclui o tempo em que a função estava realmente sendo executada e o tempo gasto nas chamadas a partir desta função.
+CallTree--tracing-ms-self = Próprio (ms)
+    .title = O tempo “próprio” inclui somente o tempo em que a função estava no final da pilha. Se esta função chamou outras funções, então o tempo das “outras” funções não é incluído. O tempo “próprio” é útil para saber onde o tempo foi realmente gasto em um programa.
+CallTree--samples-total = Total (amostras)
+    .title = O contador “total” de amostras inclui um resumo de cada amostra em que esta função foi observada estar na pilha. Inclui o tempo em que a função estava realmente sendo executada e o tempo gasto nas chamadas a partir desta função.
+CallTree--bytes-self = Próprio (bytes)
+    .title = Os bytes de “próprio” inclui os bytes alocados ou desalocados enquanto esta função estava no final da pilha. Se esta função chamou outras funções, então os bytes das “outras” funções não são incluídos. A informação de bytes de “próprio” é útil para saber onde a memória foi realmente alocada ou desalocada no programa.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
