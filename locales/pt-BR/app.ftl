@@ -448,10 +448,17 @@ StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Nativo
 StackSettings--call-tree-strategy-timing = Tempos
     .title = Resumir usando pilhas de amostras de código executado ao longo do tempo
+StackSettings--call-tree-strategy-native-retained-allocations = Memória retida
+    .title = Resumir usando bytes de memória que foram alocados, mas nunca liberados na atual seleção de visão
 StackSettings--call-tree-native-allocations = Memória alocada
     .title = Resumir usando bytes de memória alocada
 StackSettings--call-tree-strategy-native-deallocations-memory = Memória desalocada
     .title = Resumir usando bytes de memória desalocada, com base no local onde a memória foi alocada
+StackSettings--call-tree-strategy-native-deallocations-sites = Locais de desalocação
+    .title = Resumir usando bytes de memória desalocada, com base no local onde a memória foi desalocada
+StackSettings--invert-call-stack = Inverter pilha de chamadas
+    .title = Ordenar pelo tempo gasto em um node de chamadas, ignorando seus filhos.
+StackSettings--show-user-timing = Mostrar tempo do usuário
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -481,6 +488,12 @@ TrackContextMenu--hide-track = Ocultar “{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = “{ $item }” completo
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
