@@ -105,10 +105,17 @@ Home--addon-button = 安装附加组件
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--description = 描述
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--full-view = 全视图
+MenuButtons--index--cancel-upload = 取消上传
+MenuButtons--index--share-re-upload =
+    .label = 重新上传
+MenuButtons--index--share-error-uploading =
+    .label = 上传时出错
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
@@ -124,10 +131,16 @@ Home--addon-button = 安装附加组件
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-max = 最大值
+MenuButtons--metaOverheadStatistics-min = 最小值
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = 上传
+MenuButtons--publish--cancel-upload = 取消上传
+MenuButtons--publish--message-try-again = 再试一次
+MenuButtons--publish--download = 下载
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -154,14 +167,19 @@ Home--addon-button = 安装附加组件
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = 安装中…
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-native = 原生
+StackSettings--use-data-source-label = 数据源：
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = 调用树
+TabBar--flame-graph-tab = 火焰图
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
