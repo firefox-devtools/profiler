@@ -22,15 +22,36 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--github-icon =
+    .title = Ir a nuestro repositorio Git (se abrirá en una nueva ventana)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = No se pudo recuperar el perfil de { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = No se pudo leer el archivo ni analizar el perfil que contiene.
+AppViewRouter--error-message-local =
+    .message = Aún no se ha implementado.
+AppViewRouter--error-message-public =
+    .message = No se pudo descargar el perfil.
+AppViewRouter--error-message-from-url =
+    .message = No se pudo descargar el perfil.
+AppViewRouter--route-not-found--home =
+    .specialMessage = La URL a la que intentaste acceder no fue reconocida.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--expand-all = Expandir todo
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Busca el nombre de la función en Searchfox
+CallNodeContextMenu--copy-function-name = Copiar nombre de la función
+CallNodeContextMenu--copy-script-url = Copiar URL del script
+CallNodeContextMenu--copy-stack = Copiar pila
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -44,6 +65,10 @@
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--form-label-profile1 = Perfil 1:
+CompareHome--form-label-profile2 = Perfil 2:
+CompareHome--submit-button =
+    .value = Recuperar perfiles
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -54,17 +79,36 @@
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = Abrir la barra lateral
+Details--close-sidebar-button =
+    .title = Cerrar la barra lateral
 
 ## Footer Links
 
+FooterLinks--legal = Legal
+FooterLinks--Privacy = Privacidad
+FooterLinks--Cookies = Cookies
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Tipo de gráfico:
+FullTimeline--categories-with-cpu = Categorías con CPU
+FullTimeline--categories = Categorías
+FullTimeline--stack-height = Altura de pila
 
 ## Home page
 
+Home--upload-from-file-input-button = Cargar un perfil desde un archivo
+Home--upload-from-url-button = Cargar un perfil desde una URL
+Home--load-from-url-submit-button =
+    .value = Cargar
+Home--documentation-button = Documentación
+Home--menu-button = Activar botón de menú de { -profiler-brand-name }
+Home--addon-button = Instalar complemento
+Home--instructions-title = Cómo ver y registrar perfiles
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
