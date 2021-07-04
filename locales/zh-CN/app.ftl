@@ -180,6 +180,7 @@ StackSettings--use-data-source-label = 数据源：
 
 TabBar--calltree-tab = 调用树
 TabBar--flame-graph-tab = 火焰图
+TabBar--network-tab = 网络
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
