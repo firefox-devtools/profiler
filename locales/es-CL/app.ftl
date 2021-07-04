@@ -109,6 +109,13 @@ Home--documentation-button = Documentación
 Home--menu-button = Activar botón de menú de { -profiler-brand-name }
 Home--addon-button = Instalar complemento
 Home--instructions-title = Cómo ver y registrar perfiles
+Home--record-instructions-start-stop = Detener e iniciar perfilado
+Home--record-instructions-capture-load = Capturar y cargar perfil
+Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo. Haz que la web sea más rápida.
+Home--additional-content-title = Cargar perfiles existentes
+Home--additional-content-content = Puedes <strong>arrastrar y soltar</strong> un archivo de perfil aquí para cargarlo, o:
+Home--compare-recordings-info = También puedes comparar los registros. <a>Abre la interfaz de comparación.</a>
+Home--recent-uploaded-recordings-title = Registros subidos recientemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
