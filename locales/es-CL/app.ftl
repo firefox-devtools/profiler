@@ -120,6 +120,8 @@ Home--recent-uploaded-recordings-title = Registros subidos recientemente
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Ingrese términos de filtro
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -129,46 +131,148 @@ Home--recent-uploaded-recordings-title = Registros subidos recientemente
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Haz clic aquí para cargar el perfil { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Borrar
+    .title = Este perfil no puede ser eliminado porque no tenemos la información de autorización.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = ¡Aún no se ha subido ningún perfil!
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gestionar este registro
+       *[other] Gestionar estos registros
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Iniciar la selección aquí
+MarkerContextMenu--end-selection-here = Finalizar la selección aquí
+MarkerContextMenu--start-selection-at-marker-start = Iniciar la selección en el <strong>inicio</strong> del marcador
+MarkerContextMenu--start-selection-at-marker-end = Iniciar la selección en el <strong>término</strong> del marcador
+MarkerContextMenu--end-selection-at-marker-start = Terminar la selección en el <strong>inicio</strong> del marcador
+MarkerContextMenu--end-selection-at-marker-end = Terminar la selección en el <strong>término</strong> del marcador
+MarkerContextMenu--copy-description = Copiar descripción
+MarkerContextMenu--copy-call-stack = Copiar pila de llamadas
+MarkerContextMenu--copy-url = Copiar URL
+MarkerContextMenu--copy-full-payload = Copiar payload completo
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Marcadores de filtros:
+    .title = Solo mostrar marcadores que coincidan con cierto nombre
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selecciona un marcador para mostrar información sobre él.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Inicio
+MarkerTable--duration = Duración
+MarkerTable--type = Tipo
+MarkerTable--description = Descripción
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Información del perfil
+MenuButtons--index--full-view = Vista completa
+MenuButtons--index--cancel-upload = Cancelar subida
+MenuButtons--index--share-upload =
+    .label = Subir perfil local
+MenuButtons--index--share-re-upload =
+    .label = Volver a subir
+MenuButtons--index--share-error-uploading =
+    .label = Error al subir
+MenuButtons--index--revert = Revertir al perfil original
+MenuButtons--index--docs = Docs
+MenuButtons--permalink--button =
+    .label = Enlace permanente
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Subido:
+MenuButtons--index--profile-info-uploaded-actions = Borrar
+MenuButtons--index--metaInfo-subtitle = Información del perfil
+MenuButtons--metaInfo--symbols = Símbolos:
+MenuButtons--metaInfo--profile-symbolicated = El perfil está simbolizado
+MenuButtons--metaInfo--profile-not-symbolicated = El perfil no está simbolizado
+MenuButtons--metaInfo--resymbolicate-profile = Volver a simbolizar el perfil
+MenuButtons--metaInfo--symbolicate-profile = Simbolizar perfil
+MenuButtons--metaInfo--attempting-resymbolicate = Intentando volver a simbolizar el perfil
+MenuButtons--metaInfo--currently-symbolicating = Perfil actualmente simbolizado
+MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--recording-started = Inicio del registro:
+MenuButtons--metaInfo--interval = Intervalo:
+MenuButtons--metaInfo--profile-version = Versión del perfil:
+MenuButtons--metaInfo--buffer-capacity = Capacidad del búfer:
+MenuButtons--metaInfo--buffer-duration = Duración del búfer:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } segundo
+       *[other] { $configurationDuration } segundos
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitado
+MenuButtons--metaInfo--application = Aplicación
+MenuButtons--metaInfo--name-and-version = Nombre y versión:
+MenuButtons--metaInfo--update-channel = Canal de actualización:
+MenuButtons--metaInfo--build-id = ID de compilación:
+MenuButtons--metaInfo--build-type = Tipo de compilación:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Plataforma
+MenuButtons--metaInfo--device = Dispositivo:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = SO:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Métricas visuales
+MenuButtons--metaInfo--speed-index = Índice de velocidad:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Índice de velocidad de percepción:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Índice de velocidad de contenido:
+MenuButtons--metaInfo-renderRowOfList-label-features = Funcionalidades
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro de hilos:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Mediana
+MenuButtons--metaOverheadStatistics-max = Máximo
+MenuButtons--metaOverheadStatistics-min = Mínimo
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--message-try-again = Volver a intentarlo
+MenuButtons--publish--download = Descargar
+MenuButtons--publish--compressing = Comprimiendo…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -180,6 +284,12 @@ Home--recent-uploaded-recordings-title = Registros subidos recientemente
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Borrar
+    .title = Clic aquí para borrar el perfil { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
