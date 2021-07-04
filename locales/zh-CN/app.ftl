@@ -55,10 +55,15 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = 打开侧栏
+Details--close-sidebar-button =
+    .title = 关闭侧栏
 
 ## Footer Links
 
-FooterLinks--legal = 法律信息
+FooterLinks--legal = 法律
+FooterLinks--Privacy = 隐私
 FooterLinks--Cookies = Cookie
 
 ## FullTimeline
@@ -68,6 +73,8 @@ FooterLinks--Cookies = Cookie
 
 ## Home page
 
+Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
+Home--addon-button = 安装附加组件
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
