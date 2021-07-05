@@ -14,7 +14,7 @@
 }
 
 /* Remove the border, as it compets with box-shadow styles applied with focus.css */
-.photon-checkbox:focus {
+.photon-checkbox:focus-visible {
   border: none;
 }
 

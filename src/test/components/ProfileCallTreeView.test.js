@@ -102,6 +102,17 @@ describe('calltree/ProfileCallTreeView', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
+  it('renders an unfiltered call tree with filenames', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A[file:hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28]
+      B[file:git:github.com/rust-lang/rust:library/std/src/sys/unix/thread.rs:53cb7b09b00cbea8754ffb78e7e3cb521cb8af4b]
+      C[lib:libC.so][file:s3:gecko-generated-sources:a5d3747707d6877b0e5cb0a364e3cb9fea8aa4feb6ead138952c2ba46d41045297286385f0e0470146f49403e46bd266e654dfca986de48c230f3a71c2aafed4/ipc/ipdl/PBackgroundChild.cpp:]
+      D[lib:libD.so]
+    `);
+    const { container } = setup(profile);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   it('renders an inverted call tree', () => {
     const profileForInvertedTree = getProfileFromTextSamples(`
       A  A               A

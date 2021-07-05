@@ -4,7 +4,7 @@
 // @flow
 
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
-import exampleSymbolTable from '../fixtures/example-symbol-table';
+import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 
@@ -34,7 +34,7 @@ describe('SymbolStoreDB', function() {
       await symbolStoreDB.storeSymbolTable(
         lib.debugName,
         lib.breakpadId,
-        exampleSymbolTable
+        completeSymbolTableAsTuple
       );
     }
 
