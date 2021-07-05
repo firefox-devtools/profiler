@@ -134,13 +134,47 @@ MenuButtons--permalink--button =
 
 MenuButtons--index--profile-info-uploaded-label = 上传于：
 MenuButtons--index--profile-info-uploaded-actions = 删除
+MenuButtons--metaInfo--symbols = 符号：
 MenuButtons--metaInfo--cpu = CPU：
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+       *[other] { $physicalCPUs } 颗物理核心
+    }、{ $logicalCPUs ->
+       *[other] { $logicalCPUs } 颗逻辑核心
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+       *[other] { $physicalCPUs } 颗物理核心
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+       *[other] { $logicalCPUs } 颗逻辑核心
+    }
+MenuButtons--metaInfo--application = 应用程序
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
 
 ##
 
+MenuButtons--metaInfo--device = 设备：
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = OS:
+MenuButtons--metaInfo-renderRowOfList-label-features = 功能：
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = 线程过滤器：
+MenuButtons--metaInfo-renderRowOfList-label-extensions = 扩展：
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
@@ -181,7 +215,7 @@ MenuButtons--publish--download = 下载
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
-ServiceWorkerManager--installing-button = 安装中…
+ServiceWorkerManager--installing-button = 正在安装…
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
