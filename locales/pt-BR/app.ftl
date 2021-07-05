@@ -229,6 +229,7 @@ MarkerContextMenu--end-selection-at-marker-end = Terminar a seleção no <strong
 MarkerContextMenu--copy-description = Copiar descrição
 MarkerContextMenu--copy-call-stack = Copiar pilha de chamadas
 MarkerContextMenu--copy-url = Copiar URL
+MarkerContextMenu--copy-full-payload = Copiar todo o conteúdo
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -349,6 +350,10 @@ MenuButtons--metaInfo--os = Sistema operacional:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Métricas visuais
 MenuButtons--metaInfo--speed-index = Índice de velocidade:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Índice de velocidade perceptivo:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Índice de velocidade de todo o conteúdo:
 MenuButtons--metaInfo-renderRowOfList-label-features = Recursos:
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro de threads:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensões:
@@ -537,17 +542,17 @@ TransformNavigator--collapse-resource = Recolher: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--focus-subtree = Node em foco: { $item }
+TransformNavigator--focus-subtree = Focar node: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--focus-function = Foco: { $item }
+TransformNavigator--focus-function = Focar: { $item }
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--merge-call-node = Node em merge: { $item }
+TransformNavigator--merge-call-node = Merge node: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
@@ -557,7 +562,12 @@ TransformNavigator--merge-function = Merge: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--drop-function = Descarte: { $item }
+TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Recolher recursão: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
