@@ -293,6 +293,64 @@ describe('sanitizePII', function() {
     }
   });
 
+  it('should sanitize extension ids inside text markers', function() {
+    const unsanitizedNameField =
+      'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
+    const sanitizedNameField =
+      'api_call: runtime.onUpdateAvailable.addListener';
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveExtensions: true,
+      },
+      getProfileWithMarkers([
+        [
+          'ExtensionParent',
+          0,
+          1,
+          {
+            type: 'Text',
+            name: unsanitizedNameField,
+          },
+        ],
+      ])
+    );
+
+    const marker = sanitizedProfile.threads[0].markers.data[0];
+    if (!marker || marker.type !== 'Text') {
+      throw new Error('Expected a Text marker');
+    }
+    expect(marker.name).toBe(sanitizedNameField);
+  });
+
+  it('should sanitize both URLs and extension ids inside Extension Suspend markers', function() {
+    const unsanitizedNameField =
+      'onBeforeRequest https://profiler.firefox.com/ by extension';
+    const sanitizedNameField = 'onBeforeRequest https://<URL>';
+    const { sanitizedProfile } = setup(
+      {
+        shouldRemoveUrls: true,
+        shouldRemoveExtensions: true,
+      },
+      getProfileWithMarkers([
+        [
+          'Extension Suspend',
+          0,
+          1,
+          {
+            type: 'Text',
+            name: unsanitizedNameField,
+          },
+        ],
+      ])
+    );
+
+    const marker = sanitizedProfile.threads[0].markers.data[0];
+    if (!marker || marker.type !== 'Text') {
+      throw new Error('Expected a Text marker');
+    }
+    expect(marker.name).toBe(sanitizedNameField);
+  });
+
   it('should not sanitize all the preference values inside preference read markers', function() {
     const { sanitizedProfile } = setup(
       {
