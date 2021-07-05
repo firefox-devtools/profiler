@@ -50,6 +50,25 @@ async function logAndExec(
 }
 
 /**
+ * Logs the command to be executed first, and executes a series of shell commands
+ * and pipes the stdout of them to the next one. In the end, returns the stdout
+ * of the last piped command.
+ *
+ * @throws Will throw an error if one of the executed commands fails.
+ */
+function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
+  console.log('[exec]', commands.map(command => command.join(' ')).join(' | '));
+  let prevOutput = '';
+  for (const command of commands) {
+    const [executable, ...args] = command;
+    prevOutput = cp
+      .execFileSync(executable, args, { input: prevOutput })
+      .toString();
+  }
+  return prevOutput.toString();
+}
+
+/**
  * Pause with a message and wait for the enter as a confirmation.
  * The prompt will not be displayed if the `-y` argument is given to the script.
  * This is mainly used by the CircleCI automation.
@@ -160,23 +179,19 @@ async function checkAllowedPaths(
   console.log(
     `>>> Checking if ${compareBranch} branch has changes from the files that are not allowed.`
   );
-  // git log --no-merges baseBranch..compareBranch --pretty="format:" --name-only
-  const changedFilesResult = await logAndExec(
-    'git',
-    'log',
-    '--no-merges',
-    `${upstream}/${baseBranch}..${upstream}/${compareBranch}`,
-    '--pretty=format:',
-    '--name-only'
+
+  // git rev-list --no-merges upstream/baseBranch..upstream/compareBranch | git diff-tree --stdin --no-commit-id --name-only -r
+  const changedFilesResult = logAndPipeExec(
+    [
+      'git',
+      'rev-list',
+      '--no-merges',
+      `${upstream}/${baseBranch}..${upstream}/${compareBranch}`,
+    ],
+    ['git', 'diff-tree', '--stdin', '--no-commit-id', '--name-only', '-r']
   );
 
-  if (changedFilesResult.stderr.length) {
-    throw new Error(
-      `Checking allowed paths command failed with a stderr output: ${changedFilesResult.stderr.toString()}`
-    );
-  }
-
-  const changedFiles = changedFilesResult.stdout.toString().split('\n');
+  const changedFiles = changedFilesResult.split('\n');
   for (const file of changedFiles) {
     if (file.length > 0 && !matchRegexp.test(file)) {
       throw new Error(oneLine`
