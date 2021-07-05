@@ -688,6 +688,17 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 
   return null;
 }
+function _findFileNameFromFuncName(
+  funcNameWithModifier: string
+): string | null {
+  const findFileNameResult = /\[file:([^\]]+)\]/.exec(funcNameWithModifier);
+  if (findFileNameResult) {
+    const fileName = findFileNameResult[1];
+    return fileName;
+  }
+
+  return null;
+}
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
@@ -764,6 +775,12 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       funcTable.resource[funcIndex] = resourceIndex;
+
+      // Find the file name from the function name
+      const fileName = _findFileNameFromFuncName(funcNameWithModifier);
+      if (fileName) {
+        funcTable.fileName[funcIndex] = stringTable.indexForString(fileName);
+      }
 
       // Find the wanted jit type from the function name
       const jitType = _findJitTypeFromFuncName(funcNameWithModifier);
