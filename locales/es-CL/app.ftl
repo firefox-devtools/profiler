@@ -45,7 +45,7 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
-CallNodeContextMenu--transform-merge-function = Fusión de función
+CallNodeContextMenu--transform-merge-function = Fusionar función
     .title = Fusionar una función la remueve del perfil, y asigna su tiempo a la función que la llamó. Esto sucede en todas partes donde la función fue llamada dentro del árbol.
 CallNodeContextMenu--transform-merge-call-node = Fusionar solo el nodo
     .title = Fusionar un nodo lo remueve del perfil, y asigna su tiempo al nodo de la función que le llamó. Solo remueve la función de esa parte específica del árbol. Cualquier otro lugar donde la función haya sido llamada permanecerá en el perfil.
@@ -56,6 +56,21 @@ CallNodeContextMenu--transform-focus-function-title =
     función. Además, reinicia el árbol de llamadas para que la función
     sea la única raíz del árbol. Esto puede combinar múltiples sitios de llamadas de funciones
     dentro de un perfil en un único nodo de llamada.
+CallNodeContextMenu--transform-focus-function = Enfocarse en la función
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Enfocarse en la función (invertido)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Enfocarse solo en el subárbol
+    .title = Enfocarse en el subárbol removerá cualquier muestra que no incluya esa parte específica del árbol de llamados. Retira una rama del árbol de llamados, no obstante solo lo hace para un único nodo de llamada. Todo el resto de las llamadas de la función son ignoradas.
+CallNodeContextMenu--transform-collapse-function-subtree = Contraer función.
+    .title = Contraer una función removerá todo lo que llamó, y asignará todo el tiempo a la función. Esto puede ayudar a simplificar un perfil que llama a código que no necesita ser analizado.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForResource }</strong>
+    .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
+CallNodeContextMenu--transform-collapse-direct-recursion = Contraer recursión directa
+    .title = Contraer una recursión directa remueve las llamadas con recursión repetida pasándolas a una misma función.
 CallNodeContextMenu--expand-all = Expandir todo
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
