@@ -45,6 +45,17 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Fusión de función
+    .title = Fusionar una función la remueve del perfil, y asigna su tiempo a la función que la llamó. Esto sucede en todas partes donde la función fue llamada dentro del árbol.
+CallNodeContextMenu--transform-merge-call-node = Fusionar solo el nodo
+    .title = Fusionar un nodo lo remueve del perfil, y asigna su tiempo al nodo de la función que le llamó. Solo remueve la función de esa parte específica del árbol. Cualquier otro lugar donde la función haya sido llamada permanecerá en el perfil.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Enfocarse en una función eliminará cualquier muestra que no incluya aquella
+    función. Además, reinicia el árbol de llamadas para que la función
+    sea la única raíz del árbol. Esto puede combinar múltiples sitios de llamadas de funciones
+    dentro de un perfil en un único nodo de llamada.
 CallNodeContextMenu--expand-all = Expandir todo
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
