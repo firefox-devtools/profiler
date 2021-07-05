@@ -32,6 +32,7 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--copy-script-url = 复制脚本 URL
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -73,12 +74,17 @@ FooterLinks--Cookies = Cookie
 
 ## Home page
 
+Home--load-from-url-submit-button =
+    .value = 加载
+Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--addon-button = 安装附加组件
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = 输入过滤条件
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -93,6 +99,8 @@ Home--addon-button = 安装附加组件
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = 复制描述
+MarkerContextMenu--copy-url = 复制 URL
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -116,11 +124,17 @@ MenuButtons--index--share-re-upload =
     .label = 重新上传
 MenuButtons--index--share-error-uploading =
     .label = 上传时出错
+MenuButtons--index--docs = 文档
+MenuButtons--permalink--button =
+    .label = 固定链接
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = 上传于：
+MenuButtons--index--profile-info-uploaded-actions = 删除
+MenuButtons--metaInfo--cpu = CPU：
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
