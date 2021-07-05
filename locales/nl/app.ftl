@@ -90,6 +90,10 @@ CallNodeContextMenu--transform-collapse-direct-recursion = Directe recursie same
     .title =
         Als u directe recursie samenvouwt, worden alle aanroepen die herhaaldelijk naar
         dezelfde functie terugvallen verwijderd.
+CallNodeContextMenu--transform-drop-function = Monsters met deze functie weglaten
+    .title =
+        Als u monsters weglaat, wordt hun tijd uit het profiel verwijderd. Dit is nuttig om
+        tijdsinformatie die niet relevant voor de analyse is te elimineren.
 CallNodeContextMenu--expand-all = Alles uitbreiden
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -111,11 +115,17 @@ CallTree--tracing-ms-total = Looptijd (ms)
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selecteer een node om informatie erover te tonen.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Voer de profiel-URL’s die u wilt vergelijken in
+CompareHome--instruction-content =
+    Het hulpmiddel extraheert de gegevens uit de geselecteerde track en het bereik voor
+    elk profiel en plaatst ze samen in dezelfde weergave, om ze gemakkelijk te
+    vergelijken te maken.
 CompareHome--form-label-profile1 = Profiel 1:
 CompareHome--form-label-profile2 = Profiel 2:
 CompareHome--submit-button =
@@ -171,10 +181,25 @@ Home--load-from-url-submit-button =
     .value = Laden
 Home--documentation-button = Documentatie
 Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
+Home--addon-button = Add-on installeren
+Home--addon-button-instructions =
+    Installeer de add-on Gecko Profiler om een prestatieprofiel op te nemen
+    in { -firefox-brand-name }, analyseer het en deel het met profiler.firefox.com.
+Home--instructions-title = Profielen bekijken en opnemen
+Home--instructions-content =
+    Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
+    Bestaande profielen kunnen echter bekeken worden in elke moderne browser.
+Home--record-instructions-start-stop = Profileren stoppen en starten
+Home--additional-content-title = Bestaande profielen laden
+Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
+Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
+Home--recent-uploaded-recordings-title = Onlangs geüploade opnamen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Voer filtertermen in
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -184,11 +209,36 @@ Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Klik hier om profiel { $smallProfileName } te laden
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Verwijderen
+    .title = Dit profiel kan niet worden verwijderd, omdat we geen autorisatiegegevens hebben.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Er is nog geen profiel geüpload!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Al uw opnamen bekijken en beheren (nog { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Deze opname beheren
+       *[other] Deze opnamen beheren
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Selectie hier starten
+MarkerContextMenu--end-selection-here = Selectie hier beëindigen
+MarkerContextMenu--copy-description = Beschrijving kopiëren
+MarkerContextMenu--copy-call-stack = Aanroepstack kopiëren
+MarkerContextMenu--copy-url = URL kopiëren
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -201,15 +251,39 @@ Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Start
+MarkerTable--duration = Duur
+MarkerTable--type = Type
+MarkerTable--description = Beschrijving
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Profielinfo
+MenuButtons--index--full-view = Volledig beeld
+MenuButtons--index--cancel-upload = Uploaden annuleren
+MenuButtons--index--share-upload =
+    .label = Lokaal profiel uploaden
+MenuButtons--index--share-re-upload =
+    .label = Opnieuw uploaden
+MenuButtons--index--share-error-uploading =
+    .label = Fout bij uploaden
+MenuButtons--index--revert = Terug naar origineel profiel
+MenuButtons--index--docs = Documenten
+MenuButtons--permalink--button =
+    .label = Permalink
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Geüpload:
+MenuButtons--index--profile-info-uploaded-actions = Verwijderen
+MenuButtons--index--metaInfo-subtitle = Profielinformatie
+MenuButtons--metaInfo--symbols = Symbolen:
+MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--recording-started = Opname gestart:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
