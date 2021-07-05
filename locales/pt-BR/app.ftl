@@ -222,6 +222,10 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 MarkerContextMenu--set-selection-from-duration = Definir seleção a partir da duração do marcador
 MarkerContextMenu--start-selection-here = Iniciar a seleção aqui
 MarkerContextMenu--end-selection-here = Finalizar a seleção aqui
+MarkerContextMenu--start-selection-at-marker-start = Iniciar a seleção no <strong>início</strong> do marcador
+MarkerContextMenu--start-selection-at-marker-end = Iniciar a seleção no <strong>final</strong> do marcador
+MarkerContextMenu--end-selection-at-marker-start = Terminar a seleção no <strong>início</strong> do marcador
+MarkerContextMenu--end-selection-at-marker-end = Terminar a seleção no <strong>final</strong> do marcador
 MarkerContextMenu--copy-description = Copiar descrição
 MarkerContextMenu--copy-call-stack = Copiar pilha de chamadas
 MarkerContextMenu--copy-url = Copiar URL
@@ -229,10 +233,14 @@ MarkerContextMenu--copy-url = Copiar URL
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Filtrar marcadores:
+    .title = Só exibir marcadores que correspondem a um determinado nome
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selecione um marcador para exibir informações sobre ele.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -459,8 +467,11 @@ ServiceWorkerManager--hide-notice-button =
 StackSettings--implementation-all-stacks = Todas as pilhas
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Nativo
+StackSettings--use-data-source-label = Origem de dados:
 StackSettings--call-tree-strategy-timing = Tempos
     .title = Resumir usando pilhas de amostras de código executado ao longo do tempo
+StackSettings--call-tree-strategy-js-allocations = Alocações JavaScript
+    .title = Resumir usando bytes alocados de JavaScript (sem desalocações)
 StackSettings--call-tree-strategy-native-retained-allocations = Memória retida
     .title = Resumir usando bytes de memória que foram alocados, mas nunca liberados na atual seleção de visão
 StackSettings--call-tree-native-allocations = Memória alocada
@@ -472,6 +483,9 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Locais de desaloc
 StackSettings--invert-call-stack = Inverter pilha de chamadas
     .title = Ordenar pelo tempo gasto em um node de chamadas, ignorando seus filhos.
 StackSettings--show-user-timing = Mostrar tempo do usuário
+StackSettings--panel-search =
+    .label = Filtrar pilhas:
+    .title = Só exibir pilhas que contêm uma função cujo nome corresponde a esta substring
 
 ## Tab Bar for the bottom half of the analysis UI.
 
