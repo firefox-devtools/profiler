@@ -116,27 +116,61 @@ CallTree--tracing-ms-total = Looptijd (ms)
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--form-label-profile1 = Profiel 1:
+CompareHome--form-label-profile2 = Profiel 2:
+CompareHome--submit-button =
+    .value = Profielen ophalen
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Dit profiel is opgenomen in een build zonder uitgave-optimalisaties.
+        Prestatiewaarnemingen zijn mogelijk niet van toepassing op de uitgavepopulatie.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
 ## used at the bottom part of the UI.
 
+Details--open-sidebar-button =
+    .title = De zijbalk openen
+Details--close-sidebar-button =
+    .title = De zijbalk sluiten
+Details--error-boundary-message =
+    .message = Oh-oh, er is een onbekende fout in dit paneel opgetreden.
 
 ## Footer Links
 
+FooterLinks--legal = Juridisch
+FooterLinks--Privacy = Privacy
+FooterLinks--Cookies = Cookies
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Grafiektype:
+FullTimeline--categories-with-cpu = Categorieën met CPU
+FullTimeline--categories = Categorieën
+FullTimeline--stack-height = Stackhoogte
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracks zichtbaar
 
 ## Home page
 
+Home--upload-from-file-input-button = Een profiel uit een bestand laden
+Home--upload-from-url-button = Een profiel van een URL laden
+Home--load-from-url-submit-button =
+    .value = Laden
+Home--documentation-button = Documentatie
+Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
