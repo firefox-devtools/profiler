@@ -104,6 +104,7 @@ CallTreeSidebar--select-a-node = Selecione um node para exibir informações sob
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Insira as URLs de profile que você quer comparar
+CompareHome--instruction-content = A ferramenta extrai os dados da faixa de cada profile no intervalo selecionado e coloca na mesma visão para facilitar a comparação.
 CompareHome--form-label-profile1 = Profile 1:
 CompareHome--form-label-profile2 = Profile 2:
 CompareHome--submit-button =
@@ -113,6 +114,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Este profile foi gravado em uma compilação sem otimizações de versão.
+        As observações de desempenho podem não se aplicar à população da versão.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -145,7 +150,7 @@ FullTimeline--stack-height = Altura da pilha
 # Variables:
 #   $visibleTrackCount (Number) - Visible track count in the timeline
 #   $totalTrackCount (Number) - Total track count in the timeline
-FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> trilhas visíveis
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> faixas visíveis
 
 ## Home page
 
@@ -167,6 +172,7 @@ Home--instructions-content =
     No entanto, profiles existentes podem ser vistos em qualquer navegador moderno.
 Home--record-instructions-start-stop = Interrompa e inicie a gravação de profiles
 Home--record-instructions-capture-load = Capture e carregue um profile
+Home--profiler-motto = Capture um profile de desempenho. Analise. Compartilhe. Torne a web mais rápida.
 Home--additional-content-title = Carregar profiles existentes
 Home--additional-content-content = Você pode <strong>arrastar e soltar</strong> aqui um arquivo de profile para carregar, ou:
 Home--compare-recordings-info = Você também pode comparar gravações. <a>Abra a interface de comparação.</a>
@@ -213,6 +219,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Definir seleção a partir da duração do marcador
 MarkerContextMenu--start-selection-here = Iniciar a seleção aqui
 MarkerContextMenu--end-selection-here = Finalizar a seleção aqui
 MarkerContextMenu--copy-description = Copiar descrição
@@ -481,10 +488,12 @@ TrackContextMenu--only-show-this-process-group = Mostrar apenas este grupo de pr
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Mostrar apenas “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Ocultar outras faixas de capturas de tela
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Ocultar “{ $trackName }”
+TrackContextMenu--show-all-tracks = Mostrar todas as faixas
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
