@@ -490,8 +490,12 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Árvore de chamadas
+TabBar--flame-graph-tab = Gráfico de chama
 TabBar--stack-chart-tab = Gráfico de pilha
+TabBar--marker-chart-tab = Gráfico de marcadores
+TabBar--marker-table-tab = Tabela de marcadores
 TabBar--network-tab = Rede
+TabBar--js-tracer-tab = Traçador JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -529,16 +533,31 @@ TransformNavigator--complete = “{ $item }” completo
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Recolher: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Node em foco: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Foco: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Node em merge: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Merge: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Descarte: { $item }
 # "Collapse function subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
