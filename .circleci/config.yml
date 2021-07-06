@@ -91,7 +91,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "20:8e:de:d1:dd:ed:41:a9:9c:f0:32:20:0a:f0:1b:2e"
-      - checkout-and-dependencies
+      - checkout
       - run: git config user.email "perf-html@mozilla.com"
       - run: git config user.name "Firefox Profiler [bot]"
       - run: node ./bin/l10n-sync.js -y
