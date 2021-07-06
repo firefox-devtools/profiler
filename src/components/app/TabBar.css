@@ -60,13 +60,12 @@
   background-color: var(--blue-50);
 }
 
-.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
+.tabBarTab:not(.selected):hover {
   border-color: var(--grey-20);
   background-color: var(--grey-20);
 }
 
-.tabBarTabWrapper:not(.beingReordered)
-  > .tabBarTab:not(.selected):hover::before {
+.tabBarTab:not(.selected):hover::before {
   background-color: var(--grey-40);
 }
 
