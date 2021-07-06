@@ -13,17 +13,6 @@
   font: inherit;
 }
 
-.tabBarContainer {
-  position: relative;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: space-between; /* This pushes the sidebar button to the right */
-  border: solid var(--grey-30);
-  border-width: 1px 0 1px;
-  background: var(--grey-10);
-}
-
 .tabBarTabWrapper {
   display: flex;
   min-width: 0; /* This makes the tab container actually shrinkable below min-content */
