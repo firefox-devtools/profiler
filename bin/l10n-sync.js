@@ -3,8 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// This script will sync the l10 branch with main branch
-// Run with -y to automatically skip the prompts.
+// This script will sync the l10 branch with the main branch.
+// You can run this script with `node bin/l10n-sync.js` but you don't necessarily
+// have to be at the project root directory to run it.
+// Run with '-y' to automatically skip the prompts.
 
 // @flow
 
@@ -34,6 +36,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
 });
 
 let SKIP_PROMPTS = false;
+const MERGE_COMMIT_MESSAGE = '🔃 Daily sync: main -> l10n';
 
 /**
  * Logs the command to be executed first, and spawns a shell then executes the
@@ -137,12 +140,16 @@ async function findUpstream() /*: Promise<string> */ {
 
     const gitRemoteOutput = gitRemoteResult.stdout.toString();
     const remotes = gitRemoteOutput.split('\n');
-    const candidates = remotes.filter(line =>
+    const upstreamLine = remotes.find(line =>
       // Change this regexp to make it work with your fork for debugging purpose.
       /devtools-html\/perf.html|firefox-devtools\/profiler/.test(line)
     );
-    const upstream = candidates[0].split('\t')[0];
 
+    if (upstreamLine === undefined) {
+      throw new Error(`'upstreamLine' is undefined.`);
+    }
+
+    const upstream = upstreamLine.split('\t')[0];
     return upstream;
   } catch (error) {
     console.error(error);
@@ -156,23 +163,23 @@ async function findUpstream() /*: Promise<string> */ {
 /**
  * Compares the `compareBranch` with `baseBranch` and checks the changed files.
  * Fails if the `compareBranch` has changes from the files that doesn't match
- * the `matchRegexp`.
+ * the `allowedRegexp`.
  *
  * @throws Will throw an error if `compareBranch` has changes from the files
- * that doesn't match the `matchRegexp`.
+ * that doesn't match the `allowedRegexp`.
  */
 async function checkAllowedPaths(
   {
     upstream,
     compareBranch,
     baseBranch,
-    matchRegexp,
+    allowedRegexp,
   } /*:
   {|
     upstream: string,
     compareBranch: string,
     baseBranch: string ,
-    matchRegexp: RegExp
+    allowedRegexp: RegExp
   |}
   */
 ) {
@@ -193,7 +200,7 @@ async function checkAllowedPaths(
 
   const changedFiles = changedFilesResult.split('\n');
   for (const file of changedFiles) {
-    if (file.length > 0 && !matchRegexp.test(file)) {
+    if (file.length > 0 && !allowedRegexp.test(file)) {
       throw new Error(oneLine`
         ${compareBranch} branch includes changes from the files that are not
         allowed: ${file}
@@ -229,15 +236,23 @@ function fewTimes(count /*: number */) /*: string */ {
 async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
   console.log('>>> Syncing the l10n branch with main.');
   // RegExp for matching only the vendored locales.
-  // It matches the files in `locale` directory but excludes `en-US` which is the
-  // main locale we edit.
+  // It matches the files in `locales` directory but excludes `en-US` which is the
+  // main locale we edit. For example:
+  // ALLOWED: locales/it/app.ftl
+  // DISALLOWED: locales/en-US/app.ftl
+  // DISALLOWED: src/index.js
   const vendoredLocalesPath = /^locales[\\/](?!en-US[\\/])/;
+
   // RegExp for matching anything but the vendored locales.
   // It matches the files that are not in the `locales` directory EXCEPT the
-  // `locales/en-US/` directory which is the main locale we edit.
-  const nonVendoredLocalesPath = /^(locales[\\/]en-US[\\/]|(?!locales[\\/]))/;
+  // `locales/en-US/` directory which is the main locale we edit. For example:
+  // ALLOWED: locales/en-US/app.ftl
+  // ALLOWED: src/index.js
+  // DISALLOWED: locales/it/app.ftl
+  const nonVendoredLocalesPath = /^(?:locales[\\/]en-US[\\/]|(?!locales[\\/]))/;
+
   // We have a total try count to re-try to sync a few more time if the previous
-  // try fails. This can accur when someone else commits to l10n branch while we
+  // try fails. This can occur when someone else commits to l10n branch while we
   // are syncing. In that case, `git push` will fail and we'll pull the latest
   // changes and try again. Nevertheless, we should have a hard cap on the try
   // count for safety.
@@ -264,7 +279,7 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
         upstream,
         compareBranch: 'l10n',
         baseBranch: 'main',
-        matchRegexp: vendoredLocalesPath,
+        allowedRegexp: vendoredLocalesPath,
       });
 
       // Second, check if the main branch contains changes except the translated locales.
@@ -272,7 +287,7 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
         upstream,
         compareBranch: 'main',
         baseBranch: 'l10n',
-        matchRegexp: nonVendoredLocalesPath,
+        allowedRegexp: nonVendoredLocalesPath,
       });
 
       console.log('>>> Merging main to l10n.');
@@ -284,7 +299,7 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
         'merge',
         `${upstream}/main`,
         '-m',
-        `🔃 Daily sync: main -> l10n (${currentDate})`
+        `${MERGE_COMMIT_MESSAGE} (${currentDate})`
       );
 
       console.log(`>>> Pushing to ${upstream}'s l10n branch.`);
@@ -300,6 +315,9 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
       // Print the output of `git push` so user can see the result.
       console.log(pushResult.stdout.toString());
       console.log(pushResult.stderr.toString());
+
+      console.log('>>> Going back to your previous banch.');
+      await logAndExec('git', 'checkout', '-');
 
       // Clear out the error after everything is done, in case this is a retry.
       error = null;
@@ -333,14 +351,11 @@ async function main() /*: Promise<void> */ {
   await checkIfWorkspaceClean();
 
   console.log(
-    `This script will sync the l10n branch on the remote '${upstream}' with the main branch.`
+    `This script will sync the branch 'l10n' on the remote '${upstream}' with the branch 'main'.`
   );
   await pauseWithMessageIfNecessary('Are you sure?');
 
   await tryToSync(upstream);
-
-  console.log('>>> Going back to your previous banch.');
-  await logAndExec('git', 'checkout', '-');
 
   console.log('>>> Done!');
 }
