@@ -133,6 +133,13 @@ FullTimeline--graph-type = Tipo de gráfico:
 FullTimeline--categories-with-cpu = Categorías con CPU
 FullTimeline--categories = Categorías
 FullTimeline--stack-height = Altura de pila
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> pistas visibles
 
 ## Home page
 
@@ -305,6 +312,10 @@ MenuButtons--metaOverheadStatistics-min = Mínimo
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Subir
+MenuButtons--publish--upload-title = Subiendo perfil…
+MenuButtons--publish--cancel-upload = Cancelar subida
+MenuButtons--publish--message-something-went-wrong = Chuta, algo salió mal al subir el perfil.
 MenuButtons--publish--message-try-again = Volver a intentarlo
 MenuButtons--publish--download = Descargar
 MenuButtons--publish--compressing = Comprimiendo…
@@ -329,12 +340,29 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Rango completo
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importando el perfil directamente desde { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Leyendo el archivo y procesando el perfil…
+ProfileLoaderAnimation--loading-message-local =
+    .message = Aún no se ha implementado.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Bajando y procesando el perfil…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Leyendo y procesando perfiles…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Vista no encontrada
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Volver al inicio
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
