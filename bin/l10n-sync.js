@@ -13,7 +13,6 @@
 const cp = require('child_process');
 const readline = require('readline');
 const { promisify } = require('util');
-const { stripIndent, oneLine } = require('common-tags');
 
 /*::
   type ExecFilePromiseResult = {|
@@ -153,10 +152,10 @@ async function findUpstream() /*: Promise<string> */ {
     return upstream;
   } catch (error) {
     console.error(error);
-    throw new Error(stripIndent`
-      Couldn't find the upstream remote. Is it well configured?
-      We're looking for either devtools-html/perf.html or firefox-devtools/profiler.
-    `);
+    throw new Error(
+      "Couldn't find the upstream remote. Is it well configured?\n" +
+        "We're looking for either devtools-html/perf.html or firefox-devtools/profiler."
+    );
   }
 }
 
@@ -201,10 +200,10 @@ async function checkAllowedPaths(
   const changedFiles = changedFilesResult.split('\n');
   for (const file of changedFiles) {
     if (file.length > 0 && !allowedRegexp.test(file)) {
-      throw new Error(oneLine`
-        ${compareBranch} branch includes changes from the files that are not
-        allowed: ${file}
-      `);
+      throw new Error(
+        `${compareBranch} branch includes changes from the files that are not ` +
+          `allowed: ${file}`
+      );
     }
   }
 }
@@ -264,11 +263,11 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
   do {
     try {
       if (tryCount > 0) {
-        console.warn(stripIndent`
-        Syncing the l10n branch has failed.
-        This may be due to a new commit during this operation. Trying again.
-        Tried ${fewTimes(tryCount)} out of ${totalTryCount}.
-      `);
+        console.warn(
+          'Syncing the l10n branch has failed.\n' +
+            'This may be due to a new commit during this operation. Trying again.\n' +
+            `Tried ${fewTimes(tryCount)} out of ${totalTryCount}.`
+        );
       }
 
       console.log(`>>> Fetching upstream ${upstream}.`);
