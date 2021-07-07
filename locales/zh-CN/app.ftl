@@ -228,6 +228,7 @@ MenuButtons--publish--download = 下载
 
 ServiceWorkerManager--installing-button = 正在安装…
 ServiceWorkerManager--pending-button = 应用并重新加载
+ServiceWorkerManager--installed-button = 重新加载应用程序
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -247,6 +248,10 @@ TabBar--network-tab = 网络
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -257,6 +262,11 @@ TabBar--network-tab = 网络
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = 折叠：{ $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
