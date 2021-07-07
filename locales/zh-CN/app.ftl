@@ -23,6 +23,8 @@
 ## This is used at the top of the homepage and other content pages.
 
 AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 性能分析 Web 应用程序</subheader>
+AppHeader--github-icon =
+    .title = 前往我们的 Git 仓库（新建窗口打开）
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -32,6 +34,12 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
+    .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
+CallNodeContextMenu--expand-all = 全部展开
+CallNodeContextMenu--copy-function-name = 复制函数名称
 CallNodeContextMenu--copy-script-url = 复制脚本 URL
 
 ## CallTree
@@ -71,6 +79,7 @@ FooterLinks--Cookies = Cookie
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--categories = 分类
 
 ## Home page
 
