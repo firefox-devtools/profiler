@@ -68,6 +68,9 @@ CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
         anropsträdet, men det gör det endast för den anropsnoden. Alla andra
         anrop från funktionen ignoreras.
 CallNodeContextMenu--expand-all = Expandera alla
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Leta upp funktionsnamnet på Searchfox
 CallNodeContextMenu--copy-function-name = Kopiera funktionsnamn
 CallNodeContextMenu--copy-script-url = Kopiera skript-URL
 CallNodeContextMenu--copy-stack = Kopiera stack
@@ -203,6 +206,12 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Starta markering här
+MarkerContextMenu--end-selection-here = Avsluta markering här
+MarkerContextMenu--start-selection-at-marker-start = Starta markering vid markörens <strong>start</strong>
+MarkerContextMenu--start-selection-at-marker-end = Starta markering vid markörens <strong>slut</strong>
+MarkerContextMenu--end-selection-at-marker-start = Avsluta markering vid markörens <strong>start</strong>
+MarkerContextMenu--end-selection-at-marker-end = Avsluta markering vid markörens <strong>slut</strong>
 MarkerContextMenu--copy-description = Kopiera beskrivning
 MarkerContextMenu--copy-call-stack = Kopiera anropsstack
 MarkerContextMenu--copy-url = Kopiera URL
@@ -211,10 +220,14 @@ MarkerContextMenu--copy-full-payload = Kopiera full nyttolast
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Filtermarkörer:
+    .title = Visa endast markörer som matchar ett visst namn
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Välj en markör för att visa information om den.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -337,6 +350,12 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 MenuButtons--metaOverheadStatistics-mean = Medel
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Rensning
+    .title = Tid för att kassera utgångna data.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Räknare
+    .title = Dags att samla in alla räknare.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
+    .title = Observerat intervall mellan två prover.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
