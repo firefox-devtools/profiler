@@ -47,7 +47,7 @@ export function withSize<
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _isSizeInfoDirty: boolean = false;
     state = { width: 0, height: 0 };
-    _container: ?(Element | Text);
+    _container: HTMLElement | null;
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
@@ -107,12 +107,11 @@ export function withSize<
       );
     }
 
-    _updateWidth(container: { +getBoundingClientRect?: () => ClientRect }) {
-      if (typeof container.getBoundingClientRect !== 'function') {
-        throw new Error('Cannot measure a Text node.');
-      }
-      const { width, height } = container.getBoundingClientRect();
-      this.setState({ width, height });
+    _updateWidth(container: HTMLElement) {
+      this.setState({
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
     }
 
     render() {
