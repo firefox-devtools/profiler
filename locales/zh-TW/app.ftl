@@ -484,7 +484,7 @@ StackSettings--panel-search =
 
 ## Tab Bar for the bottom half of the analysis UI.
 
-TabBar--calltree-tab = 呼叫數
+TabBar--calltree-tab = 呼叫樹
 TabBar--flame-graph-tab = 火焰圖
 TabBar--stack-chart-tab = 堆疊圖
 TabBar--marker-chart-tab = 標記圖
