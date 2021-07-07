@@ -25,21 +25,16 @@ import {
   getMarkerTableProfile,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
-import {
-  getBoundingBox,
-  fireFullClick,
-  fireFullContextMenu,
-} from '../fixtures/utils';
+import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CauseBacktrace } from 'firefox-profiler/types';
 
 describe('MarkerTable', function() {
-  function setup(profile = getMarkerTableProfile()) {
-    // Set an arbitrary size that will not kick in any virtualization behavior.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(2000, 1000));
+  // Set an arbitrary size that will not kick in any virtualization behavior.
+  autoMockElementSize({ width: 2000, height: 1000 });
 
+  function setup(profile = getMarkerTableProfile()) {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>

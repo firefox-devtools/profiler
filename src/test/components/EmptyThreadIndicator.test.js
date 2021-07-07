@@ -12,26 +12,21 @@ import {
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { getElementWithFixedSize } from '../fixtures/mocks/element-size';
 
 import type { StartEndRange } from 'firefox-profiler/types';
 
 describe('EmptyThreadIndicator', function() {
-  beforeEach(() => {
-    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
-      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-      // opt out of the type checker for this mock by returning `any`.
-      const mockEl = ({
-        getBoundingClientRect: () => getBoundingBox(width, height),
-      }: any);
-      return mockEl;
-    });
-  });
-
   // Sizing for the containing dom node.
   const width = 100;
   const height = 10;
+
+  beforeEach(() => {
+    jest
+      .spyOn(ReactDOM, 'findDOMNode')
+      .mockImplementation(() => getElementWithFixedSize({ width, height }));
+  });
 
   const { profile } = getProfileFromTextSamples(`
     A  A  A

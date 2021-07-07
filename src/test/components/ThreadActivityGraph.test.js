@@ -18,17 +18,17 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import { TimelineTrackThread } from '../../components/timeline/TrackThread';
+import { commitRange } from '../../actions/profile-view';
+
 import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, fireFullClick } from '../fixtures/utils';
-
+import { fireFullClick } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-
-import { commitRange } from '../../actions/profile-view';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -44,6 +44,7 @@ function getSamplesPixelPosition(
 
 describe('ThreadActivityGraph', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
@@ -60,10 +61,6 @@ describe('ThreadActivityGraph', function() {
     const { getState, dispatch } = store;
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const renderResult = render(
       <Provider store={store}>
