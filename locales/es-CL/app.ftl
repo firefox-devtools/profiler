@@ -86,11 +86,14 @@ CallNodeContextMenu--copy-stack = Copiar pila
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Selecciona un nodo para mostrar información sobre él.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Introduce las URLs del perfil que te gustaría comparar
+CompareHome--instruction-content = La herramienta extraerá los datos de la pista seleccionada y el rango para cada perfil, y los colocará ambos en la misma vista para hacerlos más fáciles de comparar.
 CompareHome--form-label-profile1 = Perfil 1:
 CompareHome--form-label-profile2 = Perfil 2:
 CompareHome--submit-button =
@@ -100,6 +103,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Este perfil se registró en una compilación sin optimización de lanzamiento.
+        Es posible que las observaciones sobre el desempeño no se apliquen a la población de lanzamiento.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -109,6 +116,8 @@ Details--open-sidebar-button =
     .title = Abrir la barra lateral
 Details--close-sidebar-button =
     .title = Cerrar la barra lateral
+Details--error-boundary-message =
+    .message = Chuta, ocurrió un error desconocido en este panel.
 
 ## Footer Links
 
