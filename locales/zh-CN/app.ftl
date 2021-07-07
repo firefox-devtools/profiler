@@ -88,6 +88,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--addon-button = 安装附加组件
+Home--recent-uploaded-recordings-title = 近期上传的记录
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -122,6 +123,7 @@ MarkerContextMenu--copy-url = 复制 URL
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = 开始
 MarkerTable--description = 描述
 
 ## MenuButtons
@@ -225,11 +227,13 @@ MenuButtons--publish--download = 下载
 ## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = 正在安装…
+ServiceWorkerManager--pending-button = 应用并重新加载
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
 
