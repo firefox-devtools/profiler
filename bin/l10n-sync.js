@@ -311,7 +311,9 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
         'merge',
         `${upstream}/main`,
         '-m',
-        `${MERGE_COMMIT_MESSAGE} (${currentDate})`
+        `${MERGE_COMMIT_MESSAGE} (${currentDate})`,
+        // Force the merge command to create a merge commit instead of a fast-forward.
+        '--no-ff'
       );
 
       console.log(`>>> Pushing to ${upstream}'s l10n branch.`);
