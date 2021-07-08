@@ -15,7 +15,7 @@ import {
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
   autoMockElementSize,
   getElementWithFixedSize,

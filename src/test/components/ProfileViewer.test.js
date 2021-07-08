@@ -18,7 +18,7 @@ import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { blankStore } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
   autoMockElementSize,
   getElementWithFixedSize,

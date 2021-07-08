@@ -35,7 +35,7 @@ import {
   fireFullClick,
   fireFullContextMenu,
 } from '../fixtures/utils';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';

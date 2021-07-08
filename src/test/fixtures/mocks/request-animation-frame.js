@@ -20,7 +20,7 @@
  *    flushRafCalls();
  *
  */
-export default function mockRaf() {
+export function mockRaf() {
   let fns = [];
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation(fn => {
     fns.push(fn);
