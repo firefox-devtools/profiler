@@ -360,17 +360,24 @@ export class ActivityGraphFillComputer {
       return;
     }
 
-    const sampleStart = (prevSampleTime + sampleTime) / 2;
-    const sampleEnd = (sampleTime + nextSampleTime) / 2;
-    let pixelStart = (sampleStart - rangeStart) * xPixelsPerMs;
-    let pixelEnd = (sampleEnd - rangeStart) * xPixelsPerMs;
-    pixelStart = Math.max(0, pixelStart);
-    pixelEnd = Math.min(canvasPixelWidth - 1, pixelEnd);
-    const intPixelStart = Math.floor(pixelStart);
-    const intPixelEnd = Math.floor(pixelEnd);
-    const intPixelCenter = Math.floor((intPixelStart + intPixelEnd) / 2);
+    const sampleCategoryStartTime = (prevSampleTime + sampleTime) / 2;
+    const sampleCategoryEndTime = (sampleTime + nextSampleTime) / 2;
+    let sampleCategoryStartPixel =
+      (sampleCategoryStartTime - rangeStart) * xPixelsPerMs;
+    let sampleCategoryEndPixel =
+      (sampleCategoryEndTime - rangeStart) * xPixelsPerMs;
+    sampleCategoryStartPixel = Math.max(0, sampleCategoryStartPixel);
+    sampleCategoryEndPixel = Math.min(
+      canvasPixelWidth - 1,
+      sampleCategoryEndPixel
+    );
+    const samplePixel = (sampleTime - rangeStart) * xPixelsPerMs;
+    const intCategoryStartPixel = Math.floor(sampleCategoryStartPixel);
+    const intCategoryEndPixel = Math.floor(sampleCategoryEndPixel);
+    const intSamplePixel = Math.floor(samplePixel);
 
-    // For every sample, we have a fractional interval of this sample's
+    // Every sample has two parts because of different CPU usage values.
+    // For every sample part, we have a fractional interval of this sample part's
     // contribution to the graph's pixels.
     //
     // v       v       v       v       v       v       v       v       v
@@ -399,57 +406,46 @@ export class ActivityGraphFillComputer {
 
     // A number between 0 and 1 for sample ratio. It changes depending on
     // the CPU usage if it's given. If not, it uses 1 directly.
-    const sampleFirstHalfRatio =
+    const beforeSampleCpuRatio =
       cpuBeforeSample === null ? 1 : cpuBeforeSample / maxThreadCPUDelta;
-    const sampleSecondHalfRatio =
+    const afterSampleCpuRatio =
       cpuAfterSample === null ? 1 : cpuAfterSample / maxThreadCPUDelta;
 
-    // Samples have two parts to be able to present the CPU utilizations properly.
-    // The first half of the sample will use the CPU delta number that belongs to
-    // this sample.
-    for (let i = intPixelStart; i <= intPixelCenter; i++) {
-      percentageBuffer[i] += sampleFirstHalfRatio;
-    }
-    // The second half of the sample will use the CPU delta number that belongs to
-    // the next sample.
-    // For the samples that are consist of only one pixel, this loop will not be
-    // executed. It will only be executed if sample has 2 or more pixels.
-    for (let i = intPixelCenter + 1; i <= intPixelEnd; i++) {
-      percentageBuffer[i] += sampleSecondHalfRatio;
-    }
+    // Samples have two parts to be able to present the different CPU usages properly.
+    // This is because CPU usage number of a sample represents the CPU usage
+    // starting starting from the previous sample time to this sample time.
+    // These parts will be:
+    // - Between `sampleCategoryStartPixel` and `samplePixel` with beforeSampleCpuRatio.
+    // - Between `samplePixel` and `sampleCategoryEndPixel` with afterSampleCpuRatio.
 
-    // If a sample is only one pixel, then only the first for loop in is being
-    // run. If a sample has more than one pixel, then both the first and the
-    // second loop is being run. If there is only one pixel, which is
-    // intPixelStart === intPixelEnd case, we should use the first half ratio to
-    // compute the sub pixel subtraction. This is because we only use the first
-    // half ratio to compute in that case. If there are 2 or more
-    // pixels, then we use the second half ratio as the ending.
-    let sampleEndRatio;
-    if (intPixelStart === intPixelEnd) {
-      // Sample has only one pixel in the activity graph. Therefore use the
-      // first half ratio as the end ratio.
-      sampleEndRatio = sampleFirstHalfRatio;
-    } else {
-      // Sample has more than one pixel in the activity graph. Therefore use the
-      // second half ratio as the end ratio.
-      sampleEndRatio = sampleSecondHalfRatio;
+    // Here we are accumulating the first part of the sample. It will use the
+    // CPU delta number that belongs to this sample.
+    // This part starts from the "sample start time" to "sample time" and uses
+    // beforeSampleCpuRatio.
+    for (let i = intCategoryStartPixel; i <= intSamplePixel; i++) {
+      percentageBuffer[i] += beforeSampleCpuRatio;
     }
 
-    // After going through all the pixels, we should now remove all the parts in
-    // the first and last pixels that don't belong to this sample. Because a
-    // sample can start and end in sub-pixel values.
-    // The algorithm works like this:
-    //  - When one sample has several pixels, start and end pixels will be
-    //    different and they will be reduced independently.
-    //  - When one pixel has several samples, start and end pixels of every sample
-    //    will be the same. Ratios of different samples will accumulate and form
-    //    the 100% of a sample.
+    // Subtract the partial pixels from start and end of the first part.
+    percentageBuffer[intCategoryStartPixel] -=
+      beforeSampleCpuRatio * (sampleCategoryStartPixel - intCategoryStartPixel);
+    percentageBuffer[intSamplePixel] -=
+      beforeSampleCpuRatio * (1 - (samplePixel - intSamplePixel));
 
-    percentageBuffer[intPixelStart] -=
-      sampleFirstHalfRatio * (pixelStart - intPixelStart);
-    percentageBuffer[intPixelEnd] -=
-      sampleEndRatio * (1 - (pixelEnd - intPixelEnd));
+    // Here we are accumulating the second part of the sample. It will use the
+    // CPU delta number that belongs to the next sample.
+    // This part starts from "sample time" to "sample end time" and uses
+    // afterSampleCpuRatio.
+    for (let i = intSamplePixel; i <= intCategoryEndPixel; i++) {
+      percentageBuffer[i] += afterSampleCpuRatio;
+    }
+
+    // Subtract the partial pixels from start and end of the second part.
+    percentageBuffer[intSamplePixel] -=
+      afterSampleCpuRatio * (samplePixel - intSamplePixel);
+    percentageBuffer[intCategoryEndPixel] -=
+      afterSampleCpuRatio *
+      (1 - (sampleCategoryEndPixel - intCategoryEndPixel));
   }
 
   /**

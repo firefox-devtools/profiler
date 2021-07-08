@@ -1188,6 +1188,30 @@ export function sanitizeTextMarker(
 }
 
 /**
+ * Sanitize Extension Text marker's name property for potential add-on ids.
+ */
+export function sanitizeExtensionTextMarker(
+  markerName: string,
+  payload: TextMarkerPayload
+): TextMarkerPayload {
+  if (markerName === 'ExtensionParent') {
+    return {
+      ...payload,
+      name: payload.name.replace(/^.*, (api_(call|event): )/, '$1'),
+    };
+  }
+
+  if (markerName === 'Extension Suspend') {
+    return {
+      ...payload,
+      name: payload.name.replace(/ by .*$/, ''),
+    };
+  }
+
+  return payload;
+}
+
+/**
  * Markers can be filtered by display area using the marker schema. Get a list of
  * marker "types" (the type field in the Payload) for a specific location.
  */

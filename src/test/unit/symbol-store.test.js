@@ -6,7 +6,7 @@
 import { SymbolStore } from '../../profile-logic/symbol-store';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import { TextDecoder } from 'util';
-import exampleSymbolTable from '../fixtures/example-symbol-table';
+import { completeSymbolTableAsTuple } from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
@@ -58,7 +58,7 @@ describe('SymbolStore', function() {
         })
       ),
       requestSymbolTableFromAddon: jest.fn(() =>
-        Promise.resolve(exampleSymbolTable)
+        Promise.resolve(completeSymbolTableAsTuple)
       ),
     };
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
@@ -139,7 +139,7 @@ describe('SymbolStore', function() {
         )
       ),
       requestSymbolTableFromAddon: jest.fn(() =>
-        Promise.resolve(exampleSymbolTable)
+        Promise.resolve(completeSymbolTableAsTuple)
       ),
     };
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
@@ -198,7 +198,7 @@ describe('SymbolStore', function() {
       }),
       requestSymbolTableFromAddon: jest
         .fn()
-        .mockResolvedValue(exampleSymbolTable),
+        .mockResolvedValue(completeSymbolTableAsTuple),
     };
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
@@ -343,7 +343,7 @@ describe('SymbolStore', function() {
           debugName === 'available-from-addon' ||
           debugName === 'available-from-both-server-and-addon'
         ) {
-          return exampleSymbolTable;
+          return completeSymbolTableAsTuple;
         }
         throw new Error('The add-on does not have symbols for this library.');
       },

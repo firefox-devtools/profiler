@@ -15,6 +15,7 @@ import {
   removePrefMarkerPreferenceValues,
   sanitizeFileIOMarkerFilenamePath,
   filterRawMarkerTableToRangeWithMarkersToDelete,
+  sanitizeExtensionTextMarker,
   sanitizeTextMarker,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
@@ -200,10 +201,11 @@ function sanitizeThreadPII(
   if (
     PIIToBeRemoved.shouldRemoveUrls ||
     PIIToBeRemoved.shouldRemovePreferenceValues ||
+    PIIToBeRemoved.shouldRemoveExtensions ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
   ) {
     for (let i = 0; i < markerTable.length; i++) {
-      const currentMarker = markerTable.data[i];
+      let currentMarker = markerTable.data[i];
 
       // Remove the all the preference values, if the user wants that.
       if (
@@ -250,6 +252,23 @@ function sanitizeThreadPII(
       ) {
         // Sanitize all the name fields of text markers in case they contain URLs.
         markerTable.data[i] = sanitizeTextMarker(currentMarker);
+        // Re-assign the value of currentMarker as the marker may be
+        // sanitized again to remove extension ids.
+        currentMarker = markerTable.data[i];
+      }
+
+      if (
+        PIIToBeRemoved.shouldRemoveExtensions &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'Text'
+      ) {
+        const markerName = stringArray[markerTable.name[i]];
+        // Sanitize extension ids out of known extension markers.
+        markerTable.data[i] = sanitizeExtensionTextMarker(
+          markerName,
+          currentMarker
+        );
       }
 
       // Remove the screenshots if the current thread index is in the

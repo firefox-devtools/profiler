@@ -17,7 +17,12 @@ import {
 // yarn scripts. Especially this is done when building and deploying the l10n
 // branch in netlify.
 export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
+  'de',
+  'en-GB',
   'en-US',
+  'it',
+  'pt-BR',
+  'zh-TW',
 ];
 export const DEFAULT_LOCALE = 'en-US';
 

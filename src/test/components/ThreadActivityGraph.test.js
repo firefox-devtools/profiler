@@ -154,6 +154,33 @@ describe('ThreadActivityGraph', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
+  it('matches the 2d canvas draw snapshot with CPU values with missing samples', () => {
+    const profile = getSamplesProfile();
+    profile.meta.interval = 1;
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'variable CPU cycles',
+    };
+    profile.threads[0].samples.threadCPUDelta = [
+      null,
+      400,
+      1000,
+      500,
+      100,
+      200,
+      800,
+      300,
+    ];
+    // Update the time array to create a gap between 3rd and 4th samples.
+    profile.threads[0].samples.time = [0, 1, 2, 7, 8, 9, 10, 11];
+
+    const { getState } = setup(profile);
+    // If there are CPU values, it should be automatically defaulted to this view.
+    expect(getTimelineType(getState())).toBe('cpu-category');
+    expect(flushDrawLog()).toMatchSnapshot();
+  });
+
   it('matches the 2d canvas draw snapshot with only one CPU usage value', () => {
     const { profile } = getProfileFromTextSamples('A  B');
     profile.meta.interval = 1;
