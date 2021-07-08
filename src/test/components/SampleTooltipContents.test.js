@@ -21,6 +21,7 @@ import {
 } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 import type {
   Profile,
@@ -85,6 +86,8 @@ describe('SampleTooltipContents', function() {
     const store = storeWithProfile(profile);
     const threadsKey = 0;
 
+    // WithSize uses requestAnimationFrame
+    const flushRafCalls = mockRaf();
     const { container } = render(
       <Provider store={store}>
         <TimelineTrackThread
@@ -94,6 +97,7 @@ describe('SampleTooltipContents', function() {
         />
       </Provider>
     );
+    flushRafCalls();
 
     const canvas = ensureExists(
       container.querySelector('.threadActivityGraphCanvas'),
@@ -103,13 +107,14 @@ describe('SampleTooltipContents', function() {
     fireEvent(
       canvas,
       getMouseEvent('mousemove', {
-        pageX: getSamplesPixelPosition(
+        offsetX: getSamplesPixelPosition(
           hoveredSampleIndex,
           hoveredSamplePosition
         ),
-        pageY: GRAPH_HEIGHT * 0.9,
+        offsetY: GRAPH_HEIGHT * 0.9,
       })
     );
+    flushRafCalls();
 
     const getTooltip = () =>
       ensureExists(
