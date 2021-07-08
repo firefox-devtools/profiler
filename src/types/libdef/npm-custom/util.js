@@ -7,5 +7,8 @@ declare module 'util' {
   declare module.exports: {
     TextDecoder: Class<TextDecoder>,
     TextEncoder: Class<TextEncoder>,
+    // See: https://github.com/facebook/flow/issues/8298
+    // eslint-disable-next-line flowtype/no-weak-types
+    promisify: (f: Function) => Function,
   };
 }
