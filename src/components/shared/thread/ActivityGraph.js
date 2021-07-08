@@ -4,13 +4,17 @@
 // @flow
 
 import * as React from 'react';
-import { ActivityGraphCanvas } from './ActivityGraphCanvas';
 import classNames from 'classnames';
+
+import { ActivityGraphCanvas } from './ActivityGraphCanvas';
 import {
   Tooltip,
   MOUSE_OFFSET,
 } from 'firefox-profiler/components/tooltip/Tooltip';
 import { SampleTooltipContents } from 'firefox-profiler/components/shared/SampleTooltipContents';
+import { withSize } from 'firefox-profiler/components/shared/WithSize';
+
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import './ActivityGraph.css';
 
@@ -48,6 +52,7 @@ export type Props = {|
   ) => number,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
+  ...SizeProps,
 |};
 
 export type HoveredPixelState = {|
@@ -65,7 +70,7 @@ function _stopPropagation(e: TransitionEvent) {
   e.stopPropagation();
 }
 
-export class ThreadActivityGraph extends React.PureComponent<Props, State> {
+class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   _resizeListener = () => this.forceUpdate();
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
   _container: HTMLElement | null = null;
@@ -122,6 +127,7 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _getSampleAtMouseEvent(
     event: SyntheticMouseEvent<HTMLCanvasElement>
   ): null | HoveredPixelState {
+    const { width } = this.props;
     // Create local variables so that Flow can refine the following to be non-null.
     const fillsQuerier = this._fillsQuerier;
     const canvas = event.currentTarget;
@@ -130,12 +136,11 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
     }
     // Re-measure the canvas and get the coordinates and time for the click.
     const { rangeStart, rangeEnd } = this.props;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.pageX - rect.left;
-    const y = event.pageY - rect.top;
-    const time = rangeStart + (x / rect.width) * (rangeEnd - rangeStart);
+    const x = event.nativeEvent.offsetX;
+    const y = event.nativeEvent.offsetY;
+    const time = rangeStart + (x / width) * (rangeEnd - rangeStart);
 
-    return fillsQuerier.getSampleAndCpuRatioAtClick(x, y, time, rect);
+    return fillsQuerier.getSampleAndCpuRatioAtClick(x, y, time);
   }
 
   _onMouseUp = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
@@ -163,6 +168,8 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
       treeOrderSampleComparator,
       maxThreadCPUDelta,
       enableCPUUsage,
+      width,
+      height,
     } = this.props;
     const { hoveredPixelState, mouseX, mouseY } = this.state;
     return (
@@ -191,6 +198,8 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
           onMouseUp={this._onMouseUp}
           enableCPUUsage={enableCPUUsage}
           maxThreadCPUDelta={maxThreadCPUDelta}
+          width={width}
+          height={height}
         />
         {hoveredPixelState === null ? null : (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
@@ -206,3 +215,5 @@ export class ThreadActivityGraph extends React.PureComponent<Props, State> {
     );
   }
 }
+
+export const ThreadActivityGraph = withSize<Props>(ThreadActivityGraphImpl);
