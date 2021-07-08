@@ -25,10 +25,6 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 
-import {
-  autoMockCanvasContext,
-  flushDrawLog,
-} from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
@@ -138,14 +134,9 @@ function setupWithPayload(markers: TestDefinedMarkers) {
 }
 
 describe('NetworkChart', function() {
-  autoMockCanvasContext();
-
   it('renders NetworkChart correctly', () => {
     const { container } = setupWithPayload([...NETWORK_MARKERS]);
-
-    const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
-    expect(drawCalls).toMatchSnapshot();
   });
 
   it('displays a context menu when right clicking', () => {
