@@ -176,16 +176,36 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } 颗逻辑核心
     }
 MenuButtons--metaInfo--interval = 间隔：
+MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+       *[other] { $configurationDuration } 秒
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = 无限制
 MenuButtons--metaInfo--application = 应用程序
+MenuButtons--metaInfo--name-and-version = 名称和版本：
+MenuButtons--metaInfo--update-channel = 更新通道:
+MenuButtons--metaInfo--build-id = 构建 ID：
+MenuButtons--metaInfo--build-type = 构建类型：
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = 调试
 
 ##
 
+MenuButtons--metaInfo--platform = 平台
 MenuButtons--metaInfo--device = 设备：
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = OS:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI：
+MenuButtons--metaInfo--visual-metrics = 视觉指标
+MenuButtons--metaInfo--speed-index = 速度指标：
 MenuButtons--metaInfo-renderRowOfList-label-features = 功能：
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = 线程过滤器：
 MenuButtons--metaInfo-renderRowOfList-label-extensions = 扩展：
@@ -240,6 +260,7 @@ ServiceWorkerManager--installed-button = 重新加载应用程序
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
+StackSettings--show-user-timing = 显示用户计时
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -270,6 +291,31 @@ TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = 折叠：{ $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = 聚焦节点：{ $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = 聚焦：{ $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = 合并节点：{ $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = 合并：{ $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = 丢弃：{ $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
