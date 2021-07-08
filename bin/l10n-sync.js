@@ -48,7 +48,17 @@ async function logAndExec(
   ...args /*: string[] */
 ) /*: Promise<ExecFilePromiseResult> */ {
   console.log('[exec]', executable, args.join(' '));
-  return execFile(executable, args);
+  const result = await execFile(executable, args);
+
+  if (result.stdout.length) {
+    console.log('stdout:\n' + result.stdout.toString());
+  }
+
+  if (result.stderr.length) {
+    console.log('stderr:\n' + result.stderr.toString());
+  }
+
+  return result;
 }
 
 /**
@@ -67,7 +77,12 @@ function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
       .execFileSync(executable, args, { input: prevOutput })
       .toString();
   }
-  return prevOutput.toString();
+
+  const output = prevOutput.toString();
+  if (output.length) {
+    console.log('stdout:\n' + output.toString());
+  }
+  return output;
 }
 
 /**
@@ -132,9 +147,7 @@ async function findUpstream() /*: Promise<string> */ {
     const gitRemoteResult = await logAndExec('git', 'remote', '-v');
 
     if (gitRemoteResult.stderr.length) {
-      throw new Error(
-        `'git remote' has stderr output: ${gitRemoteResult.stderr.toString()}`
-      );
+      throw new Error(`'git remote' failed to run.`);
     }
 
     const gitRemoteOutput = gitRemoteResult.stdout.toString();
@@ -303,17 +316,7 @@ async function tryToSync(upstream /*: string */) /*: Promise<void> */ {
 
       console.log(`>>> Pushing to ${upstream}'s l10n branch.`);
       await pauseWithMessageIfNecessary();
-      const pushResult = await logAndExec(
-        'git',
-        'push',
-        '--no-verify',
-        upstream,
-        'HEAD:l10n'
-      );
-
-      // Print the output of `git push` so user can see the result.
-      console.log(pushResult.stdout.toString());
-      console.log(pushResult.stderr.toString());
+      await logAndExec('git', 'push', '--no-verify', upstream, 'HEAD:l10n');
 
       console.log('>>> Going back to your previous banch.');
       await logAndExec('git', 'checkout', '-');
