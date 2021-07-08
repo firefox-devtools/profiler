@@ -112,15 +112,35 @@ MarkerContextMenu--copy-url = Nɣel URL
 ## This is the component for Marker Table panel.
 
 MarkerTable--start = Bdu
+MarkerTable--type = Anaw
+MarkerTable--description = Aglam
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Talɣut n umaɣnu
+MenuButtons--index--cancel-upload = Sefsex asali
+MenuButtons--index--share-upload =
+    .label = Sali amaɣnu adigan
+MenuButtons--index--share-re-upload =
+    .label = Ales asali
+MenuButtons--index--share-error-uploading =
+    .label = Tuccḍa deg usali
+MenuButtons--index--docs = Tasemlit
+MenuButtons--permalink--button =
+    .label = Permalink
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Yuli-d:
+MenuButtons--index--profile-info-uploaded-actions = Kkes
+MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
+MenuButtons--metaInfo--symbols = Izamulen:
+MenuButtons--metaInfo--cpu = CPU:
+MenuButtons--metaInfo--recording-started = Asekles yebda:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
