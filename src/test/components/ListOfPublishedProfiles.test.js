@@ -139,8 +139,6 @@ describe('ListOfPublishedProfiles', () => {
       </Provider>
     );
 
-    const { container } = renderResult;
-
     function getAllRecordingsLink() {
       // This regexp should match all possible flavor of this link.
       return screen.getByText(/manage.*recording/i);
@@ -166,7 +164,7 @@ describe('ListOfPublishedProfiles', () => {
 
     function getConfirmDeleteButton() {
       const panelContent = ensureExists(
-        container.querySelector('.arrowPanelContent'),
+        document.querySelector('.arrowPanelContent'),
         "Expected that an ArrowPanel was rendered, but it's not there."
       );
       const confirmButton = globalGetByText(panelContent, 'Delete');
@@ -184,7 +182,7 @@ describe('ListOfPublishedProfiles', () => {
 
     function getCancelDeleteButton() {
       const panelContent = ensureExists(
-        container.querySelector('.arrowPanelContent'),
+        document.querySelector('.arrowPanelContent'),
         "Expected that an ArrowPanel was rendered, but it's not there."
       );
       const confirmButton = globalGetByText(panelContent, 'Cancel');
@@ -200,12 +198,18 @@ describe('ListOfPublishedProfiles', () => {
       return confirmButton;
     }
 
+    async function waitForConfirmationPanel() {
+      await screen.findByText(/Are you sure you want to delete uploaded data/);
+      return ensureExists(document.querySelector('.arrowPanelContent'));
+    }
+
     return {
       ...renderResult,
       getAllRecordingsLink,
       getDeleteButtonForProfile,
       getConfirmDeleteButton,
       getCancelDeleteButton,
+      waitForConfirmationPanel,
     };
   }
 
@@ -339,65 +343,60 @@ describe('ListOfPublishedProfiles', () => {
       const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
       mockFetchForDeleteProfile({ endpointUrl, jwtToken });
 
-      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
       await storeProfileInformations(listOfProfileInformations);
       const {
-        container,
         getDeleteButtonForProfile,
-        findByText,
-        queryByText,
         getConfirmDeleteButton,
+        waitForConfirmationPanel,
       } = setup({
         withActionButtons: true,
       });
 
       // Wait for the full rendering with a find* operation.
-      await findByText(/macOS/);
+      await screen.findByText(/macOS/);
       const workingButton = getDeleteButtonForProfile('#012345');
 
       // Click on the delete button
       fireFullClick(workingButton);
-      jest.runAllTimers(); // Opening the panel involves a timeout.
-      expect(container.querySelector('.arrowPanelContent')).toMatchSnapshot();
+      const confirmationPanel = await waitForConfirmationPanel();
+      expect(confirmationPanel).toMatchSnapshot();
 
       // Click on the confirm button
       fireFullClick(getConfirmDeleteButton());
-      await findByText(/successfully/i);
+      await screen.findByText(/successfully/i);
       expect(await retrieveUploadedProfileInformationFromDb(profileToken)).toBe(
         null
       );
 
       // Clicking elsewhere should make the successful message disappear.
       fireFullClick((window: any));
-      await waitForElementToBeRemoved(queryByText(/successfully/i));
+      await waitForElementToBeRemoved(screen.queryByText(/successfully/i));
     });
 
     it('can cancel the deletion', async () => {
       const { profileToken } = listOfProfileInformations[0];
 
-      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
       await storeProfileInformations(listOfProfileInformations);
       const {
         getDeleteButtonForProfile,
-        findByText,
-        queryByText,
         getCancelDeleteButton,
+        waitForConfirmationPanel,
       } = setup({
         withActionButtons: true,
       });
 
       // Wait for the full rendering with a find* operation.
-      await findByText(/macOS/);
+      await screen.findByText(/macOS/);
       const workingButton = getDeleteButtonForProfile('#012345');
 
       // Click on the delete button
       fireFullClick(workingButton);
-      jest.runAllTimers(); // Opening the panel involves a timeout.
+      const confirmationPanel = await waitForConfirmationPanel();
 
       // Click on the cancel button
       fireFullClick(getCancelDeleteButton());
-      jest.runAllTimers(); // Closing the panel involves a timeout too.
-      expect(queryByText(/are you sure/i)).not.toBeInTheDocument();
+      await waitForElementToBeRemoved(confirmationPanel);
+      expect(screen.queryByText(/are you sure/i)).not.toBeInTheDocument();
       expect(
         await retrieveUploadedProfileInformationFromDb(profileToken)
       ).toEqual(listOfProfileInformations[0]);
@@ -408,35 +407,32 @@ describe('ListOfPublishedProfiles', () => {
       const endpointUrl = `https://api.profiler.firefox.com/profile/${profileToken}`;
       mockFetchForDeleteProfile({ endpointUrl, jwtToken });
 
-      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
       await storeProfileInformations(listOfProfileInformations.slice(0, 1));
       const {
-        container,
         getDeleteButtonForProfile,
-        findByText,
-        getByText,
         getConfirmDeleteButton,
+        waitForConfirmationPanel,
       } = setup({
         withActionButtons: true,
       });
 
       // Wait for the full rendering with a find* operation.
-      await findByText(/Fennec/);
+      await screen.findByText(/Fennec/);
       const workingButton = getDeleteButtonForProfile('#012345');
 
       // Click on the delete button
       fireFullClick(workingButton);
-      jest.runAllTimers(); // Opening the panel involves a timeout.
-      expect(container.querySelector('.arrowPanelContent')).toMatchSnapshot();
+      const confirmationPanel = await waitForConfirmationPanel();
+      expect(confirmationPanel).toMatchSnapshot();
 
       // Click on the confirm button
       fireFullClick(getConfirmDeleteButton());
-      await findByText(/successfully/i);
+      await screen.findByText(/successfully/i);
 
       // Clicking elsewhere should make the successful message disappear and a generic message appear.
       fireFullClick((window: any));
-      await findByText(/no profile/i);
-      expect(getByText(/no profile/i)).toBeInTheDocument();
+      await screen.findByText(/no profile/i);
+      expect(screen.getByText(/no profile/i)).toBeInTheDocument();
     });
 
     it('can handle errors', async () => {
@@ -448,13 +444,13 @@ describe('ListOfPublishedProfiles', () => {
         jwtToken: 'THIS_TOKEN_IS_UNKNOWN',
       });
 
-      jest.useFakeTimers(); // ButtonWithPanel has some asynchronous behavior.
       await storeProfileInformations(listOfProfileInformations);
       const {
         getDeleteButtonForProfile,
         findByText,
         getByText,
         getConfirmDeleteButton,
+        waitForConfirmationPanel,
       } = setup({
         withActionButtons: true,
       });
@@ -464,7 +460,7 @@ describe('ListOfPublishedProfiles', () => {
       const workingButton = getDeleteButtonForProfile('#012345');
 
       fireFullClick(workingButton);
-      jest.runAllTimers(); // Opening the panel involves a timeout.
+      await waitForConfirmationPanel();
 
       fireFullClick(getConfirmDeleteButton());
       await findByText(/An error happened/i);
