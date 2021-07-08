@@ -1516,13 +1516,19 @@ export async function unserializeProfileOfArbitraryFormat(
   arbitraryFormat: mixed
 ): Promise<Profile> {
   try {
-    if (arbitraryFormat instanceof ArrayBuffer) {
-      if (isArtTraceFormat(arbitraryFormat)) {
-        arbitraryFormat = convertArtTraceProfile(arbitraryFormat);
+    // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
+    // object is constructed from an ArrayBuffer in a different context... which
+    // happens in our tests.
+    if (String(arbitraryFormat) === '[object ArrayBuffer]') {
+      // Obviously Flow doesn't understand that this is correct, so let's help
+      // Flow here.
+      const arrayBuffer: ArrayBuffer = (arbitraryFormat: any);
+      if (isArtTraceFormat(arrayBuffer)) {
+        arbitraryFormat = convertArtTraceProfile(arrayBuffer);
       } else {
         try {
           const textDecoder = new TextDecoder('utf-8', { fatal: true });
-          arbitraryFormat = await textDecoder.decode(arbitraryFormat);
+          arbitraryFormat = await textDecoder.decode(arrayBuffer);
         } catch (e) {
           console.error('Source exception:', e);
           throw new Error(
