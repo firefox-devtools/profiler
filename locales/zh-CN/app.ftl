@@ -81,6 +81,7 @@ FooterLinks--Cookies = Cookie
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--categories-with-cpu = 含 CPU 的分类
 FullTimeline--categories = 分类
 
 ## Home page
@@ -176,6 +177,7 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } 颗逻辑核心
     }
 MenuButtons--metaInfo--interval = 间隔：
+MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
@@ -219,10 +221,16 @@ MenuButtons--metaOverheadStatistics-min = 最小值
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隐藏的线程
+MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含屏幕截图
+MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
+MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
+MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--cancel-upload = 取消上传
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
+MenuButtons--publish--compressing = 正在压缩…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -244,6 +252,7 @@ MenuButtons--publish--download = 下载
 
 ## ProfileRootMessage
 
+ProfileRootMessage--additional = 返回主页
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
@@ -252,6 +261,9 @@ MenuButtons--publish--download = 下载
 ServiceWorkerManager--installing-button = 正在安装…
 ServiceWorkerManager--pending-button = 应用并重新加载
 ServiceWorkerManager--installed-button = 重新加载应用程序
+ServiceWorkerManager--hide-notice-button =
+    .title = 隐藏重新加载通知
+    .aria-label = 隐藏重新加载通知
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -272,6 +284,11 @@ TabBar--network-tab = 网络
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = 只显示此进程组
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = 只显示“{ $trackName }”
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
@@ -286,6 +303,12 @@ TrackContextMenu--hide-track = 隐藏“{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = 完成“{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
@@ -316,6 +339,16 @@ TransformNavigator--merge-function = 合并：{ $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--drop-function = 丢弃：{ $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = 折叠递归：{ $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
