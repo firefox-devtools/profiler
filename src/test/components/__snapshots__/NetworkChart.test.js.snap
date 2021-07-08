@@ -483,5 +483,3 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
   </div>
 </div>
 `;
-
-exports[`NetworkChart renders NetworkChart correctly 2`] = `Array []`;
