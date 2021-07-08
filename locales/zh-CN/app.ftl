@@ -34,6 +34,8 @@ AppHeader--github-icon =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-focus-function = 聚焦于函数
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
@@ -173,6 +175,7 @@ MenuButtons--metaInfo--logical-cpu =
     { $logicalCPUs ->
        *[other] { $logicalCPUs } 颗逻辑核心
     }
+MenuButtons--metaInfo--interval = 间隔：
 MenuButtons--metaInfo--application = 应用程序
 
 ## Strings refer to specific types of builds, and should be kept in English.
