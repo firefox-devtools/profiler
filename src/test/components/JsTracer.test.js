@@ -66,11 +66,6 @@ describe('StackChart', function() {
     const { container } = renderResult;
 
     if (skipLoadingScreen) {
-      // Have React show the loading screen.
-      flushRafCalls();
-      // Have React show our new component, and schedule a draw call.
-      flushRafCalls();
-      // Now flush once more to actually draw to the screen.
       flushRafCalls();
     }
 
@@ -100,8 +95,6 @@ describe('StackChart', function() {
       events: simpleTracerEvents,
     });
     expect(getJsTracerChartCanvas()).toBeFalsy();
-    // Flush twice, as the canvas defers until after React updates.
-    flushRafCalls();
     flushRafCalls();
     expect(getJsTracerChartCanvas()).toBeTruthy();
   });
