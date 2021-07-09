@@ -309,12 +309,18 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 MenuButtons--metaOverheadStatistics-mean = Mediana
 MenuButtons--metaOverheadStatistics-max = Máximo
 MenuButtons--metaOverheadStatistics-min = Mínimo
+MenuButtons--metaOverheadStatistics-profiled-duration = Duración del perfilado:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir hilos ocultos
+MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir rango de tiempo oculto
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de pantalla
+MenuButtons--publish--renderCheckbox-label-resource = Incluir URL y rutas de recursos
 MenuButtons--publish--renderCheckbox-label-extension = Incluir información de extensión
 MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de preferencias
+MenuButtons--publish--reupload-performance-profile = Volver a subir perfil de rendimiento
 MenuButtons--publish--share-performance-profile = Compartir perfil de rendimiento
 MenuButtons--publish--info-description = Sube tu perfil y hazlo accesible a cualquiera que tenga el enlace.
 MenuButtons--publish--info-description-default = Por defecto, se eliminan tus datos personales.
