@@ -189,6 +189,7 @@ MenuButtons--publish--upload-title = Asali n umaɣnu…
 MenuButtons--publish--cancel-upload = Sefsex asali
 MenuButtons--publish--message-try-again = Ɛreḍ tikelt-nniḍen
 MenuButtons--publish--download = Sader
+MenuButtons--publish--compressing = Tussda…
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -207,9 +208,12 @@ MenuButtons--publish--download = Sader
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-local =
+    .message = Ur yettwasebded ara yakan.
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
