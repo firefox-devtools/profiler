@@ -20,14 +20,13 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getBoundingBox,
-  fireFullClick,
-  fireFullContextMenu,
-} from '../fixtures/utils';
+import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 describe('timeline/GlobalTrack', function() {
   autoMockCanvasContext();
+  // Some child components render to canvas.
+  autoMockElementSize({ width: 400, height: 400 });
 
   /**
    *  getProfileWithNiceTracks() looks like: [
@@ -64,11 +63,6 @@ describe('timeline/GlobalTrack', function() {
       throw new Error('Expected a process track.');
     }
     const threadIndex = track.mainThreadIndex;
-
-    // Some child components render to canvas.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(400, 400));
 
     if (threadIndex !== null) {
       // The assertions are simpler if the GeckoMain tab thread is not already selected.

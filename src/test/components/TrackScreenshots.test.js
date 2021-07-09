@@ -24,7 +24,6 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
@@ -34,15 +33,27 @@ import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profil
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getPreviewSelection } from '../../selectors/profile';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
+import {
+  autoMockElementSize,
+  setMockedElementSize,
+} from '../fixtures/mocks/element-size';
 
-// Mock out the getBoundingBox to have a 400 pixel width.
+// Mock out the element size to have a 400 pixel width and some left/top
+// positioning.
 const TRACK_WIDTH = 400;
 const LEFT = 100;
 const TOP = 7;
+const INITIAL_ELEMENT_SIZE = {
+  width: TRACK_WIDTH,
+  height: FULL_TRACK_SCREENSHOT_HEIGHT,
+  offsetX: LEFT,
+  offsetY: TOP,
+};
 
 describe('timeline/TrackScreenshots', function() {
   autoMockDomRect();
   autoMockCanvasContext();
+  autoMockElementSize(INITIAL_ELEMENT_SIZE);
 
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -145,10 +156,14 @@ describe('timeline/TrackScreenshots', function() {
   });
 
   it('places the hover image in the center of the track if there is enough space', () => {
-    const { setBoundingClientRectOffset, moveMouseAndGetTop } = setup();
+    const { moveMouseAndGetTop } = setup();
     const containerTop = 100;
     const screenshotHeight = 175; // This is the height of the zoomed-in screenshot.
-    setBoundingClientRectOffset({ left: LEFT, top: containerTop });
+    setMockedElementSize({
+      ...INITIAL_ELEMENT_SIZE,
+      offsetX: LEFT, // repeating this property for more clarity
+      offsetY: containerTop,
+    });
     const pageX = LEFT;
     const expectedTop = Math.floor(
       containerTop + FULL_TRACK_SCREENSHOT_HEIGHT / 2 - screenshotHeight / 2
@@ -247,22 +262,8 @@ function setup(
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-  let leftOffset = LEFT;
-  let topOffset = TOP;
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => {
-      const rect = getBoundingBox(TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT);
-      // Add some arbitrary X offset.
-      rect.left += leftOffset;
-      rect.right += leftOffset;
-      rect.x += leftOffset;
-      rect.y += topOffset;
-      rect.top += topOffset;
-      rect.bottom += topOffset;
-      return rect;
-    });
 
+  // getBoundingClientRect is already mocked by autoMockElementSize.
   jest.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => {
     return [
       new DOMRect(
@@ -273,17 +274,6 @@ function setup(
       ),
     ];
   });
-
-  function setBoundingClientRectOffset({
-    left,
-    top,
-  }: {
-    left: number,
-    top: number,
-  }) {
-    leftOffset = left;
-    topOffset = top;
-  }
 
   const renderResult = render(<Provider store={store}>{component}</Provider>);
   const { container } = renderResult;
@@ -363,7 +353,6 @@ function setup(
     moveMouseAndGetLeft,
     moveMouseAndGetTop,
     moveMouseAndGetImageSize,
-    setBoundingClientRectOffset,
     selectionOverlay,
     screenshotClick,
   };

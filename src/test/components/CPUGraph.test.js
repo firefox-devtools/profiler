@@ -16,8 +16,8 @@ import {
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   addCpuUsageValues,
@@ -40,6 +40,7 @@ const GRAPH_HEIGHT = 10;
 
 describe('CPUGraph', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
   function getSamplesProfile() {
     const profile = getProfileFromTextSamples(`
@@ -65,10 +66,6 @@ describe('CPUGraph', function() {
     const store = storeWithProfile(profile);
     const { dispatch } = store;
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     // Enable the CPU Graph
     dispatch(enableExperimentalCPUGraphs());

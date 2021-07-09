@@ -4,6 +4,7 @@
 
 // @flow
 import * as React from 'react';
+import { Provider } from 'react-redux';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -19,7 +20,8 @@ import {
 } from '../../components/timeline/Markers';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { overlayFills } from '../../profile-logic/marker-styles';
-import { Provider } from 'react-redux';
+import { ensureExists } from '../../utils/flow';
+
 import {
   autoMockCanvasContext,
   flushDrawLog,
@@ -27,7 +29,6 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import {
-  getBoundingBox,
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
@@ -35,18 +36,12 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { ensureExists } from '../../utils/flow';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
 function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   const flushRafCalls = mockRaf();
-
-  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
-  // a lot easier to mock this everywhere.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
 
   function flushRafTwice() {
     // We need to flush twice since when the first flush is run, it
@@ -150,6 +145,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
 
 describe('TimelineMarkers', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: 200, height: 300 });
 
   it('renders correctly', () => {
     window.devicePixelRatio = 1;

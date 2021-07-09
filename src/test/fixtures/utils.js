@@ -12,19 +12,6 @@ import type {
 import { ensureExists } from '../../utils/flow';
 import { fireEvent, screen } from '@testing-library/react';
 
-export function getBoundingBox(width: number, height: number) {
-  return {
-    width,
-    height,
-    left: 0,
-    x: 0,
-    top: 0,
-    y: 0,
-    right: width,
-    bottom: height,
-  };
-}
-
 /**
  * jsdom's MouseEvent object is incomplete (see
  * https://github.com/jsdom/jsdom/issues/1911) and we use some of the
