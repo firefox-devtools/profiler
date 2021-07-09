@@ -22,6 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>App web para el anáisis de rendimiento de { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Ir a nuestro repositorio Git (se abrirá en una nueva ventana)
 
@@ -312,6 +313,13 @@ MenuButtons--metaOverheadStatistics-min = Mínimo
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-extension = Incluir información de extensión
+MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de preferencias
+MenuButtons--publish--share-performance-profile = Compartir perfil de rendimiento
+MenuButtons--publish--info-description = Sube tu perfil y hazlo accesible a cualquiera que tenga el enlace.
+MenuButtons--publish--info-description-default = Por defecto, se eliminan tus datos personales.
+MenuButtons--publish--info-description-firefox-nightly = Este perfil es de { -firefox-nightly-brand-name }, por lo que de forma predeterminada se incluye toda la información.
+MenuButtons--publish--include-additional-data = Incluir datos adicionales que pueden ser identificables
 MenuButtons--publish--button-upload = Subir
 MenuButtons--publish--upload-title = Subiendo perfil…
 MenuButtons--publish--cancel-upload = Cancelar subida
@@ -323,10 +331,14 @@ MenuButtons--publish--compressing = Comprimiendo…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrar redes:
+    .title = Mostrar solamente solicitudes de red que coincidan con cierto nombre
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = ¿Sabías que puedes usar la coma (,) para buscar usando varios términos?
 
 ## Profile Delete Button
 
@@ -368,19 +380,44 @@ ProfileRootMessage--additional = Volver al inicio
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Instalando…
+ServiceWorkerManager--pending-button = Aplicar y recargar
+ServiceWorkerManager--installed-button = Recargar la aplicación
+ServiceWorkerManager--updated-while-not-ready = Una nueva versión de la aplicación se aplicó antes de que esta página terminara de cargar. Puede que se produzcan fallos.
+ServiceWorkerManager--new-version-is-ready = Una nueva versión de la aplicación ha sido descargada y está lista para usarse.
+ServiceWorkerManager--hide-notice-button =
+    .title = Ocultar el aviso de volver a cargar
+    .aria-label = Ocultar el aviso de volver a cargar
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Todas las pilas
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Nativo
+StackSettings--use-data-source-label = Fuente de datos:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--network-tab = Red
+TabBar--js-tracer-tab = Trazador JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Mostrar solo este grupo de procesos
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Mostrar solo “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Ocultar otras pistas de capturas de pantalla
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Ocultar “{ $trackName }”
+TrackContextMenu--show-all-tracks = Mostrar todas las pistas
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -391,8 +428,55 @@ ProfileRootMessage--additional = Volver al inicio
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Completar “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Contraer: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Enfocar nodo: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Enfocar: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Fusionar nodo: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Fusionar: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Contraer recursión: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Colapsar subárbol: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Registros subidos
