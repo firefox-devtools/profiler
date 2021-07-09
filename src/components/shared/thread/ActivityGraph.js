@@ -71,7 +71,6 @@ function _stopPropagation(e: TransitionEvent) {
 }
 
 class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
-  _resizeListener = () => this.forceUpdate();
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
   _container: HTMLElement | null = null;
 
@@ -106,8 +105,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   };
 
   componentDidMount() {
-    window.addEventListener('resize', this._resizeListener);
-    this.forceUpdate(); // for initial size
     const container = this._container;
     if (container !== null) {
       // Stop the propagation of transitionend so we won't fire multiple events
@@ -117,7 +114,6 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this._resizeListener);
     const container = this._container;
     if (container !== null) {
       container.removeEventListener('transitionend', _stopPropagation);
