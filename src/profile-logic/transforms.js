@@ -4,8 +4,8 @@
 // @flow
 
 import {
-  uintArrayToString,
-  stringToUintArray,
+  encodeUintArrayForUrlComponent,
+  decodeUintArrayFromUrlComponent,
 } from '../utils/uintarray-encoding';
 import {
   toValidImplementationFilter,
@@ -228,7 +228,9 @@ export function parseTransforms(
             invertedRaw,
           ] = tuple;
           const implementation = toValidImplementationFilter(implementationRaw);
-          const callNodePath = stringToUintArray(serializedCallNodePath);
+          const callNodePath = decodeUintArrayFromUrlComponent(
+            serializedCallNodePath
+          );
           const inverted = Boolean(invertedRaw);
           // Flow requires a switch because it can't deduce the type string correctly.
           switch (type) {
@@ -302,7 +304,7 @@ export function stringifyTransforms(
               let string = [
                 shortKey,
                 transform.implementation,
-                uintArrayToString(transform.callNodePath),
+                encodeUintArrayForUrlComponent(transform.callNodePath),
               ].join('-');
               if (transform.inverted) {
                 string += '-i';

@@ -586,12 +586,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         {showExpandAll ? (
           <>
             <Localized id="CallNodeContextMenu--expand-all">
-              <MenuItem
+              <MenuItemWithShortcut
                 onClick={this._handleClick}
                 data={{ type: 'expand-all' }}
+                shortcut="*"
               >
                 Expand all
-              </MenuItem>
+              </MenuItemWithShortcut>
             </Localized>
             <div className="react-contextmenu-separator" />
           </>
@@ -707,6 +708,20 @@ function TransformMenuItem(props: {|
       <span
         className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
       />
+      <div className="react-contextmenu-item-content">{props.children}</div>
+      <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
+    </MenuItem>
+  );
+}
+
+function MenuItemWithShortcut(props: {|
+  +children: React.Node,
+  +onClick: (event: SyntheticEvent<>, data: { type: string }) => void,
+  +shortcut: string,
+  +data: { type: string },
+|}) {
+  return (
+    <MenuItem onClick={props.onClick} data={{ type: props.data.type }}>
       <div className="react-contextmenu-item-content">{props.children}</div>
       <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
     </MenuItem>

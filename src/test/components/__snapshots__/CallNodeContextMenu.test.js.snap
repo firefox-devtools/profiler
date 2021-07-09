@@ -187,7 +187,16 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     role="menuitem"
     tabindex="-1"
   >
-    Expand all
+    <div
+      class="react-contextmenu-item-content"
+    >
+      Expand all
+    </div>
+    <kbd
+      class="callNodeContextMenuShortcut"
+    >
+      *
+    </kbd>
   </div>
   <div
     class="react-contextmenu-separator"
