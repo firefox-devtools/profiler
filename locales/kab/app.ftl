@@ -182,6 +182,13 @@ MenuButtons--metaOverheadStatistics-min = Tis
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Seddu inegzumen
 MenuButtons--publish--renderCheckbox-label-extension = Seddu talɣut n usiɣzef
 MenuButtons--publish--renderCheckbox-label-preference = Seddu azalen n usmenyif
+MenuButtons--publish--share-performance-profile = Bḍu amaɣnu n usmenyif
+MenuButtons--publish--info-description-default = S wudem amezwer, isefka-ik·im udmawanen ttwakksen.
+MenuButtons--publish--button-upload = Sali
+MenuButtons--publish--upload-title = Asali n umaɣnu…
+MenuButtons--publish--cancel-upload = Sefsex asali
+MenuButtons--publish--message-try-again = Ɛreḍ tikelt-nniḍen
+MenuButtons--publish--download = Sader
 
 ## NetworkSettings
 ## This is used in the network chart.
