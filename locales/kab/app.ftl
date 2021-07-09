@@ -29,11 +29,25 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Ur yezmir ara ad d-yerr amaɣnu seg { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Taɣuri n faylu neɣ tasleḍt n ufylu yellan deg-s d awezɣi.
+AppViewRouter--error-message-local =
+    .message = Ur yettwasebded ara yakan.
+AppViewRouter--error-message-public =
+    .message = Ur yezmir ara ad d-yader umaɣnu.
+AppViewRouter--error-message-from-url =
+    .message = Ur yezmir ara ad d-yader umaɣnu.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--expand-all = Snefli akk
+CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
+CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
+CallNodeContextMenu--copy-stack = Nqel tanebdant
 
 ## CallTree
 ## This is the component for Call Tree panel.
