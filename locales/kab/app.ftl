@@ -22,6 +22,9 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>Asnas web i { -firefox-brand-name } tesleḍt n tmellit</subheader>
+AppHeader--github-icon =
+    .title = Ddu ɣer ukufi-nneɣ Git (yettalday deg usafylu amaynut)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
