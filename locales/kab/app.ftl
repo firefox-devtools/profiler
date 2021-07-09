@@ -141,6 +141,21 @@ MenuButtons--index--metaInfo-subtitle = Talɣut n umaɣnu
 MenuButtons--metaInfo--symbols = Izamulen:
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--recording-started = Asekles yebda:
+MenuButtons--metaInfo--interval = Azilal:
+MenuButtons--metaInfo--profile-version = Lqem n umaɣnu:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } n tesdat
+       *[other] { $configurationDuration } n tesdatin
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = War talast
+MenuButtons--metaInfo--application = Asnas
+MenuButtons--metaInfo--name-and-version = Isem akked lqem:
+MenuButtons--metaInfo--update-channel = Leqqem abadu:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
