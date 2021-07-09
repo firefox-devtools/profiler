@@ -174,10 +174,14 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-min = Tis
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Seddu inegzumen
+MenuButtons--publish--renderCheckbox-label-extension = Seddu talɣut n usiɣzef
+MenuButtons--publish--renderCheckbox-label-preference = Seddu azalen n usmenyif
 
 ## NetworkSettings
 ## This is used in the network chart.
