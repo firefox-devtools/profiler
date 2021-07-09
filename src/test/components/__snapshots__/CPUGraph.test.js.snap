@@ -70,6 +70,23 @@ Array [
     "set fillStyle",
     "#c5e1fe",
   ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
 ]
 `;
 

@@ -842,6 +842,8 @@ exports[`TrackEventDelay matches the component snapshot when event delay tracks 
   >
     <canvas
       class="timelineTrackEventDelayCanvas"
+      height="40"
+      width="80"
     />
     <div
       class="timelineEmptyThreadIndicator"
