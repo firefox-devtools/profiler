@@ -29,6 +29,8 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-local =
+    .message = 尚未实现。
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -222,7 +224,7 @@ MenuButtons--metaOverheadStatistics-min = 最小值
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隐藏的线程
-MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含屏幕截图
+MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
 MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
 MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
