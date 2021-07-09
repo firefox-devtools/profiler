@@ -28,7 +28,10 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import {
+  autoMockElementSize,
+  setMockedElementSize,
+} from '../fixtures/mocks/element-size';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -106,6 +109,14 @@ describe('ThreadActivityGraph', function() {
         );
     }
 
+    /**
+     * Coordinate the flushing of the requestAnimationFrame and the draw calls.
+     */
+    function getContextDrawCalls() {
+      flushRafCalls();
+      return (window: any).__flushDrawLog();
+    }
+
     return {
       ...renderResult,
       dispatch,
@@ -117,6 +128,7 @@ describe('ThreadActivityGraph', function() {
       activityGraphCanvas,
       clickActivityGraph,
       getCallNodePath,
+      getContextDrawCalls,
     };
   }
 
@@ -128,6 +140,27 @@ describe('ThreadActivityGraph', function() {
   it('matches the 2d canvas draw snapshot', () => {
     setup();
     expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('redraws on resize', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+    // Ensure we start out with 0.
+    expect(getContextDrawCalls().length).toEqual(0);
+
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
+    window.dispatchEvent(new Event('resize'));
+    const drawCalls = getContextDrawCalls();
+    // We want to ensure that we redraw the activity graph and not something
+    // else like the sample graph.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
   });
 
   it('matches the 2d canvas draw snapshot with CPU values', () => {
