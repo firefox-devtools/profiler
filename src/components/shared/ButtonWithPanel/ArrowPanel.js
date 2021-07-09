@@ -28,6 +28,7 @@ type State = {|
 |};
 
 export class ArrowPanel extends React.PureComponent<Props, State> {
+  closeTimeout = null;
   state = {
     open: false,
     isClosing: false,
@@ -49,7 +50,11 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       }
       const openGeneration = state.openGeneration + 1;
 
-      setTimeout(this._onCloseAnimationFinish(openGeneration), 400);
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = setTimeout(
+        this._onCloseAnimationFinish(openGeneration),
+        400
+      );
 
       return { open: false, isClosing: true, openGeneration };
     });
@@ -89,6 +94,10 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
       // Closing... but only after the animation.
       this.props.onClose();
     }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.closeTimeout);
   }
 
   render() {

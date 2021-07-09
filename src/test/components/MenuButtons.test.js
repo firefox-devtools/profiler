@@ -6,7 +6,6 @@
 import * as React from 'react';
 import {
   fireEvent,
-  waitFor,
   screen,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
@@ -105,8 +104,6 @@ describe('app/MenuButtons', function() {
   }
 
   function setup(store) {
-    jest.useFakeTimers();
-
     // We need a sensible data source for this component.
     store.dispatch(
       updateUrlState(
@@ -127,10 +124,6 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const clickAndRunTimers = where => {
-      fireFullClick(where);
-      jest.runAllTimers();
-    };
     const navigateToHash = (hash: string) => {
       const newUrlState = stateFromLocation({
         pathname: `/public/${hash}/calltree`,
@@ -139,11 +132,18 @@ describe('app/MenuButtons', function() {
       });
       store.dispatch(updateUrlState(newUrlState));
     };
+
+    async function waitForPanelToBeRemoved() {
+      await waitForElementToBeRemoved(
+        ensureExists(document.querySelector('.arrowPanelContent'))
+      );
+    }
+
     return {
       ...store,
       ...renderResult,
-      clickAndRunTimers,
       navigateToHash,
+      waitForPanelToBeRemoved,
     };
   }
 
@@ -189,7 +189,6 @@ describe('app/MenuButtons', function() {
         screen.getByText(/^(Re-upload|Upload Local Profile)$/);
       const findPublishButton = () =>
         screen.findByText(/^(Re-upload|Upload Local Profile)$/);
-      const getErrorButton = () => screen.getByText('Error uploading');
       const getCancelButton = () => screen.getByText('Cancel Upload');
       const getPanelForm = () =>
         ensureExists(
@@ -199,16 +198,20 @@ describe('app/MenuButtons', function() {
       const queryPreferenceCheckbox = () =>
         screen.queryByText('Include preference values');
       const getPanel = () => screen.getByTestId('MenuButtonsPublish-container');
+      const openPublishPanel = async () => {
+        fireFullClick(getPublishButton());
+        await screen.findByText(/^(Share|Re-upload) Performance Profile$/);
+      };
 
       return {
         ...setupResult,
         getPanel,
         findPublishButton,
         getPublishButton,
-        getErrorButton,
         getCancelButton,
         getPanelForm,
         queryPreferenceCheckbox,
+        openPublishPanel,
         resolveUpload,
         rejectUpload,
       };
@@ -248,70 +251,60 @@ describe('app/MenuButtons', function() {
       expect(container).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the opened panel for a nightly profile', () => {
+    it('matches the snapshot for the opened panel for a nightly profile', async () => {
       const { profile } = createSimpleProfile('nightly');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
-        profile
-      );
-      clickAndRunTimers(getPublishButton());
+      const { getPanel, openPublishPanel } = setupForPublish(profile);
+      await openPublishPanel();
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the opened panel for a release profile', () => {
+    it('matches the snapshot for the opened panel for a release profile', async () => {
       const { profile } = createSimpleProfile('release');
-      const { getPanel, getPublishButton, clickAndRunTimers } = setupForPublish(
-        profile
-      );
-      clickAndRunTimers(getPublishButton());
+      const { getPanel, openPublishPanel } = setupForPublish(profile);
+      await openPublishPanel();
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', () => {
+    it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', async () => {
       const { profile } = createSimpleProfile();
       const {
         getPanel,
         container,
         navigateToHash,
-        getPublishButton,
-        clickAndRunTimers,
+        openPublishPanel,
       } = setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
-      clickAndRunTimers(getPublishButton());
+      await openPublishPanel();
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+    it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
       const { profile } = createPreferenceReadProfile('release');
-      const {
-        getPublishButton,
-        clickAndRunTimers,
-        queryPreferenceCheckbox,
-      } = setupForPublish(profile);
-      clickAndRunTimers(getPublishButton());
+      const { queryPreferenceCheckbox, openPublishPanel } = setupForPublish(
+        profile
+      );
+      await openPublishPanel();
       expect(queryPreferenceCheckbox()).toBeTruthy();
     });
 
-    it('does not show the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+    it('does not show the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
       const { profile } = createSimpleProfile('release');
-      const {
-        getPublishButton,
-        clickAndRunTimers,
-        queryPreferenceCheckbox,
-      } = setupForPublish(profile);
-      clickAndRunTimers(getPublishButton());
+      const { queryPreferenceCheckbox, openPublishPanel } = setupForPublish(
+        profile
+      );
+      await openPublishPanel();
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
 
     it('can publish and revert', async () => {
       const {
-        getPublishButton,
+        openPublishPanel,
         getPanelForm,
-        clickAndRunTimers,
         resolveUpload,
         getState,
       } = setupForPublish();
-      clickAndRunTimers(getPublishButton());
+      await openPublishPanel();
       fireEvent.submit(getPanelForm());
       resolveUpload('SOME_HASH');
 
@@ -334,16 +327,16 @@ describe('app/MenuButtons', function() {
         findPublishButton,
         getCancelButton,
         getPanelForm,
-        clickAndRunTimers,
+        openPublishPanel,
       } = setupForPublish();
-      clickAndRunTimers(getPublishButton());
+      await openPublishPanel();
       fireEvent.submit(getPanelForm());
 
       // These shouldn't exist anymore.
       expect(() => getPanel()).toThrow();
       expect(() => getPublishButton()).toThrow();
 
-      clickAndRunTimers(getCancelButton());
+      fireFullClick(getCancelButton());
 
       // This might be asynchronous, depending on the underlying code.
       expect(await findPublishButton()).toBeTruthy();
@@ -352,24 +345,21 @@ describe('app/MenuButtons', function() {
     it('matches the snapshot for an error', async () => {
       const {
         getPanel,
-        getPublishButton,
-        getErrorButton,
         getPanelForm,
         rejectUpload,
-        clickAndRunTimers,
+        openPublishPanel,
       } = setupForPublish();
 
-      clickAndRunTimers(getPublishButton());
+      await openPublishPanel();
       fireEvent.submit(getPanelForm());
       rejectUpload('This is a mock error');
 
       // Wait until the error button is visible.
-      await waitFor(() => {
-        getErrorButton();
-      });
+      const errorButton = await screen.findByText('Error uploading');
 
       // Now click the error button, and get a snapshot of the panel.
-      clickAndRunTimers(getErrorButton());
+      fireFullClick(errorButton);
+      await screen.findByText(/something went wrong/);
       expect(getPanel()).toMatchSnapshot();
     });
   });
@@ -383,8 +373,6 @@ describe('app/MenuButtons', function() {
           return 'toLocaleString ' + this.toUTCString();
         });
 
-      jest.useFakeTimers();
-
       const store = blankStore();
 
       // Note that we dispatch this action directly instead of using viewProfile
@@ -393,10 +381,10 @@ describe('app/MenuButtons', function() {
       await store.dispatch(loadProfile(profile, { skipSymbolication: true }));
 
       const setupResult = setup(store);
-      const { clickAndRunTimers } = setupResult;
 
-      function displayMetaInfoPanel() {
-        clickAndRunTimers(screen.getByText('Profile Info'));
+      async function displayMetaInfoPanel() {
+        fireFullClick(screen.getByText('Profile Info'));
+        await screen.findByText('Profile Information');
       }
 
       function getMetaInfoPanel() {
@@ -426,7 +414,7 @@ describe('app/MenuButtons', function() {
         displayMetaInfoPanel,
         getMetaInfoPanel,
       } = await setupForMetaInfoPanel(profile);
-      displayMetaInfoPanel();
+      await displayMetaInfoPanel();
       const renderedCapacity = ensureExists(
         screen.getByText(/Buffer Capacity/).nextSibling
       );
@@ -448,7 +436,7 @@ describe('app/MenuButtons', function() {
         displayMetaInfoPanel,
         getMetaInfoPanel,
       } = await setupForMetaInfoPanel(profile);
-      displayMetaInfoPanel();
+      await displayMetaInfoPanel();
 
       const renderedDevice = ensureExists(
         screen.getByText(/Device:/).nextSibling
@@ -477,7 +465,7 @@ describe('app/MenuButtons', function() {
         displayMetaInfoPanel,
         getMetaInfoPanel,
       } = await setupForMetaInfoPanel(profile);
-      displayMetaInfoPanel();
+      await displayMetaInfoPanel();
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
 
@@ -516,7 +504,7 @@ describe('app/MenuButtons', function() {
         const setupResult = await setupForMetaInfoPanel(profile);
         const { navigateToHash, displayMetaInfoPanel } = setupResult;
         navigateToHash(FAKE_HASH);
-        displayMetaInfoPanel();
+        await displayMetaInfoPanel();
 
         return setupResult;
       }
@@ -570,15 +558,18 @@ describe('app/MenuButtons', function() {
 
       test('dismissing the panel will move back to the profile information when opened again', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
-        const { displayMetaInfoPanel } = await setupForDeletion();
+        const {
+          displayMetaInfoPanel,
+          waitForPanelToBeRemoved,
+        } = await setupForDeletion();
         fireFullClick(await screen.findByText('Delete'));
 
         // Dismissing by clicking elsewhere
         fireFullClick(ensureExists(document.body));
-        jest.runAllTimers();
+        await waitForPanelToBeRemoved();
 
         // We're back at the profile information panel if we open the panel again.
-        displayMetaInfoPanel();
+        await displayMetaInfoPanel();
         expect(screen.getByText('Profile Information')).toBeInTheDocument();
       });
 
@@ -587,6 +578,7 @@ describe('app/MenuButtons', function() {
         const {
           getMetaInfoPanel,
           displayMetaInfoPanel,
+          waitForPanelToBeRemoved,
         } = await setupForDeletion();
         fireFullClick(await screen.findByText('Delete'));
         fireFullClick(screen.getByText('Delete'));
@@ -605,8 +597,8 @@ describe('app/MenuButtons', function() {
         // Dismissing the metainfo panel and displaying it again should show the
         // initial panel now.
         fireFullClick(ensureExists(document.body));
-        jest.runAllTimers();
-        displayMetaInfoPanel();
+        await waitForPanelToBeRemoved();
+        await displayMetaInfoPanel();
         expect(screen.getByText('Profile Information')).toBeInTheDocument();
         expect(screen.queryByText('Uploaded:')).not.toBeInTheDocument();
       });
@@ -622,7 +614,7 @@ describe('app/MenuButtons', function() {
         profile.meta.symbolicated = config.symbolicated;
 
         const setupResult = await setupForMetaInfoPanel(profile);
-        setupResult.displayMetaInfoPanel();
+        await setupResult.displayMetaInfoPanel();
         return setupResult;
       }
 

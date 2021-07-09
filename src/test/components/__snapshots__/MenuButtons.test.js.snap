@@ -1627,12 +1627,24 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     <div
       class="menuButtonsPublishButtons"
     >
-      <button
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-        type="button"
+      <a
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        href="mockCreateObjectUrl"
       >
-        Compressing…
-      </button>
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
+        />
+        Download
+         
+        <span
+          class="menuButtonsDownloadSize"
+        >
+          (
+          9 B
+          )
+        </span>
+      </a>
       <button
         class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
         type="submit"
@@ -1734,12 +1746,24 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="menuButtonsPublishButtons"
     >
-      <button
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-        type="button"
+      <a
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        href="mockCreateObjectUrl"
       >
-        Compressing…
-      </button>
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
+        />
+        Download
+         
+        <span
+          class="menuButtonsDownloadSize"
+        >
+          (
+          9 B
+          )
+        </span>
+      </a>
       <button
         class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
         type="submit"
@@ -1836,12 +1860,24 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="menuButtonsPublishButtons"
     >
-      <button
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-        type="button"
+      <a
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload"
+        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        href="mockCreateObjectUrl"
       >
-        Compressing…
-      </button>
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload"
+        />
+        Download
+         
+        <span
+          class="menuButtonsDownloadSize"
+        >
+          (
+          9 B
+          )
+        </span>
+      </a>
       <button
         class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
         type="submit"
