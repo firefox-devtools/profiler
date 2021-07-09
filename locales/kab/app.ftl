@@ -169,6 +169,7 @@ MenuButtons--metaInfo--device = Ibenk:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = Anagraw n wammud:
 MenuButtons--metaInfo-renderRowOfList-label-features = Timahilin:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
