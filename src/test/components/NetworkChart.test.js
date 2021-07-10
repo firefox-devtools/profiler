@@ -32,7 +32,6 @@ import {
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
@@ -40,6 +39,7 @@ import {
   fireFullContextMenu,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 const NETWORK_MARKERS = (function() {
   const arrayOfNetworkMarkers = Array(10)
@@ -56,16 +56,6 @@ const NETWORK_MARKERS = (function() {
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
-
-  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
-  // a lot easier to mock this everywhere.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() =>
-      // We're adding the timeline margin to try to get some round numbers in
-      // the tests.
-      getBoundingBox(200 + TIMELINE_MARGIN_RIGHT + TIMELINE_MARGIN_LEFT, 300)
-    );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('network-chart'));
@@ -132,6 +122,11 @@ function setupWithPayload(markers: TestDefinedMarkers) {
   const profile = getProfileWithMarkers(markers);
   return setupWithProfile(profile);
 }
+
+autoMockElementSize({
+  width: 200 + TIMELINE_MARGIN_RIGHT + TIMELINE_MARGIN_LEFT,
+  height: 300,
+});
 
 describe('NetworkChart', function() {
   it('renders NetworkChart correctly', () => {

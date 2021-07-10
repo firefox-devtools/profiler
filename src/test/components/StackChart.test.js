@@ -42,7 +42,6 @@ import {
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
@@ -54,6 +53,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type {
   Profile,
@@ -69,6 +69,7 @@ const GRAPH_WIDTH =
 const GRAPH_HEIGHT = 300;
 
 autoMockCanvasContext();
+autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
 
@@ -366,10 +367,6 @@ function setupSamples(
  */
 function setup(profile: Profile, funcNames: string[] = []) {
   const flushRafCalls = mockRaf();
-
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('stack-chart'));

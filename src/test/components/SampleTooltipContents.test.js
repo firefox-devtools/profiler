@@ -16,11 +16,11 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getMouseEvent,
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type {
   Profile,
@@ -56,6 +56,7 @@ function getSamplesPixelPosition(
 
 describe('SampleTooltipContents', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -83,10 +84,6 @@ describe('SampleTooltipContents', function() {
   ) {
     const store = storeWithProfile(profile);
     const threadsKey = 0;
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const { container } = render(
       <Provider store={store}>

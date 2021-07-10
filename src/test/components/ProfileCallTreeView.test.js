@@ -15,23 +15,6 @@ import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeVi
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
 import { processGeckoProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
-
-import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import { storeWithProfile } from '../fixtures/stores';
-import {
-  getBoundingBox,
-  changeSelect,
-  fireFullClick,
-  fireFullContextMenu,
-} from '../fixtures/utils';
-import {
-  getProfileFromTextSamples,
-  getProfileWithJsAllocations,
-  getProfileWithUnbalancedNativeAllocations,
-  getProfileWithBalancedNativeAllocations,
-} from '../fixtures/profiles/processed-profile';
-import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-
 import {
   getEmptyThread,
   getEmptyProfile,
@@ -44,16 +27,29 @@ import {
   addTransformToStack,
 } from '../../actions/profile-view';
 
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import { storeWithProfile } from '../fixtures/stores';
+import {
+  changeSelect,
+  fireFullClick,
+  fireFullContextMenu,
+} from '../fixtures/utils';
+import {
+  getProfileFromTextSamples,
+  getProfileWithJsAllocations,
+  getProfileWithUnbalancedNativeAllocations,
+  getProfileWithBalancedNativeAllocations,
+} from '../fixtures/profiles/processed-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+
 import type { Profile } from 'firefox-profiler/types';
 
 autoMockCanvasContext();
-beforeEach(() => {
-  // This makes the bounding box large enough so that we don't trigger
-  // VirtualList's virtualization. We assert this above.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(1000, 2000));
-});
+
+// This makes the bounding box large enough so that we don't trigger
+// VirtualList's virtualization. We assert this above.
+autoMockElementSize({ width: 1000, height: 2000 });
 
 describe('calltree/ProfileCallTreeView', function() {
   function setup(profile?: Profile) {

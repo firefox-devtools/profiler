@@ -13,14 +13,15 @@ import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import {
-  getBoundingBox,
-  waitUntilState,
-  fireFullClick,
-} from '../fixtures/utils';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { waitUntilState, fireFullClick } from '../fixtures/utils';
 
 describe('calltree/ZipFileTree', function() {
   autoMockCanvasContext();
+
+  // This makes the bounding box large enough so that we don't trigger
+  // VirtualList's virtualization.
+  autoMockElementSize({ width: 1000, height: 2000 });
 
   async function setup() {
     const { store } = await storeWithZipFile([
@@ -30,12 +31,6 @@ describe('calltree/ZipFileTree', function() {
       // Use a file with a big depth to test the automatic expansion at load time.
       'boat/ship/new/anything/explore/yes/profile4.json',
     ]);
-
-    // This makes the bounding box large enough so that we don't trigger
-    // VirtualList's virtualization.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(1000, 2000));
 
     const renderResult = render(
       <Provider store={store}>

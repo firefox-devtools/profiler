@@ -11,6 +11,8 @@ import { fireEvent } from '@testing-library/react';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackEventDelay } from '../../components/timeline/TrackEventDelay';
 import { ensureExists } from '../../utils/flow';
+import { enableEventDelayTracks } from '../../actions/app';
+
 import {
   autoMockCanvasContext,
   flushDrawLog,
@@ -18,13 +20,12 @@ import {
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
 } from '../fixtures/utils';
-import { enableEventDelayTracks } from '../../actions/app';
 import { getProfileWithEventDelays } from '../fixtures/profiles/processed-profile';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { IndexIntoSamplesTable } from 'firefox-profiler/types';
 import type { CssPixels } from '../../types/units';
@@ -52,10 +53,6 @@ describe('TrackEventDelay', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     // Enable the event delay tracks if we want to see them, they are disabled by default
     if (isTrackEnabled) {
@@ -103,6 +100,7 @@ describe('TrackEventDelay', function() {
   }
 
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

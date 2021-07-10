@@ -8,77 +8,36 @@ import ReactDOM from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/flow';
-require('./Tooltip.css');
+import './Tooltip.css';
 
 export const MOUSE_OFFSET = 11;
 // If changing this value, make sure and adjust the max-width in the .tooltip class.
 export const VISUAL_MARGIN: CssPixels = 8;
 
-type Props = {
-  mouseX: CssPixels,
-  mouseY: CssPixels,
-  children?: React.Node,
-};
+type Props = {|
+  +mouseX: CssPixels,
+  +mouseY: CssPixels,
+  +children: React.Node,
+|};
 
-type State = {
-  interiorElement: HTMLElement | null,
-  layoutGeneration: number,
-};
-
-export class Tooltip extends React.PureComponent<Props, State> {
+export class Tooltip extends React.PureComponent<Props> {
   _isMounted: boolean = false;
   _isLayoutScheduled: boolean = false;
-
-  state = {
-    interiorElement: null,
-    layoutGeneration: 0,
-  };
+  _interiorElementRef: {| current: HTMLDivElement | null |} = React.createRef();
 
   _overlayElement = ensureExists(
     document.querySelector('#root-overlay'),
     'Expected to find a root overlay element.'
   );
 
-  _takeInteriorElementRef = (el: HTMLElement | null) => {
-    this.setState({ interiorElement: el });
-  };
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  componentDidUpdate() {
-    this._scheduleRelayout();
-  }
-
-  _scheduleRelayout() {
-    if (this._isLayoutScheduled) {
-      return;
-    }
-    this._isLayoutScheduled = true;
-
-    requestAnimationFrame(() => {
-      this._isLayoutScheduled = false;
-      if (this._isMounted) {
-        this.setState(state => {
-          return { layoutGeneration: state.layoutGeneration + 1 };
-        });
-      }
-    });
-  }
-
-  render() {
-    const { children, mouseX, mouseY } = this.props;
-    const { interiorElement } = this.state;
+  setPositioningStyle() {
+    const { mouseX, mouseY } = this.props;
 
     // By default, position the tooltip below and at the right of the mouse cursor.
     let top = mouseY + MOUSE_OFFSET;
     let left = mouseX + MOUSE_OFFSET;
 
+    const interiorElement = this._interiorElementRef.current;
     if (interiorElement) {
       // Let's check the vertical position.
       if (
@@ -115,22 +74,32 @@ export class Tooltip extends React.PureComponent<Props, State> {
           left = VISUAL_MARGIN;
         }
       }
+
+      interiorElement.style.left = left + 'px';
+      interiorElement.style.top = top + 'px';
     }
+  }
 
-    const style = {
-      '--tooltip-detail-max-width': '600px',
-      left,
-      top,
-    };
+  componentDidMount() {
+    this.setPositioningStyle();
+  }
 
+  componentDidUpdate() {
+    this.setPositioningStyle();
+  }
+
+  render() {
     return ReactDOM.createPortal(
       <div
         className="tooltip"
         data-testid="tooltip"
-        style={style}
-        ref={this._takeInteriorElementRef}
+        style={{
+          /* This is the default max width, but can be redefined in children */
+          '--tooltip-detail-max-width': '600px',
+        }}
+        ref={this._interiorElementRef}
       >
-        {children}
+        {this.props.children}
       </div>,
       this._overlayElement
     );
