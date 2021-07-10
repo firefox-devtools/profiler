@@ -45,6 +45,7 @@ CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
 CallNodeContextMenu--expand-all = 全部展开
 CallNodeContextMenu--copy-function-name = 复制函数名称
 CallNodeContextMenu--copy-script-url = 复制脚本 URL
+CallNodeContextMenu--copy-stack = 复制栈
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -88,6 +89,7 @@ FooterLinks--Cookies = Cookie
 FullTimeline--graph-type = 图标类型：
 FullTimeline--categories-with-cpu = 含 CPU 的分类
 FullTimeline--categories = 分类
+FullTimeline--stack-height = 栈深度
 
 ## Home page
 
@@ -293,11 +295,15 @@ StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
 StackSettings--show-user-timing = 显示用户计时
+StackSettings--panel-search =
+    .label = 过滤栈：
+    .title = 只显示包含匹配的子字符串的函数名称的相关栈
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = 调用树
 TabBar--flame-graph-tab = 火焰图
+TabBar--stack-chart-tab = 栈图
 TabBar--network-tab = 网络
 
 ## TrackContextMenu
