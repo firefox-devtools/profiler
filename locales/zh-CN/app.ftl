@@ -22,7 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
-AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>{ -firefox-brand-name } 性能分析 Web 应用程序</subheader>
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>基于 Web 的 { -firefox-brand-name } 性能分析应用程序</subheader>
 AppHeader--github-icon =
     .title = 前往我们的 Git 仓库（新建窗口打开）
 
@@ -72,6 +72,8 @@ Details--open-sidebar-button =
     .title = 打开侧栏
 Details--close-sidebar-button =
     .title = 关闭侧栏
+Details--error-boundary-message =
+    .message = 啊哦，此面板发生某些未知错误。
 
 ## Footer Links
 
@@ -83,6 +85,7 @@ FooterLinks--Cookies = Cookie
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = 图标类型：
 FullTimeline--categories-with-cpu = 含 CPU 的分类
 FullTimeline--categories = 分类
 
