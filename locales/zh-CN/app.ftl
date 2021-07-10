@@ -221,22 +221,28 @@ MenuButtons--metaOverheadStatistics-mean = 平均
 MenuButtons--metaOverheadStatistics-max = 最大值
 MenuButtons--metaOverheadStatistics-min = 最小值
 MenuButtons--metaOverheadStatistics-statkeys-overhead = 开销
-    .title = 用于计量所有线程的时间。
+    .title = 用于采样所有线程的时间。
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = 清理
     .title = 用于清理过期数据的时间。
 MenuButtons--metaOverheadStatistics-statkeys-counter = 计数
     .title = 用于收集所有计数器的时间。
 MenuButtons--metaOverheadStatistics-statkeys-interval = 间隔
-    .title = 两次计量间的间隔。
+    .title = 两次采样间的间隔。
+MenuButtons--metaOverheadStatistics-statkeys-lockings = 锁定
+    .title = 进行采样前锁定所需的时间。
+MenuButtons--metaOverheadStatistics-overhead-duration = 开销持续时间：
+MenuButtons--metaOverheadStatistics-overhead-percentage = 开销占比：
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = 包含隐藏的线程
+MenuButtons--publish--renderCheckbox-label-hidden-time = 包含隐藏的时间范围
 MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
 MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
 MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
+MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--cancel-upload = 取消上传
 MenuButtons--publish--message-try-again = 再试一次
