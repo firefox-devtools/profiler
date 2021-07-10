@@ -118,7 +118,7 @@ MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
 MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
-MarkerContextMenu--copy-full-payload = Nɣel tuttra taččurant
+MarkerContextMenu--copy-full-payload = Nɣel tuttra tummidt
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
