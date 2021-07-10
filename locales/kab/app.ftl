@@ -114,8 +114,11 @@ Home--addon-button = Sebded azegrir
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
+MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
 MarkerContextMenu--copy-url = Nɣel URL
+MarkerContextMenu--copy-full-payload = Nɣel tuttra taččurant
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -186,6 +189,7 @@ MenuButtons--metaInfo--platform = Tiɣerɣert
 MenuButtons--metaInfo--device = Ibenk:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = Anagraw n wammud:
+MenuButtons--metaInfo--speed-index = Amatar arurad:
 MenuButtons--metaInfo-renderRowOfList-label-features = Timahilin:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 
@@ -223,6 +227,7 @@ MenuButtons--publish--compressing = Tussda…
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Azilal ummid
 
 ## Profile Loader Animation
 
