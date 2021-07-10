@@ -129,6 +129,7 @@ MarkerContextMenu--copy-url = Nɣel URL
 ## This is the component for Marker Table panel.
 
 MarkerTable--start = Bdu
+MarkerTable--duration = Tangazt
 MarkerTable--type = Anaw
 MarkerTable--description = Aglam
 
@@ -244,6 +245,8 @@ ProfileRootMessage--title = { -profiler-brand-name }
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Aseklu n usiwel
+TabBar--network-tab = Aẓeṭṭa
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
