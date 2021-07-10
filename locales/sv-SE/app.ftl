@@ -369,6 +369,7 @@ MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen
 MenuButtons--publish--share-performance-profile = Dela prestandaprofil
 MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
 MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
+MenuButtons--publish--info-description-firefox-nightly = Den här profilen är från { -firefox-nightly-brand-name }, så all information ingår som standard.
 MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
 MenuButtons--publish--button-upload = Ladda upp
 MenuButtons--publish--upload-title = Laddar upp profil...
@@ -433,6 +434,9 @@ ServiceWorkerManager--installing-button = Installerar…
 ServiceWorkerManager--pending-button = Applicera och ladda om
 ServiceWorkerManager--installed-button = Ladda om applikationen
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
+ServiceWorkerManager--hide-notice-button =
+    .title = Dölj omladdningsmeddelandet
+    .aria-label = Dölj omladdningsmeddelandet
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -446,6 +450,7 @@ StackSettings--use-data-source-label = Datakälla:
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Anropsträd
+TabBar--stack-chart-tab = Stapeldiagram
 TabBar--network-tab = Nätverk
 
 ## TrackContextMenu
