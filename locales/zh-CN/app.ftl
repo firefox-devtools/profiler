@@ -217,8 +217,17 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = 扩展：
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = 平均
 MenuButtons--metaOverheadStatistics-max = 最大值
 MenuButtons--metaOverheadStatistics-min = 最小值
+MenuButtons--metaOverheadStatistics-statkeys-overhead = 开销
+    .title = 用于计量所有线程的时间。
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = 清理
+    .title = 用于清理过期数据的时间。
+MenuButtons--metaOverheadStatistics-statkeys-counter = 计数
+    .title = 用于收集所有计数器的时间。
+MenuButtons--metaOverheadStatistics-statkeys-interval = 间隔
+    .title = 两次计量间的间隔。
 
 ## Publish panel
 ## These strings are used in the publishing panel.
