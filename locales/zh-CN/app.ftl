@@ -102,6 +102,7 @@ CallTree--bytes-self = Self（字节）
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = 输入您想要比较的 Profile 的 URL
 CompareHome--form-label-profile1 = Profile 1：
 CompareHome--form-label-profile2 = Profile 2：
 CompareHome--submit-button =
@@ -357,6 +358,7 @@ MenuButtons--publish--info-description-default = 默认情况下，将会移除�
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--upload-title = 正在上传 Profile…
 MenuButtons--publish--cancel-upload = 取消上传
+MenuButtons--publish--message-something-went-wrong = 啊哦，上传 ⁨Profile 时出了点问题。
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
 MenuButtons--publish--compressing = 正在压缩…
@@ -450,10 +452,12 @@ TrackContextMenu--only-show-this-process-group = 只显示此进程组
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = 只显示“{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = 隐藏其他快照轨
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = 隐藏“{ $trackName }”
+TrackContextMenu--show-all-tracks = 显示所有轨道
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
