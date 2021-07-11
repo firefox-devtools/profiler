@@ -48,6 +48,8 @@ AppViewRouter--route-not-found--home =
 
 CallNodeContextMenu--transform-merge-function = 合并函数
     .title = 将函数折叠后，其会从 Profile 移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
+CallNodeContextMenu--transform-merge-call-node = 只合并节点
+    .title = 将节点合并后，其会从 Profile 移除，并将所有时间归予调用该节点的函数节点，其他对该函数调用的部分将保留在 Profile 中。
 CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
