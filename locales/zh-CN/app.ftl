@@ -97,6 +97,7 @@ CallTree--bytes-self = Self（字节）
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -148,6 +149,7 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--addon-button = 安装附加组件
+Home--instructions-title = 如何查看并记录 ⁨Profile
 Home--record-instructions-start-stop = 停止并开始分析
 Home--record-instructions-capture-load = 捕捉并加载 Profile
 Home--profiler-motto = 捕捉性能 Profile。分析、分享、让网站速度更快。
@@ -519,3 +521,4 @@ TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = 已上传的记录文件
