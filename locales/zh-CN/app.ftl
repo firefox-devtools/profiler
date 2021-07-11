@@ -29,8 +29,18 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = 无法从 { -firefox-brand-name } 检索到 Profile。
+AppViewRouter--error-message-from-file =
+    .message = 无法读取或解析其中的 Profile。
 AppViewRouter--error-message-local =
     .message = 尚未实现。
+AppViewRouter--error-message-public =
+    .message = 无法下载 Profile。
+AppViewRouter--error-message-from-url =
+    .message = 无法下载 Profile。
+AppViewRouter--route-not-found--home =
+    .specialMessage = 无法识别您尝试访问的 URL。
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
