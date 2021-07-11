@@ -429,6 +429,8 @@ StackSettings--panel-search =
 TabBar--calltree-tab = 调用树
 TabBar--flame-graph-tab = 火焰图
 TabBar--stack-chart-tab = 栈图
+TabBar--marker-chart-tab = 标记图
+TabBar--marker-table-tab = 标记表
 TabBar--network-tab = 网络
 
 ## TrackContextMenu
