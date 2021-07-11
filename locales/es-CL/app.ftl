@@ -164,8 +164,14 @@ Home--load-from-url-submit-button =
     .value = Cargar
 Home--documentation-button = Documentación
 Home--menu-button = Activar botón de menú de { -profiler-brand-name }
+Home--menu-button-instructions = Habilita el botón de menú del perfilador para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
 Home--addon-button = Instalar complemento
+Home--addon-button-instructions = Instala el complemento de perfilador Gecko para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
+Home--record-instructions = Para empezar a perfilar, haz clic en el botón de perfilado o utiliza los atajos del teclado. El icono se torna azul cuando se está grabando un perfil. Pulsa <kbd>Capturar</kbd> para cargar los datos en profiler.firefox.com.
 Home--instructions-title = Cómo ver y registrar perfiles
+Home--instructions-content =
+    Registrar perfiles de rendimiento requiere de <a>{ -firefox-brand-name }</a>.
+    Sin embargo, los perfiles existentes pueden ser vistos en cualquier navegador moderno.
 Home--record-instructions-start-stop = Detener e iniciar perfilado
 Home--record-instructions-capture-load = Capturar y cargar perfil
 Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo. Haz que la web sea más rápida.
@@ -183,6 +189,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Mostrar solo tiempo propio
+    .title = Mostrar solo el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -196,6 +204,10 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Borrar
     .title = Este perfil no puede ser eliminado porque no tenemos la información de autorización.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = ¡Aún no se ha subido ningún perfil!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Revisa y gestiona todos tus registros ({ $profilesRestCount } más)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -209,6 +221,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Establecer selección a partir de la duración del marcador
 MarkerContextMenu--start-selection-here = Iniciar la selección aquí
 MarkerContextMenu--end-selection-here = Finalizar la selección aquí
 MarkerContextMenu--start-selection-at-marker-start = Iniciar la selección en el <strong>inicio</strong> del marcador
@@ -273,6 +286,36 @@ MenuButtons--metaInfo--symbolicate-profile = Simbolizar perfil
 MenuButtons--metaInfo--attempting-resymbolicate = Intentando volver a simbolizar el perfil
 MenuButtons--metaInfo--currently-symbolicating = Perfil actualmente simbolizado
 MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } núcleo físico
+       *[other] { $physicalCPUs } núcleos físicos
+    },{ $logicalCPUs ->
+        [one] { $logicalCPUs } núcleo lógico
+       *[other] { $logicalCPUs } núcleos lógicos
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } núcleo físico
+       *[other] { $physicalCPUs } núcleos físicos
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } núcleo lógico
+       *[other] { $logicalCPUs } núcleos lógicos
+    }
 MenuButtons--metaInfo--recording-started = Inicio del registro:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--profile-version = Versión del perfil:
@@ -320,6 +363,7 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Adicionales de { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Mediana
 MenuButtons--metaOverheadStatistics-max = Máximo
 MenuButtons--metaOverheadStatistics-min = Mínimo
@@ -444,10 +488,17 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sitios de desasig
 StackSettings--invert-call-stack = Invertir llamada de pila
     .title = Ordenar por el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
 StackSettings--show-user-timing = Mostrar usando tiempos
+StackSettings--panel-search =
+    .label = Filtrar pilas:
+    .title = Solo muestra las pilas que contienen una función cuyo nombre coincida con esta subcadena
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Árbol de llamadas
+TabBar--flame-graph-tab = Gráfico de flamas
+TabBar--stack-chart-tab = Gráfico de barras apiladas
+TabBar--marker-chart-tab = Gráfico de marcas
+TabBar--marker-table-tab = Tabla de marcas
 TabBar--network-tab = Red
 TabBar--js-tracer-tab = Trazador JS
 
