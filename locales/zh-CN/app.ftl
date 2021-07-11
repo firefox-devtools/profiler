@@ -50,6 +50,9 @@ CallNodeContextMenu--transform-merge-function = 合并函数
     .title = 将函数折叠后，其会从 Profile 移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
 CallNodeContextMenu--transform-merge-call-node = 只合并节点
     .title = 将节点合并后，其会从 Profile 移除，并将所有时间归予调用该节点的函数节点，其他对该函数调用的部分将保留在 Profile 中。
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title = 聚焦于函数，将移除所有不包含该函数的样本。此外，还会重新将调用树的根指定为该函数。如此可将 Profile 中的多个函数调用点合并为单个调用节点。
 CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
@@ -65,7 +68,12 @@ CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForReso
     .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
 CallNodeContextMenu--transform-collapse-direct-recursion = 折叠直接递归
     .title = 折叠直接递归可移除对相同函数的重复递归调用。
+CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
+    .title = 将样本丢弃后，会从 Profile 移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = 用 Searchfox 搜索函数名称
 CallNodeContextMenu--copy-function-name = 复制函数名称
 CallNodeContextMenu--copy-script-url = 复制脚本 URL
 CallNodeContextMenu--copy-stack = 复制栈
@@ -73,6 +81,8 @@ CallNodeContextMenu--copy-stack = 复制栈
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = 总运行时间（ms）
+    .title = 此函数在栈上被观察到出现的“总计”时长摘要。包含函数实际运行的时长，以及此函数中所调用的时长。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
