@@ -42,6 +42,15 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
+CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
+    .title = 折叠函数会移除所有调用树，关注于函数本身。这个功能可以简化代码调用时不需要分析的配置文件。
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForResource }</strong>
+    .title = 折叠资源可将所有对该资源的调用，扁平化为已折叠的单个调用节点。
+CallNodeContextMenu--transform-collapse-direct-recursion = 折叠直接递归
+    .title = 折叠直接递归可移除对相同函数的重复递归调用。
 CallNodeContextMenu--expand-all = 全部展开
 CallNodeContextMenu--copy-function-name = 复制函数名称
 CallNodeContextMenu--copy-script-url = 复制脚本 URL
