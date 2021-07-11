@@ -46,6 +46,8 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = 合并函数
+    .title = 将函数折叠后，其会从 Profile 移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
 CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
