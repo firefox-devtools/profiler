@@ -102,8 +102,6 @@ FullTimeline--stack-height = 栈深度
 
 ## Home page
 
-Home--upload-from-file-input-button = 从文件加载配置
-Home--upload-from-url-button = 从 URL 加载配置
 Home--load-from-url-submit-button =
     .value = 加载
 Home--documentation-button = 文档
