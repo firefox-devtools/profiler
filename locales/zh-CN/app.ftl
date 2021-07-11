@@ -395,9 +395,16 @@ ProfileLoaderAnimation--loading-message-local =
     .message = 尚未实现。
 ProfileLoaderAnimation--loading-message-public =
     .message = 正在下载处理 Profile…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = 正在下载处理 Profile…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = 正在读取和处理 Profile…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = 找不到视图
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = 返回主页
 
 ## ServiceWorkerManager
@@ -416,6 +423,7 @@ ServiceWorkerManager--hide-notice-button =
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = 所有栈
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
