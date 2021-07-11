@@ -53,7 +53,7 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
 CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
-    .title = 将函数折叠后，会移除其所有调用内容，并将所有时间分配予该函数。此举可避免对不需要分析的代码进行调用，简化 Profile。
+    .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化 Profile。
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
