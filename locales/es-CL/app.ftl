@@ -72,6 +72,8 @@ CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForRe
     .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
 CallNodeContextMenu--transform-collapse-direct-recursion = Contraer recursión directa
     .title = Contraer una recursión directa remueve las llamadas con recursión repetida pasándolas a una misma función.
+CallNodeContextMenu--transform-drop-function = Descartar muestras con esta función
+    .title = Descartar muestras elimina su tiempo del perfilador. Esto es útil para eliminar información de tiempos que no es relevante para el análisis.
 CallNodeContextMenu--expand-all = Expandir todo
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -87,8 +89,14 @@ CallTree--tracing-ms-total = Tiempo de ejecución (ms)
     .title = El tiempo de ejecución "total" incluye un resumen de todo el tiempo en que esta función fue observada en la pila. Esto incluye el tiempo en que la función estaba realmente ejecutándose, y el tiempo ocupado por la fuente de la llamada a esta función.
 CallTree--tracing-ms-self = Propio (ms)
     .title = El tiempo "propio" solo incluye el tiempo en que la función estuvo como finalización de la pila. Si esta función llamó a otras funciones, entonces el tiempo de "otras" funciones no es incluido. El tiempo "propio" es útil para entender dónde se está ocupando en realidad el tiempo dentro de un programa.
+CallTree--samples-total = Total (muestras)
+    .title = El conteo de muestras "total" incluye un resumen de cada muestra en que esta función fue observada en la pila. Esto incluye el tiempo en que la función estaba realmente ejecutándose, y el tiempo ocupado por la fuente de la llamada a esta función.
 CallTree--samples-self = Propio
-    .title = El conteo de muestras "propio" solo incluye muestras donde la función estuvo como finalización de l apila. Si esta función llamó a otras funciones, entonces los contadores de "Otras" funciones no son incluidos. El contador "propio" es útil para entender dónde se está ocupando en realidad el tiempo dentro de un programa.
+    .title = El conteo de muestras "propio" solo incluye muestras donde la función estuvo como finalización de la pila. Si esta función llamó a otras funciones, entonces los contadores de "Otras" funciones no son incluidos. El contador "propio" es útil para entender dónde se está ocupando en realidad el tiempo dentro de un programa.
+CallTree--bytes-total = Tamaño total (bytes)
+    .title = El "tamaño total" incluye un resumen de los bytes asignados o desasignados mientras esta función fue observada en la pila. Esto incluye tanto los bytes en que la función estaba realmente ejecutándose, como los bytes de la fuente de la llamada a esta función.
+CallTree--bytes-self = Propio (bytes)
+    .title = Los bytes "propios" incluyen los bytes asignados o desasignados donde la función estuvo como finalización de la pila. Si esta función es llamada en otras funciones, entonces los bytes de las "otras" funciones no son incluidos. Los bytes "propios" son útiles para entender dónde fue realmente asignada o desasignada la memoria dentro del programa.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -315,6 +323,18 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 MenuButtons--metaOverheadStatistics-mean = Mediana
 MenuButtons--metaOverheadStatistics-max = Máximo
 MenuButtons--metaOverheadStatistics-min = Mínimo
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Adicionales
+    .title = Tiempo para muestrear todos los hilos.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Limpieza
+    .title = Tiempo para descartar datos expirados.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Conteo
+    .title = Tiempo para reunir todos los contadores.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalo
+    .title = Intervalo observado entre dos muestras.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Bloqueos
+    .title = Tiempo para conseguir un bloqueo antes de muestrear.
+MenuButtons--metaOverheadStatistics-overhead-duration = Duraciones adicionales:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Porcentaje adicional:
 MenuButtons--metaOverheadStatistics-profiled-duration = Duración del perfilado:
 
 ## Publish panel
@@ -409,9 +429,25 @@ StackSettings--implementation-all-stacks = Todas las pilas
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Nativo
 StackSettings--use-data-source-label = Fuente de datos:
+StackSettings--call-tree-strategy-timing = Tiempos
+    .title = Resume usando pilas muestreadas de código ejecutado en el tiempo
+StackSettings--call-tree-strategy-js-allocations = Asignaciones JavaScript
+    .title = Resume usando bytes de JavaSCript asignado (no desasignaciones)
+StackSettings--call-tree-strategy-native-retained-allocations = Memoria retenida
+    .title = Resume usando bytes de memoria que fueron asignados, y nunca liberados en la selección de vista previa actual
+StackSettings--call-tree-native-allocations = Memoria asignada
+    .title = Resume usando bytes de memoria asignada
+StackSettings--call-tree-strategy-native-deallocations-memory = Memoria desasignada
+    .title = Resume usando bytes de memoria desasignada, por el sitio en que la memoria fue asignada.
+StackSettings--call-tree-strategy-native-deallocations-sites = Sitios de desasignación
+    .title = Resume usando bytes de memoria desasignada, por el sitio donde la memoria fue desasignada
+StackSettings--invert-call-stack = Invertir llamada de pila
+    .title = Ordenar por el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
+StackSettings--show-user-timing = Mostrar usando tiempos
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Árbol de llamadas
 TabBar--network-tab = Red
 TabBar--js-tracer-tab = Trazador JS
 
