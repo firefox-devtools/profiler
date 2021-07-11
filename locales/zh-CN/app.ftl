@@ -142,6 +142,7 @@ MarkerContextMenu--copy-full-payload = 复制完整载荷
 ## This is the component for Marker Table panel.
 
 MarkerTable--start = 开始
+MarkerTable--type = 类型
 MarkerTable--description = 描述
 
 ## MenuButtons
