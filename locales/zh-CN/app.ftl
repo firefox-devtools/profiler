@@ -324,6 +324,7 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = 扩展：
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } 开销
 MenuButtons--metaOverheadStatistics-mean = 平均
 MenuButtons--metaOverheadStatistics-max = 最大值
 MenuButtons--metaOverheadStatistics-min = 最小值
@@ -349,8 +350,12 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
 MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
 MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
+MenuButtons--publish--reupload-performance-profile = 重新上传性能 Profile
+MenuButtons--publish--share-performance-profile = 分享性能 Profile
+MenuButtons--publish--info-description = 上传您的 Profile，并通过链接分享给任何人。
 MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
 MenuButtons--publish--button-upload = 上传
+MenuButtons--publish--upload-title = 正在上传 Profile…
 MenuButtons--publish--cancel-upload = 取消上传
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
@@ -359,20 +364,37 @@ MenuButtons--publish--compressing = 正在压缩…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = 过滤网络请求：
+    .title = 只显示匹配某些名称的网络请求
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = 您知道可以使用半角逗号（,）搜索多个词条吗？
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = 删除
+    .title = 点击此处删除 Profile { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = 完整范围
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = 正在直接从 { -firefox-brand-name } 导入 Profile…
+ProfileLoaderAnimation--loading-message-local =
+    .message = 尚未实现。
+ProfileLoaderAnimation--loading-message-public =
+    .message = 正在下载处理 Profile…
 
 ## ProfileRootMessage
 
@@ -385,6 +407,7 @@ ProfileRootMessage--additional = 返回主页
 ServiceWorkerManager--installing-button = 正在安装…
 ServiceWorkerManager--pending-button = 应用并重新加载
 ServiceWorkerManager--installed-button = 重新加载应用程序
+ServiceWorkerManager--new-version-is-ready = 该应用程序的新版本已下载，随时可安装。
 ServiceWorkerManager--hide-notice-button =
     .title = 隐藏重新加载通知
     .aria-label = 隐藏重新加载通知
