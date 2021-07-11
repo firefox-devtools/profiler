@@ -119,8 +119,16 @@ IdleSearchField--search-input =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = 从此处开始选择
+MarkerContextMenu--end-selection-here = 至此处结束选择
+MarkerContextMenu--start-selection-at-marker-start = 从标记的<strong>起点</strong>开始选择
+MarkerContextMenu--start-selection-at-marker-end = 从标记的<strong>终点</strong>开始选择
+MarkerContextMenu--end-selection-at-marker-start = 至标记的<strong>起点</strong>结束选择
+MarkerContextMenu--end-selection-at-marker-end = 至标记的<strong>终点</strong>结束选择
 MarkerContextMenu--copy-description = 复制描述
+MarkerContextMenu--copy-call-stack = 复制调用栈
 MarkerContextMenu--copy-url = 复制 URL
+MarkerContextMenu--copy-full-payload = 复制完整载荷
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
