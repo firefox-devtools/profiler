@@ -87,6 +87,10 @@ CallTree--tracing-ms-self = Self（ms）
     .title = “Self”时间只包含函数在栈底部结束时的时间。若此函数被其他函数调用，则不会包含“其他函数”的时间。“self”时间适合用于了解程序中实际用了多长时间在哪些函数上。
 CallTree--samples-total = 总计（样本数）
     .title = 此函数在栈上被观察到出现的“总计”次数摘要。包含实际运行的的次数，以及此函数中所调用的次数。
+CallTree--samples-self = Self
+    .title = “Self”样本数只包含函数在栈底部结束时的次数。若此函数被其他函数调用，则不会包含“其他函数”的次数。“self”次数适合用于了解程序中实际用了多长时间在哪些函数上。
+CallTree--bytes-total = 总大小（字节）
+    .title = 此函数在栈上被观察到分配或释放的“总计”字节摘要。包含函数实际运行时使用的大小，以及此函数中所调用其他函数所用的内存大小。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -96,6 +100,10 @@ CallTree--samples-total = 总计（样本数）
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--form-label-profile1 = Profile 1：
+CompareHome--form-label-profile2 = Profile 2：
+CompareHome--submit-button =
+    .value = 检索 Profile
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -130,6 +138,8 @@ FullTimeline--stack-height = 栈深度
 
 ## Home page
 
+Home--upload-from-file-input-button = 从文件中加载 Profile
+Home--upload-from-url-button = 从 URL 加载 Profile
 Home--load-from-url-submit-button =
     .value = 加载
 Home--documentation-button = 文档
