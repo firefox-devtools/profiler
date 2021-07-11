@@ -147,6 +147,12 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--addon-button = 安装附加组件
+Home--record-instructions-start-stop = 停止并开始分析
+Home--record-instructions-capture-load = 捕捉并加载 Profile
+Home--profiler-motto = 捕捉性能 Profile。分析、分享、让网站速度更快。
+Home--additional-content-title = 加载现有 Profile
+Home--additional-content-content = 您可以将 Profile 文件<strong>拖放</strong>至此处，或：
+Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
 Home--recent-uploaded-recordings-title = 近期上传的记录
 
 ## IdleSearchField
@@ -158,6 +164,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = 只显示 self 时间
+    .title = 只显示调用节点所用的时间，而忽略其 children。
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
