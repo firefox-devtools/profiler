@@ -150,6 +150,8 @@ MarkerTable--description = 描述
 
 MenuButtons--index--full-view = 全视图
 MenuButtons--index--cancel-upload = 取消上传
+MenuButtons--index--share-upload =
+    .label = 上传本地配置文件
 MenuButtons--index--share-re-upload =
     .label = 重新上传
 MenuButtons--index--share-error-uploading =
