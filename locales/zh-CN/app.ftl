@@ -140,7 +140,7 @@ FullTimeline--stack-height = 栈深度
 
 ## Home page
 
-Home--upload-from-file-input-button = 从文件中加载 Profile
+Home--upload-from-file-input-button = 从文件加载 Profile
 Home--upload-from-url-button = 从 URL 加载 Profile
 Home--load-from-url-submit-button =
     .value = 加载
@@ -171,6 +171,26 @@ JsTracerSettings--show-only-self-time = 只显示 self 时间
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = 点击此处加载 Profile { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = 删除
+    .title = 由于缺少授权信息，无法删除此 Profile。
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = 还没有上传任何 Profile！
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = 查看并管理您的所有记录（还有 { $profilesRestCount } 条）
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] 管理此记录
+       *[other] 管理下列记录
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
@@ -207,10 +227,13 @@ MarkerTable--description = 描述
 
 MenuButtons--index--full-view = 全视图
 MenuButtons--index--cancel-upload = 取消上传
+MenuButtons--index--share-upload =
+    .label = 上传本地 Profile
 MenuButtons--index--share-re-upload =
     .label = 重新上传
 MenuButtons--index--share-error-uploading =
     .label = 上传时出错
+MenuButtons--index--revert = 恢复到原始 Profile
 MenuButtons--index--docs = 文档
 MenuButtons--permalink--button =
     .label = 固定链接
@@ -221,7 +244,14 @@ MenuButtons--permalink--button =
 
 MenuButtons--index--profile-info-uploaded-label = 上传于：
 MenuButtons--index--profile-info-uploaded-actions = 删除
+MenuButtons--index--metaInfo-subtitle = Profile 信息
 MenuButtons--metaInfo--symbols = 符号：
+MenuButtons--metaInfo--profile-symbolicated = Profile 已符号化
+MenuButtons--metaInfo--profile-not-symbolicated = Profile 未符号化
+MenuButtons--metaInfo--resymbolicate-profile = 重新将 Profile 符号化
+MenuButtons--metaInfo--symbolicate-profile = 符号化 Profile
+MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化 Profile
+MenuButtons--metaInfo--currently-symbolicating = 当前符号化的 Profile
 MenuButtons--metaInfo--cpu = CPU：
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -239,7 +269,7 @@ MenuButtons--metaInfo--physical-and-logical-cpu =
 #   $physicalCPUs (Number) - Number of Physical CPU Cores
 MenuButtons--metaInfo--physical-cpu =
     { $physicalCPUs ->
-       *[other] { $physicalCPUs } 颗物理核心
+       *[other] 物理核心 × { $logicalCPUs }
     }
 # This string is used when we only have the information only the number of
 # logical CPU cores.
@@ -247,9 +277,11 @@ MenuButtons--metaInfo--physical-cpu =
 #   $logicalCPUs (Number) - Number of logical CPU Cores
 MenuButtons--metaInfo--logical-cpu =
     { $logicalCPUs ->
-       *[other] { $logicalCPUs } 颗逻辑核心
+       *[other] 逻辑核心 × { $logicalCPUs }
     }
+MenuButtons--metaInfo--recording-started = 记录开始于：
 MenuButtons--metaInfo--interval = 间隔：
+MenuButtons--metaInfo--profile-version = Profile 版本：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
 # Buffer Duration in Seconds in Meta Info Panel
@@ -281,6 +313,10 @@ MenuButtons--metaInfo--os = OS:
 MenuButtons--metaInfo--abi = ABI：
 MenuButtons--metaInfo--visual-metrics = 视觉指标
 MenuButtons--metaInfo--speed-index = 速度指标：
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = 感知速度指标：
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = 内容速度指标：
 MenuButtons--metaInfo-renderRowOfList-label-features = 功能：
 MenuButtons--metaInfo-renderRowOfList-label-threads-filter = 线程过滤器：
 MenuButtons--metaInfo-renderRowOfList-label-extensions = 扩展：
