@@ -83,6 +83,8 @@ CallNodeContextMenu--copy-stack = 复制栈
 
 CallTree--tracing-ms-total = 总运行时间（ms）
     .title = 此函数在栈上被观察到出现的“总计”时长摘要。包含函数实际运行的时长，以及此函数中所调用的时长。
+CallTree--tracing-ms-self = Self（ms）
+    .title = “Self”时间只包含函数在栈底部结束时的时间。若此函数是通过其他函数调用的，则不会包含“该函数”的时间。“self”时间适合用于了解程序中实际用了多长时间在哪些函数上。
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
