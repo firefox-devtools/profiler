@@ -464,7 +464,7 @@ StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
 StackSettings--call-tree-strategy-timing = 计时
-    .title = 使用随时间推移已执行代码的采样栈进行汇总
+    .title = 使用时间推移下已执行代码的采样栈进行汇总
 StackSettings--call-tree-strategy-js-allocations = JavaScript 分配
     .title = 显示 JavaScript 分配到的字节数汇总（不含释放）
 StackSettings--call-tree-strategy-native-retained-allocations = 保留的内存
@@ -490,6 +490,7 @@ TabBar--stack-chart-tab = 栈图
 TabBar--marker-chart-tab = 标记图
 TabBar--marker-table-tab = 标记表
 TabBar--network-tab = 网络
+TabBar--js-tracer-tab = JS 追踪器
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
