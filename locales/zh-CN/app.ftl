@@ -30,15 +30,15 @@ AppHeader--github-icon =
 ## This is used for displaying errors when loading the application.
 
 AppViewRouter--error-message-unpublished =
-    .message = 无法从 { -firefox-brand-name } 检索到 Profile。
+    .message = 无法从 { -firefox-brand-name } 检索到分析记录。
 AppViewRouter--error-message-from-file =
-    .message = 无法读取或解析其中的 Profile。
+    .message = 无法读取或解析其中的分析记录。
 AppViewRouter--error-message-local =
     .message = 尚未实现。
 AppViewRouter--error-message-public =
-    .message = 无法下载 Profile。
+    .message = 无法下载分析记录。
 AppViewRouter--error-message-from-url =
-    .message = 无法下载 Profile。
+    .message = 无法下载分析记录。
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
@@ -47,12 +47,12 @@ AppViewRouter--route-not-found--home =
 ## panels.
 
 CallNodeContextMenu--transform-merge-function = 合并函数
-    .title = 将函数折叠后，其会从 Profile 移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
+    .title = 将函数折叠后，其会从分析记录移除，并将所有时间归予调用该函数的函数。在树中调用该函数的任何地方都会如此。
 CallNodeContextMenu--transform-merge-call-node = 只合并节点
-    .title = 将节点合并后，其会从 Profile 移除，并将所有时间归予调用该节点的函数节点，其他对该函数调用的部分将保留在 Profile 中。
+    .title = 将节点合并后，其会从分析记录移除，并将所有时间归予调用该节点的函数节点，其他对该函数调用的部分将保留在 Profile 中。
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
-CallNodeContextMenu--transform-focus-function-title = 聚焦于函数，将移除所有不包含该函数的样本。此外，还会重新将调用树的根指定为该函数。如此可将 Profile 中的多个函数调用点合并为单个调用节点。
+CallNodeContextMenu--transform-focus-function-title = 聚焦于函数，将移除所有不包含该函数的样本。此外，还会重新将调用树的根指定为该函数。如此可将分析记录中的多个函数调用点合并为单个调用节点。
 CallNodeContextMenu--transform-focus-function = 聚焦于函数
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反向）
@@ -60,7 +60,7 @@ CallNodeContextMenu--transform-focus-function-inverted = 聚焦于函数（反�
 CallNodeContextMenu--transform-focus-subtree = 只聚焦于子树
     .title = 聚焦于子树，将从调用树中拉出分支，并移除不属于该分支的内容。然而此功能只对单一调用节点有效，将忽略其他调用该函数的部分。
 CallNodeContextMenu--transform-collapse-function-subtree = 折叠函数
-    .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化 Profile。
+    .title = 将函数折叠后，会移除其所有调用内容，并将所有时间归予该函数。此举可避免对不需要分析的代码进行调用，简化分析记录本身。
 # This is used as the context menu item to apply the "Collapse resource" transform.
 # Variables:
 #   $nameForResource (String) - Name of the resource to collapse.
@@ -69,7 +69,7 @@ CallNodeContextMenu--transform-collapse-resource = 折叠 <strong>{ $nameForReso
 CallNodeContextMenu--transform-collapse-direct-recursion = 折叠直接递归
     .title = 折叠直接递归可移除对相同函数的重复递归调用。
 CallNodeContextMenu--transform-drop-function = 丢弃与此函数相关的样本
-    .title = 将样本丢弃后，会从 Profile 移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
+    .title = 将样本丢弃后，会从分析记录移除这些样本的时间。在需要清除与分析无关的计时信息时，十分有用。
 CallNodeContextMenu--expand-all = 全部展开
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -103,8 +103,8 @@ CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
-CompareHome--instruction-title = 输入您想要比较的 Profile 的 URL
-CompareHome--form-label-profile1 = Profile 1：
+CompareHome--instruction-title = 输入您想要比较的分析记录的 URL
+CompareHome--form-label-profile1 = 分析记录 1：
 CompareHome--form-label-profile2 = Profile 2：
 CompareHome--submit-button =
     .value = 检索 Profile
