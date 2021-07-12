@@ -207,6 +207,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = 根据标记的持续时间选择
 MarkerContextMenu--start-selection-here = 从此处开始选择
 MarkerContextMenu--end-selection-here = 至此处结束选择
 MarkerContextMenu--start-selection-at-marker-start = 从标记的<strong>起点</strong>开始选择
@@ -234,12 +235,15 @@ MarkerSidebar--select-a-marker = 选择标记即可显示其相关信息。
 ## This is the component for Marker Table panel.
 
 MarkerTable--start = 开始
+MarkerTable--duration = 持续时间
 MarkerTable--type = 类型
 MarkerTable--description = 描述
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = “分析记录”信息
 MenuButtons--index--full-view = 全视图
 MenuButtons--index--cancel-upload = 取消上传
 MenuButtons--index--share-upload =
@@ -317,6 +321,7 @@ MenuButtons--metaInfo--build-type = 构建类型：
 ## Strings refer to specific types of builds, and should be kept in English.
 
 MenuButtons--metaInfo--build-type-debug = 调试
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -355,6 +360,7 @@ MenuButtons--metaOverheadStatistics-statkeys-lockings = 锁定
     .title = 进行采样前锁定所需的时间。
 MenuButtons--metaOverheadStatistics-overhead-duration = 开销持续时间：
 MenuButtons--metaOverheadStatistics-overhead-percentage = 开销占比：
+MenuButtons--metaOverheadStatistics-profiled-duration = 分析的持续时间：
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -443,6 +449,16 @@ StackSettings--implementation-all-stacks = 所有栈
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = 原生
 StackSettings--use-data-source-label = 数据源：
+StackSettings--call-tree-strategy-js-allocations = JavaScript 分配
+    .title = 显示 JavaScript 分配到的字节数摘要（不含释放）
+StackSettings--call-tree-native-allocations = 分配到的内存
+    .title = 根据分配到的内存字节数进行摘要
+StackSettings--call-tree-strategy-native-deallocations-memory = 释放的内存
+    .title = 按照分配到内存的位置，根据释放的内存字节数进行摘要
+StackSettings--call-tree-strategy-native-deallocations-sites = 释放的位置
+    .title = 按照取释放内存的位置，根据释放的内存字节数进行摘要
+StackSettings--invert-call-stack = 反转调用栈
+    .title = 按照调用节点中所用时间排序，并忽略其 children。
 StackSettings--show-user-timing = 显示用户计时
 StackSettings--panel-search =
     .label = 过滤栈：
