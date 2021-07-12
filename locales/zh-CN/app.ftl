@@ -88,7 +88,7 @@ CallTree--tracing-ms-self = Self（ms）
 CallTree--samples-total = 总计（样本数）
     .title = 此函数在栈上被观察到出现的“总计”次数摘要。包含实际运行的的次数，以及此函数中所调用的次数。
 CallTree--samples-self = Self
-    .title = “Self”样本数只包含函数在栈底结束时的次数。若若此函数是通过其他函数调用的，则不包含“该函数”的次数。“self”次数适合用于了解程序中实际用了多长时间在哪些函数上。
+    .title = “Self”样本数只包含函数在栈底结束时的次数。若此函数是通过其他函数调用的，则不包含“该函数”的次数。“self”次数适合用于了解程序中实际用了多长时间在哪些函数上。
 CallTree--bytes-total = 总大小（字节）
     .title = 此函数在栈上被观察到分配或释放的“总计”字节摘要。包含函数实际运行时使用的大小，以及此函数中所调用其他函数所用的内存大小。
 CallTree--bytes-self = Self（字节）
@@ -236,7 +236,7 @@ MenuButtons--index--share-re-upload =
     .label = 重新上传
 MenuButtons--index--share-error-uploading =
     .label = 上传时出错
-MenuButtons--index--revert = 恢复到原始 Profile
+MenuButtons--index--revert = 恢复到原始分析记录
 MenuButtons--index--docs = 文档
 MenuButtons--permalink--button =
     .label = 固定链接
@@ -247,14 +247,14 @@ MenuButtons--permalink--button =
 
 MenuButtons--index--profile-info-uploaded-label = 上传于：
 MenuButtons--index--profile-info-uploaded-actions = 删除
-MenuButtons--index--metaInfo-subtitle = Profile 信息
+MenuButtons--index--metaInfo-subtitle = “分析记录”信息
 MenuButtons--metaInfo--symbols = 符号：
-MenuButtons--metaInfo--profile-symbolicated = Profile 已符号化
-MenuButtons--metaInfo--profile-not-symbolicated = Profile 未符号化
-MenuButtons--metaInfo--resymbolicate-profile = 重新将 Profile 符号化
-MenuButtons--metaInfo--symbolicate-profile = 符号化 Profile
-MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化 Profile
-MenuButtons--metaInfo--currently-symbolicating = 当前符号化的 Profile
+MenuButtons--metaInfo--profile-symbolicated = 分析记录已符号化
+MenuButtons--metaInfo--profile-not-symbolicated = 分析记录未符号化
+MenuButtons--metaInfo--resymbolicate-profile = 重新将分析记录符号化
+MenuButtons--metaInfo--symbolicate-profile = 符号化分析记录
+MenuButtons--metaInfo--attempting-resymbolicate = 正在尝试重新符号化分析记录
+MenuButtons--metaInfo--currently-symbolicating = 当前符号化的分析记录
 MenuButtons--metaInfo--cpu = CPU：
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -262,9 +262,9 @@ MenuButtons--metaInfo--cpu = CPU：
 #   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
 MenuButtons--metaInfo--physical-and-logical-cpu =
     { $physicalCPUs ->
-       *[other] { $physicalCPUs } 颗物理核心
+       *[other] 物理核心 × { $physicalCPUs }
     }、{ $logicalCPUs ->
-       *[other] { $logicalCPUs } 颗逻辑核心
+       *[other] 逻辑核心 × { $logicalCPUs }
     }
 # This string is used when we only have the information about the number of
 # physical CPU cores.
@@ -272,7 +272,7 @@ MenuButtons--metaInfo--physical-and-logical-cpu =
 #   $physicalCPUs (Number) - Number of Physical CPU Cores
 MenuButtons--metaInfo--physical-cpu =
     { $physicalCPUs ->
-       *[other] 物理核心 × { $logicalCPUs }
+       *[other] 物理核心 × { $physicalCPUs }
     }
 # This string is used when we only have the information only the number of
 # logical CPU cores.
@@ -284,7 +284,7 @@ MenuButtons--metaInfo--logical-cpu =
     }
 MenuButtons--metaInfo--recording-started = 记录开始于：
 MenuButtons--metaInfo--interval = 间隔：
-MenuButtons--metaInfo--profile-version = Profile 版本：
+MenuButtons--metaInfo--profile-version = 分析记录版本：
 MenuButtons--metaInfo--buffer-capacity = 缓冲容量：
 MenuButtons--metaInfo--buffer-duration = 缓冲间隔：
 # Buffer Duration in Seconds in Meta Info Panel
@@ -358,9 +358,9 @@ MenuButtons--publish--share-performance-profile = 分享性能分析记录
 MenuButtons--publish--info-description = 上传您的分析记录，并通过链接分享给任何人。
 MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
 MenuButtons--publish--button-upload = 上传
-MenuButtons--publish--upload-title = 正在上传 Profile…
+MenuButtons--publish--upload-title = 正在上传分析记录…
 MenuButtons--publish--cancel-upload = 取消上传
-MenuButtons--publish--message-something-went-wrong = 啊哦，上传 ⁨Profile 时出了点问题。
+MenuButtons--publish--message-something-went-wrong = 啊哦，上传分析记录时出了点问题。
 MenuButtons--publish--message-try-again = 再试一次
 MenuButtons--publish--download = 下载
 MenuButtons--publish--compressing = 正在压缩…
