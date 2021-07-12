@@ -115,7 +115,7 @@ CompareHome--submit-button =
 ## a debug build of Firefox.
 
 DebugWarning--warning-message =
-    .message = 此分析记录产生于未经发行优化的构建版本。所作性能观察可能不适用于一般发行版用户。
+    .message = 此分析记录来自未经发行优化的构建版本。所作性能观察可能不适用于一般发行版用户。
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -441,6 +441,10 @@ ProfileRootMessage--additional = 返回主页
 ServiceWorkerManager--installing-button = 正在安装…
 ServiceWorkerManager--pending-button = 应用并重新加载
 ServiceWorkerManager--installed-button = 重新加载应用程序
+ServiceWorkerManager--updated-while-not-ready =
+    在此页面完整加载前，已有新版应用程序生效。
+    
+    您可能会遇到些许异常。
 ServiceWorkerManager--new-version-is-ready = 该应用程序的新版本已下载，随时可安装。
 ServiceWorkerManager--hide-notice-button =
     .title = 隐藏重新加载通知
