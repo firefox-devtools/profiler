@@ -105,9 +105,9 @@ CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
 
 CompareHome--instruction-title = 输入您想要比较的分析记录的 URL
 CompareHome--form-label-profile1 = 分析记录 1：
-CompareHome--form-label-profile2 = Profile 2：
+CompareHome--form-label-profile2 = 分析记录 2：
 CompareHome--submit-button =
-    .value = 检索 Profile
+    .value = 检索分析记录
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -142,19 +142,19 @@ FullTimeline--stack-height = 栈深度
 
 ## Home page
 
-Home--upload-from-file-input-button = 从文件加载 Profile
-Home--upload-from-url-button = 从 URL 加载 Profile
+Home--upload-from-file-input-button = 从文件加载分析记录
+Home--upload-from-url-button = 从 URL 加载分析记录
 Home--load-from-url-submit-button =
     .value = 加载
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--addon-button = 安装附加组件
-Home--instructions-title = 如何查看并记录 ⁨Profile
+Home--instructions-title = 如何查看并记录分析结果
 Home--record-instructions-start-stop = 停止并开始分析
-Home--record-instructions-capture-load = 捕捉并加载 Profile
-Home--profiler-motto = 捕捉性能 Profile。分析、分享、让网站速度更快。
-Home--additional-content-title = 加载现有 Profile
-Home--additional-content-content = 您可以将 Profile 文件<strong>拖放</strong>至此处，或：
+Home--record-instructions-capture-load = 捕捉并加载分析记录
+Home--profiler-motto = 捕捉性能分析记录。研究、分享、让网站速度更快。
+Home--additional-content-title = 加载现有分析记录
+Home--additional-content-content = 您可以将分析记录<strong>拖放</strong>至此处，或：
 Home--compare-recordings-info = 您也可以比较记录内容。<a>打开比较界面。</a>
 Home--recent-uploaded-recordings-title = 近期上传的记录
 
@@ -178,10 +178,10 @@ JsTracerSettings--show-only-self-time = 只显示 self 时间
 # Variables:
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
-    .title = 点击此处加载 Profile { $smallProfileName }
+    .title = 点击此处加载分析记录 { $smallProfileName }
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = 删除
     .title = 由于缺少授权信息，无法删除此 Profile。
-ListOfPublishedProfiles--uploaded-profile-information-list-empty = 还没有上传任何 Profile！
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = 还未上传任何分析记录！
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
@@ -231,7 +231,7 @@ MarkerTable--description = 描述
 MenuButtons--index--full-view = 全视图
 MenuButtons--index--cancel-upload = 取消上传
 MenuButtons--index--share-upload =
-    .label = 上传本地 Profile
+    .label = 上传本地分析记录
 MenuButtons--index--share-re-upload =
     .label = 重新上传
 MenuButtons--index--share-error-uploading =
@@ -353,9 +353,9 @@ MenuButtons--publish--renderCheckbox-label-include-screenshots = 包含快照
 MenuButtons--publish--renderCheckbox-label-resource = 包括资源 URL 和路径
 MenuButtons--publish--renderCheckbox-label-extension = 包含扩展信息
 MenuButtons--publish--renderCheckbox-label-preference = 包含首选项值
-MenuButtons--publish--reupload-performance-profile = 重新上传性能 Profile
-MenuButtons--publish--share-performance-profile = 分享性能 Profile
-MenuButtons--publish--info-description = 上传您的 Profile，并通过链接分享给任何人。
+MenuButtons--publish--reupload-performance-profile = 重新上传性能分析记录
+MenuButtons--publish--share-performance-profile = 分享性能分析记录
+MenuButtons--publish--info-description = 上传您的分析记录，并通过链接分享给任何人。
 MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--upload-title = 正在上传 Profile…
@@ -394,15 +394,15 @@ ProfileFilterNavigator--full-range = 完整范围
 ## Profile Loader Animation
 
 ProfileLoaderAnimation--loading-message-unpublished =
-    .message = 正在直接从 { -firefox-brand-name } 导入 Profile…
+    .message = 正在直接从 { -firefox-brand-name } 导入分析记录…
 ProfileLoaderAnimation--loading-message-local =
     .message = 尚未实现。
 ProfileLoaderAnimation--loading-message-public =
-    .message = 正在下载处理 Profile…
+    .message = 正在下载处理分析记录…
 ProfileLoaderAnimation--loading-message-from-url =
-    .message = 正在下载处理 Profile…
+    .message = 正在下载处理分析记录…
 ProfileLoaderAnimation--loading-message-compare =
-    .message = 正在读取和处理 Profile…
+    .message = 正在读取和处理分析记录…
 ProfileLoaderAnimation--loading-message-view-not-found =
     .message = 找不到视图
 
@@ -521,4 +521,4 @@ TransformNavigator--collapse-function-subtree = 折叠子树：{ $item }
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
-UploadedRecordingsHome--title = 已上传的记录文件
+UploadedRecordingsHome--title = 已上传的分析记录
