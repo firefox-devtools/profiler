@@ -104,6 +104,7 @@ CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = 输入您想要比较的分析记录的 URL
+CompareHome--instruction-content = 该工具将从每份分析记录中提取选定的轨道和范围相关数据，并将它们放到同一视图，以便比较。
 CompareHome--form-label-profile1 = 分析记录 1：
 CompareHome--form-label-profile2 = 分析记录 2：
 CompareHome--submit-button =
@@ -139,6 +140,13 @@ FullTimeline--graph-type = 图标类型：
 FullTimeline--categories-with-cpu = 含 CPU 的分类
 FullTimeline--categories = 分类
 FullTimeline--stack-height = 栈深度
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = 可见 <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> 轨
 
 ## Home page
 
@@ -213,10 +221,14 @@ MarkerContextMenu--copy-full-payload = 复制完整载荷
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = 过滤标记：
+    .title = 只显示匹配特定名称的标记
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = 选择标记即可显示其相关信息。
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
