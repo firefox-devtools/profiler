@@ -158,6 +158,7 @@ Home--load-from-url-submit-button =
     .value = 加载
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
+Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
 Home--addon-button = 安装附加组件
 Home--addon-button-instructions = 安装 Gecko Profiler 附加组件，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
 Home--instructions-title = 如何查看并记录分析结果
