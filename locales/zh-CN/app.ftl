@@ -114,6 +114,8 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message = 此分析记录产生于未经发行优化的构建版本。所作性能观察可能不适用于一般发行版用户。
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -375,6 +377,7 @@ MenuButtons--publish--reupload-performance-profile = 重新上传性能分析记
 MenuButtons--publish--share-performance-profile = 分享性能分析记录
 MenuButtons--publish--info-description = 上传您的分析记录，并通过链接分享给任何人。
 MenuButtons--publish--info-description-default = 默认情况下，将会移除您的个人数据。
+MenuButtons--publish--info-description-firefox-nightly = 此分析记录来自 { -firefox-nightly-brand-name }，默认情况下将包含所有信息。
 MenuButtons--publish--button-upload = 上传
 MenuButtons--publish--upload-title = 正在上传分析记录…
 MenuButtons--publish--cancel-upload = 取消上传
@@ -413,6 +416,8 @@ ProfileFilterNavigator--full-range = 完整范围
 
 ProfileLoaderAnimation--loading-message-unpublished =
     .message = 正在直接从 { -firefox-brand-name } 导入分析记录…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = 正在读取文件并处理分析记录…
 ProfileLoaderAnimation--loading-message-local =
     .message = 尚未实现。
 ProfileLoaderAnimation--loading-message-public =
