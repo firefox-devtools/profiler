@@ -313,6 +313,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     const {
       marker,
       thread,
+      threadIdToNameMap,
       implementationFilter,
       restrictHeightWidth,
       categories,
@@ -321,9 +322,17 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
     if (data && 'cause' in data && data.cause) {
       const { cause } = data;
       const causeAge = start - cause.time;
+      let causeLabel = 'Stack';
+      if (cause.tid) {
+        const causeThreadName = threadIdToNameMap.get(cause.tid);
+        causeLabel = `Stack from thread ${String(causeThreadName)} (id ${String(
+          cause.tid
+        )})`;
+      }
+
       return [
         <TooltipDetailSeparator key="backtrace-separator" />,
-        <TooltipDetail label="Stack" key="backtrace">
+        <TooltipDetail label={causeLabel} key="backtrace">
           <div className="tooltipDetailsBackTrace">
             {/* The cause's time might be later than the marker's start. For
                 example this happens in some usual cases when the cause is

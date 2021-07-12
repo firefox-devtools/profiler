@@ -325,7 +325,7 @@ describe('TooltipMarker', function() {
           type: 'tracing',
           category: 'Paint',
           cause: {
-            tid: 4444,
+            tid: 111111,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -363,7 +363,7 @@ describe('TooltipMarker', function() {
           stylesShared: 15,
           stylesReused: 20,
           cause: {
-            tid: 4445,
+            tid: 111111,
             time: 19.5,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -388,7 +388,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
-            tid: 4446,
+            tid: 111111,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -404,7 +404,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
-            tid: 4447,
+            tid: 111111,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -491,6 +491,12 @@ describe('TooltipMarker', function() {
     const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
       state
     );
+
+    // Add another thread with the thread Id to be used on the label
+    // for the TooltipDetail component when CauseBacktrace has a tid.
+    profile.threads[1] = getEmptyThread();
+    profile.threads[1].name = 'GeckoMain';
+    profile.threads[1].tid = 111111;
 
     markerIndexes.forEach(markerIndex => {
       const marker = getMarker(markerIndex);
@@ -794,7 +800,7 @@ describe('TooltipMarker', function() {
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
-            tid: 4448,
+            tid: 111111,
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
@@ -810,6 +816,12 @@ describe('TooltipMarker', function() {
     const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
       state
     );
+
+    // Add one more thread with the thread Id to be used on the label
+    // for the TooltipDetail component when CauseBacktrace has a tid.
+    profile.threads[2] = getEmptyThread();
+    profile.threads[2].name = 'GeckoMain';
+    profile.threads[2].tid = 111111;
 
     // Render the first marker
     const marker = getMarker(markerIndexes[0]);
