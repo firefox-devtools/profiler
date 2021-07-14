@@ -26,6 +26,8 @@
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-local =
+    .message = Non ancora implementate.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -188,6 +190,8 @@ MenuButtons--publish--download = Discargar
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-local =
+    .message = Non ancora implementate.
 
 ## ProfileRootMessage
 
