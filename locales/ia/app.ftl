@@ -57,6 +57,17 @@ CallNodeContextMenu--transform-merge-call-node = Miscer solo un nodo
         nodo del function que lo ha appellate. Illo solo remove le function ex ille
         specific parte del arbore. Si le function ha essite appellate ex alterubi
         illo remanera in le profilo.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Concentrar se sur un function removera ulle specimen que non include ille
+    function. In ultra, illo re-radica le arbore del appello assi que le function
+    es le sol radice del arbore. Isto pote combina plure sitos de appello de function
+    inter un profilo, in un nodo de appello.
+CallNodeContextMenu--transform-focus-function = Foco sur function.
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Foco sur function (invertite).
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
