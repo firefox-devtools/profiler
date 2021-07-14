@@ -51,6 +51,12 @@ CallNodeContextMenu--transform-merge-function = Miscer function
         Miscer un function remove lo del profilo, e assigna su tempore al
         function que lo ha appellate. Isto eveni ubique le function ha essite appellate
         in le arbore.
+CallNodeContextMenu--transform-merge-call-node = Miscer solo un nodo
+    .title =
+        Miscer un nodo remove lo ex le profilo, e assigna su tempore al
+        nodo del function que lo ha appellate. Illo solo remove le function ex ille
+        specific parte del arbore. Si le function ha essite appellate ex alterubi
+        illo remanera in le profilo.
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
