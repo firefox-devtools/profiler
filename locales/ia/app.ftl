@@ -22,12 +22,25 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>App web pro { -firefox-brand-name } analyse de prestation</subheader>
+AppHeader--github-icon =
+    .title = Va a nostre repositorio Git (isto se aperi in un nove fenestra)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Impossibile recuperar le profilo de { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Impossibile leger le file o tractar le profilo in illo.
 AppViewRouter--error-message-local =
     .message = Non ancora implementate.
+AppViewRouter--error-message-public =
+    .message = Impossibile discargar le profilo.
+AppViewRouter--error-message-from-url =
+    .message = Impossibile discargar le profilo.
+AppViewRouter--route-not-found--home =
+    .specialMessage = Le URL que tu tentava attinger non ha essite recognoscite.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
