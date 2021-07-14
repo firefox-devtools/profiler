@@ -79,6 +79,15 @@ CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
         Collaber un function removera toto lo appellate, e assignara
          tote le tempore al function. Isto pote adjutar a simplificar un profilo que
         appella in codice que non besonia de esser analysate.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Collaber <strong>{ $nameForResource }</strong>
+    .title = Collaber un ressource applattara tote le appellos a ille ressource in un singule nodo de appello collabite.
+CallNodeContextMenu--transform-collapse-direct-recursion = Collaber directe recursion
+    .title =
+        Collaber directe recursion remove appellos que recurre repetitemente in
+        le mesme function.
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
