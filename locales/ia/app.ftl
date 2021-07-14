@@ -68,6 +68,17 @@ CallNodeContextMenu--transform-focus-function = Foco sur function.
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Foco sur function (invertite).
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Foco solo sur sub-arbore.
+    .title =
+        Concentrar se sur un sub-arbore removera ulle specimen que non include ille
+        specific parte del arbore de appello. Illo extrahe un ramo del arbore de appello,
+         totevia solo lo face pro iste singule nodo de appello. Tote le altere appellos
+        del function es ignorate.
+CallNodeContextMenu--transform-collapse-function-subtree = Collaber function
+    .title =
+        Collaber un function removera toto lo appellate, e assignara
+         tote le tempore al function. Isto pote adjutar a simplificar un profilo que
+        appella in codice que non besonia de esser analysate.
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
