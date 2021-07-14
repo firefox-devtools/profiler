@@ -46,6 +46,11 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Miscer function
+    .title =
+        Miscer un function remove lo del profilo, e assigna su tempore al
+        function que lo ha appellate. Isto eveni ubique le function ha essite appellate
+        in le arbore.
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
