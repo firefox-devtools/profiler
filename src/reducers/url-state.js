@@ -233,6 +233,7 @@ const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       // The timelineType can be set at loadtime from a URL value.
       // If it's not set from a URL value we provide a default value from this action.
       // When it's null we don't want to override the value that was set already.
@@ -503,7 +504,6 @@ const fullProfileSpecific = combineReducers({
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
   showJsTracerSummary,
-  timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading
@@ -533,6 +533,7 @@ const profileSpecific = combineReducers({
   markersSearchString,
   networkSearchString,
   transforms,
+  timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,
 });
