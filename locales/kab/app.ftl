@@ -355,6 +355,11 @@ TrackContextMenu--hide-track = Ffer “{ $trackName }”
 # Variables:
 #   $item (String) - Name of the current thread. E.g.: Web Content.
 TransformNavigator--complete = Ččar “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Fneẓ: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
