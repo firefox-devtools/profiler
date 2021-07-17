@@ -51,6 +51,10 @@ CallNodeContextMenu--transform-merge-function = Smezdi tawuri
         Asmezdi n twuri itekkes-itt seg umaɣnu, ad tmudd akud-ines i
         twuri i yettusemman yis-s. Aya iḍerru-d deg yal adeg anida i d-tettusiwel twuri deg
         useklu.
+CallNodeContextMenu--transform-focus-function = Siḍes ef twuri
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Siḍeṣ ɣef twuri (imitti)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Snefli akk
 CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
 CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
@@ -63,11 +67,13 @@ CallNodeContextMenu--copy-stack = Nqel tanebdant
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Sekcem URLs n umaɣnu i tebɣiḍ ad tsenmehleḍ
 CompareHome--form-label-profile1 = Amaɣnu 1:
 CompareHome--form-label-profile2 = Amaɣnu 2:
 
