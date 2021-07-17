@@ -298,16 +298,28 @@ ProfileLoaderAnimation--loading-message-view-not-found =
 ## ProfileRootMessage
 
 ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Uɣal ɣer ugejdan
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Asebded…
+ServiceWorkerManager--pending-button = Snes syen ales asali
+ServiceWorkerManager--installed-button = Ales asali n usnas
+ServiceWorkerManager--hide-notice-button =
+    .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
+    .aria-label = Ffer alɣu-a d-yulin i tikkelt-nniḍen
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Meṛṛa tiwuriwin
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Adigan
+StackSettings--use-data-source-label = Aɣbalu n yisefka:
+StackSettings--show-user-timing = Sken tanzagt n useqdac
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -318,6 +330,15 @@ TabBar--network-tab = Aẓeṭṭa
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Sken kan agraw-a n ukala
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Sken kan “{ $trackName }”
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Ffer “{ $trackName }”
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -328,6 +349,12 @@ TabBar--network-tab = Aẓeṭṭa
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Ččar “{ $item }”
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
