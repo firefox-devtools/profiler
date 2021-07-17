@@ -123,11 +123,27 @@ IdleSearchField--search-input =
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Kkes
+    .title = Amaɣnu-a ur yezmir ara ad yettwakkes acku ur nesɛi ara talɣut n usireg.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Ulac ameɣnu i d-yettwasulin akka ar tura!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Wali syen sefrek meṛṛa iseklasen-ik·im ({ $profilesRestCount } d wugar)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Sefrek asekles-a
+       *[other] Sefrek iseklasen-a
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Bdu afran sa
 MarkerContextMenu--end-selection-here = Taggara n ufran da
 MarkerContextMenu--copy-description = Nɣel aglam
 MarkerContextMenu--copy-call-stack = Nɣel tanebdant n usiwel
@@ -155,6 +171,7 @@ MarkerTable--description = Aglam
 
 MenuButtons--index--metaInfo-button =
     .label = Talɣut n umaɣnu
+MenuButtons--index--full-view = Askan aččuran
 MenuButtons--index--cancel-upload = Sefsex asali
 MenuButtons--index--share-upload =
     .label = Sali amaɣnu adigan
@@ -162,6 +179,7 @@ MenuButtons--index--share-re-upload =
     .label = Ales asali
 MenuButtons--index--share-error-uploading =
     .label = Tuccḍa deg usali
+MenuButtons--index--revert = Uɣal ɣer umaɣnu aɣbalu
 MenuButtons--index--docs = Tasemlit
 MenuButtons--permalink--button =
     .label = Permalink
@@ -178,6 +196,8 @@ MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--recording-started = Asekles yebda:
 MenuButtons--metaInfo--interval = Azilal:
 MenuButtons--metaInfo--profile-version = Lqem n umaɣnu:
+MenuButtons--metaInfo--buffer-capacity = Tazmert n uḥraz:
+MenuButtons--metaInfo--buffer-duration = Tanzgat n uḥraz:
 # Buffer Duration in Seconds in Meta Info Panel
 # Variable:
 #   $configurationDuration (Number) - Configuration Duration in Seconds
@@ -191,6 +211,8 @@ MenuButtons--metaInfo--buffer-duration-unlimited = War talast
 MenuButtons--metaInfo--application = Asnas
 MenuButtons--metaInfo--name-and-version = Isem akked lqem:
 MenuButtons--metaInfo--update-channel = Leqqem abadu:
+MenuButtons--metaInfo--build-id = Asulay n lebni:
+MenuButtons--metaInfo--build-type = Anaw n lebni:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -203,6 +225,8 @@ MenuButtons--metaInfo--platform = Tiɣerɣert
 MenuButtons--metaInfo--device = Ibenk:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = Anagraw n wammud:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--speed-index = Amatar arurad:
 MenuButtons--metaInfo-renderRowOfList-label-features = Timahilin:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
