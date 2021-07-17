@@ -98,7 +98,14 @@ Home--upload-from-url-button = Sali-d amaɣnu seg URL
 Home--load-from-url-submit-button =
     .value = Sali
 Home--documentation-button = Tasemlit
+Home--menu-button = Rmed taqeffalt n wumuɣ { -profiler-brand-name }
 Home--addon-button = Sebded azegrir
+Home--instructions-title = Amek ara twaliḍ akked ad teskelseḍ imuɣna
+Home--record-instructions-start-stop = Seḥbes neɣ bdu timeɣna
+Home--record-instructions-capture-load = Ṭṭef neɣ sali amaɣnu
+Home--profiler-motto = Ṭṭef amaɣnu n temlellit. Sleḍ-it. Bḍu-t. Err web d arurad.
+Home--additional-content-title = Sali imuɣna yellan
+Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
