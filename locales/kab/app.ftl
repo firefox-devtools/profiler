@@ -86,7 +86,10 @@ FooterLinks--Cookies = Inagan n tuqqna
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Anaw n udfil:
+FullTimeline--categories-with-cpu = taggayin s CPU
 FullTimeline--categories = Taggayin
+FullTimeline--stack-height = Teɣzi n tbursa
 
 ## Home page
 
