@@ -46,6 +46,11 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Smezdi tawuri
+    .title =
+        Asmezdi n twuri itekkes-itt seg umaɣnu, ad tmudd akud-ines i
+        twuri i yettusemman yis-s. Aya iḍerru-d deg yal adeg anida i d-tettusiwel twuri deg
+        useklu.
 CallNodeContextMenu--expand-all = Snefli akk
 CallNodeContextMenu--copy-function-name = Nɣel isem n tmahalt
 CallNodeContextMenu--copy-script-url = Nɣel URL n usekript
