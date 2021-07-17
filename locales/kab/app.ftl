@@ -234,7 +234,10 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-max = Afellay
 MenuButtons--metaOverheadStatistics-min = Tis
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Asfaḍ
+    .title = Akud i tukksa n yisefka ifaten.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
