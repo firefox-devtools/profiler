@@ -107,10 +107,13 @@ Home--profiler-motto = Ṭṭef amaɣnu n temlellit. Sleḍ-it. Bḍu-t. Err web
 Home--additional-content-title = Sali imuɣna yellan
 Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</strong> afaylu n umaɣnu da i usali-ines, neɣ:
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
+Home--recent-uploaded-recordings-title = Iseklasen i d-ulin melmi kan
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Sekcem awalen n yimsizdeg
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
