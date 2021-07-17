@@ -39,6 +39,8 @@ AppViewRouter--error-message-public =
     .message = Ur yezmir ara ad d-yader umaɣnu.
 AppViewRouter--error-message-from-url =
     .message = Ur yezmir ara ad d-yader umaɣnu.
+AppViewRouter--route-not-found--home =
+    .specialMessage = URL wuɣur tettaɛraḍeḍ ad tawḍeḍ ur tettwassen ara.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -238,6 +240,8 @@ MenuButtons--metaOverheadStatistics-max = Afellay
 MenuButtons--metaOverheadStatistics-min = Tis
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Asfaḍ
     .title = Akud i tukksa n yisefka ifaten.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Amessuḍan
+    .title = Akud i usegrew n meṛṛa imessuḍanen.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
