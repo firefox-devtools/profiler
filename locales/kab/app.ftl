@@ -247,12 +247,15 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Isiɣzaf:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-mean = Agejdan
 MenuButtons--metaOverheadStatistics-max = Afellay
 MenuButtons--metaOverheadStatistics-min = Tis
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Asfaḍ
     .title = Akud i tukksa n yisefka ifaten.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Amessuḍan
     .title = Akud i usegrew n meṛṛa imessuḍanen.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Azilal
+    .title = Iban-d uzilal gar sin yimedyaten
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -289,6 +292,8 @@ ProfileFilterNavigator--full-range = Azilal ummid
 
 ProfileLoaderAnimation--loading-message-local =
     .message = Ur yettwasebded ara yakan.
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Ur tettwaf ara teskant
 
 ## ProfileRootMessage
 
