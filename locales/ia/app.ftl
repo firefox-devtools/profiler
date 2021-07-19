@@ -93,6 +93,9 @@ CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste f
         Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro¶
         eliminar informationes temporal que non es pertinente al analyse.
 CallNodeContextMenu--expand-all = Expander toto
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Recercar le nomine de function sur Searchfox
 
 ## CallTree
 ## This is the component for Call Tree panel.
