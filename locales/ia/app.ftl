@@ -532,6 +532,16 @@ StackSettings--call-tree-strategy-timing = Temporisationes
     .title = Summarisa per le pilas examinate de codice exequite sur le tempore
 StackSettings--call-tree-strategy-js-allocations = Allocationes de JavaScript
     .title = Summarisa per le bytes de JavaScript allocate (nulle de-allocationes)
+StackSettings--call-tree-strategy-native-retained-allocations = Memoria retenite
+    .title = Summarisa per le bytes de memoria que ha essite allocate, e jammais liberate in le actual selection de vista preliminar
+StackSettings--call-tree-native-allocations = Memoria allocate
+    .title = Summarisa per le bytes de memoria allocate
+StackSettings--call-tree-strategy-native-deallocations-memory = Memoria de-allocate
+    .title = Summarisa per le bytes de memoria de-allocate, per le sito ubi le memoria ha essite allocate
+StackSettings--call-tree-strategy-native-deallocations-sites = Sitos de de-allocation
+    .title = Summarisa per le bytes de memoria de-allocate, per le sito ubi le memoria ha essite de-allocate
+StackSettings--invert-call-stack = Inverter le pila de appello
+    .title = Ordina per le tempore passate in un nodo de appello, ignorante su filios.
 
 ## Tab Bar for the bottom half of the analysis UI.
 
