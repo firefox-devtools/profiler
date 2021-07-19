@@ -144,11 +144,17 @@ CallTree--bytes-self = Proprie (bytes)
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Eliger un nodo pro monstrar informationes re illo.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Insere le URLs de profilo que tu amarea comparar
+CompareHome--instruction-content =
+    Le utensile extrahera le datos del tracia e gamma seligite pro
+    cata profilo e los ponera ambe sur le mesme vista pro render los facile a
+    comparar.
 CompareHome--form-label-profile1 = Profilo 1:
 CompareHome--form-label-profile2 = Profilo 2:
 
