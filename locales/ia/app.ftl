@@ -512,14 +512,26 @@ ProfileRootMessage--additional = Receder a casa
 ServiceWorkerManager--installing-button = Installation…
 ServiceWorkerManager--pending-button = Applicar e recargar
 ServiceWorkerManager--installed-button = Recargar le application
-ServiceWorkerManager--updated-while-not-ready = Un nove version del application ha essite applicate ante que iste pagina ha essite plenmente cargate.
+ServiceWorkerManager--updated-while-not-ready =
+    Un nove version del application ha essite applicate ante que iste pagina
+    ha essite plenmente cargate. Tu pote vider mal-functionamentos.
+ServiceWorkerManager--new-version-is-ready = Un nove version del application ha essite discargate e es preste a usar.
+ServiceWorkerManager--hide-notice-button =
+    .title = Celar le aviso de recargamento
+    .aria-label = Celar le aviso de recargamento
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Tote le pilas
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Native
+StackSettings--use-data-source-label = Fonte datos:
+StackSettings--call-tree-strategy-timing = Temporisationes
+    .title = Summarisa per le pilas examinate de codice exequite sur le tempore
+StackSettings--call-tree-strategy-js-allocations = Allocationes de JavaScript
+    .title = Summarisa per le bytes de JavaScript allocate (nulle de-allocationes)
 
 ## Tab Bar for the bottom half of the analysis UI.
 
