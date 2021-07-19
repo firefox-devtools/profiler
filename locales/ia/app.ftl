@@ -289,10 +289,14 @@ MarkerContextMenu--copy-full-payload = Copiar le carga utile complete
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Marcatores de filtro:
+    .title = Solo monstra marcatores que concorda con un certe nomine
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Elige un marcator pro monstrar informationes re illo.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -315,6 +319,7 @@ MenuButtons--index--share-re-upload =
     .label = Recargar
 MenuButtons--index--share-error-uploading =
     .label = Error al cargar
+MenuButtons--index--revert = Reverter al profilo original
 MenuButtons--index--docs = Documentos
 MenuButtons--permalink--button =
     .label = Ligamine permanente
@@ -327,6 +332,8 @@ MenuButtons--index--profile-info-uploaded-label = Cargate:
 MenuButtons--index--profile-info-uploaded-actions = Deler
 MenuButtons--index--metaInfo-subtitle = Informationes de profilo
 MenuButtons--metaInfo--symbols = Symbolos:
+MenuButtons--metaInfo--profile-symbolicated = Profilo symbolisate
+MenuButtons--metaInfo--profile-not-symbolicated = Profilo non symbolisate
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--interval = Intervallo:
 MenuButtons--metaInfo--profile-version = Version de profilo:
