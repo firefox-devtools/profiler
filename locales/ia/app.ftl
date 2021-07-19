@@ -335,7 +335,41 @@ MenuButtons--metaInfo--symbols = Symbolos:
 MenuButtons--metaInfo--profile-symbolicated = Profilo symbolisate
 MenuButtons--metaInfo--profile-not-symbolicated = Profilo non symbolisate
 MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
+MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
+MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
+MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
 MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } nucleo physic
+       *[other] { $physicalCPUs } nucleos physic
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } nucleo logic
+       *[other] { $logicalCPUs } nucleos logic
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } nucleo physic
+       *[other] { $physicalCPUs } nucleos physic
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } nucleo logic
+       *[other] { $logicalCPUs } nucleos logic
+    }
+MenuButtons--metaInfo--recording-started = Registration comenciate:
 MenuButtons--metaInfo--interval = Intervallo:
 MenuButtons--metaInfo--profile-version = Version de profilo:
 # Adjective refers to the buffer duration
