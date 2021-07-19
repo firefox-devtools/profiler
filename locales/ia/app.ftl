@@ -372,20 +372,39 @@ MenuButtons--metaInfo--logical-cpu =
 MenuButtons--metaInfo--recording-started = Registration comenciate:
 MenuButtons--metaInfo--interval = Intervallo:
 MenuButtons--metaInfo--profile-version = Version de profilo:
+MenuButtons--metaInfo--buffer-capacity = Capacitate de buffer:
+MenuButtons--metaInfo--buffer-duration = Capacitate de buffer:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } secunda
+       *[other] { $configurationDuration } secundas
+    }
 # Adjective refers to the buffer duration
 MenuButtons--metaInfo--buffer-duration-unlimited = Sin limite
 MenuButtons--metaInfo--application = Application
+MenuButtons--metaInfo--name-and-version = Nomine e version:
+MenuButtons--metaInfo--update-channel = Canal de actualisation:
+MenuButtons--metaInfo--build-id = ID de version:
+MenuButtons--metaInfo--build-type = Typo de compilation:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Depurar
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
+MenuButtons--metaInfo--platform = Systema operative
 MenuButtons--metaInfo--device = Apparato:
 # OS means Operating System. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--os = S. O.:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Indicatores visualmente
+MenuButtons--metaInfo--speed-index = Indice de velocitate:
 MenuButtons--metaInfo-renderRowOfList-label-features = Functionalitates:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
