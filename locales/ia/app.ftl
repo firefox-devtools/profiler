@@ -194,12 +194,22 @@ FullTimeline--graph-type = Typo de graphico:
 FullTimeline--categories-with-cpu = Categorias con CPU
 FullTimeline--categories = Categorias
 FullTimeline--stack-height = Altessa de pila
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> tracias visibile
 
 ## Home page
 
+Home--upload-from-file-input-button = Cargar un profilo ex un file
+Home--upload-from-url-button = Cargar un profilo de un URL
 Home--load-from-url-submit-button =
     .value = Cargar
 Home--documentation-button = Documentation
+Home--menu-button = Activar le button { -profiler-brand-name } del menu
 Home--addon-button = Installar additivo
 
 ## IdleSearchField
