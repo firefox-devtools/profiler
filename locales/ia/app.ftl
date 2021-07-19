@@ -344,6 +344,7 @@ MenuButtons--metaInfo--device = Apparato:
 MenuButtons--metaInfo--os = S. O.:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo-renderRowOfList-label-features = Functionalitates:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -357,6 +358,7 @@ MenuButtons--metaOverheadStatistics-min = Min
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--button-upload = Cargar
+MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
 
 ## NetworkSettings
