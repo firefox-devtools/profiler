@@ -133,6 +133,13 @@ CallTree--bytes-total = Dimension total (bytes)
         de-allocate ben que iste function ha essite presente in le pila. Isto include
         ambe le bytes ubi le function era realmente exequite e le
         bytes del visitatores ab iste function.
+CallTree--bytes-self = Proprie (bytes)
+    .title =
+        Le bytes “proprie” include le bytes allocate o de-allocate durante que iste
+        function era le extremo del pila. Si iste function era appellate in
+        altere functiones, alora le bytes del functiones “altere” non es includite.
+        Le bytes “proprie” es utile pro comprender ubi le memoria ha essite realmente
+        allocate o de-allocate in le programma.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
