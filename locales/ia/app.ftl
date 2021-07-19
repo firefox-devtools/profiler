@@ -561,6 +561,17 @@ TabBar--js-tracer-tab = Traciator JS
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Solo monstrar iste gruppo de processos
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Solo monstrar “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Celar altere tracias de instantaneos
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Celar “{ $trackName }”
+TrackContextMenu--show-all-tracks = Monstrar tote le tracias
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -571,8 +582,55 @@ TabBar--js-tracer-tab = Traciator JS
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Completar “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Collaber: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Foco sur nodo: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Foco sur: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Miscer nodo: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Miscer: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Lassar cader: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Collaber recursion: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Collaber sub-arbore: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Registrationes cargate
