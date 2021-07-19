@@ -405,12 +405,18 @@ MenuButtons--metaInfo--os = S. O.:
 MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo--visual-metrics = Indicatores visualmente
 MenuButtons--metaInfo--speed-index = Indice de velocitate:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Indice de velocitate perceptive:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Indice de velocitate complete:
 MenuButtons--metaInfo-renderRowOfList-label-features = Functionalitates:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtro de argumentos:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Additivos de { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Media
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
