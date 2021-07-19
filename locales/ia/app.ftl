@@ -231,19 +231,32 @@ Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir
 Home--additional-content-title = Cargar profilos existente
 Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
 Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
+Home--recent-uploaded-recordings-title = Registrationes cargate recentemente
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Insere terminos del filtro
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Monstrar solo le tempore proprie
+    .title = Monstra solo le tempore passate in un nodo de appello, ignorante su filios.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Clicca hic pro cargar le profilo { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Deler
+    .title = Iste profilo non pote esser delite perque nos care de informationes de autorisation.
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite cargate ancora!
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
