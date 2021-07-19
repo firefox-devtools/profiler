@@ -96,6 +96,8 @@ CallNodeContextMenu--expand-all = Expander toto
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Recercar le nomine de function sur Searchfox
+CallNodeContextMenu--copy-function-name = Copiar nomine de function
+CallNodeContextMenu--copy-script-url = Copia URL de script
 
 ## CallTree
 ## This is the component for Call Tree panel.
