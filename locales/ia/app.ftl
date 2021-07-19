@@ -279,9 +279,12 @@ MarkerContextMenu--start-selection-here = Initia le selection hic
 MarkerContextMenu--end-selection-here = Fini le selection hic
 MarkerContextMenu--start-selection-at-marker-start = Initia le selection al <strong>initio</strong> del marcator
 MarkerContextMenu--start-selection-at-marker-end = Initia le selection al <strong>fin</strong> del marcator
+MarkerContextMenu--end-selection-at-marker-start = Fini le selection al <strong>initio</strong> del marcator
+MarkerContextMenu--end-selection-at-marker-end = Fini le selection al <strong>fin</strong> del marcator
 MarkerContextMenu--copy-description = Copiar le description
 MarkerContextMenu--copy-call-stack = Copiar pila de appellos
 MarkerContextMenu--copy-url = Copiar URL
+MarkerContextMenu--copy-full-payload = Copiar le carga utile complete
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -336,6 +339,11 @@ MenuButtons--metaInfo--application = Application
 
 ##
 
+MenuButtons--metaInfo--device = Apparato:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = S. O.:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 
 ## Overhead refers to the additional resources used to run the profiler.
