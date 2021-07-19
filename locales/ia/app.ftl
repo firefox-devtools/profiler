@@ -451,28 +451,54 @@ MenuButtons--publish--info-description-firefox-nightly = Iste profilo es de { -f
 MenuButtons--publish--include-additional-data = Includer altere datos que pote esser identificabile
 MenuButtons--publish--button-upload = Cargar
 MenuButtons--publish--upload-title = Cargamento del profilo…
+MenuButtons--publish--cancel-upload = Cancellar le cargamento
+MenuButtons--publish--message-something-went-wrong = Oh oh, alco errate eveniva durante le cargamento del profilo.
 MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
+MenuButtons--publish--compressing = Comprimente…
 
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrar retes:
+    .title = Solo monstra requestas de rete que concorda con un certe nomine
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Sape tu que tu pote usar le comma (,) pro cercar per plure terminos?
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Deler
+    .title = Clicca hic pro deler le profilo { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Plen gamma
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Importation del profilo directemente de { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Lectura del file e elaboration del profilo…
 ProfileLoaderAnimation--loading-message-local =
     .message = Non ancora implementate.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Discargamento e elaboration del profilo…
+ProfileLoaderAnimation--loading-message-from-url =
+    .message = Discargamento e elaboration del profilo…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Lectura e elaboration del profilos…
+ProfileLoaderAnimation--loading-message-view-not-found =
+    .message = Vista non trovate
 
 ## ProfileRootMessage
 
@@ -484,6 +510,9 @@ ProfileRootMessage--additional = Receder a casa
 ## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Installation…
+ServiceWorkerManager--pending-button = Applicar e recargar
+ServiceWorkerManager--installed-button = Recargar le application
+ServiceWorkerManager--updated-while-not-ready = Un nove version del application ha essite applicate ante que iste pagina ha essite plenmente cargate.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
