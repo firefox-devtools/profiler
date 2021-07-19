@@ -430,11 +430,27 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Intervallo
     .title = Intervallo observate inter duo specimens.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocadas
     .title = Tempore pro acquirer le blocada ante le examination.
+MenuButtons--metaOverheadStatistics-overhead-duration = Durationes de additivos:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Percentage de additivos:
+MenuButtons--metaOverheadStatistics-profiled-duration = Duration profilate:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Includer argumentos celate
+MenuButtons--publish--renderCheckbox-label-hidden-time = Includer gamma de tempore celate
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Includer instantaneos
+MenuButtons--publish--renderCheckbox-label-resource = Includer URLs e routes de accesso del ressource
+MenuButtons--publish--renderCheckbox-label-extension = Includer informationes de extension
+MenuButtons--publish--renderCheckbox-label-preference = Includer valores de preferentia
+MenuButtons--publish--reupload-performance-profile = Re-cargar profilo de prestation
+MenuButtons--publish--share-performance-profile = Compartir profilo de prestation
+MenuButtons--publish--info-description = Carga tu profilo e lo rende accessibile a totes con le ligamine.
+MenuButtons--publish--info-description-default = De ordinario, tu datos personal es removite.
+MenuButtons--publish--info-description-firefox-nightly = Iste profilo es de { -firefox-nightly-brand-name }, assi de ordinario tote le informationes es includite.
+MenuButtons--publish--include-additional-data = Includer altere datos que pote esser identificabile
 MenuButtons--publish--button-upload = Cargar
+MenuButtons--publish--upload-title = Cargamento del profilo…
 MenuButtons--publish--message-try-again = Retentar
 MenuButtons--publish--download = Discargar
 
