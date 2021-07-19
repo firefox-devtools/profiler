@@ -334,6 +334,7 @@ MenuButtons--index--metaInfo-subtitle = Informationes de profilo
 MenuButtons--metaInfo--symbols = Symbolos:
 MenuButtons--metaInfo--profile-symbolicated = Profilo symbolisate
 MenuButtons--metaInfo--profile-not-symbolicated = Profilo non symbolisate
+MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
 MenuButtons--metaInfo--cpu = CPU:
 MenuButtons--metaInfo--interval = Intervallo:
 MenuButtons--metaInfo--profile-version = Version de profilo:
