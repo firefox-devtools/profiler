@@ -121,6 +121,12 @@ CallTree--samples-total = Total (specimens)
         function ha essite presente in le pila. Isto include le tempore que le
         function era realmente exequite e le tempore passate in le visitatores ab
         iste function.
+CallTree--samples-self = Proprie
+    .title =
+        Le conto de specimen “proprie” solo include le specimens ubi le function era
+        le extremo del pila. Si iste function era appellate in altere functiones,
+        alora le contos del functiones “altere” non es includite. Le conto "proprie" es utile
+        pro comprender ubi le tempore era realmente passate in un programma.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
