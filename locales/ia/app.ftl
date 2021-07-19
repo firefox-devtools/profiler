@@ -420,6 +420,16 @@ MenuButtons--metaOverheadStatistics-subtitle = Additivos de { -profiler-brand-sh
 MenuButtons--metaOverheadStatistics-mean = Media
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Additivos
+    .title = Tempore pro examinar tote le argumentos.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Mundification
+    .title = Tempore pro remover datos expirate.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Contator
+    .title = Tempore pro colliger tote le contatores.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervallo
+    .title = Intervallo observate inter duo specimens.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocadas
+    .title = Tempore pro acquirer le blocada ante le examination.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
