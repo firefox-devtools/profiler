@@ -103,7 +103,13 @@ CallNodeContextMenu--copy-script-url = Copia URL de script
 ## This is the component for Call Tree panel.
 
 CallTree--tracing-ms-total = Tempore executive (ms)
-    .title = Le tempore executive “total” include un summario de tote le tempore que iste function ha essite presente in le pila.
+    .title =
+        Le tempore executive “total” include un summario de tote le tempore que iste
+        function ha essite presente in le pila. Isto include le tempore que
+        le function era realmente exequite e le tempore passate in le visitatores de
+        iste function.
+CallTree--tracing-ms-self = Proprie (ms)
+    .title = Le tempore"proprie" solo include le tempore que le function era le extremo del pila.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
