@@ -222,6 +222,15 @@ Home--record-instructions =
     vias breve de claviero. Le icone es blau quando un profilo es in registration.
     Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
 Home--instructions-title = Como vider e registrar profilos
+Home--instructions-content =
+    Registrar profilos de prestation require <a>{ -firefox-brand-name }</a>.
+    Totevia, le profilos existente pote esser vidite in ulle moderne navigator.
+Home--record-instructions-start-stop = Cessar e initiar profilar
+Home--record-instructions-capture-load = Capturar e cargar un profilo
+Home--profiler-motto = Capturar un profilo de prestation. Analysar lo. Compartir lo. Render le web plus veloce.
+Home--additional-content-title = Cargar profilos existente
+Home--additional-content-content = Tu pote <strong>traher e deponer</strong> hic un file profilo pro cargar lo, o:
+Home--compare-recordings-info = Tu pote alsi comparar registrationes. <a>Aperir le interfacie de comparation.</a>
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
