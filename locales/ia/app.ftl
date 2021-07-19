@@ -210,8 +210,18 @@ Home--load-from-url-submit-button =
     .value = Cargar
 Home--documentation-button = Documentation
 Home--menu-button = Activar le button { -profiler-brand-name } del menu
-Home--menu-button-instructions = Activa le button de menu profilator pro initiar registrar un profilo de prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
+Home--menu-button-instructions =
+    Activa le button de menu profilator pro initiar registrar un profilo de
+    prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
 Home--addon-button = Installar additivo
+Home--addon-button-instructions =
+    Installa le additivo Gecko Profiler pro initiar registrar un profilo de
+    prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
+Home--record-instructions =
+    Pro initiar profilar, clicca sur le button profila o usa le
+    vias breve de claviero. Le icone es blau quando un profilo es in registration.
+    Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
+Home--instructions-title = Como vider e registrar profilos
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
