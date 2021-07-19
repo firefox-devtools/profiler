@@ -127,6 +127,12 @@ CallTree--samples-self = Proprie
         le extremo del pila. Si iste function era appellate in altere functiones,
         alora le contos del functiones “altere” non es includite. Le conto "proprie" es utile
         pro comprender ubi le tempore era realmente passate in un programma.
+CallTree--bytes-total = Dimension total (bytes)
+    .title =
+        Le “dimension total” include un summario de tote le bytes allocate o 
+        de-allocate ben que iste function ha essite presente in le pila. Isto include
+        ambe le bytes ubi le function era realmente exequite e le
+        bytes del visitatores ab iste function.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
