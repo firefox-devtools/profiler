@@ -109,7 +109,11 @@ CallTree--tracing-ms-total = Tempore executive (ms)
         le function era realmente exequite e le tempore passate in le visitatores de
         iste function.
 CallTree--tracing-ms-self = Proprie (ms)
-    .title = Le tempore"proprie" solo include le tempore que le function era le extremo del pila.
+    .title =
+        Le tempore"proprie" solo include le tempore que le function era
+        le extremo del pila. Si iste function es appellate in altere functiones,
+        alora le tempore del “altere” functiones non es includite. Le tempore “proprie” es utile
+        pro comprender le tempore realmente passate in un programma.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
