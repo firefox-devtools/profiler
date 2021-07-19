@@ -257,11 +257,28 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Deler
     .title = Iste profilo non pote esser delite perque nos care de informationes de autorisation.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nulle profilo ha essite cargate ancora!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Vide e gere tote tu ({ $profilesRestCount } restante registrationes)
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gere iste registration
+       *[other] Gere iste registrationes
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Predefini le selection del duration del marcator
+MarkerContextMenu--start-selection-here = Initia le selection hic
+MarkerContextMenu--end-selection-here = Fini le selection hic
+MarkerContextMenu--start-selection-at-marker-start = Initia le selection al <strong>initio</strong> del marcator
+MarkerContextMenu--start-selection-at-marker-end = Initia le selection al <strong>fin</strong> del marcator
 MarkerContextMenu--copy-description = Copiar le description
 MarkerContextMenu--copy-call-stack = Copiar pila de appellos
 MarkerContextMenu--copy-url = Copiar URL
