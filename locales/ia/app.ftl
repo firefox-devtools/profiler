@@ -88,6 +88,10 @@ CallNodeContextMenu--transform-collapse-direct-recursion = Collaber directe recu
     .title =
         Collaber directe recursion remove appellos que recurre repetitemente in
         le mesme function.
+CallNodeContextMenu--transform-drop-function = Lassar cader specimens con iste function
+    .title =
+        Lassar cader specimens remove lor tempore ab le profilo. Isto es utile pro¶
+        eliminar informationes temporal que non es pertinente al analyse.
 CallNodeContextMenu--expand-all = Expander toto
 
 ## CallTree
