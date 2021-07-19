@@ -542,10 +542,20 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sitos de de-alloc
     .title = Summarisa per le bytes de memoria de-allocate, per le sito ubi le memoria ha essite de-allocate
 StackSettings--invert-call-stack = Inverter le pila de appello
     .title = Ordina per le tempore passate in un nodo de appello, ignorante su filios.
+StackSettings--show-user-timing = Monstrar temporisation de usator
+StackSettings--panel-search =
+    .label = Filtrar pilas:
+    .title = Solo monstra pilas que contine un function cuje nomine concorda con iste sub-catena
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Arbore de appellos
+TabBar--flame-graph-tab = Graphico a flammas
+TabBar--stack-chart-tab = Diagramma a pilas
+TabBar--marker-chart-tab = Diagramma a marcatores
+TabBar--marker-table-tab = Tabula marcatores
 TabBar--network-tab = Rete
+TabBar--js-tracer-tab = Traciator JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
