@@ -98,6 +98,7 @@ CallNodeContextMenu--expand-all = Expander toto
 CallNodeContextMenu--searchfox = Recercar le nomine de function sur Searchfox
 CallNodeContextMenu--copy-function-name = Copiar nomine de function
 CallNodeContextMenu--copy-script-url = Copia URL de script
+CallNodeContextMenu--copy-stack = Copiar pila
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -114,6 +115,12 @@ CallTree--tracing-ms-self = Proprie (ms)
         le extremo del pila. Si iste function es appellate in altere functiones,
         alora le tempore del “altere” functiones non es includite. Le tempore “proprie” es utile
         pro comprender le tempore realmente passate in un programma.
+CallTree--samples-total = Total (specimens)
+    .title =
+        Le conto de specimen “total” include un summario de cata specimen ubi iste
+        function ha essite presente in le pila. Isto include le tempore que le
+        function era realmente exequite e le tempore passate in le visitatores ab
+        iste function.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
