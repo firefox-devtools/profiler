@@ -157,11 +157,17 @@ CompareHome--instruction-content =
     comparar.
 CompareHome--form-label-profile1 = Profilo 1:
 CompareHome--form-label-profile2 = Profilo 2:
+CompareHome--submit-button =
+    .value = Cargar profilos
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Iste profilo ha essite registrate in un compilation sin optimisationes de version.
+        Le observation del prestationes pote non pertiner al population del version.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
@@ -171,6 +177,8 @@ Details--open-sidebar-button =
     .title = Aperir le barra lateral
 Details--close-sidebar-button =
     .title = Clauder le barra lateral
+Details--error-boundary-message =
+    .message = Oh oh, alcun error incognite eveniva in iste pannello.
 
 ## Footer Links
 
@@ -182,8 +190,10 @@ FooterLinks--Cookies = Cookies
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Typo de graphico:
 FullTimeline--categories-with-cpu = Categorias con CPU
 FullTimeline--categories = Categorias
+FullTimeline--stack-height = Altessa de pila
 
 ## Home page
 
