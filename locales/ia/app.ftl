@@ -210,6 +210,7 @@ Home--load-from-url-submit-button =
     .value = Cargar
 Home--documentation-button = Documentation
 Home--menu-button = Activar le button { -profiler-brand-name } del menu
+Home--menu-button-instructions = Activa le button de menu profilator pro initiar registrar un profilo de prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
 Home--addon-button = Installar additivo
 
 ## IdleSearchField
