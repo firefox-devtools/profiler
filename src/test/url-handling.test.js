@@ -7,11 +7,13 @@
 import { oneLineTrim } from 'common-tags';
 import * as urlStateSelectors from '../selectors/url-state';
 import {
+  addTransformToStack,
   changeCallTreeSearchString,
   changeImplementationFilter,
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  changeSelectedThreads,
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
@@ -29,7 +31,12 @@ import {
   viewProfile,
   changeTimelineTrackOrganization,
 } from '../actions/receive-profile';
-import type { Profile, StartEndRange } from 'firefox-profiler/types';
+import type {
+  Profile,
+  StartEndRange,
+  Store,
+  State,
+} from 'firefox-profiler/types';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
@@ -48,6 +55,7 @@ import {
 } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
+import { getThreadsKey } from '../profile-logic/profile-data';
 
 function _getStoreWithURL(
   settings: {
@@ -84,6 +92,30 @@ function _getStoreWithURL(
     search: '?' + queryString.stringify(query, { arrayFormat: 'bracket' }),
     hash,
   });
+
+  const store = blankStore();
+  store.dispatch({
+    type: 'UPDATE_URL_STATE',
+    newUrlState,
+  });
+
+  if (profile) {
+    store.dispatch(viewProfile(profile));
+  }
+  return store;
+}
+
+// Serialize the URL of the current state, and create a new store from that URL.
+function _getStoreFromStateAfterUrlRoundtrip(
+  state: State,
+  profile: Profile | null = getProfile()
+): Store {
+  const urlState = urlStateSelectors.getUrlState(state);
+  const url = urlFromState(urlState);
+
+  const newUrlState = stateFromLocation(
+    new URL(url, 'https://profiler.firefox.com')
+  );
 
   const store = blankStore();
   store.dispatch({
@@ -1326,6 +1358,121 @@ describe('URL serialization of the transform stack', function() {
     const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`transforms=${transformString}`);
+  });
+});
+
+describe('URL persistence of transform stacks for a combined thread (multi-thread selection)', function() {
+  function setup() {
+    const store = _getStoreWithURL();
+    const { dispatch } = store;
+    dispatch(
+      addTransformToStack(0, {
+        type: 'focus-subtree',
+        callNodePath: [0, 1, 2],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+    dispatch(
+      addTransformToStack(1, {
+        type: 'collapse-resource',
+        resourceIndex: 8,
+        collapsedFuncIndex: 9,
+        implementation: 'combined',
+      })
+    );
+    dispatch(
+      addTransformToStack(getThreadsKey(new Set([0, 2])), {
+        type: 'drop-function',
+        funcIndex: 11,
+      })
+    );
+    return store;
+  }
+
+  it('persists the transform for thread 0 if thread 0 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([0])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([0]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'focus-subtree',
+        callNodePath: [0, 1, 2],
+        implementation: 'combined',
+        inverted: false,
+      },
+    ]);
+
+    newStore.dispatch(changeSelectedThreads(new Set([1])));
+    const transformStackForDifferentThread = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStackForDifferentThread).toEqual([]);
+  });
+
+  it('persists the transform for thread 1 if thread 1 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([1])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([1]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'collapse-resource',
+        resourceIndex: 8,
+        collapsedFuncIndex: 9,
+        implementation: 'combined',
+      },
+    ]);
+  });
+
+  it('persists the transform for thread 2 if thread 2 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([2])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([2]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([]);
+  });
+
+  it('persists the transform for the combined thread of 0+1 if threads 0 and 1 are selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([0, 2])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([0, 2]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'drop-function',
+        funcIndex: 11,
+      },
+    ]);
   });
 });
 
