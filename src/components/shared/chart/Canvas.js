@@ -172,12 +172,12 @@ export class ChartCanvas<HoveredItem> extends React.Component<
       // The right button is a contextual action.
       // It is important that we call the right click callback at mousedown so
       // that the state is updated and the context menus are rendered before the
-      // mouseup/contextmenu events.
+      // contextmenu events.
       this.props.onRightClick(this.state.hoveredItem);
     }
   };
 
-  _onMouseUp = (e: SyntheticMouseEvent<>) => {
+  _onClick = (e: SyntheticMouseEvent<>) => {
     if (this._mouseMovedWhileClicked) {
       return;
     }
@@ -311,7 +311,7 @@ export class ChartCanvas<HoveredItem> extends React.Component<
           className={className}
           ref={this._takeCanvasRef}
           onMouseDown={this._onMouseDown}
-          onMouseUp={this._onMouseUp}
+          onClick={this._onClick}
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}

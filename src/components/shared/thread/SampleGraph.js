@@ -194,7 +194,7 @@ export class ThreadSampleGraph extends PureComponent<Props> {
     drawSamples(idleSamples, lighterBlue);
   }
 
-  _onMouseUp = (event: SyntheticMouseEvent<>) => {
+  _onClick = (event: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
       const { rangeStart, rangeEnd, thread } = this.props;
@@ -230,7 +230,7 @@ export class ThreadSampleGraph extends PureComponent<Props> {
             'threadSampleGraphCanvas'
           )}
           ref={this._takeCanvasRef}
-          onMouseUp={this._onMouseUp}
+          onClick={this._onClick}
         >
           <h2>Stack Graph for {trackName}</h2>
           <p>This graph charts the stack height of each sample.</p>
