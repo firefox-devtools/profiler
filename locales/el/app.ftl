@@ -313,18 +313,24 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 MenuButtons--metaOverheadStatistics-subtitle = Πρόσθετοι πόροι (overhead) του { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Πρόσθετοι πόροι
     .title = Χρόνος δειγματοληψίας όλων των νημάτων.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Εκκαθάριση
+    .title = Χρόνος απόρριψης ληγμένων δεδομένων.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Μετρητής
+    .title = Χρόνος συγκέντρωσης όλων των μετρητών.
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Συμπερίληψη κρυφών νημάτων
+MenuButtons--publish--renderCheckbox-label-hidden-time = Συμπερίληψη κρυφού χρονικού διαστήματος
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερίληψη στιγμιότυπων οθόνης
 MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
 MenuButtons--publish--renderCheckbox-label-extension = Συμπερίληψη πληροφοριών επέκτασης
 MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη τιμών προτιμήσεων
 MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
 MenuButtons--publish--button-upload = Μεταφόρτωση
@@ -394,6 +400,9 @@ ServiceWorkerManager--updated-while-not-ready =
     Εφαρμόστηκε μια νέα έκδοση της εφαρμογής προτού φορτωθεί πλήρως
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
+ServiceWorkerManager--hide-notice-button =
+    .title = Απόκρυψη σημείωσης επαναφόρτωσης
+    .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -401,7 +410,14 @@ ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέα
 
 StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Εγγενές
 StackSettings--use-data-source-label = Πηγή δεδομένων:
+StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
+    .title = Ταξινόμηση κατά χρόνο που σπαταλήθηκε σε κόμβο κλήσεων, αγνοώντας τις θυγατρικές της.
+StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
+StackSettings--panel-search =
+    .label = Φιλτράρισμα στοιβών:
+    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτή την υποσυμβολοσειρά
 
 ## Tab Bar for the bottom half of the analysis UI.
 
