@@ -46,7 +46,12 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρτηση
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
+CallNodeContextMenu--copy-function-name = Αντιγραφή ονόματος συνάρτησης
 CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 
@@ -182,7 +187,9 @@ MarkerContextMenu--start-selection-at-marker-end = Έναρξη επιλογής
 MarkerContextMenu--end-selection-at-marker-start = Διακοπή επιλογής στην <strong>αρχή</strong> του δείκτη
 MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής στο <strong>τέλος</strong> του δείκτη
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
+MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
+MarkerContextMenu--copy-full-payload = Αντιγραφή πλήρους φορτίου
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -222,6 +229,7 @@ MenuButtons--permalink--button =
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Μεταφορτωμένα:
 MenuButtons--index--profile-info-uploaded-actions = Διαγραφή
 MenuButtons--index--metaInfo-subtitle = Πληροφορίες προφίλ
 MenuButtons--metaInfo--symbols = Σύμβολα:
@@ -296,6 +304,7 @@ MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--contentful-speed-Index = Δείκτης "Contentful Speed":
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Φίλτρο νημάτων:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -397,23 +406,28 @@ StackSettings--use-data-source-label = Πηγή δεδομένων:
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Δέντρο κλήσεων
+TabBar--flame-graph-tab = Γράφημα φλόγας
 TabBar--stack-chart-tab = Διάγραμμα στοιβών
 TabBar--marker-chart-tab = Διάγραμμα δεικτών
 TabBar--marker-table-tab = Πίνακας δεικτών
 TabBar--network-tab = Δίκτυο
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Εμφάνιση μόνο αυτής της ομάδας διεργασιών
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Εμφάνιση μόνο του “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κομματιών του Screenshots
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
+TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -424,21 +438,52 @@ TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Ολοκλήρωση “{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Σύμπτυξη: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Κόμβος εστίασης: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Εστίαση: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Κόμβος συγχώνευσης: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Συγχώνευση: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Απόθεση: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Σύμπτυξη αναδρομής: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
