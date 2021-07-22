@@ -105,6 +105,12 @@ CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
+    .title =
+        Ο “συνολικός” χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
+        παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
+        εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
+        αυτή τη συνάρτηση.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
