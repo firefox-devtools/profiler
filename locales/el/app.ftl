@@ -62,6 +62,18 @@ CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρ
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-collapse-function-subtree = Σύμπτυξη συνάρτησης
+    .title =
+        Η σύμπτυξη συνάρτησης θα αφαιρέσει ό,τι έχει καλέσει αυτή και θα αναθέσει
+        όλο τον χρόνο στη συνάρτηση. Αυτό μπορεί να απλοποιήσει ένα προφίλ που
+        καλεί στον κώδικα ότι δεν χρειάζεται να αναλυθεί.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $nameForResource }</strong>
+    .title =
+        Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
+        τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -77,6 +89,7 @@ CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -142,6 +155,9 @@ Home--load-from-url-submit-button =
     .value = Φόρτωση
 Home--documentation-button = Τεκμηρίωση
 Home--menu-button = Ενεργοποίηση κουμπιού μενού του { -profiler-brand-name }
+Home--menu-button-instructions =
+    Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
+    επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
 Home--addon-button = Εγκατάσταση προσθέτου
 Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
@@ -211,10 +227,14 @@ MarkerContextMenu--copy-full-payload = Αντιγραφή πλήρους φορ�
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Φιλτράρισμα σημαδιών:
+    .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβολή πληροφοριών σχετικά με αυτό.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -347,6 +367,7 @@ MenuButtons--metaOverheadStatistics-statkeys-counter = Μετρητής
 MenuButtons--metaOverheadStatistics-statkeys-interval = Χρονικό διάστημα
     .title = Παρατηρηθέν χρονικό διάστημα μεταξύ δύο δειγμάτων.
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
+MenuButtons--metaOverheadStatistics-profiled-duration = Διάρκεια καταγραφής:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -362,6 +383,7 @@ MenuButtons--publish--share-performance-profile = Κοινή χρήση προφ
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
+MenuButtons--publish--include-additional-data = Συμπερίληψη επιπλέον δεδομένων που ίσως να είναι αναγνωρίσιμα
 MenuButtons--publish--button-upload = Μεταφόρτωση
 MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
 MenuButtons--publish--cancel-upload = Ακύρωση μεταφόρτωσης
