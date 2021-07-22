@@ -51,6 +51,12 @@ CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρ�
         Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
         συνάρτηση που την κάλεσε. Αυτό συμβαίνει οπουδήποτε κλήθηκε η συνάρτηση
         στο δέντρο.
+CallNodeContextMenu--transform-merge-call-node = Συγχώνευση κόμβου μόνο
+    .title =
+        Η συγχώνευση κόμβου τον αφαιρεί από το προφίλ και αναθέτει το χρόνο του
+        στον κόμβο της συνάρτησης που τον κάλεσε. Αφαιρεί μόνο τη συνάρτηση από
+        αυτό το συγκεκριμένο μέρος του δέντρου. Τα υπόλοιπα μέρη από τα οποία
+        κλήθηκε η συνάρτηση θα παραμείνουν στο προφίλ.
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
 CallNodeContextMenu--transform-focus-function-title =
@@ -62,6 +68,12 @@ CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρ
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδεντρο μόνο
+    .title =
+        Η εστίαση σε υπόδεντρο θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτό το
+        συγκεκριμένο μέρος του δέντρου κλήσεων. Αποσύρει έναν κλάδο του δέντρου κλήσεων,
+        ωστόσο το κάνει μόνο για αυτόν τον κόμβο κλήσεων. Όλες οι άλλες κλήσεις
+        της συνάρτησης παραβλέπονται.
 CallNodeContextMenu--transform-collapse-function-subtree = Σύμπτυξη συνάρτησης
     .title =
         Η σύμπτυξη συνάρτησης θα αφαιρέσει ό,τι έχει καλέσει αυτή και θα αναθέσει
@@ -74,6 +86,14 @@ CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $n
     .title =
         Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
         τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
+CallNodeContextMenu--transform-collapse-direct-recursion = Σύμπτυξη άμεσης επανάληψης
+    .title =
+        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που επαναλαμβάνονται συνεχώς στην
+        ίδια συνάρτηση.
+CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
+    .title =
+        Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
+        εξάλειψη στοιχείων χρόνου που δεν είναι σχετικά για την ανάλυση.
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -540,7 +560,7 @@ TransformNavigator--merge-function = Συγχώνευση: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--drop-function = Απόθεση: { $item }
+TransformNavigator--drop-function = Απόρριψη: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
