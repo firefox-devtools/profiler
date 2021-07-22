@@ -46,11 +46,26 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρτησης
+    .title =
+        Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
+        συνάρτηση που την κάλεσε. Αυτό συμβαίνει οπουδήποτε κλήθηκε η συνάρτηση
+        στο δέντρο.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Η εστίαση σε συνάρτηση θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτή
+    τη συνάρτηση. Επιπλέον, ριζώνει εκ νέου το δέντρο κλήσεων ώστε η συνάρτηση
+    να είναι η μόνη ρίζα του δέντρου. Αυτό μπορεί να συνδυάσει πολλαπλές τοποθεσίες κλήσεων
+    συνάρτησης εντός ενός προφίλ σε έναν κόμβο κλήσης.
 CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρτηση
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Αναζήτηση ονόματος συνάρτησης στο Searchfox
 CallNodeContextMenu--copy-function-name = Αντιγραφή ονόματος συνάρτησης
 CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
@@ -149,6 +164,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Εμφάνιση μόνο ιδιοχρόνου
+    .title = Εμφάνιση μόνο του χρόνου που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -233,6 +250,12 @@ MenuButtons--index--profile-info-uploaded-label = Μεταφορτωμένα:
 MenuButtons--index--profile-info-uploaded-actions = Διαγραφή
 MenuButtons--index--metaInfo-subtitle = Πληροφορίες προφίλ
 MenuButtons--metaInfo--symbols = Σύμβολα:
+MenuButtons--metaInfo--profile-symbolicated = Το προφίλ είναι συμβολισμένο
+MenuButtons--metaInfo--profile-not-symbolicated = Το προφίλ δεν είναι συμβολισμένο
+MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός προφίλ
+MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
+MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
+MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτή τη στιγμή
 MenuButtons--metaInfo--cpu = CPU:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -298,6 +321,7 @@ MenuButtons--metaInfo--device = Συσκευή:
 MenuButtons--metaInfo--os = ΛΣ:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Οπτικές μετρήσεις
 MenuButtons--metaInfo--speed-index = Δείκτης ταχύτητας:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed":
@@ -311,12 +335,17 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
 MenuButtons--metaOverheadStatistics-subtitle = Πρόσθετοι πόροι (overhead) του { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Μέσο
+MenuButtons--metaOverheadStatistics-max = Μέγιστο
+MenuButtons--metaOverheadStatistics-min = Ελάχιστο
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Πρόσθετοι πόροι
     .title = Χρόνος δειγματοληψίας όλων των νημάτων.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Εκκαθάριση
     .title = Χρόνος απόρριψης ληγμένων δεδομένων.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Μετρητής
     .title = Χρόνος συγκέντρωσης όλων των μετρητών.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Χρονικό διάστημα
+    .title = Παρατηρηθέν χρονικό διάστημα μεταξύ δύο δειγμάτων.
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
 
 ## Publish panel
@@ -413,7 +442,7 @@ StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Εγγενές
 StackSettings--use-data-source-label = Πηγή δεδομένων:
 StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
-    .title = Ταξινόμηση κατά χρόνο που σπαταλήθηκε σε κόμβο κλήσεων, αγνοώντας τις θυγατρικές της.
+    .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
 StackSettings--panel-search =
     .label = Φιλτράρισμα στοιβών:
@@ -469,7 +498,7 @@ TransformNavigator--collapse-resource = Σύμπτυξη: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--focus-subtree = Κόμβος εστίασης: { $item }
+TransformNavigator--focus-subtree = Εστίαση κόμβου: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -479,7 +508,7 @@ TransformNavigator--focus-function = Εστίαση: { $item }
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
-TransformNavigator--merge-call-node = Κόμβος συγχώνευσης: { $item }
+TransformNavigator--merge-call-node = Συγχώνευση κόμβου: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
