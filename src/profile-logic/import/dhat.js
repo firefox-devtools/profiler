@@ -14,7 +14,7 @@ import {
   getEmptyThread,
   getEmptyUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
-import { coerce } from 'firefox-profiler/utils/flow';
+import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
 
 /**
  * DHAT is a heap memory analysis tool in valgrind. It's also available as rust component.
@@ -25,7 +25,7 @@ import { coerce } from 'firefox-profiler/utils/flow';
  * git clone git://sourceware.org/git/valgrind.git
  * dhat/dh_main.c
  */
-type DhatJson = {|
+type DhatJson = $ReadOnly<{|
   // Version number of the format. Incremented on each
   // backwards-incompatible change. A mandatory integer.
   dhatFileVersion: 2,
@@ -86,9 +86,9 @@ type DhatJson = {|
   //   '0x4A9A2BE: _nl_find_locale (findlocale.c:153)'
   // ],
   ftbl: string[],
-|};
+|}>;
 
-type ProgramPoint = {|
+type ProgramPoint = $ReadOnly<{|
   // Total bytes and blocks. Mandatory integers.
   tb: Bytes,
   tbk: Blocks,
@@ -132,10 +132,11 @@ type ProgramPoint = {|
   // e.g. [5, -3, 4, 2]
   acc: number[],
 
-  // Frames. Each element is an index into the "ftbl" array below.
+  // Frames. Each element is an index into the "ftbl" array above.
+  // The array is ordered from leaf to root.
   // - All modes: A mandatory array of integers.
   fs: IndexIntoDhatFrames[],
-|};
+|}>;
 
 // All units of time are in instruction counts.
 // Per: https://valgrind.org/docs/manual/dh-manual.html
@@ -171,7 +172,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
 
-  const allocations = getEmptyUnbalancedNativeAllocationsTable();
+  const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
   const thread = getEmptyThread();
   thread.pid = dhat.pid;
   const { funcTable, stringTable, stackTable, frameTable } = thread;
@@ -190,28 +191,33 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     let line = null;
     let column = null;
 
-    const result = funcName.match(/^(0x[0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$/);
-    // ^(0x[0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$   Regex
-    //  (1          )  (2 )   (3 ) (4  ) (5  )      Capture groups
+    const result = funcName.match(
+      /^0x([0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$/i
+    );
+    // ^0x([0-9a-f]+): (.+) \((.+):(\d+):(\d+)\)$   Regex
+    //    (1        )  (2 )   (3 ) (4  ) (5  )      Capture groups
     // ^                                        $   Start to end
     //               :      \(                \)    Some raw characters
-    //  (0x[0-9a-f]+)                               Match the address, e.g. 0x10250148c
+    //    ([0-9a-f]+)                               Match the address, e.g. 10250148c
     //                 (.+)                         Match the function name
     //                        (.+)                  Match the filename
     //                             (\d+)            Match the line number
     //                                   (\d+)      Match the column number
 
     // Example input: "0x10250148c: alloc::vec::Vec<T,A>::append_elements (vec.rs:1469:9)"
-    // Capture groups: 11111111111  2222222222222222222222222222222222222  333333 4444 5
+    // Capture groups:   111111111  2222222222222222222222222222222222222  333333 4444 5
     if (result) {
-      address = parseInt(result[1].substr(2), 16);
+      address = parseInt(result[1], 16);
       funcName = result[2];
       fileName = result[3];
       line = Number(result[4]);
       column = Number(result[5]);
     }
+    // If the above regex doesn't match, just use the raw funcName, without additional
+    // information.
 
     const funcKey = `${funcName} ${fileName}`;
+
     let funcIndex = funcKeyToFuncIndex.get(funcKey);
     if (funcIndex === undefined) {
       funcTable.name.push(stringTable.indexForString(funcName));
@@ -242,7 +248,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const endBytes: Bytes[] = [];
 
   for (const pp of dhat.pps) {
-    // Never reset the stackIndex, as it as stack indexes always growing taller.
+    // Never reset the stackIndex, stack indexes always growing larger.
     let stackIndex = -1;
     let prefix = null;
 
@@ -250,17 +256,19 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     for (let i = pp.fs.length - 1; i >= 0; i--) {
       // The dhat frame indexes matches the process profile frame index.
       const frameIndex = pp.fs[i];
-      const funcIndex = frameTable.func[frameIndex];
+      const funcIndex = ensureExists(
+        frameTable.func[frameIndex],
+        'Expected to find a funcIndex from a frameIndex'
+      );
+
+      // Case 1: The stack index starts at -1, increment by 1 to start searching stacks
+      //         at index 0.
+      // Case 2: This is the previously matched stack index, increment it by 1 to continue
+      //         searching at the next stack index.
+      stackIndex++;
 
       // Start searching for a stack index.
-      for (
-        // Increase the stackIndex by one. For the first run, this will end up
-        // being a stackIndex of 0. For the consecutive runs, it will be the next
-        // stack index.
-        stackIndex++;
-        stackIndex < stackTable.length;
-        stackIndex++
-      ) {
+      for (; stackIndex < stackTable.length; stackIndex++) {
         const nextFrameIndex = stackTable.frame[stackIndex];
         if (
           frameTable.func[nextFrameIndex] === funcIndex &&
@@ -290,9 +298,9 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     bytesAtGmax.push(pp.gb);
     endBytes.push(pp.eb);
 
-    allocations.time.push(0);
-    allocations.stack.push(stackIndex);
-    allocations.length++;
+    allocationsTable.time.push(0);
+    allocationsTable.stack.push(stackIndex);
+    allocationsTable.length++;
   }
 
   const totalBytesThread = { ...thread };
@@ -300,13 +308,19 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   const bytesAtGmaxThread = { ...thread };
   const endBytesThread = { ...thread };
 
-  totalBytesThread.nativeAllocations = { ...allocations, weight: totalBytes };
+  totalBytesThread.nativeAllocations = {
+    ...allocationsTable,
+    weight: totalBytes,
+  };
   maximumBytesThread.nativeAllocations = {
-    ...allocations,
+    ...allocationsTable,
     weight: maximumBytes,
   };
-  bytesAtGmaxThread.nativeAllocations = { ...allocations, weight: bytesAtGmax };
-  endBytesThread.nativeAllocations = { ...allocations, weight: endBytes };
+  bytesAtGmaxThread.nativeAllocations = {
+    ...allocationsTable,
+    weight: bytesAtGmax,
+  };
+  endBytesThread.nativeAllocations = { ...allocationsTable, weight: endBytes };
 
   totalBytesThread.name = 'Total Bytes';
   maximumBytesThread.name = 'Maximum Bytes';
