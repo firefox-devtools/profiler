@@ -75,6 +75,10 @@ class Screenshots extends PureComponent<Props, State> {
     for (let i = screenshots.length - 1; i >= 0; i--) {
       const screenshotTime = screenshots[i].start;
       if (mouseTime >= screenshotTime) {
+        if (mouseTime > (screenshots[i].end || Infinity)) {
+          // The window is already closed at this point.
+          return null;
+        }
         return i;
       }
     }
@@ -347,10 +351,14 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
       (outerContainerWidth * (time - rangeStart)) / rangeLength;
 
     const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
+    const rightmostPixel = Math.min(
+      timeToPixel(screenshots[screenshots.length - 1].end || Infinity),
+      outerContainerWidth
+    );
     let screenshotIndex = 0;
     for (
       let left = leftmostPixel;
-      left < outerContainerWidth;
+      left < rightmostPixel;
       left += imageContainerWidth
     ) {
       // Try to find the next screenshot to fit in, or re-use the existing one.
@@ -369,7 +377,10 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"
-          style={{ left, width: imageContainerWidth }}
+          style={{
+            left,
+            width: Math.min(imageContainerWidth, rightmostPixel - left),
+          }}
           key={left}
         >
           {/* The following image is centered and cropped by the outer container. */}

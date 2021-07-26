@@ -584,8 +584,12 @@ export function deriveMarkersFromRawMarkerTable(
               data,
             });
           }
-
-          previousScreenshotMarkers.set(windowID, rawMarkerIndex);
+          if (
+            stringTable.getString(name) !==
+            'CompositorScreenshotWindowDestroyed'
+          ) {
+            previousScreenshotMarkers.set(windowID, rawMarkerIndex);
+          }
 
           continue;
         }
