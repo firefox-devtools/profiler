@@ -141,7 +141,6 @@ type FullProfileSpecificBaseQuery = {|
   hiddenGlobalTracks: string, // "01"
   hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
   localTrackOrderByPid: string, // "1549-780w6~1560-01"
-  timelineType: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
@@ -171,6 +170,7 @@ type BaseQuery = {|
   symbolServer: string,
   view: string,
   implementation: string,
+  timelineType: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -311,15 +311,6 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.full.localTrackOrderByPid
       );
 
-      if (
-        urlState.profileSpecific.full.timelineType === 'stack' ||
-        urlState.profileSpecific.full.timelineType === 'cpu-category'
-      ) {
-        // The default is the category view, so only add it to the URL if it's the
-        // stack or cpu-category view.
-        baseQuery.timelineType = urlState.profileSpecific.full.timelineType;
-      }
-
       break;
     }
     case 'active-tab': {
@@ -359,6 +350,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       urlState.profileSpecific.implementation === 'combined'
         ? undefined
         : urlState.profileSpecific.implementation,
+    timelineType:
+      // The default is the category view, so only add it to the URL if it's the
+      // stack or cpu-category view.
+      // TODO: We should make the 'cpu-category' the new default with an upgrader.
+      urlState.profileSpecific.timelineType === 'category'
+        ? undefined
+        : urlState.profileSpecific.timelineType,
   }: BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
@@ -570,6 +568,7 @@ export function stateFromLocation(
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
+      timelineType: validateTimelineType(query.timelineType),
       full: {
         showJsTracerSummary: query.summary === undefined ? false : true,
         globalTrackOrder: convertGlobalTrackOrderFromString(
@@ -584,7 +583,6 @@ export function stateFromLocation(
         localTrackOrderByPid: convertLocalTrackOrderByPidFromString(
           query.localTrackOrderByPid
         ),
-        timelineType: validateTimelineType(query.timelineType),
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map(index => Number(index))
           : null,

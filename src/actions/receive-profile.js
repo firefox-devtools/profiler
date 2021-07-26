@@ -570,6 +570,7 @@ export function finalizeActiveTabProfileView(
   tabID: TabID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    const hasUrlInfo = selectedThreadIndexes !== null;
     const relevantPages = getRelevantPagesForActiveTab(getState());
 
     if (relevantPages.length === 0) {
@@ -593,11 +594,28 @@ export function finalizeActiveTabProfileView(
       ]);
     }
 
+    // Check the profile to see if we have threadCPUDelta values and switch to
+    // the category view with CPU if we have. This is needed only while we are
+    // still experimenting with the new activity graph. We should remove this
+    // when we have this on by default.
+    let timelineType = null;
+    if (
+      !hasUrlInfo &&
+      profile.meta.sampleUnits &&
+      profile.threads[0].samples.threadCPUDelta
+    ) {
+      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
+      if (hasCPUDeltaValues) {
+        timelineType = 'cpu-category';
+      }
+    }
+
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
       activeTabTimeline,
       selectedThreadIndexes,
       tabID,
+      timelineType,
     });
   };
 }

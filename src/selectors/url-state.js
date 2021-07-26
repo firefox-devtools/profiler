@@ -111,7 +111,7 @@ export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
     'Expected to find at least one thread index in the selected thread indexes'
   );
 export const getTimelineType: Selector<TimelineType> = state =>
-  getFullProfileSpecificState(state).timelineType;
+  getProfileSpecificState(state).timelineType;
 
 /**
  * Simple selectors for tracks and track order.
