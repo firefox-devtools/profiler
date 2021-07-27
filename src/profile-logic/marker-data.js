@@ -1198,7 +1198,7 @@ export function sanitizeExtensionTextMarker(
   markerName: string,
   payload: TextMarkerPayload
 ): TextMarkerPayload {
-  if (markerName === 'ExtensionParent') {
+  if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
     return {
       ...payload,
       name: payload.name.replace(/^.*, (api_(call|event): )/, '$1'),
