@@ -80,6 +80,7 @@ Home--upload-from-url-button = Завантажити профіль з URL-ад
 Home--load-from-url-submit-button =
     .value = Завантажити
 Home--documentation-button = Документація
+Home--addon-button = Встановити додаток
 Home--additional-content-title = Завантажити наявні профілі
 
 ## IdleSearchField
@@ -130,6 +131,7 @@ MenuButtons--index--metaInfo-button =
 MenuButtons--index--profile-info-uploaded-actions = Видалити
 MenuButtons--index--metaInfo-subtitle = Інформація про профіль
 MenuButtons--metaInfo--symbols = Символи:
+MenuButtons--metaInfo--cpu = ЦП:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--profile-version = Версія профілю:
 MenuButtons--metaInfo--application = Застосунок
