@@ -60,8 +60,9 @@ describe('doSymbolicateProfile', function() {
     function switchSymbolTable(otherSymbolTable: ExampleSymbolTable) {
       symbolTable = otherSymbolTable;
     }
-    let symbolicationProviderMode: 'from-server' | 'from-addon' = 'from-addon';
-    function switchSymbolProviderMode(newMode: 'from-server' | 'from-addon') {
+    let symbolicationProviderMode: 'from-server' | 'from-browser' =
+      'from-browser';
+    function switchSymbolProviderMode(newMode: 'from-server' | 'from-browser') {
       symbolicationProviderMode = newMode;
     }
 
@@ -76,7 +77,7 @@ describe('doSymbolicateProfile', function() {
           }
           if (symbolicationProviderMode !== 'from-server') {
             throw new SymbolsNotFoundError(
-              'Not in from-server mode, try requestSymbolTableFromAddon.',
+              'Not in from-server mode, try requestSymbolTableFromBrowser.',
               request.lib
             );
           }
@@ -91,16 +92,16 @@ describe('doSymbolicateProfile', function() {
           return map;
         }),
 
-      requestSymbolTableFromAddon: async lib => {
+      requestSymbolTableFromBrowser: async lib => {
         if (lib.debugName !== 'firefox.pdb') {
           throw new SymbolsNotFoundError(
             'Should only have libs called firefox.pdb',
             lib
           );
         }
-        if (symbolicationProviderMode !== 'from-addon') {
+        if (symbolicationProviderMode !== 'from-browser') {
           throw new Error(
-            'should not call requestSymbolTableFromAddon if requestSymbolsFromServer is successful'
+            'should not call requestSymbolTableFromBrowser if requestSymbolsFromServer is successful'
           );
         }
 
@@ -135,7 +136,7 @@ describe('doSymbolicateProfile', function() {
   } = selectedThreadSelectors;
 
   describe('doSymbolicateProfile', function() {
-    it('can symbolicate a profile when symbols come from-addon', async () => {
+    it('can symbolicate a profile when symbols come from-browser', async () => {
       const {
         store: { dispatch, getState },
         profile,

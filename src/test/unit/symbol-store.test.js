@@ -57,13 +57,13 @@ describe('SymbolStore', function() {
           );
         })
       ),
-      requestSymbolTableFromAddon: jest.fn(() =>
+      requestSymbolTableFromBrowser: jest.fn(() =>
         Promise.resolve(completeSymbolTableAsTuple)
       ),
     };
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
-    expect(symbolProvider.requestSymbolTableFromAddon).not.toHaveBeenCalled();
+    expect(symbolProvider.requestSymbolTableFromBrowser).not.toHaveBeenCalled();
 
     const lib1 = { debugName: 'firefox', breakpadId: 'dont-care' };
     let secondAndThirdSymbol = new Map();
@@ -76,7 +76,9 @@ describe('SymbolStore', function() {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      1
+    );
     expect(errorCallback).not.toHaveBeenCalled();
     expect(secondAndThirdSymbol.get(0xf01)).toEqual({
       name: 'second symbol',
@@ -97,7 +99,9 @@ describe('SymbolStore', function() {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      2
+    );
     expect(errorCallback).not.toHaveBeenCalled();
     expect(firstAndLastSymbol.get(0x33)).toEqual({
       name: 'first symbol',
@@ -118,7 +122,9 @@ describe('SymbolStore', function() {
       errorCallback
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      2
+    );
 
     // Empty breakpadIds should result in an error.
     expect(errorCallback).toHaveBeenCalledWith(
@@ -138,7 +144,7 @@ describe('SymbolStore', function() {
           Promise.reject(new Error('this example only supports symbol tables'))
         )
       ),
-      requestSymbolTableFromAddon: jest.fn(() =>
+      requestSymbolTableFromBrowser: jest.fn(() =>
         Promise.resolve(completeSymbolTableAsTuple)
       ),
     };
@@ -165,7 +171,9 @@ describe('SymbolStore', function() {
       errorCallback
     );
 
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      1
+    );
     expect(errorCallback).not.toHaveBeenCalled();
   });
 
@@ -196,7 +204,7 @@ describe('SymbolStore', function() {
             })
         );
       }),
-      requestSymbolTableFromAddon: jest
+      requestSymbolTableFromBrowser: jest
         .fn()
         .mockResolvedValue(completeSymbolTableAsTuple),
     };
@@ -231,8 +239,10 @@ describe('SymbolStore', function() {
     expect(errorCallback).not.toHaveBeenCalled();
 
     // requestSymbolsFromServer should have failed for lib2, so
-    // requestSymbolTableFromAddon should have been called for it, once.
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    // requestSymbolTableFromBrowser should have been called for it, once.
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      1
+    );
 
     const lib1Symbols = ensureExists(symbolsPerLibrary.get(lib1));
     const lib2Symbols = ensureExists(symbolsPerLibrary.get(lib2));
@@ -277,14 +287,16 @@ describe('SymbolStore', function() {
     expect(errorCallback).not.toHaveBeenCalled();
 
     // requestSymbolsFromServer should have succeeded for that one request,
-    // so requestSymbolTableFromAddon should not have been called again.
-    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    // so requestSymbolTableFromBrowser should not have been called again.
+    expect(symbolProvider.requestSymbolTableFromBrowser).toHaveBeenCalledTimes(
+      1
+    );
   });
 
   it('should should report the right errors', async function() {
     const libs = [
       {
-        debugName: 'available-from-both-server-and-addon',
+        debugName: 'available-from-both-server-and-browser',
         breakpadId: 'dont-care',
       },
       {
@@ -292,7 +304,7 @@ describe('SymbolStore', function() {
         breakpadId: 'dont-care',
       },
       {
-        debugName: 'available-from-addon',
+        debugName: 'available-from-browser',
         breakpadId: 'dont-care',
       },
       {
@@ -317,7 +329,7 @@ describe('SymbolStore', function() {
     ]);
     const fakeSymbolStore = new FakeSymbolStore(
       new Map([
-        ['available-from-both-server-and-addon', symbolTable],
+        ['available-from-both-server-and-browser', symbolTable],
         ['available-from-server', symbolTable],
       ])
     );
@@ -336,16 +348,16 @@ describe('SymbolStore', function() {
           });
         });
       },
-      requestSymbolTableFromAddon: async ({ debugName, breakpadId }) => {
+      requestSymbolTableFromBrowser: async ({ debugName, breakpadId }) => {
         expect(debugName).not.toEqual('');
         expect(breakpadId).not.toEqual('');
         if (
-          debugName === 'available-from-addon' ||
-          debugName === 'available-from-both-server-and-addon'
+          debugName === 'available-from-browser' ||
+          debugName === 'available-from-both-server-and-browser'
         ) {
           return completeSymbolTableAsTuple;
         }
-        throw new Error('The add-on does not have symbols for this library.');
+        throw new Error('The browser does not have symbols for this library.');
       },
     };
     symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
@@ -367,10 +379,10 @@ describe('SymbolStore', function() {
     // library should be successful and no error should be returned.
     expect(succeededLibs).toEqual(
       new Set([
-        expect.objectContaining({ debugName: 'available-from-addon' }),
+        expect.objectContaining({ debugName: 'available-from-browser' }),
         expect.objectContaining({ debugName: 'available-from-server' }),
         expect.objectContaining({
-          debugName: 'available-from-both-server-and-addon',
+          debugName: 'available-from-both-server-and-browser',
         }),
       ])
     );
@@ -395,7 +407,7 @@ describe('SymbolStore', function() {
       new SymbolsNotFoundError(
         'Could not obtain symbols for available-from-neither/dont-care.\n' +
           ' - Error: symbol table not found\n' +
-          ' - Error: The add-on does not have symbols for this library.',
+          ' - Error: The browser does not have symbols for this library.',
         {
           debugName: 'available-from-neither',
           breakpadId: 'dont-care',
