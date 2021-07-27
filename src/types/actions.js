@@ -318,6 +318,7 @@ type ReceiveProfileAction =
       +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
       +tabID: TabID | null,
+      +timelineType: TimelineType | null,
     |}
   | {|
       +type: 'DATA_RELOAD',

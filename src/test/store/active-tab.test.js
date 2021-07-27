@@ -15,11 +15,17 @@ import {
   getScreenshotTrackProfile,
   addActiveTabInformationToProfile,
   addMarkersToThreadWithCorrespondingSamples,
+  getProfileWithThreadCPUDelta,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile, blankStore } from '../fixtures/stores';
 import { getView } from '../../selectors/app';
-import { getTimelineTrackOrganization } from '../../selectors/url-state';
+import {
+  getTimelineTrackOrganization,
+  getTimelineType,
+} from '../../selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
+
+import type { Profile } from 'firefox-profiler/types';
 
 describe('ActiveTab', function() {
   function setup(p = getProfileWithNiceTracks(), addInnerWindowID = true) {
@@ -99,17 +105,17 @@ describe('ActiveTab', function() {
 
 describe('finalizeProfileView', function() {
   function setup({
+    profile = addActiveTabInformationToProfile(getProfileWithNiceTracks())
+      .profile,
     search,
     noPages,
     activeTabID,
   }: {
+    profile?: Profile,
     search: string,
     noPages?: boolean,
     activeTabID?: number | null,
   }) {
-    const { profile } = addActiveTabInformationToProfile(
-      getProfileWithNiceTracks()
-    );
     const newUrlState = stateFromLocation({
       pathname: '/public/FAKEHASH/calltree/',
       search: '?' + search,
@@ -190,5 +196,41 @@ describe('finalizeProfileView', function() {
     expect(getTimelineTrackOrganization(getState())).toEqual({
       type: 'full',
     });
+  });
+
+  it('sets the timeline type to "categories with CPU" if there are CPU usage values in the profile', function() {
+    const { profile } = addActiveTabInformationToProfile(
+      getProfileWithThreadCPUDelta([1, 2])
+    );
+    const { getState } = setup({
+      profile,
+      search: '?view=active-tab&v=5',
+    });
+
+    // Check if we can successfully finalized the profile view for active tab view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      tabID: null,
+    });
+
+    // Check if we have the 'cpu-categories' as the timelineType
+    expect(getTimelineType(getState())).toBe('cpu-category');
+  });
+
+  it('sets the timeline type to "categories" if there are no CPU usage values in the profile', function() {
+    const { getState } = setup({
+      search: '?view=active-tab&v=5',
+    });
+
+    // Check if we can successfully finalized the profile view for active tab view.
+    expect(getView(getState()).phase).toBe('DATA_LOADED');
+    expect(getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      tabID: null,
+    });
+
+    // Check if we have the 'cpu-categories' as the timelineType
+    expect(getTimelineType(getState())).toBe('category');
   });
 });
