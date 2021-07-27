@@ -16,7 +16,11 @@ import {
   getEmptyProfile,
   getEmptyStackTable,
 } from '../../../profile-logic/data-structures';
+
 /**
+ * Create a profile with three identical threads, with the frame tree and call
+ * tree shown below.
+ *
  * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to
  * generate the profile, as it's testing the relationships between frames, and thus
  * cannot be generated from a list of functions.
@@ -37,7 +41,7 @@ import {
  */
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
-  const thread = getEmptyThread();
+  let thread = getEmptyThread();
   const funcNames = [
     'funcA',
     'funcB',
@@ -132,8 +136,17 @@ export default function getProfile(): Profile {
     length: 2,
   };
 
+  thread = Object.assign(thread, {
+    samples,
+    stackTable,
+    funcTable,
+    frameTable,
+  });
+
   profile.threads.push(
-    Object.assign(thread, { samples, stackTable, funcTable, frameTable })
+    thread,
+    Object.assign({}, thread),
+    Object.assign({}, thread)
   );
 
   return profile;
