@@ -1470,7 +1470,6 @@ export function getProfilesFromRawUrl(
 
     switch (dataSource) {
       case 'from-addon':
-      case 'unpublished':
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
@@ -1499,6 +1498,7 @@ export function getProfilesFromRawUrl(
       case 'none':
       case 'from-file':
       case 'local':
+      case 'unpublished':
         // There is no profile to download for these datasources.
         break;
       default:
