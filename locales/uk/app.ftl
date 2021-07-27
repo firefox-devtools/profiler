@@ -100,6 +100,7 @@ Home--additional-content-title = Завантажити наявні профі�
 ## panels.
 
 MarkerContextMenu--copy-description = Копіювати опис
+MarkerContextMenu--copy-url = Скопіювати URL-адресу
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -112,21 +113,38 @@ MarkerContextMenu--copy-description = Копіювати опис
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--duration = Тривалість
+MarkerTable--type = Тип
+MarkerTable--description = Опис
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
+MenuButtons--index--metaInfo-button =
+    .label = Інформація про профіль
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-actions = Видалити
+MenuButtons--index--metaInfo-subtitle = Інформація про профіль
+MenuButtons--metaInfo--symbols = Символи:
+MenuButtons--metaInfo--interval = Інтервал:
+MenuButtons--metaInfo--profile-version = Версія профілю:
+MenuButtons--metaInfo--application = Застосунок
+MenuButtons--metaInfo--name-and-version = Назва та версія:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
 
 ##
 
+MenuButtons--metaInfo--platform = Платформа
+MenuButtons--metaInfo--device = Пристрій:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = ОС:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
@@ -135,6 +153,11 @@ MarkerContextMenu--copy-description = Копіювати опис
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--button-upload = Вивантажити
+MenuButtons--publish--upload-title = Вивантаження профілю…
+MenuButtons--publish--message-try-again = Повторити спробу
+MenuButtons--publish--download = Завантажити
+MenuButtons--publish--compressing = Стиснення
 
 ## NetworkSettings
 ## This is used in the network chart.
@@ -166,6 +189,7 @@ MarkerContextMenu--copy-description = Копіювати опис
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-javascript = JavaScript
 
 ## Tab Bar for the bottom half of the analysis UI.
 
