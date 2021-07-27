@@ -58,17 +58,29 @@ CompareHome--form-label-profile2 = Профіль 2:
 
 Details--open-sidebar-button =
     .title = Відкрийте бічну панель
+Details--close-sidebar-button =
+    .title = Закрити бічну панель
 
 ## Footer Links
 
+FooterLinks--legal = Правові положення
+FooterLinks--Privacy = Приватність
+FooterLinks--Cookies = Куки
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--categories = Категорії
 
 ## Home page
 
+Home--upload-from-file-input-button = Завантажити профіль із файлу
+Home--upload-from-url-button = Завантажити профіль з URL-адреси
+Home--load-from-url-submit-button =
+    .value = Завантажити
+Home--documentation-button = Документація
+Home--additional-content-title = Завантажити наявні профілі
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -87,6 +99,7 @@ Details--open-sidebar-button =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--copy-description = Копіювати опис
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
