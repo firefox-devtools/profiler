@@ -502,15 +502,13 @@ export class ActivityFillGraphQuerier {
   getSampleAndCpuRatioAtClick(
     cssX: CssPixels,
     cssY: CssPixels,
-    time: Milliseconds,
-    canvasBoundingRect: ClientRect
+    time: Milliseconds
   ): HoveredPixelState | null {
     const {
-      canvasPixelWidth,
       rangeFilteredThread: { samples, stackTable },
       greyCategoryIndex,
     } = this.renderedComponentSettings;
-    const devicePixelRatio = canvasPixelWidth / canvasBoundingRect.width;
+    const { devicePixelRatio } = window;
     const deviceX = Math.round(cssX * devicePixelRatio);
     const deviceY = Math.round(cssY * devicePixelRatio);
     const categoryUnderMouse = this._categoryAtDevicePixel(deviceX, deviceY);

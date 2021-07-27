@@ -19,6 +19,7 @@ import type {
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
+import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import type { CategoryDrawStyles } from './ActivityGraphFills';
 
@@ -41,6 +42,7 @@ type CanvasProps = {|
   +onMouseUp: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
+  ...SizeProps,
 |};
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
@@ -102,12 +104,13 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       categories,
       enableCPUUsage,
       maxThreadCPUDelta,
+      width,
+      height,
     } = this.props;
 
-    const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
-    const canvasPixelWidth = Math.round(rect.width * window.devicePixelRatio);
-    const canvasPixelHeight = Math.round(rect.height * window.devicePixelRatio);
+    const canvasPixelWidth = Math.round(width * window.devicePixelRatio);
+    const canvasPixelHeight = Math.round(height * window.devicePixelRatio);
     canvas.width = canvasPixelWidth;
     canvas.height = canvasPixelHeight;
 

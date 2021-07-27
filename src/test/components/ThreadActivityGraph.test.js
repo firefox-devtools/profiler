@@ -28,7 +28,10 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import {
+  autoMockElementSize,
+  setMockedElementSize,
+} from '../fixtures/mocks/element-size';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -62,6 +65,10 @@ describe('ThreadActivityGraph', function() {
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
 
+    /**
+     * The ThreadActivityGraph is not a connected component. It's easiest to
+     * test it as once it's connected to the Redux store in TimelineTrackThread.
+     */
     const renderResult = render(
       <Provider store={store}>
         <TimelineTrackThread
@@ -88,8 +95,8 @@ describe('ThreadActivityGraph', function() {
       graphHeightPercentage: number
     ) {
       fireFullClick(activityGraphCanvas, {
-        pageX: getSamplesPixelPosition(index),
-        pageY: GRAPH_HEIGHT * graphHeightPercentage,
+        offsetX: getSamplesPixelPosition(index),
+        offsetY: GRAPH_HEIGHT * graphHeightPercentage,
       });
     }
 
@@ -100,6 +107,14 @@ describe('ThreadActivityGraph', function() {
         .map(funcIndex =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
+    }
+
+    /**
+     * Coordinate the flushing of the requestAnimationFrame and the draw calls.
+     */
+    function getContextDrawCalls() {
+      flushRafCalls();
+      return (window: any).__flushDrawLog();
     }
 
     return {
@@ -113,6 +128,7 @@ describe('ThreadActivityGraph', function() {
       activityGraphCanvas,
       clickActivityGraph,
       getCallNodePath,
+      getContextDrawCalls,
     };
   }
 
@@ -124,6 +140,27 @@ describe('ThreadActivityGraph', function() {
   it('matches the 2d canvas draw snapshot', () => {
     setup();
     expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('redraws on resize', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+    // Ensure we start out with 0.
+    expect(getContextDrawCalls().length).toEqual(0);
+
+    // Send out the resize with a width change.
+    // By changing the "fake" result of getBoundingClientRect, we ensure that
+    // the pure components rerender because their `width` props change.
+    setMockedElementSize({ width: GRAPH_WIDTH * 2, height: GRAPH_HEIGHT });
+    window.dispatchEvent(new Event('resize'));
+    const drawCalls = getContextDrawCalls();
+    // We want to ensure that we redraw the activity graph and not something
+    // else like the sample graph.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
   });
 
   it('matches the 2d canvas draw snapshot with CPU values', () => {
@@ -200,99 +237,93 @@ describe('ThreadActivityGraph', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  /**
-   * The ThreadActivityGraph is not a connected component. It's easiest to test it
-   * as once it's connected to the Redux store in the SelectedActivityGraph.
-   */
-  describe('ThreadActivityGraph', function() {
-    it('selects the full call node path when clicked', function() {
-      const { clickActivityGraph, getCallNodePath } = setup();
+  it('selects the full call node path when clicked', function() {
+    const { clickActivityGraph, getCallNodePath } = setup();
 
-      // The full call node at this sample is:
-      //  A -> B -> C -> F -> G
-      clickActivityGraph(1, 0.2);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
+    // The full call node at this sample is:
+    //  A -> B -> C -> F -> G
+    clickActivityGraph(1, 0.2);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
 
-      // The full call node at this sample is:
-      //  A -> B -> H -> I
-      clickActivityGraph(1, 0.8);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
-    });
+    // The full call node at this sample is:
+    //  A -> B -> H -> I
+    clickActivityGraph(1, 0.8);
+    expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
+  });
 
-    it('will redraw even when there are no samples in range', function() {
-      const { dispatch } = setup();
-      flushDrawLog();
+  it('will redraw even when there are no samples in range', function() {
+    const { dispatch } = setup();
+    flushDrawLog();
 
-      // Commit a thin range which contains no samples
-      dispatch(commitRange(0.5, 0.6));
-      const drawCalls = flushDrawLog();
-      // We use the presence of 'globalCompositeOperation' to know
-      // whether the canvas was redrawn or not.
-      expect(drawCalls.map(([fn]) => fn)).toContain(
-        'set globalCompositeOperation'
-      );
-    });
+    // Commit a thin range which contains no samples
+    dispatch(commitRange(0.5, 0.6));
+    const drawCalls = flushDrawLog();
+    // We use the presence of 'globalCompositeOperation' to know
+    // whether the canvas was redrawn or not.
+    expect(drawCalls.map(([fn]) => fn)).toContain(
+      'set globalCompositeOperation'
+    );
+  });
 
-    it('will compute the percentage properly even though it is in a commited range with missing samples', function() {
-      const MS_TO_NS_MULTIPLIER = 1000000;
-      const profile = getSamplesProfile();
-      profile.meta.interval = 1;
-      profile.meta.sampleUnits = {
-        time: 'ms',
-        eventDelay: 'ms',
-        threadCPUDelta: 'ns',
-      };
+  it('will compute the percentage properly even though it is in a commited range with missing samples', function() {
+    const MS_TO_NS_MULTIPLIER = 1000000;
+    const profile = getSamplesProfile();
+    profile.meta.interval = 1;
+    profile.meta.sampleUnits = {
+      time: 'ms',
+      eventDelay: 'ms',
+      threadCPUDelta: 'ns',
+    };
 
-      // We are creating a profile which has 8ms missing sample area in it.
-      // It's starting between the sample 2 and 3.
-      profile.threads[0].samples.threadCPUDelta = [
-        null,
-        0.4 * MS_TO_NS_MULTIPLIER,
-        0.1 * MS_TO_NS_MULTIPLIER,
-        4 * MS_TO_NS_MULTIPLIER, // It's 50% CPU because the actual interval is 8ms.
-        1 * MS_TO_NS_MULTIPLIER,
-        0.2 * MS_TO_NS_MULTIPLIER,
-        0.8 * MS_TO_NS_MULTIPLIER,
-        0.3 * MS_TO_NS_MULTIPLIER,
-      ];
-      profile.threads[0].samples.time = [
-        0,
-        1,
-        2,
-        10, // For this sample, the interval is 8ms since there are missing samples.
-        11,
-        12,
-        13,
-        14,
-      ];
+    // We are creating a profile which has 8ms missing sample area in it.
+    // It's starting between the sample 2 and 3.
+    profile.threads[0].samples.threadCPUDelta = [
+      null,
+      0.4 * MS_TO_NS_MULTIPLIER,
+      0.1 * MS_TO_NS_MULTIPLIER,
+      4 * MS_TO_NS_MULTIPLIER, // It's 50% CPU because the actual interval is 8ms.
+      1 * MS_TO_NS_MULTIPLIER,
+      0.2 * MS_TO_NS_MULTIPLIER,
+      0.8 * MS_TO_NS_MULTIPLIER,
+      0.3 * MS_TO_NS_MULTIPLIER,
+    ];
+    profile.threads[0].samples.time = [
+      0,
+      1,
+      2,
+      10, // For this sample, the interval is 8ms since there are missing samples.
+      11,
+      12,
+      13,
+      14,
+    ];
 
-      const { dispatch } = setup(profile);
-      flushDrawLog();
+    const { dispatch } = setup(profile);
+    flushDrawLog();
 
-      // Commit a range that starts right after the missing sample.
-      dispatch(commitRange(9, 14));
+    // Commit a range that starts right after the missing sample.
+    dispatch(commitRange(9, 14));
 
-      const drawCalls = flushDrawLog();
-      // Activity graph uses lineTo to draw the lines for the samples.
-      const lineToOperations = drawCalls.filter(
-        ([operation]) => operation === 'lineTo'
-      );
+    const drawCalls = flushDrawLog();
+    // Activity graph uses lineTo to draw the lines for the samples.
+    const lineToOperations = drawCalls.filter(
+      ([operation]) => operation === 'lineTo'
+    );
 
-      expect(lineToOperations.length).toBeGreaterThan(0);
-      // Make sure that all the lineTo operations are inside the activity graph
-      // rectangle. There should not be any sample that starts or ends outside
-      // of the graph.
-      expect(
-        lineToOperations.filter(
-          ([, x, y]) =>
-            x < 0 ||
-            x > GRAPH_WIDTH ||
-            y < 0 ||
-            y > GRAPH_HEIGHT ||
-            isNaN(x) ||
-            isNaN(y)
-        )
-      ).toEqual([]);
-    });
+    expect(lineToOperations.length).toBeGreaterThan(0);
+    // Make sure that all the lineTo operations are inside the activity graph
+    // rectangle. There should not be any sample that starts or ends outside
+    // of the graph.
+    expect(
+      lineToOperations.filter(
+        ([, x, y]) =>
+          x < 0 ||
+          x > GRAPH_WIDTH ||
+          y < 0 ||
+          y > GRAPH_HEIGHT ||
+          isNaN(x) ||
+          isNaN(y)
+      )
+    ).toEqual([]);
   });
 });

@@ -39,6 +39,7 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -162,6 +163,8 @@ function setup(
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
+  // WithSize uses requestAnimationFrame
+  const flushRafCalls = mockRaf();
   const renderResult = render(
     <Provider store={store}>
       <TimelineLocalTrack
@@ -172,6 +175,7 @@ function setup(
       />
     </Provider>
   );
+  flushRafCalls();
 
   const { container } = renderResult;
 

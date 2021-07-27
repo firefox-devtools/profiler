@@ -1183,6 +1183,226 @@ Array [
     "#6200a4",
   ],
   Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    15,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    25,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    45,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    55,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    65,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
     "beginPath",
   ],
   Array [
@@ -2388,94 +2608,6 @@ Array [
     Object {},
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    -5,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    5,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    15,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    25,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    35,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    45,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    55,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    65,
-    0,
-    10,
-    10,
-  ],
-  Array [
     "clearRect",
     0,
     0,
@@ -3632,6 +3764,226 @@ Array [
       width="4"
     />,
     "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    15,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    25,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    45,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    55,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    65,
+    0,
+    10,
+    10,
   ],
   Array [
     "set globalCompositeOperation",
@@ -4893,94 +5245,6 @@ Array [
     Object {},
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    -5,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    5,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    15,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    25,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    35,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    45,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    55,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    65,
-    0,
-    10,
-    10,
-  ],
-  Array [
     "clearRect",
     0,
     0,
@@ -6137,6 +6401,226 @@ Array [
       width="4"
     />,
     "repeat",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -3.3333333333333335,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    3.3333333333333335,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    10,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    43.333333333333336,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    50,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    56.666666666666664,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    63.333333333333336,
+    0,
+    6.666666666666667,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    70.00000000000001,
+    0,
+    6.666666666666667,
+    10,
   ],
   Array [
     "set globalCompositeOperation",
@@ -7398,94 +7882,6 @@ Array [
     Object {},
   ],
   Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    -3.3333333333333335,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    3.3333333333333335,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    10,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    43.333333333333336,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    50,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    56.666666666666664,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    63.333333333333336,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    70.00000000000001,
-    0,
-    6.666666666666667,
-    10,
-  ],
-  Array [
     "clearRect",
     0,
     0,
@@ -8656,6 +9052,160 @@ Array [
     "#d7d7db",
   ],
   Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe900",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffe90060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a4",
+  ],
+  Array [
+    "set fillStyle",
+    "#6200a460",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940060",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {},
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    -5,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    35,
+    0,
+    10,
+    10,
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
     "beginPath",
   ],
   Array [
@@ -9458,28 +10008,6 @@ Array [
   Array [
     "set fillStyle",
     Object {},
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    -5,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    35,
-    0,
-    10,
-    10,
   ],
   Array [
     "clearRect",
