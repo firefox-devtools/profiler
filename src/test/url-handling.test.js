@@ -1178,7 +1178,7 @@ describe('url upgrading', function() {
           pathname:
             '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
           search:
-            '?globalTrackOrder=5-0-1-2-3-4&hiddenGlobalTracks=5-3-4&localTrackOrderByPid=1234-1-0~345-2-0-1&hiddenLocalTracksByPid=678-2-3-0',
+            '?globalTrackOrder=5-0-1-2-3-4&hiddenGlobalTracks=5-3-4&localTrackOrderByPid=1234-1-0~345-2-0-1&hiddenLocalTracksByPid=678-2-3-0&thread=12',
           v: 5,
         },
         null
@@ -1209,6 +1209,25 @@ describe('url upgrading', function() {
       );
       expect(urlStateSelectors.getHiddenLocalTracksByPid(state)).toEqual(
         new Map([[678, new Set([0, 2, 3])]])
+      );
+      expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
+        new Set([12])
+      );
+    });
+
+    it('parses version 5 with multiple selected threads (comma-separated)', function() {
+      const { getState } = _getStoreWithURL(
+        {
+          pathname:
+            '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+          search: '?thread=3%2C12%2C7',
+          v: 5,
+        },
+        null
+      );
+      const state = getState();
+      expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
+        new Set([3, 7, 12])
       );
     });
   });

@@ -339,7 +339,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
     thread:
-      selectedThreads === null ? undefined : [...selectedThreads].join(','),
+      selectedThreads === null
+        ? undefined
+        : encodeUintSetForUrlComponent(selectedThreads),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     view,
@@ -516,7 +518,9 @@ export function stateFromLocation(
   const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
-    query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
+    query.thread !== undefined
+      ? decodeUintArrayFromUrlComponent(query.thread)
+      : [];
 
   // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -988,6 +992,10 @@ const _upgraders = {
           return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
         })
         .join('~');
+    }
+    if (query.thread) {
+      const selectedThreads = new Set(query.thread.split(',').map(n => +n));
+      query.thread = encodeUintSetForUrlComponent(selectedThreads);
     }
 
     // In this version, uintarray-encoding started supporting a range syntax:
