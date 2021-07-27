@@ -2475,6 +2475,23 @@ Array [
     10,
     10,
   ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
 ]
 `;
 
@@ -4962,6 +4979,23 @@ Array [
     0,
     10,
     10,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
   ],
 ]
 `;
@@ -7451,6 +7485,23 @@ Array [
     6.666666666666667,
     10,
   ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
 ]
 `;
 
@@ -9431,6 +9482,23 @@ Array [
     10,
   ],
   Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#003eaa",
   ],
@@ -10173,6 +10241,8 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
     >
       <canvas
         class="timelineMarkersCanvas"
+        height="10"
+        width="80"
       />
     </div>
   </div>

@@ -24,7 +24,7 @@ import {
   autoMockElementSize,
   setMockedElementSize,
 } from '../fixtures/mocks/element-size';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
@@ -698,7 +698,10 @@ function setup(profileOverrides: MixedObject = {}) {
   function depressKey(code: string, duration: Milliseconds) {
     jest.spyOn(performance, 'now').mockReturnValue(0);
     fireEvent.keyDown(viewportContainer(), { code });
-    flushRafCalls([duration]);
+    // we run requestAnimationFrame callbacks only once here: indeed Viewport
+    // will schedule callbacks as long as the keyup event isn't sent, and we'd
+    // go into an infinite loop.
+    flushRafCalls({ timestamps: [duration], once: true });
     fireEvent.keyUp(viewportContainer(), { code });
     flushRafCalls();
   }

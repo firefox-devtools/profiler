@@ -21,7 +21,7 @@ import { ensureExists } from '../../utils/flow';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getMouseEvent,

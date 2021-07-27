@@ -35,20 +35,13 @@ import {
   fireFullClick,
   fireFullContextMenu,
 } from '../fixtures/utils';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
 function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   const flushRafCalls = mockRaf();
-
-  function flushRafTwice() {
-    // We need to flush twice since when the first flush is run, it
-    // will request more code to be run in later animation frames.
-    flushRafCalls();
-    flushRafCalls();
-  }
 
   const profile = getProfileWithMarkers(...markersPerThread);
 
@@ -66,7 +59,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
     </Provider>
   );
 
-  flushRafTwice();
+  flushRafCalls();
 
   function getContextMenu() {
     return ensureExists(
@@ -124,17 +117,16 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
     fireMouseEvent('mousemove', positioningOptions);
     fireFullContextMenu(canvas, positioningOptions);
 
-    flushRafTwice();
+    flushRafCalls();
   }
 
   function mouseOver(where: { x: CssPixels, y: CssPixels }) {
     const positioningOptions = getPositioningOptions(where);
     fireMouseEvent('mousemove', positioningOptions);
-    flushRafTwice();
+    flushRafCalls();
   }
 
   return {
-    flushRafTwice,
     rightClick,
     mouseOver,
     getContextMenu,

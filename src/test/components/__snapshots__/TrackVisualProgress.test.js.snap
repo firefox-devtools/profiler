@@ -147,6 +147,8 @@ exports[`TrackVisualProgress matches the component snapshot 1`] = `
   >
     <canvas
       class="timelineTrackVisualProgressCanvas"
+      height="40"
+      width="70"
     />
   </div>
 </div>

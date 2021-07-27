@@ -20,7 +20,7 @@ import {
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getMouseEvent,

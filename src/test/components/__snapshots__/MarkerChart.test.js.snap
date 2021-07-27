@@ -38,7 +38,7 @@ exports[`MarkerChart context menus displays when right clicking on a marker 1`] 
 <nav
   class="react-contextmenu markerContextMenu react-contextmenu--visible"
   role="menu"
-  style="position: fixed; opacity: 0; pointer-events: none;"
+  style="position: fixed; opacity: 1; pointer-events: auto; top: 27px; left: 153px;"
   tabindex="-1"
 >
   <div
