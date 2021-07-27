@@ -48,7 +48,10 @@ import {
   addActiveTabInformationToProfile,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
-import { encodeUintArrayForUrlComponent } from '../utils/uintarray-encoding';
+import {
+  encodeUintArrayForUrlComponent,
+  encodeUintSetForUrlComponent,
+} from '../utils/uintarray-encoding';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
@@ -130,10 +133,13 @@ function _getStoreFromStateAfterUrlRoundtrip(
 }
 
 describe('selectedThread', function() {
-  function dispatchUrlWithThread(store, threadIndex) {
+  function dispatchUrlWithThread(store, threadIndexSet) {
+    const serializedSelectedThreads = encodeUintSetForUrlComponent(
+      threadIndexSet
+    );
     const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
-      search: `?thread=${threadIndex}`,
+      search: `?thread=${serializedSelectedThreads}&v=${CURRENT_URL_VERSION}`,
       hash: '',
     });
     store.dispatch({
@@ -142,22 +148,30 @@ describe('selectedThread', function() {
     });
   }
 
-  function setup(threadIndex) {
+  function setup(threadIndexSet) {
     const store = blankStore();
-    dispatchUrlWithThread(store, threadIndex);
+    dispatchUrlWithThread(store, threadIndexSet);
 
     const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
     Object.assign(profile.threads[0], {
       name: 'GeckoMain',
       processType: 'default',
+      pid: 123,
     });
     Object.assign(profile.threads[1], {
       name: 'Compositor',
       processType: 'default',
+      pid: 123,
     });
     Object.assign(profile.threads[2], {
       name: 'GeckoMain',
       processType: 'tab',
+      pid: 246,
+    });
+    Object.assign(profile.threads[3], {
+      name: 'GeckoMain',
+      processType: 'tab',
+      pid: 789,
     });
 
     store.dispatch(viewProfile(profile));
@@ -166,18 +180,25 @@ describe('selectedThread', function() {
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const { getState } = setup(1);
+    const { getState } = setup(new Set([1]));
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([1])
     );
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const { getState } = setup(100);
+    const { getState } = setup(new Set([100]));
 
     // "2" is the content process' main tab
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([2])
+    );
+  });
+
+  it('selects the right threads (multi selection) when receiving a profile from web', function() {
+    const { getState } = setup(new Set([0, 2]));
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([0, 2])
     );
   });
 });
