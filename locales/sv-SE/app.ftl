@@ -360,15 +360,21 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Inkludera dolda trådar
+MenuButtons--publish--renderCheckbox-label-hidden-time = Inkludera dolt tidsintervall
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skärmdumpar
 MenuButtons--publish--renderCheckbox-label-extension = Inkludera tilläggsinformation
 MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärden
 MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
 MenuButtons--publish--share-performance-profile = Dela prestandaprofil
 MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
 MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
+MenuButtons--publish--info-description-firefox-nightly = Den här profilen är från { -firefox-nightly-brand-name }, så all information ingår som standard.
+MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
 MenuButtons--publish--button-upload = Ladda upp
 MenuButtons--publish--upload-title = Laddar upp profil...
 MenuButtons--publish--cancel-upload = Avbryt uppladdning
+MenuButtons--publish--message-something-went-wrong = Hoppsan, något gick fel när du laddade upp profilen.
 MenuButtons--publish--message-try-again = Försök igen
 MenuButtons--publish--download = Hämta
 MenuButtons--publish--compressing = Komprimerar...
@@ -376,10 +382,14 @@ MenuButtons--publish--compressing = Komprimerar...
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrera nätverk:
+    .title = Visa endast nätverksförfrågningar som matchar ett visst namn
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = Visste du att du kan använda komma (,) för att söka med flera termer?
 
 ## Profile Delete Button
 
@@ -424,6 +434,9 @@ ServiceWorkerManager--installing-button = Installerar…
 ServiceWorkerManager--pending-button = Applicera och ladda om
 ServiceWorkerManager--installed-button = Ladda om applikationen
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
+ServiceWorkerManager--hide-notice-button =
+    .title = Dölj omladdningsmeddelandet
+    .aria-label = Dölj omladdningsmeddelandet
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -437,6 +450,7 @@ StackSettings--use-data-source-label = Datakälla:
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Anropsträd
+TabBar--stack-chart-tab = Stapeldiagram
 TabBar--network-tab = Nätverk
 
 ## TrackContextMenu

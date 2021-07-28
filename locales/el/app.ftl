@@ -46,17 +46,76 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Συγχώνευση συνάρτησης
+    .title =
+        Η συγχώνευση μιας συνάρτησης την αφαιρεί από το προφίλ και αναθέτει το χρόνο της στη
+        συνάρτηση που την κάλεσε. Αυτό συμβαίνει οπουδήποτε κλήθηκε η συνάρτηση
+        στο δέντρο.
+CallNodeContextMenu--transform-merge-call-node = Συγχώνευση κόμβου μόνο
+    .title =
+        Η συγχώνευση κόμβου τον αφαιρεί από το προφίλ και αναθέτει το χρόνο του
+        στον κόμβο της συνάρτησης που τον κάλεσε. Αφαιρεί μόνο τη συνάρτηση από
+        αυτό το συγκεκριμένο μέρος του δέντρου. Τα υπόλοιπα μέρη από τα οποία
+        κλήθηκε η συνάρτηση θα παραμείνουν στο προφίλ.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Η εστίαση σε συνάρτηση θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτή
+    τη συνάρτηση. Επιπλέον, ριζώνει εκ νέου το δέντρο κλήσεων ώστε η συνάρτηση
+    να είναι η μόνη ρίζα του δέντρου. Αυτό μπορεί να συνδυάσει πολλαπλές τοποθεσίες κλήσεων
+    συνάρτησης εντός ενός προφίλ σε έναν κόμβο κλήσης.
+CallNodeContextMenu--transform-focus-function = Εστίαση στη συνάρτηση
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Εστίαση στη συνάρτηση (ανεστραμμένη)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Εστίαση στο υπόδεντρο μόνο
+    .title =
+        Η εστίαση σε υπόδεντρο θα αφαιρέσει κάθε δείγμα που δεν περιλαμβάνει αυτό το
+        συγκεκριμένο μέρος του δέντρου κλήσεων. Αποσύρει έναν κλάδο του δέντρου κλήσεων,
+        ωστόσο το κάνει μόνο για αυτόν τον κόμβο κλήσεων. Όλες οι άλλες κλήσεις
+        της συνάρτησης παραβλέπονται.
+CallNodeContextMenu--transform-collapse-function-subtree = Σύμπτυξη συνάρτησης
+    .title =
+        Η σύμπτυξη συνάρτησης θα αφαιρέσει ό,τι έχει καλέσει αυτή και θα αναθέσει
+        όλο τον χρόνο στη συνάρτηση. Αυτό μπορεί να απλοποιήσει ένα προφίλ που
+        καλεί στον κώδικα ότι δεν χρειάζεται να αναλυθεί.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Σύμπτυξη <strong>{ $nameForResource }</strong>
+    .title =
+        Η σύμπτυξη πόρου θα εξομαλύνει όλες τις κλήσεις σε αυτό
+        τον πόρο σε ένα μόνο συμπτυγμένο κόμβο κλήσεων.
+CallNodeContextMenu--transform-collapse-direct-recursion = Σύμπτυξη άμεσης επανάληψης
+    .title =
+        Η σύμπτυξη άμεσης επανάληψης αφαιρεί τις κλήσεις που επαναλαμβάνονται συνεχώς στην
+        ίδια συνάρτηση.
+CallNodeContextMenu--transform-drop-function = Απόρριψη δειγμάτων με αυτή τη συνάρτηση
+    .title =
+        Η απόρριψη δειγμάτων αφαιρεί τον χρόνο τους από το προφίλ. Αυτό είναι χρήσιμο για την
+        εξάλειψη στοιχείων χρόνου που δεν είναι σχετικά για την ανάλυση.
 CallNodeContextMenu--expand-all = Ανάπτυξη όλων
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Αναζήτηση ονόματος συνάρτησης στο Searchfox
+CallNodeContextMenu--copy-function-name = Αντιγραφή ονόματος συνάρτησης
 CallNodeContextMenu--copy-script-url = Αντιγραφή URL σεναρίου
 CallNodeContextMenu--copy-stack = Αντιγραφή στοίβας
 
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Χρόνος εκτέλεσης (ms)
+    .title =
+        Ο “συνολικός” χρόνος εκτέλεσης περιλαμβάνει μια περίληψη όλου του χρόνου όπου
+        παρατηρήθηκε αυτή η συνάρτηση σε στοίβα. Περιέχει τον χρόνο πραγματικής
+        εκτέλεσης της συνάρτησης και τον χρόνο που χρησιμοποιήθηκε στους καλούντες από
+        αυτή τη συνάρτηση.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -122,6 +181,9 @@ Home--load-from-url-submit-button =
     .value = Φόρτωση
 Home--documentation-button = Τεκμηρίωση
 Home--menu-button = Ενεργοποίηση κουμπιού μενού του { -profiler-brand-name }
+Home--menu-button-instructions =
+    Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
+    επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
 Home--addon-button = Εγκατάσταση προσθέτου
 Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
@@ -144,6 +206,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Εμφάνιση μόνο ιδιοχρόνου
+    .title = Εμφάνιση μόνο του χρόνου που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -182,15 +246,21 @@ MarkerContextMenu--start-selection-at-marker-end = Έναρξη επιλογής
 MarkerContextMenu--end-selection-at-marker-start = Διακοπή επιλογής στην <strong>αρχή</strong> του δείκτη
 MarkerContextMenu--end-selection-at-marker-end = Διακοπή επιλογής στο <strong>τέλος</strong> του δείκτη
 MarkerContextMenu--copy-description = Αντιγραφή περιγραφής
+MarkerContextMenu--copy-call-stack = Αντιγραφή στοίβας κλήσεων
 MarkerContextMenu--copy-url = Αντιγραφή URL
+MarkerContextMenu--copy-full-payload = Αντιγραφή πλήρους φορτίου
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Φιλτράρισμα σημαδιών:
+    .title = Εμφάνιση μόνο των σημαδιών που αντιστοιχούν σε ένα συγκεκριμένο όνομα
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβολή πληροφοριών σχετικά με αυτό.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -222,9 +292,16 @@ MenuButtons--permalink--button =
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Μεταφορτωμένα:
 MenuButtons--index--profile-info-uploaded-actions = Διαγραφή
 MenuButtons--index--metaInfo-subtitle = Πληροφορίες προφίλ
 MenuButtons--metaInfo--symbols = Σύμβολα:
+MenuButtons--metaInfo--profile-symbolicated = Το προφίλ είναι συμβολισμένο
+MenuButtons--metaInfo--profile-not-symbolicated = Το προφίλ δεν είναι συμβολισμένο
+MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός προφίλ
+MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
+MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
+MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτή τη στιγμή
 MenuButtons--metaInfo--cpu = CPU:
 # This string is used when we have the information about both physical and
 # logical CPU cores.
@@ -290,34 +367,49 @@ MenuButtons--metaInfo--device = Συσκευή:
 MenuButtons--metaInfo--os = ΛΣ:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Οπτικές μετρήσεις
 MenuButtons--metaInfo--speed-index = Δείκτης ταχύτητας:
 # “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--perceptual-speed-index = Δείκτης "Perceptual Speed":
 # “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
 MenuButtons--metaInfo--contentful-speed-Index = Δείκτης "Contentful Speed":
 MenuButtons--metaInfo-renderRowOfList-label-features = Λειτουργίες:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Φίλτρο νημάτων:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Επεκτάσεις:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
 MenuButtons--metaOverheadStatistics-subtitle = Πρόσθετοι πόροι (overhead) του { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Μέσο
+MenuButtons--metaOverheadStatistics-max = Μέγιστο
+MenuButtons--metaOverheadStatistics-min = Ελάχιστο
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Πρόσθετοι πόροι
     .title = Χρόνος δειγματοληψίας όλων των νημάτων.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Εκκαθάριση
+    .title = Χρόνος απόρριψης ληγμένων δεδομένων.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Μετρητής
+    .title = Χρόνος συγκέντρωσης όλων των μετρητών.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Χρονικό διάστημα
+    .title = Παρατηρηθέν χρονικό διάστημα μεταξύ δύο δειγμάτων.
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
+MenuButtons--metaOverheadStatistics-profiled-duration = Διάρκεια καταγραφής:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Συμπερίληψη κρυφών νημάτων
+MenuButtons--publish--renderCheckbox-label-hidden-time = Συμπερίληψη κρυφού χρονικού διαστήματος
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Συμπερίληψη στιγμιότυπων οθόνης
 MenuButtons--publish--renderCheckbox-label-resource = Συμπερίληψη URL και διαδρομών πόρων
 MenuButtons--publish--renderCheckbox-label-extension = Συμπερίληψη πληροφοριών επέκτασης
 MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη τιμών προτιμήσεων
 MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται όλες οι πληροφορίες από προεπιλογή.
+MenuButtons--publish--include-additional-data = Συμπερίληψη επιπλέον δεδομένων που ίσως να είναι αναγνωρίσιμα
 MenuButtons--publish--button-upload = Μεταφόρτωση
 MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
 MenuButtons--publish--cancel-upload = Ακύρωση μεταφόρτωσης
@@ -385,6 +477,9 @@ ServiceWorkerManager--updated-while-not-ready =
     Εφαρμόστηκε μια νέα έκδοση της εφαρμογής προτού φορτωθεί πλήρως
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
+ServiceWorkerManager--hide-notice-button =
+    .title = Απόκρυψη σημείωσης επαναφόρτωσης
+    .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -392,28 +487,40 @@ ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέα
 
 StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Εγγενές
 StackSettings--use-data-source-label = Πηγή δεδομένων:
+StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
+    .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
+StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
+StackSettings--panel-search =
+    .label = Φιλτράρισμα στοιβών:
+    .title = Εμφάνιση μόνο στοιβών που περιέχουν συνάρτηση της οποίας το όνομα αντιστοιχεί σε αυτή την υποσυμβολοσειρά
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Δέντρο κλήσεων
+TabBar--flame-graph-tab = Γράφημα φλόγας
 TabBar--stack-chart-tab = Διάγραμμα στοιβών
 TabBar--marker-chart-tab = Διάγραμμα δεικτών
 TabBar--marker-table-tab = Πίνακας δεικτών
 TabBar--network-tab = Δίκτυο
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Εμφάνιση μόνο αυτής της ομάδας διεργασιών
 # This is used as the context menu item to show only the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Εμφάνιση μόνο του “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Απόκρυψη άλλων κομματιών του Screenshots
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
 TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
+TrackContextMenu--show-all-tracks = Εμφάνιση όλων των κομματιών
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -424,21 +531,52 @@ TrackContextMenu--hide-track = Απόκρυψη του “{ $trackName }”
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Ολοκλήρωση “{ $item }”
 # "Collapse resource" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Σύμπτυξη: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Εστίαση κόμβου: { $item }
 # "Focus function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Εστίαση: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Συγχώνευση κόμβου: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Συγχώνευση: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Απόρριψη: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Σύμπτυξη αναδρομής: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Σύμπτυξη υπόδεντρου: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

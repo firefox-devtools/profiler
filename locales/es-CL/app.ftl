@@ -22,6 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>App web para el anáisis de rendimiento de { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Ir a nuestro repositorio Git (se abrirá en una nueva ventana)
 
@@ -71,6 +72,8 @@ CallNodeContextMenu--transform-collapse-resource = Contraer <strong>{ $nameForRe
     .title = Contraer un recurso aplanará todas las llamadas a ese recurso a un solo nodo de llamada contraído.
 CallNodeContextMenu--transform-collapse-direct-recursion = Contraer recursión directa
     .title = Contraer una recursión directa remueve las llamadas con recursión repetida pasándolas a una misma función.
+CallNodeContextMenu--transform-drop-function = Descartar muestras con esta función
+    .title = Descartar muestras elimina su tiempo del perfilador. Esto es útil para eliminar información de tiempos que no es relevante para el análisis.
 CallNodeContextMenu--expand-all = Expandir todo
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -82,6 +85,18 @@ CallNodeContextMenu--copy-stack = Copiar pila
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Tiempo de ejecución (ms)
+    .title = El tiempo de ejecución "total" incluye un resumen de todo el tiempo en que esta función fue observada en la pila. Esto incluye el tiempo en que la función estaba realmente ejecutándose, y el tiempo ocupado por la fuente de la llamada a esta función.
+CallTree--tracing-ms-self = Propio (ms)
+    .title = El tiempo "propio" solo incluye el tiempo en que la función estuvo como finalización de la pila. Si esta función llamó a otras funciones, entonces el tiempo de "otras" funciones no es incluido. El tiempo "propio" es útil para entender dónde se está ocupando en realidad el tiempo dentro de un programa.
+CallTree--samples-total = Total (muestras)
+    .title = El conteo de muestras "total" incluye un resumen de cada muestra en que esta función fue observada en la pila. Esto incluye el tiempo en que la función estaba realmente ejecutándose, y el tiempo ocupado por la fuente de la llamada a esta función.
+CallTree--samples-self = Propio
+    .title = El conteo de muestras "propio" solo incluye muestras donde la función estuvo como finalización de la pila. Si esta función llamó a otras funciones, entonces los contadores de "Otras" funciones no son incluidos. El contador "propio" es útil para entender dónde se está ocupando en realidad el tiempo dentro de un programa.
+CallTree--bytes-total = Tamaño total (bytes)
+    .title = El "tamaño total" incluye un resumen de los bytes asignados o desasignados mientras esta función fue observada en la pila. Esto incluye tanto los bytes en que la función estaba realmente ejecutándose, como los bytes de la fuente de la llamada a esta función.
+CallTree--bytes-self = Propio (bytes)
+    .title = Los bytes "propios" incluyen los bytes asignados o desasignados donde la función estuvo como finalización de la pila. Si esta función es llamada en otras funciones, entonces los bytes de las "otras" funciones no son incluidos. Los bytes "propios" son útiles para entender dónde fue realmente asignada o desasignada la memoria dentro del programa.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -149,8 +164,14 @@ Home--load-from-url-submit-button =
     .value = Cargar
 Home--documentation-button = Documentación
 Home--menu-button = Activar botón de menú de { -profiler-brand-name }
+Home--menu-button-instructions = Habilita el botón de menú del perfilador para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
 Home--addon-button = Instalar complemento
+Home--addon-button-instructions = Instala el complemento de perfilador Gecko para comenzar a registrar un perfil de rendimiento en { -firefox-brand-name }, luego analízalo y compártelo con profiler.firefox.com.
+Home--record-instructions = Para empezar a perfilar, haz clic en el botón de perfilado o utiliza los atajos del teclado. El icono se torna azul cuando se está grabando un perfil. Pulsa <kbd>Capturar</kbd> para cargar los datos en profiler.firefox.com.
 Home--instructions-title = Cómo ver y registrar perfiles
+Home--instructions-content =
+    Registrar perfiles de rendimiento requiere de <a>{ -firefox-brand-name }</a>.
+    Sin embargo, los perfiles existentes pueden ser vistos en cualquier navegador moderno.
 Home--record-instructions-start-stop = Detener e iniciar perfilado
 Home--record-instructions-capture-load = Capturar y cargar perfil
 Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo. Haz que la web sea más rápida.
@@ -168,6 +189,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Mostrar solo tiempo propio
+    .title = Mostrar solo el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -181,6 +204,10 @@ ListOfPublishedProfiles--published-profiles-link =
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Borrar
     .title = Este perfil no puede ser eliminado porque no tenemos la información de autorización.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = ¡Aún no se ha subido ningún perfil!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Revisa y gestiona todos tus registros ({ $profilesRestCount } más)
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
@@ -194,6 +221,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Establecer selección a partir de la duración del marcador
 MarkerContextMenu--start-selection-here = Iniciar la selección aquí
 MarkerContextMenu--end-selection-here = Finalizar la selección aquí
 MarkerContextMenu--start-selection-at-marker-start = Iniciar la selección en el <strong>inicio</strong> del marcador
@@ -258,6 +286,36 @@ MenuButtons--metaInfo--symbolicate-profile = Simbolizar perfil
 MenuButtons--metaInfo--attempting-resymbolicate = Intentando volver a simbolizar el perfil
 MenuButtons--metaInfo--currently-symbolicating = Perfil actualmente simbolizado
 MenuButtons--metaInfo--cpu = CPU:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } núcleo físico
+       *[other] { $physicalCPUs } núcleos físicos
+    },{ $logicalCPUs ->
+        [one] { $logicalCPUs } núcleo lógico
+       *[other] { $logicalCPUs } núcleos lógicos
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } núcleo físico
+       *[other] { $physicalCPUs } núcleos físicos
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } núcleo lógico
+       *[other] { $logicalCPUs } núcleos lógicos
+    }
 MenuButtons--metaInfo--recording-started = Inicio del registro:
 MenuButtons--metaInfo--interval = Intervalo:
 MenuButtons--metaInfo--profile-version = Versión del perfil:
@@ -305,13 +363,39 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensiones:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = Adicionales de { -profiler-brand-short-name }
 MenuButtons--metaOverheadStatistics-mean = Mediana
 MenuButtons--metaOverheadStatistics-max = Máximo
 MenuButtons--metaOverheadStatistics-min = Mínimo
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Adicionales
+    .title = Tiempo para muestrear todos los hilos.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Limpieza
+    .title = Tiempo para descartar datos expirados.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Conteo
+    .title = Tiempo para reunir todos los contadores.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Intervalo
+    .title = Intervalo observado entre dos muestras.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Bloqueos
+    .title = Tiempo para conseguir un bloqueo antes de muestrear.
+MenuButtons--metaOverheadStatistics-overhead-duration = Duraciones adicionales:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Porcentaje adicional:
+MenuButtons--metaOverheadStatistics-profiled-duration = Duración del perfilado:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Incluir hilos ocultos
+MenuButtons--publish--renderCheckbox-label-hidden-time = Incluir rango de tiempo oculto
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Incluir capturas de pantalla
+MenuButtons--publish--renderCheckbox-label-resource = Incluir URL y rutas de recursos
+MenuButtons--publish--renderCheckbox-label-extension = Incluir información de extensión
+MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de preferencias
+MenuButtons--publish--reupload-performance-profile = Volver a subir perfil de rendimiento
+MenuButtons--publish--share-performance-profile = Compartir perfil de rendimiento
+MenuButtons--publish--info-description = Sube tu perfil y hazlo accesible a cualquiera que tenga el enlace.
+MenuButtons--publish--info-description-default = Por defecto, se eliminan tus datos personales.
+MenuButtons--publish--info-description-firefox-nightly = Este perfil es de { -firefox-nightly-brand-name }, por lo que de forma predeterminada se incluye toda la información.
+MenuButtons--publish--include-additional-data = Incluir datos adicionales que pueden ser identificables
 MenuButtons--publish--button-upload = Subir
 MenuButtons--publish--upload-title = Subiendo perfil…
 MenuButtons--publish--cancel-upload = Cancelar subida
@@ -323,10 +407,14 @@ MenuButtons--publish--compressing = Comprimiendo…
 ## NetworkSettings
 ## This is used in the network chart.
 
+NetworkSettings--panel-search =
+    .label = Filtrar redes:
+    .title = Mostrar solamente solicitudes de red que coincidan con cierto nombre
 
 ## PanelSearch
 ## The component that is used for all the search input hints in the application.
 
+PanelSearch--search-field-hint = ¿Sabías que puedes usar la coma (,) para buscar usando varios términos?
 
 ## Profile Delete Button
 
@@ -368,19 +456,67 @@ ProfileRootMessage--additional = Volver al inicio
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Instalando…
+ServiceWorkerManager--pending-button = Aplicar y recargar
+ServiceWorkerManager--installed-button = Recargar la aplicación
+ServiceWorkerManager--updated-while-not-ready = Una nueva versión de la aplicación se aplicó antes de que esta página terminara de cargar. Puede que se produzcan fallos.
+ServiceWorkerManager--new-version-is-ready = Una nueva versión de la aplicación ha sido descargada y está lista para usarse.
+ServiceWorkerManager--hide-notice-button =
+    .title = Ocultar el aviso de volver a cargar
+    .aria-label = Ocultar el aviso de volver a cargar
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Todas las pilas
+StackSettings--implementation-javascript = JavaScript
+StackSettings--implementation-native = Nativo
+StackSettings--use-data-source-label = Fuente de datos:
+StackSettings--call-tree-strategy-timing = Tiempos
+    .title = Resume usando pilas muestreadas de código ejecutado en el tiempo
+StackSettings--call-tree-strategy-js-allocations = Asignaciones JavaScript
+    .title = Resume usando bytes de JavaSCript asignado (no desasignaciones)
+StackSettings--call-tree-strategy-native-retained-allocations = Memoria retenida
+    .title = Resume usando bytes de memoria que fueron asignados, y nunca liberados en la selección de vista previa actual
+StackSettings--call-tree-native-allocations = Memoria asignada
+    .title = Resume usando bytes de memoria asignada
+StackSettings--call-tree-strategy-native-deallocations-memory = Memoria desasignada
+    .title = Resume usando bytes de memoria desasignada, por el sitio en que la memoria fue asignada.
+StackSettings--call-tree-strategy-native-deallocations-sites = Sitios de desasignación
+    .title = Resume usando bytes de memoria desasignada, por el sitio donde la memoria fue desasignada
+StackSettings--invert-call-stack = Invertir llamada de pila
+    .title = Ordenar por el tiempo ocupado en un nodo de llamada, ignorando sus hijos.
+StackSettings--show-user-timing = Mostrar usando tiempos
+StackSettings--panel-search =
+    .label = Filtrar pilas:
+    .title = Solo muestra las pilas que contienen una función cuyo nombre coincida con esta subcadena
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Árbol de llamadas
+TabBar--flame-graph-tab = Gráfico de flamas
+TabBar--stack-chart-tab = Gráfico de barras apiladas
+TabBar--marker-chart-tab = Gráfico de marcas
+TabBar--marker-table-tab = Tabla de marcas
+TabBar--network-tab = Red
+TabBar--js-tracer-tab = Trazador JS
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+TrackContextMenu--only-show-this-process-group = Mostrar solo este grupo de procesos
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Mostrar solo “{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Ocultar otras pistas de capturas de pantalla
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Ocultar “{ $trackName }”
+TrackContextMenu--show-all-tracks = Mostrar todas las pistas
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
@@ -391,8 +527,55 @@ ProfileRootMessage--additional = Volver al inicio
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Completar “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Contraer: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Enfocar nodo: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Enfocar: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Fusionar nodo: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Fusionar: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Descartar: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion = Contraer recursión: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Colapsar subárbol: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Registros subidos
