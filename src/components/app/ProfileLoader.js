@@ -54,7 +54,6 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
-      case 'unpublished':
         retrieveProfileFromAddon();
         break;
       case 'from-file':
@@ -74,6 +73,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
         }
         break;
       case 'uploaded-recordings':
+      case 'unpublished':
       case 'none':
         // nothing to do
         break;
