@@ -69,7 +69,7 @@ CompareHome--form-label-profile2 = Профіль 2:
 ## used at the bottom part of the UI.
 
 Details--open-sidebar-button =
-    .title = Відкрийте бічну панель
+    .title = Відкрити бічну панель
 Details--close-sidebar-button =
     .title = Закрити бічну панель
 
@@ -100,7 +100,7 @@ Home--profiler-motto = Отримайте профіль швидкодії. П�
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
-Home--recent-uploaded-recordings-title = Недавно завантажені записи
+Home--recent-uploaded-recordings-title = Недавно завантажені записування
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -123,13 +123,22 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодног�
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
-ListOfPublishedProfiles--uploaded-profile-information-label = Переглядайте всі свої записи та керуйте ними (ще { $profilesRestCount })
+ListOfPublishedProfiles--uploaded-profile-information-label = Переглянути всі свої записування та керувати ними (ще { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Керувати цим записуванням
+        [few] Керувати цими записуваннями
+       *[many] Керувати цими записуваннями
+    }
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
-MarkerContextMenu--copy-description = Копіювати опис
+MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
 
 ## MarkerSettings
@@ -151,7 +160,7 @@ MarkerTable--description = Опис
 ## These strings are used for the buttons at the top of the profile viewer.
 
 MenuButtons--index--metaInfo-button =
-    .label = Інформація про профіль
+    .label = Дані профілю
 MenuButtons--index--cancel-upload = Скасувати вивантаження
 MenuButtons--index--share-upload =
     .label = Вивантажити локальний профіль
