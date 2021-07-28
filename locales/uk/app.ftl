@@ -114,6 +114,11 @@ Home--recent-uploaded-recordings-title = Недавно завантажені �
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Клацніть тут, щоб завантажити профіль { $smallProfileName }
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодного профілю ще не завантажено!
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
@@ -147,12 +152,14 @@ MarkerTable--description = Опис
 
 MenuButtons--index--metaInfo-button =
     .label = Інформація про профіль
+MenuButtons--index--cancel-upload = Скасувати вивантаження
 MenuButtons--index--share-upload =
     .label = Вивантажити локальний профіль
 MenuButtons--index--share-re-upload =
     .label = Повторно вивантажити
 MenuButtons--index--share-error-uploading =
     .label = Помилка вивантаження
+MenuButtons--index--revert = Повернутися до початкового профілю
 MenuButtons--index--docs = Документи
 
 ## MetaInfo panel
@@ -257,6 +264,11 @@ StackSettings--use-data-source-label = Джерело даних:
 ## This is used as a context menu for timeline to organize the tracks in the
 ## analysis UI.
 
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Сховати “{ $trackName }”
+TrackContextMenu--show-all-tracks = Показати всі доріжки
 
 ## TransformNavigator
 ## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
