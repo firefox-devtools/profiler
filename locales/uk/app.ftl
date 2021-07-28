@@ -29,11 +29,19 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-local =
+    .message = Ще не впроваджено.
+AppViewRouter--error-message-public =
+    .message = Не вдалося завантажити профіль.
+AppViewRouter--error-message-from-url =
+    .message = Не вдалося завантажити профіль.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--copy-function-name = Скопіювати назву функції
+CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
 
 ## CallTree
 ## This is the component for Call Tree panel.
@@ -139,6 +147,12 @@ MarkerTable--description = Опис
 
 MenuButtons--index--metaInfo-button =
     .label = Інформація про профіль
+MenuButtons--index--share-upload =
+    .label = Вивантажити локальний профіль
+MenuButtons--index--share-re-upload =
+    .label = Повторно вивантажити
+MenuButtons--index--share-error-uploading =
+    .label = Помилка вивантаження
 MenuButtons--index--docs = Документи
 
 ## MetaInfo panel
@@ -167,6 +181,8 @@ MenuButtons--metaInfo--name-and-version = Назва та версія:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
+MenuButtons--metaInfo--build-type-debug = Debug
+MenuButtons--metaInfo--build-type-opt = Opt
 
 ##
 
@@ -224,12 +240,15 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Встановлення…
+ServiceWorkerManager--installed-button = Перезавантажити застосунок
+ServiceWorkerManager--new-version-is-ready = Нова версія застосунку завантажена та готова до використання.
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
 StackSettings--implementation-javascript = JavaScript
+StackSettings--use-data-source-label = Джерело даних:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
@@ -253,3 +272,4 @@ StackSettings--implementation-javascript = JavaScript
 ## This is the page that displays all the profiles that user has uploaded.
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
+UploadedRecordingsHome--title = Вивантажені записи
