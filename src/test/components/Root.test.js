@@ -11,7 +11,7 @@ jest.mock('../../actions/receive-profile', () => ({
   // These mocks will get their implementation in the `setup` function.
   // Otherwise the implementation is wiped before the test starts.
   // See https://github.com/facebook/jest/issues/7573 for more info.
-  retrieveProfileFromAddon: jest.fn(),
+  retrieveProfileFromBrowser: jest.fn(),
   retrieveProfileFromStore: jest.fn(),
   retrieveProfilesToCompare: jest.fn(),
 }));
@@ -51,13 +51,13 @@ import { fatalError } from '../../actions/errors';
 const {
   temporaryError,
   viewProfile,
-  waitingForProfileFromAddon,
+  waitingForProfileFromBrowser,
   waitingForProfileFromStore,
 } = jest.requireActual('../../actions/receive-profile');
 // These functions are mocks
 import {
   retrieveProfileFromStore,
-  retrieveProfileFromAddon,
+  retrieveProfileFromBrowser,
   retrieveProfilesToCompare,
 } from '../../actions/receive-profile';
 import { stateFromLocation } from '../../app-logic/url-handling';
@@ -77,9 +77,9 @@ describe('app/AppViewRouter', function() {
     const { container, dispatch, navigateToAddonLoadingPage } = setup();
 
     navigateToAddonLoadingPage();
-    dispatch(waitingForProfileFromAddon());
+    dispatch(waitingForProfileFromBrowser());
     expect(container.firstChild).toMatchSnapshot();
-    expect(retrieveProfileFromAddon).toBeCalled();
+    expect(retrieveProfileFromBrowser).toBeCalled();
 
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
@@ -95,7 +95,7 @@ describe('app/AppViewRouter', function() {
     } = setup();
 
     navigateToAddonLoadingPage();
-    dispatch(waitingForProfileFromAddon());
+    dispatch(waitingForProfileFromBrowser());
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
 
@@ -174,7 +174,7 @@ function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // Flow doesn't know these actions are jest mocks.
-  (retrieveProfileFromAddon: any).mockImplementation(() => async () => {});
+  (retrieveProfileFromBrowser: any).mockImplementation(() => async () => {});
   (retrieveProfileFromStore: any).mockImplementation(() => async () => {});
   (retrieveProfilesToCompare: any).mockImplementation(() => async () => {});
 
