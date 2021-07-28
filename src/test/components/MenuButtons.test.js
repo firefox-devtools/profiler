@@ -108,7 +108,7 @@ describe('app/MenuButtons', function() {
     store.dispatch(
       updateUrlState(
         stateFromLocation({
-          pathname: '/from-addon',
+          pathname: '/from-browser',
           search: '',
           hash: '',
         })
@@ -316,7 +316,7 @@ describe('app/MenuButtons', function() {
       fireFullClick(revertButton);
       await waitForElementToBeRemoved(revertButton);
 
-      expect(getDataSource(getState())).toBe('from-addon');
+      expect(getDataSource(getState())).toBe('from-browser');
       expect(getHash(getState())).toBe('');
     });
 

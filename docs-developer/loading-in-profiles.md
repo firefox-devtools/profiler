@@ -94,7 +94,7 @@ server.listen(PORT, err => {
 
 ### Directly from Firefox
 
-> `https://profiler.firefox.com/from-addon/`
+> `https://profiler.firefox.com/from-browser/`
 
 Firefox loads the profiles directly into the front-end through a WebChannel mechanism. This is done with the profile menu button, which can be enabled on the homepage of [profiler.firefox.com](https://profiler.firefox.com/)
 

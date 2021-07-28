@@ -39,9 +39,7 @@ export type DataSource =
   | 'from-file'
   // This datasource is used to fetch a profile from Firefox via a frame script.
   // This is the first entry-point when a profile is captured in the browser.
-  // In the past it was used by the Gecko Profiler add-on, hence the name.
-  // We intend to rename this to from-browser in the future.
-  | 'from-addon'
+  | 'from-browser'
   // This is used for profiles that have been shared / uploaded to the Profiler
   // Server.
   | 'public'
@@ -51,7 +49,7 @@ export type DataSource =
   | 'unpublished'
   // Reserved for future use. Once implemented, it would work as follows:
   // Whenever a non-public profile is loaded into the profiler, e.g. via
-  // from-addon or from-file, we want to store it in a local database
+  // from-browser or from-file, we want to store it in a local database
   // automatically, generate an ID for it, and redirect the URL to /local/{id}/.
   // This would make it so that the page can be reloaded, or restored after a
   // browser restart, without losing the profile.

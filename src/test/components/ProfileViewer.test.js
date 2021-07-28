@@ -44,7 +44,7 @@ describe('ProfileViewer', function() {
     store.dispatch(
       updateUrlState(
         stateFromLocation({
-          pathname: '/from-addon',
+          pathname: '/from-browser',
           search: '',
           hash: '',
         })

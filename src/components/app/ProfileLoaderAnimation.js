@@ -18,7 +18,7 @@ import type { AppViewState, State, DataSource } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 const LOADING_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
-  'from-addon': 'ProfileLoaderAnimation--loading-message-unpublished',
+  'from-browser': 'ProfileLoaderAnimation--loading-message-unpublished',
   unpublished: 'ProfileLoaderAnimation--loading-message-unpublished',
   'from-file': 'ProfileLoaderAnimation--loading-message-from-file',
   local: 'ProfileLoaderAnimation--loading-message-local',

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
+exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-browser to public 1`] = `<profile-viewer />`;
 
 exports[`app/AppViewRouter renders an home when the user pressed back after an error 1`] = `
 <div
