@@ -19,7 +19,10 @@ import {
   coerce,
   ensureExists,
 } from 'firefox-profiler/utils/flow';
-import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getThreadsKey,
+  toValidCallTreeSummaryStrategy,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
@@ -33,7 +36,6 @@ import type {
   TrackIndex,
   CallNodePath,
   ThreadIndex,
-  TransformStacksPerThread,
   TimelineType,
 } from 'firefox-profiler/types';
 import {
@@ -270,6 +272,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   }
 
   const { selectedThreads } = urlState.profileSpecific;
+  const selectedThreadsKey =
+    selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
   let ctxId;
   let view;
@@ -339,7 +343,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
     thread:
-      selectedThreads === null ? undefined : [...selectedThreads].join(','),
+      selectedThreads === null
+        ? undefined
+        : encodeUintSetForUrlComponent(selectedThreads),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     view,
@@ -381,11 +387,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
-      if (selectedThreads !== null) {
+      if (
+        selectedThreadsKey !== null &&
+        urlState.profileSpecific.transforms[selectedThreadsKey]
+      ) {
         query.transforms =
           stringifyTransforms(
-            selectedThreads,
-            urlState.profileSpecific.transforms
+            urlState.profileSpecific.transforms[selectedThreadsKey]
           ) || undefined;
       }
       query.ctSummary =
@@ -516,7 +524,14 @@ export function stateFromLocation(
   const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
-    query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
+    query.thread !== undefined
+      ? decodeUintArrayFromUrlComponent(query.thread)
+      : [];
+
+  const selectedThreads =
+    selectedThreadsList.length !== 0 ? new Set(selectedThreadsList) : null;
+  const selectedThreadsKey =
+    selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
   // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -534,7 +549,10 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
-  const transforms = parseTransforms(selectedThreadsList, query.transforms);
+  const transforms = {};
+  if (selectedThreadsKey !== null) {
+    transforms[selectedThreadsKey] = parseTransforms(query.transforms);
+  }
 
   let tabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
@@ -562,8 +580,7 @@ export function stateFromLocation(
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
-      selectedThreads:
-        selectedThreadsList.length === 0 ? null : new Set(selectedThreadsList),
+      selectedThreads,
       callTreeSearchString: query.search || '',
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
@@ -868,20 +885,17 @@ const _upgraders = {
       return;
     }
 
-    const transformStacksPerThread: TransformStacksPerThread = query.transforms
-      ? parseTransforms([selectedThread], query.transforms)
-      : {};
-
-    // At the time this upgrader was written, there was only one selected thread.
-    // Only upgrade the single transfrom.
-    const transforms = transformStacksPerThread[selectedThread];
+    const transforms = parseTransforms(query.transforms);
 
     if (!transforms || transforms.length === 0) {
       // We don't have any transforms to upgrade.
       return;
     }
 
+    // The transform stack is for the selected thread.
+    // At the time this upgrader was written, there was only one selected thread.
     const thread = profile.threads[selectedThread];
+
     for (let i = 0; i < transforms.length; i++) {
       const transform = transforms[i];
       if (
@@ -909,10 +923,7 @@ const _upgraders = {
       );
     }
 
-    processedLocation.query.transforms = stringifyTransforms(
-      new Set([selectedThread]),
-      transformStacksPerThread
-    );
+    processedLocation.query.transforms = stringifyTransforms(transforms);
   },
   [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
     // We changed how the ranges are serialized to the URLs. Before it was the
@@ -989,6 +1000,10 @@ const _upgraders = {
         })
         .join('~');
     }
+    if (query.thread) {
+      const selectedThreads = new Set(query.thread.split(',').map(n => +n));
+      query.thread = encodeUintSetForUrlComponent(selectedThreads);
+    }
 
     // In this version, uintarray-encoding started supporting a range syntax:
     // Instead of "abcd" we now support "awd" as a shortcut.
@@ -1002,6 +1017,18 @@ const _upgraders = {
     // verbose. And they get collapsed to the range syntax automatically.
     // Moreover, the new URL version ensures that we don't attempt to interpret
     // new URLs with old profiler versions.
+
+    // There was another change in this version: query.transforms now stores a
+    // different value when multiple threads are selected. Rather than storing
+    // a list of transform stacks for the individual threads, it now stores the
+    // transform stack for the combined thread.
+    // We can discard any transforms for individual threads because they're not
+    // affecting the current view; the current view displays the combined thread.
+    // And the old format of semicolon-separated transform stacks is no longer
+    // parsed.
+    if (query.transforms && query.transforms.includes(';')) {
+      delete query.transforms;
+    }
   },
 };
 

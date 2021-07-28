@@ -25,7 +25,7 @@ import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addRootOverlayElement,
@@ -117,8 +117,6 @@ describe('timeline/TrackThread', function() {
     const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
-    flushRafCalls();
-    // The size update then schedules another rAF draw call for canvas components.
     flushRafCalls();
 
     const stackGraphCanvas = () =>

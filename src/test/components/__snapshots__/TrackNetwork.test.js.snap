@@ -694,7 +694,7 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
   <canvas
     class="timelineTrackNetworkCanvas"
     height="35"
-    width="0"
+    width="400"
   />
   <div
     class="timelineVerticalIndicatorsLine"

@@ -59,6 +59,8 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             >
               <canvas
                 class="timelineMarkersCanvas"
+                height="300"
+                width="200"
               />
             </div>
           </div>
@@ -71,6 +73,8 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
             >
               <canvas
                 class="timelineMarkersCanvas"
+                height="300"
+                width="200"
               />
             </div>
           </div>
@@ -152,6 +156,8 @@ exports[`ActiveTabTimeline ActiveTabResourceTrack with a thread/sub-frame track 
             >
               <canvas
                 class="timelineMarkersCanvas"
+                height="300"
+                width="200"
               />
             </div>
           </div>
@@ -225,6 +231,8 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           >
             <canvas
               class="timelineMarkersCanvas"
+              height="300"
+              width="200"
             />
           </div>
         </div>
@@ -297,6 +305,8 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
           >
             <canvas
               class="timelineMarkersCanvas"
+              height="300"
+              width="200"
             />
           </div>
         </div>
@@ -376,6 +386,8 @@ exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a res
                 >
                   <canvas
                     class="timelineMarkersCanvas"
+                    height="300"
+                    width="200"
                   />
                 </div>
               </div>
@@ -401,7 +413,38 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
   >
     <ol
       class="timelineRulerContainer"
-    />
+    >
+      <li
+        class="timelineRulerNotch"
+        style="left: 0px;"
+      >
+        <span
+          class="timelineRulerNotchText"
+        >
+          0.0000s
+        </span>
+      </li>
+      <li
+        class="timelineRulerNotch"
+        style="left: 100px;"
+      >
+        <span
+          class="timelineRulerNotchText"
+        >
+          0.0005s
+        </span>
+      </li>
+      <li
+        class="timelineRulerNotch"
+        style="left: 200px;"
+      >
+        <span
+          class="timelineRulerNotchText"
+        >
+          0.0010s
+        </span>
+      </li>
+    </ol>
   </div>
   <div
     class="overflowEdgeIndicator timelineOverflowEdgeIndicator"
@@ -485,6 +528,8 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       >
                         <canvas
                           class="timelineMarkersCanvas"
+                          height="300"
+                          width="200"
                         />
                       </div>
                     </div>
@@ -497,6 +542,8 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
                       >
                         <canvas
                           class="timelineMarkersCanvas"
+                          height="300"
+                          width="200"
                         />
                       </div>
                     </div>

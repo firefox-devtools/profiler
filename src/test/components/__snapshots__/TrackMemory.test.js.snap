@@ -153,6 +153,8 @@ exports[`TrackMemory matches the component snapshot 1`] = `
     >
       <canvas
         class="timelineMarkersCanvas"
+        height="10"
+        width="80"
       />
     </div>
   </div>
@@ -161,6 +163,8 @@ exports[`TrackMemory matches the component snapshot 1`] = `
   >
     <canvas
       class="timelineTrackMemoryCanvas"
+      height="25"
+      width="80"
     />
     <div
       class="timelineEmptyThreadIndicator"

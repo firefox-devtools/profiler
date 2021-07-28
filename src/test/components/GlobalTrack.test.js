@@ -22,6 +22,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 describe('timeline/GlobalTrack', function() {
   autoMockCanvasContext();
@@ -69,6 +70,8 @@ describe('timeline/GlobalTrack', function() {
       dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
     }
 
+    // WithSize uses requestAnimationFrame
+    const flushRafCalls = mockRaf();
     const renderResult = render(
       <Provider store={store}>
         <TimelineGlobalTrack
@@ -78,6 +81,7 @@ describe('timeline/GlobalTrack', function() {
         />
       </Provider>
     );
+    flushRafCalls();
     const { container } = renderResult;
 
     const getGlobalTrackLabel = () =>

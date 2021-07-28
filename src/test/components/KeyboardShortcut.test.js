@@ -11,7 +11,7 @@ import createStore from 'firefox-profiler/app-logic/create-store';
 import { KeyboardShortcut } from 'firefox-profiler/components/app/KeyboardShortcut';
 import { fireFullKeyPress } from 'firefox-profiler/test/fixtures/utils';
 import { coerce } from 'firefox-profiler/utils/flow';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 describe('app/KeyboardShortcut', function() {
   function setup() {

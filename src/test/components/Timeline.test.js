@@ -15,7 +15,7 @@ import {
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
   autoMockElementSize,
   getElementWithFixedSize,
@@ -48,11 +48,15 @@ describe('Timeline multiple thread selection', function() {
     const profile = getProfileWithNiceTracks();
     const store = storeWithProfile(profile);
 
+    // We need a properly laid out ActivityGraph for some of the operations in
+    // tests.
+    const flushRafCalls = mockRaf();
     const renderResult = render(
       <Provider store={store}>
         <Timeline />
       </Provider>
     );
+    flushRafCalls();
 
     return { ...renderResult, ...store };
   }
@@ -163,7 +167,7 @@ describe('Timeline multiple thread selection', function() {
       null
     );
 
-    fireFullClick(activityGraph, { pageX: 50, pageY: 50 });
+    fireFullClick(activityGraph, { offsetX: 50, offsetY: 50 });
 
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain process]',
@@ -406,7 +410,7 @@ describe('Timeline', function() {
     jest
       .spyOn(ReactDOM, 'findDOMNode')
       .mockImplementation(() =>
-        getElementWithFixedSize({ width: 300, height: 300 })
+        getElementWithFixedSize({ width: 200, height: 300 })
       );
   });
 
@@ -422,9 +426,6 @@ describe('Timeline', function() {
       </Provider>
     );
 
-    // We need to flush twice since when the first flush is run, it
-    // will request more code to be run in later animation frames.
-    flushRafCalls();
     flushRafCalls();
 
     const drawCalls = flushDrawLog();

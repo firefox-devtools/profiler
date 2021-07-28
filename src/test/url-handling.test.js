@@ -7,11 +7,13 @@
 import { oneLineTrim } from 'common-tags';
 import * as urlStateSelectors from '../selectors/url-state';
 import {
+  addTransformToStack,
   changeCallTreeSearchString,
   changeImplementationFilter,
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  changeSelectedThreads,
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
@@ -29,7 +31,12 @@ import {
   viewProfile,
   changeTimelineTrackOrganization,
 } from '../actions/receive-profile';
-import type { Profile, StartEndRange } from 'firefox-profiler/types';
+import type {
+  Profile,
+  StartEndRange,
+  Store,
+  State,
+} from 'firefox-profiler/types';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
@@ -41,13 +48,17 @@ import {
   addActiveTabInformationToProfile,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
-import { encodeUintArrayForUrlComponent } from '../utils/uintarray-encoding';
+import {
+  encodeUintArrayForUrlComponent,
+  encodeUintSetForUrlComponent,
+} from '../utils/uintarray-encoding';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
 } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
+import { getThreadsKey } from '../profile-logic/profile-data';
 
 function _getStoreWithURL(
   settings: {
@@ -97,11 +108,38 @@ function _getStoreWithURL(
   return store;
 }
 
+// Serialize the URL of the current state, and create a new store from that URL.
+function _getStoreFromStateAfterUrlRoundtrip(
+  state: State,
+  profile: Profile | null = getProfile()
+): Store {
+  const urlState = urlStateSelectors.getUrlState(state);
+  const url = urlFromState(urlState);
+
+  const newUrlState = stateFromLocation(
+    new URL(url, 'https://profiler.firefox.com')
+  );
+
+  const store = blankStore();
+  store.dispatch({
+    type: 'UPDATE_URL_STATE',
+    newUrlState,
+  });
+
+  if (profile) {
+    store.dispatch(viewProfile(profile));
+  }
+  return store;
+}
+
 describe('selectedThread', function() {
-  function dispatchUrlWithThread(store, threadIndex) {
+  function dispatchUrlWithThread(store, threadIndexSet) {
+    const serializedSelectedThreads = encodeUintSetForUrlComponent(
+      threadIndexSet
+    );
     const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
-      search: `?thread=${threadIndex}`,
+      search: `?thread=${serializedSelectedThreads}&v=${CURRENT_URL_VERSION}`,
       hash: '',
     });
     store.dispatch({
@@ -110,22 +148,30 @@ describe('selectedThread', function() {
     });
   }
 
-  function setup(threadIndex) {
+  function setup(threadIndexSet) {
     const store = blankStore();
-    dispatchUrlWithThread(store, threadIndex);
+    dispatchUrlWithThread(store, threadIndexSet);
 
     const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
     Object.assign(profile.threads[0], {
       name: 'GeckoMain',
       processType: 'default',
+      pid: 123,
     });
     Object.assign(profile.threads[1], {
       name: 'Compositor',
       processType: 'default',
+      pid: 123,
     });
     Object.assign(profile.threads[2], {
       name: 'GeckoMain',
       processType: 'tab',
+      pid: 246,
+    });
+    Object.assign(profile.threads[3], {
+      name: 'GeckoMain',
+      processType: 'tab',
+      pid: 789,
     });
 
     store.dispatch(viewProfile(profile));
@@ -134,18 +180,25 @@ describe('selectedThread', function() {
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const { getState } = setup(1);
+    const { getState } = setup(new Set([1]));
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([1])
     );
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const { getState } = setup(100);
+    const { getState } = setup(new Set([100]));
 
     // "2" is the content process' main tab
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([2])
+    );
+  });
+
+  it('selects the right threads (multi selection) when receiving a profile from web', function() {
+    const { getState } = setup(new Set([0, 2]));
+    expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
+      new Set([0, 2])
     );
   });
 });
@@ -1178,7 +1231,7 @@ describe('url upgrading', function() {
           pathname:
             '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
           search:
-            '?globalTrackOrder=5-0-1-2-3-4&hiddenGlobalTracks=5-3-4&localTrackOrderByPid=1234-1-0~345-2-0-1&hiddenLocalTracksByPid=678-2-3-0',
+            '?globalTrackOrder=5-0-1-2-3-4&hiddenGlobalTracks=5-3-4&localTrackOrderByPid=1234-1-0~345-2-0-1&hiddenLocalTracksByPid=678-2-3-0&thread=12',
           v: 5,
         },
         null
@@ -1209,6 +1262,25 @@ describe('url upgrading', function() {
       );
       expect(urlStateSelectors.getHiddenLocalTracksByPid(state)).toEqual(
         new Map([[678, new Set([0, 2, 3])]])
+      );
+      expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
+        new Set([12])
+      );
+    });
+
+    it('parses version 5 with multiple selected threads (comma-separated)', function() {
+      const { getState } = _getStoreWithURL(
+        {
+          pathname:
+            '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+          search: '?thread=3%2C12%2C7',
+          v: 5,
+        },
+        null
+      );
+      const state = getState();
+      expect(urlStateSelectors.getSelectedThreadIndexesOrNull(state)).toEqual(
+        new Set([3, 7, 12])
       );
     });
   });
@@ -1307,6 +1379,121 @@ describe('URL serialization of the transform stack', function() {
     const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`transforms=${transformString}`);
+  });
+});
+
+describe('URL persistence of transform stacks for a combined thread (multi-thread selection)', function() {
+  function setup() {
+    const store = _getStoreWithURL();
+    const { dispatch } = store;
+    dispatch(
+      addTransformToStack(0, {
+        type: 'focus-subtree',
+        callNodePath: [0, 1, 2],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+    dispatch(
+      addTransformToStack(1, {
+        type: 'collapse-resource',
+        resourceIndex: 8,
+        collapsedFuncIndex: 9,
+        implementation: 'combined',
+      })
+    );
+    dispatch(
+      addTransformToStack(getThreadsKey(new Set([0, 2])), {
+        type: 'drop-function',
+        funcIndex: 11,
+      })
+    );
+    return store;
+  }
+
+  it('persists the transform for thread 0 if thread 0 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([0])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([0]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'focus-subtree',
+        callNodePath: [0, 1, 2],
+        implementation: 'combined',
+        inverted: false,
+      },
+    ]);
+
+    newStore.dispatch(changeSelectedThreads(new Set([1])));
+    const transformStackForDifferentThread = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStackForDifferentThread).toEqual([]);
+  });
+
+  it('persists the transform for thread 1 if thread 1 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([1])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([1]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'collapse-resource',
+        resourceIndex: 8,
+        collapsedFuncIndex: 9,
+        implementation: 'combined',
+      },
+    ]);
+  });
+
+  it('persists the transform for thread 2 if thread 2 is selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([2])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([2]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([]);
+  });
+
+  it('persists the transform for the combined thread of 0+1 if threads 0 and 1 are selected', function() {
+    const { dispatch, getState } = setup();
+    dispatch(changeSelectedThreads(new Set([0, 2])));
+    const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+
+    expect(
+      urlStateSelectors.getSelectedThreadIndexesOrNull(newStore.getState())
+    ).toEqual(new Set([0, 2]));
+
+    const transformStack = selectedThreadSelectors.getTransformStack(
+      newStore.getState()
+    );
+    expect(transformStack).toEqual([
+      {
+        type: 'drop-function',
+        funcIndex: 11,
+      },
+    ]);
   });
 });
 
