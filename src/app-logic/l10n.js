@@ -18,10 +18,14 @@ import {
 // branch in netlify.
 export const AVAILABLE_LOCALES: Array<string> = AVAILABLE_STAGING_LOCALES || [
   'de',
+  'el',
   'en-GB',
   'en-US',
+  'es-CL',
+  'ia',
   'it',
   'pt-BR',
+  'zh-CN',
   'zh-TW',
 ];
 export const DEFAULT_LOCALE = 'en-US';
