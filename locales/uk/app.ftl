@@ -47,6 +47,7 @@ AppHeader--github-icon =
 ## This is used in the page to compare two profiles.
 ## See: https://profiler.firefox.com/compare/
 
+CompareHome--instruction-title = Введіть URL-адреси профілів, які ви хочете порівняти
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
 
@@ -84,8 +85,13 @@ Home--load-from-url-submit-button =
     .value = Завантажити
 Home--documentation-button = Документація
 Home--addon-button = Встановити додаток
+Home--addon-button-instructions =
+    Встановіть додаток Gecko Profiler, щоб почати запис профілю швидкодії
+    у { -firefox-brand-name }, а потім проаналізуйте його та поділіться ним із profiler.firefox.com.
+Home--profiler-motto = Отримайте профіль швидкодії. Проаналізуйте його. Поділіться ним. Зробіть Інтернет швидшим.
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
+Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
 Home--recent-uploaded-recordings-title = Недавно завантажені записи
 
 ## IdleSearchField
@@ -133,17 +139,29 @@ MarkerTable--description = Опис
 
 MenuButtons--index--metaInfo-button =
     .label = Інформація про профіль
+MenuButtons--index--docs = Документи
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
 ## the current profile.
 
+MenuButtons--index--profile-info-uploaded-label = Вивантажено:
 MenuButtons--index--profile-info-uploaded-actions = Видалити
 MenuButtons--index--metaInfo-subtitle = Інформація про профіль
 MenuButtons--metaInfo--symbols = Символи:
 MenuButtons--metaInfo--cpu = ЦП:
+MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--profile-version = Версія профілю:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } секунда
+        [few] { $configurationDuration } секунди
+       *[many] { $configurationDuration } секунд
+    }
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
 
@@ -188,14 +206,22 @@ MenuButtons--publish--compressing = Стиснення
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-local =
+    .message = Ще не впроваджено.
+ProfileLoaderAnimation--loading-message-public =
+    .message = Завантаження та обробка профілю…
+ProfileLoaderAnimation--loading-message-compare =
+    .message = Читання та обробка профілів…
 
 ## ProfileRootMessage
 
+ProfileRootMessage--title = { -profiler-brand-name }
 
 ## ServiceWorkerManager
 ## This is the component responsible for handling the service worker installation
 ## and update. It appears at the top of the UI.
 
+ServiceWorkerManager--installing-button = Встановлення…
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
