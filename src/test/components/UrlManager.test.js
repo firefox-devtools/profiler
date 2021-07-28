@@ -276,7 +276,7 @@ describe('UrlManager', function() {
   });
 
   it('prevents navigating back after publishing', async () => {
-    // This loads a profile using the add-on.
+    // This loads a profile from the browser.
     const {
       getState,
       dispatch,

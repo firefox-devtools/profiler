@@ -354,7 +354,7 @@ type ReceiveProfileAction =
   | {| +type: 'REQUESTING_SYMBOL_TABLE', +requestedLib: RequestedLib |}
   | {| +type: 'RECEIVED_SYMBOL_TABLE_REPLY', +requestedLib: RequestedLib |}
   | {| +type: 'START_SYMBOLICATING' |}
-  | {| +type: 'WAITING_FOR_PROFILE_FROM_ADDON' |}
+  | {| +type: 'WAITING_FOR_PROFILE_FROM_BROWSER' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_URL', +profileUrl: ?string |}
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};

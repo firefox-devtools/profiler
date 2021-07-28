@@ -31,7 +31,7 @@ export default connect(
   {
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
-    retrieveProfileFromAddon,
+    retrieveProfileFromBrowser,
   }
   // Finally pass in the non-connected component. Redux will then merge the various
   // objects together to create new props.

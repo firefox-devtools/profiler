@@ -103,7 +103,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       // need the profile data.
       //
       // Also note the profile may be null for the `from-addon` dataSource since
-      // we do not `await` for retrieveProfileFromAddon function, but also in
+      // we do not `await` for retrieveProfileFromBrowser function, but also in
       // case of fatal errors in the process of retrieving and processing a
       // profile. To handle the latter case properly, we won't `pushState` if
       // we're in a FATAL_ERROR state.
