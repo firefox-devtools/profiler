@@ -22,6 +22,9 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>вебзастосунок для аналізування швидкодії { -firefox-brand-name }</subheader>
+AppHeader--github-icon =
+    .title = Перейти до нашого репозиторію Git (відкриється у новому вікні)
 
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
@@ -82,6 +85,8 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Документація
 Home--addon-button = Встановити додаток
 Home--additional-content-title = Завантажити наявні профілі
+Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
+Home--recent-uploaded-recordings-title = Недавно завантажені записи
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -95,6 +100,11 @@ Home--additional-content-title = Завантажити наявні профі�
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодного профілю ще не завантажено!
+# This string is used below the 'Recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Переглядайте всі свої записи та керуйте ними (ще { $profilesRestCount })
 
 ## MarkerContextMenu
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
