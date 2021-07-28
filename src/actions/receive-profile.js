@@ -909,9 +909,9 @@ function getSymbolStore(
         }
       });
     },
-    requestSymbolTableFromAddon: async lib => {
+    requestSymbolTableFromBrowser: async lib => {
       if (!geckoProfiler) {
-        throw new Error("There's no connection to the gecko profiler add-on.");
+        throw new Error("There's no connection to the browser.");
       }
 
       const { debugName, breakpadId } = lib;
