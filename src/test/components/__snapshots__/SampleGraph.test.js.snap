@@ -90,6 +90,23 @@ Array [
     10,
     10,
   ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
 ]
 `;
 

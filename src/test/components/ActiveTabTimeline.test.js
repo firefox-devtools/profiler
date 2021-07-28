@@ -13,12 +13,7 @@ import { Timeline } from '../../components/timeline';
 import { TimelineActiveTabGlobalTrack } from '../../components/timeline/ActiveTabGlobalTrack';
 import { TimelineActiveTabResourcesPanel } from '../../components/timeline/ActiveTabResourcesPanel';
 import { TimelineActiveTabResourceTrack } from '../../components/timeline/ActiveTabResourceTrack';
-import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
-import { getBoundingBox, fireFullClick } from '../fixtures/utils';
-import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
-import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
@@ -27,21 +22,26 @@ import { getFirstSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedThreads } from '../../actions/profile-view';
 import { ensureExists, getFirstItemFromSet } from '../../utils/flow';
 
+import { storeWithProfile } from '../fixtures/stores';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { fireFullClick } from '../fixtures/utils';
+import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
+import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import {
+  autoMockElementSize,
+  getElementWithFixedSize,
+} from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+
 describe('ActiveTabTimeline', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: 200, height: 300 });
   beforeEach(() => {
-    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
-      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-      // opt out of the type checker for this mock by returning `any`.
-      const mockEl = ({
-        getBoundingClientRect: () => getBoundingBox(300, 300),
-      }: any);
-      return mockEl;
-    });
-
     jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
+      .spyOn(ReactDOM, 'findDOMNode')
+      .mockImplementation(() =>
+        getElementWithFixedSize({ width: 200, height: 300 })
+      );
   });
 
   it('should be rendered properly from the Timeline component', () => {
@@ -59,11 +59,14 @@ describe('ActiveTabTimeline', function() {
       })
     );
 
+    // WithSize uses requestAnimationFrame
+    const flushRafCalls = mockRaf();
     const { container } = render(
       <Provider store={store}>
         <Timeline />
       </Provider>
     );
+    flushRafCalls();
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -98,6 +101,9 @@ describe('ActiveTabTimeline', function() {
       // The assertions are simpler if the GeckoMain tab thread is not already selected.
       dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
+      // WithSize uses requestAnimationFrame
+      const flushRafCalls = mockRaf();
+
       const renderResult = render(
         <Provider store={store}>
           <TimelineActiveTabGlobalTrack
@@ -107,6 +113,8 @@ describe('ActiveTabTimeline', function() {
           />
         </Provider>
       );
+      flushRafCalls();
+
       const { container } = renderResult;
 
       const getGlobalTrackRow = () =>
@@ -181,6 +189,9 @@ describe('ActiveTabTimeline', function() {
       const { getState, dispatch } = store;
       const resourceTracks = getActiveTabResourceTracks(getState());
 
+      // WithSize uses requestAnimationFrame
+      const flushRafCalls = mockRaf();
+
       const renderResult = render(
         <Provider store={store}>
           <TimelineActiveTabResourcesPanel
@@ -189,6 +200,8 @@ describe('ActiveTabTimeline', function() {
           />
         </Provider>
       );
+
+      flushRafCalls();
 
       const getResourcesPanelHeader = () => screen.getByText(/Resources/);
       const getResourceFrameTrack = () => screen.queryByText(/IFrame:/);
@@ -204,6 +217,7 @@ describe('ActiveTabTimeline', function() {
         getResourceFrameTrack,
         mainThreadIndex,
         resourceThreadIndex,
+        flushRafCalls,
       };
     }
 
@@ -213,8 +227,9 @@ describe('ActiveTabTimeline', function() {
     });
 
     it('matches the snapshot of a resources panel when opened', () => {
-      const { container, getResourcesPanelHeader } = setup();
+      const { container, getResourcesPanelHeader, flushRafCalls } = setup();
       fireFullClick(getResourcesPanelHeader());
+      flushRafCalls();
       expect(container.firstChild).toMatchSnapshot();
     });
 
@@ -224,11 +239,16 @@ describe('ActiveTabTimeline', function() {
     });
 
     it('clicking on the header opens the resources panel', () => {
-      const { getResourcesPanelHeader, getResourceFrameTrack } = setup();
+      const {
+        getResourcesPanelHeader,
+        getResourceFrameTrack,
+        flushRafCalls,
+      } = setup();
       const resourcesPanelHeader = getResourcesPanelHeader();
       expect(getResourceFrameTrack()).toBeFalsy();
 
       fireFullClick(resourcesPanelHeader);
+      flushRafCalls();
       expect(getResourceFrameTrack()).toBeTruthy();
     });
 
@@ -284,6 +304,9 @@ describe('ActiveTabTimeline', function() {
       const { getState, dispatch } = store;
       const resourceTracks = getActiveTabResourceTracks(getState());
       const trackIndex = 1;
+
+      // WithSize uses requestAnimationFrame
+      const flushRafCalls = mockRaf();
       const renderResult = render(
         <Provider store={store}>
           <TimelineActiveTabResourceTrack
@@ -293,6 +316,7 @@ describe('ActiveTabTimeline', function() {
           />
         </Provider>
       );
+      flushRafCalls();
 
       const { container } = renderResult;
       const resourcePage = ensureExists(profile.pages)[2];

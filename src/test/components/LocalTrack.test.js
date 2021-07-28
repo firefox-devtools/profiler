@@ -37,11 +37,9 @@ import {
   getStoreWithMemoryTrack,
 } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getBoundingBox,
-  fireFullClick,
-  fireFullContextMenu,
-} from '../fixtures/utils';
+import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -50,6 +48,7 @@ const PID = 222;
 
 describe('timeline/LocalTrack', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: 400, height: 400 });
 
   describe('with a thread track', function() {
     it('matches the snapshot of a local track', () => {
@@ -164,10 +163,8 @@ function setup(
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
 
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(400, 400));
-
+  // WithSize uses requestAnimationFrame
+  const flushRafCalls = mockRaf();
   const renderResult = render(
     <Provider store={store}>
       <TimelineLocalTrack
@@ -178,6 +175,7 @@ function setup(
       />
     </Provider>
   );
+  flushRafCalls();
 
   const { container } = renderResult;
 

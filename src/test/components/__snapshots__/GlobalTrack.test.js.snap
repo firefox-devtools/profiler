@@ -40,6 +40,8 @@ process: \\"tab\\" (222)"
           >
             <canvas
               class="timelineMarkersCanvas"
+              height="400"
+              width="400"
             />
           </div>
         </div>
@@ -52,6 +54,8 @@ process: \\"tab\\" (222)"
           >
             <canvas
               class="timelineMarkersCanvas"
+              height="400"
+              width="400"
             />
           </div>
         </div>
@@ -64,6 +68,8 @@ process: \\"tab\\" (222)"
           >
             <canvas
               class="timelineMarkersCanvas"
+              height="400"
+              width="400"
             />
           </div>
         </div>
@@ -143,6 +149,8 @@ process: \\"tab\\" (222)"
               >
                 <canvas
                   class="timelineMarkersCanvas"
+                  height="400"
+                  width="400"
                 />
               </div>
             </div>
@@ -220,6 +228,8 @@ process: \\"tab\\" (222)"
               >
                 <canvas
                   class="timelineMarkersCanvas"
+                  height="400"
+                  width="400"
                 />
               </div>
             </div>
@@ -330,6 +340,8 @@ process: \\"default\\" (5555)"
               >
                 <canvas
                   class="timelineMarkersCanvas"
+                  height="400"
+                  width="400"
                 />
               </div>
             </div>

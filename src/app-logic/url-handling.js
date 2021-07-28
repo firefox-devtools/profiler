@@ -19,7 +19,10 @@ import {
   coerce,
   ensureExists,
 } from 'firefox-profiler/utils/flow';
-import { toValidCallTreeSummaryStrategy } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getThreadsKey,
+  toValidCallTreeSummaryStrategy,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
@@ -33,11 +36,15 @@ import type {
   TrackIndex,
   CallNodePath,
   ThreadIndex,
-  TransformStacksPerThread,
   TimelineType,
 } from 'firefox-profiler/types';
+import {
+  decodeUintArrayFromUrlComponent,
+  encodeUintArrayForUrlComponent,
+  encodeUintSetForUrlComponent,
+} from '../utils/uintarray-encoding';
 
-export const CURRENT_URL_VERSION = 5;
+export const CURRENT_URL_VERSION = 6;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -132,11 +139,10 @@ function getPathParts(urlState: UrlState): string[] {
 
 // Base query that only applies to full profile view.
 type FullProfileSpecificBaseQuery = {|
-  globalTrackOrder: string, // "3-2-0-1"
-  hiddenGlobalTracks: string, // "0-1"
-  hiddenLocalTracksByPid: string,
-  localTrackOrderByPid: string,
-  timelineType: string,
+  globalTrackOrder: string, // "3201"
+  hiddenGlobalTracks: string, // "01"
+  hiddenLocalTracksByPid: string, // "1549-0w8~1593-23~1598-01~1602-02~1607-1"
+  localTrackOrderByPid: string, // "1549-780w6~1560-01"
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
@@ -166,6 +172,7 @@ type BaseQuery = {|
   symbolServer: string,
   view: string,
   implementation: string,
+  timelineType: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -265,6 +272,8 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
   }
 
   const { selectedThreads } = urlState.profileSpecific;
+  const selectedThreadsKey =
+    selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
   let ctxId;
   let view;
@@ -293,47 +302,19 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
     case 'full': {
       // Add the full profile specific state query here.
       baseQuery = ({}: FullProfileSpecificBaseQueryShape);
-      baseQuery.globalTrackOrder =
-        urlState.profileSpecific.full.globalTrackOrder.join('-') || undefined;
+      baseQuery.globalTrackOrder = convertGlobalTrackOrderToString(
+        urlState.profileSpecific.full.globalTrackOrder
+      );
+      baseQuery.hiddenGlobalTracks = convertHiddenGlobalTracksToString(
+        urlState.profileSpecific.full.hiddenGlobalTracks
+      );
+      baseQuery.hiddenLocalTracksByPid = convertHiddenLocalTracksByPidToString(
+        urlState.profileSpecific.full.hiddenLocalTracksByPid
+      );
+      baseQuery.localTrackOrderByPid = convertLocalTrackOrderByPidToString(
+        urlState.profileSpecific.full.localTrackOrderByPid
+      );
 
-      // Add the parameter hiddenGlobalTracks only when needed.
-      if (urlState.profileSpecific.full.hiddenGlobalTracks.size > 0) {
-        baseQuery.hiddenGlobalTracks = [
-          ...urlState.profileSpecific.full.hiddenGlobalTracks,
-        ].join('-');
-      }
-
-      let hiddenLocalTracksByPid = '';
-      for (const [pid, tracks] of urlState.profileSpecific.full
-        .hiddenLocalTracksByPid) {
-        if (tracks.size > 0) {
-          hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
-        }
-      }
-      if (hiddenLocalTracksByPid.length > 0) {
-        // Only add to the query string if something was actually hidden.
-        // Also, slice off the last '~'.
-        baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
-      }
-
-      if (
-        urlState.profileSpecific.full.timelineType === 'stack' ||
-        urlState.profileSpecific.full.timelineType === 'cpu-category'
-      ) {
-        // The default is the category view, so only add it to the URL if it's the
-        // stack or cpu-category view.
-        baseQuery.timelineType = urlState.profileSpecific.full.timelineType;
-      }
-
-      let localTrackOrderByPid = '';
-      for (const [pid, trackOrder] of urlState.profileSpecific.full
-        .localTrackOrderByPid) {
-        if (trackOrder.length > 0) {
-          localTrackOrderByPid +=
-            `${String(pid)}-` + trackOrder.join('-') + '~';
-        }
-      }
-      baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
       break;
     }
     case 'active-tab': {
@@ -362,7 +343,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
     thread:
-      selectedThreads === null ? undefined : [...selectedThreads].join(','),
+      selectedThreads === null
+        ? undefined
+        : encodeUintSetForUrlComponent(selectedThreads),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     view,
@@ -373,6 +356,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       urlState.profileSpecific.implementation === 'combined'
         ? undefined
         : urlState.profileSpecific.implementation,
+    timelineType:
+      // The default is the category view, so only add it to the URL if it's the
+      // stack or cpu-category view.
+      // TODO: We should make the 'cpu-category' the new default with an upgrader.
+      urlState.profileSpecific.timelineType === 'category'
+        ? undefined
+        : urlState.profileSpecific.timelineType,
   }: BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
@@ -397,11 +387,13 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
-      if (selectedThreads !== null) {
+      if (
+        selectedThreadsKey !== null &&
+        urlState.profileSpecific.transforms[selectedThreadsKey]
+      ) {
         query.transforms =
           stringifyTransforms(
-            selectedThreads,
-            urlState.profileSpecific.transforms
+            urlState.profileSpecific.transforms[selectedThreadsKey]
           ) || undefined;
       }
       query.ctSummary =
@@ -532,7 +524,14 @@ export function stateFromLocation(
   const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
-    query.thread !== undefined ? query.thread.split(',').map(n => +n) : [];
+    query.thread !== undefined
+      ? decodeUintArrayFromUrlComponent(query.thread)
+      : [];
+
+  const selectedThreads =
+    selectedThreadsList.length !== 0 ? new Set(selectedThreadsList) : null;
+  const selectedThreadsKey =
+    selectedThreads !== null ? getThreadsKey(selectedThreads) : null;
 
   // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -550,7 +549,10 @@ export function stateFromLocation(
     implementation = query.implementation;
   }
 
-  const transforms = parseTransforms(selectedThreadsList, query.transforms);
+  const transforms = {};
+  if (selectedThreadsKey !== null) {
+    transforms[selectedThreadsKey] = parseTransforms(query.transforms);
+  }
 
   let tabID = null;
   if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
@@ -578,29 +580,26 @@ export function stateFromLocation(
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
-      selectedThreads:
-        selectedThreadsList.length === 0 ? null : new Set(selectedThreadsList),
+      selectedThreads,
       callTreeSearchString: query.search || '',
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
+      timelineType: validateTimelineType(query.timelineType),
       full: {
         showJsTracerSummary: query.summary === undefined ? false : true,
-        globalTrackOrder: query.globalTrackOrder
-          ? query.globalTrackOrder.split('-').map(index => Number(index))
-          : [],
-        hiddenGlobalTracks: query.hiddenGlobalTracks
-          ? new Set(
-              query.hiddenGlobalTracks.split('-').map(index => Number(index))
-            )
-          : new Set(),
-        hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
-          ? parseHiddenTracks(query.hiddenLocalTracksByPid)
-          : new Map(),
-        localTrackOrderByPid: query.localTrackOrderByPid
-          ? parseLocalTrackOrder(query.localTrackOrderByPid)
-          : new Map(),
-        timelineType: validateTimelineType(query.timelineType),
+        globalTrackOrder: convertGlobalTrackOrderFromString(
+          query.globalTrackOrder
+        ),
+        hiddenGlobalTracks: convertHiddenGlobalTracksFromString(
+          query.hiddenGlobalTracks
+        ),
+        hiddenLocalTracksByPid: convertHiddenLocalTracksByPidFromString(
+          query.hiddenLocalTracksByPid
+        ),
+        localTrackOrderByPid: convertLocalTrackOrderByPidFromString(
+          query.localTrackOrderByPid
+        ),
         legacyThreadOrder: query.threadOrder
           ? query.threadOrder.split('-').map(index => Number(index))
           : null,
@@ -615,22 +614,63 @@ export function stateFromLocation(
   };
 }
 
+function convertGlobalTrackOrderFromString(
+  rawString: string | null | void
+): TrackIndex[] {
+  if (!rawString) {
+    return [];
+  }
+
+  return decodeUintArrayFromUrlComponent(rawString);
+}
+
+function convertGlobalTrackOrderToString(order: TrackIndex[]): string | void {
+  return encodeUintArrayForUrlComponent(order) || undefined;
+}
+
+function convertHiddenGlobalTracksFromString(
+  rawString: string | null | void
+): Set<TrackIndex> {
+  if (!rawString) {
+    return new Set();
+  }
+
+  return new Set(decodeUintArrayFromUrlComponent(rawString));
+}
+
+function convertHiddenGlobalTracksToString(
+  hiddenGlobalTracks: Set<TrackIndex>
+): string | void {
+  // Add the parameter hiddenGlobalTracks only when needed.
+  if (hiddenGlobalTracks.size > 0) {
+    return encodeUintSetForUrlComponent(hiddenGlobalTracks);
+  }
+  return undefined;
+}
+
 /**
- * Hidden tracks must have the track indexes plus the associated PID.
+ * Hidden local tracks must have the track indexes plus the associated PID.
  *
- * Syntax: Pid-TrackIndex-TrackIndex~Pid-TrackIndex
- * Example: 124553-0-3~124554-1
+ * Syntax: Pid-<encoded TrackIndex set>~Pid-<encoded TrackIndex set>
+ * Example: 124553-03~124554-1
  */
-function parseHiddenTracks(rawText: string): Map<Pid, Set<TrackIndex>> {
+function convertHiddenLocalTracksByPidFromString(
+  rawText: string | null | void
+): Map<Pid, Set<TrackIndex>> {
+  if (!rawText) {
+    return new Map();
+  }
+
   const hiddenLocalTracksByPid = new Map();
 
   for (const stringPart of rawText.split('~')) {
-    const [pidString, ...indexStrings] = stringPart.split('-');
-    if (indexStrings.length === 0) {
+    if (!stringPart.includes('-')) {
       continue;
     }
+    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
+    const hiddenTracksString = stringPart.slice(pidString.length + 1);
     const pid = Number(pidString);
-    const indexes = indexStrings.map(string => Number(string));
+    const indexes = decodeUintArrayFromUrlComponent(hiddenTracksString);
     if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
       hiddenLocalTracksByPid.set(pid, new Set(indexes));
     }
@@ -638,30 +678,64 @@ function parseHiddenTracks(rawText: string): Map<Pid, Set<TrackIndex>> {
   return hiddenLocalTracksByPid;
 }
 
+function convertHiddenLocalTracksByPidToString(
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>
+): string | void {
+  const strings = [];
+  for (const [pid, tracks] of hiddenLocalTracksByPid) {
+    if (tracks.size > 0) {
+      strings.push(`${pid}-${encodeUintSetForUrlComponent(tracks)}`);
+    }
+  }
+  // Only add to the query string if something was actually hidden.
+  return strings.join('~') || undefined;
+}
+
 /**
  * Local tracks must have their track order associated by PID.
  *
- * Syntax: Pid-TrackIndex-TrackIndex~Pid-TrackIndex
- * Example: 124553-0-3~124554-1
+ * Syntax: Pid-<encoded TrackIndex array>~Pid-<encoded TrackIndex array>
+ * Example: 124553-0w354~124554-1
  */
-function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
+function convertLocalTrackOrderByPidFromString(
+  rawText: string | null | void
+): Map<Pid, TrackIndex[]> {
+  if (!rawText) {
+    return new Map();
+  }
+
   const localTrackOrderByPid = new Map();
 
   for (const stringPart of rawText.split('~')) {
-    const [pidString, ...indexStrings] = stringPart.split('-');
-    if (indexStrings.length <= 1) {
+    if (!stringPart.includes('-')) {
       // There is no order to determine, let the URL validation create the
       // default value.
       continue;
     }
+    const pidString = stringPart.slice(0, stringPart.indexOf('-'));
+    const trackOrderString = stringPart.slice(pidString.length + 1);
     const pid = Number(pidString);
-    const indexes = indexStrings.map(string => Number(string));
+    const indexes = decodeUintArrayFromUrlComponent(trackOrderString);
     if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
       localTrackOrderByPid.set(pid, indexes);
     }
   }
 
   return localTrackOrderByPid;
+}
+
+function convertLocalTrackOrderByPidToString(
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>
+): string | void {
+  const strings = [];
+  for (const [pid, trackOrder] of localTrackOrderByPid) {
+    if (trackOrder.length > 0) {
+      strings.push(
+        `${String(pid)}-${encodeUintArrayForUrlComponent(trackOrder)}`
+      );
+    }
+  }
+  return strings.join('~') || undefined;
 }
 
 // This Error class is used in other codepaths to detect the specific error of
@@ -811,20 +885,17 @@ const _upgraders = {
       return;
     }
 
-    const transformStacksPerThread: TransformStacksPerThread = query.transforms
-      ? parseTransforms([selectedThread], query.transforms)
-      : {};
-
-    // At the time this upgrader was written, there was only one selected thread.
-    // Only upgrade the single transfrom.
-    const transforms = transformStacksPerThread[selectedThread];
+    const transforms = parseTransforms(query.transforms);
 
     if (!transforms || transforms.length === 0) {
       // We don't have any transforms to upgrade.
       return;
     }
 
+    // The transform stack is for the selected thread.
+    // At the time this upgrader was written, there was only one selected thread.
     const thread = profile.threads[selectedThread];
+
     for (let i = 0; i < transforms.length; i++) {
       const transform = transforms[i];
       if (
@@ -852,10 +923,7 @@ const _upgraders = {
       );
     }
 
-    processedLocation.query.transforms = stringifyTransforms(
-      new Set([selectedThread]),
-      transformStacksPerThread
-    );
+    processedLocation.query.transforms = stringifyTransforms(transforms);
   },
   [5]: ({ query }: ProcessedLocationBeforeUpgrade) => {
     // We changed how the ranges are serialized to the URLs. Before it was the
@@ -894,6 +962,73 @@ const _upgraders = {
       })
       .filter(Boolean)
       .join('~');
+  },
+  [6]: ({ query }: ProcessedLocationBeforeUpgrade) => {
+    // The tracks-related query arguments have been converted to use uintarray-encoding.
+    // Update them from the 0-10-9-8-1-2-3-4-5-6-7 syntax to the "0aw81w7" syntax.
+    if (query.globalTrackOrder) {
+      const globalTrackOrder = (query.globalTrackOrder: string)
+        .split('-')
+        .map(s => +s);
+      query.globalTrackOrder =
+        encodeUintArrayForUrlComponent(globalTrackOrder) || undefined;
+    }
+    if (query.hiddenGlobalTracks) {
+      const hiddenGlobalTracks = new Set(
+        (query.hiddenGlobalTracks: string).split('-').map(s => +s)
+      );
+      query.hiddenGlobalTracks =
+        encodeUintSetForUrlComponent(hiddenGlobalTracks) || undefined;
+    }
+    if (query.hiddenLocalTracksByPid) {
+      query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
+        .split('~')
+        .map(pidAndTracks => {
+          const [pid, ...tracks] = pidAndTracks.split('-');
+          const hiddenTracks = new Set(tracks.map(s => +s));
+          return `${pid}-${encodeUintSetForUrlComponent(hiddenTracks)}`;
+        })
+        .join('~');
+    }
+    if (query.localTrackOrderByPid) {
+      query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
+        .split('~')
+        .map(pidAndTracks => {
+          const [pid, ...tracks] = pidAndTracks.split('-');
+          const trackOrder = tracks.map(s => +s);
+          return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
+        })
+        .join('~');
+    }
+    if (query.thread) {
+      const selectedThreads = new Set(query.thread.split(',').map(n => +n));
+      query.thread = encodeUintSetForUrlComponent(selectedThreads);
+    }
+
+    // In this version, uintarray-encoding started supporting a range syntax:
+    // Instead of "abcd" we now support "awd" as a shortcut.
+    // This is not only used for the track index properties that we converted
+    // above, it also affects any cell tree transforms stored in the URL.
+    // However, the change to the uintarray encoding is backwards compatible in
+    // such a way that old encodings can still be decoded with the new version,
+    // without any change in meaning.
+    // As a result, we don't need to do any upgrading for call tree transforms:
+    // Old URLs still work with the new version, they're just potentially more
+    // verbose. And they get collapsed to the range syntax automatically.
+    // Moreover, the new URL version ensures that we don't attempt to interpret
+    // new URLs with old profiler versions.
+
+    // There was another change in this version: query.transforms now stores a
+    // different value when multiple threads are selected. Rather than storing
+    // a list of transform stacks for the individual threads, it now stores the
+    // transform stack for the combined thread.
+    // We can discard any transforms for individual threads because they're not
+    // affecting the current view; the current view displays the combined thread.
+    // And the old format of semicolon-separated transform stacks is no longer
+    // parsed.
+    if (query.transforms && query.transforms.includes(';')) {
+      delete query.transforms;
+    }
   },
 };
 

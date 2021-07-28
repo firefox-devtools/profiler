@@ -15,9 +15,12 @@ import {
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect.js';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
-  getBoundingBox,
+  autoMockElementSize,
+  getElementWithFixedSize,
+} from '../fixtures/mocks/element-size';
+import {
   fireFullClick,
   fireFullKeyPress,
   fireFullContextMenu,
@@ -39,20 +42,21 @@ import type { Profile } from 'firefox-profiler/types';
 describe('Timeline multiple thread selection', function() {
   autoMockDomRect();
   autoMockCanvasContext();
+  autoMockElementSize({ width: 200, height: 300 });
 
   function setup() {
     const profile = getProfileWithNiceTracks();
     const store = storeWithProfile(profile);
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
-
+    // We need a properly laid out ActivityGraph for some of the operations in
+    // tests.
+    const flushRafCalls = mockRaf();
     const renderResult = render(
       <Provider store={store}>
         <Timeline />
       </Provider>
     );
+    flushRafCalls();
 
     return { ...renderResult, ...store };
   }
@@ -163,7 +167,7 @@ describe('Timeline multiple thread selection', function() {
       null
     );
 
-    fireFullClick(activityGraph, { pageX: 50, pageY: 50 });
+    fireFullClick(activityGraph, { offsetX: 50, offsetY: 50 });
 
     expect(getHumanReadableTracks(getState())).toEqual([
       'show [thread GeckoMain process]',
@@ -400,20 +404,14 @@ function _getProfileWithDroppedSamples(): Profile {
 
 describe('Timeline', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: 200, height: 300 });
 
   beforeEach(() => {
-    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
-      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-      // opt out of the type checker for this mock by returning `any`.
-      const mockEl = ({
-        getBoundingClientRect: () => getBoundingBox(300, 300),
-      }: any);
-      return mockEl;
-    });
-
     jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
+      .spyOn(ReactDOM, 'findDOMNode')
+      .mockImplementation(() =>
+        getElementWithFixedSize({ width: 200, height: 300 })
+      );
   });
 
   it('renders the header', () => {
@@ -428,9 +426,6 @@ describe('Timeline', function() {
       </Provider>
     );
 
-    // We need to flush twice since when the first flush is run, it
-    // will request more code to be run in later animation frames.
-    flushRafCalls();
     flushRafCalls();
 
     const drawCalls = flushDrawLog();

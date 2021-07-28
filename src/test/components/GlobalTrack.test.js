@@ -20,14 +20,14 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getBoundingBox,
-  fireFullClick,
-  fireFullContextMenu,
-} from '../fixtures/utils';
+import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 describe('timeline/GlobalTrack', function() {
   autoMockCanvasContext();
+  // Some child components render to canvas.
+  autoMockElementSize({ width: 400, height: 400 });
 
   /**
    *  getProfileWithNiceTracks() looks like: [
@@ -65,16 +65,13 @@ describe('timeline/GlobalTrack', function() {
     }
     const threadIndex = track.mainThreadIndex;
 
-    // Some child components render to canvas.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(400, 400));
-
     if (threadIndex !== null) {
       // The assertions are simpler if the GeckoMain tab thread is not already selected.
       dispatch(changeSelectedThreads(new Set([threadIndex + 1])));
     }
 
+    // WithSize uses requestAnimationFrame
+    const flushRafCalls = mockRaf();
     const renderResult = render(
       <Provider store={store}>
         <TimelineGlobalTrack
@@ -84,6 +81,7 @@ describe('timeline/GlobalTrack', function() {
         />
       </Provider>
     );
+    flushRafCalls();
     const { container } = renderResult;
 
     const getGlobalTrackLabel = () =>

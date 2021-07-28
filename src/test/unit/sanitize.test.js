@@ -312,14 +312,25 @@ describe('sanitizePII', function() {
             name: unsanitizedNameField,
           },
         ],
+        [
+          'ExtensionChild',
+          0,
+          1,
+          {
+            type: 'Text',
+            name: unsanitizedNameField,
+          },
+        ],
       ])
     );
 
-    const marker = sanitizedProfile.threads[0].markers.data[0];
-    if (!marker || marker.type !== 'Text') {
-      throw new Error('Expected a Text marker');
+    const markers = sanitizedProfile.threads[0].markers;
+    for (const marker of [markers.data[0], markers.data[1]]) {
+      if (!marker || marker.type !== 'Text') {
+        throw new Error('Expected a Text marker');
+      }
+      expect(marker.name).toBe(sanitizedNameField);
     }
-    expect(marker.name).toBe(sanitizedNameField);
   });
 
   it('should sanitize both URLs and extension ids inside Extension Suspend markers', function() {

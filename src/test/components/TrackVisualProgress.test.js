@@ -17,10 +17,10 @@ import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
@@ -61,10 +61,6 @@ describe('TrackVisualProgress', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const renderResult = render(
       <Provider store={store}>
@@ -108,6 +104,7 @@ describe('TrackVisualProgress', function() {
   }
 
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

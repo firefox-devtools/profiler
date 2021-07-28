@@ -22,6 +22,8 @@ import {
 import { MarkerChart } from '../../components/marker-chart';
 import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
+import { getPreviewSelection } from '../../selectors/profile';
 import { ensureExists } from '../../utils/flow';
 
 import {
@@ -36,7 +38,6 @@ import {
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
-  getBoundingBox,
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
@@ -44,9 +45,8 @@ import {
   fireFullClick,
   fireFullContextMenu,
 } from '../fixtures/utils';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
-import { getPreviewSelection } from '../../selectors/profile';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type {
   UserTimingMarkerPayload,
@@ -97,14 +97,6 @@ const MARKERS: TestDefinedMarkers = [
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
 
-  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
-  // a lot easier to mock this everywhere.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() =>
-      getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
-    );
-
   const store = storeWithProfile(profile);
 
   store.dispatch(changeSelectedTab('marker-chart'));
@@ -140,6 +132,10 @@ function setupWithProfile(profile) {
 
 describe('MarkerChart', function() {
   autoMockCanvasContext();
+  autoMockElementSize({
+    width: 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT,
+    height: 300,
+  });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

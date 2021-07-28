@@ -12,14 +12,15 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import { JsTracer } from '../../components/js-tracer';
+import { getShowJsTracerSummary } from '../../selectors/url-state';
+
 import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   fireFullClick,
@@ -28,7 +29,8 @@ import {
   getProfileWithJsTracerEvents,
   type TestDefinedJsTracerEvent,
 } from '../fixtures/profiles/processed-profile';
-import { getShowJsTracerSummary } from '../../selectors/url-state';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+
 jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;
@@ -38,6 +40,7 @@ const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -49,10 +52,6 @@ describe('StackChart', function() {
     events: TestDefinedJsTracerEvent[],
   }) {
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const profile = getProfileWithJsTracerEvents(events);
 
@@ -67,11 +66,6 @@ describe('StackChart', function() {
     const { container } = renderResult;
 
     if (skipLoadingScreen) {
-      // Have React show the loading screen.
-      flushRafCalls();
-      // Have React show our new component, and schedule a draw call.
-      flushRafCalls();
-      // Now flush once more to actually draw to the screen.
       flushRafCalls();
     }
 
@@ -101,8 +95,6 @@ describe('StackChart', function() {
       events: simpleTracerEvents,
     });
     expect(getJsTracerChartCanvas()).toBeFalsy();
-    // Flush twice, as the canvas defers until after React updates.
-    flushRafCalls();
     flushRafCalls();
     expect(getJsTracerChartCanvas()).toBeTruthy();
   });

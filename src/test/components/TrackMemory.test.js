@@ -13,23 +13,23 @@ import { fireEvent } from '@testing-library/react';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackMemory } from '../../components/timeline/TrackMemory';
 import { ensureExists } from '../../utils/flow';
+
 import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   getMouseEvent,
 } from '../fixtures/utils';
-
 import {
   getProfileFromTextSamples,
   getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -61,10 +61,6 @@ describe('TrackMemory', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const renderResult = render(
       <Provider store={store}>
@@ -109,6 +105,7 @@ describe('TrackMemory', function() {
   }
 
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 

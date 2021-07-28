@@ -25,22 +25,21 @@ import {
   autoMockCanvasContext,
   flushDrawLog,
 } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
   fireFullClick,
 } from '../fixtures/utils';
-
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-// The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
-// pixels wide. Use the value 50 to click in the middle of this stack, and
+// The graph is 400 pixels wide based on the element size mock. Each stack is
+// 100 pixels wide. Use the value 50 to click in the middle of this stack, and
 // incrementing by steps of 100 pixels to get to the next stack.
 const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = 50;
@@ -54,6 +53,7 @@ describe('timeline/TrackThread', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
@@ -100,10 +100,6 @@ describe('timeline/TrackThread', function() {
       return { pageX: x + w * 0.5, pageY: y + h * 0.5 };
     }
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
     // Note: These tests were first written with the timeline using the ThreadStackGraph.
     // This is not the default view, so dispatch an action to change to the older default
     // view.
@@ -121,8 +117,6 @@ describe('timeline/TrackThread', function() {
     const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
-    flushRafCalls();
-    // The size update then schedules another rAF draw call for canvas components.
     flushRafCalls();
 
     const stackGraphCanvas = () =>

@@ -92,6 +92,10 @@ export class Draggable extends React.PureComponent<Props, State> {
     mouseMoveHandler: MouseEvent => void,
     mouseUpHandler: MouseEvent => void
   ) {
+    // Unregister any leftover old handlers, in case we didn't get a mouseup for the previous
+    // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).
+    this._uninstallMoveAndUpHandlers();
+
     this._handlers = { mouseMoveHandler, mouseUpHandler };
     window.addEventListener('mousemove', mouseMoveHandler, true);
     window.addEventListener('mouseup', mouseUpHandler, true);
@@ -102,6 +106,7 @@ export class Draggable extends React.PureComponent<Props, State> {
       const { mouseMoveHandler, mouseUpHandler } = this._handlers;
       window.removeEventListener('mousemove', mouseMoveHandler, true);
       window.removeEventListener('mouseup', mouseUpHandler, true);
+      this._handlers = null;
     }
   }
 

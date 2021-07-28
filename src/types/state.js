@@ -234,7 +234,6 @@ export type FullProfileSpecificUrlState = {|
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
   localTrackOrderByPid: Map<Pid, TrackIndex[]>,
   showJsTracerSummary: boolean,
-  timelineType: TimelineType,
   legacyThreadOrder: ThreadIndex[] | null,
   legacyHiddenThreads: ThreadIndex[] | null,
 |};
@@ -258,6 +257,7 @@ export type ProfileSpecificUrlState = {|
   markersSearchString: string,
   networkSearchString: string,
   transforms: TransformStacksPerThread,
+  timelineType: TimelineType,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
 |};

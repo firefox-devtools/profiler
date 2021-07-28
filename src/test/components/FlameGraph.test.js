@@ -13,22 +13,8 @@ import copy from 'copy-to-clipboard';
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { FlameGraph } from '../../components/flame-graph';
 import { CallNodeContextMenu } from '../../components/shared/CallNodeContextMenu';
-
-import {
-  autoMockCanvasContext,
-  flushDrawLog,
-} from '../fixtures/mocks/canvas-context';
-import { storeWithProfile } from '../fixtures/stores';
-import {
-  getBoundingBox,
-  addRootOverlayElement,
-  removeRootOverlayElement,
-  getMouseEvent,
-  fireFullClick,
-  fireFullContextMenu,
-  findFillTextPositionFromDrawLog,
-} from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { getInvertCallstack } from '../../selectors/url-state';
+import { ensureExists } from '../../utils/flow';
 import {
   getEmptyThread,
   getEmptyProfile,
@@ -41,9 +27,23 @@ import {
   changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { getInvertCallstack } from '../../selectors/url-state';
-import { ensureExists } from '../../utils/flow';
+
+import {
+  autoMockCanvasContext,
+  flushDrawLog,
+} from '../fixtures/mocks/canvas-context';
+import { storeWithProfile } from '../fixtures/stores';
+import {
+  addRootOverlayElement,
+  removeRootOverlayElement,
+  getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
+  findFillTextPositionFromDrawLog,
+} from '../fixtures/utils';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
@@ -52,6 +52,7 @@ const GRAPH_HEIGHT = 300;
 
 describe('FlameGraph', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   afterEach(removeRootOverlayElement);
   beforeEach(addRootOverlayElement);
 
@@ -223,10 +224,6 @@ describe('FlameGraph', function() {
 
 function setupFlameGraph() {
   const flushRafCalls = mockRaf();
-
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
   const {
     profile,

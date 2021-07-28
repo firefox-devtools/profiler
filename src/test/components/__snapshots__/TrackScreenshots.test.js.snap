@@ -107,7 +107,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
   </div>
   <div
     class="timelineTrackScreenshotImgContainer"
-    style="left: 375px; width: 37.5px;"
+    style="left: 375px; width: 25px;"
   >
     <img
       class="timelineTrackScreenshotImg"

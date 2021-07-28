@@ -153,11 +153,313 @@ Array [
     5,
     11,
   ],
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    150,
+    1,
+    200,
+    13,
+  ],
+  Array [
+    "measureText",
+    "https://mozilla.org",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "https://mozilla.org",
+    153,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    160,
+    17,
+    179,
+    13,
+  ],
+  Array [
+    "measureText",
+    "Interpreter",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "Interpreter",
+    163,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    339,
+    18,
+    0.9999999999999745,
+    11,
+  ],
+  Array [
+    "fillRect",
+    170,
+    33,
+    160,
+    13,
+  ],
+  Array [
+    "measureText",
+    "IonMonkey",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "IonMonkey",
+    173,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    149,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "measureText",
+    "Tracing Information",
+  ],
+  Array [
+    "fillText",
+    "Tracing Information",
+    5,
+    11,
+  ],
 ]
 `;
 
 exports[`StackChart matches the snapshot for an inverted draw call 1`] = `
 Array [
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    150,
+    1,
+    200,
+    13,
+  ],
+  Array [
+    "measureText",
+    "https://mozilla.org",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "https://mozilla.org",
+    153,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    160,
+    17,
+    179,
+    13,
+  ],
+  Array [
+    "measureText",
+    "Interpreter",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "Interpreter",
+    163,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    339,
+    18,
+    0.9999999999999745,
+    11,
+  ],
+  Array [
+    "fillRect",
+    170,
+    33,
+    160,
+    13,
+  ],
+  Array [
+    "measureText",
+    "IonMonkey",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "IonMonkey",
+    173,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    149,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    365,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "measureText",
+    "Tracing Information",
+  ],
+  Array [
+    "fillText",
+    "Tracing Information",
+    5,
+    11,
+  ],
   Array [
     "set font",
     "10px sans-serif",

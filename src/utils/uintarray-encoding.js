@@ -5,30 +5,170 @@
 
 /**
  * Space-efficient url component compatible encoding for arrays of 32bit
- * unsigned integers. Smaller numbers take up fewer characters.
+ * unsigned integers. Smaller numbers take up fewer characters, and ranges
+ * of consecutive numbers are collapsed into a range syntax.
  */
 
-const encodingChars: string =
+// Depending on who you ask, there are different sets of allowed (non-reserved)
+// characters you can use in a URL component without percent-encoding. The most
+// stringent set is defined by RFC 3986, which only allows 66 characters:
+// 10 digits + 26 * 2 letters + 4 special characters . _ - ~
+// The JavaScript encodeURIComponent function is less strict than RFC 3986 and
+// also allows the following five characters, but we do not use them: ! ' ( ) *
+//
+// This file implements a VLQ-style encoding for arrays of unsigned 32 integers.
+//
+// The encoding makes use of 64 of the allowed 66 URL component characters:
+// 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._
+// It leaves - and ~ available for other uses.
+// Individual numbers take up fewer characters ("digits") than in the decimal
+// encoding, and there is no need for separator characters. Moreover, sequences
+// of consecutive integers (going up by 1 or down by 1) have a compact
+// representation using a "range marker" ("w").
+// Examples:
+//  [0] -> "0", [9, 10] -> "9a", [31, 167, 32, 33, 34, 35] -> "vB7x0wx3"
+//
+// Here's how it works:
+// Each individual number is encoded as a variable-length quantity into a sequence
+// of 6-bit digits. Each digit has 1 "continuation bit" and 5 "value bits".
+// Each digit is represented as one of the 64 possible characters (2^6 == 64).
+// See https://en.wikipedia.org/wiki/Variable-length_quantity for more background,
+// but note that our encoding uses sextets (6-bit digits) rather than octets.
+// The Wikipedia article mentions redundancy from "leading zero" octets (0x80).
+// Those correspond to "leading zero" sextets (0b100000, "w") in this encoding,
+// and we exploit this redundancy for the consecutive range syntax: If a number
+// starts with a leading zero digit, it means that the uint array should
+// include all consecutive numbers starting at the previous decoded number up
+// to (or down to) the current decoded number. Otherwise, no leading zero
+// digits are emitted, so smaller numbers take up fewer digits.
+
+const ENCODING_DIGITS: string =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
 
-function uintToString(value: number): string {
+// Prepending this digit to an encoded number does not change the number: It's
+// like a leading zero. It has the continuation bit set to 1 but the value bits
+// set to zero. The encoding for this digit is "w".
+// We use this digit to indicate "consecutive ranges".
+const LEADING_ZERO_DIGIT: string = ENCODING_DIGITS[0b100000];
+
+export function encodeUintSetForUrlComponent(numbers: Set<number>): string {
+  // A set has no order. Convert it to an array and then sort the array,
+  // so that consecutive numbers can be detected by encodeUintArrayForUrlComponent.
+  const array = Array.from(numbers);
+  array.sort((a, b) => a - b);
+  return encodeUintArrayForUrlComponent(array);
+}
+
+export function encodeUintArrayForUrlComponent(numbers: number[]): string {
+  let result = '';
+  for (let i = 0; i < numbers.length; i++) {
+    const skipCount = countSkippableConsecutiveNumbersAt(numbers, i);
+    if (skipCount === 0) {
+      result += encodeUint(numbers[i]);
+      continue;
+    }
+
+    i += skipCount;
+
+    // We use the "leading zero digit" as the range marker.
+    result += LEADING_ZERO_DIGIT;
+    result += encodeUint(numbers[i]);
+  }
+  return result;
+}
+
+export function decodeUintArrayFromUrlComponent(s: string): number[] {
+  const array = [];
+  let i = 0;
+  while (i < s.length) {
+    const { value, hasLeadingZero, nextI } = decodeUint(s, i);
+    if (hasLeadingZero && array.length >= 1) {
+      const startValue = array[array.length - 1];
+      const endValue = value;
+      if (endValue > startValue) {
+        for (let x = startValue + 1; x < endValue; x++) {
+          array.push(x);
+        }
+      } else {
+        for (let x = startValue - 1; x > endValue; x--) {
+          array.push(x);
+        }
+      }
+    }
+    array.push(value);
+    i = nextI;
+  }
+  return array;
+}
+
+// Returns the number of items at numbers[start..] that can be substituted with a
+// "consecutive range" marker. If the return value is non-zero, there is a
+// consecutive range which starts at numbers[start - 1] and ends at
+// numbers[start + returnValue] (inclusive).
+// A consecutive range is a sequence of at least three numbers which either all
+// go up by one or down by one.
+//
+// Example:
+//   We want to turn the sequence "1, 3, 4, 5, 6, 5, 4, 3, 2" into the "collapsed"
+//   sequence "1, 3, ...6, ...2".
+//   We skip "4, 5" and substitute them with a range marker:
+//   countSkippableConsecutiveNumbersAt([1, 3, 4, 5, 6, 5, 4, 3, 2], 2) === 2
+//                                             ^^^^ can be skipped
+//   We also skip "5, 4, 3":
+//   countSkippableConsecutiveNumbersAt([1, 3, 4, 5, 6, 5, 4, 3, 2], 5) === 3
+//                                                      ^^^^^^^ can be skipped
+function countSkippableConsecutiveNumbersAt(
+  numbers: number[],
+  start: number
+): number {
+  if (start < 1 || start + 1 >= numbers.length) {
+    return 0;
+  }
+  const previous = numbers[start - 1];
+  const current = numbers[start];
+  const next = numbers[start + 1];
+
+  let skipCount = 0;
+  if (current === previous + 1 && next === current + 1) {
+    // Found increasing consecutive range.
+    skipCount = 1;
+    while (
+      start + skipCount + 1 < numbers.length &&
+      numbers[start + skipCount + 1] === current + skipCount + 1
+    ) {
+      skipCount++;
+    }
+  } else if (current === previous - 1 && next === current - 1) {
+    // Found decreasing consecutive range.
+    skipCount = 1;
+    while (
+      start + skipCount + 1 < numbers.length &&
+      numbers[start + skipCount + 1] === current - skipCount - 1
+    ) {
+      skipCount++;
+    }
+  }
+  return skipCount;
+}
+
+function encodeUint(value: number): string {
+  // Build the string digit by digit, back to front. The last digit has the
+  // continuation bit set to 0, the other digits have it set to 1.
+  // No "leading zero" digits are emitted, so that smaller numbers use fewer
+  // digits, and so that "leading zero" digits can have special meaning.
   let x = value;
-  let r = encodingChars[x & 0b11111];
+  let r = ENCODING_DIGITS[x & 0b11111];
   x >>= 5;
   while (x !== 0) {
-    r = encodingChars[0b100000 + (x & 0b11111)] + r;
+    r = ENCODING_DIGITS[0b100000 + (x & 0b11111)] + r;
     x >>= 5;
   }
   return r;
 }
 
-export function uintArrayToString(array: number[]): string {
-  return array.map(uintToString).join('');
-}
-
-function encodingCharToNumber(x: string): number {
+function bitsFromEncodingDigit(x: string): number {
   switch (x) {
-    // encodingChars.split('').map((c, i) => `    case '${c}': return ${i};`).join('\n')
+    // ENCODING_DIGITS.split('').map((c, i) => `    case '${c}': return ${i};`).join('\n')
     case '0':
       return 0;
     case '1':
@@ -162,16 +302,32 @@ function encodingCharToNumber(x: string): number {
   }
 }
 
-export function stringToUintArray(s: string): number[] {
-  const array = [];
-  let val = 0;
-  for (let i = 0; i < s.length; i++) {
-    const x = encodingCharToNumber(s[i]);
-    val = (val << 5) + (x & 0b11111);
-    if ((x & 0b100000) === 0) {
-      array.push(val);
-      val = 0;
-    }
+// Decode a single encoded number which begins at s[start].
+function decodeUint(
+  s: string,
+  start: number
+): {|
+  // The decoded number.
+  value: number,
+  // Whether the encoding of this number started with a "leading zero" digit.
+  // Our caller uses this as a "consecutive range" marker.
+  hasLeadingZero: boolean,
+  // The end of the variable-length encoding; the next number starts at s[nextI].
+  nextI: number,
+|} {
+  let i = start;
+  let bits = bitsFromEncodingDigit(s[i]);
+  let continuationBit = bits & 0b100000;
+  let valueBits = bits & 0b011111;
+  const hasLeadingZero = continuationBit !== 0 && valueBits === 0;
+  let value = valueBits;
+  i++;
+  while (continuationBit && i < s.length) {
+    bits = bitsFromEncodingDigit(s[i]);
+    continuationBit = bits & 0b100000;
+    valueBits = bits & 0b011111;
+    value = (value << 5) | valueBits;
+    i++;
   }
-  return array;
+  return { value, hasLeadingZero, nextI: i };
 }

@@ -16,11 +16,12 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import {
   getMouseEvent,
-  getBoundingBox,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
 import type {
   Profile,
@@ -56,6 +57,7 @@ function getSamplesPixelPosition(
 
 describe('SampleTooltipContents', function() {
   autoMockCanvasContext();
+  autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
@@ -84,10 +86,8 @@ describe('SampleTooltipContents', function() {
     const store = storeWithProfile(profile);
     const threadsKey = 0;
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
+    // WithSize uses requestAnimationFrame
+    const flushRafCalls = mockRaf();
     const { container } = render(
       <Provider store={store}>
         <TimelineTrackThread
@@ -97,6 +97,7 @@ describe('SampleTooltipContents', function() {
         />
       </Provider>
     );
+    flushRafCalls();
 
     const canvas = ensureExists(
       container.querySelector('.threadActivityGraphCanvas'),
@@ -106,13 +107,14 @@ describe('SampleTooltipContents', function() {
     fireEvent(
       canvas,
       getMouseEvent('mousemove', {
-        pageX: getSamplesPixelPosition(
+        offsetX: getSamplesPixelPosition(
           hoveredSampleIndex,
           hoveredSamplePosition
         ),
-        pageY: GRAPH_HEIGHT * 0.9,
+        offsetY: GRAPH_HEIGHT * 0.9,
       })
     );
+    flushRafCalls();
 
     const getTooltip = () =>
       ensureExists(

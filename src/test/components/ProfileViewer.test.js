@@ -17,25 +17,23 @@ import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import { getBoundingBox } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
+import {
+  autoMockElementSize,
+  getElementWithFixedSize,
+} from '../fixtures/mocks/element-size';
 
 describe('ProfileViewer', function() {
   autoMockCanvasContext();
-  beforeEach(() => {
-    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
-      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-      // opt out of the type checker for this mock by returning `any`.
-      const mockEl = ({
-        getBoundingClientRect: () => getBoundingBox(300, 300),
-      }: any);
-      return mockEl;
-    });
+  autoMockElementSize({ width: 200, height: 300 });
 
+  beforeEach(() => {
     jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
+      .spyOn(ReactDOM, 'findDOMNode')
+      .mockImplementation(() =>
+        getElementWithFixedSize({ width: 300, height: 300 })
+      );
   });
 
   function setup() {

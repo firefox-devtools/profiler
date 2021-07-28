@@ -33,19 +33,41 @@ import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
 export type DataSource =
   | 'none'
+  // This is used when the profile is loaded from a local file, via drag and
+  // drop or via a file input. Reloading a URL with this data source cannot
+  // work automatically because the file would need to be picked again.
   | 'from-file'
-  //  This datasource is used to fetch a profile from Firefox. This used to be
-  //  handled by an addon, hence the name, but now this is all inside Firefox.
+  // This datasource is used to fetch a profile from Firefox via a frame script.
+  // This is the first entry-point when a profile is captured in the browser.
+  // In the past it was used by the Gecko Profiler add-on, hence the name.
+  // We intend to rename this to from-browser in the future.
   | 'from-addon'
-  // This is an alias for 'from-addon' until we phase that one out. We
-  // introduced it when implementing the "delete profile" functionality, because
-  // `from-addon` didn't suit this use-case well. In the future we want to
-  // completely replace `from-addon` with this one.
-  | 'unpublished'
-  | 'local'
+  // This is used for profiles that have been shared / uploaded to the Profiler
+  // Server.
   | 'public'
+  // This is used after a public profile is deleted / unpublished.
+  // In the future, we may want to use the "local" data source for this, and
+  // remove "unpublished".
+  | 'unpublished'
+  // Reserved for future use. Once implemented, it would work as follows:
+  // Whenever a non-public profile is loaded into the profiler, e.g. via
+  // from-addon or from-file, we want to store it in a local database
+  // automatically, generate an ID for it, and redirect the URL to /local/{id}/.
+  // This would make it so that the page can be reloaded, or restored after a
+  // browser restart, without losing the profile.
+  | 'local'
+  // This is used to load profiles from a URL. It is used in two scenarios:
+  //  - For public profiles which are hosted on a different server than the
+  //    regular profiler server, for example for profiles that are captured
+  //    automatically in Firefox CI.
+  //  - With a localhost URL, in order to import profiles from a locally running
+  //    script.
   | 'from-url'
+  // This is used when comparing two profiles. The displayed profile is a
+  // comparison profile created from two input profiles.
   | 'compare'
+  // This is a page which displays a list of profiles that were uploaded from
+  // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
 
 export type TimelineType = 'stack' | 'category' | 'cpu-category';
@@ -318,6 +340,7 @@ type ReceiveProfileAction =
       +selectedThreadIndexes: Set<ThreadIndex>,
       +activeTabTimeline: ActiveTabTimeline,
       +tabID: TabID | null,
+      +timelineType: TimelineType | null,
     |}
   | {|
       +type: 'DATA_RELOAD',

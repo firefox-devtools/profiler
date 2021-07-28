@@ -169,7 +169,7 @@ class LocalTrackComponent extends PureComponent<Props> {
           className={classNames('timelineTrackRow timelineTrackLocalRow', {
             selected: isSelected,
           })}
-          onMouseUp={this._selectCurrentTrack}
+          onClick={this._selectCurrentTrack}
         >
           <ContextMenuTrigger
             id="TimelineTrackContextMenu"

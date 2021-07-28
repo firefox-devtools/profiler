@@ -570,6 +570,7 @@ export function finalizeActiveTabProfileView(
   tabID: TabID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    const hasUrlInfo = selectedThreadIndexes !== null;
     const relevantPages = getRelevantPagesForActiveTab(getState());
 
     if (relevantPages.length === 0) {
@@ -593,11 +594,28 @@ export function finalizeActiveTabProfileView(
       ]);
     }
 
+    // Check the profile to see if we have threadCPUDelta values and switch to
+    // the category view with CPU if we have. This is needed only while we are
+    // still experimenting with the new activity graph. We should remove this
+    // when we have this on by default.
+    let timelineType = null;
+    if (
+      !hasUrlInfo &&
+      profile.meta.sampleUnits &&
+      profile.threads[0].samples.threadCPUDelta
+    ) {
+      const hasCPUDeltaValues = getIsCPUUtilizationProvided(getState());
+      if (hasCPUDeltaValues) {
+        timelineType = 'cpu-category';
+      }
+    }
+
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
       activeTabTimeline,
       selectedThreadIndexes,
       tabID,
+      timelineType,
     });
   };
 }
@@ -891,9 +909,9 @@ function getSymbolStore(
         }
       });
     },
-    requestSymbolTableFromAddon: async lib => {
+    requestSymbolTableFromBrowser: async lib => {
       if (!geckoProfiler) {
-        throw new Error("There's no connection to the gecko profiler add-on.");
+        throw new Error("There's no connection to the browser.");
       }
 
       const { debugName, breakpadId } = lib;
@@ -1452,7 +1470,6 @@ export function getProfilesFromRawUrl(
 
     switch (dataSource) {
       case 'from-addon':
-      case 'unpublished':
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the addon and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
@@ -1481,6 +1498,7 @@ export function getProfilesFromRawUrl(
       case 'none':
       case 'from-file':
       case 'local':
+      case 'unpublished':
         // There is no profile to download for these datasources.
         break;
       default:

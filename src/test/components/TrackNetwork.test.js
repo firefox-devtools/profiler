@@ -20,23 +20,27 @@ import {
 import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
-import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  getBoundingBox,
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
+import {
+  autoMockElementSize,
+  setMockedElementSize,
+} from '../fixtures/mocks/element-size';
 
-// The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
-// mimicks what is computed by the actual component.
+// The graph is 400 pixels wide based on the element size mock, and the graph
+// height mimicks what is computed by the actual component.
 const GRAPH_WIDTH = 400;
 const GRAPH_HEIGHT = TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
 
 autoMockCanvasContext();
+autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 
 beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
@@ -65,9 +69,7 @@ describe('timeline/TrackNetwork', function() {
     // Send out the resize with a width change.
     // By changing the "fake" result of getBoundingClientRect, we ensure that
     // the pure components rerender because their `width` props change.
-    HTMLElement.prototype.getBoundingClientRect.mockImplementation(() =>
-      getBoundingBox(GRAPH_WIDTH - 100, GRAPH_HEIGHT)
-    );
+    setMockedElementSize({ width: GRAPH_WIDTH - 100, height: GRAPH_HEIGHT });
     window.dispatchEvent(new Event('resize'));
     expect(getContextDrawCalls().length > 0).toBe(true);
   });
@@ -130,10 +132,6 @@ function setup() {
 
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
-
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
   const renderResult = render(
     <Provider store={store}>
