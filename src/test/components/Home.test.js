@@ -61,9 +61,11 @@ describe('app/Home', function() {
 
     // Respond back from the browser that the menu button is not yet enabled.
     triggerResponse({
-      type: 'STATUS_RESPONSE',
-      menuButtonIsEnabled: false,
+      type: 'SUCCESS_RESPONSE',
       requestId: getLastRequestId(),
+      response: {
+        menuButtonIsEnabled: false,
+      },
     });
     await findByTestId('home-enable-popup-instructions');
 
@@ -71,8 +73,9 @@ describe('app/Home', function() {
 
     // Respond back from the browser that the menu button was enabled.
     triggerResponse({
-      type: 'ENABLE_MENU_BUTTON_DONE',
+      type: 'SUCCESS_RESPONSE',
       requestId: getLastRequestId(),
+      response: undefined,
     });
     await findByTestId('home-record-instructions');
   });
