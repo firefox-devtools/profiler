@@ -39,7 +39,7 @@ type CanvasProps = {|
   ) => number,
   +categories: CategoryList,
   +passFillsQuerier: ActivityFillGraphQuerier => void,
-  +onMouseUp: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
+  +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
   ...SizeProps,
@@ -194,9 +194,9 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
   }
 
   render() {
-    const { className, trackName, onMouseUp } = this.props;
+    const { className, trackName, onClick } = this.props;
     return (
-      <canvas className={className} ref={this._canvas} onMouseUp={onMouseUp}>
+      <canvas className={className} ref={this._canvas} onClick={onClick}>
         <h2>Activity Graph for {trackName}</h2>
         <p>This graph shows a visual chart of thread activity.</p>
       </canvas>

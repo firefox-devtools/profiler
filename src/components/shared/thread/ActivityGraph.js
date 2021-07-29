@@ -139,7 +139,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     return fillsQuerier.getSampleAndCpuRatioAtClick(x, y, time);
   }
 
-  _onMouseUp = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
+  _onClick = (event: SyntheticMouseEvent<HTMLCanvasElement>) => {
     const sampleState = this._getSampleAtMouseEvent(event);
     if (sampleState !== null) {
       this.props.onSampleClick(event, sampleState.sample);
@@ -191,7 +191,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           treeOrderSampleComparator={treeOrderSampleComparator}
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
-          onMouseUp={this._onMouseUp}
+          onClick={this._onClick}
           enableCPUUsage={enableCPUUsage}
           maxThreadCPUDelta={maxThreadCPUDelta}
           width={width}

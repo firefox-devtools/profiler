@@ -58,7 +58,7 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     };
   }
 
-  _onMouseUp = (
+  _onClick = (
     clickedArea: 'timelineTrackResourceLabel' | 'timelineTrackRow'
   ) => (event: MouseEvent) => {
     const { isSelected } = this.props;
@@ -176,11 +176,11 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
             selected: isSelected,
             opened: isOpen,
           })}
-          onMouseUp={this._onMouseUp('timelineTrackRow')}
+          onClick={this._onClick('timelineTrackRow')}
         >
           <div
             className="timelineTrackResourceLabel"
-            onMouseUp={this._onMouseUp('timelineTrackResourceLabel')}
+            onClick={this._onClick('timelineTrackResourceLabel')}
           >
             <span>{trackLabel}</span> {resourceTrack.name}
           </div>

@@ -90,9 +90,9 @@ export function triggerLoadingFromUrl(profileUrl: string): Action {
   };
 }
 
-export function waitingForProfileFromAddon(): Action {
+export function waitingForProfileFromBrowser(): Action {
   return {
-    type: 'WAITING_FOR_PROFILE_FROM_ADDON',
+    type: 'WAITING_FOR_PROFILE_FROM_BROWSER',
   };
 }
 
@@ -850,10 +850,10 @@ class SymbolicationStepQueue {
 const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
 
 /**
- * If the profile object we got from the add-on is an ArrayBuffer, convert it
+ * If the profile object we got from the browser is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
-async function _unpackGeckoProfileFromAddon(profile) {
+async function _unpackGeckoProfileFromBrowser(profile) {
   // Note: the following check will work for array buffers coming from another
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
@@ -863,15 +863,15 @@ async function _unpackGeckoProfileFromAddon(profile) {
   return profile;
 }
 
-async function getProfileFromAddon(
+async function getProfileFromBrowser(
   dispatch: Dispatch,
   geckoProfiler: $GeckoProfiler
 ): Promise<Profile> {
-  dispatch(waitingForProfileFromAddon());
+  dispatch(waitingForProfileFromBrowser());
 
-  // XXX update state to show that we're connected to the profiler addon
+  // XXX update state to show that we're connected to the browser
   const rawGeckoProfile = await geckoProfiler.getProfile();
-  const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
+  const unpackedProfile = await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
   const profile = processGeckoProfile(unpackedProfile);
   await dispatch(loadProfile(profile, { geckoProfiler }));
 
@@ -909,9 +909,9 @@ function getSymbolStore(
         }
       });
     },
-    requestSymbolTableFromAddon: async lib => {
+    requestSymbolTableFromBrowser: async lib => {
       if (!geckoProfiler) {
-        throw new Error("There's no connection to the gecko profiler add-on.");
+        throw new Error("There's no connection to the browser.");
       }
 
       const { debugName, breakpadId } = lib;
@@ -967,14 +967,14 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
-export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
+export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
         dispatch(
           temporaryError(
             new TemporaryError(oneLine`
-            We were unable to connect to the Gecko profiler add-on within thirty seconds.
+            We were unable to connect to the browser within thirty seconds.
             This might be because the profile is big or your machine is slower than usual.
             Still waiting...
           `)
@@ -984,7 +984,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
 
-      await getProfileFromAddon(dispatch, geckoProfiler);
+      await getProfileFromBrowser(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
@@ -1470,13 +1470,12 @@ export function getProfilesFromRawUrl(
 
     switch (dataSource) {
       case 'from-addon':
-      case 'unpublished':
         // We don't need to `await` the result because there's no url upgrading
-        // when retrieving the profile from the addon and we don't need to wait
+        // when retrieving the profile from the browser and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
         // symbolication and rather want to show the UI as soon as we get
         // the profile data.
-        dispatch(retrieveProfileFromAddon());
+        dispatch(retrieveProfileFromBrowser());
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
@@ -1499,6 +1498,7 @@ export function getProfilesFromRawUrl(
       case 'none':
       case 'from-file':
       case 'local':
+      case 'unpublished':
         // There is no profile to download for these datasources.
         break;
       default:
@@ -1509,7 +1509,7 @@ export function getProfilesFromRawUrl(
     }
 
     // Profile may be null only for the `from-addon` dataSource since we do
-    // not `await` for retrieveProfileFromAddon function.
+    // not `await` for retrieveProfileFromBrowser function.
     return getProfileOrNull(getState());
   };
 }
