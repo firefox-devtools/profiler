@@ -1460,7 +1460,14 @@ export function getProfilesFromRawUrl(
 ): ThunkAction<Promise<Profile | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
-    let dataSource = ensureIsValidDataSource(pathParts[0]);
+    let possibleDataSource = pathParts[0];
+
+    // Treat from-addon as from-browser, for compatibility with Firefox < 93.
+    if (possibleDataSource === 'from-addon') {
+      possibleDataSource = 'from-browser';
+    }
+
+    let dataSource = ensureIsValidDataSource(possibleDataSource);
     if (dataSource === 'from-file') {
       // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
       // be 'from-file' and needs to be redirected to home page.
@@ -1469,7 +1476,7 @@ export function getProfilesFromRawUrl(
     dispatch(setDataSource(dataSource));
 
     switch (dataSource) {
-      case 'from-addon':
+      case 'from-browser':
         // We don't need to `await` the result because there's no url upgrading
         // when retrieving the profile from the browser and we don't need to wait
         // for the process. Moreover we don't want to wait for the end of
@@ -1508,7 +1515,7 @@ export function getProfilesFromRawUrl(
         );
     }
 
-    // Profile may be null only for the `from-addon` dataSource since we do
+    // Profile may be null only for the `from-browser` dataSource since we do
     // not `await` for retrieveProfileFromBrowser function.
     return getProfileOrNull(getState());
   };

@@ -76,7 +76,7 @@ describe('app/ServiceWorkerManager', () => {
 
     function navigateToAddonLoadingPage() {
       const newUrlState = stateFromLocation({
-        pathname: '/from-addon/',
+        pathname: '/from-browser/',
         search: '',
         hash: '',
       });
@@ -233,7 +233,7 @@ describe('app/ServiceWorkerManager', () => {
     });
   });
 
-  describe('with the `from-addon` datasource', () => {
+  describe('with the `from-browser` datasource', () => {
     it(`doesn't show a notice if updated after we were fully loaded`, async () => {
       process.env.NODE_ENV = 'production';
 
@@ -278,7 +278,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(
         ensureExists(container.querySelector('.photon-message-bar')).className
       ).toMatch(/\bphoton-message-bar-warning\b/);
-      // There's no reload button for the `from-addon` datasource.
+      // There's no reload button for the `from-browser` datasource.
       expect(queryByText(/reload/i)).not.toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
 

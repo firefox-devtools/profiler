@@ -53,7 +53,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       retrieveProfilesToCompare,
     } = this.props;
     switch (dataSource) {
-      case 'from-addon':
+      case 'from-browser':
         retrieveProfileFromBrowser();
         break;
       case 'from-file':

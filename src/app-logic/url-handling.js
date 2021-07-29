@@ -119,7 +119,7 @@ function getPathParts(urlState: UrlState): string[] {
       return ['compare'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
-    case 'from-addon':
+    case 'from-browser':
     case 'unpublished':
     case 'from-file':
       return [dataSource, urlState.selectedTab];
@@ -262,7 +262,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       break;
     case 'public':
     case 'local':
-    case 'from-addon':
+    case 'from-browser':
     case 'unpublished':
     case 'from-file':
     case 'from-url':
@@ -469,7 +469,7 @@ export function ensureIsValidDataSource(
   );
   switch (coercedDataSource) {
     case 'none':
-    case 'from-addon':
+    case 'from-browser':
     case 'unpublished':
     case 'from-file':
     case 'local':
@@ -500,7 +500,7 @@ type Location = {
  * Parse the window.location string to create the UrlState.
  *
  * `profile` parameter is nullable and optional. It's nullable because data sources
- * like from-addon can't upgrade a url for a freshly captured profile. So we need
+ * like from-browser can't upgrade a url for a freshly captured profile. So we need
  * to skip upgrading for these sources. It's also optional for both testing
  * purposes and for places where we would like to do the upgrading without
  * providing any profile.
@@ -761,11 +761,18 @@ export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocationBeforeUpgrade,
   profile?: Profile | null
 ): ProcessedLocation {
+  // Forward /from-addon to /from-browser immediately, outside of the versioning process.
+  // This ensures compatibility with Firefox versions < 93.
+  processedLocation.pathname = processedLocation.pathname.replace(
+    /^\/from-addon/,
+    '/from-browser'
+  );
+
   const urlVersion = +processedLocation.query.v || 0;
   if (profile === null || urlVersion === CURRENT_URL_VERSION) {
     // Do not upgrade when either profile data is null or url is on the latest
     // version already. Profile can be null only when the source could not provide
-    // that for upgrader and therefore upgrading step is not needed (e.g. 'from-addon').
+    // that for upgrader and therefore upgrading step is not needed (e.g. 'from-browser').
     return processedLocation;
   }
 
