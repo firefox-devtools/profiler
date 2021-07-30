@@ -1956,10 +1956,10 @@ describe('actions/receive-profile', function() {
         hash: '',
       });
       await dispatch(finalizeProfileView());
-      const [, fromAddon, urlString] = urlFromState(
+      const [, fromUrl, urlString] = urlFromState(
         UrlStateSelectors.getUrlState(getState())
       ).split('/');
-      expect(fromAddon).toEqual('from-url');
+      expect(fromUrl).toEqual('from-url');
       expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
     });
 
@@ -1986,17 +1986,17 @@ describe('actions/receive-profile', function() {
       expect(getView(getState()).phase).toBe('DATA_LOADED');
     });
 
-    it('retrieves profile from a `from-addon` data source and loads it', async function() {
+    it('retrieves profile from a `from-browser` data source and loads it', async function() {
       const { geckoProfile, getState, waitUntilPhase } = await setup(
         {
-          pathname: '/from-addon/',
+          pathname: '/from-browser/',
           search: '',
           hash: '',
         },
         0
       );
 
-      // Differently, `from-addon` calls the finalizeProfileView internally,
+      // Differently, `from-browser` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
       const processedProfile = processGeckoProfile(geckoProfile);
@@ -2005,10 +2005,10 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('finishes symbolication for `from-addon` data source', async function() {
+    it('finishes symbolication for `from-browser` data source', async function() {
       const { waitUntilSymbolication } = await setup(
         {
-          pathname: '/from-addon/',
+          pathname: '/from-browser/',
           search: '',
           hash: '',
         },

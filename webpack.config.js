@@ -160,7 +160,7 @@ if (process.env.NODE_ENV === 'production') {
               // the user to be able to access them.
               return null;
             }
-            // 3. It's a URL like /from-addon/, or /public/.../?... .
+            // 3. It's a URL like /from-browser/, or /public/.../?... .
             // For those URLs we want to respond with index.html, which is
             // cached as the "/" URL.
             return url.origin + '/';

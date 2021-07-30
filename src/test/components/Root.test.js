@@ -86,7 +86,7 @@ describe('app/AppViewRouter', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('does not try to retrieve a profile when moving from from-addon to public', function() {
+  it('does not try to retrieve a profile when moving from from-browser to public', function() {
     const {
       container,
       dispatch,
@@ -199,7 +199,7 @@ function setup() {
 
   function navigateToAddonLoadingPage() {
     const newUrlState = stateFromLocation({
-      pathname: '/from-addon/',
+      pathname: '/from-browser/',
       search: '',
       hash: '',
     });

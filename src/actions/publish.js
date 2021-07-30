@@ -335,13 +335,13 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       } else {
         const dataSource = getDataSource(prePublishedState);
         const isUnpublished =
-          dataSource === 'unpublished' || dataSource === 'from-addon';
+          dataSource === 'unpublished' || dataSource === 'from-browser';
         dispatch(
           profilePublished(
             hash,
             profileName,
             // Only include the pre-published state if we want to be able to revert
-            // the profile. If we are viewing from-addon, then it's only a single
+            // the profile. If we are viewing from-browser, then it's only a single
             // profile.
             isUnpublished ? null : prePublishedState
           )

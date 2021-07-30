@@ -28,7 +28,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import { Localized } from '@fluent/react';
 
 const ERROR_MESSAGES_L10N_ID: { [string]: string } = Object.freeze({
-  'from-addon': 'AppViewRouter--error-message-unpublished',
+  'from-browser': 'AppViewRouter--error-message-unpublished',
   unpublished: 'AppViewRouter--error-message-unpublished',
   'from-file': 'AppViewRouter--error-message-from-file',
   local: 'AppViewRouter--error-message-local',
@@ -64,7 +64,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         break;
       case 'uploaded-recordings':
         return <UploadedRecordingsHome />;
-      case 'from-addon':
+      case 'from-browser':
       case 'unpublished':
       case 'from-file':
       case 'local':
