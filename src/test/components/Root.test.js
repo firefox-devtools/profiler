@@ -74,9 +74,13 @@ describe('app/AppViewRouter', function() {
   });
 
   it('renders the addon loading page, and the profile view after capturing', function() {
-    const { container, dispatch, navigateToAddonLoadingPage } = setup();
+    const {
+      container,
+      dispatch,
+      navigateToFromBrowserProfileLoadingPage,
+    } = setup();
 
-    navigateToAddonLoadingPage();
+    navigateToFromBrowserProfileLoadingPage();
     dispatch(waitingForProfileFromBrowser());
     expect(container.firstChild).toMatchSnapshot();
     expect(retrieveProfileFromBrowser).toBeCalled();
@@ -90,11 +94,11 @@ describe('app/AppViewRouter', function() {
     const {
       container,
       dispatch,
-      navigateToAddonLoadingPage,
+      navigateToFromBrowserProfileLoadingPage,
       navigateToStoreLoadingPage,
     } = setup();
 
-    navigateToAddonLoadingPage();
+    navigateToFromBrowserProfileLoadingPage();
     dispatch(waitingForProfileFromBrowser());
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
@@ -197,7 +201,7 @@ function setup() {
     store.dispatch(updateUrlState(newUrlState));
   }
 
-  function navigateToAddonLoadingPage() {
+  function navigateToFromBrowserProfileLoadingPage() {
     const newUrlState = stateFromLocation({
       pathname: '/from-browser/',
       search: '',
@@ -237,7 +241,7 @@ function setup() {
     ...renderResult,
     dispatch: store.dispatch,
     navigateToStoreLoadingPage,
-    navigateToAddonLoadingPage,
+    navigateToFromBrowserProfileLoadingPage,
     navigateBackToHome,
     navigateToCompareHome,
     navigateToMyProfiles,
