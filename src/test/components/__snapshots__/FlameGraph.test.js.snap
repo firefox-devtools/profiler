@@ -21,7 +21,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 14px; top: 306px;"
+  style="left: 14px; top: 306px;"
 >
   <div
     class="tooltipCallNode"
@@ -152,7 +152,11 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
         >
           Script URL:
         </div>
-        path/to/file:10:100
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:10:100
+        </div>
       </div>
     </div>
   </div>
@@ -694,7 +698,7 @@ exports[`FlameGraph shows a tooltip with the resource information 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 80.66666666666666px; top: 226px;"
+  style="left: 80.66666666666666px; top: 226px;"
 >
   <div
     class="tooltipCallNode"
@@ -825,7 +829,11 @@ exports[`FlameGraph shows a tooltip with the resource information 1`] = `
         >
           Script URL:
         </div>
-        path/to/file:17:107
+        <div
+          class="tooltipDetailsUrl"
+        >
+          path/to/file:17:107
+        </div>
         <div
           class="tooltipLabel"
         >

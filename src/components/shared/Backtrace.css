@@ -1,5 +1,4 @@
 .backtrace {
-  max-width: var(--tooltip-detail-max-width);
   padding: 0;
   margin: 0;
 }

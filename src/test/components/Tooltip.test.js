@@ -43,7 +43,6 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${MOUSE_OFFSET}px`,
         top: `${MOUSE_OFFSET}px`,
-        '--tooltip-detail-max-width': '600px',
       });
 
       const mouseX = 50;
@@ -53,7 +52,6 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${mouseX + MOUSE_OFFSET}px`,
         top: `${mouseY + MOUSE_OFFSET}px`,
-        '--tooltip-detail-max-width': '600px',
       });
     });
 
@@ -72,7 +70,6 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,
-        '--tooltip-detail-max-width': '600px',
       });
     });
 
@@ -87,7 +84,6 @@ describe('shared/Tooltip', () => {
       expect(getTooltipStyle()).toEqual({
         left: `${expectedLeft}px`,
         top: `${expectedTop}px`,
-        '--tooltip-detail-max-width': '600px',
       });
     });
   });
