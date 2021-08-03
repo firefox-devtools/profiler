@@ -39,7 +39,7 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
   style="--tooltip-detail-max-width: 600px; left: 23px; top: 13px;"
 >
   <div
-    class="tooltipMarker"
+    class="tooltipMarker tooltipNetwork"
     style="--tooltip-detail-max-width: 600px;"
   >
     <div
