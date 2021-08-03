@@ -298,6 +298,7 @@ class Network extends PureComponent<Props, State> {
         {shouldShowTooltip && hoveredMarkerIndex !== null && hoveredMarker ? (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <TooltipMarker
+              className="tooltipNetwork"
               markerIndex={hoveredMarkerIndex}
               marker={hoveredMarker}
               threadsKey={threadIndex}
