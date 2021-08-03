@@ -14,6 +14,8 @@ import {
   getEmptyThread,
   getEmptyUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
+import { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
+
 import { coerce, ensureExists } from 'firefox-profiler/utils/flow';
 
 /**
@@ -150,6 +152,12 @@ type IndexIntoDhatFrames = number;
 type ReadCount = number;
 type WriteCount = number;
 
+/**
+ * The dhat convertor converts to the processed profile format, rather than to the Gecko
+ * format, as it needs the UnbalancedNativeAllocationsTable type, which is unavailable
+ * in the Gecko format. In the Gecko format, that data comes in the form of markers, which
+ * would be awkard to target.
+ */
 export function attemptToConvertDhat(json: mixed): Profile | null {
   if (!json || typeof json !== 'object') {
     return null;
@@ -173,9 +181,7 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
   profile.meta.importedFrom = `dhat`;
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const thread = getEmptyThread();
-  thread.pid = dhat.pid;
-  const { funcTable, stringTable, stackTable, frameTable } = thread;
+  const { funcTable, stringTable, stackTable, frameTable } = getEmptyThread();
 
   const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
@@ -303,36 +309,53 @@ export function attemptToConvertDhat(json: mixed): Profile | null {
     allocationsTable.length++;
   }
 
-  const totalBytesThread = { ...thread };
-  const maximumBytesThread = { ...thread };
-  const bytesAtGmaxThread = { ...thread };
-  const endBytesThread = { ...thread };
+  profile.threads = [
+    { name: 'Total Bytes', weight: totalBytes },
+    { name: 'Maximum Bytes', weight: maximumBytes },
+    { name: 'Bytes at Global Max', weight: bytesAtGmax },
+    { name: 'Bytes at End', weight: endBytes },
+  ].map(({ name, weight }) => {
+    const thread = getEmptyThread();
 
-  totalBytesThread.nativeAllocations = {
-    ...allocationsTable,
-    weight: totalBytes,
-  };
-  maximumBytesThread.nativeAllocations = {
-    ...allocationsTable,
-    weight: maximumBytes,
-  };
-  bytesAtGmaxThread.nativeAllocations = {
-    ...allocationsTable,
-    weight: bytesAtGmax,
-  };
-  endBytesThread.nativeAllocations = { ...allocationsTable, weight: endBytes };
+    thread.pid = dhat.pid;
+    thread.name = name;
+    thread.stringTable = new UniqueStringArray(stringTable.serializeToArray());
 
-  totalBytesThread.name = 'Total Bytes';
-  maximumBytesThread.name = 'Maximum Bytes';
-  bytesAtGmaxThread.name = 'Bytes at Global Max';
-  endBytesThread.name = 'Bytes at End';
+    thread.funcTable.name = funcTable.name.slice();
+    thread.funcTable.isJS = funcTable.isJS.slice();
+    thread.funcTable.relevantForJS = funcTable.relevantForJS.slice();
+    thread.funcTable.resource = funcTable.resource.slice();
+    thread.funcTable.fileName = funcTable.fileName.slice();
+    thread.funcTable.lineNumber = funcTable.lineNumber.slice();
+    thread.funcTable.columnNumber = funcTable.columnNumber.slice();
+    thread.funcTable.length = funcTable.length;
 
-  profile.threads.push(
-    totalBytesThread,
-    maximumBytesThread,
-    bytesAtGmaxThread,
-    endBytesThread
-  );
+    thread.frameTable.address = frameTable.address.slice();
+    thread.frameTable.line = frameTable.line.slice();
+    thread.frameTable.column = frameTable.column.slice();
+    thread.frameTable.category = frameTable.category.slice();
+    thread.frameTable.subcategory = frameTable.subcategory.slice();
+    thread.frameTable.innerWindowID = frameTable.innerWindowID.slice();
+    thread.frameTable.implementation = frameTable.implementation.slice();
+    thread.frameTable.func = frameTable.func.slice();
+    thread.frameTable.length = frameTable.length;
+
+    thread.stackTable.frame = stackTable.frame.slice();
+    thread.stackTable.category = stackTable.category.slice();
+    thread.stackTable.category = stackTable.category.slice();
+    thread.stackTable.prefix = stackTable.prefix.slice();
+    thread.stackTable.length = stackTable.length;
+
+    thread.nativeAllocations = {
+      time: allocationsTable.time.slice(),
+      stack: allocationsTable.stack.slice(),
+      weight,
+      weightType: 'bytes',
+      length: allocationsTable.length,
+    };
+
+    return thread;
+  });
 
   return profile;
 }
