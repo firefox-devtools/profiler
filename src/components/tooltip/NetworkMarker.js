@@ -62,8 +62,8 @@ function _getHumanReadableDataStatus(status: NetworkStatus): string {
       return 'Response received';
     case 'STATUS_REDIRECT':
       return 'Redirecting request';
-    case 'STATUS_ABORT':
-      return 'Request was aborted';
+    case 'STATUS_CANCEL':
+      return 'Request was canceled';
     default:
       throw assertExhaustiveCheck(status);
   }

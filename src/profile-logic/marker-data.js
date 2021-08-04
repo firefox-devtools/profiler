@@ -493,7 +493,7 @@ export function deriveMarkersFromRawMarkerTable(
             openNetworkMarkers.set(data.id, rawMarkerIndex);
           } else {
             // End status can be any status other than 'STATUS_START'. They are
-            // either 'STATUS_STOP', 'STATUS_REDIRECT' or 'STATUS_ABORT'.
+            // either 'STATUS_STOP', 'STATUS_REDIRECT' or 'STATUS_CANCEL'.
             const endData = data;
 
             const startIndex = openNetworkMarkers.get(data.id);

@@ -179,7 +179,7 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
       Status
       :
     </div>
-    Request was aborted
+    Request was canceled
     <div
       class="tooltipLabel"
     >
