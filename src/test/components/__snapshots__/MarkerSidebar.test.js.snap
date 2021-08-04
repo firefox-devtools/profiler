@@ -9,7 +9,6 @@ exports[`MarkerSidebar matches the snapshots when displaying data about the curr
   >
     <div
       class="tooltipMarker"
-      style="--tooltip-detail-max-width: 100%;"
     >
       <div
         class="tooltipHeader"

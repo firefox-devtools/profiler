@@ -381,14 +381,14 @@ export function getNetworkMarkerDetails(
       {payload.cache}
     </TooltipDetail>,
     <TooltipDetail label="URL" key="Network-URL">
-      <span className="tooltipNetworkUrl">{payload.URI}</span>
+      <span className="tooltipDetailsUrl">{payload.URI}</span>
     </TooltipDetail>
   );
 
   if (payload.RedirectURI) {
     details.push(
       <TooltipDetail label="Redirect URL" key="Network-Redirect URL">
-        <span className="tooltipNetworkUrl">{payload.RedirectURI}</span>
+        <span className="tooltipDetailsUrl">{payload.RedirectURI}</span>
       </TooltipDetail>
     );
   }

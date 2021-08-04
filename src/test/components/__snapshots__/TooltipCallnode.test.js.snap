@@ -124,7 +124,9 @@ exports[`TooltipCallNode with page information displays Page URL for iframe page
       >
         iframe URL:
       </div>
-      <div>
+      <div
+        class="tooltipDetailsUrl"
+      >
         https://iframe.example.com/
       </div>
       <div
@@ -192,7 +194,9 @@ exports[`TooltipCallNode with page information displays Page URL for non-iframe 
       >
         Page URL:
       </div>
-      <div>
+      <div
+        class="tooltipDetailsUrl"
+      >
         https://developer.mozilla.org/en-US/
       </div>
     </div>

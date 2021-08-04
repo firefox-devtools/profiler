@@ -51,7 +51,3 @@
 .tooltipNetworkMimeTypeSwatch {
   background-color: var(--marker-color);
 }
-
-.tooltipNetworkUrl {
-  word-break: break-word;
-}
