@@ -74,7 +74,7 @@ describe('app/ServiceWorkerManager', () => {
       store.dispatch(updateUrlState(newUrlState));
     }
 
-    function navigateToAddonLoadingPage() {
+    function navigateToFromBrowserProfileLoadingPage() {
       const newUrlState = stateFromLocation({
         pathname: '/from-browser/',
         search: '',
@@ -105,7 +105,7 @@ describe('app/ServiceWorkerManager', () => {
       getReloadButton: () => screen.getByText(/reload/i),
       getCloseButton: () => screen.getByLabelText(/hide/i),
       navigateToStoreLoadingPage,
-      navigateToAddonLoadingPage,
+      navigateToFromBrowserProfileLoadingPage,
       navigateToFileLoadingPage,
       dispatch: store.dispatch,
     };
@@ -237,8 +237,12 @@ describe('app/ServiceWorkerManager', () => {
     it(`doesn't show a notice if updated after we were fully loaded`, async () => {
       process.env.NODE_ENV = 'production';
 
-      const { navigateToAddonLoadingPage, container, dispatch } = setup();
-      navigateToAddonLoadingPage();
+      const {
+        navigateToFromBrowserProfileLoadingPage,
+        container,
+        dispatch,
+      } = setup();
+      navigateToFromBrowserProfileLoadingPage();
       await dispatch(viewProfile(_getSimpleProfile()));
 
       const installOptions = serviceWorkerRuntime.install.mock.calls[0][0];
@@ -258,12 +262,12 @@ describe('app/ServiceWorkerManager', () => {
       process.env.NODE_ENV = 'production';
 
       const {
-        navigateToAddonLoadingPage,
+        navigateToFromBrowserProfileLoadingPage,
         container,
         dispatch,
         queryByText,
       } = setup();
-      navigateToAddonLoadingPage();
+      navigateToFromBrowserProfileLoadingPage();
 
       const installOptions = serviceWorkerRuntime.install.mock.calls[0][0];
 
