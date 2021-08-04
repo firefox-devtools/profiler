@@ -98,7 +98,7 @@ export function waitingForProfileFromBrowser(): Action {
 
 /**
  * Call this function once the profile has been fetched and pre-processed from whatever
- * source (url, addon, file, etc).
+ * source (url, browser, file, etc).
  */
 export function loadProfile(
   profile: Profile,
