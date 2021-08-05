@@ -67,6 +67,7 @@ import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
 import { TextEncoder, TextDecoder } from 'util';
+import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
@@ -83,6 +84,104 @@ function simulateSymbolStoreHasNoCache() {
         )
       ),
   }));
+}
+
+function simulateOldWebChannelAndFrameScript(geckoProfiler) {
+  const webChannel = mockWebChannel();
+
+  const { registerMessageToChromeListener, triggerResponse } = webChannel;
+  // Pretend that this browser does not support obtaining the profile via
+  // the WebChannel. This will trigger fallback to the frame script /
+  // geckoProfiler API.
+  registerMessageToChromeListener(message => {
+    switch (message.type) {
+      case 'STATUS_QUERY': {
+        triggerResponse(
+          ({
+            type: 'STATUS_RESPONSE',
+            requestId: message.requestId,
+            menuButtonIsEnabled: true,
+          }: any)
+        );
+        break;
+      }
+      default: {
+        triggerResponse(
+          ({
+            error: `Unexpected message ${message.type}`,
+          }: any)
+        );
+        break;
+      }
+    }
+  });
+
+  // Simulate the frame script's geckoProfiler API.
+  window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+  return webChannel;
+}
+
+function simulateWebChannel(profileGetter) {
+  const webChannel = mockWebChannel();
+
+  const { registerMessageToChromeListener, triggerResponse } = webChannel;
+  async function simulateBrowserSide(message) {
+    switch (message.type) {
+      case 'STATUS_QUERY': {
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: {
+            menuButtonIsEnabled: true,
+            version: 1,
+          },
+        });
+        break;
+      }
+      case 'ENABLE_MENU_BUTTON': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error:
+            'ENABLE_MENU_BUTTON is a valid message but not covered by this test.',
+        });
+        break;
+      }
+      case 'GET_PROFILE': {
+        const profile: ArrayBuffer | MixedObject = await profileGetter();
+        triggerResponse({
+          type: 'SUCCESS_RESPONSE',
+          requestId: message.requestId,
+          response: profile,
+        });
+        break;
+      }
+      case 'GET_SYMBOL_TABLE':
+      case 'QUERY_SYMBOLICATION_API': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error: 'No symbol tables available',
+        });
+        break;
+      }
+      default: {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error: `Unexpected message ${message.type}`,
+        });
+        break;
+      }
+    }
+  }
+
+  registerMessageToChromeListener(message => {
+    simulateBrowserSide(message);
+  });
+
+  return webChannel;
 }
 
 describe('actions/receive-profile', function() {
@@ -516,41 +615,26 @@ describe('actions/receive-profile', function() {
       return encode(JSON.stringify(json));
     }
 
-    function setup(profileAs = 'json') {
+    function _setup(profileAs = 'json') {
       jest.useFakeTimers();
 
       const profileJSON = createGeckoProfile();
-      let mockGetProfile;
-      switch (profileAs) {
-        case 'json':
-          mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
-          break;
-        case 'arraybuffer':
-          mockGetProfile = jest
-            .fn()
-            .mockResolvedValue(toUint8Array(profileJSON).buffer);
-          break;
-        case 'gzip':
-          mockGetProfile = jest
-            .fn()
-            .mockReturnValue(
-              compress(toUint8Array(profileJSON)).then(x => x.buffer)
-            );
-          break;
-        default:
-          throw new Error('unknown profiler format');
-      }
-
-      const geckoProfiler = {
-        getProfile: mockGetProfile,
-        getSymbolTable: jest
-          .fn()
-          .mockRejectedValue(new Error('No symbol tables available')),
+      const profileGetter = async () => {
+        switch (profileAs) {
+          case 'json':
+            return profileJSON;
+          case 'arraybuffer':
+            return toUint8Array(profileJSON).buffer;
+          case 'gzip':
+            return (await compress(toUint8Array(profileJSON))).buffer;
+          default:
+            throw new Error('unknown profiler format');
+        }
       };
+
       window.fetch = jest
         .fn()
         .mockRejectedValue(new Error('No symbolication API in place'));
-      window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
 
       simulateSymbolStoreHasNoCache();
 
@@ -577,9 +661,39 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
 
       return {
+        profileGetter,
+        store,
+      };
+    }
+
+    function setupWithFrameScript(profileAs: string = 'json') {
+      const { store, profileGetter } = _setup(profileAs);
+
+      const geckoProfiler = {
+        getProfile: jest.fn().mockImplementation(() => profileGetter()),
+        getSymbolTable: jest
+          .fn()
+          .mockRejectedValue(new Error('No symbol tables available')),
+      };
+
+      const webChannel = simulateOldWebChannelAndFrameScript(geckoProfiler);
+
+      return {
         geckoProfiler,
         store,
         ...store,
+        ...webChannel,
+      };
+    }
+
+    function setupWithWebChannel(profileAs: string = 'json') {
+      const { store, profileGetter } = _setup(profileAs);
+      const webChannel = simulateWebChannel(profileGetter);
+
+      return {
+        store,
+        ...store,
+        ...webChannel,
       };
     }
 
@@ -589,31 +703,37 @@ describe('actions/receive-profile', function() {
       delete window.fetch;
     });
 
-    for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
-      const desc = 'can retrieve a profile from the browser as ' + profileAs;
+    for (const setupWith of ['frame-script', 'web-channel']) {
+      for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
+        it(`can retrieve a profile from the browser as ${profileAs} using ${setupWith}`, async function() {
+          const setupFn = {
+            'frame-script': setupWithFrameScript,
+            'web-channel': setupWithWebChannel,
+          }[setupWith];
+          const { dispatch, getState } = setupFn(profileAs);
+          await dispatch(retrieveProfileFromBrowser());
+          expect(console.warn).toHaveBeenCalledTimes(2);
 
-      it(desc, async function() {
-        const { dispatch, getState } = setup(profileAs);
-        await dispatch(retrieveProfileFromBrowser());
-        expect(console.warn).toHaveBeenCalledTimes(2);
-
-        const state = getState();
-        expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-        expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
-          start: 0,
-          // The end can be computed as the sum of:
-          // - difference of the starts of the subprocess and the main process (1000)
-          // - the max of the last sample. (in this case, last sample's time is 6.
-          // - the interval (1)
-          end: 1007,
+          const state = getState();
+          expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
+          expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+            start: 0,
+            // The end can be computed as the sum of:
+            // - difference of the starts of the subprocess and the main process (1000)
+            // - the max of the last sample. (in this case, last sample's time is 6.
+            // - the interval (1)
+            end: 1007,
+          });
+          // not empty
+          expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(
+            3
+          );
         });
-        // not empty
-        expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
-      });
+      }
     }
 
-    it('tries to symbolicate the received profile', async () => {
-      const { dispatch, geckoProfiler } = setup();
+    it('tries to symbolicate the received profile, frame script version', async () => {
+      const { dispatch, geckoProfiler } = setupWithFrameScript();
 
       await dispatch(retrieveProfileFromBrowser());
 
@@ -630,38 +750,17 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('displays a warning after 30 seconds', async function() {
-      const { dispatch, store } = setup();
+    it('tries to symbolicate the received profile, webchannel version', async () => {
+      const { dispatch } = setupWithWebChannel();
 
-      const states = await observeStoreStateChanges(store, () => {
-        const dispatchResultPromise = dispatch(retrieveProfileFromBrowser());
+      await dispatch(retrieveProfileFromBrowser());
 
-        // this will triggers the timeout synchronously, before the profiler
-        // promise's then is run.
-        jest.advanceTimersByTime(30000);
-        return dispatchResultPromise;
-      });
-      const views = states.map(state => getView(state));
-
-      const errorMessage =
-        'We were unable to connect to the browser within thirty seconds. This might be because the profile is big or your machine is slower than usual. Still waiting...';
-
-      expect(views.slice(0, 3)).toEqual([
-        {
-          phase: 'INITIALIZING',
-          additionalData: { attempt: null, message: errorMessage },
-        }, // when the error happens
-        { phase: 'INITIALIZING' }, // when we could connect to the browser but waiting for the profile
-        { phase: 'PROFILE_LOADED' }, // yay, we got a profile!
-      ]);
-
-      const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
-        start: 0,
-        end: 1007, // see the above test for more explanation on this value
-      });
-      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
+      expect(window.fetch).toHaveBeenCalledWith(
+        'https://symbols.mozilla.org/symbolicate/v5',
+        expect.objectContaining({
+          body: expect.stringMatching(/memoryMap.*firefox/),
+        })
+      );
     });
   });
 
@@ -1868,7 +1967,8 @@ describe('actions/receive-profile', function() {
           .fn()
           .mockRejectedValue(new Error('No symbol tables available')),
       };
-      window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+      simulateOldWebChannelAndFrameScript(geckoProfiler);
 
       simulateSymbolStoreHasNoCache();
 

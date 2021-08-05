@@ -6,6 +6,7 @@
 import type {
   ResponseFromBrowser,
   MessageFromBrowser,
+  MessageToBrowser,
 } from '../../../app-logic/web-channel';
 
 /**
@@ -15,6 +16,7 @@ import type {
 export function mockWebChannel() {
   const messagesSentToBrowser = [];
   const listeners = [];
+  let onMessageToChrome = null;
 
   jest
     .spyOn(window, 'addEventListener')
@@ -36,7 +38,15 @@ export function mockWebChannel() {
     });
 
   jest.spyOn(window, 'dispatchEvent').mockImplementation(event => {
-    messagesSentToBrowser.push(JSON.parse(event.detail));
+    if (
+      event instanceof CustomEvent &&
+      event.type === 'WebChannelMessageToChrome'
+    ) {
+      messagesSentToBrowser.push(JSON.parse(event.detail));
+      if (onMessageToChrome) {
+        onMessageToChrome(JSON.parse(event.detail).message);
+      }
+    }
   });
 
   function triggerResponse<R: ResponseFromBrowser>(
@@ -52,10 +62,17 @@ export function mockWebChannel() {
     }
   }
 
+  function registerMessageToChromeListener(
+    listener: MessageToBrowser => void
+  ): void {
+    onMessageToChrome = listener;
+  }
+
   return {
     messagesSentToBrowser,
     listeners,
     triggerResponse,
+    registerMessageToChromeListener,
     getLastRequestId: (): number => {
       const message = messagesSentToBrowser[messagesSentToBrowser.length - 1];
       if (!message) {

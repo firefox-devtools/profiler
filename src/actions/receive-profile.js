@@ -77,6 +77,11 @@ import type {
 
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import {
+  getProfileViaWebChannel,
+  getSymbolTableViaWebChannel,
+  querySupportsGetProfileAndSymbolicationViaWebChannel,
+} from '../app-logic/web-channel';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -108,6 +113,7 @@ export function loadProfile(
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
     geckoProfiler: $GeckoProfiler,
+    shouldUseWebChannel: boolean,
     skipSymbolication: boolean, // Please use this in tests only.
   |}> = {},
   initialLoad: boolean = false
@@ -146,6 +152,7 @@ export function loadProfile(
     if (initialLoad === false) {
       await dispatch(
         finalizeProfileView(
+          config.shouldUseWebChannel,
           config.geckoProfiler,
           config.timelineTrackOrganization,
           config.skipSymbolication
@@ -165,6 +172,7 @@ export function loadProfile(
  * Note: skipSymbolication is used in tests only, this is enforced.
  */
 export function finalizeProfileView(
+  shouldUseWebChannel: boolean = false,
   geckoProfiler?: $GeckoProfiler,
   timelineTrackOrganization?: TimelineTrackOrganization,
   skipSymbolication?: boolean
@@ -246,6 +254,7 @@ export function finalizeProfileView(
       const symbolStore = getSymbolStore(
         dispatch,
         getSymbolServerUrl(getState()),
+        shouldUseWebChannel,
         geckoProfiler
       );
       if (symbolStore) {
@@ -853,7 +862,9 @@ const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
  * If the profile object we got from the browser is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
-async function _unpackGeckoProfileFromBrowser(profile) {
+async function _unpackGeckoProfileFromBrowser(
+  profile: ArrayBuffer | MixedObject
+): MixedObject {
   // Note: the following check will work for array buffers coming from another
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
@@ -863,17 +874,47 @@ async function _unpackGeckoProfileFromBrowser(profile) {
   return profile;
 }
 
+/**
+ * Gets the profile from the browser.
+ * This either happens via a WebChannel (starting with Firefox 93) or via a frame script, whose
+ * API is encapsulated in a GeckoProfiler object.
+ * The GeckoProfiler API and frame script can be removed once Firefox ESR is 93 or newer.
+ *
+ * @param {Dispatch} dispatch
+ * @param {boolean} shouldUseWebChannel Whether the profile and symbolication information should be
+ *   obtained via the WebChannel.
+ * @param {$GeckoProfiler | void} geckoProfiler A GeckoProfiler object to interact with the framescript.
+ *   Only needed if shouldUseWebChannel is false.
+ * @returns {Promise<Profile>}
+ */
 async function getProfileFromBrowser(
   dispatch: Dispatch,
-  geckoProfiler: $GeckoProfiler
+  shouldUseWebChannel: boolean,
+  geckoProfiler?: $GeckoProfiler
 ): Promise<Profile> {
   dispatch(waitingForProfileFromBrowser());
 
   // XXX update state to show that we're connected to the browser
-  const rawGeckoProfile = await geckoProfiler.getProfile();
+
+  async function getRawGeckoProfile(): Promise<ArrayBuffer | MixedObject> {
+    // On Firefox 93 and above, we can get the profile from the WebChannel.
+    if (shouldUseWebChannel) {
+      return getProfileViaWebChannel();
+    }
+    // For older versions, fall back to the geckoProfiler frame script API.
+    // This fallback can be removed once the oldest supported Firefox ESR version is 93 or newer.
+    if (!geckoProfiler) {
+      throw new Error(
+        'geckoProfiler object must be supplied if shouldUseWebChannel is false'
+      );
+    }
+    return geckoProfiler.getProfile();
+  }
+
+  const rawGeckoProfile = await getRawGeckoProfile();
   const unpackedProfile = await _unpackGeckoProfileFromBrowser(rawGeckoProfile);
   const profile = processGeckoProfile(unpackedProfile);
-  await dispatch(loadProfile(profile, { geckoProfiler }));
+  await dispatch(loadProfile(profile, { geckoProfiler, shouldUseWebChannel }));
 
   return profile;
 }
@@ -881,6 +922,7 @@ async function getProfileFromBrowser(
 function getSymbolStore(
   dispatch: Dispatch,
   symbolServerUrl: string,
+  shouldUseWebChannel: boolean = false,
   geckoProfiler?: $GeckoProfiler
 ): SymbolStore | null {
   if (!window.indexedDB) {
@@ -910,6 +952,25 @@ function getSymbolStore(
       });
     },
     requestSymbolTableFromBrowser: async lib => {
+      // On Firefox 93 and above, we can get the symbol table from the WebChannel.
+      if (shouldUseWebChannel) {
+        const { debugName, breakpadId } = lib;
+        dispatch(requestingSymbolTable(lib));
+        try {
+          const symbolTable = await getSymbolTableViaWebChannel(
+            debugName,
+            breakpadId
+          );
+          dispatch(receivedSymbolTableReply(lib));
+          return symbolTable;
+        } catch (error) {
+          dispatch(receivedSymbolTableReply(lib));
+          throw error;
+        }
+      }
+
+      // If not using the WebChannel, fall back to the geckoProfiler frame script API.
+      // This can be removed once the oldest supported Firefox ESR version is 93 or newer.
       if (!geckoProfiler) {
         throw new Error("There's no connection to the browser.");
       }
@@ -967,24 +1028,74 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
+class TimeoutError extends Error {
+  name = 'TimeoutError';
+}
+
+function makeTimeoutRejectionPromise(durationInMs) {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject(new TimeoutError(`Timed out after ${durationInMs}ms`));
+    }, durationInMs);
+  });
+}
+
 export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
-      const timeoutId = setTimeout(() => {
-        dispatch(
-          temporaryError(
-            new TemporaryError(oneLine`
-            We were unable to connect to the browser within thirty seconds.
-            This might be because the profile is big or your machine is slower than usual.
-            Still waiting...
-          `)
-          )
-        );
-      }, 30000);
-      const geckoProfiler = await window.geckoProfilerPromise;
-      clearTimeout(timeoutId);
+      let shouldUseWebChannel = false;
+      try {
+        shouldUseWebChannel = await Promise.race([
+          querySupportsGetProfileAndSymbolicationViaWebChannel(),
+          makeTimeoutRejectionPromise(5000),
+        ]);
+      } catch (e) {
+        if (e instanceof TimeoutError) {
+          // The browser never reacted to our WebChannelMessageToChrome event.
+          // This can happen if we're running on a browser that's not Firefox, or if we're running
+          // on an old version of Firefox which does not have support for any WebChannels.
+          // Ignore the timeout and fall back to window.geckoProfilerPromise below.
+        } else {
+          // The WebChannel responded with an error. This usually means that this profiler
+          // instance is running on a different host than the one that's specified in the
+          // preference `devtools.performance.recording.ui-base-url`.
+          // That's unusual, because we get here only for the /from-browser entry point,
+          // which is usually accessed from the new tab that the browser opens when a
+          // profile is captured - and that tab gets opened on the profiler instance that's
+          // configured in the base URL.
+          // We completely stop trying to connect to the browser and display an error message.
+          // (We don't fall back to the frame script, because we'd most likely display
+          // the waiting animation indefinitely and never connect to a frame script.)
+          throw new Error(oneLine`
+            This profiler instance was unable to connect to the
+            WebChannel. This usually means that it’s running on a
+            different host from the one that is specified in the
+            preference devtools.performance.recording.ui-base-url. If
+            you would like to capture new profiles with this instance, you can go to about:config
+            and change the preference. Error: ${e.name}: ${e.message}
+          `);
+        }
+      }
 
-      await getProfileFromBrowser(dispatch, geckoProfiler);
+      let geckoProfiler;
+
+      if (!shouldUseWebChannel) {
+        const timeoutId = setTimeout(() => {
+          dispatch(
+            temporaryError(
+              new TemporaryError(oneLine`
+                We were unable to connect to the browser within thirty seconds.
+                This might be because the profile is big or your machine is slower than usual.
+                Still waiting...
+              `)
+            )
+          );
+        }, 30000);
+        geckoProfiler = await window.geckoProfilerPromise;
+        clearTimeout(timeoutId);
+      }
+
+      await getProfileFromBrowser(dispatch, shouldUseWebChannel, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
       console.error(error);
@@ -1142,7 +1253,7 @@ async function _extractProfileOrZipFromResponse(
         ),
       };
     default:
-      throw new Error(`Unhandled file type: ${(contentType: empty)}`);
+      throw assertExhaustiveCheck(contentType);
   }
 }
 
@@ -1175,7 +1286,7 @@ async function _extractZipFromResponse(
  */
 async function _extractJsonFromArrayBuffer(
   arrayBuffer: ArrayBuffer
-): Promise<any> {
+): Promise<MixedObject> {
   let profileBytes = new Uint8Array(arrayBuffer);
   // Check for the gzip magic number in the header.
   if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
@@ -1193,7 +1304,7 @@ async function _extractJsonFromResponse(
   response: Response,
   reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
-): Promise<any> {
+): Promise<MixedObject> {
   try {
     // await before returning so that we can catch JSON parse errors.
     return await _extractJsonFromArrayBuffer(await response.arrayBuffer());
