@@ -757,7 +757,7 @@ describe('TooltipMarker', function() {
         payload: {
           contentType: null,
           cache: 'Unresolved',
-          status: 'STATUS_ABORT',
+          status: 'STATUS_CANCEL',
         },
       })
     );

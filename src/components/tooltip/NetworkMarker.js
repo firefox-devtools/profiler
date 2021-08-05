@@ -62,8 +62,8 @@ function _getHumanReadableDataStatus(status: NetworkStatus): string {
       return 'Response received';
     case 'STATUS_REDIRECT':
       return 'Redirecting request';
-    case 'STATUS_ABORT':
-      return 'Request was aborted';
+    case 'STATUS_CANCEL':
+      return 'Request was canceled';
     default:
       throw assertExhaustiveCheck(status);
   }
@@ -381,14 +381,14 @@ export function getNetworkMarkerDetails(
       {payload.cache}
     </TooltipDetail>,
     <TooltipDetail label="URL" key="Network-URL">
-      <span className="tooltipNetworkUrl">{payload.URI}</span>
+      <span className="tooltipDetailsUrl">{payload.URI}</span>
     </TooltipDetail>
   );
 
   if (payload.RedirectURI) {
     details.push(
       <TooltipDetail label="Redirect URL" key="Network-Redirect URL">
-        <span className="tooltipNetworkUrl">{payload.RedirectURI}</span>
+        <span className="tooltipDetailsUrl">{payload.RedirectURI}</span>
       </TooltipDetail>
     );
   }

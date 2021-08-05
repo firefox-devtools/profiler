@@ -417,7 +417,7 @@ export type NetworkStatus =
   | 'STATUS_START'
   | 'STATUS_STOP'
   | 'STATUS_REDIRECT'
-  | 'STATUS_ABORT';
+  | 'STATUS_CANCEL';
 export type NetworkRedirectType = 'Permanent' | 'Temporary' | 'Internal';
 export type NetworkPayload = {|
   type: 'Network',
