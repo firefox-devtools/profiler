@@ -4,6 +4,7 @@
 // @flow
 
 import { attemptToConvertChromeProfile } from './import/chrome';
+import { attemptToConvertDhat } from './import/dhat';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import {
@@ -1561,6 +1562,11 @@ export async function unserializeProfileOfArbitraryFormat(
     const processedChromeProfile = attemptToConvertChromeProfile(json);
     if (processedChromeProfile) {
       return processedChromeProfile;
+    }
+
+    const processedDhat = attemptToConvertDhat(json);
+    if (processedDhat) {
+      return processedDhat;
     }
 
     // Else: Treat it as a Gecko profile and just attempt to process it.
