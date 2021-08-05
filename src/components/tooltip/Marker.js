@@ -391,14 +391,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
    * a short list of rendering strategies, in the order they appear.
    */
   render() {
-    const { className, restrictHeightWidth } = this.props;
+    const { className } = this.props;
     return (
-      <div
-        className={classNames('tooltipMarker', className)}
-        style={{
-          '--tooltip-detail-max-width': restrictHeightWidth ? '600px' : '100%',
-        }}
-      >
+      <div className={classNames('tooltipMarker', className)}>
         <div className="tooltipHeader">
           <div className="tooltipOneLine">
             {this._maybeRenderMarkerDuration()}

@@ -4,7 +4,7 @@ exports[`SampleTooltipContents renders the sample tooltip properly 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 11px; top: 10px;"
+  style="left: 11px; top: 10px;"
 >
   <div
     class="tooltipDetails"
@@ -285,7 +285,7 @@ exports[`SampleTooltipContents renders the sample with "variable CPU cycles" CPU
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 11px; top: 10px;"
+  style="left: 11px; top: 10px;"
 >
   <div
     class="tooltipDetails"
@@ -397,7 +397,7 @@ exports[`SampleTooltipContents renders the sample with ns CPU usage information 
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 11px; top: 10px;"
+  style="left: 11px; top: 10px;"
 >
   <div
     class="tooltipDetails"
@@ -509,7 +509,7 @@ exports[`SampleTooltipContents renders the sample with µs CPU usage information
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 11px; top: 10px;"
+  style="left: 11px; top: 10px;"
 >
   <div
     class="tooltipDetails"

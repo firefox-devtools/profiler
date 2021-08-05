@@ -4,7 +4,7 @@ exports[`VerticalIndicators displays tooltips 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 22px; top: 33px;"
+  style="left: 22px; top: 33px;"
 >
   <div>
     <span
@@ -36,11 +36,10 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 23px; top: 13px;"
+  style="left: 23px; top: 13px;"
 >
   <div
-    class="tooltipMarker"
-    style="--tooltip-detail-max-width: 600px;"
+    class="tooltipMarker tooltipNetwork"
   >
     <div
       class="tooltipHeader"
@@ -77,7 +76,7 @@ exports[`timeline/TrackNetwork draws differently a request and displays a toolti
         :
       </div>
       <span
-        class="tooltipNetworkUrl"
+        class="tooltipDetailsUrl"
       >
         https://mozilla.org
       </span>

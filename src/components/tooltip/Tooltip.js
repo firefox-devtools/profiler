@@ -93,10 +93,6 @@ export class Tooltip extends React.PureComponent<Props> {
       <div
         className="tooltip"
         data-testid="tooltip"
-        style={{
-          /* This is the default max width, but can be redefined in children */
-          '--tooltip-detail-max-width': '600px',
-        }}
         ref={this._interiorElementRef}
       >
         {this.props.children}

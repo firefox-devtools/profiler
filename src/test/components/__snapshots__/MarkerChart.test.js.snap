@@ -256,11 +256,10 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 189px; top: 150px;"
+  style="left: 189px; top: 150px;"
 >
   <div
     class="tooltipMarker"
-    style="--tooltip-detail-max-width: 600px;"
   >
     <div
       class="tooltipHeader"
@@ -1081,11 +1080,10 @@ exports[`MarkerChart with active tab renders the hovered marker properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="--tooltip-detail-max-width: 600px; left: 102px; top: 38px;"
+  style="left: 102px; top: 38px;"
 >
   <div
     class="tooltipMarker"
-    style="--tooltip-detail-max-width: 600px;"
   >
     <div
       class="tooltipHeader"

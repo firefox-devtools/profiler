@@ -216,7 +216,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel" key="file">
           Script URL:
         </div>,
-        fileNameURL,
+        <div className="tooltipDetailsUrl" key="fileVal">
+          {fileNameURL}
+        </div>,
       ];
     }
 
@@ -249,7 +251,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             <div className="tooltipLabel" key="iframe">
               iframe URL:
             </div>,
-            <div key="iframeVal">{page.url}</div>,
+            <div className="tooltipDetailsUrl" key="iframeVal">
+              {page.url}
+            </div>,
           ];
 
           // Getting the embedder URL now.
@@ -271,7 +275,9 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             <div className="tooltipLabel" key="page">
               Page URL:
             </div>,
-            <div key="pageVal">{page.url}</div>,
+            <div className="tooltipDetailsUrl" key="pageVal">
+              {page.url}
+            </div>,
           ];
         }
       }
