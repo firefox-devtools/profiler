@@ -58,16 +58,16 @@ Make any necessary adjustments in the presented options, like threads to sample 
 
 If you've been profiling a browser from the Google Play Store, your profile should contain fully symbolicated C++ call stacks at least for libxul.so. If it doesn't, check the following:
 
- - Are you profiling a "Nightly" GeckoView build? A common mistake is to profile a regular "build" build from treeherder, i.e. one that was not compiled with the "nightly" configuration. Unfortunately, those regular treeherder builds do not upload symbol information to the Mozilla symbol server. Please use a different build in that case.
+ - Are you profiling a "shippable" GeckoView build? A common mistake is to profile a regular "opt" build from treeherder, i.e. one that was not compiled with the "shippable" configuration. Unfortunately, those regular treeherder builds do not upload symbol information to the Mozilla symbol server. Please use a different build in that case.
  - Are you profiling a build from the tryserver or a local build? Read on below for how to obtain symbol information in those cases.
 
 ### Try builds
 
-If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job (run time: about 3 minutes) on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly" configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
+If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job (run time: about 3 minutes) on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
 
 ### Local builds
 
-If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through one small extra hoop: Before profiling, in the *Profile Performance* panel in `about:debugging`, open the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information. ... Except at the moment there is [a problem](https://bugzilla.mozilla.org/show_bug.cgi?id=1615066) that makes symbolication fail, unless you manually run a command to strip debug information from `libxul.so`. See the bug for more details.
+If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through one small extra hoop: Before profiling, in the *Profile Performance* panel in `about:debugging`, go to *Settings*, scroll down to the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information.
 
 ## Startup profiling
 
