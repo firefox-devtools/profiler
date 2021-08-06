@@ -159,8 +159,11 @@ Home--load-from-url-submit-button =
 Home--documentation-button = 文档
 Home--menu-button = 启用 { -profiler-brand-name } 菜单按钮
 Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
-Home--addon-button = 安装附加组件
-Home--addon-button-instructions = 安装 Gecko Profiler 附加组件，即可在 { -firefox-brand-name } 中记录性能，然后进行剖析并分享至 profiler.firefox.com。
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = 此分析器无法连接至 WebChannel，因此无法启用分析器菜单按钮。
 Home--record-instructions = 要进行分析，请点击“分析”按钮，或使用键盘快捷键。在性能记录时，此图标将会变为蓝色。按下<kbd>捕捉</kbd>即可将数据加载至 profiler.firefox.com。
 Home--instructions-title = 如何查看并记录分析结果
 Home--instructions-content = 需使用 <a>{ -firefox-brand-name }</a> 记录性能分析信息。但可以使用任何现代浏览器查看现有分析记录。
