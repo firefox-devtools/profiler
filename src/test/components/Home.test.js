@@ -43,7 +43,7 @@ describe('app/Home', function() {
     return { ...renderResults };
   }
 
-  it('renders the install screen for the extension', () => {
+  it('renders a button to enable the popup in Firefox', () => {
     const { container } = setup(FIREFOX);
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -51,66 +51,6 @@ describe('app/Home', function() {
   it('renders the information screen for other browsers', () => {
     const { container } = setup(SAFARI);
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders the usage instructions for pages with the extension installed', () => {
-    window.isGeckoProfilerAddonInstalled = true;
-
-    const { container } = setup(FIREFOX);
-
-    expect(container.firstChild).toMatchSnapshot();
-
-    delete window.isGeckoProfilerAddonInstalled;
-  });
-
-  it('renders a button to enable the popup when it is available', async () => {
-    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
-
-    // No one has asked anything to the WebChannel.
-    expect(listeners).toHaveLength(0);
-
-    const { findByTestId } = setup(FIREFOX);
-
-    // There is an outstanding question to the WebChannel
-    expect(listeners.length).toBeGreaterThan(0);
-
-    // Respond from the browser that the menu button is available.
-    triggerResponse({
-      type: 'STATUS_RESPONSE',
-      menuButtonIsEnabled: false,
-      requestId: getLastRequestId(),
-    });
-
-    // The UI should update for the record instructions, which is an async
-    // handle of the WebChannel message.
-    const instructions = await findByTestId('home-enable-popup-instructions');
-
-    expect(instructions).toMatchSnapshot();
-  });
-
-  it('renders the usage instructions for when the popup is enabled', async () => {
-    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
-
-    // No one has asked anything to the WebChannel.
-    expect(listeners).toHaveLength(0);
-
-    const { findByTestId } = setup(FIREFOX);
-
-    // There is an outstanding question to the WebChannel
-    expect(listeners.length).toBeGreaterThan(0);
-
-    // Respond from the browser that the menu button is available.
-    triggerResponse({
-      type: 'STATUS_RESPONSE',
-      menuButtonIsEnabled: true,
-      requestId: getLastRequestId(),
-    });
-
-    // The UI should update for the record instructions, which is an async
-    // handle of the WebChannel message.
-    const instructions = await findByTestId('home-record-instructions');
-
-    expect(instructions).toMatchSnapshot();
   });
 
   // This test's assertions are that it can find elements through getByTestId.
@@ -135,5 +75,37 @@ describe('app/Home', function() {
       requestId: getLastRequestId(),
     });
     await findByTestId('home-record-instructions');
+  });
+
+  it('renders an error if the WebChannel is not available', async () => {
+    // This simulates what happens if the profiler is run from a host which
+    // is not the configured profiler base-url, or in an old Firefox version (<76)
+    // which has WebChannels but no profiler WebChannel.
+
+    const { listeners, triggerResponse } = mockWebChannel();
+
+    // No one has asked anything to the WebChannel.
+    expect(listeners).toHaveLength(0);
+
+    const { findByText } = setup(FIREFOX);
+
+    // There is an outstanding question to the WebChannel
+    expect(listeners.length).toBeGreaterThan(0);
+
+    // Respond from the browser that the WebChannel does not exist.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    triggerResponse({
+      errno: 2, // ERRNO_NO_SUCH_CHANNEL
+      error: 'No such channel',
+    });
+    expect(console.error).toHaveBeenCalled();
+
+    // The UI should update to include a note about the WebChannel being unavailable,
+    // which is an async handler of the WebChannel message.
+    const webChannelUnavailableMessage = await findByText(
+      /This profiler instance was unable to connect to the WebChannel/
+    );
+
+    expect(webChannelUnavailableMessage).toMatchSnapshot();
   });
 });

@@ -11,7 +11,6 @@ import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNav
 import { ListOfPublishedProfiles } from './ListOfPublishedProfiles';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
-import AddonScreenshot from 'firefox-profiler-res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from 'firefox-profiler-res/img/jpg/perf-screenshot-2021-05-06.jpg';
 import FirefoxPopupScreenshot from 'firefox-profiler-res/img/jpg/firefox-profiler-button-2021-05-06.jpg';
 import {
@@ -33,36 +32,7 @@ import type {
 import { Localized } from '@fluent/react';
 import './Home.css';
 
-const ADDON_URL =
-  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
-
 import { DragAndDropOverlay } from './DragAndDrop';
-
-type InstallButtonProps = {
-  name: string,
-  xpiUrl: string,
-  children?: React.Node,
-  className?: string,
-};
-
-class InstallButton extends React.PureComponent<InstallButtonProps> {
-  onInstallClick = (e: SyntheticEvent<HTMLAnchorElement>) => {
-    if (window.InstallTrigger) {
-      const { name, xpiUrl } = this.props;
-      window.InstallTrigger.install({ [name]: xpiUrl });
-    }
-    e.preventDefault();
-  };
-
-  render() {
-    const { xpiUrl, children, className } = this.props;
-    return (
-      <a href={xpiUrl} className={className} onClick={this.onInstallClick}>
-        {children}
-      </a>
-    );
-  }
-}
 
 type ActionButtonsProps = {|
   +retrieveProfileFromFile: WrapFunctionInDispatch<
@@ -224,18 +194,6 @@ function InstructionTransition(props: { children: React.Node }) {
   );
 }
 
-/**
- * Provide a global function for the add-on to to notify this component that it has
- * been installed.
- */
-let homeInstance;
-window.geckoProfilerAddonInstalled = function() {
-  if (homeInstance) {
-    // Forces the Home component to re-evaluate window.isGeckoProfilerAddonInstalled.
-    homeInstance.addonInstalled();
-  }
-};
-
 type OwnHomeProps = {|
   +specialMessage?: string,
 |};
@@ -248,14 +206,13 @@ type DispatchHomeProps = {|
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
-  popupAddonInstallPhase: PopupAddonInstallPhase,
+  popupInstallPhase: PopupInstallPhase,
 };
 
-type PopupAddonInstallPhase =
-  // Firefox Beta or Relase
-  | 'suggest-install-addon'
-  | 'addon-installed'
-  // Firefox Nightly:
+type PopupInstallPhase =
+  // Firefox:
+  | 'checking-webchannel'
+  | 'webchannel-unavailable'
   | 'popup-enabled'
   | 'suggest-enable-popup'
   // Other browsers:
@@ -265,74 +222,47 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   constructor(props: HomeProps) {
     super(props);
     // Start by suggesting that we install the add-on.
-    let popupAddonInstallPhase = 'other-browser';
+    let popupInstallPhase = 'other-browser';
 
     if (_isFirefox()) {
-      if (window.isGeckoProfilerAddonInstalled) {
-        popupAddonInstallPhase = 'addon-installed';
-      } else {
-        popupAddonInstallPhase = 'suggest-install-addon';
-      }
+      popupInstallPhase = 'checking-webchannel';
 
       // Query the browser to see if the menu button is available.
       queryIsMenuButtonEnabled().then(
         isMenuButtonEnabled => {
           this.setState({
-            popupAddonInstallPhase: isMenuButtonEnabled
+            popupInstallPhase: isMenuButtonEnabled
               ? 'popup-enabled'
               : 'suggest-enable-popup',
           });
         },
         () => {
-          // Do nothing if this request returns an error. It probably just means
-          // that we're talking to an older version of the browser.
+          this.setState({ popupInstallPhase: 'webchannel-unavailable' });
         }
       );
     }
 
     this.state = {
-      popupAddonInstallPhase,
+      popupInstallPhase,
     };
-
-    // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
-    homeInstance = this;
-  }
-
-  /**
-   * This is a publicly accessible method, that the addon can use to signal
-   * that it is installed. This component races with the frame script installation,
-   * so provide a way for frame script to signal that it was loaded.
-   */
-  addonInstalled() {
-    this.setState(({ popupAddonInstallPhase }) => {
-      if (
-        popupAddonInstallPhase === 'popup-enabled' ||
-        popupAddonInstallPhase === 'suggest-enable-popup'
-      ) {
-        // The popup is available, ignore the addon.
-        return null;
-      }
-      return { popupAddonInstallPhase: 'addon-installed' };
-    });
   }
 
   _renderInstructions() {
-    const { popupAddonInstallPhase } = this.state;
-    switch (popupAddonInstallPhase) {
-      case 'suggest-install-addon':
-        return this._renderInstallAddonInstructions();
-      case 'addon-installed':
-        return this._renderRecordInstructions(AddonScreenshot);
+    const { popupInstallPhase } = this.state;
+    switch (popupInstallPhase) {
+      case 'checking-webchannel':
+      case 'suggest-enable-popup':
+        return this._renderEnablePopupInstructions(true);
+      case 'webchannel-unavailable':
+        return this._renderEnablePopupInstructions(false);
       case 'popup-enabled':
         return this._renderRecordInstructions(FirefoxPopupScreenshot);
-      case 'suggest-enable-popup':
-        return this._renderEnablePopupInstructions();
       case 'other-browser':
         return this._renderOtherBrowserInstructions();
       default:
         throw assertExhaustiveCheck(
-          popupAddonInstallPhase,
-          'Unhandled PopupAddonInstallPhase'
+          popupInstallPhase,
+          'Unhandled PopupInstallPhase'
         );
     }
   }
@@ -341,7 +271,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     e.preventDefault();
     enableMenuButton().then(
       () => {
-        this.setState({ popupAddonInstallPhase: 'popup-enabled' });
+        this.setState({ popupInstallPhase: 'popup-enabled' });
       },
       error => {
         // This error doesn't get surfaced in the UI, but it does in console.
@@ -350,7 +280,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     );
   };
 
-  _renderEnablePopupInstructions() {
+  _renderEnablePopupInstructions(webChannelAvailable: boolean) {
     return (
       <InstructionTransition key={0}>
         <div
@@ -366,63 +296,56 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
           />
           {/* Right column: instructions */}
           <div>
-            <button
-              type="button"
-              className="homeSectionButton"
-              onClick={this._enableMenuButton}
+            <Localized
+              id="Home--enable-button-unavailable"
+              attrs={{ title: !webChannelAvailable }}
             >
-              <span className="homeSectionPlus">+</span>
-              <Localized id="Home--menu-button">
-                Enable Profiler Menu Button
-              </Localized>
-            </button>
+              <button
+                type="button"
+                className="homeSectionButton"
+                onClick={this._enableMenuButton}
+                disabled={!webChannelAvailable}
+                title={
+                  webChannelAvailable
+                    ? undefined
+                    : 'This profiler instance was unable to connect to the WebChannel, so it cannot enable the profiler menu button.'
+                }
+              >
+                <span className="homeSectionPlus">+</span>
+                <Localized id="Home--menu-button">
+                  Enable Profiler Menu Button
+                </Localized>
+              </button>
+            </Localized>
             <DocsButton />
-            <p>
+            {webChannelAvailable ? (
               <Localized id="Home--menu-button-instructions">
-                Enable the profiler menu button to start recording a performance
-                profile in Firefox, then analyze it and share it with
-                profiler.firefox.com.
+                <p>
+                  Enable the profiler menu button to start recording a
+                  performance profile in Firefox, then analyze it and share it
+                  with profiler.firefox.com.
+                </p>
               </Localized>
-            </p>
-          </div>
-          {/* end of grid container */}
-        </div>
-      </InstructionTransition>
-    );
-  }
-
-  _renderInstallAddonInstructions() {
-    return (
-      <InstructionTransition key={0}>
-        <div
-          className="homeInstructions"
-          data-testid="home-install-addon-instructions"
-        >
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={PerfScreenshot}
-            alt="screenshot of profiler.firefox.com"
-          />
-          {/* Right column: instructions */}
-          <div>
-            <InstallButton
-              name="Gecko Profiler"
-              className="homeSectionButton"
-              xpiUrl={ADDON_URL}
-            >
-              <span className="homeSectionPlus">+</span>
-              <Localized id="Home--addon-button">Install add-on</Localized>
-            </InstallButton>
-            <DocsButton />
-            <p>
-              <Localized id="Home--addon-button-instructions">
-                Install the Gecko Profiler Add-on to start recording a
-                performance profile in Firefox, then analyze it and share it
-                with profiler.firefox.com.
+            ) : (
+              <Localized
+                id="Home--web-channel-unavailable"
+                elems={{
+                  code: <code />,
+                }}
+              >
+                <p>
+                  This profiler instance was unable to connect to the
+                  WebChannel. This usually means that it’s running on a
+                  different host from the one that is specified in the
+                  preference{' '}
+                  <code>devtools.performance.recording.ui-base-url</code>. If
+                  you would like to capture new profiles with this instance, and
+                  give it programmatic control of the profiler menu button, you
+                  can go to <code>about:config</code>
+                  and change the preference.
+                </p>
               </Localized>
-            </p>
+            )}
           </div>
           {/* end of grid container */}
         </div>

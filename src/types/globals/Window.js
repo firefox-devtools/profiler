@@ -31,11 +31,6 @@ declare class Window {
   // profiler.firefox.com and globals injected via frame scripts.
   geckoProfilerPromise: Promise<$GeckoProfiler>;
   connectToGeckoProfiler: $GeckoProfiler => void;
-  geckoProfilerAddonInstalled?: () => void;
-  isGeckoProfilerAddonInstalled?: boolean;
-  InstallTrigger?: {
-    install: MixedObject => boolean,
-  };
 
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
   // the DOM structure.
