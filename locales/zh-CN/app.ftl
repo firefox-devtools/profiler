@@ -163,7 +163,10 @@ Home--menu-button-instructions = 启用分析器菜单按钮，即可在 { -fire
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
-    .title = 此分析器无法连接至 WebChannel，因此无法启用分析器菜单按钮。
+    .title = 此分析器无法连接至 WebChannel，无法启用分析器菜单按钮。
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable = 此分析器无法连接至 WebChannel。通常是因为运行分析器的主机与 <code>devtools.performance.recording.ui-base-url</code> 首选项中指定的主机不同。若您想要使用此分析器捕捉新的性能分析记录，并可程序化控制分析器菜单按钮，可到 <code>about:config</code> 调整该首选项。
 Home--record-instructions = 要进行分析，请点击“分析”按钮，或使用键盘快捷键。在性能记录时，此图标将会变为蓝色。按下<kbd>捕捉</kbd>即可将数据加载至 profiler.firefox.com。
 Home--instructions-title = 如何查看并记录分析结果
 Home--instructions-content = 需使用 <a>{ -firefox-brand-name }</a> 记录性能分析信息。但可以使用任何现代浏览器查看现有分析记录。
