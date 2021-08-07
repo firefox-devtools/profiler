@@ -67,7 +67,7 @@ export function withSize<
         // This component could have already been unmounted, check for the existence
         // of the container.
         if (this._container) {
-          this._updateWidth(this._container);
+          this._updateSize(this._container);
         }
       });
     }
@@ -81,7 +81,7 @@ export function withSize<
       if (document.hidden) {
         this._isSizeInfoDirty = true;
       } else {
-        this._updateWidth(container);
+        this._updateSize(container);
       }
     };
 
@@ -93,7 +93,7 @@ export function withSize<
         return;
       }
       if (!document.hidden && this._isSizeInfoDirty) {
-        this._updateWidth(container);
+        this._updateSize(container);
         this._isSizeInfoDirty = false;
       }
     };
@@ -107,7 +107,7 @@ export function withSize<
       );
     }
 
-    _updateWidth(container: HTMLElement) {
+    _updateSize(container: HTMLElement) {
       this.setState({
         width: container.offsetWidth,
         height: container.offsetHeight,
