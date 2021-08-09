@@ -22,7 +22,7 @@
 ## AppHeader
 ## This is used at the top of the homepage and other content pages.
 
-AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>вебзастосунок для аналізування швидкодії { -firefox-brand-name }</subheader>
+AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader>вебзастосунок для аналізу швидкодії { -firefox-brand-name }</subheader>
 AppHeader--github-icon =
     .title = Перейти до нашого репозиторію Git (відкриється у новому вікні)
 
@@ -72,6 +72,8 @@ Details--open-sidebar-button =
     .title = Відкрити бічну панель
 Details--close-sidebar-button =
     .title = Закрити бічну панель
+Details--error-boundary-message =
+    .message = Йой, на цій панелі сталася невідома помилка.
 
 ## Footer Links
 
@@ -92,15 +94,11 @@ Home--upload-from-url-button = Завантажити профіль з URL-ад
 Home--load-from-url-submit-button =
     .value = Завантажити
 Home--documentation-button = Документація
-Home--addon-button = Встановити додаток
-Home--addon-button-instructions =
-    Встановіть додаток Gecko Profiler, щоб почати запис профілю швидкодії
-    у { -firefox-brand-name }, а потім проаналізуйте його та поділіться ним із profiler.firefox.com.
 Home--profiler-motto = Отримайте профіль швидкодії. Проаналізуйте його. Поділіться ним. Зробіть Інтернет швидшим.
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
-Home--recent-uploaded-recordings-title = Недавно завантажені записування
+Home--recent-uploaded-recordings-title = Останні завантаження
 
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
@@ -123,15 +121,15 @@ ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодног�
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
 #   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Recent uploaded recordings'.
-ListOfPublishedProfiles--uploaded-profile-information-label = Переглянути всі свої записування та керувати ними (ще { $profilesRestCount })
+ListOfPublishedProfiles--uploaded-profile-information-label = Переглянути всі свої записи та керувати ними (ще { $profilesRestCount })
 # Depending on the number of uploaded profiles, the message is different.
 # Variables:
 #   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
 ListOfPublishedProfiles--uploaded-profile-information-list =
     { $uploadedProfileCount ->
-        [one] Керувати цим записуванням
-        [few] Керувати цими записуваннями
-       *[many] Керувати цими записуваннями
+        [one] Керувати цим записом
+        [few] Керувати цими записами
+       *[many] Керувати цими записами
     }
 
 ## MarkerContextMenu
@@ -219,7 +217,7 @@ MenuButtons--publish--button-upload = Вивантажити
 MenuButtons--publish--upload-title = Вивантаження профілю…
 MenuButtons--publish--message-try-again = Повторити спробу
 MenuButtons--publish--download = Завантажити
-MenuButtons--publish--compressing = Стиснення
+MenuButtons--publish--compressing = Стиснення…
 
 ## NetworkSettings
 ## This is used in the network chart.
