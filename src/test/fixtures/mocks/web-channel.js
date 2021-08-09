@@ -35,7 +35,9 @@ export function mockWebChannel() {
     messagesSentToBrowser.push(JSON.parse(event.detail));
   });
 
-  function triggerResponse(message: MessageFromBrowser) {
+  function triggerResponse(
+    message: MessageFromBrowser | {| errno: number, error: string |}
+  ) {
     for (const listener of listeners.slice()) {
       listener({
         detail: {

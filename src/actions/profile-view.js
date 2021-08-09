@@ -137,9 +137,11 @@ export function selectLeafCallNode(
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
+    // The newSelectedStack could be undefined if there are 0 samples.
     const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+
     const newSelectedCallNode =
-      newSelectedStack === null
+      newSelectedStack === null || newSelectedStack === undefined
         ? -1
         : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
     dispatch(

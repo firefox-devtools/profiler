@@ -74,9 +74,9 @@ describe('app/ServiceWorkerManager', () => {
       store.dispatch(updateUrlState(newUrlState));
     }
 
-    function navigateToAddonLoadingPage() {
+    function navigateToFromBrowserProfileLoadingPage() {
       const newUrlState = stateFromLocation({
-        pathname: '/from-addon/',
+        pathname: '/from-browser/',
         search: '',
         hash: '',
       });
@@ -105,7 +105,7 @@ describe('app/ServiceWorkerManager', () => {
       getReloadButton: () => screen.getByText(/reload/i),
       getCloseButton: () => screen.getByLabelText(/hide/i),
       navigateToStoreLoadingPage,
-      navigateToAddonLoadingPage,
+      navigateToFromBrowserProfileLoadingPage,
       navigateToFileLoadingPage,
       dispatch: store.dispatch,
     };
@@ -233,12 +233,16 @@ describe('app/ServiceWorkerManager', () => {
     });
   });
 
-  describe('with the `from-addon` datasource', () => {
+  describe('with the `from-browser` datasource', () => {
     it(`doesn't show a notice if updated after we were fully loaded`, async () => {
       process.env.NODE_ENV = 'production';
 
-      const { navigateToAddonLoadingPage, container, dispatch } = setup();
-      navigateToAddonLoadingPage();
+      const {
+        navigateToFromBrowserProfileLoadingPage,
+        container,
+        dispatch,
+      } = setup();
+      navigateToFromBrowserProfileLoadingPage();
       await dispatch(viewProfile(_getSimpleProfile()));
 
       const installOptions = serviceWorkerRuntime.install.mock.calls[0][0];
@@ -258,12 +262,12 @@ describe('app/ServiceWorkerManager', () => {
       process.env.NODE_ENV = 'production';
 
       const {
-        navigateToAddonLoadingPage,
+        navigateToFromBrowserProfileLoadingPage,
         container,
         dispatch,
         queryByText,
       } = setup();
-      navigateToAddonLoadingPage();
+      navigateToFromBrowserProfileLoadingPage();
 
       const installOptions = serviceWorkerRuntime.install.mock.calls[0][0];
 
@@ -278,7 +282,7 @@ describe('app/ServiceWorkerManager', () => {
       expect(
         ensureExists(container.querySelector('.photon-message-bar')).className
       ).toMatch(/\bphoton-message-bar-warning\b/);
-      // There's no reload button for the `from-addon` datasource.
+      // There's no reload button for the `from-browser` datasource.
       expect(queryByText(/reload/i)).not.toBeInTheDocument();
       expect(container.firstChild).toMatchSnapshot();
 

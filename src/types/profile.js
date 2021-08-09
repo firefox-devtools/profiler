@@ -789,6 +789,10 @@ export type ProfileMeta = {|
   // Firefox versions may not have it.
   // This property landed in Firefox 88.
   device?: string,
+  // Profile importers can optionally add information about where they are imported from.
+  // They also use the "product" field in the meta information, but this is somewhat
+  // ambiguous. This field, if present, is unambiguous that it was imported.
+  importedFrom?: string,
 |};
 
 /**

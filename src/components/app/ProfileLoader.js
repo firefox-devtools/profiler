@@ -8,7 +8,7 @@ import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import {
-  retrieveProfileFromAddon,
+  retrieveProfileFromBrowser,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfilesToCompare,
@@ -32,7 +32,7 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
+  +retrieveProfileFromBrowser: typeof retrieveProfileFromBrowser,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
   +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
   +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
@@ -47,14 +47,14 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       hash,
       profileUrl,
       profilesToCompare,
-      retrieveProfileFromAddon,
+      retrieveProfileFromBrowser,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
       retrieveProfilesToCompare,
     } = this.props;
     switch (dataSource) {
-      case 'from-addon':
-        retrieveProfileFromAddon();
+      case 'from-browser':
+        retrieveProfileFromBrowser();
         break;
       case 'from-file':
         // retrieveProfileFromFile should already have been called
@@ -109,7 +109,7 @@ export const ProfileLoader = explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
-    retrieveProfileFromAddon,
+    retrieveProfileFromBrowser,
     retrieveProfilesToCompare,
   },
   component: ProfileLoaderImpl,

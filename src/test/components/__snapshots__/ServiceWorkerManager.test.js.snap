@@ -96,7 +96,7 @@ exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource show
 </div>
 `;
 
-exports[`app/ServiceWorkerManager with the \`from-addon\` datasource shows a warning notice if updated before we were ready 1`] = `
+exports[`app/ServiceWorkerManager with the \`from-browser\` datasource shows a warning notice if updated before we were ready 1`] = `
 <div
   class="serviceworker-ready-notice-wrapper"
 >

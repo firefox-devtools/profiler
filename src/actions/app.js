@@ -117,7 +117,7 @@ export function setHasZoomedViaMousewheel() {
  * It takes the location and profile data, converts the location into url
  * state and then dispatches relevant actions to finalize the view.
  * `profile` parameter can be null when the data source can't provide the profile
- * and the url upgrader step is not needed (e.g. 'from-addon').
+ * and the url upgrader step is not needed (e.g. 'from-browser').
  */
 export function setupInitialUrlState(
   location: Location,

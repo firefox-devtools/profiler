@@ -11,7 +11,7 @@ jest.mock('../../actions/receive-profile', () => ({
   // These mocks will get their implementation in the `setup` function.
   // Otherwise the implementation is wiped before the test starts.
   // See https://github.com/facebook/jest/issues/7573 for more info.
-  retrieveProfileFromAddon: jest.fn(),
+  retrieveProfileFromBrowser: jest.fn(),
   retrieveProfileFromStore: jest.fn(),
   retrieveProfilesToCompare: jest.fn(),
 }));
@@ -51,13 +51,13 @@ import { fatalError } from '../../actions/errors';
 const {
   temporaryError,
   viewProfile,
-  waitingForProfileFromAddon,
+  waitingForProfileFromBrowser,
   waitingForProfileFromStore,
 } = jest.requireActual('../../actions/receive-profile');
 // These functions are mocks
 import {
   retrieveProfileFromStore,
-  retrieveProfileFromAddon,
+  retrieveProfileFromBrowser,
   retrieveProfilesToCompare,
 } from '../../actions/receive-profile';
 import { stateFromLocation } from '../../app-logic/url-handling';
@@ -74,28 +74,32 @@ describe('app/AppViewRouter', function() {
   });
 
   it('renders the addon loading page, and the profile view after capturing', function() {
-    const { container, dispatch, navigateToAddonLoadingPage } = setup();
+    const {
+      container,
+      dispatch,
+      navigateToFromBrowserProfileLoadingPage,
+    } = setup();
 
-    navigateToAddonLoadingPage();
-    dispatch(waitingForProfileFromAddon());
+    navigateToFromBrowserProfileLoadingPage();
+    dispatch(waitingForProfileFromBrowser());
     expect(container.firstChild).toMatchSnapshot();
-    expect(retrieveProfileFromAddon).toBeCalled();
+    expect(retrieveProfileFromBrowser).toBeCalled();
 
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('does not try to retrieve a profile when moving from from-addon to public', function() {
+  it('does not try to retrieve a profile when moving from from-browser to public', function() {
     const {
       container,
       dispatch,
-      navigateToAddonLoadingPage,
+      navigateToFromBrowserProfileLoadingPage,
       navigateToStoreLoadingPage,
     } = setup();
 
-    navigateToAddonLoadingPage();
-    dispatch(waitingForProfileFromAddon());
+    navigateToFromBrowserProfileLoadingPage();
+    dispatch(waitingForProfileFromBrowser());
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
 
@@ -174,7 +178,7 @@ function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
   // Flow doesn't know these actions are jest mocks.
-  (retrieveProfileFromAddon: any).mockImplementation(() => async () => {});
+  (retrieveProfileFromBrowser: any).mockImplementation(() => async () => {});
   (retrieveProfileFromStore: any).mockImplementation(() => async () => {});
   (retrieveProfilesToCompare: any).mockImplementation(() => async () => {});
 
@@ -197,9 +201,9 @@ function setup() {
     store.dispatch(updateUrlState(newUrlState));
   }
 
-  function navigateToAddonLoadingPage() {
+  function navigateToFromBrowserProfileLoadingPage() {
     const newUrlState = stateFromLocation({
-      pathname: '/from-addon/',
+      pathname: '/from-browser/',
       search: '',
       hash: '',
     });
@@ -237,7 +241,7 @@ function setup() {
     ...renderResult,
     dispatch: store.dispatch,
     navigateToStoreLoadingPage,
-    navigateToAddonLoadingPage,
+    navigateToFromBrowserProfileLoadingPage,
     navigateBackToHome,
     navigateToCompareHome,
     navigateToMyProfiles,

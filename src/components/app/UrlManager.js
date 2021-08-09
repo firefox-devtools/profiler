@@ -102,8 +102,8 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       // while processing and especially upgrading the url information we may
       // need the profile data.
       //
-      // Also note the profile may be null for the `from-addon` dataSource since
-      // we do not `await` for retrieveProfileFromAddon function, but also in
+      // Also note the profile may be null for the `from-browser` dataSource since
+      // we do not `await` for retrieveProfileFromBrowser function, but also in
       // case of fatal errors in the process of retrieving and processing a
       // profile. To handle the latter case properly, we won't `pushState` if
       // we're in a FATAL_ERROR state.
@@ -140,20 +140,20 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     // Profile sanitization and publishing can do weird things for the history API
     // and we could end up having unconsistent state.
     // That's why we prevent going back in history in these cases:
-    // 1 - between "from-addon" and "public" (in any direction)
+    // 1 - between "from-browser" and "public" (in any direction)
     // 2 - with the "public" datasource when the hash changes (this means the
     //     user once published again an already public profile, and then wants to go
     //     back).
     // But we want to accept the other interactions.
 
-    // 1. Do we move between "from-addon" and "public"?
-    const movesBetweenFromAddonAndPublic =
-      // from-addon -> public
-      (['from-addon', 'unpublished'].includes(previousUrlState.dataSource) &&
+    // 1. Do we move between "from-browser" and "public"?
+    const movesBetweenFromBrowserAndPublic =
+      // from-browser -> public
+      (['from-browser', 'unpublished'].includes(previousUrlState.dataSource) &&
         newUrlState.dataSource === 'public') ||
-      // or public -> from-addon
+      // or public -> from-browser
       (previousUrlState.dataSource === 'public' &&
-        ['from-addon', 'unpublished'].includes(newUrlState.dataSource));
+        ['from-browser', 'unpublished'].includes(newUrlState.dataSource));
 
     // 2. Do we move between 2 different hashes for a public profile
     const movesBetweenHashValues =
@@ -161,7 +161,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       newUrlState.dataSource === 'public' &&
       previousUrlState.hash !== newUrlState.hash;
 
-    if (movesBetweenFromAddonAndPublic || movesBetweenHashValues) {
+    if (movesBetweenFromBrowserAndPublic || movesBetweenHashValues) {
       window.history.replaceState(
         previousUrlState,
         document.title,

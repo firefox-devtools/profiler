@@ -3,7 +3,6 @@
 exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -150,7 +149,6 @@ exports[`TooltipMarker renders profiled off-main thread FileIO markers properly 
 exports[`TooltipMarker renders properly network markers that were aborted 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -179,7 +177,7 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
       Status
       :
     </div>
-    Request was aborted
+    Request was canceled
     <div
       class="tooltipLabel"
     >
@@ -194,7 +192,7 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -254,7 +252,6 @@ exports[`TooltipMarker renders properly network markers that were aborted 1`] = 
 exports[`TooltipMarker renders properly network markers where content type is blank 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -298,7 +295,7 @@ exports[`TooltipMarker renders properly network markers where content type is bl
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -426,7 +423,6 @@ exports[`TooltipMarker renders properly network markers where content type is bl
 exports[`TooltipMarker renders properly network markers where content type is missing 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -470,7 +466,7 @@ exports[`TooltipMarker renders properly network markers where content type is mi
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -623,7 +619,6 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 1
 exports[`TooltipMarker renders properly network markers with a preconnect part 2`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -667,7 +662,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part 2
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -884,7 +879,6 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
 exports[`TooltipMarker renders properly network markers with a preconnect part containing only the domain lookup 2`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -928,7 +922,7 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -1071,7 +1065,6 @@ exports[`TooltipMarker renders properly network markers with a preconnect part c
 exports[`TooltipMarker renders properly normal network markers 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1115,7 +1108,7 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
     </span>
@@ -1326,7 +1319,6 @@ exports[`TooltipMarker renders properly normal network markers 1`] = `
 exports[`TooltipMarker renders properly redirect network markers for a Internal redirection 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1377,7 +1369,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://www.wikia.com/
     </span>
@@ -1388,7 +1380,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     </span>
@@ -1440,7 +1432,6 @@ exports[`TooltipMarker renders properly redirect network markers for a Internal 
 exports[`TooltipMarker renders properly redirect network markers for a Permanent redirection 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1491,7 +1482,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://www.wikia.com/
     </span>
@@ -1502,7 +1493,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     </span>
@@ -1554,7 +1545,6 @@ exports[`TooltipMarker renders properly redirect network markers for a Permanent
 exports[`TooltipMarker renders properly redirect network markers for a Temporary redirection 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1605,7 +1595,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://www.wikia.com/
     </span>
@@ -1616,7 +1606,7 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     </span>
@@ -1668,7 +1658,6 @@ exports[`TooltipMarker renders properly redirect network markers for a Temporary
 exports[`TooltipMarker renders properly redirect network markers for an internal redirection from a HSTS header 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1719,7 +1708,7 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://www.wikia.com/
     </span>
@@ -1730,7 +1719,7 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     </span>
@@ -1782,7 +1771,6 @@ exports[`TooltipMarker renders properly redirect network markers for an internal
 exports[`TooltipMarker renders properly redirect network markers without additional redirection information 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1826,7 +1814,7 @@ exports[`TooltipMarker renders properly redirect network markers without additio
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://www.wikia.com/
     </span>
@@ -1837,7 +1825,7 @@ exports[`TooltipMarker renders properly redirect network markers without additio
       :
     </div>
     <span
-      class="tooltipNetworkUrl"
+      class="tooltipDetailsUrl"
     >
       http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     </span>
@@ -1889,7 +1877,6 @@ exports[`TooltipMarker renders properly redirect network markers without additio
 exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662-10 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1921,7 +1908,6 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard 
 exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1960,7 +1946,6 @@ exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: BailoutKind::ArgumentCheck at Uninitialized on line 388 of self-hosted:388-10 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -1992,7 +1977,6 @@ exports[`TooltipMarker renders tooltips for various markers: BailoutKind::Argume
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2050,7 +2034,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] =
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2107,7 +2090,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.6 1`] =
 exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2164,7 +2146,6 @@ exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.7 1`] =
 exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profiled thread)-114.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2495,7 +2476,6 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO (non-profile
 exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2819,7 +2799,6 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -2970,7 +2949,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3093,7 +3071,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3167,7 +3144,6 @@ exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = 
 exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3253,7 +3229,6 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-120 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3339,7 +3314,6 @@ exports[`TooltipMarker renders tooltips for various markers: IPCOut-121 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: Invalidate http://mozilla.com/script.js:1234-10 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3371,7 +3345,6 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate http://m
 exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3410,7 +3383,6 @@ exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] =
 exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3456,7 +3428,6 @@ exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3495,7 +3466,6 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
 exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3539,7 +3509,6 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-112.
 exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3585,7 +3554,6 @@ exports[`TooltipMarker renders tooltips for various markers: PlayAudio-115 1`] =
 exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.9 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3645,7 +3613,6 @@ exports[`TooltipMarker renders tooltips for various markers: PreferenceRead-114.
 exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -3950,7 +3917,6 @@ exports[`TooltipMarker renders tooltips for various markers: RefreshObserver-122
 exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -4260,7 +4226,6 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -4598,7 +4563,6 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteractive (TTFI)-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -4637,7 +4601,6 @@ exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteract
 exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`] = `
 <div
   class="tooltipMarker propClass"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"
@@ -4703,7 +4666,6 @@ exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`]
 exports[`TooltipMarker shows a tooltip for Jank markers 1`] = `
 <div
   class="tooltipMarker"
-  style="--tooltip-detail-max-width: 600px;"
 >
   <div
     class="tooltipHeader"

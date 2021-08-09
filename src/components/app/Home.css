@@ -75,11 +75,10 @@
   width: 100%;
   box-sizing: border-box;
   padding: 0.5em;
-  border: 2px solid var(--blue-60);
+  border: 2px solid currentColor;
   margin: 15px 0;
   background-color: #fff;
-  color: var(--blue-60);
-  cursor: pointer;
+  color: var(--grey-50);
   font-size: 16px;
   font-weight: bold;
   line-height: 1.5;
@@ -87,6 +86,11 @@
   text-decoration: none;
   transition: background-color 250ms var(--animation-curve),
     color 250ms var(--animation-curve);
+}
+
+.homeSectionButton:not(:disabled) {
+  color: var(--blue-60);
+  cursor: pointer;
 }
 
 .homeSectionLoadProfile {
@@ -119,8 +123,8 @@
   font-size: 13px;
 }
 
-.homeSectionButton:hover,
-.homeSectionButton[aria-expanded='true'] {
+.homeSectionButton:not(:disabled):hover,
+.homeSectionButton:not(:disabled)[aria-expanded='true'] {
   background-color: var(--blue-60);
   color: #fff;
 }

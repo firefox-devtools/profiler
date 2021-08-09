@@ -117,15 +117,26 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('none');
   });
 
-  it('sets the data source to from-addon', async function() {
+  it('sets the data source to from-browser', async function() {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      '/from-addon/'
+      '/from-browser/'
     );
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
-    expect(getDataSource(getState())).toMatch('from-addon');
+    expect(getDataSource(getState())).toMatch('from-browser');
+  });
+
+  it('sets the data source to from-browser when coming from the legacy URL /from-addon', async function() {
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
+      '/from-addon'
+    );
+    expect(getDataSource(getState())).toMatch('none');
+    createUrlManager();
+
+    await waitUntilUrlSetupPhase('done');
+    expect(getDataSource(getState())).toMatch('from-browser');
   });
 
   it('redirects from-file back to no data source', async function() {
@@ -276,13 +287,13 @@ describe('UrlManager', function() {
   });
 
   it('prevents navigating back after publishing', async () => {
-    // This loads a profile using the add-on.
+    // This loads a profile from the browser.
     const {
       getState,
       dispatch,
       createUrlManager,
       waitUntilUrlSetupPhase,
-    } = setup('/from-addon/');
+    } = setup('/from-browser/');
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
 
@@ -322,14 +333,14 @@ describe('UrlManager', function() {
     expect(previousLocation).toEqual(window.location.href);
   });
 
-  it('persists view query string for `from-addon` data source ', async function() {
+  it('persists view query string for `from-browser` data source ', async function() {
     // This setup function doesn't add any profile to the state, so that's why
     // it logs an error that says we don't have innerWindowID in this profile.
     // We can safely ignore that part because we don't test this part of the
     // codebase here. We only care about the timeline track organization.
     jest.spyOn(console, 'error').mockImplementation(() => {});
     const { getState, waitUntilUrlSetupPhase, createUrlManager } = setup(
-      '/from-addon/?view=active-tab'
+      '/from-browser/?view=active-tab'
     );
     await createUrlManager();
     await waitUntilUrlSetupPhase('done');

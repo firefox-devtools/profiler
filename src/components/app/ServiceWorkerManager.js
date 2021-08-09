@@ -146,7 +146,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       case 'uploaded-recordings':
         return false;
       case 'from-file':
-      case 'from-addon':
+      case 'from-browser':
       case 'unpublished':
       case 'public':
       case 'from-url':
@@ -194,7 +194,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         // These datasources have no profile loaded, we can update it right away.
         return true;
       case 'from-file':
-      case 'from-addon':
+      case 'from-browser':
       case 'unpublished':
         // We should not propose to reload the page for these data sources,
         // because we'd lose the data.

@@ -24,7 +24,7 @@ import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
   finalizeProfileView,
-  retrieveProfileFromAddon,
+  retrieveProfileFromBrowser,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfileFromFile,
@@ -511,7 +511,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileFromAddon', function() {
+  describe('retrieveProfileFromBrowser', function() {
     function toUint8Array(json) {
       return encode(JSON.stringify(json));
     }
@@ -590,11 +590,11 @@ describe('actions/receive-profile', function() {
     });
 
     for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
-      const desc = 'can retrieve a profile from the addon as ' + profileAs;
+      const desc = 'can retrieve a profile from the browser as ' + profileAs;
 
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
-        await dispatch(retrieveProfileFromAddon());
+        await dispatch(retrieveProfileFromBrowser());
         expect(console.warn).toHaveBeenCalledTimes(2);
 
         const state = getState();
@@ -615,7 +615,7 @@ describe('actions/receive-profile', function() {
     it('tries to symbolicate the received profile', async () => {
       const { dispatch, geckoProfiler } = setup();
 
-      await dispatch(retrieveProfileFromAddon());
+      await dispatch(retrieveProfileFromBrowser());
 
       expect(geckoProfiler.getSymbolTable).toHaveBeenCalledWith(
         'firefox',
@@ -634,7 +634,7 @@ describe('actions/receive-profile', function() {
       const { dispatch, store } = setup();
 
       const states = await observeStoreStateChanges(store, () => {
-        const dispatchResultPromise = dispatch(retrieveProfileFromAddon());
+        const dispatchResultPromise = dispatch(retrieveProfileFromBrowser());
 
         // this will triggers the timeout synchronously, before the profiler
         // promise's then is run.
@@ -644,14 +644,14 @@ describe('actions/receive-profile', function() {
       const views = states.map(state => getView(state));
 
       const errorMessage =
-        'We were unable to connect to the Gecko profiler add-on within thirty seconds. This might be because the profile is big or your machine is slower than usual. Still waiting...';
+        'We were unable to connect to the browser within thirty seconds. This might be because the profile is big or your machine is slower than usual. Still waiting...';
 
       expect(views.slice(0, 3)).toEqual([
         {
           phase: 'INITIALIZING',
           additionalData: { attempt: null, message: errorMessage },
         }, // when the error happens
-        { phase: 'INITIALIZING' }, // when we could connect to the addon but waiting for the profile
+        { phase: 'INITIALIZING' }, // when we could connect to the browser but waiting for the profile
         { phase: 'PROFILE_LOADED' }, // yay, we got a profile!
       ]);
 
@@ -1956,10 +1956,10 @@ describe('actions/receive-profile', function() {
         hash: '',
       });
       await dispatch(finalizeProfileView());
-      const [, fromAddon, urlString] = urlFromState(
+      const [, fromUrl, urlString] = urlFromState(
         UrlStateSelectors.getUrlState(getState())
       ).split('/');
-      expect(fromAddon).toEqual('from-url');
+      expect(fromUrl).toEqual('from-url');
       expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
     });
 
@@ -1986,17 +1986,17 @@ describe('actions/receive-profile', function() {
       expect(getView(getState()).phase).toBe('DATA_LOADED');
     });
 
-    it('retrieves profile from a `from-addon` data source and loads it', async function() {
+    it('retrieves profile from a `from-browser` data source and loads it', async function() {
       const { geckoProfile, getState, waitUntilPhase } = await setup(
         {
-          pathname: '/from-addon/',
+          pathname: '/from-browser/',
           search: '',
           hash: '',
         },
         0
       );
 
-      // Differently, `from-addon` calls the finalizeProfileView internally,
+      // Differently, `from-browser` calls the finalizeProfileView internally,
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
       const processedProfile = processGeckoProfile(geckoProfile);
@@ -2005,17 +2005,17 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('finishes symbolication for `from-addon` data source', async function() {
+    it('finishes symbolication for `from-browser` data source', async function() {
       const { waitUntilSymbolication } = await setup(
         {
-          pathname: '/from-addon/',
+          pathname: '/from-browser/',
           search: '',
           hash: '',
         },
         0
       );
 
-      // It should successfully symbolicate the profiles that are loaded from addon.
+      // It should successfully symbolicate the profiles that are loaded from the browser.
       return expect(waitUntilSymbolication()).resolves.toBe(undefined);
     });
 

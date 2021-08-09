@@ -976,6 +976,7 @@ export function convertArtTraceProfile(
       interval: intervalInMsec,
       processType: 0,
       product: 'ART Trace (Android)',
+      importedFrom: 'ART Trace (Android)',
       pid: summaryDetails.pid,
       stackwalk: 1,
       startTime: 0,
