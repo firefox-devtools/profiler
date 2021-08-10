@@ -12,6 +12,8 @@ Startup profiling does not use the settings that you configured in the add-on's 
 
 * If you'd like a coarser resolution, you can also choose a different interval using `MOZ_PROFILER_STARTUP_INTERVAL`, which defaults to 1 (unit is millisecond). You can't go below 1 ms, but you can use e.g. 10 ms.
 
+* More environment variables are available to control the profiler settings. They can be listed by setting `MOZ_PROFILER_HELP=1` and running Firefox from a command line inside a terminal; Firefox will exit immediately, and display all recognized variables in the terminal.
+
 ## Shutdown
 
 1. Start your Firefox with the environment variable `MOZ_PROFILER_SHUTDOWN=<filename>` set, where `<filename>` is the name of the file where the recorded profile should be saved.
