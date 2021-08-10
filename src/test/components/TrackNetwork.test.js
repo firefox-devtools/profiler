@@ -6,6 +6,9 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
+// This module is mocked.
+import copy from 'copy-to-clipboard';
+
 import {
   render,
   fireEvent,
@@ -13,6 +16,7 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 
 import { TrackNetwork } from '../../components/timeline/TrackNetwork';
+import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
@@ -24,6 +28,8 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getMouseEvent,
+  fireFullClick,
+  fireFullContextMenu,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
@@ -84,7 +90,9 @@ describe('timeline/TrackNetwork', function() {
       canvas,
       getMouseEvent('mousemove', {
         pageX: 12,
+        offsetX: 12,
         pageY: 2,
+        offsetY: 2,
       })
     );
 
@@ -95,6 +103,85 @@ describe('timeline/TrackNetwork', function() {
     // We draw at least one hovered request with a different stroke style.
     expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
     expect(drawCalls).toMatchSnapshot();
+  });
+
+  it('displays a context menu when right clicking', () => {
+    // Always use fake timers when dealing with context menus.
+    jest.useFakeTimers();
+
+    const { getContextMenu, clickOnMenuItem } = setup();
+    const canvas = ensureExists(document.querySelector('canvas'));
+
+    // First the user hovers the track.
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        offsetX: 12,
+        pageY: 2,
+        offsetY: 2,
+      })
+    );
+
+    expect(screen.getByTestId('tooltip')).toBeInTheDocument();
+
+    // Then the user right clicks.
+    fireFullContextMenu(canvas);
+
+    expect(getContextMenu()).toBeInTheDocument();
+    expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument();
+
+    // The user clicks on an item.
+    clickOnMenuItem('Copy description');
+    expect(copy).toHaveBeenLastCalledWith('Load 0: https://mozilla.org');
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
+
+    jest.runAllTimers();
+
+    expect(document.querySelector('.react-contextmenu')).toBeFalsy();
+  });
+
+  it('displays a context menu when right clicking, and hides it when clicking in blank space', () => {
+    // Always use fake timers when dealing with context menus.
+    jest.useFakeTimers();
+
+    const { getContextMenu } = setup();
+    const canvas = ensureExists(document.querySelector('canvas'));
+
+    // First the user hovers the track.
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        offsetX: 12,
+        pageY: 2,
+        offsetY: 2,
+      })
+    );
+
+    expect(screen.getByTestId('tooltip')).toBeInTheDocument();
+
+    // Then the user right clicks.
+    fireFullContextMenu(canvas);
+
+    expect(getContextMenu()).toBeInTheDocument();
+    expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument();
+
+    // The user hovers some blank space
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        offsetX: 12,
+        pageY: 20,
+        offsetY: 20,
+      })
+    );
+
+    // And then right clicks again => In this case the context menu should disappear!
+    fireFullContextMenu(canvas);
+    jest.runAllTimers();
+    expect(document.querySelector('.react-contextmenu')).toBeFalsy();
   });
 });
 
@@ -120,9 +207,40 @@ describe('VerticalIndicators', function() {
         pageY: 22,
       })
     );
-    // The tooltip is rendered in a portal, so it is not a child of the container.
+
     const tooltip = screen.getByTestId('tooltip');
     expect(tooltip).toMatchSnapshot();
+  });
+
+  it('displays a context menu when right clicking', () => {
+    // Always use fake timers when dealing with context menus.
+    jest.useFakeTimers();
+
+    const { getIndicatorLines, getContextMenu, clickOnMenuItem } = setup();
+
+    // We're looking at the third indicator only to change from the previous test.
+    const [, , thirdIndicator] = getIndicatorLines();
+    fireEvent.mouseOver(thirdIndicator);
+    // Note: we don't need to specify pageX/pageY here, as we don't test the
+    // position of the tooltip, but only its presence.
+    fireEvent.mouseMove(thirdIndicator);
+
+    const tooltip = screen.getByTestId('tooltip');
+    expect(tooltip).toBeInTheDocument();
+
+    // Then the user right clicks.
+    fireFullContextMenu(thirdIndicator);
+    expect(getContextMenu()).toBeInTheDocument();
+    expect(tooltip).not.toBeInTheDocument();
+
+    // The user clicks on an item.
+    clickOnMenuItem('Copy description');
+    expect(copy).toHaveBeenLastCalledWith('DOMContentLoaded');
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
+
+    jest.runAllTimers();
+
+    expect(document.querySelector('.react-contextmenu')).toBeFalsy();
   });
 });
 
@@ -136,6 +254,7 @@ function setup() {
   const renderResult = render(
     <Provider store={store}>
       <TrackNetwork threadIndex={0} />
+      <MaybeMarkerContextMenu />
     </Provider>
   );
 
@@ -153,6 +272,17 @@ function setup() {
     return (window: any).__flushDrawLog();
   }
 
+  function getContextMenu() {
+    return ensureExists(
+      document.querySelector('.react-contextmenu'),
+      `Couldn't find the context menu.`
+    );
+  }
+
+  function clickOnMenuItem(stringOrRegexp) {
+    fireFullClick(screen.getByText(stringOrRegexp));
+  }
+
   return {
     ...renderResult,
     dispatch,
@@ -161,5 +291,7 @@ function setup() {
     store,
     getContextDrawCalls,
     getIndicatorLines,
+    getContextMenu,
+    clickOnMenuItem,
   };
 }
