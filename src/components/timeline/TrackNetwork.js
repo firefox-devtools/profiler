@@ -310,6 +310,10 @@ class Network extends PureComponent<Props, State> {
     const { hoveredMarkerIndex, mouseX, mouseY } = this.state;
     const hoveredMarker =
       hoveredMarkerIndex === null ? null : getMarker(hoveredMarkerIndex);
+
+    // This is used for the tooltips of the network markers, but not for the
+    // vertical indicators. Indeed the vertical indicators tooltips are useful
+    // when the user changes the selection.
     const shouldShowTooltip =
       !isModifyingSelection && rightClickedMarkerIndex === null;
 
@@ -345,6 +349,7 @@ class Network extends PureComponent<Props, State> {
             zeroAt={zeroAt}
             width={containerWidth}
             onRightClick={this._onVerticalIndicatorRightClick}
+            shouldShowTooltip={rightClickedMarkerIndex === null}
           />
           {shouldShowTooltip && hoveredMarkerIndex !== null && hoveredMarker ? (
             <Tooltip mouseX={mouseX} mouseY={mouseY}>

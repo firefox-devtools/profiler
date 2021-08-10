@@ -26,6 +26,7 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +zeroAt: Milliseconds,
   +width: CssPixels,
+  +shouldShowTooltip: boolean,
   +onRightClick: MarkerIndex => mixed,
 |};
 
@@ -52,6 +53,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       rangeEnd,
       zeroAt,
       width,
+      shouldShowTooltip,
     } = this.props;
     return verticalMarkerIndexes.map<React.Node>(markerIndex => {
       const marker = getMarker(markerIndex);
@@ -110,20 +112,24 @@ export class VerticalIndicators extends React.PureComponent<Props> {
           onMouseDown={this._onMouseDown}
           data-marker-index={markerIndex}
           tooltip={
-            <>
-              <div>
-                <span
-                  className="timelineVerticalIndicatorsSwatch"
-                  style={{ backgroundColor: color }}
-                />{' '}
-                {marker.name}
-                <span className="timelineVerticalIndicatorsDim">{' at '}</span>
-                <span className="timelineVerticalIndicatorsTime">
-                  {formatSeconds(marker.start - zeroAt)}
-                </span>{' '}
-              </div>
-              {url}
-            </>
+            shouldShowTooltip ? (
+              <>
+                <div>
+                  <span
+                    className="timelineVerticalIndicatorsSwatch"
+                    style={{ backgroundColor: color }}
+                  />{' '}
+                  {marker.name}
+                  <span className="timelineVerticalIndicatorsDim">
+                    {' at '}
+                  </span>
+                  <span className="timelineVerticalIndicatorsTime">
+                    {formatSeconds(marker.start - zeroAt)}
+                  </span>{' '}
+                </div>
+                {url}
+              </>
+            ) : null
           }
         />
       );
