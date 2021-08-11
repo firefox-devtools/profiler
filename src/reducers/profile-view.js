@@ -580,6 +580,27 @@ const rightClickedMarker: Reducer<MarkerReference | null> = (
   }
 };
 
+const hoveredMarker: Reducer<MarkerReference | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_HOVERED_MARKER':
+      if (action.markerIndex !== null) {
+        return {
+          threadsKey: action.threadsKey,
+          markerIndex: action.markerIndex,
+        };
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+      return null;
+    default:
+      return state;
+  }
+};
+
 /**
  * TODO: This is not used yet, see issue #222
  * This is for tracking mouse position in timeline-axis
@@ -645,6 +666,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,
+      hoveredMarker,
       mouseTimePosition,
     }),
     profile,

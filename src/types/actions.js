@@ -199,6 +199,11 @@ type ProfileAction =
       +markerIndex: MarkerIndex | null,
     |}
   | {|
+      +type: 'CHANGE_HOVERED_MARKER',
+      +threadsKey: ThreadsKey,
+      +markerIndex: MarkerIndex | null,
+    |}
+  | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
       +previewSelection: PreviewSelection,
     |}
