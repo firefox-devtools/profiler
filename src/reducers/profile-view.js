@@ -24,7 +24,7 @@ import type {
   ThreadViewOptions,
   ThreadViewOptionsPerThreads,
   RightClickedCallNode,
-  RightClickedMarker,
+  MarkerReference,
   ActiveTabTimeline,
   CallNodePath,
   IndexIntoFuncTable,
@@ -552,7 +552,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   }
 };
 
-const rightClickedMarker: Reducer<RightClickedMarker | null> = (
+const rightClickedMarker: Reducer<MarkerReference | null> = (
   state = null,
   action
 ) => {

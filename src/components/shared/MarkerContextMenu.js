@@ -29,7 +29,7 @@ import type {
   ImplementationFilter,
   IndexIntoStackTable,
   Thread,
-  RightClickedMarkerInfo,
+  MarkerReference,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -45,7 +45,7 @@ import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per
 import './MarkerContextMenu.css';
 
 type OwnProps = {|
-  +rightClickedMarkerInfo: RightClickedMarkerInfo,
+  +rightClickedMarkerInfo: MarkerReference,
 |};
 
 type StateProps = {|
@@ -397,7 +397,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
 });
 
 type MaybeProps = {|
-  +rightClickedMarkerInfo: RightClickedMarkerInfo | null,
+  +rightClickedMarkerInfo: MarkerReference | null,
 |};
 
 /**
