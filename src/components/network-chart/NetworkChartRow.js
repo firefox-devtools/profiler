@@ -323,7 +323,6 @@ type NetworkChartRowProps = {|
   +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
   +isSelected: boolean,
-  +isLeftClicked: boolean,
   +select: MarkerIndex => mixed,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
@@ -466,7 +465,6 @@ export class NetworkChartRow extends React.PureComponent<
       timeRange,
       isRightClicked,
       shouldDisplayTooltips,
-      isLeftClicked,
       isSelected,
     } = this.props;
 
@@ -481,7 +479,6 @@ export class NetworkChartRow extends React.PureComponent<
       {
         odd: index % 2 === 1,
         isRightClicked,
-        isLeftClicked,
         isSelected,
       }
     );

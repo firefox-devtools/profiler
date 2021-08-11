@@ -260,7 +260,6 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         shouldDisplayTooltips={this._shouldDisplayTooltips}
         isRightClicked={rightClickedMarkerIndex === markerIndex}
         onRightClick={this._onRightClick}
-        isLeftClicked={selectedNetworkMarkerIndex === markerIndex}
         isSelected={selectedNetworkMarkerIndex === markerIndex}
         select={this._select}
         onLeftClick={this._onLeftClick}
