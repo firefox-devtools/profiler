@@ -19,7 +19,10 @@ import {
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
+import {
+  changeRightClickedMarker,
+  changeSelectedNetworkMarker,
+} from 'firefox-profiler/actions/profile-view';
 
 import {
   TRACK_NETWORK_ROW_HEIGHT,
@@ -52,6 +55,7 @@ type CanvasProps = {|
   +rangeEnd: Milliseconds,
   +hoveredMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
   +width: CssPixels,
   +networkTiming: MarkerTiming[],
   +onHoveredMarkerChange: (
@@ -152,6 +156,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
       networkTiming,
       hoveredMarkerIndex,
       rightClickedMarkerIndex,
+      selectedNetworkMarkerIndex,
       width: containerWidth,
     } = this.props;
 
@@ -172,6 +177,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
 
     let hoveredPath = null;
     let rightClickedPath = null;
+    let selectedPath = null;
     for (let rowIndex = 0; rowIndex < networkTiming.length; rowIndex++) {
       const timing = networkTiming[rowIndex];
       for (let timingIndex = 0; timingIndex < timing.length; timingIndex++) {
@@ -185,18 +191,31 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
         const path = new Path2D();
         path.moveTo(start, y);
         path.lineTo(end, y);
-        if (timing.index[timingIndex] === hoveredMarkerIndex) {
-          // Save the hovered path to draw it at the end, on top of everything else.
-          hoveredPath = path;
-        } else if (timing.index[timingIndex] === rightClickedMarkerIndex) {
-          rightClickedPath = path;
-        } else {
-          ctx.stroke(path);
+
+        // For the general case, we draw the path right away.
+        // But in specific cases (hovered, selected, right clicked), we save the
+        // path so that we draw it at the end, on top of everything else, with a
+        // different color.
+        const thisMarkerIndex = timing.index[timingIndex];
+        console.log(thisMarkerIndex, rightClickedMarkerIndex);
+        switch (thisMarkerIndex) {
+          // This is in descending precedence order.
+          case rightClickedMarkerIndex:
+            rightClickedPath = path;
+            break;
+          case hoveredMarkerIndex:
+            hoveredPath = path;
+            break;
+          case selectedNetworkMarkerIndex:
+            selectedPath = path;
+            break;
+          default:
+            ctx.stroke(path);
         }
       }
     }
 
-    if (hoveredPath || rightClickedPath) {
+    if (hoveredPath || rightClickedPath || selectedPath) {
       ctx.strokeStyle = HOVERED_STYLE;
       if (hoveredPath) {
         ctx.stroke(hoveredPath);
@@ -204,6 +223,10 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
 
       if (rightClickedPath) {
         ctx.stroke(rightClickedPath);
+      }
+
+      if (selectedPath) {
+        ctx.stroke(selectedPath);
       }
     }
   }
@@ -235,10 +258,12 @@ type StateProps = {|
   +networkTiming: MarkerTiming[],
   +verticalMarkerIndexes: MarkerIndex[],
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
 |};
 
 type DispatchProps = {|
   changeRightClickedMarker: typeof changeRightClickedMarker,
+  changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
 |};
 
 type Props = {|
@@ -279,6 +304,8 @@ class Network extends PureComponent<Props, State> {
       // the right click callback at mousedown so that the state is updated and
       // the context menus are rendered before the mouseup/contextmenu events.
       this._onRightClick();
+    } else {
+      this._onLeftClick();
     }
   };
 
@@ -286,6 +313,14 @@ class Network extends PureComponent<Props, State> {
     const { threadIndex, changeRightClickedMarker } = this.props;
     const { hoveredMarkerIndex } = this.state;
     changeRightClickedMarker(threadIndex, hoveredMarkerIndex);
+  };
+
+  _onLeftClick = () => {
+    const { threadIndex, changeSelectedNetworkMarker } = this.props;
+    const { hoveredMarkerIndex } = this.state;
+    if (hoveredMarkerIndex !== null) {
+      changeSelectedNetworkMarker(threadIndex, hoveredMarkerIndex);
+    }
   };
 
   _onVerticalIndicatorRightClick = (markerIndex: MarkerIndex) => {
@@ -306,6 +341,7 @@ class Network extends PureComponent<Props, State> {
       threadIndex,
       width: containerWidth,
       rightClickedMarkerIndex,
+      selectedNetworkMarkerIndex,
     } = this.props;
     const { hoveredMarkerIndex, mouseX, mouseY } = this.state;
     const hoveredMarker =
@@ -337,6 +373,7 @@ class Network extends PureComponent<Props, State> {
             networkTiming={networkTiming}
             hoveredMarkerIndex={hoveredMarkerIndex}
             rightClickedMarkerIndex={rightClickedMarkerIndex}
+            selectedNetworkMarkerIndex={selectedNetworkMarkerIndex}
             width={containerWidth}
             onHoveredMarkerChange={this._onHoveredMarkerChange}
           />
@@ -388,8 +425,11 @@ export const TrackNetwork = explicitConnect<
       isModifyingSelection: getPreviewSelection(state).isModifying,
       verticalMarkerIndexes: selectors.getTimelineVerticalMarkerIndexes(state),
       rightClickedMarkerIndex: selectors.getRightClickedMarkerIndex(state),
+      selectedNetworkMarkerIndex: selectors.getSelectedNetworkMarkerIndex(
+        state
+      ),
     };
   },
-  mapDispatchToProps: { changeRightClickedMarker },
+  mapDispatchToProps: { changeRightClickedMarker, changeSelectedNetworkMarker },
   component: withSize<Props>(Network),
 });

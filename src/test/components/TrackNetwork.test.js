@@ -15,13 +15,15 @@ import {
   screen,
 } from 'firefox-profiler/test/fixtures/testing-library';
 
-import { TrackNetwork } from '../../components/timeline/TrackNetwork';
-import { MaybeMarkerContextMenu } from '../../components/shared/MarkerContextMenu';
+import { TrackNetwork } from 'firefox-profiler/components/timeline/TrackNetwork';
+import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
-} from '../../app-logic/constants';
+} from 'firefox-profiler/app-logic/constants';
 import { ensureExists } from 'firefox-profiler/utils/flow';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { changeSelectedNetworkMarker } from 'firefox-profiler/actions/profile-view';
 
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
@@ -33,7 +35,6 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 import {
   autoMockElementSize,
@@ -109,7 +110,7 @@ describe('timeline/TrackNetwork', function() {
     // Always use fake timers when dealing with context menus.
     jest.useFakeTimers();
 
-    const { getContextMenu, clickOnMenuItem } = setup();
+    const { getContextMenu, clickOnMenuItem, getContextDrawCalls } = setup();
     const canvas = ensureExists(document.querySelector('canvas'));
 
     // First the user hovers the track.
@@ -125,11 +126,19 @@ describe('timeline/TrackNetwork', function() {
 
     expect(screen.getByTestId('tooltip')).toBeInTheDocument();
 
+    // Flush existing draw calls, to check that we redraw properly.
+    getContextDrawCalls();
+
     // Then the user right clicks.
     fireFullContextMenu(canvas);
 
     expect(getContextMenu()).toBeInTheDocument();
     expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument();
+
+    // Check that we redrew with a different style.
+    const drawCalls = getContextDrawCalls();
+    // We draw at least one hovered request with a different stroke style.
+    expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
 
     // The user clicks on an item.
     clickOnMenuItem('Copy description');
@@ -182,6 +191,66 @@ describe('timeline/TrackNetwork', function() {
     fireFullContextMenu(canvas);
     jest.runAllTimers();
     expect(document.querySelector('.react-contextmenu')).toBeFalsy();
+  });
+
+  it('selects the network marker when left clicking', () => {
+    const { getContextDrawCalls, getState } = setup();
+
+    const canvas = ensureExists(document.querySelector('canvas'));
+
+    // First the user hovers the track.
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        pageY: 2,
+      })
+    );
+
+    // Check that nothing is selected yet.
+    expect(
+      selectedThreadSelectors.getSelectedNetworkMarkerIndex(getState())
+    ).toBe(null);
+
+    // Then the user left clicks.
+    fireFullClick(canvas);
+    expect(
+      selectedThreadSelectors.getSelectedNetworkMarkerIndex(getState())
+    ).toBe(0);
+
+    // Flush out any existing draw calls as we're interested in what comes news.
+    getContextDrawCalls();
+    // Ensure we start out with 0.
+    expect(getContextDrawCalls().length).toEqual(0);
+    getContextDrawCalls();
+
+    // The mouse leaves the track.
+    fireEvent.mouseLeave(canvas);
+
+    const drawCalls = getContextDrawCalls();
+    // We draw at least one hovered request with a different stroke style.
+    expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
+  });
+
+  it('draws the selected network marker when it changes elsewhere', () => {
+    const { getContextDrawCalls, getState, dispatch } = setup();
+
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+    // Ensure we start out with 0.
+    expect(getContextDrawCalls().length).toEqual(0);
+
+    // Check that nothing is selected yet.
+    expect(
+      selectedThreadSelectors.getSelectedNetworkMarkerIndex(getState())
+    ).toBe(null);
+
+    dispatch(changeSelectedNetworkMarker(0, 2));
+
+    // Check that we redrew with a selected style.
+    const drawCalls = getContextDrawCalls();
+    // We draw at least one hovered request with a different stroke style.
+    expect(drawCalls).toContainEqual(['set strokeStyle', '#0069aa']);
   });
 });
 
