@@ -606,6 +606,17 @@ export function getMarkerSelectorsPerThread(
       typeof markerIndex === 'number' ? getMarker(markerIndex) : null
   );
 
+  const getHoveredMarkerIndex: Selector<null | MarkerIndex> = createSelector(
+    ProfileSelectors.getProfileViewOptions,
+    ({ hoveredMarker }) => {
+      if (hoveredMarker !== null && hoveredMarker.threadsKey === threadsKey) {
+        return hoveredMarker.markerIndex;
+      }
+
+      return null;
+    }
+  );
+
   return {
     getMarkerGetter,
     getTimelineJankMarkerIndexes,
@@ -642,5 +653,6 @@ export function getMarkerSelectorsPerThread(
     getUserTimingMarkerTiming,
     getRightClickedMarkerIndex,
     getRightClickedMarker,
+    getHoveredMarkerIndex,
   };
 }
