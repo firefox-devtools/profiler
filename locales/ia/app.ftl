@@ -213,10 +213,11 @@ Home--menu-button = Activar le button { -profiler-brand-name } del menu
 Home--menu-button-instructions =
     Activa le button de menu profilator pro initiar registrar un profilo de
     prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
-Home--addon-button = Installar additivo
-Home--addon-button-instructions =
-    Installa le additivo Gecko Profiler pro initiar registrar un profilo de
-    prestation in { -firefox-brand-name }, pois analysa lo e comparti lo con profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Iste instantia del profilator non pute connecter se a WebChannel, perque non pote activar le button de menu del profilator.
 Home--record-instructions =
     Pro initiar profilar, clicca sur le button profila o usa le
     vias breve de claviero. Le icone es blau quando un profilo es in registration.
