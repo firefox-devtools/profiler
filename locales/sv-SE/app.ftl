@@ -67,6 +67,18 @@ CallNodeContextMenu--transform-focus-subtree = Fokusera endast på underträd
         innehåller den specifika delen av anropsträdet. Den tar ut en gren av
         anropsträdet, men det gör det endast för den anropsnoden. Alla andra
         anrop från funktionen ignoreras.
+CallNodeContextMenu--transform-collapse-function-subtree = Fäll ihop funktion
+    .title =
+        Att fälla ihop en funktion kommer ta bort allt som anropas, och tilldela
+        all tid till funktionen. Detta kan förenkla en profilering som
+        anropar kod som inte behöver analyseras.
+# This is used as the context menu item to apply the "Collapse resource" transform.
+# Variables:
+#   $nameForResource (String) - Name of the resource to collapse.
+CallNodeContextMenu--transform-collapse-resource = Fäll ihop <strong> { $nameForResource } </strong>
+    .title =
+        Att fälla ihop en resurs plattar ut alla anrop till den
+        resursen till en enda ihopfälld anropsnod.
 CallNodeContextMenu--expand-all = Expandera alla
 # Searchfox is a source code indexing tool for Mozilla Firefox.
 # See: https://searchfox.org/
@@ -147,10 +159,6 @@ Home--menu-button = Aktivera { -profiler-brand-name } menyknapp
 Home--menu-button-instructions =
     Aktivera profil-menyknappen för att börja spela in en prestandaprofil
     i { -firefox-brand-name }, analysera den och dela den med profiler.firefox.com.
-Home--addon-button = Installera tillägg
-Home--addon-button-instructions =
-    Installera tillägget Gecko Profiler för att börja spela in en prestandaprofil
-    i { -firefox-brand-name }, analysera den sedan och dela den med profiler.firefox.com.
 Home--record-instructions =
     För att starta profilering, klicka på profileringsknappen eller använd
     kortkommandona. Ikonen är blå när en profil spelas in. Tryck på
