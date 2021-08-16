@@ -218,6 +218,14 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Iste instantia del profilator non pute connecter se a WebChannel, perque non pote activar le button de menu del profilator.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Iste instantia de profilator non ha potite connecter se al canal web. Isto usualmente significa que
+    illo flue sur un hoste differente de illo que es specificate in le preferentia
+    <code>devtools.performance.recording.ui-base-url</code>. Si tu vole capturar nove
+    profilos con iste instantia, e da illo programmatic controlar del button de menu profilator,
+    tu pote ir a <code>re:config</code> e cambiar le preferentia.
 Home--record-instructions =
     Pro initiar profilar, clicca sur le button profila o usa le
     vias breve de claviero. Le icone es blau quando un profilo es in registration.
