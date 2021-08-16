@@ -90,6 +90,11 @@ CallNodeContextMenu--copy-stack = Kopiera stack
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Körningstid (ms)
+    .title =
+        Den "totala" körtiden innehåller en sammanfattning av hela tiden där denna
+        funktion observerades vara på stacken. Detta inkluderar den tid då funktionen
+        faktiskt kördes och den tid som tillbringades i anropen från den här funktionen.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
