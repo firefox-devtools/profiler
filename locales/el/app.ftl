@@ -184,7 +184,6 @@ Home--menu-button = Ενεργοποίηση κουμπιού μενού του 
 Home--menu-button-instructions =
     Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
-Home--addon-button = Εγκατάσταση προσθέτου
 Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
@@ -392,6 +391,8 @@ MenuButtons--metaOverheadStatistics-statkeys-counter = Μετρητής
     .title = Χρόνος συγκέντρωσης όλων των μετρητών.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Χρονικό διάστημα
     .title = Παρατηρηθέν χρονικό διάστημα μεταξύ δύο δειγμάτων.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Κλειδώματα
+    .title = Χρόνος για απόκτηση κλειδώματος πριν από τη δειγματοληψία.
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
 MenuButtons--metaOverheadStatistics-profiled-duration = Διάρκεια καταγραφής:
 
