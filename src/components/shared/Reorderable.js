@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import clamp from 'clamp';
-import arrayMove from 'array-move';
+import { arrayMoveImmutable as arrayMove } from 'array-move';
 import {
   getContentRect,
   getMarginRect,

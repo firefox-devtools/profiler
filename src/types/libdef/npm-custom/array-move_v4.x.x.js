@@ -4,5 +4,14 @@
 // @flow
 
 declare module 'array-move' {
-  declare module.exports: <T>(input: T[], from: number, to: number) => T[];
+  declare export function arrayMoveImmutable<T>(
+    input: T[],
+    from: number,
+    to: number
+  ): T[];
+  declare export function arrayMoveMutable<T>(
+    input: T[],
+    from: number,
+    to: number
+  ): void;
 }
