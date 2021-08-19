@@ -2,7 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import type { MessageFromBrowser } from '../../../app-logic/web-channel';
+
+import type {
+  ResponseFromBrowser,
+  MessageFromBrowser,
+  MessageToBrowser,
+} from '../../../app-logic/web-channel';
 
 /**
  * Mock out the WebChannel, a Firefox internal mechanism that allows us to
@@ -11,6 +16,7 @@ import type { MessageFromBrowser } from '../../../app-logic/web-channel';
 export function mockWebChannel() {
   const messagesSentToBrowser = [];
   const listeners = [];
+  let onMessageToChrome = null;
 
   jest
     .spyOn(window, 'addEventListener')
@@ -32,11 +38,19 @@ export function mockWebChannel() {
     });
 
   jest.spyOn(window, 'dispatchEvent').mockImplementation(event => {
-    messagesSentToBrowser.push(JSON.parse(event.detail));
+    if (
+      event instanceof CustomEvent &&
+      event.type === 'WebChannelMessageToChrome'
+    ) {
+      messagesSentToBrowser.push(JSON.parse(event.detail));
+      if (onMessageToChrome) {
+        onMessageToChrome(JSON.parse(event.detail).message);
+      }
+    }
   });
 
-  function triggerResponse(
-    message: MessageFromBrowser | {| errno: number, error: string |}
+  function triggerResponse<R: ResponseFromBrowser>(
+    message: MessageFromBrowser<R>
   ) {
     for (const listener of listeners.slice()) {
       listener({
@@ -48,10 +62,17 @@ export function mockWebChannel() {
     }
   }
 
+  function registerMessageToChromeListener(
+    listener: MessageToBrowser => void
+  ): void {
+    onMessageToChrome = listener;
+  }
+
   return {
     messagesSentToBrowser,
     listeners,
     triggerResponse,
+    registerMessageToChromeListener,
     getLastRequestId: (): number => {
       const message = messagesSentToBrowser[messagesSentToBrowser.length - 1];
       if (!message) {
