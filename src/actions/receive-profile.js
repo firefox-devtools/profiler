@@ -688,9 +688,11 @@ export function changeTimelineTrackOrganization(
  */
 export function resymbolicateProfile(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
+    const shouldUseWebChannel = await checkIfWebChannelUsableForSymbolication();
     const symbolStore = getSymbolStore(
       dispatch,
-      getSymbolServerUrl(getState())
+      getSymbolServerUrl(getState()),
+      shouldUseWebChannel
     );
     const profile = getProfile(getState());
     if (!symbolStore) {
