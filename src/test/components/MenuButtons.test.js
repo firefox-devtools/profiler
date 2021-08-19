@@ -624,10 +624,11 @@ describe('app/MenuButtons', function() {
         expect(screen.getByText('Profile is symbolicated')).toBeInTheDocument();
         fireFullClick(screen.getByText('Re-symbolicate profile'));
 
-        expect(symbolicateProfile).toHaveBeenCalled();
         expect(
-          screen.getByText('Attempting to re-symbolicate profile')
+          await screen.findByText('Attempting to re-symbolicate profile')
         ).toBeInTheDocument();
+        expect(symbolicateProfile).toHaveBeenCalled();
+
         // No symbolicate button is available.
         expect(
           screen.queryByText('Symbolicate profile')
@@ -650,11 +651,12 @@ describe('app/MenuButtons', function() {
           screen.getByText('Profile is not symbolicated')
         ).toBeInTheDocument();
         fireFullClick(screen.getByText('Symbolicate profile'));
-        expect(symbolicateProfile).toHaveBeenCalled();
 
         expect(
-          screen.getByText('Currently symbolicating profile')
+          await screen.findByText('Currently symbolicating profile')
         ).toBeInTheDocument();
+        expect(symbolicateProfile).toHaveBeenCalled();
+
         // No symbolicate button is available.
         expect(
           screen.queryByText('Symbolicate profile')
