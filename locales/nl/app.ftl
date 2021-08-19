@@ -181,10 +181,6 @@ Home--load-from-url-submit-button =
     .value = Laden
 Home--documentation-button = Documentatie
 Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
-Home--addon-button = Add-on installeren
-Home--addon-button-instructions =
-    Installeer de add-on Gecko Profiler om een prestatieprofiel op te nemen
-    in { -firefox-brand-name }, analyseer het en deel het met profiler.firefox.com.
 Home--instructions-title = Profielen bekijken en opnemen
 Home--instructions-content =
     Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
@@ -329,6 +325,8 @@ MenuButtons--metaInfo--recording-started = Opname gestart:
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--call-tree-strategy-native-deallocations-sites = Deallocatie van websites
+    .title = Samenvatting aan de hand van de gedealloceerde bytes geheugenruimte, per website waarvan de geheugenruimte was gedealloceerd.
 
 ## Tab Bar for the bottom half of the analysis UI.
 
