@@ -717,6 +717,7 @@ export function viewProfile(
     transformStacks: TransformStacksPerThread,
     geckoProfiler: $GeckoProfiler,
     skipSymbolication: boolean,
+    shouldUseWebChannel: boolean,
   |}> = {}
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
@@ -1038,6 +1039,18 @@ function makeTimeoutRejectionPromise(durationInMs) {
       reject(new TimeoutError(`Timed out after ${durationInMs}ms`));
     }, durationInMs);
   });
+}
+
+export async function checkIfWebChannelUsableForSymbolication(): Promise<boolean> {
+  try {
+    return await Promise.race([
+      querySupportsGetProfileAndSymbolicationViaWebChannel(),
+      makeTimeoutRejectionPromise(5000),
+    ]);
+  } catch (e) {
+    // It timed out or some other error happened. Don't use the WebChannel.
+    return false;
+  }
 }
 
 export function retrieveProfileFromBrowser(): ThunkAction<Promise<void>> {
@@ -1464,8 +1477,10 @@ export function retrieveProfileFromFile(
           throw new Error('Unable to parse the profile.');
         }
 
+        const shouldUseWebChannel = await checkIfWebChannelUsableForSymbolication();
+
         await withHistoryReplaceStateAsync(async () => {
-          await dispatch(viewProfile(profile));
+          await dispatch(viewProfile(profile, { shouldUseWebChannel }));
         });
       }
     } catch (error) {
