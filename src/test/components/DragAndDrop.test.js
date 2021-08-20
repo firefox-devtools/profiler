@@ -18,6 +18,7 @@ import {
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import { getView } from 'firefox-profiler/selectors';
+import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
 describe('app/DragAndDrop', () => {
   afterEach(function() {
@@ -66,6 +67,23 @@ describe('app/DragAndDrop', () => {
 
   it('receives profile on file drop', async () => {
     window.TextDecoder = TextDecoder;
+
+    // When the file is dropped, the profiler tries to connect to the WebChannel
+    // for symbolication. Handle that request so that we don't time out.
+    // We handle it by rejecting it.
+    const {
+      registerMessageToChromeListener,
+      triggerResponse,
+    } = mockWebChannel();
+    registerMessageToChromeListener(() => {
+      triggerResponse({
+        errno: 2, // ERRNO_NO_SUCH_CHANNEL
+        error: 'No such channel',
+      });
+    });
+    // Ignore the console.error from the the WebChannel error.
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const store = createStore();
     const { container } = render(
       <Provider store={store}>
@@ -84,5 +102,6 @@ describe('app/DragAndDrop', () => {
     await waitFor(() =>
       expect(getView(store.getState()).phase).toBe('DATA_LOADED')
     );
+    expect(spy).toHaveBeenCalled();
   });
 });
