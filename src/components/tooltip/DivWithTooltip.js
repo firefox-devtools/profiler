@@ -7,6 +7,8 @@ import * as React from 'react';
 import { Tooltip } from './Tooltip';
 import type { CssPixels } from 'firefox-profiler/types';
 
+// This isn't an exact object on purpose, because we'll pass all other props to
+// the underlying <div>.
 type Props = {
   +tooltip: React.Node,
   +children?: React.Node,
@@ -55,13 +57,9 @@ export class DivWithTooltip extends React.PureComponent<Props, State> {
   };
 
   render() {
+    const { children, tooltip, ...containerProps } = this.props;
     const { mouseX, mouseY, isMouseOver } = this.state;
-    const { children, tooltip } = this.props;
     const shouldShowTooltip = isMouseOver;
-
-    // Pass through the props without the tooltip property.
-    const containerProps = Object.assign({}, this.props);
-    delete containerProps.tooltip;
 
     return (
       <div

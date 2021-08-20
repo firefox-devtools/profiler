@@ -690,35 +690,44 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
   class="timelineTrackNetwork"
   style="height: 35px;"
 >
-  <canvas
-    class="timelineTrackNetworkCanvas"
-    height="35"
-    width="400"
-  />
   <div
-    class="timelineVerticalIndicatorsLine"
-    data-testid="vertical-indicator-line"
-    style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
-  />
-  <div
-    class="timelineVerticalIndicatorsLine"
-    data-testid="vertical-indicator-line"
-    style="--vertical-indicator-color: #000; left: 200px;"
-  />
-  <div
-    class="timelineVerticalIndicatorsLine"
-    data-testid="vertical-indicator-line"
-    style="--vertical-indicator-color: var(--blue-50); left: 200px;"
-  />
-  <div
-    class="timelineVerticalIndicatorsLine"
-    data-testid="vertical-indicator-line"
-    style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
-  />
-  <div
-    class="timelineVerticalIndicatorsLine"
-    data-testid="vertical-indicator-line"
-    style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
-  />
+    class="react-contextmenu-wrapper treeViewContextMenu"
+  >
+    <canvas
+      class="timelineTrackNetworkCanvas"
+      height="35"
+      width="400"
+    />
+    <div
+      class="timelineVerticalIndicatorsLine"
+      data-marker-index="10"
+      data-testid="vertical-indicator-line"
+      style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
+    />
+    <div
+      class="timelineVerticalIndicatorsLine"
+      data-marker-index="11"
+      data-testid="vertical-indicator-line"
+      style="--vertical-indicator-color: #000; left: 200px;"
+    />
+    <div
+      class="timelineVerticalIndicatorsLine"
+      data-marker-index="12"
+      data-testid="vertical-indicator-line"
+      style="--vertical-indicator-color: var(--blue-50); left: 200px;"
+    />
+    <div
+      class="timelineVerticalIndicatorsLine"
+      data-marker-index="13"
+      data-testid="vertical-indicator-line"
+      style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
+    />
+    <div
+      class="timelineVerticalIndicatorsLine"
+      data-marker-index="14"
+      data-testid="vertical-indicator-line"
+      style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
+    />
+  </div>
 </div>
 `;

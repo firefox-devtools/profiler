@@ -9,6 +9,7 @@ import React, { PureComponent } from 'react';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
+import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { VerticalIndicators } from './VerticalIndicators';
 
 import {
@@ -18,6 +19,8 @@ import {
   getPreviewSelection,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
+
 import {
   TRACK_NETWORK_ROW_HEIGHT,
   TRACK_NETWORK_ROW_REPEAT,
@@ -48,6 +51,7 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +hoveredMarkerIndex: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
   +width: CssPixels,
   +networkTiming: MarkerTiming[],
   +onHoveredMarkerChange: (
@@ -147,6 +151,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
       rangeEnd,
       networkTiming,
       hoveredMarkerIndex,
+      rightClickedMarkerIndex,
       width: containerWidth,
     } = this.props;
 
@@ -166,6 +171,7 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
     ctx.lineWidth = rowHeight * 0.75;
 
     let hoveredPath = null;
+    let rightClickedPath = null;
     for (let rowIndex = 0; rowIndex < networkTiming.length; rowIndex++) {
       const timing = networkTiming[rowIndex];
       for (let timingIndex = 0; timingIndex < timing.length; timingIndex++) {
@@ -182,15 +188,23 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
         if (timing.index[timingIndex] === hoveredMarkerIndex) {
           // Save the hovered path to draw it at the end, on top of everything else.
           hoveredPath = path;
+        } else if (timing.index[timingIndex] === rightClickedMarkerIndex) {
+          rightClickedPath = path;
         } else {
           ctx.stroke(path);
         }
       }
     }
 
-    if (hoveredPath) {
+    if (hoveredPath || rightClickedPath) {
       ctx.strokeStyle = HOVERED_STYLE;
-      ctx.stroke(hoveredPath);
+      if (hoveredPath) {
+        ctx.stroke(hoveredPath);
+      }
+
+      if (rightClickedPath) {
+        ctx.stroke(rightClickedPath);
+      }
     }
   }
 
@@ -220,12 +234,18 @@ type StateProps = {|
   +getMarker: MarkerIndex => Marker,
   +networkTiming: MarkerTiming[],
   +verticalMarkerIndexes: MarkerIndex[],
+  +rightClickedMarkerIndex: MarkerIndex | null,
 |};
-type DispatchProps = {||};
+
+type DispatchProps = {|
+  changeRightClickedMarker: typeof changeRightClickedMarker,
+|};
+
 type Props = {|
   ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
   ...SizeProps,
 |};
+
 type State = {|
   +hoveredMarkerIndex: MarkerIndex | null,
   +mouseX: CssPixels,
@@ -253,6 +273,26 @@ class Network extends PureComponent<Props, State> {
     }
   };
 
+  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+    if (e.button === 2) {
+      // The right button is a contextual action. It is important that we call
+      // the right click callback at mousedown so that the state is updated and
+      // the context menus are rendered before the mouseup/contextmenu events.
+      this._onRightClick();
+    }
+  };
+
+  _onRightClick = () => {
+    const { threadIndex, changeRightClickedMarker } = this.props;
+    const { hoveredMarkerIndex } = this.state;
+    changeRightClickedMarker(threadIndex, hoveredMarkerIndex);
+  };
+
+  _onVerticalIndicatorRightClick = (markerIndex: MarkerIndex) => {
+    const { threadIndex, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadIndex, markerIndex);
+  };
+
   render() {
     const {
       pages,
@@ -265,11 +305,17 @@ class Network extends PureComponent<Props, State> {
       isModifyingSelection,
       threadIndex,
       width: containerWidth,
+      rightClickedMarkerIndex,
     } = this.props;
     const { hoveredMarkerIndex, mouseX, mouseY } = this.state;
     const hoveredMarker =
       hoveredMarkerIndex === null ? null : getMarker(hoveredMarkerIndex);
-    const shouldShowTooltip = !isModifyingSelection;
+
+    // This is used for the tooltips of the network markers, but not for the
+    // vertical indicators. Indeed the vertical indicators tooltips are useful
+    // when the user changes the selection.
+    const shouldShowTooltip =
+      !isModifyingSelection && rightClickedMarkerIndex === null;
 
     return (
       <div
@@ -277,35 +323,46 @@ class Network extends PureComponent<Props, State> {
         style={{
           height: TRACK_NETWORK_HEIGHT,
         }}
+        onMouseDown={this._onMouseDown}
       >
-        <NetworkCanvas
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          networkTiming={networkTiming}
-          hoveredMarkerIndex={hoveredMarkerIndex}
-          width={containerWidth}
-          onHoveredMarkerChange={this._onHoveredMarkerChange}
-        />
-        <VerticalIndicators
-          verticalMarkerIndexes={verticalMarkerIndexes}
-          getMarker={getMarker}
-          pages={pages}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          zeroAt={zeroAt}
-          width={containerWidth}
-        />
-        {shouldShowTooltip && hoveredMarkerIndex !== null && hoveredMarker ? (
-          <Tooltip mouseX={mouseX} mouseY={mouseY}>
-            <TooltipMarker
-              className="tooltipNetwork"
-              markerIndex={hoveredMarkerIndex}
-              marker={hoveredMarker}
-              threadsKey={threadIndex}
-              restrictHeightWidth={true}
-            />
-          </Tooltip>
-        ) : null}
+        <ContextMenuTrigger
+          id="MarkerContextMenu"
+          attributes={{
+            className: 'treeViewContextMenu',
+          }}
+        >
+          <NetworkCanvas
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            networkTiming={networkTiming}
+            hoveredMarkerIndex={hoveredMarkerIndex}
+            rightClickedMarkerIndex={rightClickedMarkerIndex}
+            width={containerWidth}
+            onHoveredMarkerChange={this._onHoveredMarkerChange}
+          />
+          <VerticalIndicators
+            verticalMarkerIndexes={verticalMarkerIndexes}
+            getMarker={getMarker}
+            pages={pages}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            zeroAt={zeroAt}
+            width={containerWidth}
+            onRightClick={this._onVerticalIndicatorRightClick}
+            shouldShowTooltip={rightClickedMarkerIndex === null}
+          />
+          {shouldShowTooltip && hoveredMarkerIndex !== null && hoveredMarker ? (
+            <Tooltip mouseX={mouseX} mouseY={mouseY}>
+              <TooltipMarker
+                className="tooltipNetwork"
+                markerIndex={hoveredMarkerIndex}
+                marker={hoveredMarker}
+                threadsKey={threadIndex}
+                restrictHeightWidth={true}
+              />
+            </Tooltip>
+          ) : null}
+        </ContextMenuTrigger>
       </div>
     );
   }
@@ -330,7 +387,9 @@ export const TrackNetwork = explicitConnect<
       zeroAt: getZeroAt(state),
       isModifyingSelection: getPreviewSelection(state).isModifying,
       verticalMarkerIndexes: selectors.getTimelineVerticalMarkerIndexes(state),
+      rightClickedMarkerIndex: selectors.getRightClickedMarkerIndex(state),
     };
   },
+  mapDispatchToProps: { changeRightClickedMarker },
   component: withSize<Props>(Network),
 });
