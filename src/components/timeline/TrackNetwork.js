@@ -197,7 +197,6 @@ class NetworkCanvas extends PureComponent<CanvasProps> {
         // path so that we draw it at the end, on top of everything else, with a
         // different color.
         const thisMarkerIndex = timing.index[timingIndex];
-        console.log(thisMarkerIndex, rightClickedMarkerIndex);
         switch (thisMarkerIndex) {
           // This is in descending precedence order.
           case rightClickedMarkerIndex:
