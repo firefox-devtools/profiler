@@ -243,6 +243,11 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     changeHoveredMarker(threadsKey, hoveredMarkerIndex);
   };
 
+  _onMouseLeaveRenderedList = () => {
+    const { threadsKey, changeHoveredMarker } = this.props;
+    changeHoveredMarker(threadsKey, null);
+  };
+
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
@@ -342,6 +347,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
               onCopy={this._onCopy}
               onKeyDown={this._onKeyDown}
               ref={this._virtualListRef}
+              onMouseLeaveRenderedList={this._onMouseLeaveRenderedList}
             />
           </ContextMenuTrigger>
         )}
