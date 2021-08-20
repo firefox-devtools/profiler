@@ -261,10 +261,8 @@ export class Reorderable extends React.PureComponent<Props, State> {
       adjustPrecedingBy,
       adjustSucceedingBy,
     } = this.state;
-    const adjustedClassName =
-      phase === 'MANIPULATING' ? className + ' beingReordered' : className;
     return (
-      <TagName className={adjustedClassName}>
+      <TagName className={className}>
         {orderedChildren.map((child, childIndex) => {
           const style = {
             transition: '200ms ease-in-out transform',
