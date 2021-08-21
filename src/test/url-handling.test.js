@@ -14,6 +14,7 @@ import {
   changeNetworkSearchString,
   changeProfileName,
   changeSelectedThreads,
+  changeGlobalTrackOrder,
   commitRange,
   setDataSource,
 } from '../actions/profile-view';
@@ -37,7 +38,7 @@ import type {
   Store,
   State,
 } from 'firefox-profiler/types';
-import getProfile from './fixtures/profiles/call-nodes';
+import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
   getHumanReadableTracks,
@@ -55,6 +56,7 @@ import {
 import {
   getActiveTabGlobalTracks,
   getActiveTabResourceTracks,
+  getProfile,
 } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
@@ -67,7 +69,7 @@ function _getStoreWithURL(
     hash?: string,
     v?: number | false, // If v is false, do not add a v parameter to the search string.
   } = {},
-  profile: Profile | null = getProfile()
+  profile: Profile | null = getNiceProfile()
 ) {
   const { pathname, hash, search, v } = Object.assign(
     {
@@ -109,10 +111,8 @@ function _getStoreWithURL(
 }
 
 // Serialize the URL of the current state, and create a new store from that URL.
-function _getStoreFromStateAfterUrlRoundtrip(
-  state: State,
-  profile: Profile | null = getProfile()
-): Store {
+function _getStoreFromStateAfterUrlRoundtrip(state: State): Store {
+  const profile = getProfile(state);
   const urlState = urlStateSelectors.getUrlState(state);
   const url = urlFromState(urlState);
 
@@ -240,8 +240,9 @@ describe('url handling tracks', function() {
     });
 
     it('will not accept invalid tracks in the thread order', function() {
-      const { getState } = initWithSearchParams('?globalTrackOrder=10');
-      expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([1, 0]);
+      const { getState } = initWithSearchParams('?globalTrackOrder=102');
+      // This will result in being the default order.
+      expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([0, 1]);
     });
 
     it('will not accept invalid hidden threads', function() {
@@ -251,6 +252,51 @@ describe('url handling tracks', function() {
       expect(urlStateSelectors.getHiddenGlobalTracks(getState())).toEqual(
         new Set([0])
       );
+    });
+
+    it('keeps the order at reload', function() {
+      // In this test, we want to have indexes greater than 10. So we generate
+      // 15 threads with the same information.
+      const aLotOfThreads = Array.from({ length: 15 }, () => 'A');
+      const { profile } = getProfileFromTextSamples(...aLotOfThreads);
+
+      // Set a different pid for each thread, so that they're only global tracks.
+      profile.threads.forEach((thread, i) => {
+        thread.pid = i;
+      });
+
+      const store = _getStoreWithURL({}, profile);
+      store.dispatch(
+        changeGlobalTrackOrder([
+          5,
+          4,
+          2,
+          11,
+          9,
+          1,
+          12,
+          13,
+          14,
+          3,
+          7,
+          8,
+          10,
+          6,
+          0,
+        ])
+      );
+
+      const previousOrder = urlStateSelectors.getGlobalTrackOrder(
+        store.getState()
+      );
+
+      // This simulate a page reload.
+      const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(
+        store.getState()
+      );
+      expect(
+        urlStateSelectors.getGlobalTrackOrder(storeAfterReload.getState())
+      ).toEqual(previousOrder);
     });
   });
 

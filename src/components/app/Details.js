@@ -67,41 +67,41 @@ class ProfileViewerImpl extends PureComponent<Props> {
   render() {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
-    const extraButton = hasSidebar && (
-      <Localized
-        id={
-          isSidebarOpen
-            ? 'Details--close-sidebar-button'
-            : 'Details--open-sidebar-button'
-        }
-        attrs={{ title: true }}
-        vars={{ isSidebarOpen: isSidebarOpen }}
-      >
-        <button
-          className={classNames(
-            'sidebar-open-close-button',
-            'photon-button',
-            'photon-button-ghost',
-            {
-              'sidebar-open-close-button-isopen': isSidebarOpen,
-              'sidebar-open-close-button-isclosed': !isSidebarOpen,
-            }
-          )}
-          title={isSidebarOpen ? 'Close the sidebar' : 'Open the sidebar'}
-          type="button"
-          onClick={this._onClickSidebarButton}
-        />
-      </Localized>
-    );
-
     return (
       <div className="Details">
-        <TabBar
-          selectedTabSlug={selectedTab}
-          visibleTabs={visibleTabs}
-          onSelectTab={this._onSelectTab}
-          extraElements={extraButton}
-        />
+        <div className="Details-top-bar">
+          <TabBar
+            selectedTabSlug={selectedTab}
+            visibleTabs={visibleTabs}
+            onSelectTab={this._onSelectTab}
+          />
+          {hasSidebar && (
+            <Localized
+              id={
+                isSidebarOpen
+                  ? 'Details--close-sidebar-button'
+                  : 'Details--open-sidebar-button'
+              }
+              attrs={{ title: true }}
+              vars={{ isSidebarOpen: isSidebarOpen }}
+            >
+              <button
+                className={classNames(
+                  'sidebar-open-close-button',
+                  'photon-button',
+                  'photon-button-ghost',
+                  {
+                    'sidebar-open-close-button-isopen': isSidebarOpen,
+                    'sidebar-open-close-button-isclosed': !isSidebarOpen,
+                  }
+                )}
+                title={isSidebarOpen ? 'Close the sidebar' : 'Open the sidebar'}
+                type="button"
+                onClick={this._onClickSidebarButton}
+              />
+            </Localized>
+          )}
+        </div>
         <Localized
           id="Details--error-boundary-message"
           attrs={{ message: true }}
