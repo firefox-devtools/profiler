@@ -184,6 +184,11 @@ Home--menu-button = Ενεργοποίηση κουμπιού μενού του 
 Home--menu-button-instructions =
     Ενεργοποιήστε το κουμπί του μενού του εργαλείου καταγραφής για να ξεκινήσετε ένα προφίλ
     επιδόσεων στο { -firefox-brand-name } και έπειτα, να το αναλύσετε και να το μοιραστείτε με το profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Αυτή η διεργασία εργαλείου προφίλ δεν ήταν δυνατό να συνδεθεί στο WebChannel, ώστε να μην μπορεί να ενεργοποιήσει το κουμπί του μενού του εργαλείου προφίλ.
 Home--instructions-title = Τρόπος προβολής και καταγραφής προφίλ
 Home--instructions-content =
     Η καταγραφή των προφίλ επιδόσεων απαιτεί το <a>{ -firefox-brand-name }</a>.
@@ -393,6 +398,7 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Χρονικό διάσ�
     .title = Παρατηρηθέν χρονικό διάστημα μεταξύ δύο δειγμάτων.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Κλειδώματα
     .title = Χρόνος για απόκτηση κλειδώματος πριν από τη δειγματοληψία.
+MenuButtons--metaOverheadStatistics-overhead-duration = Διάρκειες επιβάρυνσης (overhead):
 MenuButtons--metaOverheadStatistics-overhead-percentage = Ποσοστό πρόσθετων πόρων:
 MenuButtons--metaOverheadStatistics-profiled-duration = Διάρκεια καταγραφής:
 
@@ -490,6 +496,12 @@ StackSettings--implementation-all-stacks = Όλες οι στοίβες
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Εγγενές
 StackSettings--use-data-source-label = Πηγή δεδομένων:
+StackSettings--call-tree-strategy-js-allocations = Κατανομές JavaScript
+    .title = Περίληψη με bytes των κατανομών JavaScript (όχι ακυρώσεις κατανομών)
+StackSettings--call-tree-strategy-native-retained-allocations = Κρατημένη μνήμη
+    .title = Περίληψη με bytes μνήμης που κατανεμήθηκαν και δεν απελευθερώθηκαν ποτέ στην τρέχουσα επιλογή προεπισκόπησης
+StackSettings--call-tree-native-allocations = Κατανεμημένη Μνήμη
+    .title = Περίληψη με bytes κατανεμημένης μνήμης
 StackSettings--invert-call-stack = Αναστροφή στοίβας κλήσεων
     .title = Ταξινόμηση κατά χρόνο που χρησιμοποιήθηκε σε κόμβο κλήσεων, αγνοώντας τους θυγατρικούς του.
 StackSettings--show-user-timing = Εμφάνιση χρονισμού χρήστη
