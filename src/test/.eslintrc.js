@@ -17,7 +17,10 @@ module.exports = {
     // Adding more errors now
     'testing-library/no-manual-cleanup': 'error',
     'testing-library/no-wait-for-snapshot': 'error',
-    'testing-library/prefer-explicit-assert': 'error',
+    'testing-library/prefer-explicit-assert': [
+      'error',
+      { includeFindQueries: false },
+    ],
     'testing-library/prefer-presence-queries': 'error',
     'testing-library/prefer-wait-for': 'error',
 
