@@ -1793,5 +1793,18 @@ const _upgraders = {
       thread.nativeSymbols = nativeSymbols;
     }
   },
+  [37]: profile => {
+    // "Java Main Thread" has been renamed to "AndroidUI (JVM)".
+    // Usually thread name changes are not that important as they don't affect
+    // the front-end logic. But this one is important because visibility of
+    // timeline markers depends on this name.
+    // We don't need a gecko upgrader for this change because this renaming was
+    // done long ago.
+    for (const thread of profile.threads) {
+      if (thread.name === 'Java Main Thread') {
+        thread.name = 'AndroidUI (JVM)';
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

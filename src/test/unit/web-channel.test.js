@@ -3,7 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { queryIsMenuButtonEnabled } from '../../app-logic/web-channel';
+import {
+  enableMenuButton,
+  queryIsMenuButtonEnabled,
+  WebChannelError,
+} from '../../app-logic/web-channel';
 
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
@@ -30,15 +34,72 @@ describe('event handlers for Firefox WebChannel events', function() {
 
     // Trigger the response from the browser.
     triggerResponse({
-      type: 'STATUS_RESPONSE',
-      menuButtonIsEnabled: true,
+      type: 'SUCCESS_RESPONSE',
       requestId: getLastRequestId(),
+      response: {
+        menuButtonIsEnabled: true,
+      },
     });
 
     // Check that the response makes sense and the listeners are cleared.
     const isMenuButtonEnabled = await response;
     expect(listeners).toHaveLength(0);
     expect(isMenuButtonEnabled).toBe(true);
+  });
+
+  it('handles legacy STATUS_QUERY responses correctly', async () => {
+    // This test can be removed once the oldest supported Firefox ESR version is 93 or newer.
+
+    const { triggerResponse, getLastRequestId } = mockWebChannel();
+
+    // Query the menu button is enabled.
+    const responseForTrue = queryIsMenuButtonEnabled();
+
+    // Trigger the response from the browser.
+    triggerResponse(
+      ({
+        type: 'STATUS_RESPONSE',
+        requestId: getLastRequestId(),
+        menuButtonIsEnabled: true,
+      }: any)
+    );
+
+    const isMenuButtonEnabledForTrue = await responseForTrue;
+    expect(isMenuButtonEnabledForTrue).toBe(true);
+
+    // Query the menu button is enabled.
+    const responseForFalse = queryIsMenuButtonEnabled();
+
+    // Trigger the response from the browser.
+    triggerResponse(
+      ({
+        type: 'STATUS_RESPONSE',
+        requestId: getLastRequestId(),
+        menuButtonIsEnabled: false,
+      }: any)
+    );
+
+    const isMenuButtonEnabledForFalse = await responseForFalse;
+    expect(isMenuButtonEnabledForFalse).toBe(false);
+  });
+
+  it('handles legacy ENABLE_MENU_BUTTON_DONE responses correctly', async () => {
+    // This test can be removed once the oldest supported Firefox ESR version is 93 or newer.
+
+    const { triggerResponse, getLastRequestId } = mockWebChannel();
+
+    // Ask the browser to enable the menu button.
+    const response = enableMenuButton();
+
+    // Trigger the response from the browser.
+    triggerResponse(
+      ({
+        type: 'ENABLE_MENU_BUTTON_DONE',
+        requestId: getLastRequestId(),
+      }: any)
+    );
+
+    await expect(response).resolves.toBe(undefined);
   });
 
   it('will error if the message is not understood by Firefox', async function() {
@@ -49,17 +110,17 @@ describe('event handlers for Firefox WebChannel events', function() {
       .mockImplementation(() => {});
     const response = queryIsMenuButtonEnabled();
 
-    // The triggerResponse doesn't allow unknown message types, so coerce it
-    // into a Function to test the error path.
-    (triggerResponse: any)({
+    triggerResponse({
       errno: 2,
       error: 'No Such Channel',
     });
 
-    await expect(response).rejects.toEqual({
-      errno: 2,
-      error: 'No Such Channel',
-    });
+    await expect(response).rejects.toEqual(
+      new WebChannelError({
+        errno: 2,
+        error: 'No Such Channel',
+      })
+    );
     expect(consoleError).toHaveBeenCalled();
   });
 
