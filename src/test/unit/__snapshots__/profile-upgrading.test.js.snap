@@ -416,7 +416,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 23,
+    "version": 24,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -8304,7 +8304,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 23,
+    "version": 24,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -9749,7 +9749,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 23,
+    "version": 24,
   },
   "pages": Array [
     Object {

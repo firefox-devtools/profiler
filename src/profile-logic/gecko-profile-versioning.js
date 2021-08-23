@@ -1350,5 +1350,12 @@ const _upgraders = {
     }
     convertToVersion23Recursive(profile);
   },
+  [24]: _ => {
+    // This version bumps happened when a new end status "STATUS_CANCELED"
+    // appeared for network markers, to ensure that a new version of the
+    // frontend will handle it.
+    // No upgrade is needed though, because previous versions of firefox weren't
+    // generating anything in this case.
+  },
 };
 /* eslint-enable no-useless-computed-key */
