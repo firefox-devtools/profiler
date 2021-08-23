@@ -122,7 +122,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
@@ -251,7 +251,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile displays the delete 
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
@@ -354,7 +354,7 @@ exports[`app/MenuButtons <MetaInfoPanel> deleting a profile does not display the
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
@@ -467,7 +467,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
@@ -866,7 +866,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
@@ -1205,7 +1205,7 @@ exports[`app/MenuButtons <MetaInfoPanel> with no statistics object should not ma
         >
           Profile Version:
         </span>
-        36
+        37
       </div>
       <div
         class="metaInfoRow"
