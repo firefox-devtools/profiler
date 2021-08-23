@@ -112,7 +112,6 @@ Home--load-from-url-submit-button =
     .value = Sali
 Home--documentation-button = Tasemlit
 Home--menu-button = Rmed taqeffalt n wumuɣ { -profiler-brand-name }
-Home--addon-button = Sebded azegrir
 Home--instructions-title = Amek ara twaliḍ akked ad teskelseḍ imuɣna
 Home--record-instructions-start-stop = Seḥbes neɣ bdu timeɣna
 Home--record-instructions-capture-load = Ṭṭef neɣ sali amaɣnu
@@ -360,6 +359,16 @@ TransformNavigator--complete = Ččar “{ $item }”
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Fneẓ: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Afukus: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Smezdi: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
