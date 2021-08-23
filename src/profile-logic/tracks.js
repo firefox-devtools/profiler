@@ -851,7 +851,7 @@ function _indexesAreValid(listLength: number, indexes: number[]) {
     // The indexes are valid and include every single value.
     indexes
       .slice()
-      .sort()
+      .sort((a, b) => a - b) // sort numerically
       .every((value, arrayIndex) => value === arrayIndex)
   );
 }

@@ -16,11 +16,9 @@ import {
 import './TabBar.css';
 
 type Props = {|
-  +className?: string,
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: string => void,
-  +extraElements?: React.Node,
 |};
 
 export class TabBar extends React.PureComponent<Props> {
@@ -35,55 +33,47 @@ export class TabBar extends React.PureComponent<Props> {
   };
 
   render() {
-    const {
-      className,
-      selectedTabSlug,
-      visibleTabs,
-      extraElements,
-    } = this.props;
+    const { selectedTabSlug, visibleTabs } = this.props;
     return (
-      <div className={classNames('tabBarContainer', className)}>
-        <ol
-          className="tabBarTabWrapper"
-          role="tablist"
-          aria-label="Profiler tabs"
-        >
-          {visibleTabs.map(tabSlug => (
-            <li
-              className={classNames({
-                tabBarTab: true,
-                selected: tabSlug === selectedTabSlug,
-              })}
-              key={tabSlug}
-              data-name={tabSlug}
-              onClick={this._onClickListener}
-              onMouseDown={this._onMouseDown}
-            >
-              {/* adding a button for better keyboard navigation and
+      <ol
+        className="tabBarTabWrapper"
+        role="tablist"
+        aria-label="Profiler tabs"
+      >
+        {visibleTabs.map(tabSlug => (
+          <li
+            className={classNames({
+              tabBarTab: true,
+              selected: tabSlug === selectedTabSlug,
+            })}
+            key={tabSlug}
+            data-name={tabSlug}
+            onClick={this._onClickListener}
+            onMouseDown={this._onMouseDown}
+          >
+            {/* adding a button for better keyboard navigation and
               adding ARIA attributes for screen reader support.*/}
-              <Localized id={tabsWithTitleL10nId[tabSlug]}>
-                <button
-                  className="tabBarTabButton"
-                  type="button"
-                  // The tab's id attribute connects the tab to its tabpanel
-                  // that has an aria-labelledby attribute of the same value.
-                  // The id is not used for CSS styling.
-                  id={`${tabSlug}-tab-button`}
-                  role="tab"
-                  aria-selected={tabSlug === selectedTabSlug}
-                  // The control and content relationship is established
-                  // with aria-controls attribute
-                  // (the tabbanel has an id of the same value).
-                  aria-controls={`${tabSlug}-tab`}
-                >
-                  {tabsWithTitleL10nId[tabSlug]}
-                </button>
-              </Localized>
-            </li>
-          ))}
-        </ol>
-        {extraElements}
-      </div>
+            <Localized id={tabsWithTitleL10nId[tabSlug]}>
+              <button
+                className="tabBarTabButton"
+                type="button"
+                // The tab's id attribute connects the tab to its tabpanel
+                // that has an aria-labelledby attribute of the same value.
+                // The id is not used for CSS styling.
+                id={`${tabSlug}-tab-button`}
+                role="tab"
+                aria-selected={tabSlug === selectedTabSlug}
+                // The control and content relationship is established
+                // with aria-controls attribute
+                // (the tabbanel has an id of the same value).
+                aria-controls={`${tabSlug}-tab`}
+              >
+                {tabsWithTitleL10nId[tabSlug]}
+              </button>
+            </Localized>
+          </li>
+        ))}
+      </ol>
     );
   }
 }

@@ -26,6 +26,8 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +zeroAt: Milliseconds,
   +width: CssPixels,
+  +shouldShowTooltip: boolean,
+  +onRightClick: MarkerIndex => mixed,
 |};
 
 /**
@@ -33,6 +35,15 @@ type Props = {|
  * in the timeline.
  */
 export class VerticalIndicators extends React.PureComponent<Props> {
+  _onMouseDown = (e: SyntheticMouseEvent<HTMLDivElement>) => {
+    if (e.button === 2 && this.props.onRightClick && e.currentTarget) {
+      this.props.onRightClick(parseInt(e.currentTarget.dataset.markerIndex));
+    }
+    // We handled this event here, so let's avoid that it's handled also in the
+    // main canvas code and empty the state.
+    e.stopPropagation();
+  };
+
   render() {
     const {
       getMarker,
@@ -42,6 +53,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       rangeEnd,
       zeroAt,
       width,
+      shouldShowTooltip,
     } = this.props;
     return verticalMarkerIndexes.map<React.Node>(markerIndex => {
       const marker = getMarker(markerIndex);
@@ -97,21 +109,27 @@ export class VerticalIndicators extends React.PureComponent<Props> {
           data-testid="vertical-indicator-line"
           style={{ '--vertical-indicator-color': color, left }}
           className="timelineVerticalIndicatorsLine"
+          onMouseDown={this._onMouseDown}
+          data-marker-index={markerIndex}
           tooltip={
-            <>
-              <div>
-                <span
-                  className="timelineVerticalIndicatorsSwatch"
-                  style={{ backgroundColor: color }}
-                />{' '}
-                {marker.name}
-                <span className="timelineVerticalIndicatorsDim">{' at '}</span>
-                <span className="timelineVerticalIndicatorsTime">
-                  {formatSeconds(marker.start - zeroAt)}
-                </span>{' '}
-              </div>
-              {url}
-            </>
+            shouldShowTooltip ? (
+              <>
+                <div>
+                  <span
+                    className="timelineVerticalIndicatorsSwatch"
+                    style={{ backgroundColor: color }}
+                  />{' '}
+                  {marker.name}
+                  <span className="timelineVerticalIndicatorsDim">
+                    {' at '}
+                  </span>
+                  <span className="timelineVerticalIndicatorsTime">
+                    {formatSeconds(marker.start - zeroAt)}
+                  </span>{' '}
+                </div>
+                {url}
+              </>
+            ) : null
           }
         />
       );
