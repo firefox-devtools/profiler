@@ -364,11 +364,21 @@ TransformNavigator--collapse-resource = Fneẓ: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Afukus: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Smezdi tikerrist: { $item }
 # "Merge function" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Smezdi: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Sers: { $item }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
