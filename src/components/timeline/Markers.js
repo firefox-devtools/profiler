@@ -495,7 +495,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
             onMouseOut={this._onMouseOut}
           />
         </ContextMenuTrigger>
-        {shouldShowTooltip && hoveredMarkerIndex && hoveredMarker ? (
+        {shouldShowTooltip && hoveredMarkerIndex !== null && hoveredMarker ? (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
             <TooltipMarker
               markerIndex={hoveredMarkerIndex}
