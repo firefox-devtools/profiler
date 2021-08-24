@@ -220,7 +220,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       (filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer' ||
-        filteredThread.name === 'Java Main Thread' ||
+        filteredThread.name === 'AndroidUI (JVM)' ||
         filteredThread.name === 'Merged thread' ||
         filteredThread.name.startsWith('MediaDecoderStateMachine')) &&
       processType !== 'plugin';
