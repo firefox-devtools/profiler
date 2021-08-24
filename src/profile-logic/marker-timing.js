@@ -83,10 +83,17 @@ export function getMarkerTimingAndBuckets(
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
 
-    let markerTimingsByName = markerTimingsMap.get(marker.name);
+    // We want to group all network requests in the same line. Indeed they all
+    // have different names and they'd end up with one single request in each
+    // line without this special handling.
+    const markerLineName =
+      marker.data && marker.data.type === 'Network'
+        ? 'Network Requests'
+        : marker.name;
+    let markerTimingsByName = markerTimingsMap.get(markerLineName);
     if (markerTimingsByName === undefined) {
       markerTimingsByName = [];
-      markerTimingsMap.set(marker.name, markerTimingsByName);
+      markerTimingsMap.set(markerLineName, markerTimingsByName);
     }
 
     // Place the marker in the closest row that is empty.
@@ -101,7 +108,7 @@ export function getMarkerTimingAndBuckets(
           end: [],
           index: [],
           label: [],
-          name: marker.name,
+          name: markerLineName,
           bucket: bucketName,
           length: 0,
         };
@@ -155,6 +162,17 @@ export function getMarkerTimingAndBuckets(
       // Keep the original ordering if the names are the same.
       return 0;
     }
+
+    // Put network requests at the end of the Network category.
+    if (a.bucket === 'Network') {
+      if (a.name === 'Network Requests') {
+        return 1;
+      }
+      if (b.name === 'Network Requests') {
+        return -1;
+      }
+    }
+
     // Sort by names second
     return a.name > b.name ? 1 : -1;
   });

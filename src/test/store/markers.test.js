@@ -8,6 +8,7 @@ import {
 } from 'firefox-profiler/selectors';
 import { changeTimelineTrackOrganization } from 'firefox-profiler/actions/receive-profile';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import { ensureExists } from 'firefox-profiler/utils/flow';
 
 import {
   getUserTiming,
@@ -118,6 +119,86 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
           index: [0],
           label: [''],
           bucket: 'Other',
+          length: 1,
+        },
+      ]);
+    });
+  });
+
+  describe('network markers', function() {
+    function getTimingAndBucketsForNetworkMarkers(testMarkers) {
+      const profile = getProfileWithMarkers(testMarkers);
+
+      // Let's monkey patch the returned profile to set the Network category on
+      // all markers.
+      const networkCategory = ensureExists(profile.meta.categories).findIndex(
+        category => category.name === 'Network'
+      );
+      profile.threads.forEach(thread => {
+        thread.markers.category.fill(networkCategory);
+      });
+
+      const { getState } = storeWithProfile(profile);
+      return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
+    }
+
+    it('groups all network markers in the same line', () => {
+      const markerTiming = getTimingAndBucketsForNetworkMarkers([
+        ...getNetworkMarkers({
+          startTime: 1,
+          endTime: 5,
+          uri: 'https://www.mozilla.org/',
+          id: 1,
+        }),
+        ...getNetworkMarkers({
+          startTime: 6, // starts after the previous one, to test the algorithm that put it in the same line
+          endTime: 9,
+          uri: 'https://www.mozilla.org/image.jpg',
+          id: 1,
+          payload: { contentType: 'image/jpg' },
+        }),
+      ]);
+
+      expect(markerTiming).toEqual([
+        'Network',
+        {
+          name: 'Network Requests',
+          bucket: 'Network',
+          start: [1, 6],
+          end: [5, 9],
+          index: [0, 1],
+          label: [
+            'https://www.mozilla.org/',
+            'https://www.mozilla.org/image.jpg',
+          ],
+          length: 2,
+        },
+      ]);
+    });
+
+    it('puts network markers at the end of the Network category', () => {
+      const markerTiming = getTimingAndBucketsForNetworkMarkers([
+        ...getNetworkMarkers(),
+        ['Unload', 3, null, { type: 'tracing', category: 'Navigation' }],
+      ]);
+      expect(markerTiming).toEqual([
+        'Network',
+        {
+          name: 'Unload',
+          bucket: 'Network',
+          start: [3],
+          end: [3],
+          index: [1],
+          label: [''],
+          length: 1,
+        },
+        {
+          name: 'Network Requests',
+          bucket: 'Network',
+          start: [0],
+          end: [1],
+          index: [0],
+          label: ['https://mozilla.org'],
           length: 1,
         },
       ]);
@@ -388,7 +469,7 @@ describe('Marker schema filtering', function() {
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
-      // Notice: no network markers!
+      'Load 0: https://mozilla.org',
       'UserTiming',
       'RandomTracingMarker',
     ]);
@@ -570,7 +651,7 @@ describe('Marker schema filtering', function() {
       'no payload',
       'payload no schema',
       'RefreshDriverTick',
-      // Notice: no network markers!
+      'Load 0: https://mozilla.org',
       'UserTiming',
       'RandomTracingMarker',
     ]);
