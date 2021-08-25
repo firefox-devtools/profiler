@@ -111,6 +111,37 @@ CallTree--tracing-ms-total = Looptijd (ms)
         functie zich on de stack bevond. Dit omvat de tijd waarin de
         functie daadwerkelijk werd uitgevoerd en de tijd die werd gespendeerd
         aan aanroepen vanuit deze functie.
+CallTree--tracing-ms-self = Zelf (ms)
+    .title =
+        De ‘zelf’-tijd omvat alleen de tijd waarin de functie zich aan het
+        eind van de stack bevond. Als deze functie andere functies heeft aangeroepen,
+        is de tijd van de ‘andere’ functie niet meegenomen. De ‘zelf’-tijd is nuttig
+        voor het begrip van welke tijd daadwerkelijk in het programma is besteed.
+CallTree--samples-total = Totaal (monsters)
+    .title =
+        Het ‘totale’ monsteraantal omvat een samenvatting van elk monster waarin deze
+        functie zich in de stack bevond. Dit omvat de tijd waarin de functie
+        daadwerkelijk werd uitgevoerd en de gespendeerde tijd in de aanroepen
+        vanuit deze functie.
+CallTree--samples-self = Zelf
+    .title =
+        Het aantal ‘zelf’-monsters omvat alleen de monsters waarin de functie zich
+        aan het einde van de stack bevond. Als deze functie andere functies heeft aangeroepen,
+        zijn de aantallen ‘andere’ functies niet meegeteld. Het aantal keren ‘zelf’ is nuttig
+        voor het begrip van waar tijd daadwerkelijk in een programma is besteed.
+CallTree--bytes-total = Totale grootte (bytes)
+    .title =
+        De ‘totale grootte’ omvat een samenvatting van alle bytes die gealloceerd of
+        gedealloceerd zijn, terwijl deze functie zich in de stack bevond. Dit bevat
+        zowel de bytes waarbij de functie daadwerkelijk werd uitgevoerd als de
+        bytes van de aanroepen vanuit deze functie.
+CallTree--bytes-self = Zelf (bytes)
+    .title =
+        De ‘zelf’-bytes omvatten alle bytes die gealloceerd of gedealloceerd zijn, terwijl
+        deze functie zich aan het einde van de stack bevond. Als deze functie andere
+        functies heeft aangeroepen, dan zijn de bytes van ‘andere’ functie niet opgenomen.
+        De ‘zelf’-bytes zijn nuttig om te begrijpen waar geheugenruimte daadwerkelijk
+        in het programma was gealloceerd of gedealloceerd.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -181,11 +212,33 @@ Home--load-from-url-submit-button =
     .value = Laden
 Home--documentation-button = Documentatie
 Home--menu-button = Menuknop { -profiler-brand-name } inschakelen
+Home--menu-button-instructions =
+    Schakel de menuknop Profiler in om te beginnen met het opnemen van een
+    prestatieprofiel in { -firefox-brand-name }, analyseer dit en deel het met profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Deze profiler-instantie kan geen verbinding maken met het WebChannel, dus de Profiler-menuknop kan niet worden ingeschakeld.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Deze profiler-instantie kan geen verbinding maken met het WebChannell. Dit betekent meestal dat deze
+    wordt uitgevoerd op een andere host dan opgegeven in de voorkeur
+    <code>devtools.performance.recording.ui-base-url</code>. Als u nieuwe profielen wilt vastleggen
+    met deze instantie, en er programmatische controle over de profiler-menuknop aan wilt geven,
+    dan kunt u naar <code>about:config</code> gaan en de voorkeur wijzigen.
+Home--record-instructions =
+    Klik om te starten met het maken van een profiel op de profielknop of gebruik de
+    sneltoetsen. Het pictogram is blauw als er een profiel wordt opgenomen.
+    Klik op SHIFT om de gegevens in profiler.firefox.com te laden.
 Home--instructions-title = Profielen bekijken en opnemen
 Home--instructions-content =
     Het opnemen van prestatieprofielen vereist <a>{ -firefox-brand-name }</a>.
     Bestaande profielen kunnen echter bekeken worden in elke moderne browser.
 Home--record-instructions-start-stop = Profileren stoppen en starten
+Home--record-instructions-capture-load = Profiel vastleggen en laden
+Home--profiler-motto = Leg een prestatieprofiel vast. Analyseer het. Deel het. Maak het internet sneller.
 Home--additional-content-title = Bestaande profielen laden
 Home--additional-content-content = U kunt een profielbestand hierheen <strong>verslepen</strong> om het te laden, of:
 Home--compare-recordings-info = U kunt ook opnamen vergelijken. <a>De vergelijkingsinterface openen.</a>
@@ -200,6 +253,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Alleen zelftijd tonen
+    .title = Alleen de tijd in een aanroepnode tonen en onderliggende aanroepen negeren.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -230,19 +285,29 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Selectie instellen vanuit duur markering
 MarkerContextMenu--start-selection-here = Selectie hier starten
 MarkerContextMenu--end-selection-here = Selectie hier beëindigen
+MarkerContextMenu--start-selection-at-marker-start = Selectie starten bij <strong>start</strong> markering
+MarkerContextMenu--start-selection-at-marker-end = Selectie starten bij <strong>einde</strong> markering
+MarkerContextMenu--end-selection-at-marker-start = Selectie beëindigen bij <strong>start</strong> markering
+MarkerContextMenu--end-selection-at-marker-end = Selectie beëindigen bij <strong>einde</strong> markering
 MarkerContextMenu--copy-description = Beschrijving kopiëren
 MarkerContextMenu--copy-call-stack = Aanroepstack kopiëren
 MarkerContextMenu--copy-url = URL kopiëren
+MarkerContextMenu--copy-full-payload = Volledige payload kopiëren
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Markeringen filteren:
+    .title = Alleen markeringen tonen die overeenkomen met een bepaalde naam
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Selecteer een markering om informatie erover te tonen.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
