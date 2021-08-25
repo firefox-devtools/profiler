@@ -66,7 +66,8 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     // `display` property is used to decide where to display these markers, and
     // we need it to hide them from the marker chart.
     name: 'Network',
-    display: ['marker-table'],
+    display: ['marker-table', 'marker-chart'],
+    chartLabel: '{marker.data.URI}',
     data: [],
   },
 ];
