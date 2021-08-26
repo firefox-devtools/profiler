@@ -323,10 +323,11 @@ type NetworkChartRowProps = {|
   +threadsKey: ThreadsKey,
   +isRightClicked: boolean,
   +isSelected: boolean,
-  +isLeftClicked: boolean,
+  +isHoveredFromState: boolean,
   +select: MarkerIndex => mixed,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
+  +onHover?: (MarkerIndex | null) => mixed,
   +shouldDisplayTooltips: () => boolean,
 |};
 
@@ -355,6 +356,10 @@ export class NetworkChartRow extends React.PureComponent<
       pageY,
       hovered: true,
     });
+
+    if (this.props.onHover) {
+      this.props.onHover(this.props.markerIndex);
+    }
   };
 
   _hoverOut = () => {
@@ -466,8 +471,8 @@ export class NetworkChartRow extends React.PureComponent<
       timeRange,
       isRightClicked,
       shouldDisplayTooltips,
-      isLeftClicked,
       isSelected,
+      isHoveredFromState,
     } = this.props;
 
     if (networkPayload === null) {
@@ -481,8 +486,8 @@ export class NetworkChartRow extends React.PureComponent<
       {
         odd: index % 2 === 1,
         isRightClicked,
-        isLeftClicked,
         isSelected,
+        isHovered: isHoveredFromState,
       }
     );
 

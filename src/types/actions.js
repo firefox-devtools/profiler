@@ -147,11 +147,6 @@ export type CheckedSharingOptions = {|
   includePreferenceValues: boolean,
 |};
 
-export type RightClickedMarkerInfo = {|
-  +threadsKey: ThreadsKey,
-  +markerIndex: MarkerIndex,
-|};
-
 export type Localization = ReactLocalization;
 
 type ProfileAction =
@@ -200,6 +195,11 @@ type ProfileAction =
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_MARKER',
+      +threadsKey: ThreadsKey,
+      +markerIndex: MarkerIndex | null,
+    |}
+  | {|
+      +type: 'CHANGE_HOVERED_MARKER',
       +threadsKey: ThreadsKey,
       +markerIndex: MarkerIndex | null,
     |}
