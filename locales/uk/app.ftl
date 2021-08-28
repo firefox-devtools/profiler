@@ -46,6 +46,14 @@ AppViewRouter--route-not-found--home =
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--transform-merge-function = Об'єднати функцію
+    .title = Об’єднання функції вилучає її з профілю та призначає її час для функції, яка її викликала. Це відбувається всюди, де функцію було викликано в дереві.
+CallNodeContextMenu--transform-merge-call-node = Об'єднати лише вузол
+    .title = Об’єднання вузла вилучає його з профілю та призначає його час для вузла функції, який його викликав. Це вилучає функцію лише з тієї певної частини дерева. Будь-які інші місця, з яких було викликано функцію, залишаться у профілі.
+CallNodeContextMenu--transform-collapse-function-subtree = Згорнути функцію
+    .title =
+        Згортання функції вилучить усе, що вона викликала, і призначить увесь час для функції.
+        Це може допомогти спростити профіль, що викликає код, який не потребує аналізу.
 CallNodeContextMenu--expand-all = Розгорнути все
 CallNodeContextMenu--copy-function-name = Скопіювати назву функції
 CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
