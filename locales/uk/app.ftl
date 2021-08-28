@@ -29,19 +29,27 @@ AppHeader--github-icon =
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
+AppViewRouter--error-message-unpublished =
+    .message = Не вдалося отримати профіль з { -firefox-brand-name }.
+AppViewRouter--error-message-from-file =
+    .message = Не вдалося прочитати файл або проаналізувати профіль у ньому.
 AppViewRouter--error-message-local =
     .message = Ще не впроваджено.
 AppViewRouter--error-message-public =
     .message = Не вдалося завантажити профіль.
 AppViewRouter--error-message-from-url =
     .message = Не вдалося завантажити профіль.
+AppViewRouter--route-not-found--home =
+    .specialMessage = URL-адреса, до якої ви намагаєтеся отримати доступ, не розпізнана.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
 
+CallNodeContextMenu--expand-all = Розгорнути все
 CallNodeContextMenu--copy-function-name = Скопіювати назву функції
 CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
+CallNodeContextMenu--copy-stack = Копіювати стек
 
 ## CallTree
 ## This is the component for Call Tree panel.
