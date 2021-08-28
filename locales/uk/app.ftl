@@ -66,6 +66,8 @@ CallNodeContextMenu--copy-stack = Копіювати стек
 CompareHome--instruction-title = Введіть URL-адреси профілів, які ви хочете порівняти
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
+CompareHome--submit-button =
+    .value = Отримати профілі
 
 ## DebugWarning
 ## This is displayed at the top of the analysis page when the loaded profile is
@@ -93,6 +95,7 @@ FooterLinks--Cookies = Куки
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
 
+FullTimeline--graph-type = Тип графіка:
 FullTimeline--categories = Категорії
 
 ## Home page
