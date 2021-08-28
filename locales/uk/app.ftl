@@ -128,6 +128,13 @@ FooterLinks--Cookies = Куки
 
 FullTimeline--graph-type = Тип графіка:
 FullTimeline--categories = Категорії
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-visible = Показано доріжки <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span>
 
 ## Home page
 
@@ -136,6 +143,15 @@ Home--upload-from-url-button = Завантажити профіль з URL-ад
 Home--load-from-url-submit-button =
     .value = Завантажити
 Home--documentation-button = Документація
+Home--menu-button = Увімкнути кнопку меню { -profiler-brand-name }
+Home--menu-button-instructions =
+    Увімкніть кнопку меню профайлера, щоб почати запис швидкодії
+    профілю в { -firefox-brand-name }, потім аналізуйте його та оприлюдніть на profiler.firefox.com.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Екземпляр профайлера не зміг з'єднатися з WebChannel, тому не вдалося увімкнути кнопку меню профайлера.
 Home--profiler-motto = Отримайте профіль швидкодії. Проаналізуйте його. Поділіться ним. Зробіть Інтернет швидшим.
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
