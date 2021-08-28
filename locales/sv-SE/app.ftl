@@ -360,6 +360,7 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Tillägg:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-subtitle = { -profiler-brand-short-name } Overhead
 MenuButtons--metaOverheadStatistics-mean = Medel
 MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
@@ -369,6 +370,8 @@ MenuButtons--metaOverheadStatistics-statkeys-counter = Räknare
     .title = Dags att samla in alla räknare.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
     .title = Observerat intervall mellan två prover.
+MenuButtons--metaOverheadStatistics-overhead-percentage = Overheadprocent:
+MenuButtons--metaOverheadStatistics-profiled-duration = Profilerad varaktighet:
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -376,6 +379,7 @@ MenuButtons--metaOverheadStatistics-statkeys-interval = Intervall
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Inkludera dolda trådar
 MenuButtons--publish--renderCheckbox-label-hidden-time = Inkludera dolt tidsintervall
 MenuButtons--publish--renderCheckbox-label-include-screenshots = Inkludera skärmdumpar
+MenuButtons--publish--renderCheckbox-label-resource = Inkludera resursURLs och sökvägar
 MenuButtons--publish--renderCheckbox-label-extension = Inkludera tilläggsinformation
 MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärden
 MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
@@ -459,12 +463,17 @@ StackSettings--implementation-all-stacks = Alla stackar
 StackSettings--implementation-javascript = JavaScript
 StackSettings--implementation-native = Ursprunglig
 StackSettings--use-data-source-label = Datakälla:
+StackSettings--show-user-timing = Visa användartiming
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Anropsträd
+TabBar--flame-graph-tab = Flamgraf
 TabBar--stack-chart-tab = Stapeldiagram
+TabBar--marker-chart-tab = Markördiagram
+TabBar--marker-table-tab = Markörtabell
 TabBar--network-tab = Nätverk
+TabBar--js-tracer-tab = JS Tracer
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
@@ -490,6 +499,17 @@ TrackContextMenu--show-all-tracks = Visa alla spår
 ## To learn more about them, visit:
 ## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
 
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Slutförd “{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Fäll ihop: { $item }
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
 # Variables:
@@ -510,6 +530,11 @@ TransformNavigator--merge-call-node = Sammanfoga nod: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--merge-function = Sammanfoga: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Släpp: { $item }
 # "Collapse direct recursion" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
 # Variables:
