@@ -152,6 +152,12 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Екземпляр профайлера не зміг з'єднатися з WebChannel, тому не вдалося увімкнути кнопку меню профайлера.
+Home--instructions-title = Як переглядати та записувати профілі
+Home--instructions-content =
+    Для запису профілів швидкодії потрібен <a>{ -firefox-brand-name }</a>.
+    Однак, наявні профілі можна переглядати в будь-якому сучасному браузері.
+Home--record-instructions-start-stop = Зупинити й почати запис профілю
+Home--record-instructions-capture-load = Захопити й завантажити профіль
 Home--profiler-motto = Отримайте профіль швидкодії. Проаналізуйте його. Поділіться ним. Зробіть Інтернет швидшим.
 Home--additional-content-title = Завантажити наявні профілі
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
@@ -161,6 +167,8 @@ Home--recent-uploaded-recordings-title = Останні завантаження
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
+IdleSearchField--search-input =
+    .placeholder = Введіть умови фільтру
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
