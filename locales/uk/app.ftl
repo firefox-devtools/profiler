@@ -314,6 +314,8 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
+    .title = Час викинути застарілі дані.
 
 ## Publish panel
 ## These strings are used in the publishing panel.
@@ -334,6 +336,12 @@ MenuButtons--publish--compressing = Стиснення…
 
 ## Profile Delete Button
 
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Видалити
+    .title = Натисніть тут, щоб видалити профіль { $smallProfileName }
 
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
@@ -341,6 +349,10 @@ MenuButtons--publish--compressing = Стиснення…
 
 ## Profile Loader Animation
 
+ProfileLoaderAnimation--loading-message-unpublished =
+    .message = Імпортування профілю безпосередньо з { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-message-from-file =
+    .message = Читання файлу та обробка профілю…
 ProfileLoaderAnimation--loading-message-local =
     .message = Ще не впроваджено.
 ProfileLoaderAnimation--loading-message-public =
@@ -359,18 +371,25 @@ ProfileRootMessage--title = { -profiler-brand-name }
 ## and update. It appears at the top of the UI.
 
 ServiceWorkerManager--installing-button = Встановлення…
+ServiceWorkerManager--pending-button = Застосувати та перезавантажити
 ServiceWorkerManager--installed-button = Перезавантажити застосунок
 ServiceWorkerManager--new-version-is-ready = Нова версія застосунку завантажена та готова до використання.
+ServiceWorkerManager--hide-notice-button =
+    .title = Сховати сповіщення про перезавантаження
+    .aria-label = Сховати сповіщення про перезавантаження
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
 ## Chart panels. It's used to switch between different views of the stack.
 
+StackSettings--implementation-all-stacks = Усі стеки
 StackSettings--implementation-javascript = JavaScript
 StackSettings--use-data-source-label = Джерело даних:
 
 ## Tab Bar for the bottom half of the analysis UI.
 
+TabBar--calltree-tab = Дерево викликів
+TabBar--network-tab = Мережа
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
