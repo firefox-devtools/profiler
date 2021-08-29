@@ -234,8 +234,8 @@ type VirtualListProps<Item> = {|
   +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
-  +onKeyDown: (SyntheticKeyboardEvent<>) => void,
-  +onCopy: ClipboardEvent => void,
+  +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
+  +onCopy?: ClipboardEvent => void,
   // This is called when the mouse leaves the list as it is rendered. That is if
   // there isn't enough item to fill the component's height, and the user moves
   // the mouse below the items, this callback would be called.
@@ -304,8 +304,9 @@ export class VirtualList<Item> extends React.PureComponent<
   };
 
   _onCopy = (event: ClipboardEvent) => {
-    if (document.activeElement === this._container.current) {
-      this.props.onCopy(event);
+    const { onCopy } = this.props;
+    if (onCopy && document.activeElement === this._container.current) {
+      onCopy(event);
     }
   };
 

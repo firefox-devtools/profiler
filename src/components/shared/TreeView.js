@@ -240,19 +240,6 @@ class TreeViewRowScrolledColumns<
     } = this.props;
     const RenderComponent = mainColumn.component;
 
-    // By default there's no 'aria-expanded' attribute.
-    let ariaExpanded = null;
-
-    // if a node can be expanded (has children), and is not expanded yet,
-    // aria-expanded is false.
-    if (canBeExpanded) {
-      ariaExpanded = false;
-    }
-
-    // If a node is expanded, ariaExpanded is true.
-    if (isExpanded) {
-      ariaExpanded = true;
-    }
     // Cleaning up self time display so we can use it in aria-label below.
     let selfDisplay = displayData.selfTimeUnit;
     if (selfDisplay === '—') {
@@ -270,7 +257,7 @@ class TreeViewRowScrolledColumns<
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
         // The following attributes are important for accessibility.
-        aria-expanded={ariaExpanded}
+        aria-expanded={canBeExpanded ? isExpanded : null}
         aria-level={depth + 1}
         aria-selected={isSelected}
         aria-label={displayData.ariaLabel}
