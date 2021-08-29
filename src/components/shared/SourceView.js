@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import memoize from 'memoize-immutable';
 
 import { VirtualList } from './VirtualList';
 
@@ -51,27 +52,13 @@ type LineNumber = number;
 
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _specialItems: [] = [];
-  _visibleRows: LineNumber[];
-  _sourceLines: string[];
   _list: VirtualList<LineNumber> | null = null;
   _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
 
-  constructor(props: SourceViewProps) {
-    super(props);
-
-    this._visibleRows = this._getAllVisibleRows(props);
-    this._sourceLines = props.source.split('\n');
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps: SourceViewProps) {
-    if (
-      nextProps.source !== this.props.source ||
-      nextProps.timings !== this.props.timings
-    ) {
-      this._visibleRows = this._getAllVisibleRows(nextProps);
-      this._sourceLines = nextProps.source.split('\n');
-    }
-  }
+  _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
+  _computeAllLineNumbersMemoized = memoize(function(source: string): number[] {
+    return source.split('\n').map((_str, i) => i + 1);
+  });
 
   scrollLineIntoView(lineNumber: number) {
     if (this._list) {
@@ -100,18 +87,23 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       );
     }
 
+    const sourceLines = this._getSourceLines();
     return (
       <div
         className={classNames('treeViewRow', 'treeViewRowScrolledColumns')}
         style={rowHeightStyle}
       >
-        <code>{this._sourceLines[index]}</code>
+        <code>{sourceLines[index]}</code>
       </div>
     );
   };
 
-  _getAllVisibleRows(props: SourceViewProps): LineNumber[] {
-    return props.source.split('\n').map((_str, i) => i + 1);
+  _getSourceLines(): string[] {
+    return this._computeSourceLinesMemoized(this.props.source);
+  }
+
+  _getAllVisibleLineNumbers(): LineNumber[] {
+    return this._computeAllLineNumbersMemoized(this.props.source);
   }
 
   focus() {
@@ -127,7 +119,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         <SourceViewHeader />
         <VirtualList
           className="sourceViewBody"
-          items={this._visibleRows}
+          items={this._getAllVisibleLineNumbers()}
           renderItem={this._renderRow}
           itemHeight={rowHeight}
           columnCount={2}
