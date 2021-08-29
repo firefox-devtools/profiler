@@ -10,16 +10,19 @@ import { SourceView } from '../shared/SourceView';
 import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
+import type { LineTimings } from 'firefox-profiler/types';
 
 import './BottomStuff.css';
 
 type StateProps = {|
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
+  +lineTimings: LineTimings,
 |};
 
 type DispatchProps = {|
@@ -32,11 +35,12 @@ function BottomStuffImpl({
   selectedTab,
   isSidebarOpen,
   invalidatePanelLayout,
+  lineTimings,
 }: Props) {
   return (
     <div className="bottom-stuff">
       <div className="bottom-main">
-        <SourceView timings={{}} source={fileContent} rowHeight={16} />
+        <SourceView timings={lineTimings} source={fileContent} rowHeight={16} />
       </div>
       <div className="bottom-tabs">
         <span className="bottom-tab bottom-tab--selected">
@@ -51,6 +55,7 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
+    lineTimings: selectedThreadSelectors.getLineTimings(state),
   }),
   mapDispatchToProps: {
     invalidatePanelLayout,

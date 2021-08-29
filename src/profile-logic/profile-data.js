@@ -42,6 +42,7 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
+  IndexIntoStringTable,
   ThreadIndex,
   Category,
   Counter,
@@ -55,6 +56,8 @@ import type {
   CallNodeTable,
   CallNodePath,
   CallNodeAndCategoryPath,
+  StackLineInfo,
+  LineTimings,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SamplesLikeTable,
@@ -2921,4 +2924,73 @@ export function hasThreadKeys(
     }
   }
   return true;
+}
+
+export function getStackLineInfo(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  fileNameStringIndex: IndexIntoStringTable
+): StackLineInfo {
+  const selfLineForAllStacks = [];
+  const stackLines = [];
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const frame = stackTable.frame[stackIndex];
+    const prefixStack = stackTable.prefix[stackIndex];
+    const func = frameTable.func[frame];
+    const fileNameStringIndexOfThisStack = funcTable.fileName[func];
+    const prefixLines = prefixStack ? stackLines[prefixStack] : null;
+    let selfLine = null;
+    let lines = prefixLines;
+    if (fileNameStringIndexOfThisStack === fileNameStringIndex) {
+      selfLine = frameTable.line[frame];
+      if (selfLine) {
+        if (prefixLines === null) {
+          lines = new Set([selfLine]);
+        } else if (prefixLines.has(selfLine)) {
+          lines = prefixLines;
+        } else {
+          lines = new Set(prefixLines);
+          lines.add(selfLine);
+        }
+      }
+    }
+    selfLineForAllStacks.push(selfLine);
+    stackLines.push(lines);
+  }
+  return {
+    selfLine: selfLineForAllStacks,
+    stackLines,
+  };
+}
+
+export function getLineTimings(
+  stackLineInfo: StackLineInfo,
+  samples: SamplesLikeTable
+): LineTimings {
+  const { selfLine, stackLines } = stackLineInfo;
+  const totalLineHits = new Map();
+  const selfLineHits = new Map();
+
+  // TODO: Maybe aggregate sample count per stack first, and then visit each stack only once?
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    const setOfHitLines = stackLines[stackIndex];
+    if (setOfHitLines !== null) {
+      for (const line of setOfHitLines) {
+        const oldHitCount = totalLineHits.get(line) ?? 0;
+        totalLineHits.set(line, oldHitCount + weight);
+      }
+    }
+    const line = selfLine[stackIndex];
+    if (line !== null) {
+      const oldHitCount = selfLineHits.get(line) ?? 0;
+      selfLineHits.set(line, oldHitCount + weight);
+    }
+  }
+  return { totalLineHits, selfLineHits };
 }

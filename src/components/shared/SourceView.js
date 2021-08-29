@@ -11,7 +11,7 @@ import cpp from 'refractor/lang/cpp.js';
 
 import { VirtualList } from './VirtualList';
 
-import type { CssPixels } from 'firefox-profiler/types';
+import type { CssPixels, LineTimings } from 'firefox-profiler/types';
 
 import './SourceView.css';
 
@@ -44,15 +44,25 @@ for understanding where time was actually spent in a program."
   );
 };
 
-interface SourceLineTimings {}
-
 type SourceViewProps = {|
-  +timings: SourceLineTimings,
+  +timings: LineTimings,
   +source: string,
   +rowHeight: CssPixels,
 |};
 
 type LineNumber = number;
+
+function mapGetKeyWithMaxValue<K>(map: Map<K, number>): K | void {
+  let maxValue = -Infinity;
+  let keyForMaxValue;
+  for (const [key, value] of map) {
+    if (value > maxValue) {
+      maxValue = value;
+      keyForMaxValue = key;
+    }
+  }
+  return keyForMaxValue;
+}
 
 function createElement(
   { properties, tagName: TagName, children, type, value }: any,
@@ -84,8 +94,9 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
 
   _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
-  _computeAllLineNumbersMemoized = memoize((source: string): number[] =>
-    source.split('\n').map((_str, i) => i + 1)
+  _computeAllLineNumbersMemoized = memoize(
+    (source: string, _timings: LineTimings): number[] =>
+      source.split('\n').map((_str, i) => i + 1)
   );
   _computeMaxLineLengthMemoized = memoize((sourceLines: string[]): number =>
     sourceLines.reduce(
@@ -94,6 +105,15 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     )
   );
 
+  componentDidMount() {
+    const heaviestLine = mapGetKeyWithMaxValue(
+      this.props.timings.totalLineHits
+    );
+    if (heaviestLine !== undefined) {
+      this.scrollLineIntoView(Math.max(1, heaviestLine - 5));
+    }
+  }
+
   scrollLineIntoView(lineNumber: number) {
     if (this._list) {
       this._list.scrollItemIntoView(lineNumber - 1, 0);
@@ -101,7 +121,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _renderRow = (lineNumber: LineNumber, index: number, columnIndex: number) => {
-    const { rowHeight } = this.props;
+    const { rowHeight, timings } = this.props;
     // React converts height into 'px' values, while lineHeight is valid in
     // non-'px' units.
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
@@ -111,16 +131,26 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     // handle multi-line comments properly, for example.
     const row = refractor.highlight(sourceLines[index], 'cpp');
 
+    const total = timings.totalLineHits.get(lineNumber);
+    const self = timings.selfLineHits.get(lineNumber);
+    const isNonZero = !!total || !!self;
+
     if (columnIndex === 0) {
       return (
         <div
-          className={classNames('sourceViewRow', 'sourceViewRowFixedColumns')}
+          className={classNames('sourceViewRow', 'sourceViewRowFixedColumns', {
+            sourceViewRowNonZero: isNonZero,
+          })}
           style={rowHeightStyle}
         >
-          <span className="sourceViewRowColumn sourceViewFixedColumn total"></span>
-          <span className="sourceViewRowColumn sourceViewFixedColumn self"></span>
+          <span className="sourceViewRowColumn sourceViewFixedColumn total">
+            {total}
+          </span>
+          <span className="sourceViewRowColumn sourceViewFixedColumn self">
+            {self}
+          </span>
           <span className="sourceViewRowColumn sourceViewFixedColumn lineNumber">
-            {index + 1}
+            {lineNumber}
           </span>
         </div>
       );
@@ -128,7 +158,9 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
     return (
       <div
-        className={classNames('sourceViewRow', 'sourceViewRowScrolledColumns')}
+        className={classNames('sourceViewRow', 'sourceViewRowScrolledColumns', {
+          sourceViewRowNonZero: isNonZero,
+        })}
         style={rowHeightStyle}
         key={index}
       >
@@ -141,8 +173,9 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return this._computeSourceLinesMemoized(this.props.source);
   }
 
-  _getAllVisibleLineNumbers(): LineNumber[] {
-    return this._computeAllLineNumbersMemoized(this.props.source);
+  _getItems(): LineNumber[] {
+    const { source, timings } = this.props;
+    return this._computeAllLineNumbersMemoized(source, timings);
   }
 
   focus() {
@@ -162,7 +195,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         <SourceViewHeader />
         <VirtualList
           className="sourceViewBody"
-          items={this._getAllVisibleLineNumbers()}
+          items={this._getItems()}
           renderItem={this._renderRow}
           itemHeight={rowHeight}
           columnCount={2}

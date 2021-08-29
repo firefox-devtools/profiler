@@ -45,6 +45,11 @@
   text-align: right;
 }
 
+.sourceViewFixedColumn {
+  text-align: right;
+  padding-right: 5px;
+}
+
 .sourceViewRowColumn.sourceViewFixedColumn {
   overflow: hidden;
   box-sizing: border-box;
@@ -60,9 +65,15 @@
 .sourceViewFixedColumn.lineNumber {
   font-variant-numeric: tabular-nums;
   color: #aaa;
-  width: 35px;
-  text-align: right;
+  width: 45px;
+}
+
+/*.sourceViewRowColumn.total,*/
+.sourceViewFixedColumn.lineNumber {
   border-right: 0;
+}
+.sourceViewHeaderColumn.sourceViewFixedColumn.lineNumber::after {
+  display: none;
 }
 
 .sourceViewBody {
@@ -104,14 +115,18 @@
 .sourceViewRowFixedColumns {
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   white-space: nowrap;
 }
 
 .sourceViewRowScrolledColumns {
-  padding-left: 8px;
+  padding-left: 3px;
   white-space: pre;
+}
+
+.sourceViewRowNonZero {
+  background-color: #edf6ff;
 }
 
 code[class*="language-"] {

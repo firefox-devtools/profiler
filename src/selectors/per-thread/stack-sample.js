@@ -21,6 +21,8 @@ import type {
   WeightType,
   CallNodeInfo,
   CallNodePath,
+  StackLineInfo,
+  LineTimings,
   IndexIntoCallNodeTable,
   SelectedState,
   StartEndRange,
@@ -77,6 +79,25 @@ export function getStackAndSampleSelectorsPerThread(
         frameTable,
         funcTable,
         defaultCategory
+      );
+    }
+  );
+
+  const getStackLineInfo: Selector<StackLineInfo> = createSelector(
+    threadSelectors.getFilteredThread,
+    ({
+      stackTable,
+      frameTable,
+      funcTable,
+      stringTable,
+    }: Thread): StackLineInfo => {
+      return ProfileData.getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        stringTable.indexForString(
+          'hg:hg.mozilla.org/mozilla-central:xpcom/threads/TaskController.cpp:f31a22da96294e7f31af4bf9a5a88c68a55c3705'
+        )
       );
     }
   );
@@ -208,6 +229,12 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
+  const getLineTimings: Selector<LineTimings> = createSelector(
+    getStackLineInfo,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
+    ProfileData.getLineTimings
+  );
+
   const getTracedTiming: Selector<TracedTiming | null> = createSelector(
     threadSelectors.getFilteredSamplesForCallTree,
     getCallNodeInfo,
@@ -253,6 +280,7 @@ export function getStackAndSampleSelectorsPerThread(
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
     getCallNodeInfo,
+    getStackLineInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -260,6 +288,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
+    getLineTimings,
     getTracedTiming,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,
