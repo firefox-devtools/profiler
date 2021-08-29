@@ -145,8 +145,8 @@ Home--load-from-url-submit-button =
 Home--documentation-button = Документація
 Home--menu-button = Увімкнути кнопку меню { -profiler-brand-name }
 Home--menu-button-instructions =
-    Увімкніть кнопку меню профайлера, щоб почати запис швидкодії
-    профілю в { -firefox-brand-name }, потім аналізуйте його та оприлюдніть на profiler.firefox.com.
+    Увімкніть кнопку меню профайлера, щоб почати запис швидкодії профілю у
+    { -firefox-brand-name }, потім аналізуйте його та оприлюдніть на profiler.firefox.com.
 # The word WebChannel should not be translated.
 # This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
 # of the "Enable Firefox Profiler menu button" button.
