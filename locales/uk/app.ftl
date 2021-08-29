@@ -229,6 +229,7 @@ MarkerTable--description = Опис
 
 MenuButtons--index--metaInfo-button =
     .label = Дані профілю
+MenuButtons--index--full-view = Повний огляд
 MenuButtons--index--cancel-upload = Скасувати вивантаження
 MenuButtons--index--share-upload =
     .label = Вивантажити локальний профіль
@@ -248,6 +249,40 @@ MenuButtons--index--profile-info-uploaded-actions = Видалити
 MenuButtons--index--metaInfo-subtitle = Інформація про профіль
 MenuButtons--metaInfo--symbols = Символи:
 MenuButtons--metaInfo--cpu = ЦП:
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } фізичне ядро
+        [few] { $physicalCPUs } фізичні ядра
+       *[many] { $physicalCPUs } фізичних ядер
+    }, { $logicalCPUs ->
+        [one] { $logicalCPUs } логічне ядро
+        [few] { $logicalCPUs } логічні ядра
+       *[many] { $logicalCPUs } логічних ядер
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } фізичне ядро
+        [few] { $physicalCPUs } фізичні ядра
+       *[many] { $physicalCPUs } фізичних ядер
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } логічне ядро
+        [few] { $logicalCPUs } логічні ядра
+       *[many] { $logicalCPUs } логічних ядер
+    }
 MenuButtons--metaInfo--recording-started = Запис розпочато:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--profile-version = Версія профілю:
