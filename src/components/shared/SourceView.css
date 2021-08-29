@@ -58,7 +58,11 @@
 }
 
 .sourceViewFixedColumn.lineNumber {
-  width: 25px;
+  font-variant-numeric: tabular-nums;
+  color: #aaa;
+  width: 35px;
+  text-align: right;
+  border-right: 0;
 }
 
 .sourceViewBody {
@@ -97,10 +101,62 @@
   background: white;
 }
 
-.sourceViewRow {
+.sourceViewRowFixedColumns {
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: flex-start;
   white-space: nowrap;
+}
+
+.sourceViewRowScrolledColumns {
+  padding-left: 8px;
+  white-space: pre;
+}
+
+code[class*="language-"] {
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	font-family: ui-monospace, Roboto Mono, monospace;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+.syn_type,
+.token.class-name {
+  color: teal;
+}
+
+.syn_def,
+.token.function {
+  font-weight: 600;
+}
+
+.syn_string,
+.token.string {
+  color: green;
+}
+
+.syn_comment,
+.token.comment {
+  color: darkred;
+}
+
+.syn_tag,
+.syn_reserved,
+.token.keyword {
+  color: blue;
+}
+
+.syn_regex,
+.token.regex {
+  color: #6d7b8d;
 }

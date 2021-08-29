@@ -6,12 +6,16 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
+import { refractor } from 'refractor/lib/core.js';
+import cpp from 'refractor/lang/cpp.js';
 
 import { VirtualList } from './VirtualList';
 
 import type { CssPixels } from 'firefox-profiler/types';
 
 import './SourceView.css';
+
+refractor.register(cpp);
 
 const SourceViewHeader = () => {
   return (
@@ -50,15 +54,45 @@ type SourceViewProps = {|
 
 type LineNumber = number;
 
+function createElement(
+  { properties, tagName: TagName, children, type, value }: any,
+  key
+) {
+  switch (type) {
+    case 'root':
+      return <>{children ? children.map(createElement) : null}</>;
+    case 'element':
+      return (
+        <TagName
+          {...properties}
+          key={key}
+          className={properties.className.join(' ')}
+        >
+          {children ? children.map(createElement) : null}
+        </TagName>
+      );
+    case 'text':
+      return value;
+    default:
+      return null;
+  }
+}
+
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _specialItems: [] = [];
   _list: VirtualList<LineNumber> | null = null;
   _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
 
   _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
-  _computeAllLineNumbersMemoized = memoize(function(source: string): number[] {
-    return source.split('\n').map((_str, i) => i + 1);
-  });
+  _computeAllLineNumbersMemoized = memoize((source: string): number[] =>
+    source.split('\n').map((_str, i) => i + 1)
+  );
+  _computeMaxLineLengthMemoized = memoize((sourceLines: string[]): number =>
+    sourceLines.reduce(
+      (prevMaxLen, line) => Math.max(prevMaxLen, line.length),
+      0
+    )
+  );
 
   scrollLineIntoView(lineNumber: number) {
     if (this._list) {
@@ -71,6 +105,11 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     // React converts height into 'px' values, while lineHeight is valid in
     // non-'px' units.
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
+    const sourceLines = this._getSourceLines();
+
+    // This syntax-highlights each line individually. That means it doesn't
+    // handle multi-line comments properly, for example.
+    const row = refractor.highlight(sourceLines[index], 'cpp');
 
     if (columnIndex === 0) {
       return (
@@ -81,19 +120,19 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
           <span className="sourceViewRowColumn sourceViewFixedColumn total"></span>
           <span className="sourceViewRowColumn sourceViewFixedColumn self"></span>
           <span className="sourceViewRowColumn sourceViewFixedColumn lineNumber">
-            {lineNumber}
+            {index + 1}
           </span>
         </div>
       );
     }
 
-    const sourceLines = this._getSourceLines();
     return (
       <div
-        className={classNames('treeViewRow', 'treeViewRowScrolledColumns')}
+        className={classNames('sourceViewRow', 'sourceViewRowScrolledColumns')}
         style={rowHeightStyle}
+        key={index}
       >
-        <code>{sourceLines[index]}</code>
+        <code className="language-cpp">{createElement(row)}</code>
       </div>
     );
   };
@@ -114,6 +153,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
   render() {
     const { rowHeight } = this.props;
+    const sourceLines = this._getSourceLines();
+    const maxLength = this._computeMaxLineLengthMemoized(sourceLines);
+    const CHAR_WIDTH_ESTIMATE = 8;
+
     return (
       <div className="sourceView">
         <SourceViewHeader />
@@ -126,7 +169,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
           focusable={true}
           specialItems={this._specialItems}
           disableOverscan={false}
-          containerWidth={4000}
+          containerWidth={maxLength * CHAR_WIDTH_ESTIMATE}
           ref={this._takeListRef}
         />
       </div>

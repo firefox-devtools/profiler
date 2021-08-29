@@ -116,10 +116,10 @@ int32_t TaskController::GetPoolThreadCount() {
 }
 
 #if defined(MOZ_COLLECTING_RUNNABLE_TELEMETRY)
-#  define AUTO_PROFILE_FOLLOWING_TASK(task)                                  \
-    nsAutoCString name;                                                      \
-    (task)->GetName(name);                                                   \
-    AUTO_PROFILER_LABEL_DYNAMIC_NSCSTRING_NONSENSITIVE("Task", OTHER, name); \
+#  define AUTO_PROFILE_FOLLOWING_TASK(task)                                  \\
+    nsAutoCString name;                                                      \\
+    (task)->GetName(name);                                                   \\
+    AUTO_PROFILER_LABEL_DYNAMIC_NSCSTRING_NONSENSITIVE("Task", OTHER, name); \\
     AUTO_PROFILER_MARKER_TEXT("Runnable", OTHER, {}, name);
 #else
 #  define AUTO_PROFILE_FOLLOWING_TASK(task)
@@ -539,7 +539,7 @@ class RunnableTask : public Task {
     // If we're on the main thread, we want to record our current
     // runnable's name in a static so that BHR can record it.
     Array<char, nsThread::kRunnableNameBufSize> restoreRunnableName;
-    restoreRunnableName[0] = '\0';
+    restoreRunnableName[0] = '\\0';
     auto clear = MakeScopeExit([&] {
       MOZ_ASSERT(NS_IsMainThread());
       nsThread::sMainThreadRunnableName = restoreRunnableName;
@@ -556,7 +556,7 @@ class RunnableTask : public Task {
                                (uint32_t)name.Length());
     memcpy(nsThread::sMainThreadRunnableName.begin(), name.BeginReading(),
            length);
-    nsThread::sMainThreadRunnableName[length] = '\0';
+    nsThread::sMainThreadRunnableName[length] = '\\0';
 #endif
 
     mRunnable->Run();
