@@ -317,7 +317,8 @@ MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 ## These strings are displayed at the bottom of the "Profile Info" panel.
 
 MenuButtons--metaOverheadStatistics-mean = Середнє
-MenuButtons--metaOverheadStatistics-max = Мін
+MenuButtons--metaOverheadStatistics-max = Макс
+MenuButtons--metaOverheadStatistics-min = Мін
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
 
