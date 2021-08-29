@@ -204,17 +204,28 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--start-selection-here = Почати вибір тут
+MarkerContextMenu--end-selection-here = Завершити вибір тут
+MarkerContextMenu--start-selection-at-marker-start = Почати вибір на <strong>початку</strong> маркера
+MarkerContextMenu--start-selection-at-marker-end = Почати вибір в <strong>кінці</strong> маркера
+MarkerContextMenu--end-selection-at-marker-start = Завершити вибір на <strong>початку</strong> маркера
+MarkerContextMenu--end-selection-at-marker-end = Завершити вибір в <strong>кінці</strong> маркера
 MarkerContextMenu--copy-description = Скопіювати опис
 MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
+MarkerContextMenu--copy-full-payload = Копіювати повне корисне навантаження
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
 
+MarkerSettings--panel-search =
+    .label = Фільтр маркерів:
+    .title = Показувати лише маркери, що відповідають певній назві
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
+MarkerSidebar--select-a-marker = Виберіть маркер для показу інформації про нього.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -239,6 +250,8 @@ MenuButtons--index--share-error-uploading =
     .label = Помилка вивантаження
 MenuButtons--index--revert = Повернутися до початкового профілю
 MenuButtons--index--docs = Документи
+MenuButtons--permalink--button =
+    .label = Стороннє посилання
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about
