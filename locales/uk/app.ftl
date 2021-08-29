@@ -183,6 +183,8 @@ IdleSearchField--search-input =
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
     .title = Клацніть тут, щоб завантажити профіль { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Видалити
+    .title = Цей профіль не можна видалити оскільки ми не маємо інформації про авторизацію.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Жодного профілю ще не завантажено!
 # This string is used below the 'Recent uploaded recordings' list section.
 # Variables:
@@ -203,6 +205,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## panels.
 
 MarkerContextMenu--copy-description = Скопіювати опис
+MarkerContextMenu--copy-call-stack = Скопіювати стек викликів
 MarkerContextMenu--copy-url = Скопіювати URL-адресу
 
 ## MarkerSettings
@@ -216,6 +219,7 @@ MarkerContextMenu--copy-url = Скопіювати URL-адресу
 ## MarkerTable
 ## This is the component for Marker Table panel.
 
+MarkerTable--start = Почати
 MarkerTable--duration = Тривалість
 MarkerTable--type = Тип
 MarkerTable--description = Опис
