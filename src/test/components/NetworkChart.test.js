@@ -24,6 +24,7 @@ import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
+import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -643,6 +644,20 @@ describe('Network Chart/tooltip behavior', () => {
     expect(getByTestId('tooltip')).toBeInTheDocument();
     fireEvent(rowItem(), getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
     expect(queryByTestId('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('changes the redux store when the mouse hovers the line', () => {
+    const { rowItem, getState } = setupWithPayload(getNetworkMarkers());
+
+    // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
+    // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
+    fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
+    expect(selectedThreadSelectors.getHoveredMarkerIndex(getState())).toBe(0);
+
+    fireEvent(rowItem(), getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(selectedThreadSelectors.getHoveredMarkerIndex(getState())).toBe(
+      null
+    );
   });
 
   it('does not show tooltips when a context menu is displayed', () => {

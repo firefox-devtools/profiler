@@ -106,6 +106,51 @@ describe('timeline/TrackNetwork', function() {
     expect(drawCalls).toMatchSnapshot();
   });
 
+  it('changes the hovered marker information in the redux store', () => {
+    const { getState } = setup();
+
+    const canvas = ensureExists(document.querySelector('canvas'));
+
+    // Hover marker 0
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        offsetX: 12,
+        pageY: 2,
+        offsetY: 2,
+      })
+    );
+
+    expect(selectedThreadSelectors.getHoveredMarkerIndex(getState())).toBe(0);
+
+    // Hover marker 1
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 30,
+        offsetX: 30,
+        pageY: 7,
+        offsetY: 7,
+      })
+    );
+    expect(selectedThreadSelectors.getHoveredMarkerIndex(getState())).toBe(1);
+
+    // Hover some blank space
+    fireEvent(
+      canvas,
+      getMouseEvent('mousemove', {
+        pageX: 12,
+        offsetX: 12,
+        pageY: 10,
+        offsetY: 10,
+      })
+    );
+    expect(selectedThreadSelectors.getHoveredMarkerIndex(getState())).toBe(
+      null
+    );
+  });
+
   it('displays a context menu when right clicking', () => {
     // Always use fake timers when dealing with context menus.
     jest.useFakeTimers();

@@ -60,7 +60,7 @@ export type RightClickedCallNode = {|
   +callNodePath: CallNodePath,
 |};
 
-export type RightClickedMarker = {|
+export type MarkerReference = {|
   +threadsKey: ThreadsKey,
   +markerIndex: MarkerIndex,
 |};
@@ -102,7 +102,8 @@ export type ProfileViewState = {
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
     rightClickedCallNode: RightClickedCallNode | null,
-    rightClickedMarker: RightClickedMarker | null,
+    rightClickedMarker: MarkerReference | null,
+    hoveredMarker: MarkerReference | null,
     mouseTimePosition: Milliseconds | null,
   |},
   +profile: Profile | null,

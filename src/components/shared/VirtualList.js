@@ -236,6 +236,10 @@ type VirtualListProps<Item> = {|
   +specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown: (SyntheticKeyboardEvent<>) => void,
   +onCopy: ClipboardEvent => void,
+  // This is called when the mouse leaves the list as it is rendered. That is if
+  // there isn't enough item to fill the component's height, and the user moves
+  // the mouse below the items, this callback would be called.
+  +onMouseLeaveRenderedList?: () => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
   // time: this will render only the visible part, which makes each update faster.
   +disableOverscan: boolean,
@@ -373,6 +377,12 @@ export class VirtualList<Item> extends React.PureComponent<
     }
   }
 
+  _onMouseLeaveInnerWrapper = () => {
+    if (this.props.onMouseLeaveRenderedList) {
+      this.props.onMouseLeaveRenderedList();
+    }
+  };
+
   render() {
     const {
       itemHeight,
@@ -400,7 +410,10 @@ export class VirtualList<Item> extends React.PureComponent<
         aria-label={ariaLabel}
         aria-activedescendant={ariaActiveDescendant}
       >
-        <div className={`${className}InnerWrapper`}>
+        <div
+          className={`${className}InnerWrapper`}
+          onMouseLeave={this._onMouseLeaveInnerWrapper}
+        >
           {range(columnCount).map(columnIndex => (
             <VirtualListInner
               className={classNames(

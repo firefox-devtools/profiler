@@ -25,6 +25,7 @@ import { getSelectedThreadsKey } from '../../selectors/url-state';
 import {
   changeSelectedNetworkMarker,
   changeRightClickedMarker,
+  changeHoveredMarker,
 } from '../../actions/profile-view';
 import type { SizeProps } from '../shared/WithSize';
 import type {
@@ -45,13 +46,15 @@ const ROW_HEIGHT = 16;
 type DispatchProps = {|
   +changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
   +changeRightClickedMarker: typeof changeRightClickedMarker,
+  +changeHoveredMarker: typeof changeHoveredMarker,
 |};
 
 type StateProps = {|
-  +selectedNetworkMarkerIndex: MarkerIndex | null,
   +markerIndexes: MarkerIndex[],
   +getMarker: MarkerIndex => Marker,
+  +selectedNetworkMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
+  +hoveredMarkerIndexFromState: MarkerIndex | null,
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadsKey: ThreadsKey,
@@ -65,14 +68,21 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class NetworkChartImpl extends React.PureComponent<Props> {
   _virtualListRef = React.createRef<VirtualList<MarkerIndex>>();
   _memoizedGetSpecialItems = memoize(
-    (selectedNetworkMarkerIndex, rightClickedMarkerIndex) => {
-      const specialItems = [undefined, undefined];
+    (
+      selectedNetworkMarkerIndex,
+      rightClickedMarkerIndex,
+      hoveredMarkerIndex
+    ) => {
+      const specialItems = [undefined, undefined, undefined];
 
       if (selectedNetworkMarkerIndex !== null) {
         specialItems[0] = selectedNetworkMarkerIndex;
       }
       if (rightClickedMarkerIndex !== null) {
         specialItems[1] = rightClickedMarkerIndex;
+      }
+      if (hoveredMarkerIndex !== null) {
+        specialItems[2] = hoveredMarkerIndex;
       }
       return specialItems;
     },
@@ -99,10 +109,15 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   }
 
   _getSpecialItems = () => {
-    const { selectedNetworkMarkerIndex, rightClickedMarkerIndex } = this.props;
+    const {
+      selectedNetworkMarkerIndex,
+      rightClickedMarkerIndex,
+      hoveredMarkerIndexFromState,
+    } = this.props;
     return this._memoizedGetSpecialItems(
       selectedNetworkMarkerIndex,
-      rightClickedMarkerIndex
+      rightClickedMarkerIndex,
+      hoveredMarkerIndexFromState
     );
   };
 
@@ -223,6 +238,16 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     changeSelectedNetworkMarker(threadsKey, selectedNetworkMarkerIndex);
   };
 
+  _onRowHovered = (hoveredMarkerIndex: MarkerIndex | null) => {
+    const { threadsKey, changeHoveredMarker } = this.props;
+    changeHoveredMarker(threadsKey, hoveredMarkerIndex);
+  };
+
+  _onMouseLeaveRenderedList = () => {
+    const { threadsKey, changeHoveredMarker } = this.props;
+    changeHoveredMarker(threadsKey, null);
+  };
+
   _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
@@ -231,6 +256,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
       getMarker,
       rightClickedMarkerIndex,
       selectedNetworkMarkerIndex,
+      hoveredMarkerIndexFromState,
       timeRange,
       width,
     } = this.props;
@@ -259,11 +285,12 @@ class NetworkChartImpl extends React.PureComponent<Props> {
         width={width}
         shouldDisplayTooltips={this._shouldDisplayTooltips}
         isRightClicked={rightClickedMarkerIndex === markerIndex}
+        isHoveredFromState={hoveredMarkerIndexFromState === markerIndex}
         onRightClick={this._onRightClick}
-        isLeftClicked={selectedNetworkMarkerIndex === markerIndex}
         isSelected={selectedNetworkMarkerIndex === markerIndex}
         select={this._select}
         onLeftClick={this._onLeftClick}
+        onHover={this._onRowHovered}
       />
     );
   };
@@ -320,6 +347,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
               onCopy={this._onCopy}
               onKeyDown={this._onKeyDown}
               ref={this._virtualListRef}
+              onMouseLeaveRenderedList={this._onMouseLeaveRenderedList}
             />
           </ContextMenuTrigger>
         )}
@@ -339,11 +367,14 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
       selectedNetworkMarkerIndex: selectedThreadSelectors.getSelectedNetworkMarkerIndex(
         state
       ),
-      getMarker: selectedThreadSelectors.getMarkerGetter(state),
       rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
+      ),
+      hoveredMarkerIndexFromState: selectedThreadSelectors.getHoveredMarkerIndex(
         state
       ),
       timeRange: getPreviewSelectionRange(state),
@@ -353,6 +384,7 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
     mapDispatchToProps: {
       changeSelectedNetworkMarker,
       changeRightClickedMarker,
+      changeHoveredMarker,
     },
     component: NetworkChartImpl,
   }
