@@ -4,6 +4,8 @@ You can use the Firefox Profiler to investigate performance issues on Android, n
 
 In order to do so, you need both your phone with the mobile Gecko-based browser, and a machine running Firefox Desktop. You also need a USB connection between the two devices. Then you can use [about:debugging](https://developer.mozilla.org/en-US/docs/Tools/about:debugging) in Firefox Desktop to connect to the phone and control profiling from there. The result will be shown in Firefox Desktop.
 
+[In this 1 minute video demonstration](https://www.youtube.com/watch?v=TxAlQBv6-yg) you can see the few steps needed to capture a profile from Fenix. For additional details and troubleshooting info, see below.
+
 ## Setup
 
 ### Pick a build to profile
