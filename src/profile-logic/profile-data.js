@@ -2965,9 +2965,12 @@ export function getStackLineInfo(
 }
 
 export function getLineTimings(
-  stackLineInfo: StackLineInfo,
+  stackLineInfo: StackLineInfo | null,
   samples: SamplesLikeTable
-): LineTimings {
+): LineTimings | null {
+  if (stackLineInfo === null) {
+    return null;
+  }
   const { selfLine, stackLines } = stackLineInfo;
   const totalLineHits = new Map();
   const selfLineHits = new Map();

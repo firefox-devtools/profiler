@@ -83,21 +83,21 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
-  const getStackLineInfo: Selector<StackLineInfo> = createSelector(
+  const getStackLineInfo: Selector<StackLineInfo | null> = createSelector(
     threadSelectors.getFilteredThread,
-    ({
-      stackTable,
-      frameTable,
-      funcTable,
-      stringTable,
-    }: Thread): StackLineInfo => {
+    UrlState.getSelectedBottomTabFileName,
+    (
+      { stackTable, frameTable, funcTable, stringTable }: Thread,
+      selectedBottomTabFileName
+    ): StackLineInfo | null => {
+      if (selectedBottomTabFileName === null) {
+        return null;
+      }
       return ProfileData.getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        stringTable.indexForString(
-          'hg:hg.mozilla.org/mozilla-central:xpcom/threads/TaskController.cpp:f31a22da96294e7f31af4bf9a5a88c68a55c3705'
-        )
+        stringTable.indexForString(selectedBottomTabFileName)
       );
     }
   );

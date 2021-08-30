@@ -31,6 +31,7 @@ import type {
   ProfileSpecificUrlState,
   FullProfileSpecificUrlState,
   ActiveTabSpecificProfileUrlState,
+  BottomTabsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -69,6 +70,8 @@ export const getInvertCallstack: Selector<boolean> = state =>
   getProfileSpecificState(state).invertCallstack;
 export const getShowUserTimings: Selector<boolean> = state =>
   getProfileSpecificState(state).showUserTimings;
+export const getBottomTabs: Selector<BottomTabsState> = state =>
+  getProfileSpecificState(state).bottomTabs;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>
@@ -235,6 +238,15 @@ export const getTransformStack: DangerousSelectorWithArguments<
     EMPTY_TRANSFORM_STACK
   );
 };
+
+export const getSelectedBottomTabFileName: Selector<
+  string | null
+> = createSelector(getBottomTabs, bottomTabs => {
+  if (bottomTabs.selectedIndex === null) {
+    return null;
+  }
+  return bottomTabs.list[bottomTabs.selectedIndex].fileName;
+});
 
 /**
  * The URL predictor is used to generate a link for an uploaded profile, to predict

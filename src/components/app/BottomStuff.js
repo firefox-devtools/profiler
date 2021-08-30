@@ -7,45 +7,63 @@ import React from 'react';
 
 import { SourceView } from '../shared/SourceView';
 
-import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
-import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
-import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
+import {
+  getBottomTabs,
+  getSelectedBottomTabFileName,
+} from 'firefox-profiler/selectors/url-state';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-import type { LineTimings } from 'firefox-profiler/types';
+import type { LineTimings, BottomTabsState } from 'firefox-profiler/types';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
 
 import './BottomStuff.css';
+import classNames from 'classnames';
 
 type StateProps = {|
-  +selectedTab: TabSlug,
-  +isSidebarOpen: boolean,
-  +lineTimings: LineTimings,
+  +lineTimings: LineTimings | null,
+  +bottomTabs: BottomTabsState,
+  +selectedBottomTabFileName: string | null,
 |};
 
-type DispatchProps = {|
-  +invalidatePanelLayout: typeof invalidatePanelLayout,
-|};
+type DispatchProps = {||};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 function BottomStuffImpl({
-  selectedTab,
-  isSidebarOpen,
-  invalidatePanelLayout,
   lineTimings,
+  bottomTabs,
+  selectedBottomTabFileName,
 }: Props) {
   return (
     <div className="bottom-stuff">
       <div className="bottom-main">
-        <SourceView timings={lineTimings} source={fileContent} rowHeight={16} />
+        {lineTimings !== null ? (
+          <SourceView
+            timings={lineTimings}
+            source={fileContent}
+            rowHeight={16}
+            key={selectedBottomTabFileName}
+          />
+        ) : null}
       </div>
       <div className="bottom-tabs">
-        <span className="bottom-tab bottom-tab--selected">
-          TaskController.cpp
-        </span>
+        {bottomTabs.list.map((tab, index) => {
+          const parsedName = parseFileNameFromSymbolication(tab.fileName);
+          const path = parsedName.path;
+          const fileName = path.slice(path.lastIndexOf('/') + 1);
+          return (
+            <span
+              key={index}
+              className={classNames('bottom-tab', {
+                'bottom-tab--selected': index === bottomTabs.selectedIndex,
+              })}
+            >
+              {fileName}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
@@ -53,13 +71,11 @@ function BottomStuffImpl({
 
 export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    selectedTab: getSelectedTab(state),
-    isSidebarOpen: getIsSidebarOpen(state),
     lineTimings: selectedThreadSelectors.getLineTimings(state),
+    bottomTabs: getBottomTabs(state),
+    selectedBottomTabFileName: getSelectedBottomTabFileName(state),
   }),
-  mapDispatchToProps: {
-    invalidatePanelLayout,
-  },
+  // mapDispatchToProps: {},
   component: BottomStuffImpl,
 });
 

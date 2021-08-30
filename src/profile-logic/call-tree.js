@@ -322,6 +322,17 @@ export class CallTree {
     return displayData;
   }
 
+  getRawFileNameForCallNode(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): string | null {
+    const funcIndex = this._callNodeTable.func[callNodeIndex];
+    const fileName = this._funcTable.fileName[funcIndex];
+    if (fileName === null) {
+      return null;
+    }
+    return this._stringTable.getString(fileName);
+  }
+
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
     return getOriginAnnotationForFunc(
       funcIndex,

@@ -225,6 +225,16 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
+export type IndexIntoBottomTabs = number;
+export type BottomTab = {|
+  fileName: string,
+|};
+
+export type BottomTabsState = {|
+  list: BottomTab[],
+  selectedIndex: IndexIntoBottomTabs | null,
+|};
+
 /**
  * Full profile specific url state
  * They should not be used from the active tab view.
@@ -261,6 +271,7 @@ export type ProfileSpecificUrlState = {|
   timelineType: TimelineType,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
+  bottomTabs: BottomTabsState,
 |};
 
 /**

@@ -28,6 +28,7 @@ import type {
   UploadState,
   State,
   UploadedProfileInformation,
+  BottomTab,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
@@ -291,6 +292,10 @@ type ProfileAction =
     |}
   | {|
       +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
+    |}
+  | {|
+      +type: 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT',
+      +tab: BottomTab,
     |};
 
 type ReceiveProfileAction =

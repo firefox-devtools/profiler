@@ -6,6 +6,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import memoize from 'memoize-immutable';
+import range from 'array-range';
 import { refractor } from 'refractor/lib/core.js';
 import cpp from 'refractor/lang/cpp.js';
 
@@ -94,10 +95,21 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   _takeListRef = (list: VirtualList<LineNumber> | null) => (this._list = list);
 
   _computeSourceLinesMemoized = memoize((source: string) => source.split('\n'));
+
   _computeAllLineNumbersMemoized = memoize(
-    (source: string, _timings: LineTimings): number[] =>
-      source.split('\n').map((_str, i) => i + 1)
+    (sourceLines: string[], timings: LineTimings): number[] => {
+      const maxKnownLineNumberFromTimings = Math.max(
+        ...timings.totalLineHits.keys()
+      );
+      const maxLineNumberFromSource = sourceLines.length;
+      const maxLineNumber = Math.max(
+        maxKnownLineNumberFromTimings,
+        maxLineNumberFromSource
+      );
+      return range(1, maxLineNumber + 1);
+    }
   );
+
   _computeMaxLineLengthMemoized = memoize((sourceLines: string[]): number =>
     sourceLines.reduce(
       (prevMaxLen, line) => Math.max(prevMaxLen, line.length),
@@ -106,6 +118,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   );
 
   componentDidMount() {
+    this.scrollHeaviestLineIntoView();
+  }
+
+  scrollHeaviestLineIntoView() {
     const heaviestLine = mapGetKeyWithMaxValue(
       this.props.timings.totalLineHits
     );
@@ -126,10 +142,11 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     // non-'px' units.
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
     const sourceLines = this._getSourceLines();
+    const line = index < sourceLines.length ? sourceLines[index] : '';
 
     // This syntax-highlights each line individually. That means it doesn't
     // handle multi-line comments properly, for example.
-    const row = refractor.highlight(sourceLines[index], 'cpp');
+    const row = refractor.highlight(line, 'cpp');
 
     const total = timings.totalLineHits.get(lineNumber);
     const self = timings.selfLineHits.get(lineNumber);
@@ -174,8 +191,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _getItems(): LineNumber[] {
-    const { source, timings } = this.props;
-    return this._computeAllLineNumbersMemoized(source, timings);
+    const { timings } = this.props;
+    return this._computeAllLineNumbersMemoized(this._getSourceLines(), timings);
   }
 
   focus() {

@@ -20,6 +20,7 @@ import type {
   UrlState,
   Reducer,
   TimelineTrackOrganization,
+  BottomTabsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -472,6 +473,46 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
   }
 };
 
+const bottomTabs: Reducer<BottomTabsState> = (
+  state = { list: [], selectedIndex: null },
+  action
+) => {
+  switch (action.type) {
+    case 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT': {
+      const index = state.list.findIndex(
+        tab => tab.fileName === action.tab.fileName
+      );
+      if (index === -1) {
+        const selectedIndex = state.list.length;
+        return {
+          list: [...state.list, action.tab],
+          selectedIndex,
+        };
+      }
+      const selectedIndex = index;
+      if (selectedIndex !== state.selectedIndex) {
+        return {
+          ...state,
+          selectedIndex,
+        };
+      }
+      return state;
+    }
+    case 'SELECT_BOTTOM_TAB': {
+      const selectedIndex = action.index;
+      if (selectedIndex !== state.selectedIndex) {
+        return {
+          ...state,
+          selectedIndex,
+        };
+      }
+      return state;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * Active tab specific profile url states
  */
@@ -533,6 +574,7 @@ const profileSpecific = combineReducers({
   markersSearchString,
   networkSearchString,
   transforms,
+  bottomTabs,
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,

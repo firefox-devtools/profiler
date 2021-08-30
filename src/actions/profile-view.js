@@ -1439,6 +1439,15 @@ export function changeMouseTimePosition(
   };
 }
 
+export function createBottomTabIfNeededAndSelect(fileName: string): Action {
+  return {
+    type: 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT',
+    tab: {
+      fileName,
+    },
+  };
+}
+
 export function handleCallNodeTransformShortcut(
   event: SyntheticKeyboardEvent<>,
   threadsKey: ThreadsKey,

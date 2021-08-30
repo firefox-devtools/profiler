@@ -350,6 +350,7 @@ type TreeViewProps<DisplayData> = {|
   +onSelectionChange: NodeIndex => mixed,
   +onRightClickSelection?: NodeIndex => mixed,
   +onEnterKey?: NodeIndex => mixed,
+  +onDoubleClick?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
@@ -539,7 +540,11 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
 
     if (event.detail === 2 && event.button === 0) {
       // double click
-      this._toggle(nodeId);
+      if (this.props.onDoubleClick) {
+        this.props.onDoubleClick(nodeId);
+      } else {
+        this._toggle(nodeId);
+      }
     }
   };
 
