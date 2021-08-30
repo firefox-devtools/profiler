@@ -16,7 +16,10 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import type { LineTimings, BottomTabsState } from 'firefox-profiler/types';
-import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  parseFileNameFromSymbolication,
+  getUrlsForSourceFile,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import './BottomStuff.css';
 import classNames from 'classnames';
@@ -31,18 +34,88 @@ type DispatchProps = {||};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
+type FileSourceStatus =
+  | {| type: 'LOADING' |}
+  | {| type: 'ERROR', error: string |}
+  | {| type: 'AVAILABLE', source: string |};
+type FileSourceItem = {|
+  fileName: string,
+  status: FileSourceStatus,
+|};
+
+const fileSources: FileSourceItem[] = [];
+
+function getFileSourceStatus(fileName: string): FileSourceStatus {
+  const item = fileSources.find(item => item.fileName === fileName);
+  if (item) {
+    return item.status;
+  }
+
+  const parsedName = parseFileNameFromSymbolication(fileName);
+  const urls = getUrlsForSourceFile(parsedName);
+  let status;
+  if (urls.corsFetchableRawSource) {
+    const url = urls.corsFetchableRawSource;
+    status = {
+      type: 'LOADING',
+    };
+    fetch(url, { credentials: 'omit' })
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(
+            `The request to ${url} return HTTP status ${response.status}`
+          );
+        }
+        return response.text();
+      })
+      .then(
+        source => {
+          const itemIndex = fileSources.findIndex(
+            item => item.fileName === fileName
+          );
+          const status = {
+            type: 'AVAILABLE',
+            source,
+          };
+          fileSources.splice(itemIndex, 1, { fileName, status });
+        },
+        error => {
+          const itemIndex = fileSources.findIndex(
+            item => item.fileName === fileName
+          );
+          const status = {
+            type: 'ERROR',
+            error: error.toString(),
+          };
+          fileSources.splice(itemIndex, 1, { fileName, status });
+        }
+      );
+  } else {
+    status = {
+      type: 'ERROR',
+      error: `The file ${fileName} cannot be loaded by the profiler. There is no CORS-enabled URL for it.`,
+    };
+  }
+  fileSources.push({ fileName, status });
+  return status;
+}
+
 function BottomStuffImpl({
   lineTimings,
   bottomTabs,
   selectedBottomTabFileName,
 }: Props) {
+  const status =
+    selectedBottomTabFileName !== null
+      ? getFileSourceStatus(selectedBottomTabFileName)
+      : null;
   return (
     <div className="bottom-stuff">
       <div className="bottom-main">
         {lineTimings !== null ? (
           <SourceView
             timings={lineTimings}
-            source={fileContent}
+            source={status && status.type === 'AVAILABLE' ? status.source : ''}
             rowHeight={16}
             key={selectedBottomTabFileName}
           />

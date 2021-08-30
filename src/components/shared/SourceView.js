@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import memoize from 'memoize-immutable';
+import memoize from 'memoize-one';
 import range from 'array-range';
 import { refractor } from 'refractor/lib/core.js';
 import cpp from 'refractor/lang/cpp.js';
@@ -126,7 +126,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this.props.timings.totalLineHits
     );
     if (heaviestLine !== undefined) {
-      this.scrollLineIntoView(Math.max(1, heaviestLine - 5));
+      this.scrollLineIntoView(heaviestLine);
     }
   }
 

@@ -2211,6 +2211,60 @@ export function parseFileNameFromSymbolication(
   };
 }
 
+// Returns a URL that serves the file with permissive CORS headers, or null if
+// it's a local path or a JavaScript URL.
+export function getUrlsForSourceFile(
+  parsedFile: ParsedFileNameFromSymbolication
+): {|
+  corsFetchableRawSource?: string,
+  userCopyableRawSource?: string,
+  userViewablePrettySource?: string,
+|} {
+  switch (parsedFile.type) {
+    case 'hg': {
+      const { repo, rev, path } = parsedFile;
+      return {
+        corsFetchableRawSource: `https://${repo}/raw-file/${rev}/${path}`,
+        userCopyableRawSource: `view-source:https://${repo}/raw-file/${rev}/${path}`,
+        userViewablePrettySource: `https://${repo}/file/${rev}/${path}`,
+      };
+    }
+    case 'git': {
+      const { repo, rev, path } = parsedFile;
+      // Example repo: "github.com/rust-lang/rust"
+      if (!repo.startsWith('github.com/')) {
+        return { userViewablePrettySource: undefined };
+      }
+      // const repoPath = repo.slice('github.com/'.length);
+      // Example repoPath: "rust-lang/rust"
+      return {
+        corsFetchableRawSource: `https://${repo}/raw-file/${rev}/${path}`,
+        userCopyableRawSource: `view-source:https://${repo}/raw-file/${rev}/${path}`,
+        userViewablePrettySource: `https://${repo}/file/${rev}/${path}`,
+      };
+    }
+    case 's3': {
+      const { bucket, digest, path } = parsedFile;
+      return {
+        // Not CORS-enabled at the moment, see https://bugzilla.mozilla.org/show_bug.cgi?id=1717976.
+        // corsFetchableRawSource: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+        userCopyableRawSource: `view-source:https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+        userViewablePrettySource: `https://crash-stats.mozilla.org/sources/highlight/?url=https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+      };
+    }
+    case 'normal': {
+      const { path } = parsedFile;
+      // if (path.startsWith('resource://') || path.startsWith('chrome://')) {
+      return {
+        userCopyableRawSource: `view-source:${path}`,
+        userViewablePrettySource: `view-source:${path}`,
+      };
+    }
+    default:
+      throw assertExhaustiveCheck(parsedFile.type, 'unhandled ParsedFile type');
+  }
+}
+
 // Determines which information to show in the "origin annotation" if both an
 // origin name and a filename are present.
 // A return value of true means "show both", false means "only show filename."
