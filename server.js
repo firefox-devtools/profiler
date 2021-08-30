@@ -20,9 +20,9 @@ const serverConfig = {
   // case of the profiler, which is a quite heavy program.
   hot: false,
   liveReload: false,
-  contentBase: config.output.path,
-  publicPath: config.output.publicPath,
+  // redirects all 404 requests to index.html
   historyApiFallback: {
+    // Without any special rule about having a "." character in the URL request.
     disableDotRule: true,
   },
   headers: {
@@ -48,9 +48,7 @@ const serverConfig = {
       form-action 'none'
     `,
   },
-  stats: {
-    colors: true,
-  },
+  static: false,
 };
 
 // Allow a local file to override various options.
@@ -65,7 +63,7 @@ if (localConfigExists) {
   }
 }
 
-new WebpackDevServer(webpack(config), serverConfig).listen(port, host, function(
+new WebpackDevServer(serverConfig, webpack(config)).listen(port, host, function(
   err
 ) {
   if (err) {
