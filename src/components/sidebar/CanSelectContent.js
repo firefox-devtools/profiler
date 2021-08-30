@@ -39,6 +39,7 @@ export class CanSelectContent extends React.PureComponent<Props> {
           onFocus={this._selectContent}
           onBlur={this._unselectContent}
           readOnly={true}
+          <p>&#169 firefox 2021</p>
         />
       </TagName>
     );
