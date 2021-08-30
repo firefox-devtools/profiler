@@ -22,6 +22,7 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   changeRightClickedMarker,
   changeSelectedNetworkMarker,
+  changeHoveredMarker,
 } from 'firefox-profiler/actions/profile-view';
 
 import {
@@ -258,11 +259,13 @@ type StateProps = {|
   +verticalMarkerIndexes: MarkerIndex[],
   +rightClickedMarkerIndex: MarkerIndex | null,
   +selectedNetworkMarkerIndex: MarkerIndex | null,
+  +hoveredMarkerIndexFromState: MarkerIndex | null,
 |};
 
 type DispatchProps = {|
   changeRightClickedMarker: typeof changeRightClickedMarker,
   changeSelectedNetworkMarker: typeof changeSelectedNetworkMarker,
+  changeHoveredMarker: typeof changeHoveredMarker,
 |};
 
 type Props = {|
@@ -284,6 +287,8 @@ class Network extends PureComponent<Props, State> {
     mouseX?: CssPixels,
     mouseY?: CssPixels
   ) => {
+    const { threadIndex, changeHoveredMarker } = this.props;
+    changeHoveredMarker(threadIndex, hoveredMarkerIndex);
     if (hoveredMarkerIndex === null) {
       if (!window.persistTooltips) {
         // This persistTooltips property is part of the web console API. It helps
@@ -341,6 +346,7 @@ class Network extends PureComponent<Props, State> {
       width: containerWidth,
       rightClickedMarkerIndex,
       selectedNetworkMarkerIndex,
+      hoveredMarkerIndexFromState,
     } = this.props;
     const { hoveredMarkerIndex, mouseX, mouseY } = this.state;
     const hoveredMarker =
@@ -370,7 +376,11 @@ class Network extends PureComponent<Props, State> {
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             networkTiming={networkTiming}
-            hoveredMarkerIndex={hoveredMarkerIndex}
+            hoveredMarkerIndex={
+              hoveredMarkerIndex === null
+                ? hoveredMarkerIndexFromState
+                : hoveredMarkerIndex
+            }
             rightClickedMarkerIndex={rightClickedMarkerIndex}
             selectedNetworkMarkerIndex={selectedNetworkMarkerIndex}
             width={containerWidth}
@@ -427,8 +437,13 @@ export const TrackNetwork = explicitConnect<
       selectedNetworkMarkerIndex: selectors.getSelectedNetworkMarkerIndex(
         state
       ),
+      hoveredMarkerIndexFromState: selectors.getHoveredMarkerIndex(state),
     };
   },
-  mapDispatchToProps: { changeRightClickedMarker, changeSelectedNetworkMarker },
+  mapDispatchToProps: {
+    changeRightClickedMarker,
+    changeSelectedNetworkMarker,
+    changeHoveredMarker,
+  },
   component: withSize<Props>(Network),
 });

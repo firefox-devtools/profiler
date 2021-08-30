@@ -24,7 +24,7 @@ import type {
   ThreadViewOptions,
   ThreadViewOptionsPerThreads,
   RightClickedCallNode,
-  RightClickedMarker,
+  MarkerReference,
   ActiveTabTimeline,
   CallNodePath,
   IndexIntoFuncTable,
@@ -552,7 +552,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   }
 };
 
-const rightClickedMarker: Reducer<RightClickedMarker | null> = (
+const rightClickedMarker: Reducer<MarkerReference | null> = (
   state = null,
   action
 ) => {
@@ -570,6 +570,27 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
       // We want to change the state only when the menu is hidden.
       if (action.isVisible) {
         return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+      return null;
+    default:
+      return state;
+  }
+};
+
+const hoveredMarker: Reducer<MarkerReference | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_HOVERED_MARKER':
+      if (action.markerIndex !== null) {
+        return {
+          threadsKey: action.threadsKey,
+          markerIndex: action.markerIndex,
+        };
       }
 
       return null;
@@ -645,6 +666,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedTrack,
       rightClickedCallNode,
       rightClickedMarker,
+      hoveredMarker,
       mouseTimePosition,
     }),
     profile,
