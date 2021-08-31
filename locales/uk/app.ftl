@@ -310,6 +310,7 @@ MenuButtons--metaInfo--buffer-duration-seconds =
     }
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
+MenuButtons--metaInfo--update-channel = Канал оновлень:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
