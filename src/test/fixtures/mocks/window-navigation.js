@@ -172,13 +172,14 @@ function mockWindowHistory() {
       return states.length;
     },
     scrollRestoration: 'auto',
-    state: null,
+    get state() {
+      return states[index] ?? null;
+    },
     back() {
       if (index <= 0) {
         return;
       }
       index--;
-      history.state = states[index];
       // $FlowExpectError Flow doesn't know about this internal property.
       window.location[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
@@ -189,7 +190,6 @@ function mockWindowHistory() {
       }
       index++;
 
-      history.state = states[index];
       // $FlowExpectError Flow doesn't know about this internal property.
       window.location[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
