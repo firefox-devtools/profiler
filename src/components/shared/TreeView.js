@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import memoize from 'memoize-immutable';
 import { Localized } from '@fluent/react';
 
 import { VirtualList } from './VirtualList';
@@ -370,66 +371,59 @@ type TreeViewProps<DisplayData> = {|
 export class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
-  _specialItems: [NodeIndex | void, NodeIndex | void];
-  _visibleRows: NodeIndex[];
-  _expandedNodes: Set<NodeIndex | null>;
   _list: VirtualList<NodeIndex> | null = null;
   _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
 
-  constructor(props: TreeViewProps<DisplayData>) {
-    super(props);
-
-    this._updateSpecialItems(props);
-    this._expandedNodes = new Set(props.expandedNodeIds);
-    this._visibleRows = this._getAllVisibleRows(props);
-  }
-
-  // The tuple `_specialItems` always contains 2 elements: the first element is
+  // The tuple `specialItems` always contains 2 elements: the first element is
   // the selected node id (if any), and the second element is the right clicked
   // id (if any).
-  // This method will always change the tuple, so we take care to call it only
-  // if one of these values changes.
-  _updateSpecialItems(props: TreeViewProps<DisplayData>) {
-    this._specialItems = [undefined, undefined];
+  _computeSpecialItemsMemoized = memoize(
+    (
+      selectedNodeId: NodeIndex | null,
+      rightClickedNodeId: ?NodeIndex
+    ): [NodeIndex | void, NodeIndex | void] => [
+      selectedNodeId ?? undefined,
+      rightClickedNodeId ?? undefined,
+    ],
+    { limit: 1 }
+  );
 
-    if (props.selectedNodeId !== null) {
-      this._specialItems[0] = props.selectedNodeId;
-    }
+  _computeExpandedNodesMemoized = memoize(
+    (expandedNodeIds: Array<NodeIndex | null>) =>
+      new Set<NodeIndex | null>(expandedNodeIds),
+    { limit: 1 }
+  );
 
-    if (
-      props.rightClickedNodeId !== undefined &&
-      props.rightClickedNodeId !== null
-    ) {
-      this._specialItems[1] = props.rightClickedNodeId;
-    }
-  }
+  _computeAllVisibleRowsMemoized = memoize(
+    (tree: Tree<DisplayData>, expandedNodes: Set<NodeIndex | null>) => {
+      function _addVisibleRowsFromNode(tree, expandedNodes, arr, nodeId) {
+        arr.push(nodeId);
+        if (!expandedNodes.has(nodeId)) {
+          return;
+        }
+        const children = tree.getChildren(nodeId);
+        for (let i = 0; i < children.length; i++) {
+          _addVisibleRowsFromNode(tree, expandedNodes, arr, children[i]);
+        }
+      }
+
+      const roots = tree.getRoots();
+      const allRows = [];
+      for (let i = 0; i < roots.length; i++) {
+        _addVisibleRowsFromNode(tree, expandedNodes, allRows, roots[i]);
+      }
+      return allRows;
+    },
+    { limit: 1 }
+  );
 
   scrollSelectionIntoView() {
     const { selectedNodeId, tree } = this.props;
     if (this._list && selectedNodeId !== null) {
       const list = this._list; // this temp variable so that flow knows that it's non-null
-      const rowIndex = this._visibleRows.indexOf(selectedNodeId);
+      const rowIndex = this._getAllVisibleRows().indexOf(selectedNodeId);
       const depth = tree.getDepth(selectedNodeId);
       list.scrollItemIntoView(rowIndex, depth * 10);
-    }
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
-    const hasNewSelectedNode =
-      nextProps.selectedNodeId !== this.props.selectedNodeId;
-    const hasNewRightClickedNode =
-      nextProps.rightClickedNodeId !== this.props.rightClickedNodeId;
-
-    if (hasNewSelectedNode || hasNewRightClickedNode) {
-      this._updateSpecialItems(nextProps);
-    }
-
-    if (
-      nextProps.tree !== this.props.tree ||
-      nextProps.expandedNodeIds !== this.props.expandedNodeIds
-    ) {
-      this._expandedNodes = new Set(nextProps.expandedNodeIds);
-      this._visibleRows = this._getAllVisibleRows(nextProps);
     }
   }
 
@@ -490,33 +484,25 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     );
   };
 
-  _addVisibleRowsFromNode(
-    props: TreeViewProps<DisplayData>,
-    arr: NodeIndex[],
-    nodeId: NodeIndex,
-    depth: number
-  ) {
-    arr.push(nodeId);
-    if (this._isCollapsed(nodeId)) {
-      return;
-    }
-    const children = props.tree.getChildren(nodeId);
-    for (let i = 0; i < children.length; i++) {
-      this._addVisibleRowsFromNode(props, arr, children[i], depth + 1);
-    }
+  _getExpandedNodes(): Set<NodeIndex | null> {
+    return this._computeExpandedNodesMemoized(this.props.expandedNodeIds);
   }
 
-  _getAllVisibleRows(props: TreeViewProps<DisplayData>): NodeIndex[] {
-    const roots = props.tree.getRoots();
-    const allRows = [];
-    for (let i = 0; i < roots.length; i++) {
-      this._addVisibleRowsFromNode(props, allRows, roots[i], 0);
-    }
-    return allRows;
+  _getAllVisibleRows(): NodeIndex[] {
+    const { tree } = this.props;
+    return this._computeAllVisibleRowsMemoized(tree, this._getExpandedNodes());
+  }
+
+  _getSpecialItems(): [NodeIndex | void, NodeIndex | void] {
+    const { selectedNodeId, rightClickedNodeId } = this.props;
+    return this._computeSpecialItemsMemoized(
+      selectedNodeId,
+      rightClickedNodeId
+    );
   }
 
   _isCollapsed(nodeId: NodeIndex): boolean {
-    return !this._expandedNodes.has(nodeId);
+    return !this._getExpandedNodes().has(nodeId);
   }
 
   _toggle = (
@@ -524,7 +510,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: boolean = false
   ) => {
-    const newSet = new Set(this._expandedNodes);
+    const newSet = new Set(this._getExpandedNodes());
     if (newExpanded) {
       newSet.add(nodeId);
       if (toggleAll) {
@@ -602,7 +588,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     event.preventDefault();
 
     const selected = this.props.selectedNodeId;
-    const visibleRows = this._getAllVisibleRows(this.props);
+    const visibleRows = this._getAllVisibleRows();
     const selectedRowIndex = visibleRows.findIndex(
       nodeId => nodeId === selected
     );
@@ -738,13 +724,13 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
             ariaActiveDescendant={
               selectedNodeId !== null ? `treeViewRow-${selectedNodeId}` : null
             }
-            items={this._visibleRows}
+            items={this._getAllVisibleRows()}
             renderItem={this._renderRow}
             itemHeight={rowHeight}
             columnCount={2}
             focusable={true}
             onKeyDown={this._onKeyDown}
-            specialItems={this._specialItems}
+            specialItems={this._getSpecialItems()}
             disableOverscan={!!disableOverscan}
             onCopy={this._onCopy}
             // If there is a deep call node depth, expand the width, or else keep it
