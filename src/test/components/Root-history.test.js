@@ -6,13 +6,20 @@
 
 import * as React from 'react';
 
-import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  screen,
+  cleanup,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { Root } from '../../components/app/Root';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { getProfileUrlForHash } from '../../actions/receive-profile';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
+import {
+  autoMockFullNavigation,
+  resetHistoryWithUrl,
+} from '../fixtures/mocks/window-navigation';
 import { coerceMatchingShape } from '../../utils/flow';
 import { makeProfileSerializable } from '../../profile-logic/process-profile';
 
@@ -65,7 +72,7 @@ describe('Root with history', function() {
     }
 
     const store = blankStore();
-    const renderResult = render(<Root store={store} />);
+    render(<Root store={store} />);
 
     async function waitForTab({
       name,
@@ -81,10 +88,17 @@ describe('Root with history', function() {
       });
     }
 
+    // This simulates a page reload, using the current URL.
+    function loadPageAgain() {
+      cleanup();
+      resetHistoryWithUrl();
+      const store = blankStore();
+      render(<Root store={store} />);
+    }
+
     return {
-      ...renderResult,
-      ...store,
       waitForTab,
+      loadPageAgain,
     };
   }
 
@@ -98,16 +112,16 @@ describe('Root with history', function() {
   });
 
   it('can view a file from the profile store, use history with it', async function() {
-    const { getByText, queryByText, waitForTab } = setup({
+    const { waitForTab } = setup({
       profileHash: 'FAKEHASH',
     });
 
     expect(window.history.length).toBe(1);
 
     expect(
-      getByText('Downloading and processing the profile…')
+      screen.getByText('Downloading and processing the profile…')
     ).toBeInTheDocument();
-    expect(queryByText('Call Tree')).not.toBeInTheDocument();
+    expect(screen.queryByText('Call Tree')).not.toBeInTheDocument();
 
     await Promise.all((window: any).fetch.mock.results.map(n => n.value));
 
@@ -142,6 +156,39 @@ describe('Root with history', function() {
 
     // The history will still have the same length, as we haven't overwritten it.
     expect(window.history.length).toBe(2);
+  });
+
+  // In the next test, we test that we don't throw.
+  // eslint-disable-next-line jest/expect-expect
+  it('can work with history after a reload', async function() {
+    const { waitForTab, loadPageAgain } = setup({
+      profileHash: 'FAKEHASH',
+    });
+
+    await waitForTab({ name: 'Call Tree', selected: true });
+
+    // Now we reload the page, wiping the history.
+    loadPageAgain();
+
+    // Wait until the call tree is visible.
+    await waitForTab({ name: 'Call Tree', selected: true });
+    await waitForTab({ name: 'Marker Chart', selected: false });
+
+    // Trigger a history event by clicking a tab.
+    const markerChart = await waitForTab({
+      name: 'Marker Chart',
+      selected: false,
+    });
+    markerChart.click();
+
+    await waitForTab({ name: 'Call Tree', selected: false });
+    await waitForTab({ name: 'Marker Chart', selected: true });
+
+    // Now go back to the call tree.
+    window.history.back();
+
+    await waitForTab({ name: 'Call Tree', selected: true });
+    await waitForTab({ name: 'Marker Chart', selected: false });
   });
 
   it('resets the history length between tests', async function() {
