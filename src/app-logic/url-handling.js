@@ -116,7 +116,12 @@ function getPathParts(urlState: UrlState): string[] {
     case 'none':
       return [];
     case 'compare':
-      return ['compare'];
+      // Special handling for CompareHome: we shouldn't append anything but the
+      // dataSource when the user is on the comparison form.
+      if (urlState.profilesToCompare === null) {
+        return ['compare'];
+      }
+      return ['compare', urlState.selectedTab];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':

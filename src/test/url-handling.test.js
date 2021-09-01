@@ -1597,6 +1597,13 @@ describe('compare', function() {
     );
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
+    expect(resultingUrl).toMatch('/calltree/');
+
+    store.dispatch(changeSelectedTab('flame-graph'));
+    const newResultingUrl = urlFromState(
+      urlStateSelectors.getUrlState(store.getState())
+    );
+    expect(newResultingUrl).toMatch('/flame-graph/');
   });
 });
 
