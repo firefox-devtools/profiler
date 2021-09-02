@@ -905,6 +905,7 @@ describe('extractProfileFilterPageData', function() {
     aboutBlank: 2,
     profiler: 3,
     exampleSubFrame: 4,
+    unknown: 5,
   };
   // This is the `profile.pages` array.
   const pages = [
@@ -984,5 +985,27 @@ describe('extractProfileFilterPageData', function() {
       hostname: 'about:blank',
       favicon: null,
     });
+  });
+
+  it('fails to extract the page data when there is no profile data in common', function() {
+    // Ignore the error we output when it fails.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const relevantPages = new Set([innerWindowIds.unknown]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+
+    expect(pageData).toEqual(null);
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it('fails to extract the page data when there is only a sub frame', function() {
+    // Ignore the error we output when it fails.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const relevantPages = new Set([innerWindowIds.exampleSubFrame]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+
+    expect(pageData).toEqual(null);
+    expect(console.error).toHaveBeenCalled();
   });
 });
