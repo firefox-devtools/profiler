@@ -432,10 +432,18 @@ export type CategoryList = Array<Category>;
  * The unique field for a page is innerWindowID.
  */
 export type Page = {|
+  // Tab ID of the page. This ID is the same for all the pages inside a tab's
+  // session history.
   tabID: TabID,
+  // ID of the JS `window` object in a `Document`. It's unique for every page.
   innerWindowID: InnerWindowID,
+  // Url of this page.
   url: string,
-  // 0 means no embedder
+  // Each page describes a frame in websites. A frame can either be the top-most
+  // one or inside of another one. For the children frames, `embedderInnerWindowID`
+  // points to the innerWindowID of the parent (embedder). It's `0` if there is
+  // no embedder, which means that it's the top-most frame. That way all pages
+  // can create a tree of pages that can be navigated.
   embedderInnerWindowID: number,
 |};
 
