@@ -974,4 +974,15 @@ describe('extractProfileFilterPageData', function() {
       favicon: 'https://profiler.firefox.com/favicon.ico',
     });
   });
+
+  it('extracts the page data when there is only about:blank as relevant page', function() {
+    const relevantPages = new Set([innerWindowIds.aboutBlank]);
+
+    const pageData = extractProfileFilterPageData(pages, relevantPages);
+    expect(pageData).toEqual({
+      origin: 'about:blank',
+      hostname: 'about:blank',
+      favicon: null,
+    });
+  });
 });

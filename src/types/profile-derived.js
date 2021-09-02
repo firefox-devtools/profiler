@@ -378,7 +378,7 @@ export type InitialSelectedTrackReference = HTMLElement;
 export type ProfileFilterPageData = {|
   origin: string,
   hostname: string,
-  favicon: string,
+  favicon: string | null,
 |};
 
 /**

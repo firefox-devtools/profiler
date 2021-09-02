@@ -2806,6 +2806,17 @@ export function extractProfileFilterPageData(
   }
 
   const pageUrl = filteredPages[0].url;
+
+  if (pageUrl.startsWith('about:')) {
+    // If we only have an `about:*` page, we should return early with a friendly
+    // origin and hostname. Otherwise the try block will fail.
+    return {
+      origin: pageUrl,
+      hostname: pageUrl,
+      favicon: null,
+    };
+  }
+
   try {
     const page = new URL(pageUrl);
     // FIXME(Bug 1620546): This is not ideal and we should get the favicon
