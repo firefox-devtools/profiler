@@ -1439,11 +1439,11 @@ export function changeMouseTimePosition(
   };
 }
 
-export function createBottomTabIfNeededAndSelect(fileName: string): Action {
+export function createSourceTabIfNeededAndSelect(file: string): Action {
   return {
-    type: 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT',
+    type: 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT',
     tab: {
-      fileName,
+      file,
     },
   };
 }

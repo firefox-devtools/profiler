@@ -178,7 +178,7 @@ type BaseQuery = {|
   view: string,
   implementation: string,
   timelineType: string,
-  bottomTab: string,
+  sourceTab: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
   ...OriginsProfileSpecificBaseQuery,
@@ -402,10 +402,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
             urlState.profileSpecific.transforms[selectedThreadsKey]
           ) || undefined;
       }
-      const { bottomTabs } = urlState.profileSpecific;
-      query.bottomTab =
-        bottomTabs.selectedIndex !== null
-          ? bottomTabs.list[bottomTabs.selectedIndex].fileName
+      const { sourceTabs } = urlState.profileSpecific;
+      query.sourceTab =
+        sourceTabs.selectedIndex !== null
+          ? sourceTabs.tabs[sourceTabs.selectedIndex].file
           : undefined;
       query.ctSummary =
         urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy ===
@@ -570,17 +570,13 @@ export function stateFromLocation(
     tabID = Number(query.ctxId);
   }
 
-  const bottomTabs = query.bottomTab
+  const sourceTabs = query.sourceTab
     ? {
-        list: [
-          {
-            fileName: query.bottomTab,
-          },
-        ],
+        tabs: [{ file: query.sourceTab }],
         selectedIndex: 0,
       }
     : {
-        list: [],
+        tabs: [],
         selectedIndex: null,
       };
 
@@ -610,7 +606,7 @@ export function stateFromLocation(
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
-      bottomTabs,
+      sourceTabs,
       timelineType: validateTimelineType(query.timelineType),
       full: {
         showJsTracerSummary: query.summary === undefined ? false : true,

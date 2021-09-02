@@ -28,7 +28,7 @@ import {
   changeExpandedCallNodes,
   addTransformToStack,
   handleCallNodeTransformShortcut,
-  createBottomTabIfNeededAndSelect,
+  createSourceTabIfNeededAndSelect,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/flow';
 
@@ -69,7 +69,7 @@ type DispatchProps = {|
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
-  +createBottomTabIfNeededAndSelect: typeof createBottomTabIfNeededAndSelect,
+  +createSourceTabIfNeededAndSelect: typeof createSourceTabIfNeededAndSelect,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -218,12 +218,12 @@ class CallTreeImpl extends PureComponent<Props> {
   };
 
   _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
-    const { tree, createBottomTabIfNeededAndSelect } = this.props;
-    const fileName = tree.getRawFileNameForCallNode(nodeId);
-    if (fileName === null) {
+    const { tree, createSourceTabIfNeededAndSelect } = this.props;
+    const file = tree.getRawFileNameForCallNode(nodeId);
+    if (file === null) {
       return;
     }
-    createBottomTabIfNeededAndSelect(fileName);
+    createSourceTabIfNeededAndSelect(file);
   };
 
   procureInterestingInitialSelection() {
@@ -333,7 +333,7 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
     handleCallNodeTransformShortcut,
-    createBottomTabIfNeededAndSelect,
+    createSourceTabIfNeededAndSelect,
   },
   component: CallTreeImpl,
 });

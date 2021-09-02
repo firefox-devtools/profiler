@@ -85,19 +85,19 @@ export function getStackAndSampleSelectorsPerThread(
 
   const getStackLineInfo: Selector<StackLineInfo | null> = createSelector(
     threadSelectors.getFilteredThread,
-    UrlState.getSelectedBottomTabFileName,
+    UrlState.getSelectedSourceTabFile,
     (
       { stackTable, frameTable, funcTable, stringTable }: Thread,
-      selectedBottomTabFileName
+      selectedSourceTabFile
     ): StackLineInfo | null => {
-      if (selectedBottomTabFileName === null) {
+      if (selectedSourceTabFile === null) {
         return null;
       }
       return ProfileData.getStackLineInfo(
         stackTable,
         frameTable,
         funcTable,
-        stringTable.indexForString(selectedBottomTabFileName)
+        stringTable.indexForString(selectedSourceTabFile)
       );
     }
   );
@@ -229,7 +229,7 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
-  const getLineTimings: Selector<LineTimings> = createSelector(
+  const getLineTimings: Selector<LineTimings | null> = createSelector(
     getStackLineInfo,
     threadSelectors.getPreviewFilteredSamplesForCallTree,
     ProfileData.getLineTimings

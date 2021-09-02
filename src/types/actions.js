@@ -28,9 +28,10 @@ import type {
   UploadState,
   State,
   UploadedProfileInformation,
-  BottomTab,
+  SourceTab,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
+import { string } from 'prop-types';
 
 export type DataSource =
   | 'none'
@@ -294,8 +295,8 @@ type ProfileAction =
       +type: 'ENABLE_EXPERIMENTAL_CPU_GRAPHS',
     |}
   | {|
-      +type: 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT',
-      +tab: BottomTab,
+      +type: 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT',
+      +tab: SourceTab,
     |};
 
 type ReceiveProfileAction =
@@ -536,6 +537,11 @@ type L10nAction =
       +direction: 'ltr' | 'rtl',
     |};
 
+    type SourcesAction =
+    | {| +type: 'SOURCE_LOADING_BEGIN', file: string, url: string |}
+    | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
+    | {| +type: 'SOURCE_LOADING_ERROR', file: string, error: string |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -546,4 +552,5 @@ export type Action =
   | PublishAction
   | DragAndDropAction
   | CurrentProfileUploadedInformationAction
-  | L10nAction;
+  | L10nAction
+  | SourcesAction;

@@ -20,7 +20,7 @@ import type {
   UrlState,
   Reducer,
   TimelineTrackOrganization,
-  BottomTabsState,
+  SourceTabsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -473,19 +473,17 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
   }
 };
 
-const bottomTabs: Reducer<BottomTabsState> = (
-  state = { list: [], selectedIndex: null },
+const sourceTabs: Reducer<SourceTabsState> = (
+  state = { tabs: [], selectedIndex: null },
   action
 ) => {
   switch (action.type) {
-    case 'CREATE_BOTTOM_TAB_IF_NEEDED_AND_SELECT': {
-      const index = state.list.findIndex(
-        tab => tab.fileName === action.tab.fileName
-      );
+    case 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT': {
+      const index = state.tabs.findIndex(tab => tab.file === action.tab.file);
       if (index === -1) {
-        const selectedIndex = state.list.length;
+        const selectedIndex = state.tabs.length;
         return {
-          list: [...state.list, action.tab],
+          tabs: [...state.tabs, action.tab],
           selectedIndex,
         };
       }
@@ -498,7 +496,7 @@ const bottomTabs: Reducer<BottomTabsState> = (
       }
       return state;
     }
-    case 'SELECT_BOTTOM_TAB': {
+    case 'SELECT_SOURCE_TAB': {
       const selectedIndex = action.index;
       if (selectedIndex !== state.selectedIndex) {
         return {
@@ -574,7 +572,7 @@ const profileSpecific = combineReducers({
   markersSearchString,
   networkSearchString,
   transforms,
-  bottomTabs,
+  sourceTabs,
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,

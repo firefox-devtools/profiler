@@ -225,14 +225,24 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
-export type IndexIntoBottomTabs = number;
-export type BottomTab = {|
-  fileName: string,
+export type IndexIntoSourceTabs = number;
+export type SourceTab = {|
+  file: string,
 |};
 
-export type BottomTabsState = {|
-  list: BottomTab[],
-  selectedIndex: IndexIntoBottomTabs | null,
+export type SourceTabsState = {|
+  tabs: SourceTab[],
+  selectedIndex: IndexIntoSourceTabs | null,
+|};
+
+export type FileSourceStatus =
+  | {| type: 'LOADING', url: string |}
+  | {| type: 'ERROR', error: string |}
+  | {| type: 'AVAILABLE', source: string |};
+
+export type FileSourceItem = {|
+  file: string,
+  status: FileSourceStatus,
 |};
 
 /**
@@ -271,7 +281,7 @@ export type ProfileSpecificUrlState = {|
   timelineType: TimelineType,
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
-  bottomTabs: BottomTabsState,
+  sourceTabs: SourceTabsState,
 |};
 
 /**
@@ -323,6 +333,7 @@ export type State = {|
   +zippedProfiles: ZippedProfilesState,
   +publish: PublishState,
   +l10n: L10nState,
+  +sources: FileSourceItem[],
 |};
 
 export type IconWithClassName = {|
