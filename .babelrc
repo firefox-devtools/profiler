@@ -53,6 +53,15 @@
       }
     ],
     [
+      "@babel/plugin-proposal-private-property-in-object",
+      {
+        // Like `plugin-proposal-class-properties`, `loose` option is being used
+        // inside of this plugin as well. These plugins must have the same value,
+        // therefore it's set to true here.
+        "loose": true
+      }
+    ],
+    [
       // This plugin is configured by preset-env when needed... however because
       // Webpack v4 doesn't understand this new syntaxe we need to
       // unconditionally transpile it even for platforms that don't support it.

@@ -157,8 +157,8 @@ export function setupInitialUrlState(
     // load process.
     withHistoryReplaceStateSync(() => {
       dispatch(updateUrlState(urlState));
-      dispatch(urlSetupDone());
       dispatch(finalizeProfileView());
+      dispatch(urlSetupDone());
     });
   };
 }

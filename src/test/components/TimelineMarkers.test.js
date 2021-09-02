@@ -63,9 +63,13 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
 
   function getContextMenu() {
     return ensureExists(
-      renderResult.container.querySelector('.react-contextmenu'),
+      document.querySelector('.react-contextmenu'),
       `Couldn't find the context menu.`
     );
+  }
+
+  function tryToGetMarkerTooltip() {
+    return document.querySelector('.tooltipMarker');
   }
 
   function clickOnMenuItem(stringOrRegexp) {
@@ -75,7 +79,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   function fireMouseEvent(eventName, options) {
     fireEvent(
       ensureExists(
-        renderResult.container.querySelector('canvas'),
+        document.querySelector('canvas'),
         `Couldn't find the canvas element`
       ),
       getMouseEvent(eventName, options)
@@ -108,7 +112,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   function rightClick(where: { x: CssPixels, y: CssPixels }) {
     const positioningOptions = getPositioningOptions(where);
     const canvas = ensureExists(
-      renderResult.container.querySelector('canvas'),
+      document.querySelector('canvas'),
       `Couldn't find the canvas element`
     );
 
@@ -130,6 +134,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
     rightClick,
     mouseOver,
     getContextMenu,
+    tryToGetMarkerTooltip,
     clickOnMenuItem,
     ...renderResult,
   };
@@ -138,6 +143,10 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
 describe('TimelineMarkers', function() {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
+  // We will be hovering over element with a tooltip. It requires root overlay
+  // element to be present in DOM.
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
   it('renders correctly', () => {
     window.devicePixelRatio = 1;
@@ -188,16 +197,30 @@ describe('TimelineMarkers', function() {
     delete window.devicePixelRatio;
   });
 
+  it('renders the first marker tooltip when hovered', () => {
+    const { tryToGetMarkerTooltip, mouseOver } = setupWithMarkers(
+      { rangeStart: 0, rangeEnd: 10 },
+      [
+        ['DOMEvent', 0, 3],
+        ['Navigation', 6, 10],
+      ]
+    );
+
+    // Tooltip should not be visible yet.
+    expect(tryToGetMarkerTooltip()).not.toBeInTheDocument();
+
+    // The "DOMEvent" marker is drawn from 0,0 to 5,60.
+    mouseOver({ x: 30, y: 2 });
+
+    // It should be visible after hovering the first marker.
+    expect(tryToGetMarkerTooltip()).toBeInTheDocument();
+  });
+
   describe('displays context menus', () => {
     beforeEach(() => {
       // Always use fake timers when dealing with context menus.
       jest.useFakeTimers();
-      // We will be hovering over element with a tooltip. It requires root overlay
-      // element to be present in DOM
-      addRootOverlayElement();
     });
-
-    afterEach(removeRootOverlayElement);
 
     it('when right clicking on a marker', () => {
       const { rightClick, getContextMenu, clickOnMenuItem } = setupWithMarkers(

@@ -1168,6 +1168,24 @@ export function changeSelectedNetworkMarker(
     threadsKey,
   };
 }
+
+/**
+ * This action is used when hovering a network marker in the network track (in
+ * the timeline) or the network chart (in the bottom part), so that it's also
+ * highlighted in the other component.
+ * In the future this will be used for other types of markers as well.
+ */
+export function changeHoveredMarker(
+  threadsKey: ThreadsKey,
+  hoveredNetworkMarker: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_HOVERED_MARKER',
+    markerIndex: hoveredNetworkMarker,
+    threadsKey,
+  };
+}
+
 /**
  * This action is used when the user right clicks a marker, and is especially
  * used to display its context menu.

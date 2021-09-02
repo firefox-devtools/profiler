@@ -1976,6 +1976,27 @@ Array [
       5,
     ],
   },
+  Object {
+    "bucket": "Other",
+    "end": Array [
+      7,
+      8,
+    ],
+    "index": Array [
+      6,
+      7,
+    ],
+    "label": Array [
+      "https://mozilla.org",
+      "https://mozilla.org",
+    ],
+    "length": 2,
+    "name": "Network Requests",
+    "start": Array [
+      6,
+      7,
+    ],
+  },
 ]
 `;
 

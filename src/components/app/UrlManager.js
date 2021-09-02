@@ -200,17 +200,16 @@ class UrlManagerImpl extends React.PureComponent<Props> {
       return;
     }
 
+    const oldUrl = window.location.pathname + window.location.search;
     const newUrl = urlFromState(urlState);
-    if (newUrl !== window.location.pathname + window.location.search) {
-      if (!getIsHistoryReplaceState()) {
-        // Push the URL state only when the url setup is done, and we haven't set
-        // a flag to only replace the state.
-        window.history.pushState(urlState, document.title, newUrl);
-      } else {
-        // Replace the URL state before the URL setup is done, and if we've specifically
-        // flagged to replace the URL state.
-        window.history.replaceState(urlState, document.title, newUrl);
-      }
+    if (!window.history.state || getIsHistoryReplaceState()) {
+      // Replace the URL state if we've specifically flagged to replace the URL
+      // state. This happens during the loading process. Also do it if we don't
+      // have an history state yet.
+      window.history.replaceState(urlState, document.title, newUrl);
+    } else if (newUrl !== oldUrl) {
+      // Push the URL state when we haven't set a flag to only replace the state.
+      window.history.pushState(urlState, document.title, newUrl);
     }
   }
 

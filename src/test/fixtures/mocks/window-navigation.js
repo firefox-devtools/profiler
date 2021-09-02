@@ -42,6 +42,10 @@ import { coerceMatchingShape } from '../../../utils/flow';
 // window.history can change the inner location directly.
 const internalLocationAssign = Symbol.for('internalLocationAssign');
 
+// This symbol will be used in the mock for window.history so that we can reset
+// it from tests.
+const internalHistoryReset = Symbol.for('internalHistoryReset');
+
 /**
  * This mock creates a location API that allows for assigning to the location,
  * which we need to be able to do for certain tests.
@@ -164,21 +168,29 @@ function mockWindowLocation(location: string = 'http://localhost') {
 function mockWindowHistory() {
   const originalHistory = Object.getOwnPropertyDescriptor(window, 'history');
 
-  let states = [null];
-  let urls = [window.location.href];
-  let index = 0;
+  let states, urls, index;
+
+  function reset() {
+    states = [null];
+    urls = [window.location.href];
+    index = 0;
+  }
+
+  reset();
+
   const history = {
     get length() {
       return states.length;
     },
     scrollRestoration: 'auto',
-    state: null,
+    get state() {
+      return states[index] ?? null;
+    },
     back() {
       if (index <= 0) {
         return;
       }
       index--;
-      history.state = states[index];
       // $FlowExpectError Flow doesn't know about this internal property.
       window.location[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
@@ -189,7 +201,6 @@ function mockWindowHistory() {
       }
       index++;
 
-      history.state = states[index];
       // $FlowExpectError Flow doesn't know about this internal property.
       window.location[internalLocationAssign](urls[index]);
       window.dispatchEvent(new Event('popstate'));
@@ -223,6 +234,8 @@ function mockWindowHistory() {
 
       states[index] = newState;
     },
+    // $FlowExpectError Flow doesn't know about symbol properties sadly.
+    [internalHistoryReset]: reset,
   };
 
   // This "delete" call doesn't seem to be necessary, but better do it so that
@@ -273,4 +286,11 @@ export function autoMockFullNavigation() {
       cleanup = null;
     }
   });
+}
+
+export function resetHistoryWithUrl(url: string = window.location.href) {
+  // $FlowExpectError Flow doesn't know about this internal property.
+  window.location[internalLocationAssign](url);
+  // $FlowExpectError Flow doesn't know about this internal property.
+  window.history[internalHistoryReset]();
 }
