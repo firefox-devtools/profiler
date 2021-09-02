@@ -57,6 +57,23 @@ CallNodeContextMenu--transform-merge-call-node = Об'єднати лише ву
         вузла функції, який його викликав. Це вилучає функцію лише з тієї
         певної частини дерева. Будь-які інші місця, з яких було викликано функцію,
         залишаться у профілі.
+# This is used as the context menu item title for "Focus on function" and "Focus
+# on function (inverted)" transforms.
+CallNodeContextMenu--transform-focus-function-title =
+    Фокус на функції вилучить будь -який зразок, який не містить цієї функції.
+    Крім того, він повторно вкорінює дерево викликів, щоб функція була єдиним
+    коренем дерева. Це може об'єднати декілька сайтів викликів функцій у профілі
+    в один вузол виклику.
+CallNodeContextMenu--transform-focus-function = Фокус на функції
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-function-inverted = Фокус на функції (інвертовано)
+    .title = { CallNodeContextMenu--transform-focus-function-title }
+CallNodeContextMenu--transform-focus-subtree = Фокус лише на піддереві
+    .title =
+        Фокус на піддереві вилучить будь -який зразок, який не включає цю
+        конкретну частину дерева викликів. Це витягує гілку дерева викликів,
+        однак робить це лише для того єдиного вузла виклику. Усі інші виклики
+        функції ігноруються.
 CallNodeContextMenu--transform-collapse-function-subtree = Згорнути функцію
     .title =
         Згортання функції вилучить усе, що вона викликала, і призначить
@@ -78,6 +95,9 @@ CallNodeContextMenu--transform-drop-function = Покинути зразки з 
         Якщо покинути зразки, їх час вилучається з профілю. Це корисно для
         усунення інформації про час, який не стосується аналізу.
 CallNodeContextMenu--expand-all = Розгорнути все
+# Searchfox is a source code indexing tool for Mozilla Firefox.
+# See: https://searchfox.org/
+CallNodeContextMenu--searchfox = Шукати назву функції у Searchfox
 CallNodeContextMenu--copy-function-name = Скопіювати назву функції
 CallNodeContextMenu--copy-script-url = Скопіювати URL-адресу скрипту
 CallNodeContextMenu--copy-stack = Копіювати стек
@@ -85,10 +105,39 @@ CallNodeContextMenu--copy-stack = Копіювати стек
 ## CallTree
 ## This is the component for Call Tree panel.
 
+CallTree--tracing-ms-total = Час роботи (мс)
+    .title =
+        "Загальний" час роботи включає в себе суму всього часу,
+        протягом якого ця функція знаходилась у стеку. Сюди входить час,
+        протягом якого функція насправді виконувалася, а також час,
+        витрачений ініціаторами з цієї функції.
+CallTree--tracing-ms-self = Власний (мс)
+    .title =
+        "Власний" час включає лише час, коли функція була кінцем стека.
+        Якщо ця функція викликала інші функції, час “інших” функцій не
+        враховується. "Власний" час корисний для розуміння того, на що
+        був фактично витрачений час у програмі.
+CallTree--samples-total = Всього (зразки)
+    .title =
+        "Всього" зразків включає суму кожного зразка, де ця функція була
+        виявлена у стеку. Сюди входить час, коли функція насправді виконувалася,
+        а також час, витрачений ініціаторами з цієї функції.
+CallTree--samples-self = Власний
+    .title =
+        "Власний" підрахунок зразків включає лише зразки, де функція була
+        кінцем стека. Якщо ця функція викликала інші функції, час “інших” функцій
+        не включається. "Власний" підрахунок корисний для розуміння того,
+        на що був фактично витрачений час у програмі.
+CallTree--bytes-total = Загальний розмір (байтів)
+    .title =
+        "Загальний розмір" включає суму всіх призначених чи звільнених байтів,
+        коли ця функція знаходилась у стеку. Сюди входять як байти,
+        де функція насправді виконувалася, так і байти ініціаторів викликів з цієї функції.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
 
+CallTreeSidebar--select-a-node = Виберіть вузол для показу інформації про нього.
 
 ## CompareHome
 ## This is used in the page to compare two profiles.
@@ -127,7 +176,9 @@ FooterLinks--Cookies = Куки
 ## page.
 
 FullTimeline--graph-type = Тип графіка:
+FullTimeline--categories-with-cpu = Категорії з CPU
 FullTimeline--categories = Категорії
+FullTimeline--stack-height = Висота стеку
 # This string is used as the text of the track selection button.
 # Displays the ratio of visible tracks count to total tracks count in the timeline.
 # We have spans here to make the numbers bold.
