@@ -17,7 +17,7 @@ export function fetchSourceForFile(file: string): ThunkAction<Promise<void>> {
       dispatch({
         type: 'SOURCE_LOADING_ERROR',
         file,
-        error: `The file ${file} cannot be loaded by the profiler. There is no CORS-enabled URL for it.`,
+        error: `The file ${parsedName.path} cannot be loaded by the profiler. There is no CORS-enabled URL for it.`,
       });
       return;
     }
@@ -30,7 +30,7 @@ export function fetchSourceForFile(file: string): ThunkAction<Promise<void>> {
 
       if (response.status !== 200) {
         throw new Error(
-          `The request to ${url} return HTTP status ${response.status}`
+          `The request to ${url} returned HTTP status ${response.status}`
         );
       }
 

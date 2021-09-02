@@ -141,12 +141,6 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     // React converts height into 'px' values, while lineHeight is valid in
     // non-'px' units.
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
-    const sourceLines = this._getSourceLines();
-    const line = index < sourceLines.length ? sourceLines[index] : '';
-
-    // This syntax-highlights each line individually. That means it doesn't
-    // handle multi-line comments properly, for example.
-    const row = refractor.highlight(line, 'cpp');
 
     const total = timings.totalLineHits.get(lineNumber);
     const self = timings.selfLineHits.get(lineNumber);
@@ -172,6 +166,15 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         </div>
       );
     }
+
+    const sourceLines = this._getSourceLines();
+    const line = index < sourceLines.length ? sourceLines[index] : '';
+
+    // This syntax-highlights each line individually. That means it doesn't
+    // handle multi-line comments properly, for example.
+    // TODO: Fix this properly. Maybe compute highlighting data for the entire
+    // file in a worker?
+    const row = refractor.highlight(line, 'cpp');
 
     return (
       <div

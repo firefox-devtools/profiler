@@ -41,6 +41,25 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
+function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
+  switch (status.type) {
+    case 'LOADING': {
+      const { url } = status;
+      return (
+        <div className="sourceStatusOverlay loading">Waiting for {new URL(url).host}...</div>
+      );
+    }
+    case 'ERROR': {
+      const { error } = status;
+      return (
+        <div className="sourceStatusOverlay error">{error}</div>
+      );
+    }
+    default:
+      return null;
+  }
+}
+
 class BottomStuffImpl extends React.PureComponent<Props> {
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
@@ -74,13 +93,16 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     return (
       <div className="bottom-stuff">
         <div className="bottom-main">
-          {lineTimings !== null ? (
-            <SourceView
-              timings={lineTimings}
-              source={source}
-              rowHeight={16}
-              key={selectedSourceTabFile}
-            />
+          {lineTimings !== null && selectedSourceTabSource !== undefined ? (
+            <>
+              <SourceView
+                timings={lineTimings}
+                source={source}
+                rowHeight={16}
+                key={selectedSourceTabFile}
+              />
+              <SourceStatusOverlay status={selectedSourceTabSource} />
+            </>
           ) : null}
         </div>
         <div className="bottom-tabs">

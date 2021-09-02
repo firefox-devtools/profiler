@@ -10,10 +10,51 @@
 
 .bottom-main {
   display: flex;
+  position: relative;
   min-height: 0;
   flex: 1;
   flex-flow: column nowrap;
   background: #eee;
+}
+
+.sourceStatusOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  width: max-content;
+  min-width: 200px;
+  max-width: min(500px, 100%);
+  height: min-content;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: rgba(240, 240, 240, 0.8);
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 15px;
+  word-break: break-word;
+}
+
+.sourceStatusOverlay.loading::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: url(/res/img/spinner.png) center center / 32px 32px no-repeat
+}
+
+.sourceStatusOverlay.error::before {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  background: url(/res/img/svg/error.svg) center center / 32px 32px no-repeat;
+  filter: brightness(70%) drop-shadow(0 1px rgba(255,255,255, 0.5));
 }
 
 .bottom-tabs {

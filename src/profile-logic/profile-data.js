@@ -2247,7 +2247,7 @@ export function getUrlsForSourceFile(
       const { bucket, digest, path } = parsedFile;
       return {
         // Not CORS-enabled at the moment, see https://bugzilla.mozilla.org/show_bug.cgi?id=1717976.
-        // corsFetchableRawSource: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
+        corsFetchableRawSource: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userCopyableRawSource: `view-source:https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userViewablePrettySource: `https://crash-stats.mozilla.org/sources/highlight/?url=https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
       };
