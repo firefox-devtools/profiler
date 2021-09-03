@@ -133,6 +133,12 @@ CallTree--bytes-total = Загальний розмір (байтів)
         "Загальний розмір" включає суму всіх призначених чи звільнених байтів,
         коли ця функція знаходилась у стеку. Сюди входять як байти,
         де функція насправді виконувалася, так і байти ініціаторів викликів з цієї функції.
+CallTree--bytes-self = Власний (байти)
+    .title =
+        "Власний" обсяг байтів включає суму всіх виділених чи звільнених байтів,
+        коли функція була кінцем стеку. Якщо ця функція викликає інші функції,
+        байти “інших” функцій не включаються. "Власний" обсяг байтів корисний для розуміння того,
+        скільки пам'яті було фактично виділено чи звільнено у програмі.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -144,6 +150,9 @@ CallTreeSidebar--select-a-node = Виберіть вузол для показу
 ## See: https://profiler.firefox.com/compare/
 
 CompareHome--instruction-title = Введіть URL-адреси профілів, які ви хочете порівняти
+CompareHome--instruction-content =
+    Інструмент буде витягувати дані з вибраної доріжки та діапазону для
+    кожного профілю та розмістить їх в одному поданні, щоб полегшити порівняння.
 CompareHome--form-label-profile1 = Профіль 1:
 CompareHome--form-label-profile2 = Профіль 2:
 CompareHome--submit-button =
@@ -153,6 +162,10 @@ CompareHome--submit-button =
 ## This is displayed at the top of the analysis page when the loaded profile is
 ## a debug build of Firefox.
 
+DebugWarning--warning-message =
+    .message =
+        Цей профіль був записаний у збірці без оптимізації випуску.
+        Спостереження за продуктивністю може не поширюватися на користувачів випуску.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
