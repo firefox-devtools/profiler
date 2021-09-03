@@ -69,11 +69,15 @@
 }
 
 .bottom-tabs-reorderable {
+  min-width: 0;
+  flex-shrink: 1;
   display: flex;
   flex-flow: row nowrap;
 }
 
 .bottom-tab {
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 2px 8px 0;
   border: solid transparent;
   border-width: 0 1px;
