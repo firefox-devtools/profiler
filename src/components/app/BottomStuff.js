@@ -66,11 +66,28 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
 }
 
 class BottomStuffImpl extends React.PureComponent<Props> {
+  _sourceView: SourceView | null = null;
+  _takeSourceViewRef = (sourceView: SourceView | null) => {
+    this._sourceView = sourceView;
+  };
+
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
+    if (this._sourceView) {
+      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+    }
   }
-  componentDidUpdate() {
+
+  componentDidUpdate(prevProps: Props) {
     this._triggerSourceLoadingIfNeeded();
+
+    if (
+      this._sourceView &&
+      prevProps.sourceTabActivationGeneration <
+        this.props.sourceTabActivationGeneration
+    ) {
+      this._sourceView.scrollToHotSpot(this.props.selectedCallNodeLineTimings);
+    }
   }
 
   _triggerSourceLoadingIfNeeded() {
@@ -92,9 +109,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
   render() {
     const {
       globalLineTimings,
-      selectedCallNodeLineTimings,
       sourceTabs,
-      sourceTabActivationGeneration,
       selectedSourceTabSource,
     } = this.props;
     const source =
@@ -127,19 +142,18 @@ class BottomStuffImpl extends React.PureComponent<Props> {
           })}
         </div>
         <div className="bottom-main">
-          {selectedSourceTabSource !== undefined &&
-          selectedSourceTabFile !== null ? (
-            <>
-              <SourceView
-                key={selectedSourceTabFile}
-                timings={globalLineTimings}
-                timingsInformingScrolling={selectedCallNodeLineTimings}
-                source={source}
-                rowHeight={16}
-                scrollToHotSpotGeneration={sourceTabActivationGeneration}
-              />
-              <SourceStatusOverlay status={selectedSourceTabSource} />
-            </>
+          {selectedSourceTabFile !== null ? (
+            <SourceView
+              key={selectedSourceTabFile}
+              scrollRestorationKey={selectedSourceTabFile}
+              timings={globalLineTimings}
+              source={source}
+              rowHeight={16}
+              ref={this._takeSourceViewRef}
+            />
+          ) : null}
+          {selectedSourceTabSource !== undefined ? (
+            <SourceStatusOverlay status={selectedSourceTabSource} />
           ) : null}
         </div>
       </div>

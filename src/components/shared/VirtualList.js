@@ -268,6 +268,11 @@ type Geometry = {
   innerRectY: CssPixels,
 };
 
+export type ScrollPosition = {|
+  +x: number,
+  +y: number,
+|};
+
 export class VirtualList<Item> extends React.PureComponent<
   VirtualListProps<Item>
 > {
@@ -381,6 +386,23 @@ export class VirtualList<Item> extends React.PureComponent<
 
     const itemLeft = offsetX;
     container.scrollLeft = itemLeft;
+  }
+
+  getScrollPosition(): ScrollPosition | null {
+    const container = this._container.current;
+    if (!container) {
+      return null;
+    }
+    return { x: container.scrollLeft, y: container.scrollTop };
+  }
+
+  setScrollPosition(pos: ScrollPosition | null) {
+    const container = this._container.current;
+    if (!container || !pos) {
+      return;
+    }
+    container.scrollLeft = pos.x;
+    container.scrollTop = pos.y;
   }
 
   focus() {

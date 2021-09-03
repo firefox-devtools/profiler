@@ -47,10 +47,9 @@ for understanding where time was actually spent in a program."
 
 type SourceViewProps = {|
   +timings: LineTimings,
-  +timingsInformingScrolling: LineTimings,
   +source: string,
   +rowHeight: CssPixels,
-  +scrollToHotSpotGeneration: number,
+  +scrollRestorationKey: string,
 |};
 
 type LineNumber = number;
@@ -91,6 +90,8 @@ function createElement(
   }
 }
 
+const scrollRestorationMap: Map<string, number> = new Map();
+
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _specialItems: [] = [];
   _list: VirtualList<LineNumber> | null = null;
@@ -120,24 +121,23 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   );
 
   componentDidMount() {
-    this.scrollToHotSpot();
-  }
-
-  componentDidUpdate(prevProps: SourceViewProps) {
-    console.log(
-      `${prevProps.scrollToHotSpotGeneration}, ${this.props.scrollToHotSpotGeneration}`
-    );
-    if (
-      prevProps.scrollToHotSpotGeneration < this.props.scrollToHotSpotGeneration
-    ) {
-      this.scrollToHotSpot();
+    // Restore the old scroll position.
+    const scrollPos = scrollRestorationMap.get(this.props.scrollRestorationKey);
+    if (scrollPos !== undefined && this._list) {
+      this._list.setScrollPosition(scrollPos);
     }
   }
 
-  scrollToHotSpot() {
-    const heaviestLine = mapGetKeyWithMaxValue(
-      this.props.timingsInformingScrolling.totalLineHits
-    );
+  componentWillUnmount() {
+    // Store the current scroll position.
+    const scrollPos = this._list ? this._list.getScrollPosition() : null;
+    scrollRestorationMap.set(this.props.scrollRestorationKey, scrollPos);
+  }
+
+  scrollToHotSpot(timingsForScrolling: LineTimings) {
+    const heaviestLine =
+      mapGetKeyWithMaxValue(timingsForScrolling.totalLineHits) ??
+      mapGetKeyWithMaxValue(this.props.timings.totalLineHits);
     if (heaviestLine !== undefined) {
       this.scrollToLine(heaviestLine - 5);
     }
