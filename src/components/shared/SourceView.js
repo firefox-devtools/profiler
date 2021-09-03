@@ -13,6 +13,7 @@ import cpp from 'refractor/lang/cpp.js';
 import { VirtualList } from './VirtualList';
 
 import type { CssPixels, LineTimings } from 'firefox-profiler/types';
+import type { ScrollPosition } from './VirtualList';
 
 import './SourceView.css';
 
@@ -90,7 +91,7 @@ function createElement(
   }
 }
 
-const scrollRestorationMap: Map<string, number> = new Map();
+const scrollRestorationMap: Map<string, ScrollPosition | null> = new Map();
 
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _specialItems: [] = [];
