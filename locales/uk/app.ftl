@@ -165,7 +165,7 @@ CompareHome--submit-button =
 DebugWarning--warning-message =
     .message =
         Цей профіль був записаний у збірці без оптимізації випуску.
-        Спостереження за продуктивністю може не поширюватися на користувачів випуску.
+        Спостереження за швидкодією може не поширюватися на користувачів випуску.
 
 ## Details
 ## This is the bottom panel in the analysis UI. They are generic strings to be
