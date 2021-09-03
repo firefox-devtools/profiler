@@ -6,6 +6,7 @@
 import React from 'react';
 
 import { SourceView } from '../shared/SourceView';
+import { Reorderable } from '../shared/Reorderable';
 
 import {
   getSourceTabs,
@@ -24,7 +25,10 @@ import type {
 } from 'firefox-profiler/types';
 
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
-import { changeSelectedSourceTab } from 'firefox-profiler/actions/profile-view';
+import {
+  changeSelectedSourceTab,
+  changeSourceTabOrder,
+} from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
 
 import './BottomStuff.css';
@@ -42,6 +46,7 @@ type StateProps = {|
 type DispatchProps = {|
   +fetchSourceForFile: typeof fetchSourceForFile,
   +changeSelectedSourceTab: typeof changeSelectedSourceTab,
+  +changeSourceTabOrder: typeof changeSourceTabOrder,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -111,6 +116,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
       globalLineTimings,
       sourceTabs,
       selectedSourceTabSource,
+      changeSourceTabOrder,
     } = this.props;
     const source =
       selectedSourceTabSource && selectedSourceTabSource.type === 'AVAILABLE'
@@ -123,23 +129,32 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     return (
       <div className="bottom-stuff">
         <div className="bottom-tabs">
-          {sourceTabs.tabs.map((tab, index) => {
-            const parsedName = parseFileNameFromSymbolication(tab.file);
-            const path = parsedName.path;
-            const file = path.slice(path.lastIndexOf('/') + 1);
-            return (
-              <span
-                key={index}
-                data-index={index}
-                className={classNames('bottom-tab', {
-                  'bottom-tab--selected': index === sourceTabs.selectedIndex,
-                })}
-                onMouseDown={this._tabClicked}
-              >
-                {file}
-              </span>
-            );
-          })}
+          <Reorderable
+            tagName="div"
+            className="bottom-tabs-reorderable"
+            grippyClassName="bottom-tab"
+            order={sourceTabs.order}
+            orient="horizontal"
+            onChangeOrder={changeSourceTabOrder}
+          >
+            {sourceTabs.tabs.map((tab, index) => {
+              const parsedName = parseFileNameFromSymbolication(tab.file);
+              const path = parsedName.path;
+              const file = path.slice(path.lastIndexOf('/') + 1);
+              return (
+                <span
+                  key={index}
+                  data-index={index}
+                  className={classNames('bottom-tab', {
+                    'bottom-tab--selected': index === sourceTabs.selectedIndex,
+                  })}
+                  onMouseDown={this._tabClicked}
+                >
+                  {file}
+                </span>
+              );
+            })}
+          </Reorderable>
         </div>
         <div className="bottom-main">
           {selectedSourceTabFile !== null ? (
@@ -172,6 +187,10 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     selectedSourceTabFile: getSelectedSourceTabFile(state),
     selectedSourceTabSource: getSelectedSourceTabSource(state),
   }),
-  mapDispatchToProps: { fetchSourceForFile, changeSelectedSourceTab },
+  mapDispatchToProps: {
+    fetchSourceForFile,
+    changeSelectedSourceTab,
+    changeSourceTabOrder,
+  },
   component: BottomStuffImpl,
 });

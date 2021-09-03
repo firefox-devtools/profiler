@@ -228,7 +228,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     const { rowHeight } = this.props;
     const sourceLines = this._getSourceLines();
     const maxLength = this._computeMaxLineLengthMemoized(sourceLines);
-    const CHAR_WIDTH_ESTIMATE = 8;
+    const CHAR_WIDTH_ESTIMATE = 8; // css pixels
 
     return (
       <div className="sourceView">

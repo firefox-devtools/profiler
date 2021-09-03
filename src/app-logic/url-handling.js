@@ -575,11 +575,13 @@ export function stateFromLocation(
         activationGeneration: 0,
         tabs: [{ file: query.sourceTab }],
         selectedIndex: 0,
+        order: [0],
       }
     : {
         activationGeneration: 0,
         tabs: [],
         selectedIndex: null,
+        order: [],
       };
 
   return {

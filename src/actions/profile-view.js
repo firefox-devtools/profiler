@@ -1455,6 +1455,13 @@ export function changeSelectedSourceTab(index: number): Action {
   };
 }
 
+export function changeSourceTabOrder(order: number[]): Action {
+  return {
+    type: 'CHANGE_SOURCE_TAB_ORDER',
+    order,
+  };
+}
+
 export function handleCallNodeTransformShortcut(
   event: SyntheticKeyboardEvent<>,
   threadsKey: ThreadsKey,

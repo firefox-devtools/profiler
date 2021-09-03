@@ -300,6 +300,10 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SELECTED_SOURCE_TAB',
       +index: number,
+    |}
+  | {|
+      +type: 'CHANGE_SOURCE_TAB_ORDER',
+      +order: number[],
     |};
 
 type ReceiveProfileAction =

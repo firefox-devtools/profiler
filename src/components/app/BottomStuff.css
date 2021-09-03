@@ -68,6 +68,11 @@
   line-height: 18px;
 }
 
+.bottom-tabs-reorderable {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
 .bottom-tab {
   padding: 2px 8px 0;
   border: solid transparent;
