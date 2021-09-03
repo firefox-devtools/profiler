@@ -102,14 +102,16 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
   _computeAllLineNumbersMemoized = memoize(
     (sourceLines: string[], timings: LineTimings): number[] => {
-      const maxKnownLineNumberFromTimings = Math.max(
-        ...timings.totalLineHits.keys()
-      );
-      const maxLineNumberFromSource = sourceLines.length;
-      const maxLineNumber = Math.max(
-        maxKnownLineNumberFromTimings,
-        maxLineNumberFromSource
-      );
+      let maxLineNumber = sourceLines.length;
+      if (maxLineNumber <= 1) {
+        // We probably don't have the true source code yet, and don't really know
+        // the true number of lines in this file.
+        // Derive a maximum line number from the timings.
+        // Add a bit of space at the bottom (10 rows) so that the scroll position
+        // isn't too constrained - if the last known line is chosen as the "hot spot",
+        // this extra space allows us to display it in the top half of the viewport.
+        maxLineNumber = Math.max(...timings.totalLineHits.keys()) + 10;
+      }
       return range(1, maxLineNumber + 1);
     }
   );
