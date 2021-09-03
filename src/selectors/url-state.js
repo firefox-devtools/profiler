@@ -72,6 +72,8 @@ export const getShowUserTimings: Selector<boolean> = state =>
   getProfileSpecificState(state).showUserTimings;
 export const getSourceTabs: Selector<SourceTabsState> = state =>
   getProfileSpecificState(state).sourceTabs;
+export const getSourceTabActivationGeneration: Selector<number> = state =>
+  getSourceTabs(state).activationGeneration;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>

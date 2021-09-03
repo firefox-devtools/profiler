@@ -371,6 +371,18 @@ export class VirtualList<Item> extends React.PureComponent<
     }
   }
 
+  scrollToItem(itemIndex: number, offsetX: CssPixels) {
+    const container = this._container.current;
+    if (!container) {
+      return;
+    }
+    const itemTop = itemIndex * this.props.itemHeight;
+    container.scrollTop = itemTop;
+
+    const itemLeft = offsetX;
+    container.scrollLeft = itemLeft;
+  }
+
   focus() {
     const container = this._container.current;
     if (container) {

@@ -572,10 +572,12 @@ export function stateFromLocation(
 
   const sourceTabs = query.sourceTab
     ? {
+        activationGeneration: 0,
         tabs: [{ file: query.sourceTab }],
         selectedIndex: 0,
       }
     : {
+        activationGeneration: 0,
         tabs: [],
         selectedIndex: null,
       };

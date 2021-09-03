@@ -2980,6 +2980,22 @@ export function hasThreadKeys(
   return true;
 }
 
+/**
+ * Compute the sets of line numbers in the given file that are hit by each stack.
+ * For each stack in the stack table and each line in the file, we answer the
+ * question "Does this stack contribute to line X's self time? Does it contribute
+ * to line X's total time?"
+ * Each stack can only contribute to one line's self time: the line of the stack's
+ * own frame.
+ * But each stack can contribute to the total time of multiple lines: All the lines
+ * in the file that are encountered by any of the stack's ancestor stacks.
+ * E.g if functions A, B and C are all in the same file, then a stack with the call
+ * path [A, B, C] will contribute to the total time of 3 lines:
+ *   1. The line in A which has the call to B,
+ *   2. The line in B which has the call to C, and
+ *   3. The line in C that is being executed at that stack (stack.frame.line).
+ * This last line is the stack's "self line".
+ */
 export function getStackLineInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
@@ -2988,6 +3004,9 @@ export function getStackLineInfo(
 ): StackLineInfo {
   const selfLineForAllStacks = [];
   const stackLines = [];
+
+  // This loop takes advantage of the fact that the stack table is topologically ordered:
+  // Prefix stacks are always visited before their descendants.
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const frame = stackTable.frame[stackIndex];
     const prefixStack = stackTable.prefix[stackIndex];
@@ -3018,12 +3037,116 @@ export function getStackLineInfo(
   };
 }
 
+/**
+ * Gathers the line numbers which are hit by a given call node.
+ * These line numbers are in the source file that contains that call node's func.
+ *
+ * This is best explained with an example.
+ * Let the call node be the node for the call path [A, B, C].
+ * Let this be the stack tree:
+ *
+ *  - stack 1, func A
+ *    - stack 2, func B
+ *      - stack 3, func C, line 30
+ *      - stack 4, func C, line 40
+ *    - stack 5, func B
+ *      - stack 6, func C, line 60
+ *      - stack 7, func C, line 70
+ *        - stack 8, func D
+ *      - stack 9, func E
+ *    - stack 10, func F
+ *
+ * This maps to the following call tree:
+ *
+ *  - call node 1, func A
+ *    - call node 2, func B
+ *      - call node 3, func C
+ *        - call node 4, func D
+ *      - call node 5, func E
+ *   - call node 6, func F
+ *
+ * The call path [A, B, C] uniquely identifies call node 3.
+ * The following stacks all "collapse into" ("map to") call node 3:
+ * stack 3, 4, 6 and 7.
+ * Stack 8 maps to call node 4, which is a child of call node 3.
+ * All other stacks are outside the call path [A, B, C].
+ *
+ * In this function, we only compute "line hits" that are contributed to
+ * the given call node.
+ * Stacks 3, 4, 6 and 7 all contribute their time both as "self time"
+ * and as "total time" to call node 3, at the line numbers 30, 40, 60,
+ * and 70, respectively.
+ * Stack 8 also hits call node 3 at line 70, but does not contribute to
+ * call node 3's "self time", it only contributes to its "total time".
+ * All other stacks don't contribute to call node 3's self or total time.
+ *
+ * All stacks can contribute no more than one line in the given call node.
+ * This is different from the getStackLineInfo function above, where each
+ * stack can hit many lines in the same file, because all of the ancestor
+ * stacks are taken into account, rather than just one of them. Concretely,
+ * this means that in the returned StackLineInfo, each stackLines[stack]
+ * set will only contain at most one element.
+ *
+ * The returned StackLineInfo is as follows:
+ *   selfLine[stack]:
+ *     For stacks that map to the given call node, this is stack.frame.line.
+ *     For all other stacks this is null.
+ *   stackLines[stack]:
+ *     For stacks that map to the given call node or one of its descendent
+ *     call nodes, this is a set containing one element, which is
+ *     ancestorStack.frame.line, where ancestorStack maps to the given call
+ *     node.
+ *     For all other stacks, this is null.
+ */
+export function getStackLineInfoForCallNode(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  callNodeIndex: IndexIntoCallNodeTable,
+  { stackIndexToCallNodeIndex }: CallNodeInfo
+): StackLineInfo {
+  const callNodeSelfLineForAllStacks = [];
+  const callNodeTotalLinesForAllStacks = [];
+
+  // This loop takes advantage of the fact that the stack table is topologically ordered:
+  // Prefix stacks are always visited before their descendants.
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+      // This stack contributes to the call node's self time.
+      // We don't need to check the stack's func or file because it'll be
+      // the same as the given call node's func and file.
+      const frame = stackTable.frame[stackIndex];
+      const line = frameTable.line[frame];
+      callNodeSelfLineForAllStacks.push(line);
+      callNodeTotalLinesForAllStacks.push(
+        line !== null ? new Set([line]) : null
+      );
+    } else {
+      // Inherit total time contribution from the parent stack.
+      const prefixStack = stackTable.prefix[stackIndex];
+      const inheritedLineSet = prefixStack
+        ? callNodeTotalLinesForAllStacks[prefixStack]
+        : null;
+      callNodeSelfLineForAllStacks.push(null);
+      callNodeTotalLinesForAllStacks.push(inheritedLineSet);
+    }
+  }
+  return {
+    selfLine: callNodeSelfLineForAllStacks,
+    stackLines: callNodeTotalLinesForAllStacks,
+  };
+}
+
+export const emptyLineTimings: LineTimings = {
+  totalLineHits: new Map(),
+  selfLineHits: new Map(),
+};
+
 export function getLineTimings(
   stackLineInfo: StackLineInfo | null,
   samples: SamplesLikeTable
-): LineTimings | null {
+): LineTimings {
   if (stackLineInfo === null) {
-    return null;
+    return emptyLineTimings;
   }
   const { selfLine, stackLines } = stackLineInfo;
   const totalLineHits = new Map();

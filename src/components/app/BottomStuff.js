@@ -10,6 +10,7 @@ import { SourceView } from '../shared/SourceView';
 import {
   getSourceTabs,
   getSelectedSourceTabFile,
+  getSourceTabActivationGeneration,
 } from 'firefox-profiler/selectors/url-state';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedSourceTabSource } from 'firefox-profiler/selectors/sources';
@@ -29,10 +30,12 @@ import './BottomStuff.css';
 import classNames from 'classnames';
 
 type StateProps = {|
-  +lineTimings: LineTimings | null,
+  +globalLineTimings: LineTimings,
+  +selectedCallNodeLineTimings: LineTimings,
   +sourceTabs: SourceTabsState,
   +selectedSourceTabFile: string | null,
   +selectedSourceTabSource: FileSourceStatus | void,
+  +sourceTabActivationGeneration: number,
 |};
 
 type DispatchProps = {|
@@ -46,14 +49,14 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
     case 'LOADING': {
       const { url } = status;
       return (
-        <div className="sourceStatusOverlay loading">Waiting for {new URL(url).host}...</div>
+        <div className="sourceStatusOverlay loading">
+          Waiting for {new URL(url).host}...
+        </div>
       );
     }
     case 'ERROR': {
       const { error } = status;
-      return (
-        <div className="sourceStatusOverlay error">{error}</div>
-      );
+      return <div className="sourceStatusOverlay error">{error}</div>;
     }
     default:
       return null;
@@ -81,9 +84,10 @@ class BottomStuffImpl extends React.PureComponent<Props> {
 
   render() {
     const {
-      lineTimings,
+      globalLineTimings,
+      selectedCallNodeLineTimings,
       sourceTabs,
-      selectedSourceTabFile,
+      sourceTabActivationGeneration,
       selectedSourceTabSource,
     } = this.props;
     const source =
@@ -93,13 +97,14 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     return (
       <div className="bottom-stuff">
         <div className="bottom-main">
-          {lineTimings !== null && selectedSourceTabSource !== undefined ? (
+          {selectedSourceTabSource !== undefined ? (
             <>
               <SourceView
-                timings={lineTimings}
+                timings={globalLineTimings}
+                timingsInformingScrolling={selectedCallNodeLineTimings}
                 source={source}
                 rowHeight={16}
-                key={selectedSourceTabFile}
+                scrollToHotSpotGeneration={sourceTabActivationGeneration}
               />
               <SourceStatusOverlay status={selectedSourceTabSource} />
             </>
@@ -129,7 +134,11 @@ class BottomStuffImpl extends React.PureComponent<Props> {
 
 export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    lineTimings: selectedThreadSelectors.getLineTimings(state),
+    globalLineTimings: selectedThreadSelectors.getLineTimings(state),
+    selectedCallNodeLineTimings: selectedThreadSelectors.getLineTimingsForSelectedCallNode(
+      state
+    ),
+    sourceTabActivationGeneration: getSourceTabActivationGeneration(state),
     sourceTabs: getSourceTabs(state),
     selectedSourceTabFile: getSelectedSourceTabFile(state),
     selectedSourceTabSource: getSelectedSourceTabSource(state),

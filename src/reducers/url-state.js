@@ -474,7 +474,7 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 };
 
 const sourceTabs: Reducer<SourceTabsState> = (
-  state = { tabs: [], selectedIndex: null },
+  state = { activationGeneration: 0, tabs: [], selectedIndex: null },
   action
 ) => {
   switch (action.type) {
@@ -483,6 +483,7 @@ const sourceTabs: Reducer<SourceTabsState> = (
       if (index === -1) {
         const selectedIndex = state.tabs.length;
         return {
+          activationGeneration: state.activationGeneration + 1,
           tabs: [...state.tabs, action.tab],
           selectedIndex,
         };
@@ -490,11 +491,15 @@ const sourceTabs: Reducer<SourceTabsState> = (
       const selectedIndex = index;
       if (selectedIndex !== state.selectedIndex) {
         return {
-          ...state,
+          activationGeneration: state.activationGeneration + 1,
+          tabs: state.tabs,
           selectedIndex,
         };
       }
-      return state;
+      return {
+        ...state,
+        activationGeneration: state.activationGeneration + 1,
+      };
     }
     case 'SELECT_SOURCE_TAB': {
       const selectedIndex = action.index;

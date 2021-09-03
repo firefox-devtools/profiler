@@ -47,8 +47,10 @@ for understanding where time was actually spent in a program."
 
 type SourceViewProps = {|
   +timings: LineTimings,
+  +timingsInformingScrolling: LineTimings,
   +source: string,
   +rowHeight: CssPixels,
+  +scrollToHotSpotGeneration: number,
 |};
 
 type LineNumber = number;
@@ -118,21 +120,38 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   );
 
   componentDidMount() {
-    this.scrollHeaviestLineIntoView();
+    this.scrollToHotSpot();
   }
 
-  scrollHeaviestLineIntoView() {
+  componentDidUpdate(prevProps: SourceViewProps) {
+    console.log(
+      `${prevProps.scrollToHotSpotGeneration}, ${this.props.scrollToHotSpotGeneration}`
+    );
+    if (
+      prevProps.scrollToHotSpotGeneration < this.props.scrollToHotSpotGeneration
+    ) {
+      this.scrollToHotSpot();
+    }
+  }
+
+  scrollToHotSpot() {
     const heaviestLine = mapGetKeyWithMaxValue(
-      this.props.timings.totalLineHits
+      this.props.timingsInformingScrolling.totalLineHits
     );
     if (heaviestLine !== undefined) {
-      this.scrollLineIntoView(heaviestLine);
+      this.scrollToLine(heaviestLine - 4);
     }
   }
 
   scrollLineIntoView(lineNumber: number) {
     if (this._list) {
       this._list.scrollItemIntoView(lineNumber - 1, 0);
+    }
+  }
+
+  scrollToLine(lineNumber: number) {
+    if (this._list) {
+      this._list.scrollToItem(lineNumber - 1, 0);
     }
   }
 

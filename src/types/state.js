@@ -231,6 +231,7 @@ export type SourceTab = {|
 |};
 
 export type SourceTabsState = {|
+  activationGeneration: number,
   tabs: SourceTab[],
   selectedIndex: IndexIntoSourceTabs | null,
 |};

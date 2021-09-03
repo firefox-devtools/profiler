@@ -31,7 +31,6 @@ import type {
   SourceTab,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
-import { string } from 'prop-types';
 
 export type DataSource =
   | 'none'
@@ -537,10 +536,10 @@ type L10nAction =
       +direction: 'ltr' | 'rtl',
     |};
 
-    type SourcesAction =
-    | {| +type: 'SOURCE_LOADING_BEGIN', file: string, url: string |}
-    | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
-    | {| +type: 'SOURCE_LOADING_ERROR', file: string, error: string |};
+type SourcesAction =
+  | {| +type: 'SOURCE_LOADING_BEGIN', file: string, url: string |}
+  | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
+  | {| +type: 'SOURCE_LOADING_ERROR', file: string, error: string |};
 
 export type Action =
   | ProfileAction

@@ -198,6 +198,38 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.computeCallNodeMaxDepth
   );
 
+  const getStackLineInfoForSelectedCallNode: Selector<StackLineInfo | null> = createSelector(
+    threadSelectors.getFilteredThread,
+    UrlState.getSelectedSourceTabFile,
+    getCallNodeInfo,
+    getSelectedCallNodeIndex,
+    (
+      { stackTable, frameTable, funcTable, stringTable }: Thread,
+      selectedSourceTabFile,
+      callNodeInfo,
+      selectedCallNodeIndex
+    ): StackLineInfo | null => {
+      if (selectedSourceTabFile === null || selectedCallNodeIndex === null) {
+        return null;
+      }
+      const selectedFunc =
+        callNodeInfo.callNodeTable.func[selectedCallNodeIndex];
+      const selectedFuncFile = funcTable.fileName[selectedFunc];
+      if (
+        selectedFuncFile === null ||
+        stringTable.getString(selectedFuncFile) !== selectedSourceTabFile
+      ) {
+        return null;
+      }
+      return ProfileData.getStackLineInfoForCallNode(
+        stackTable,
+        frameTable,
+        selectedCallNodeIndex,
+        callNodeInfo
+      );
+    }
+  );
+
   /**
    * When computing the call tree, a "samples" table is used, which
    * can represent a variety of formats with different weight types.
@@ -229,8 +261,14 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
-  const getLineTimings: Selector<LineTimings | null> = createSelector(
+  const getLineTimings: Selector<LineTimings> = createSelector(
     getStackLineInfo,
+    threadSelectors.getPreviewFilteredSamplesForCallTree,
+    ProfileData.getLineTimings
+  );
+
+  const getLineTimingsForSelectedCallNode: Selector<LineTimings> = createSelector(
+    getStackLineInfoForSelectedCallNode,
     threadSelectors.getPreviewFilteredSamplesForCallTree,
     ProfileData.getLineTimings
   );
@@ -281,6 +319,7 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     getCallNodeInfo,
     getStackLineInfo,
+    getStackLineInfoForSelectedCallNode,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
     getExpandedCallNodePaths,
@@ -289,6 +328,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getLineTimings,
+    getLineTimingsForSelectedCallNode,
     getTracedTiming,
     getStackTimingByDepth,
     getFilteredCallNodeMaxDepth,
