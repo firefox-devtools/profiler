@@ -2235,10 +2235,10 @@ export function getUrlsForSourceFile(
       if (!repo.startsWith('github.com/')) {
         return { userViewablePrettySource: undefined };
       }
-      // const repoPath = repo.slice('github.com/'.length);
+      const repoPath = repo.slice('github.com/'.length);
       // Example repoPath: "rust-lang/rust"
       return {
-        corsFetchableRawSource: `https://${repo}/raw-file/${rev}/${path}`,
+        corsFetchableRawSource: `https://raw.githubusercontent.com/${repoPath}/${rev}/${path}`,
         userCopyableRawSource: `view-source:https://${repo}/raw-file/${rev}/${path}`,
         userViewablePrettySource: `https://${repo}/file/${rev}/${path}`,
       };
@@ -2246,7 +2246,6 @@ export function getUrlsForSourceFile(
     case 's3': {
       const { bucket, digest, path } = parsedFile;
       return {
-        // Not CORS-enabled at the moment, see https://bugzilla.mozilla.org/show_bug.cgi?id=1717976.
         corsFetchableRawSource: `https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userCopyableRawSource: `view-source:https://${bucket}.s3.amazonaws.com/${digest}/${path}`,
         userViewablePrettySource: `https://crash-stats.mozilla.org/sources/highlight/?url=https://${bucket}.s3.amazonaws.com/${digest}/${path}`,

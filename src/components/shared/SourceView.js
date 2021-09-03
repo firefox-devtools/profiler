@@ -139,7 +139,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this.props.timingsInformingScrolling.totalLineHits
     );
     if (heaviestLine !== undefined) {
-      this.scrollToLine(heaviestLine - 4);
+      this.scrollToLine(heaviestLine - 5);
     }
   }
 
