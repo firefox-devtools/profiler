@@ -2788,7 +2788,7 @@ export function extractProfileFilterPageData(
   let filteredPages = pages.filter(
     page =>
       // It's the top-most frame if `embedderInnerWindowID` is zero.
-      relevantPages.has(page.innerWindowID) && page.embedderInnerWindowID === 0
+      page.embedderInnerWindowID === 0 && relevantPages.has(page.innerWindowID)
   );
 
   if (filteredPages.length > 1) {
