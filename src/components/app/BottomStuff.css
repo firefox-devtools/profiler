@@ -63,20 +63,51 @@
   height: 24px;
   flex-flow: row nowrap;
   justify-content: start;
-  padding: 0 4px;
-  background: #ddd;
-  box-shadow: inset 0 1px #666;
+  background: var(--grey-10);
+  box-shadow: inset 0 -1px var(--grey-30);
   line-height: 18px;
 }
 
 .bottom-tab {
-  padding: 0 8px;
-  margin-bottom: 3px;
+  padding: 2px 8px 0;
+  border: solid transparent;
+  border-width: 0 1px;
+  position: relative;
+  transition-duration: 200ms;
+  transition-property: background-color, border-color;
+  cursor: default;
+  user-select: none;
+}
+
+.bottom-tab::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  transition: none;
+  opacity: 0;
+}
+
+.bottom-tab:not(.bottom-tab--selected):hover {
+  background-color: var(--grey-20);
+}
+
+.bottom-tab:not(.bottom-tab--selected):hover::before {
+  background-color: var(--grey-40);
+  transition: opacity 200ms;
+  opacity: 1;
 }
 
 .bottom-tab--selected {
-  border: 1px solid #666;
-  border-top: none;
+  transition: none;
+  border-color: var(--grey-30);
   background: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-tab--selected::before {
+  background-color: var(--blue-50);
+  transition: none;
+  opacity: 1;
 }

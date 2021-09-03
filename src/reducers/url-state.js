@@ -501,7 +501,7 @@ const sourceTabs: Reducer<SourceTabsState> = (
         activationGeneration: state.activationGeneration + 1,
       };
     }
-    case 'SELECT_SOURCE_TAB': {
+    case 'CHANGE_SELECTED_SOURCE_TAB': {
       const selectedIndex = action.index;
       if (selectedIndex !== state.selectedIndex) {
         return {

@@ -24,6 +24,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
+import { changeSelectedSourceTab } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
 
 import './BottomStuff.css';
@@ -40,6 +41,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +fetchSourceForFile: typeof fetchSourceForFile,
+  +changeSelectedSourceTab: typeof changeSelectedSourceTab,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -82,6 +84,11 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     }
   }
 
+  _tabClicked = e => {
+    const index = +e.target.dataset.index;
+    this.props.changeSelectedSourceTab(index);
+  };
+
   render() {
     const {
       globalLineTimings,
@@ -94,12 +101,37 @@ class BottomStuffImpl extends React.PureComponent<Props> {
       selectedSourceTabSource && selectedSourceTabSource.type === 'AVAILABLE'
         ? selectedSourceTabSource.source
         : '';
+    const selectedSourceTabFile =
+      sourceTabs.selectedIndex !== null
+        ? sourceTabs.tabs[sourceTabs.selectedIndex].file
+        : null;
     return (
       <div className="bottom-stuff">
+        <div className="bottom-tabs">
+          {sourceTabs.tabs.map((tab, index) => {
+            const parsedName = parseFileNameFromSymbolication(tab.file);
+            const path = parsedName.path;
+            const file = path.slice(path.lastIndexOf('/') + 1);
+            return (
+              <span
+                key={index}
+                data-index={index}
+                className={classNames('bottom-tab', {
+                  'bottom-tab--selected': index === sourceTabs.selectedIndex,
+                })}
+                onMouseDown={this._tabClicked}
+              >
+                {file}
+              </span>
+            );
+          })}
+        </div>
         <div className="bottom-main">
-          {selectedSourceTabSource !== undefined ? (
+          {selectedSourceTabSource !== undefined &&
+          selectedSourceTabFile !== null ? (
             <>
               <SourceView
+                key={selectedSourceTabFile}
                 timings={globalLineTimings}
                 timingsInformingScrolling={selectedCallNodeLineTimings}
                 source={source}
@@ -109,23 +141,6 @@ class BottomStuffImpl extends React.PureComponent<Props> {
               <SourceStatusOverlay status={selectedSourceTabSource} />
             </>
           ) : null}
-        </div>
-        <div className="bottom-tabs">
-          {sourceTabs.tabs.map((tab, index) => {
-            const parsedName = parseFileNameFromSymbolication(tab.file);
-            const path = parsedName.path;
-            const file = path.slice(path.lastIndexOf('/') + 1);
-            return (
-              <span
-                key={index}
-                className={classNames('bottom-tab', {
-                  'bottom-tab--selected': index === sourceTabs.selectedIndex,
-                })}
-              >
-                {file}
-              </span>
-            );
-          })}
         </div>
       </div>
     );
@@ -143,6 +158,6 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     selectedSourceTabFile: getSelectedSourceTabFile(state),
     selectedSourceTabSource: getSelectedSourceTabSource(state),
   }),
-  mapDispatchToProps: { fetchSourceForFile },
+  mapDispatchToProps: { fetchSourceForFile, changeSelectedSourceTab },
   component: BottomStuffImpl,
 });

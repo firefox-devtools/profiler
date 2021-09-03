@@ -296,6 +296,10 @@ type ProfileAction =
   | {|
       +type: 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT',
       +tab: SourceTab,
+    |}
+  | {|
+      +type: 'CHANGE_SELECTED_SOURCE_TAB',
+      +index: number,
     |};
 
 type ReceiveProfileAction =

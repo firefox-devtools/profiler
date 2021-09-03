@@ -1448,6 +1448,13 @@ export function createSourceTabIfNeededAndSelect(file: string): Action {
   };
 }
 
+export function changeSelectedSourceTab(index: number): Action {
+  return {
+    type: 'CHANGE_SELECTED_SOURCE_TAB',
+    index,
+  };
+}
+
 export function handleCallNodeTransformShortcut(
   event: SyntheticKeyboardEvent<>,
   threadsKey: ThreadsKey,
