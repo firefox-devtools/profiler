@@ -2784,19 +2784,39 @@ export function extractProfileFilterPageData(
     return null;
   }
 
-  // Getting the first page's innerWindowID and then getting its url.
-  const innerWindowID = [...relevantPages][0];
-  const filteredPages = pages.filter(
-    page => page.innerWindowID === innerWindowID
+  // Getting the pages that are relevant and a top-most frame.
+  let filteredPages = pages.filter(
+    page =>
+      // It's the top-most frame if `embedderInnerWindowID` is zero.
+      page.embedderInnerWindowID === 0 && relevantPages.has(page.innerWindowID)
   );
 
-  if (filteredPages.length !== 1) {
-    // There should be only one page with the given innerWindowID, they are unique.
-    console.error(`Expected one page but ${filteredPages.length} found.`);
+  if (filteredPages.length > 1) {
+    // If there are more than one top-most page, it's also good to filter out the
+    // `about:` pages so user can see their url they are actually profiling.
+    filteredPages = filteredPages.filter(
+      page => !page.url.startsWith('about:')
+    );
+  }
+
+  if (filteredPages.length === 0) {
+    // There should be at least one relevant page.
+    console.error(`Expected a relevant page but couldn't find it.`);
     return null;
   }
 
   const pageUrl = filteredPages[0].url;
+
+  if (pageUrl.startsWith('about:')) {
+    // If we only have an `about:*` page, we should return early with a friendly
+    // origin and hostname. Otherwise the try block will fail.
+    return {
+      origin: pageUrl,
+      hostname: pageUrl,
+      favicon: null,
+    };
+  }
+
   try {
     const page = new URL(pageUrl);
     // FIXME(Bug 1620546): This is not ideal and we should get the favicon
