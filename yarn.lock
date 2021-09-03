@@ -6627,10 +6627,10 @@ interpret@^1.0.0, interpret@^1.4.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
 
-intl-pluralrules@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/intl-pluralrules/-/intl-pluralrules-1.2.2.tgz#2b73542a9502a8a3a742cdd917f3d969fb5482fe"
-  integrity sha512-SBdlNCJAhTA0I0uHg2dn7I+c6BCvSVk6zJ/01ozjwJK7BvKms9RH3w3Sd/Ag24KffZ/Yx6KJRCKAc7eE8TZLNg==
+intl-pluralrules@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/intl-pluralrules/-/intl-pluralrules-1.3.0.tgz#ed1a9b1a9fa25ac49453ed2e215e01e33be1458f"
+  integrity sha512-hFzGTkxCjyrwHvn4pWVoB3/cFk1RIOOKNFlcNvm37YjXsmdhIt2dU/Nwh9c9i95Xa248wDF1+bI71Q+yDlGPeA==
 
 ip-regex@^4.0.0:
   version "4.3.0"
