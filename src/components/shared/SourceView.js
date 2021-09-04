@@ -110,7 +110,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         // Add a bit of space at the bottom (10 rows) so that the scroll position
         // isn't too constrained - if the last known line is chosen as the "hot spot",
         // this extra space allows us to display it in the top half of the viewport.
-        maxLineNumber = Math.max(...timings.totalLineHits.keys()) + 10;
+        maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
       }
       return range(1, maxLineNumber + 1);
     }
