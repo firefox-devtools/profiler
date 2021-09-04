@@ -62,7 +62,6 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.3.3",
     "idb": "^6.1.2",
-    "intl-pluralrules": "^1.2.2",
     "jszip": "^3.7.1",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
