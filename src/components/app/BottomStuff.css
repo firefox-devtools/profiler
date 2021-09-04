@@ -62,10 +62,17 @@
   overflow: hidden;
   height: 24px;
   flex-flow: row nowrap;
-  justify-content: start;
+  justify-content: space-between;
   background: var(--grey-10);
   box-shadow: inset 0 -1px var(--grey-30);
   line-height: 18px;
+}
+
+.bottom-close-button {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: url(../../../res/img/svg/close-dark.svg) no-repeat center / 16px 16px;
 }
 
 .bottom-tabs-reorderable {

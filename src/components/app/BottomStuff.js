@@ -28,6 +28,7 @@ import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import {
   changeSelectedSourceTab,
   changeSourceTabOrder,
+  closeBottomBox,
 } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -47,6 +48,7 @@ type DispatchProps = {|
   +fetchSourceForFile: typeof fetchSourceForFile,
   +changeSelectedSourceTab: typeof changeSelectedSourceTab,
   +changeSourceTabOrder: typeof changeSourceTabOrder,
+  +closeBottomBox: typeof closeBottomBox,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -106,9 +108,13 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     }
   }
 
-  _tabClicked = e => {
+  _onClickTab = e => {
     const index = +e.target.dataset.index;
     this.props.changeSelectedSourceTab(index);
+  };
+
+  _onClickCloseButton = () => {
+    this.props.closeBottomBox();
   };
 
   render() {
@@ -148,13 +154,23 @@ class BottomStuffImpl extends React.PureComponent<Props> {
                   className={classNames('bottom-tab', {
                     'bottom-tab--selected': index === sourceTabs.selectedIndex,
                   })}
-                  onMouseDown={this._tabClicked}
+                  onMouseDown={this._onClickTab}
                 >
                   {file}
                 </span>
               );
             })}
           </Reorderable>
+          <button
+            className={classNames(
+              'bottom-close-button',
+              'photon-button',
+              'photon-button-ghost'
+            )}
+            title="Close the bottom box"
+            type="button"
+            onClick={this._onClickCloseButton}
+          />
         </div>
         <div className="bottom-main">
           {selectedSourceTabFile !== null ? (
@@ -191,6 +207,7 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     fetchSourceForFile,
     changeSelectedSourceTab,
     changeSourceTabOrder,
+    closeBottomBox,
   },
   component: BottomStuffImpl,
 });

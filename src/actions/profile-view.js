@@ -1440,6 +1440,16 @@ export function changeMouseTimePosition(
   };
 }
 
+export function closeBottomBox(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const tab = getSelectedTab(getState());
+    dispatch({
+      type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
+      tab,
+    });
+  };
+}
+
 export function createSourceTabIfNeededAndSelect(
   file: string,
   currentTab: TabSlug
