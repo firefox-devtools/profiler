@@ -23,6 +23,7 @@ import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
 import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
+import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
 import {
   getUploadProgress,
   getUploadPhase,
@@ -48,6 +49,7 @@ type StateProps = {|
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
   +icons: IconWithClassName[],
+  +isBottomBoxOpen: boolean,
 |};
 
 type DispatchProps = {|
@@ -69,6 +71,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
       isHidingStaleProfile,
       hasSanitizedProfile,
       icons,
+      isBottomBoxOpen,
     } = this.props;
 
     return (
@@ -137,17 +140,16 @@ class ProfileViewerImpl extends PureComponent<Props> {
           >
             <Timeline />
             <SplitterLayout
-              customClassName="profileViewerSplitter2"
               vertical
-              percentage={false}
+              percentage={true}
               // The DetailsContainer is primary.
               primaryIndex={0}
               // The BottomStuff is secondary.
-              secondaryInitialSize={270}
+              secondaryInitialSize={40}
               onDragEnd={invalidatePanelLayout}
             >
               <DetailsContainer />
-              <BottomStuff />
+              {isBottomBoxOpen ? <BottomStuff /> : null}
             </SplitterLayout>
           </SplitterLayout>
           <SymbolicationStatusOverlay />
@@ -169,6 +171,7 @@ export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
     isHidingStaleProfile: getIsHidingStaleProfile(state),
     hasSanitizedProfile: getHasSanitizedProfile(state),
     icons: getIconsWithClassNames(state),
+    isBottomBoxOpen: getIsBottomBoxOpen(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,

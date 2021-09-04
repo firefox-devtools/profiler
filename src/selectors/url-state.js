@@ -74,6 +74,8 @@ export const getSourceTabs: Selector<SourceTabsState> = state =>
   getProfileSpecificState(state).sourceTabs;
 export const getSourceTabActivationGeneration: Selector<number> = state =>
   getSourceTabs(state).activationGeneration;
+export const getTabsWithOpenBottomBox: Selector<TabSlug[]> = state =>
+  getProfileSpecificState(state).tabsWithOpenBottomBox;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>
@@ -251,6 +253,12 @@ export const getSelectedSourceTabFile: Selector<string | null> = createSelector(
   }
 );
 
+export const getIsBottomBoxOpen: Selector<boolean> = createSelector(
+  getTabsWithOpenBottomBox,
+  getSelectedTab,
+  (tabsWithOpenBottomBox, selectedTabSlug) =>
+    tabsWithOpenBottomBox.includes(selectedTabSlug)
+);
 /**
  * The URL predictor is used to generate a link for an uploaded profile, to predict
  * what the URL will be.

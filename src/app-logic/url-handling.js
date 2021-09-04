@@ -37,6 +37,7 @@ import type {
   CallNodePath,
   ThreadIndex,
   TimelineType,
+  SourceTabsState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -402,9 +403,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
             urlState.profileSpecific.transforms[selectedThreadsKey]
           ) || undefined;
       }
-      const { sourceTabs } = urlState.profileSpecific;
+      const { sourceTabs, tabsWithOpenBottomBox } = urlState.profileSpecific;
       query.sourceTab =
-        sourceTabs.selectedIndex !== null
+        sourceTabs.selectedIndex !== null &&
+        tabsWithOpenBottomBox.includes(selectedTab)
           ? sourceTabs.tabs[sourceTabs.selectedIndex].file
           : undefined;
       query.ctSummary =
@@ -570,26 +572,28 @@ export function stateFromLocation(
     tabID = Number(query.ctxId);
   }
 
-  const sourceTabs = query.sourceTab
-    ? {
-        activationGeneration: 0,
-        tabs: [{ file: query.sourceTab }],
-        selectedIndex: 0,
-        order: [0],
-      }
-    : {
-        activationGeneration: 0,
-        tabs: [],
-        selectedIndex: null,
-        order: [],
-      };
+  const selectedTab =
+    toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
+  const sourceTabs: SourceTabsState = {
+    activationGeneration: 0,
+    tabs: [],
+    selectedIndex: null,
+    order: [],
+  };
+  const tabsWithOpenBottomBox = [];
+  if (query.sourceTab) {
+    sourceTabs.tabs.push({ file: query.sourceTab });
+    sourceTabs.selectedIndex = 0;
+    sourceTabs.order.push(0);
+    tabsWithOpenBottomBox.push(selectedTab);
+  }
 
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
-    selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
+    selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     symbolServerUrl: query.symbolServer || null,
@@ -611,6 +615,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceTabs,
+      tabsWithOpenBottomBox,
       timelineType: validateTimelineType(query.timelineType),
       full: {
         showJsTracerSummary: query.summary === undefined ? false : true,

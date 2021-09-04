@@ -162,7 +162,7 @@ export type ZipFileState =
       +pathInZipFile: string,
     |};
 
-export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
+export type IsOpenPerPanelState = { [TabSlug]: boolean };
 
 export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
 
@@ -180,7 +180,7 @@ export type AppState = {|
   +view: AppViewState,
   +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
-  +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
+  +isSidebarOpenPerPanel: IsOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: {
@@ -284,6 +284,7 @@ export type ProfileSpecificUrlState = {|
   full: FullProfileSpecificUrlState,
   activeTab: ActiveTabSpecificProfileUrlState,
   sourceTabs: SourceTabsState,
+  tabsWithOpenBottomBox: TabSlug[],
 |};
 
 /**

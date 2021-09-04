@@ -523,6 +523,27 @@ const sourceTabs: Reducer<SourceTabsState> = (
   }
 };
 
+const tabsWithOpenBottomBox: Reducer<TabSlug[]> = (state = [], action) => {
+  switch (action.type) {
+    case 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT': {
+      const { currentTab } = action;
+      if (!state.includes(currentTab)) {
+        return [...state, currentTab];
+      }
+      return state;
+    }
+    case 'CLOSE_BOTTOM_BOX_FOR_TAB': {
+      const { tab } = action;
+      if (state.includes(tab)) {
+        return state.filter(t => t !== tab);
+      }
+      return state;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * Active tab specific profile url states
  */
@@ -585,6 +606,7 @@ const profileSpecific = combineReducers({
   networkSearchString,
   transforms,
   sourceTabs,
+  tabsWithOpenBottomBox,
   timelineType,
   full: fullProfileSpecific,
   activeTab: activeTabProfileSpecific,

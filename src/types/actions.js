@@ -296,6 +296,7 @@ type ProfileAction =
   | {|
       +type: 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT',
       +tab: SourceTab,
+      +currentTab: TabSlug,
     |}
   | {|
       +type: 'CHANGE_SELECTED_SOURCE_TAB',
@@ -304,6 +305,10 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SOURCE_TAB_ORDER',
       +order: number[],
+    |}
+  | {|
+      +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
+      +tab: TabSlug,
     |};
 
 type ReceiveProfileAction =

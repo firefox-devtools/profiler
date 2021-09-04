@@ -10,7 +10,7 @@ import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   AppState,
   AppViewState,
-  IsSidebarOpenPerPanelState,
+  IsOpenPerPanelState,
   Reducer,
   UrlSetupPhase,
   ThreadsKey,
@@ -91,7 +91,7 @@ function _getSidebarInitialState() {
   return state;
 }
 
-const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
+const isSidebarOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   state = _getSidebarInitialState(),
   action
 ) => {

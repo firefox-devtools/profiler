@@ -223,7 +223,7 @@ class CallTreeImpl extends PureComponent<Props> {
     if (file === null) {
       return;
     }
-    createSourceTabIfNeededAndSelect(file);
+    createSourceTabIfNeededAndSelect(file, 'calltree');
   };
 
   procureInterestingInitialSelection() {

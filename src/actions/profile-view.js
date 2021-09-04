@@ -66,6 +66,7 @@ import type {
   ThreadsKey,
   Milliseconds,
 } from 'firefox-profiler/types';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import { funcHasRecursiveCall } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
@@ -1439,12 +1440,16 @@ export function changeMouseTimePosition(
   };
 }
 
-export function createSourceTabIfNeededAndSelect(file: string): Action {
+export function createSourceTabIfNeededAndSelect(
+  file: string,
+  currentTab: TabSlug
+): Action {
   return {
     type: 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT',
     tab: {
       file,
     },
+    currentTab,
   };
 }
 
