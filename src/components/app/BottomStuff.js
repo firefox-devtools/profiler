@@ -109,8 +109,12 @@ class BottomStuffImpl extends React.PureComponent<Props> {
   }
 
   _onClickTab = e => {
-    const index = +e.target.dataset.index;
+    if (e.button !== 0) {
+      return;
+    }
+    const index = +e.currentTarget.dataset.index;
     this.props.changeSelectedSourceTab(index);
+    e.preventDefault();
   };
 
   _onClickCloseButton = () => {
@@ -136,7 +140,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
       <div className="bottom-stuff">
         <div className="bottom-tabs">
           <Reorderable
-            tagName="div"
+            tagName="ol"
             className="bottom-tabs-reorderable"
             grippyClassName="bottom-tab"
             order={sourceTabs.order}
@@ -148,7 +152,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
               const path = parsedName.path;
               const file = path.slice(path.lastIndexOf('/') + 1);
               return (
-                <span
+                <li
                   key={index}
                   data-index={index}
                   className={classNames('bottom-tab', {
@@ -156,8 +160,8 @@ class BottomStuffImpl extends React.PureComponent<Props> {
                   })}
                   onMouseDown={this._onClickTab}
                 >
-                  {file}
-                </span>
+                  <span className="bottom-tab-text">{file}</span>
+                </li>
               );
             })}
           </Reorderable>

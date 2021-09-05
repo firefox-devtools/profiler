@@ -76,6 +76,8 @@
 }
 
 .bottom-tabs-reorderable {
+  margin: 0;
+  padding: 0;
   min-width: 0;
   flex-shrink: 1;
   display: flex;
@@ -83,8 +85,8 @@
 }
 
 .bottom-tab {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block;
+  margin: 0 0 1px;
   padding: 2px 8px 0;
   border: solid transparent;
   border-width: 0 1px;
@@ -117,6 +119,7 @@
 }
 
 .bottom-tab--selected {
+  margin: 0;
   transition: none;
   border-color: var(--grey-30);
   background: white;
@@ -126,4 +129,9 @@
   background-color: var(--blue-50);
   transition: none;
   opacity: 1;
+}
+
+.bottom-tab-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
