@@ -28,6 +28,7 @@ import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
 import {
   changeSelectedSourceTab,
   changeSourceTabOrder,
+  closeSourceTab,
   closeBottomBox,
 } from 'firefox-profiler/actions/profile-view';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
@@ -48,6 +49,7 @@ type DispatchProps = {|
   +fetchSourceForFile: typeof fetchSourceForFile,
   +changeSelectedSourceTab: typeof changeSelectedSourceTab,
   +changeSourceTabOrder: typeof changeSourceTabOrder,
+  +closeSourceTab: typeof closeSourceTab,
   +closeBottomBox: typeof closeBottomBox,
 |};
 
@@ -109,12 +111,22 @@ class BottomStuffImpl extends React.PureComponent<Props> {
   }
 
   _onClickTab = e => {
-    if (e.button !== 0) {
+    if (e.button !== 0 || e.target.matches('.bottom-tab-close-button')) {
       return;
     }
     const index = +e.currentTarget.dataset.index;
     this.props.changeSelectedSourceTab(index);
     e.preventDefault();
+  };
+
+  _onClickTabCloseButton = e => {
+    let { sourceTabs } = this.props;
+    const index = +e.currentTarget.parentElement.dataset.index;
+    const isOnlyTab = sourceTabs.tabs.length === 1;
+    this.props.closeSourceTab(index);
+    if (isOnlyTab) {
+      this.props.closeBottomBox();
+    }
   };
 
   _onClickCloseButton = () => {
@@ -161,6 +173,12 @@ class BottomStuffImpl extends React.PureComponent<Props> {
                   onMouseDown={this._onClickTab}
                 >
                   <span className="bottom-tab-text">{file}</span>
+                  <button
+                    className={classNames('bottom-tab-close-button')}
+                    title={`Close ${file}`}
+                    type="button"
+                    onClick={this._onClickTabCloseButton}
+                  />
                 </li>
               );
             })}
@@ -211,6 +229,7 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     fetchSourceForFile,
     changeSelectedSourceTab,
     changeSourceTabOrder,
+    closeSourceTab,
     closeBottomBox,
   },
   component: BottomStuffImpl,

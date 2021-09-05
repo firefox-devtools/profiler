@@ -85,9 +85,13 @@
 }
 
 .bottom-tab {
-  display: block;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  min-width: 0;
+  align-items: center;
   margin: 0 0 1px;
-  padding: 2px 8px 0;
+  padding: 2px 4px 0;
   border: solid transparent;
   border-width: 0 1px;
   position: relative;
@@ -119,7 +123,8 @@
 }
 
 .bottom-tab--selected {
-  margin: 0;
+  margin-bottom: 0;
+  padding-bottom: 1px;
   transition: none;
   border-color: var(--grey-30);
   background: white;
@@ -134,4 +139,40 @@
 .bottom-tab-text {
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: -2px 4px 0;
+}
+
+.bottom-tab-close-button {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 1px;
+  border: 0;
+  background: none;
+  border-radius: 2px;
+}
+
+.bottom-tab-close-button::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  background-color: black;
+  -webkit-mask: url(../../../res/img/svg/close-dark.svg) no-repeat center / contain;
+  mask: url(../../../res/img/svg/close-dark.svg) no-repeat center / contain;
+}
+
+.bottom-tab-close-button:hover::before {
+  background-color: white;
+}
+
+.bottom-tab-close-button:hover {
+  background-color: var(--blue-50);
+}
+
+.bottom-tab-close-button:hover:active {
+  background-color: var(--blue-60);
 }

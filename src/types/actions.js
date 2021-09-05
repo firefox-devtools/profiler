@@ -307,6 +307,10 @@ type ProfileAction =
       +order: number[],
     |}
   | {|
+      +type: 'CLOSE_SOURCE_TAB',
+      +index: number,
+    |}
+  | {|
       +type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
       +tab: TabSlug,
     |};

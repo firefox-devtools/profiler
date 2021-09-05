@@ -518,6 +518,40 @@ const sourceTabs: Reducer<SourceTabsState> = (
         ...state,
         order: action.order,
       };
+    case 'CLOSE_SOURCE_TAB': {
+      const { index } = action;
+      if (state.tabs.length === 1) {
+        // This was the only tab.
+        return {
+          ...state,
+          tabs: [],
+          selectedIndex: null,
+          order: [],
+        };
+      }
+      let newSelectedIndex = state.selectedIndex ?? 0;
+      if (index === state.selectedIndex) {
+        // The selected tab is being closed.
+        const indexOfTabInOrder = state.order.indexOf(index);
+        const isLastTabInOrder = indexOfTabInOrder === state.order.length - 1;
+        if (isLastTabInOrder) {
+          // Select the previous tab.
+          newSelectedIndex = state.order[indexOfTabInOrder - 1];
+        } else {
+          // Select the next tab.
+          newSelectedIndex = state.order[indexOfTabInOrder + 1];
+        }
+      }
+      return {
+        ...state,
+        tabs: state.tabs.filter((_tab, i) => i !== index),
+        selectedIndex:
+          newSelectedIndex > index ? newSelectedIndex - 1 : newSelectedIndex,
+        order: state.order
+          .filter(i => i !== index)
+          .map(i => (i > index ? i - 1 : i)),
+      };
+    }
     default:
       return state;
   }

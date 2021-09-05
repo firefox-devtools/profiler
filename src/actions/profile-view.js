@@ -1477,6 +1477,13 @@ export function changeSourceTabOrder(order: number[]): Action {
   };
 }
 
+export function closeSourceTab(index: number): Action {
+  return {
+    type: 'CLOSE_SOURCE_TAB',
+    index,
+  };
+}
+
 export function handleCallNodeTransformShortcut(
   event: SyntheticKeyboardEvent<>,
   threadsKey: ThreadsKey,
