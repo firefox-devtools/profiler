@@ -119,8 +119,14 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     e.preventDefault();
   };
 
+  _onMouseDownCloseButton = e => {
+    // Don't allow the Reorderable to see this event. We don't want dragging on the
+    // close button to move the tab.
+    e.stopPropagation();
+  };
+
   _onClickTabCloseButton = e => {
-    let { sourceTabs } = this.props;
+    const { sourceTabs } = this.props;
     const index = +e.currentTarget.parentElement.dataset.index;
     const isOnlyTab = sourceTabs.tabs.length === 1;
     this.props.closeSourceTab(index);
@@ -178,6 +184,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
                     title={`Close ${file}`}
                     type="button"
                     onClick={this._onClickTabCloseButton}
+                    onMouseDown={this._onMouseDownCloseButton}
                   />
                 </li>
               );
