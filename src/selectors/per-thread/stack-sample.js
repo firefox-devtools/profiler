@@ -86,9 +86,11 @@ export function getStackAndSampleSelectorsPerThread(
   const getStackLineInfo: Selector<StackLineInfo | null> = createSelector(
     threadSelectors.getFilteredThread,
     UrlState.getSelectedSourceTabFile,
+    UrlState.getInvertCallstack,
     (
       { stackTable, frameTable, funcTable, stringTable }: Thread,
-      selectedSourceTabFile
+      selectedSourceTabFile,
+      invertCallStack
     ): StackLineInfo | null => {
       if (selectedSourceTabFile === null) {
         return null;
@@ -97,7 +99,8 @@ export function getStackAndSampleSelectorsPerThread(
         stackTable,
         frameTable,
         funcTable,
-        stringTable.indexForString(selectedSourceTabFile)
+        stringTable.indexForString(selectedSourceTabFile),
+        invertCallStack
       );
     }
   );
@@ -203,11 +206,13 @@ export function getStackAndSampleSelectorsPerThread(
     UrlState.getSelectedSourceTabFile,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
+    UrlState.getInvertCallstack,
     (
       { stackTable, frameTable, funcTable, stringTable }: Thread,
       selectedSourceTabFile,
       callNodeInfo,
-      selectedCallNodeIndex
+      selectedCallNodeIndex,
+      invertCallStack
     ): StackLineInfo | null => {
       if (selectedSourceTabFile === null || selectedCallNodeIndex === null) {
         return null;
@@ -225,7 +230,8 @@ export function getStackAndSampleSelectorsPerThread(
         stackTable,
         frameTable,
         selectedCallNodeIndex,
-        callNodeInfo
+        callNodeInfo,
+        invertCallStack
       );
     }
   );

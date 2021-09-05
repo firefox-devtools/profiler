@@ -2984,6 +2984,41 @@ export function hasThreadKeys(
  * For each stack in the stack table and each line in the file, we answer the
  * question "Does this stack contribute to line X's self time? Does it contribute
  * to line X's total time?"
+ */
+export function getStackLineInfo(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  fileNameStringIndex: IndexIntoStringTable,
+  isInvertedTree: boolean
+): StackLineInfo {
+  return isInvertedTree
+    ? getStackLineInfoInverted(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileNameStringIndex
+      )
+    : getStackLineInfoNonInverted(
+        stackTable,
+        frameTable,
+        funcTable,
+        fileNameStringIndex
+      );
+}
+
+/**
+ * This function handles the non-inverted case.
+ *
+ * Compute the sets of line numbers in the given file that are hit by each stack.
+ * For each stack in the stack table and each line in the file, we answer the
+ * question "Does this stack contribute to line X's self time? Does it contribute
+ * to line X's total time?"
+ *
+ * Compute the sets of line numbers in the given file that are hit by each stack.
+ * For each stack in the stack table and each line in the file, we answer the
+ * question "Does this stack contribute to line X's self time? Does it contribute
+ * to line X's total time?"
  * Each stack can only contribute to one line's self time: the line of the stack's
  * own frame.
  * But each stack can contribute to the total time of multiple lines: All the lines
@@ -2995,7 +3030,7 @@ export function hasThreadKeys(
  *   3. The line in C that is being executed at that stack (stack.frame.line).
  * This last line is the stack's "self line".
  */
-export function getStackLineInfo(
+export function getStackLineInfoNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
@@ -3011,18 +3046,15 @@ export function getStackLineInfo(
     const prefixStack = stackTable.prefix[stackIndex];
     const func = frameTable.func[frame];
     const fileNameStringIndexOfThisStack = funcTable.fileName[func];
-    const prefixLines = prefixStack ? stackLines[prefixStack] : null;
     let selfLine = null;
-    let lines = prefixLines;
+    let lines = prefixStack ? stackLines[prefixStack] : null;
     if (fileNameStringIndexOfThisStack === fileNameStringIndex) {
       selfLine = frameTable.line[frame];
-      if (selfLine) {
-        if (prefixLines === null) {
+      if (selfLine !== null) {
+        if (lines === null) {
           lines = new Set([selfLine]);
-        } else if (prefixLines.has(selfLine)) {
-          lines = prefixLines;
-        } else {
-          lines = new Set(prefixLines);
+        } else if (!lines.has(selfLine)) {
+          lines = new Set(lines);
           lines.add(selfLine);
         }
       }
@@ -3034,6 +3066,93 @@ export function getStackLineInfo(
     selfLine: selfLineForAllStacks,
     stackLines,
   };
+}
+
+/**
+ * This function handles the inverted case.
+ */
+export function getStackLineInfoInverted(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  fileNameStringIndex: IndexIntoStringTable
+): StackLineInfo {
+  const selfLineForAllStacks = [];
+  const stackLines = [];
+
+  // This loop takes advantage of the fact that the stack table is topologically ordered:
+  // Prefix stacks are always visited before their descendants.
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const frame = stackTable.frame[stackIndex];
+    const prefixStack = stackTable.prefix[stackIndex];
+    const func = frameTable.func[frame];
+    const fileNameStringIndexOfThisStack = funcTable.fileName[func];
+    let selfLine = null;
+    let lines = null;
+    if (prefixStack === null) {
+      // This stack node is a root of the inverted tree. That means that this stack's
+      // frame's line is where the self time is assigned, for the entire subtree of
+      // the inverted stack tree at this root.
+      if (fileNameStringIndexOfThisStack === fileNameStringIndex) {
+        selfLine = frameTable.line[frame];
+        if (selfLine !== null) {
+          lines = new Set([selfLine]);
+        }
+      }
+    } else {
+      // This stack node has a prefix, which, in inverted mode, means that *this node
+      // calls someone else, and that's where the time is spent*. The prefix is the callee.
+      // So this stack node contributes its time to its root node's line.
+      // We inherit the prefix's self line.
+      selfLine = selfLineForAllStacks[prefixStack];
+
+      // Add this stack's line to the totalLines set.
+      lines = stackLines[prefixStack];
+      if (fileNameStringIndexOfThisStack === fileNameStringIndex) {
+        const thisStackLine = frameTable.line[frame];
+        if (thisStackLine !== null) {
+          if (lines === null) {
+            lines = new Set([thisStackLine]);
+          } else if (!lines.has(thisStackLine)) {
+            lines = new Set(lines);
+            lines.add(thisStackLine);
+          }
+        }
+      }
+    }
+    selfLineForAllStacks.push(selfLine);
+    stackLines.push(lines);
+  }
+  return {
+    selfLine: selfLineForAllStacks,
+    stackLines,
+  };
+}
+
+/**
+ * Gathers the line numbers which are hit by a given call node.
+ * These line numbers are in the source file that contains that call node's func.
+ */
+export function getStackLineInfoForCallNode(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  isInvertedTree: boolean
+): StackLineInfo {
+  return isInvertedTree
+    ? getStackLineInfoForCallNodeInverted(
+        stackTable,
+        frameTable,
+        callNodeIndex,
+        callNodeInfo
+      )
+    : getStackLineInfoForCallNodeNonInverted(
+        stackTable,
+        frameTable,
+        callNodeIndex,
+        callNodeInfo
+      );
 }
 
 /**
@@ -3097,7 +3216,7 @@ export function getStackLineInfo(
  *     node.
  *     For all other stacks, this is null.
  */
-export function getStackLineInfoForCallNode(
+export function getStackLineInfoForCallNodeNonInverted(
   stackTable: StackTable,
   frameTable: FrameTable,
   callNodeIndex: IndexIntoCallNodeTable,
@@ -3127,6 +3246,61 @@ export function getStackLineInfoForCallNode(
         : null;
       callNodeSelfLineForAllStacks.push(null);
       callNodeTotalLinesForAllStacks.push(inheritedLineSet);
+    }
+  }
+  return {
+    selfLine: callNodeSelfLineForAllStacks,
+    stackLines: callNodeTotalLinesForAllStacks,
+  };
+}
+
+/**
+ * This handles the inverted case.
+ */
+export function getStackLineInfoForCallNodeInverted(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  callNodeIndex: IndexIntoCallNodeTable,
+  { stackIndexToCallNodeIndex }: CallNodeInfo
+): StackLineInfo {
+  const callNodeSelfLineForAllStacks = [];
+  const callNodeTotalLinesForAllStacks = [];
+
+  // This loop takes advantage of the fact that the stack table is topologically ordered:
+  // Prefix stacks are always visited before their descendants.
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefixStack = stackTable.prefix[stackIndex];
+    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+      const frame = stackTable.frame[stackIndex];
+      const line = frameTable.line[frame];
+      if (prefixStack === null) {
+        // This is a root of the inverted tree, and it is the given
+        // call node. That means that we have a self line.
+        callNodeSelfLineForAllStacks.push(line);
+      } else {
+        // This is not a root stack node, so no self time is spent
+        // in the given call node for this stack node.
+        callNodeSelfLineForAllStacks.push(null);
+      }
+      callNodeTotalLinesForAllStacks.push(
+        line !== null ? new Set([line]) : null
+      );
+    } else {
+      if (prefixStack === null) {
+        // This is a root of the inverted tree, but it doesn't map
+        // to the given call node.
+        callNodeSelfLineForAllStacks.push(null);
+        callNodeTotalLinesForAllStacks.push(null);
+      } else {
+        // This is not a root stack node. Samples that hit this stack node
+        // spend their time in the root node of our subtree. If that root
+        // maps to the given call node, we may have self time.
+        // Inherit both self and total time contribution from the parent stack.
+        const inheritedSelfLine = callNodeSelfLineForAllStacks[prefixStack];
+        const inheritedLineSet = callNodeTotalLinesForAllStacks[prefixStack];
+        callNodeSelfLineForAllStacks.push(inheritedSelfLine);
+        callNodeTotalLinesForAllStacks.push(inheritedLineSet);
+      }
     }
   }
   return {
