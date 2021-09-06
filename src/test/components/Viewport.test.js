@@ -630,7 +630,6 @@ function setup(profileOverrides: MixedObject = {}) {
       previewSelection: getPreviewSelection(state),
     }),
     mapDispatchToProps: {},
-    // eslint-disable-next-line react/display-name
     component: (props: Props) => (
       <ChartWithViewport
         viewportProps={{
