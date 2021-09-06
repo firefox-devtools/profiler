@@ -216,6 +216,18 @@ Home--menu-button-instructions =
 # of the "Enable Firefox Profiler menu button" button.
 Home--enable-button-unavailable =
     .title = Екземпляр профайлера не зміг з'єднатися з WebChannel, тому не вдалося увімкнути кнопку меню профайлера.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Цей екземпляр профайлера не зміг під'єднатися до WebChannel. Зазвичай це означає,
+    що він працює на хості не зазначеному в налаштуваннях
+    <code>devtools.performance.recording.ui-base-url</code>. Якщо ви хочете захопити нові
+    профілі цим екземпляром і надати йому програмне керування кнопкою меню
+    профайлера, ви можете перейти до <code>about:config</code> і змінити налаштування.
+Home--record-instructions =
+    Щоб розпочати запис профілю, натисніть кнопку запису або скористайтеся
+    комбінацією клавіш. Під час запису профілю піктограма стає синього кольору.
+    Натисніть <kbd>Захопити</kbd>, щоб завантажити дані на profiler.firefox.com.
 Home--instructions-title = Як переглядати та записувати профілі
 Home--instructions-content =
     Для запису профілів швидкодії потрібен <a>{ -firefox-brand-name }</a>.
@@ -237,6 +249,8 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
+JsTracerSettings--show-only-self-time = Показувати лише час власний час
+    .title = Показувати лише час, проведений у вузлі виклику, нехтуючи його дочірні елементи.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -375,6 +389,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
+MenuButtons--metaInfo--build-id = ID збірки:
+MenuButtons--metaInfo--build-type = Тип збірки:
 
 ## Strings refer to specific types of builds, and should be kept in English.
 
@@ -389,6 +405,8 @@ MenuButtons--metaInfo--device = Пристрій:
 MenuButtons--metaInfo--os = ОС:
 # ABI means Application Binary Interface. This describes the platform a profile was captured on.
 MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo-renderRowOfList-label-features = Можливості:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Фільтр потоків:
 MenuButtons--metaInfo-renderRowOfList-label-extensions = Розширення:
 
 ## Overhead refers to the additional resources used to run the profiler.
@@ -403,8 +421,22 @@ MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
 ## Publish panel
 ## These strings are used in the publishing panel.
 
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Включити приховані потоки
+MenuButtons--publish--renderCheckbox-label-hidden-time = Включити прихований діапазон часу
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Включити знімки екрана
+MenuButtons--publish--renderCheckbox-label-resource = Включити URL-адреси ресурсів та шляхи
+MenuButtons--publish--renderCheckbox-label-extension = Включити відомості про розширення
+MenuButtons--publish--renderCheckbox-label-preference = Включити значення параметрів
+MenuButtons--publish--reupload-performance-profile = Повторно завантажити профіль швидкодії
+MenuButtons--publish--share-performance-profile = Поділитися профілем швидкодії
+MenuButtons--publish--info-description = Вивантажте свій профіль і зробіть його доступним для всіх, хто має посилання.
+MenuButtons--publish--info-description-default = Типово ваші особисті дані вилучаються.
+MenuButtons--publish--info-description-firefox-nightly = Цей профіль з { -firefox-nightly-brand-name }, тому типово включено всю інформацію.
+MenuButtons--publish--include-additional-data = Включити додаткові дані, які можуть розкрити вашу ідентичність
 MenuButtons--publish--button-upload = Вивантажити
 MenuButtons--publish--upload-title = Вивантаження профілю…
+MenuButtons--publish--cancel-upload = Скасувати вивантаження
+MenuButtons--publish--message-something-went-wrong = Йой, під час вивантаження профілю сталася якась халепа.
 MenuButtons--publish--message-try-again = Повторити спробу
 MenuButtons--publish--download = Завантажити
 MenuButtons--publish--compressing = Стиснення…
@@ -429,6 +461,7 @@ ProfileDeleteButton--delete-button =
 ## ProfileFilterNavigator
 ## This is used at the top of the profile analysis UI.
 
+ProfileFilterNavigator--full-range = Повний спектр
 
 ## Profile Loader Animation
 
