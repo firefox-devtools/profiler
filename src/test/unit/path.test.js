@@ -89,7 +89,7 @@ describe('PathSet', function() {
 
     const resultValues = [];
     set.forEach(function(value1, value2, thisSet) {
-      expect(this).toBe(undefined); // eslint-disable-line babel/no-invalid-this
+      expect(this).toBe(undefined); // eslint-disable-line @babel/no-invalid-this
       expect(value1).toBe(value2);
       expect(thisSet).toBe(set);
       resultValues.push(value1);
