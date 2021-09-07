@@ -57,7 +57,7 @@
   filter: brightness(70%) drop-shadow(0 1px rgba(255,255,255, 0.5));
 }
 
-.bottom-tabs {
+.bottom-box-bar {
   display: flex;
   overflow: hidden;
   height: 24px;
@@ -73,6 +73,13 @@
   height: 24px;
   flex-shrink: 0;
   background: url(../../../res/img/svg/close-dark.svg) no-repeat center / 16px 16px;
+}
+
+
+.bottom-box-tabs {
+  flex-shrink: 1;
+  display: flex;
+  flex-flow: row nowrap;
 }
 
 .bottom-tabs-reorderable {
@@ -131,6 +138,15 @@
   background: white;
 }
 
+.bottom-box-tabs:focus-visible {
+  outline: 0;
+}
+
+.bottom-box-tabs:focus-visible .bottom-tab--selected {
+  text-decoration: underline;
+  color: var(--blue-60);
+}
+
 .bottom-tab--selected::before {
   background-color: var(--blue-50);
   transition: none;
@@ -154,6 +170,10 @@
   border: 0;
   background: none;
   border-radius: 2px;
+}
+
+.bottom-tab:not(.bottom-tab--selected) .bottom-tab-close-button {
+  -moz-user-focus: ignore;
 }
 
 .bottom-tab-close-button::before {

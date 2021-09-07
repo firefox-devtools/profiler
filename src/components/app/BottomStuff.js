@@ -139,6 +139,49 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     this.props.closeBottomBox();
   };
 
+  _onTabsMouseDown = e => {
+    // Don't focus the tab bar on mousedown.
+    e.preventDefault();
+  };
+
+  _onTabsKeyDown = (event: SyntheticKeyboardEvent<>) => {
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
+      return;
+    }
+    const { sourceTabs, changeSelectedSourceTab } = this.props;
+    const { selectedIndex, tabs, order } = sourceTabs;
+
+    if (tabs.length === 0) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        if (selectedIndex === null) {
+          changeSelectedSourceTab(
+            event.key === 'ArrowLeft' ? order[order.length - 1] : order[0]
+          );
+        } else {
+          const delta = event.key === 'ArrowLeft' ? -1 : 1;
+          const selectedIndexInOrder = order.indexOf(selectedIndex);
+          const newIndexInOrder = Math.max(
+            0,
+            Math.min(order.length - 1, selectedIndexInOrder + delta)
+          );
+          changeSelectedSourceTab(order[newIndexInOrder]);
+        }
+        break;
+      case 'Home':
+        changeSelectedSourceTab(order[0]);
+        break;
+      case 'End':
+        changeSelectedSourceTab(order[order.length - 1]);
+        break;
+      default:
+    }
+  };
+
   render() {
     const {
       globalLineTimings,
@@ -156,40 +199,49 @@ class BottomStuffImpl extends React.PureComponent<Props> {
         : null;
     return (
       <div className="bottom-stuff">
-        <div className="bottom-tabs">
-          <Reorderable
-            tagName="ol"
-            className="bottom-tabs-reorderable"
-            grippyClassName="bottom-tab"
-            order={sourceTabs.order}
-            orient="horizontal"
-            onChangeOrder={changeSourceTabOrder}
+        <div className="bottom-box-bar">
+          <div
+            className="bottom-box-tabs"
+            tabIndex="0"
+            onMouseDown={this._onTabsMouseDown}
+            onKeyDown={this._onTabsKeyDown}
           >
-            {sourceTabs.tabs.map((tab, index) => {
-              const parsedName = parseFileNameFromSymbolication(tab.file);
-              const path = parsedName.path;
-              const file = path.slice(path.lastIndexOf('/') + 1);
-              return (
-                <li
-                  key={index}
-                  data-index={index}
-                  className={classNames('bottom-tab', {
-                    'bottom-tab--selected': index === sourceTabs.selectedIndex,
-                  })}
-                  onMouseDown={this._onClickTab}
-                >
-                  <span className="bottom-tab-text">{file}</span>
-                  <button
-                    className={classNames('bottom-tab-close-button')}
-                    title={`Close ${file}`}
-                    type="button"
-                    onClick={this._onClickTabCloseButton}
-                    onMouseDown={this._onMouseDownCloseButton}
-                  />
-                </li>
-              );
-            })}
-          </Reorderable>
+            <Reorderable
+              tagName="ol"
+              className="bottom-tabs-reorderable"
+              grippyClassName="bottom-tab"
+              order={sourceTabs.order}
+              orient="horizontal"
+              onChangeOrder={changeSourceTabOrder}
+            >
+              {sourceTabs.tabs.map((tab, index) => {
+                const parsedName = parseFileNameFromSymbolication(tab.file);
+                const path = parsedName.path;
+                const file = path.slice(path.lastIndexOf('/') + 1);
+                return (
+                  <li
+                    key={index}
+                    data-index={index}
+                    className={classNames('bottom-tab', {
+                      'bottom-tab--selected':
+                        index === sourceTabs.selectedIndex,
+                    })}
+                    onMouseDown={this._onClickTab}
+                  >
+                    <span className="bottom-tab-text">{file}</span>
+                    <button
+                      className={classNames('bottom-tab-close-button')}
+                      title={`Close ${file}`}
+                      type="button"
+                      onClick={this._onClickTabCloseButton}
+                      onMouseDown={this._onMouseDownCloseButton}
+                      tabIndex={index === sourceTabs.selectedIndex ? 0 : -1}
+                    />
+                  </li>
+                );
+              })}
+            </Reorderable>
+          </div>
           <button
             className={classNames(
               'bottom-close-button',
