@@ -177,10 +177,21 @@
   opacity: 0.7;
 }
 
+/* stylelint-disable order/properties-order, declaration-block-no-duplicate-properties, value-keyword-case */
 .treeViewBody:focus .treeViewRow.isSelected {
-  background-color: highlight;
-  color: highlighttext;
+  /* Fallback for browsers that don't support SelectedItem */
+  background-color: Highlight;
+  color: HighlightText;
+
+  /* Safari's non-standard SelectedItem equivalent (until SelectedItem is implemented, https://bugs.webkit.org/show_bug.cgi?id=230007 ) */
+  background-color: -apple-system-selected-content-background;
+  color: -apple-system-alternate-selected-text;
+
+  /* The new standard color */
+  background-color: SelectedItem;
+  color: SelectedItemText;
 }
+/* stylelint-enable order/properties-order, declaration-block-no-duplicate-properties, value-keyword-case */
 
 .treeViewBody:focus .treeViewRow.isSelected a {
   color: inherit;
