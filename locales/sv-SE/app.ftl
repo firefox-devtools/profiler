@@ -219,6 +219,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Ange markering från markörens varaktighet
 MarkerContextMenu--start-selection-here = Starta markering här
 MarkerContextMenu--end-selection-here = Avsluta markering här
 MarkerContextMenu--start-selection-at-marker-start = Starta markering vid markörens <strong>start</strong>
