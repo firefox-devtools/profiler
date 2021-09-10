@@ -9,6 +9,7 @@ import type {
   TracingEventUnion,
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
+import type { Profile } from 'firefox-profiler/types';
 
 import { TextDecoder } from 'util';
 
@@ -24,48 +25,33 @@ afterAll(async function () {
 });
 
 describe('converting Linux perf profile', function () {
-  it('should import a perf profile', async function () {
-    let version = -1;
-    try {
-      const fs = require('fs');
-      const zlib = require('zlib');
-      const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.perf.gz');
-      const decompressedArrayBuffer = zlib.gunzipSync(buffer);
-      const text = decompressedArrayBuffer.toString('utf8');
-      const profile = await unserializeProfileOfArbitraryFormat(text);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
-      version = profile.meta.version;
-      expect(profile).toMatchSnapshot();
-    } catch (e) {
-      console.log(e);
-      // probably file not found
+  async function loadProfile(filename: string): Promise<Profile> {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(filename);
+    const decompressedArrayBuffer = zlib.gunzipSync(buffer);
+    const text = decompressedArrayBuffer.toString('utf8');
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
     }
-    expect(version).toEqual(GECKO_PROFILE_VERSION);
+    return profile;
+  }
+
+  it('should import a perf profile', async function () {
+    const profile = await loadProfile(
+      'src/test/fixtures/upgrades/test.perf.gz'
+    );
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    expect(profile).toMatchSnapshot();
   });
 
   it('should import a simple perf profile', async function () {
-    let version = -1;
-    try {
-      const fs = require('fs');
-      const zlib = require('zlib');
-      const buffer = fs.readFileSync(
-        'src/test/fixtures/upgrades/simple-perf.txt.gz'
-      );
-      const decompressedArrayBuffer = zlib.gunzipSync(buffer);
-      const text = decompressedArrayBuffer.toString('utf8');
-      const profile = await unserializeProfileOfArbitraryFormat(text);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
-      version = profile.meta.version;
-      expect(profile).toMatchSnapshot();
-    } catch (e) {
-      console.log(e);
-      // probably file not found
-    }
-    expect(version).toEqual(GECKO_PROFILE_VERSION);
+    const profile = await loadProfile(
+      'src/test/fixtures/upgrades/simple-perf.txt.gz'
+    );
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    expect(profile).toMatchSnapshot();
   });
 });
 
