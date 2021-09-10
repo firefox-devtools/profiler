@@ -53,6 +53,14 @@ describe('converting Linux perf profile', function () {
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
     expect(profile).toMatchSnapshot();
   });
+
+  it('should import a perf profile of gzip', async function () {
+    const profile = await loadProfile(
+      'src/test/fixtures/upgrades/gzip.perf.gz'
+    );
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    expect(profile).toMatchSnapshot();
+  });
 });
 
 describe('converting dhat profiles', function () {
