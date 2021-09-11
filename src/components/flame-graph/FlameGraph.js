@@ -27,6 +27,7 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
+  createSourceTabIfNeededAndSelect,
 } from 'firefox-profiler/actions/profile-view';
 
 import type {
@@ -90,6 +91,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut,
+  +createSourceTabIfNeededAndSelect: typeof createSourceTabIfNeededAndSelect,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -114,6 +116,18 @@ class FlameGraphImpl extends React.PureComponent<Props> {
       threadsKey,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
+  };
+
+  _onCallNodeDoubleClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
+    if (callNodeIndex === null) {
+      return;
+    }
+    const { callTree, createSourceTabIfNeededAndSelect } = this.props;
+    const file = callTree.getRawFileNameForCallNode(callNodeIndex);
+    if (file === null) {
+      return;
+    }
+    createSourceTabIfNeededAndSelect(file, 'flame-graph');
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
@@ -337,6 +351,7 @@ class FlameGraphImpl extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
+              onDoubleClick: this._onCallNodeDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
@@ -402,6 +417,7 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedCallNode,
     changeRightClickedCallNode,
     handleCallNodeTransformShortcut,
+    createSourceTabIfNeededAndSelect,
   },
   options: { forwardRef: true },
   component: FlameGraphImpl,
