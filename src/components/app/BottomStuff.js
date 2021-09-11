@@ -78,6 +78,9 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
   }
 }
 
+// ["a/b/hello", "c/d/world"] -> ["hello", "world"]
+// ["a/b/hello", "c/d/hello"] -> ["b/hello", "d/hello"]
+// ["a\\b/hello", "c/d\\hello"] -> ["b/hello", "d\\hello"]
 function computeMinimalUniquePathTails(paths: string[]) {
   const pathsWithOffsets = paths.map(path => {
     const components = path.split(/[/\\]/);
@@ -87,7 +90,7 @@ function computeMinimalUniquePathTails(paths: string[]) {
     for (const component of components) {
       curOffset -= component.length;
       offsets.push(curOffset);
-      curOffset -= 1; // for the slash
+      curOffset -= 1; // for the slash or backslash
     }
     return { path, offsets };
   });
