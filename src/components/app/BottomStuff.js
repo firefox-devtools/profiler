@@ -15,6 +15,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedSourceTabSource } from 'firefox-profiler/selectors/sources';
+import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -43,6 +44,7 @@ type StateProps = {|
   +selectedSourceTabFile: string | null,
   +selectedSourceTabSource: FileSourceStatus | void,
   +sourceTabActivationGeneration: number,
+  +disableOverscan: boolean,
 |};
 
 type DispatchProps = {|
@@ -188,6 +190,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
       sourceTabs,
       selectedSourceTabSource,
       changeSourceTabOrder,
+      disableOverscan,
     } = this.props;
     const source =
       selectedSourceTabSource && selectedSourceTabSource.type === 'AVAILABLE'
@@ -261,6 +264,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
             <SourceView
               key={selectedSourceTabFile}
               scrollRestorationKey={selectedSourceTabFile}
+              disableOverscan={disableOverscan}
               timings={globalLineTimings}
               source={source}
               rowHeight={16}
@@ -286,6 +290,7 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     sourceTabs: getSourceTabs(state),
     selectedSourceTabFile: getSelectedSourceTabFile(state),
     selectedSourceTabSource: getSelectedSourceTabSource(state),
+    disableOverscan: getPreviewSelection(state).isModifying,
   }),
   mapDispatchToProps: {
     fetchSourceForFile,

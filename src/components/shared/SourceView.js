@@ -51,6 +51,7 @@ type SourceViewProps = {|
   +source: string,
   +rowHeight: CssPixels,
   +scrollRestorationKey: string,
+  +disableOverscan: boolean,
 |};
 
 type LineNumber = number;
@@ -227,7 +228,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   render() {
-    const { rowHeight } = this.props;
+    const { rowHeight, disableOverscan } = this.props;
     const sourceLines = this._getSourceLines();
     const maxLength = this._computeMaxLineLengthMemoized(sourceLines);
     const CHAR_WIDTH_ESTIMATE = 8; // css pixels
@@ -243,7 +244,7 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
           columnCount={2}
           focusable={true}
           specialItems={this._specialItems}
-          disableOverscan={false}
+          disableOverscan={disableOverscan}
           containerWidth={maxLength * CHAR_WIDTH_ESTIMATE}
           ref={this._takeListRef}
         />
