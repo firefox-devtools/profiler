@@ -4,6 +4,7 @@
 // @flow
 
 import React from 'react';
+import memoize from 'memoize-one';
 
 import { SourceView } from '../shared/SourceView';
 import { Reorderable } from '../shared/Reorderable';
@@ -23,6 +24,7 @@ import type {
   LineTimings,
   SourceTabsState,
   FileSourceStatus,
+  SourceTab,
 } from 'firefox-profiler/types';
 
 import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
@@ -76,11 +78,102 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
   }
 }
 
+function computeMinimalUniquePathTails(paths: string[]) {
+  const pathsWithOffsets = paths.map(path => {
+    const components = path.split(/[/\\]/);
+    components.reverse();
+    const offsets = [];
+    let curOffset = path.length;
+    for (const component of components) {
+      curOffset -= component.length;
+      offsets.push(curOffset);
+      curOffset -= 1; // for the slash
+    }
+    return { path, offsets };
+  });
+
+  const collisions = new Set();
+  const map = new Map();
+  const subPaths = [];
+  for (let i = 0; i < pathsWithOffsets.length; i++) {
+    const pathWithOffsets = pathsWithOffsets[i];
+    const { path, offsets } = pathWithOffsets;
+    let depth = 0;
+    while (depth < offsets.length) {
+      const subPath = path.slice(offsets[depth]);
+      if (!collisions.has(subPath)) {
+        break;
+      }
+      depth++;
+    }
+
+    if (depth === offsets.length) {
+      // Collided all the way to the full path.
+      subPaths.push(path);
+      continue;
+    }
+
+    let subPath = path.slice(offsets[depth]);
+    const collidedI = map.get(subPath);
+    if (collidedI === undefined) {
+      map.set(subPath, i);
+      subPaths.push(subPath);
+      continue;
+    }
+
+    // We collided on subPath. This is the first collision on subPath.
+    collisions.add(subPath);
+    map.delete(subPath);
+
+    const collidedPath = pathsWithOffsets[collidedI].path;
+    const collidedOffsets = pathsWithOffsets[collidedI].offsets;
+
+    // We need to go at least 1 level deeper to make the subPaths different.
+    depth++;
+
+    while (depth < Math.min(offsets.length, collidedOffsets.length) + 1) {
+      const subPath = path.slice(offsets[Math.min(depth, offsets.length - 1)]);
+      const collidedSubPath = collidedPath.slice(
+        collidedOffsets[Math.min(depth, collidedOffsets.length - 1)]
+      );
+      if (subPath !== collidedSubPath) {
+        break;
+      }
+      collisions.add(subPath);
+      depth++;
+    }
+
+    subPath = path.slice(offsets[Math.min(depth, offsets.length - 1)]);
+    const collidedSubPath = collidedPath.slice(
+      collidedOffsets[Math.min(depth, collidedOffsets.length - 1)]
+    );
+    if (subPath !== collidedSubPath) {
+      map.set(collidedSubPath, collidedI);
+      subPaths[collidedI] = collidedSubPath;
+      map.set(subPath, i);
+      subPaths.push(subPath);
+      continue;
+    }
+
+    // The full paths must be identical.
+    subPaths[collidedI] = collidedPath;
+    subPaths.push(path);
+  }
+
+  return subPaths;
+}
+
 class BottomStuffImpl extends React.PureComponent<Props> {
   _sourceView: SourceView | null = null;
   _takeSourceViewRef = (sourceView: SourceView | null) => {
     this._sourceView = sourceView;
   };
+
+  _computeMinimalPathsMemoized = memoize((tabs: SourceTab[]): string[] =>
+    computeMinimalUniquePathTails(
+      tabs.map(tab => parseFileNameFromSymbolication(tab.file).path)
+    )
+  );
 
   componentDidMount() {
     this._triggerSourceLoadingIfNeeded();
@@ -200,6 +293,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
       sourceTabs.selectedIndex !== null
         ? sourceTabs.tabs[sourceTabs.selectedIndex].file
         : null;
+    const minimalPaths = this._computeMinimalPathsMemoized(sourceTabs.tabs);
     return (
       <div className="bottom-stuff">
         <div className="bottom-box-bar">
@@ -218,9 +312,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
               onChangeOrder={changeSourceTabOrder}
             >
               {sourceTabs.tabs.map((tab, index) => {
-                const parsedName = parseFileNameFromSymbolication(tab.file);
-                const path = parsedName.path;
-                const file = path.slice(path.lastIndexOf('/') + 1);
+                const file = minimalPaths[index];
                 return (
                   <li
                     key={index}
