@@ -4,43 +4,43 @@
 
 .tabs,
 .tabs-reorderable {
-  min-width: 0;
-  flex-shrink: 1;
   display: flex;
+  min-width: 0;
   flex-flow: row nowrap;
+  flex-shrink: 1;
 }
 
 .tabs-reorderable {
-  margin: 0 -0.5px;
   padding: 0;
+  margin: 0 -0.5px;
 }
 
 .tab {
+  position: relative;
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
   min-width: 0;
+  flex-flow: row nowrap;
   align-items: center;
-  margin: 0 -0.5px 1px;
+  justify-content: space-between;
   padding: 2px 4px 0;
   border: solid transparent;
   border-width: 0 1px;
-  position: relative;
+  margin: 0 -0.5px 1px;
+  cursor: default;
   transition-duration: 200ms;
   transition-property: background-color, border-color;
-  cursor: default;
   user-select: none;
 }
 
 .tab::before {
-  content: "";
   position: absolute;
   top: 0;
-  left: -1px;
   right: -1px;
+  left: -1px;
   height: 2px;
-  transition: none;
+  content: '';
   opacity: 0;
+  transition: none;
 }
 
 .tab:not(.tab--selected):hover {
@@ -49,17 +49,17 @@
 
 .tab:not(.tab--selected):hover::before {
   background-color: var(--grey-40);
-  transition: opacity 200ms;
   opacity: 1;
+  transition: opacity 200ms;
 }
 
 .tab--selected {
   z-index: 1;
-  margin-bottom: 0;
   padding-bottom: 1px;
-  transition: none;
   border-color: var(--grey-30);
+  margin-bottom: 0;
   background: white;
+  transition: none;
 }
 
 .bottom-box-tabs:focus-visible {
@@ -67,29 +67,29 @@
 }
 
 .bottom-box-tabs:focus-visible .tab--selected {
-  text-decoration: underline;
   color: var(--blue-60);
+  text-decoration: underline;
 }
 
 .tab--selected::before {
   background-color: var(--blue-50);
-  transition: none;
   opacity: 1;
+  transition: none;
 }
 
 .tab-text {
   overflow: hidden;
-  text-overflow: ellipsis;
   margin: -2px 4px 0;
+  text-overflow: ellipsis;
 }
 
 .tab-close-button {
-  flex-shrink: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   padding: 1px;
   border: 0;
   background: none;
@@ -97,12 +97,13 @@
 }
 
 .tab-close-button::before {
-  content: '';
   display: block;
   width: 12px;
   height: 12px;
   background-color: black;
-  -webkit-mask: url(../../../res/img/svg/close-dark.svg) no-repeat center / contain;
+  content: '';
+  -webkit-mask: url(../../../res/img/svg/close-dark.svg) no-repeat center /
+    contain;
   mask: url(../../../res/img/svg/close-dark.svg) no-repeat center / contain;
 }
 

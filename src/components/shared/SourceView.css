@@ -3,16 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .sourceView {
-  background: white;
   display: flex;
   flex: 1;
   flex-flow: column nowrap;
+  background: white;
 }
 
- .sourceViewHeader {
+.sourceViewHeader {
   display: flex;
-  flex-flow: row nowrap;
   height: 16px;
+  flex-flow: row nowrap;
   padding: 1px 0;
   border-bottom: 1px solid var(--grey-30);
   background: white;
@@ -46,8 +46,8 @@
 }
 
 .sourceViewFixedColumn {
-  text-align: right;
   padding-right: 5px;
+  text-align: right;
 }
 
 .sourceViewRowColumn.sourceViewFixedColumn {
@@ -63,14 +63,10 @@
 }
 
 .sourceViewFixedColumn.lineNumber {
-  font-variant-numeric: tabular-nums;
-  color: #aaa;
   width: 45px;
-}
-
-/*.sourceViewRowColumn.total,*/
-.sourceViewFixedColumn.lineNumber {
   border-right: 0;
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
 }
 .sourceViewHeaderColumn.sourceViewFixedColumn.lineNumber::after {
   display: none;
@@ -129,20 +125,18 @@
   background-color: #edf6ff;
 }
 
-code[class*="language-"] {
-	word-spacing: normal;
-	word-break: normal;
-	word-wrap: normal;
-	font-family: ui-monospace, Roboto Mono, monospace;
-
-	-moz-tab-size: 4;
-	-o-tab-size: 4;
-	tab-size: 4;
-
-	-webkit-hyphens: none;
-	-moz-hyphens: none;
-	-ms-hyphens: none;
-	hyphens: none;
+code[class*='language-'] {
+  font-family: ui-monospace, Roboto Mono, monospace;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  word-break: normal;
+  word-spacing: normal;
+  word-wrap: normal;
 }
 
 .syn_type,
