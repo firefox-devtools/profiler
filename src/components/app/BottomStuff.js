@@ -117,19 +117,20 @@ function computeMinimalUniquePathTails(paths: string[]) {
     }
 
     let subPath = path.slice(offsets[depth]);
-    const collidedI = map.get(subPath);
-    if (collidedI === undefined) {
+    const collidedIndex = map.get(subPath);
+    if (collidedIndex === undefined) {
       map.set(subPath, i);
       subPaths.push(subPath);
       continue;
     }
 
+    // collidedIndex < i
     // We collided on subPath. This is the first collision on subPath.
     collisions.add(subPath);
     map.delete(subPath);
 
-    const collidedPath = pathsWithOffsets[collidedI].path;
-    const collidedOffsets = pathsWithOffsets[collidedI].offsets;
+    const collidedPath = pathsWithOffsets[collidedIndex].path;
+    const collidedOffsets = pathsWithOffsets[collidedIndex].offsets;
 
     // We need to go at least 1 level deeper to make the subPaths different.
     depth++;
@@ -151,15 +152,15 @@ function computeMinimalUniquePathTails(paths: string[]) {
       collidedOffsets[Math.min(depth, collidedOffsets.length - 1)]
     );
     if (subPath !== collidedSubPath) {
-      map.set(collidedSubPath, collidedI);
-      subPaths[collidedI] = collidedSubPath;
+      map.set(collidedSubPath, collidedIndex);
+      subPaths[collidedIndex] = collidedSubPath;
       map.set(subPath, i);
       subPaths.push(subPath);
       continue;
     }
 
     // The full paths must be identical.
-    subPaths[collidedI] = collidedPath;
+    subPaths[collidedIndex] = collidedPath;
     subPaths.push(path);
   }
 
