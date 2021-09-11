@@ -226,6 +226,9 @@ class BottomStuffImpl extends React.PureComponent<Props> {
                       'bottom-tab--selected':
                         index === sourceTabs.selectedIndex,
                     })}
+                    role="tab"
+                    aria-selected={index === sourceTabs.selectedIndex}
+                    aria-controls="bottom-main"
                     onMouseDown={this._onClickTab}
                   >
                     <span className="bottom-tab-text">{file}</span>
@@ -253,7 +256,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
             onClick={this._onClickCloseButton}
           />
         </div>
-        <div className="bottom-main">
+        <div className="bottom-main" id="bottom-main">
           {selectedSourceTabFile !== null ? (
             <SourceView
               key={selectedSourceTabFile}
