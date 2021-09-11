@@ -138,6 +138,9 @@ const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
     // Committed range changes: (fallthrough)
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':
+    // Bottom box: (fallthrough)
+    case 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT':
+    case 'CLOSE_BOTTOM_BOX_FOR_TAB':
       return state + 1;
     default:
       return state;
