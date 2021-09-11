@@ -7,7 +7,7 @@ import React from 'react';
 import memoize from 'memoize-one';
 
 import { SourceView } from '../shared/SourceView';
-import { Reorderable } from '../shared/Reorderable';
+import { Tabs } from './Tabs';
 
 import {
   getSourceTabs,
@@ -80,7 +80,7 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
 
 // ["a/b/hello", "c/d/world"] -> ["hello", "world"]
 // ["a/b/hello", "c/d/hello"] -> ["b/hello", "d/hello"]
-// ["a\\b/hello", "c/d\\hello"] -> ["b/hello", "d\\hello"]
+// ["a\\b/hello", "c/b\\hello"] -> ["b/hello", "b\\hello"]
 function computeMinimalUniquePathTails(paths: string[]) {
   const pathsWithOffsets = paths.map(path => {
     const components = path.split(/[/\\]/);
@@ -209,24 +209,16 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     }
   }
 
-  _onClickTab = e => {
-    if (e.button !== 0 || e.target.matches('.bottom-tab-close-button')) {
-      return;
-    }
-    const index = +e.currentTarget.dataset.index;
+  _onSelectTab = index => {
     this.props.changeSelectedSourceTab(index);
-    e.preventDefault();
   };
 
-  _onMouseDownCloseButton = e => {
-    // Don't allow the Reorderable to see this event. We don't want dragging on the
-    // close button to move the tab.
-    e.stopPropagation();
+  _onChangeTabOrder = order => {
+    this.props.changeSourceTabOrder(order);
   };
 
-  _onClickTabCloseButton = e => {
+  _onCloseTab = index => {
     const { sourceTabs } = this.props;
-    const index = +e.currentTarget.parentElement.dataset.index;
     const isOnlyTab = sourceTabs.tabs.length === 1;
     this.props.closeSourceTab(index);
     if (isOnlyTab) {
@@ -238,55 +230,11 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     this.props.closeBottomBox();
   };
 
-  _onTabsMouseDown = e => {
-    // Don't focus the tab bar on mousedown.
-    e.preventDefault();
-  };
-
-  _onTabsKeyDown = (event: SyntheticKeyboardEvent<>) => {
-    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
-      return;
-    }
-    const { sourceTabs, changeSelectedSourceTab } = this.props;
-    const { selectedIndex, tabs, order } = sourceTabs;
-
-    if (tabs.length === 0) {
-      return;
-    }
-
-    switch (event.key) {
-      case 'ArrowLeft':
-      case 'ArrowRight':
-        if (selectedIndex === null) {
-          changeSelectedSourceTab(
-            event.key === 'ArrowLeft' ? order[order.length - 1] : order[0]
-          );
-        } else {
-          const delta = event.key === 'ArrowLeft' ? -1 : 1;
-          const selectedIndexInOrder = order.indexOf(selectedIndex);
-          const newIndexInOrder = Math.max(
-            0,
-            Math.min(order.length - 1, selectedIndexInOrder + delta)
-          );
-          changeSelectedSourceTab(order[newIndexInOrder]);
-        }
-        break;
-      case 'Home':
-        changeSelectedSourceTab(order[0]);
-        break;
-      case 'End':
-        changeSelectedSourceTab(order[order.length - 1]);
-        break;
-      default:
-    }
-  };
-
   render() {
     const {
       globalLineTimings,
       sourceTabs,
       selectedSourceTabSource,
-      changeSourceTabOrder,
       disableOverscan,
     } = this.props;
     const source =
@@ -301,49 +249,16 @@ class BottomStuffImpl extends React.PureComponent<Props> {
     return (
       <div className="bottom-stuff">
         <div className="bottom-box-bar">
-          <div
+          <Tabs
             className="bottom-box-tabs"
-            tabIndex="0"
-            onMouseDown={this._onTabsMouseDown}
-            onKeyDown={this._onTabsKeyDown}
-          >
-            <Reorderable
-              tagName="ol"
-              className="bottom-tabs-reorderable"
-              grippyClassName="bottom-tab"
-              order={sourceTabs.order}
-              orient="horizontal"
-              onChangeOrder={changeSourceTabOrder}
-            >
-              {sourceTabs.tabs.map((tab, index) => {
-                const file = minimalPaths[index];
-                return (
-                  <li
-                    key={index}
-                    data-index={index}
-                    className={classNames('bottom-tab', {
-                      'bottom-tab--selected':
-                        index === sourceTabs.selectedIndex,
-                    })}
-                    role="tab"
-                    aria-selected={index === sourceTabs.selectedIndex}
-                    aria-controls="bottom-main"
-                    onMouseDown={this._onClickTab}
-                  >
-                    <span className="bottom-tab-text">{file}</span>
-                    <button
-                      className={classNames('bottom-tab-close-button')}
-                      title={`Close ${file}`}
-                      type="button"
-                      onClick={this._onClickTabCloseButton}
-                      onMouseDown={this._onMouseDownCloseButton}
-                      tabIndex={index === sourceTabs.selectedIndex ? 0 : -1}
-                    />
-                  </li>
-                );
-              })}
-            </Reorderable>
-          </div>
+            tabs={minimalPaths}
+            order={sourceTabs.order}
+            selectedIndex={sourceTabs.selectedIndex}
+            onSelectTab={this._onSelectTab}
+            onCloseTab={this._onCloseTab}
+            onChangeOrder={this._onChangeTabOrder}
+            controlledElementIdForAria="bottom-main"
+          />
           <button
             className={classNames(
               'bottom-close-button',
