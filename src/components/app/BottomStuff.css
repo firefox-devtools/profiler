@@ -75,8 +75,9 @@
   background: url(../../../res/img/svg/close-dark.svg) no-repeat center / 16px 16px;
 }
 
-
-.bottom-box-tabs {
+.bottom-box-tabs,
+.bottom-tabs-reorderable {
+  min-width: 0;
   flex-shrink: 1;
   display: flex;
   flex-flow: row nowrap;
@@ -85,10 +86,6 @@
 .bottom-tabs-reorderable {
   margin: 0 -0.5px;
   padding: 0;
-  min-width: 0;
-  flex-shrink: 1;
-  display: flex;
-  flex-flow: row nowrap;
 }
 
 .bottom-tab {
