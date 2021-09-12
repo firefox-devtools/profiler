@@ -59,7 +59,9 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
+type SourceStatusOverlayProps = {| status: FileSourceStatus |};
+
+function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
   switch (status.type) {
     case 'LOADING': {
       const { url } = status;
