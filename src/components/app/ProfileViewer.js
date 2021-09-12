@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { DetailsContainer } from './DetailsContainer';
-import { BottomStuff } from './BottomStuff';
+import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
 import { CurrentProfileUploadedInformationLoader } from './CurrentProfileUploadedInformationLoader';
@@ -144,12 +144,12 @@ class ProfileViewerImpl extends PureComponent<Props> {
               percentage={true}
               // The DetailsContainer is primary.
               primaryIndex={0}
-              // The BottomStuff is secondary.
+              // The BottomBox is secondary.
               secondaryInitialSize={40}
               onDragEnd={invalidatePanelLayout}
             >
               <DetailsContainer />
-              {isBottomBoxOpen ? <BottomStuff /> : null}
+              {isBottomBoxOpen ? <BottomBox /> : null}
             </SplitterLayout>
           </SplitterLayout>
           <SymbolicationStatusOverlay />

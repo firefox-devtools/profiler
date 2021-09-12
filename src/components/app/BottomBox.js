@@ -37,7 +37,7 @@ import type {
 import { SourceView } from '../shared/SourceView';
 import { Tabs } from './Tabs';
 
-import './BottomStuff.css';
+import './BottomBox.css';
 
 type StateProps = {|
   +globalLineTimings: LineTimings,
@@ -78,7 +78,7 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
   }
 }
 
-class BottomStuffImpl extends React.PureComponent<Props> {
+class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView: SourceView | null = null;
   _takeSourceViewRef = (sourceView: SourceView | null) => {
     this._sourceView = sourceView;
@@ -158,7 +158,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
         : null;
     const minimalPaths = this._computeMinimalPathsMemoized(sourceTabs.tabs);
     return (
-      <div className="bottom-stuff">
+      <div className="bottom-box">
         <div className="bottom-box-bar">
           <Tabs
             className="bottom-box-tabs"
@@ -202,7 +202,7 @@ class BottomStuffImpl extends React.PureComponent<Props> {
   }
 }
 
-export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
+export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     globalLineTimings: selectedThreadSelectors.getLineTimings(state),
     selectedCallNodeLineTimings: selectedThreadSelectors.getLineTimingsForSelectedCallNode(
@@ -221,5 +221,5 @@ export const BottomStuff = explicitConnect<{||}, StateProps, DispatchProps>({
     closeSourceTab,
     closeBottomBox,
   },
-  component: BottomStuffImpl,
+  component: BottomBoxImpl,
 });
