@@ -12,12 +12,16 @@ import './Tabs.css';
 type Props = {|
   +className: string,
   +tabs: string[],
-  +order: number[],
   +selectedIndex: number | null,
   +controlledElementIdForAria: string,
   +onSelectTab: number => void,
-  +onCloseTab: number => void,
-  +onChangeOrder: (number[]) => void,
+
+  // Optional. If not specified, no close buttons are displayed.
+  +onCloseTab?: number => void,
+
+  // Both optional. Only if both are specified, tab dragging will be allowed.
+  +order?: number[],
+  +onChangeOrder?: (number[]) => void,
 |};
 
 export class Tabs extends React.PureComponent<Props> {
@@ -34,12 +38,16 @@ export class Tabs extends React.PureComponent<Props> {
   };
 
   _onClickTabCloseButton = (e: SyntheticMouseEvent<HTMLElement>) => {
+    const { onCloseTab } = this.props;
+    if (!onCloseTab) {
+      return;
+    }
     const parentElement = e.currentTarget.parentElement;
     if (!parentElement || !(parentElement instanceof HTMLElement)) {
       return;
     }
     const index = +parentElement.dataset.index;
-    this.props.onCloseTab(index);
+    onCloseTab(index);
     e.stopPropagation(); // Don't bubble up to the tab, i.e. don't select the closing tab.
   };
 
@@ -52,11 +60,13 @@ export class Tabs extends React.PureComponent<Props> {
     if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
       return;
     }
-    const { selectedIndex, tabs, order, onSelectTab } = this.props;
+    const { selectedIndex, tabs, onSelectTab } = this.props;
 
     if (tabs.length === 0) {
       return;
     }
+
+    const order = this.props.order ?? tabs.map((_tab, i) => i);
 
     switch (event.key) {
       case 'ArrowLeft':
@@ -87,21 +97,45 @@ export class Tabs extends React.PureComponent<Props> {
 
   render() {
     const {
-      tabs,
-      order,
-      selectedIndex,
-      onChangeOrder,
       className,
+      tabs,
+      selectedIndex,
       controlledElementIdForAria,
+      order,
+      onChangeOrder,
+      onCloseTab,
     } = this.props;
 
-    return (
-      <div
-        className={classNames(className, 'tabs')}
-        tabIndex="0"
-        onMouseDown={this._onTabsMouseDown}
-        onKeyDown={this._onTabsKeyDown}
-      >
+    let renderedTabs = tabs.map((tab, index) => {
+      return (
+        <li
+          key={index}
+          data-index={index}
+          className={classNames('tab', {
+            'tab--selected': index === selectedIndex,
+          })}
+          role="tab"
+          aria-selected={index === selectedIndex}
+          aria-controls={controlledElementIdForAria}
+          onMouseDown={this._onClickTab}
+        >
+          <span className="tab-text">{tab}</span>
+          {onCloseTab ? (
+            <button
+              className={classNames('tab-close-button')}
+              title={`Close ${tab}`}
+              type="button"
+              onClick={this._onClickTabCloseButton}
+              onMouseDown={this._onMouseDownCloseButton}
+              tabIndex={index === selectedIndex ? 0 : -1}
+            />
+          ) : null}
+        </li>
+      );
+    });
+
+    if (order && onChangeOrder) {
+      renderedTabs = (
         <Reorderable
           tagName="ol"
           className="tabs-reorderable"
@@ -110,32 +144,22 @@ export class Tabs extends React.PureComponent<Props> {
           orient="horizontal"
           onChangeOrder={onChangeOrder}
         >
-          {tabs.map((tab, index) => {
-            return (
-              <li
-                key={index}
-                data-index={index}
-                className={classNames('tab', {
-                  'tab--selected': index === selectedIndex,
-                })}
-                role="tab"
-                aria-selected={index === selectedIndex}
-                aria-controls={controlledElementIdForAria}
-                onMouseDown={this._onClickTab}
-              >
-                <span className="tab-text">{tab}</span>
-                <button
-                  className={classNames('tab-close-button')}
-                  title={`Close ${tab}`}
-                  type="button"
-                  onClick={this._onClickTabCloseButton}
-                  onMouseDown={this._onMouseDownCloseButton}
-                  tabIndex={index === selectedIndex ? 0 : -1}
-                />
-              </li>
-            );
-          })}
+          {renderedTabs}
         </Reorderable>
+      );
+    }
+
+    return (
+      <div
+        className={classNames(className, 'tabs')}
+        // Allow focusing this element with the keyboard
+        tabIndex="0"
+        // ... but not with the mouse.
+        onMouseDown={this._onTabsMouseDown}
+        // Handle arrow keys and home / end keys when focused.
+        onKeyDown={this._onTabsKeyDown}
+      >
+        {renderedTabs}
       </div>
     );
   }
