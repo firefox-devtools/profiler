@@ -5,9 +5,7 @@
 
 import React from 'react';
 import memoize from 'memoize-one';
-
-import { SourceView } from '../shared/SourceView';
-import { Tabs } from './Tabs';
+import classNames from 'classnames';
 
 import {
   getSourceTabs,
@@ -17,6 +15,15 @@ import {
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedSourceTabSource } from 'firefox-profiler/selectors/sources';
 import { getPreviewSelection } from 'firefox-profiler/selectors/profile';
+import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
+import {
+  changeSelectedSourceTab,
+  changeSourceTabOrder,
+  closeSourceTab,
+  closeBottomBox,
+} from 'firefox-profiler/actions/profile-view';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
+import { computeMinimalUniquePathTails } from 'firefox-profiler/utils/minimal-paths';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -27,17 +34,10 @@ import type {
   SourceTab,
 } from 'firefox-profiler/types';
 
-import { fetchSourceForFile } from 'firefox-profiler/actions/sources';
-import {
-  changeSelectedSourceTab,
-  changeSourceTabOrder,
-  closeSourceTab,
-  closeBottomBox,
-} from 'firefox-profiler/actions/profile-view';
-import { parseFileNameFromSymbolication } from 'firefox-profiler/profile-logic/profile-data';
+import { SourceView } from '../shared/SourceView';
+import { Tabs } from './Tabs';
 
 import './BottomStuff.css';
-import classNames from 'classnames';
 
 type StateProps = {|
   +globalLineTimings: LineTimings,
@@ -76,95 +76,6 @@ function SourceStatusOverlay({ status }: {| status: FileSourceStatus |}) {
     default:
       return null;
   }
-}
-
-// ["a/b/hello", "c/d/world"] -> ["hello", "world"]
-// ["a/b/hello", "c/d/hello"] -> ["b/hello", "d/hello"]
-// ["a\\b/hello", "c/b\\hello"] -> ["b/hello", "b\\hello"]
-function computeMinimalUniquePathTails(paths: string[]) {
-  const pathsWithOffsets = paths.map(path => {
-    const components = path.split(/[/\\]/);
-    components.reverse();
-    const offsets = [];
-    let curOffset = path.length;
-    for (const component of components) {
-      curOffset -= component.length;
-      offsets.push(curOffset);
-      curOffset -= 1; // for the slash or backslash
-    }
-    return { path, offsets };
-  });
-
-  const collisions = new Set();
-  const map = new Map();
-  const subPaths = [];
-  for (let i = 0; i < pathsWithOffsets.length; i++) {
-    const pathWithOffsets = pathsWithOffsets[i];
-    const { path, offsets } = pathWithOffsets;
-    let depth = 0;
-    while (depth < offsets.length) {
-      const subPath = path.slice(offsets[depth]);
-      if (!collisions.has(subPath)) {
-        break;
-      }
-      depth++;
-    }
-
-    if (depth === offsets.length) {
-      // Collided all the way to the full path.
-      subPaths.push(path);
-      continue;
-    }
-
-    let subPath = path.slice(offsets[depth]);
-    const collidedIndex = map.get(subPath);
-    if (collidedIndex === undefined) {
-      map.set(subPath, i);
-      subPaths.push(subPath);
-      continue;
-    }
-
-    // collidedIndex < i
-    // We collided on subPath. This is the first collision on subPath.
-    collisions.add(subPath);
-    map.delete(subPath);
-
-    const collidedPath = pathsWithOffsets[collidedIndex].path;
-    const collidedOffsets = pathsWithOffsets[collidedIndex].offsets;
-
-    // We need to go at least 1 level deeper to make the subPaths different.
-    depth++;
-
-    while (depth < Math.min(offsets.length, collidedOffsets.length) + 1) {
-      const subPath = path.slice(offsets[Math.min(depth, offsets.length - 1)]);
-      const collidedSubPath = collidedPath.slice(
-        collidedOffsets[Math.min(depth, collidedOffsets.length - 1)]
-      );
-      if (subPath !== collidedSubPath) {
-        break;
-      }
-      collisions.add(subPath);
-      depth++;
-    }
-
-    subPath = path.slice(offsets[Math.min(depth, offsets.length - 1)]);
-    const collidedSubPath = collidedPath.slice(
-      collidedOffsets[Math.min(depth, collidedOffsets.length - 1)]
-    );
-    if (subPath !== collidedSubPath) {
-      map.set(collidedSubPath, collidedIndex);
-      subPaths[collidedIndex] = collidedSubPath;
-      map.set(subPath, i);
-      subPaths.push(subPath);
-      continue;
-    }
-
-    // The full paths must be identical.
-    subPaths[collidedIndex] = collidedPath;
-    subPaths.push(path);
-  }
-
-  return subPaths;
 }
 
 class BottomStuffImpl extends React.PureComponent<Props> {
