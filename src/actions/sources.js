@@ -17,7 +17,12 @@ export function fetchSourceForFile(file: string): ThunkAction<Promise<void>> {
       dispatch({
         type: 'SOURCE_LOADING_ERROR',
         file,
-        error: `The file ${parsedName.path} cannot be loaded by the profiler. There is no CORS-enabled URL for it.`,
+        error: {
+          // `The file ${parsedName.path} cannot be loaded by the profiler. There is no CORS-enabled URL for it.`
+          type: 'DONT_KNOW_WHERE_TO_GET_SOURCE',
+          allowRetry: false,
+          path: parsedName.path,
+        },
       });
       return;
     }
@@ -38,7 +43,16 @@ export function fetchSourceForFile(file: string): ThunkAction<Promise<void>> {
       dispatch({ type: 'SOURCE_LOADING_SUCCESS', file, source });
     } catch (e) {
       const error = e.toString();
-      dispatch({ type: 'SOURCE_LOADING_ERROR', file, error });
+      dispatch({
+        type: 'SOURCE_LOADING_ERROR',
+        file,
+        error: {
+          type: 'NETWORK_ERROR',
+          url,
+          allowRetry: true,
+          networkErrorMessage: error,
+        },
+      });
     }
   };
 }

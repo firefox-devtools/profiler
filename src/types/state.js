@@ -239,8 +239,21 @@ export type SourceTabsState = {|
 
 export type FileSourceStatus =
   | {| type: 'LOADING', url: string |}
-  | {| type: 'ERROR', error: string |}
+  | {| type: 'ERROR', error: SourceLoadingError |}
   | {| type: 'AVAILABLE', source: string |};
+
+export type SourceLoadingError =
+  | {|
+      type: 'DONT_KNOW_WHERE_TO_GET_SOURCE',
+      path: string,
+      allowRetry: boolean,
+    |}
+  | {|
+      type: 'NETWORK_ERROR',
+      url: string,
+      networkErrorMessage: string,
+      allowRetry: boolean,
+    |};
 
 export type FileSourceItem = {|
   file: string,

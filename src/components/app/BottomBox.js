@@ -36,8 +36,10 @@ import type {
 
 import { SourceView } from '../shared/SourceView';
 import { Tabs } from './Tabs';
+import { Localized } from '@fluent/react';
 
 import './BottomBox.css';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 type StateProps = {|
   +globalLineTimings: LineTimings,
@@ -65,15 +67,48 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
   switch (status.type) {
     case 'LOADING': {
       const { url } = status;
+      const host = new URL(url).host;
       return (
-        <div className="sourceStatusOverlay loading">
-          Waiting for {new URL(url).host}...
-        </div>
+        <Localized id="SourceView--loading-url" vars={{ host }}>
+          <div className="sourceStatusOverlay loading">
+            {`Waiting for ${host}…`}
+          </div>
+        </Localized>
       );
     }
     case 'ERROR': {
       const { error } = status;
-      return <div className="sourceStatusOverlay error">{error}</div>;
+      switch (error.type) {
+        case 'DONT_KNOW_WHERE_TO_GET_SOURCE': {
+          const { path } = error;
+          return (
+            <Localized
+              id="SourceView--experimental-source-view-cannot-obtain-source"
+              vars={{ path }}
+            >
+              <div className="sourceStatusOverlay error">
+                {`The source view is experimental and can only obtain source code in limited cases.
+                  It currently cannot obtain source code for the file ${path}.`}
+              </div>
+            </Localized>
+          );
+        }
+        case 'NETWORK_ERROR': {
+          const { url, networkErrorMessage } = error;
+          return (
+            <Localized
+              id="SourceView--network-error-when-obtaining-source"
+              vars={{ url, networkErrorMessage }}
+            >
+              <div className="sourceStatusOverlay error">
+                {`There was a network error when fetching the URL ${url}: ${networkErrorMessage}`}
+              </div>
+            </Localized>
+          );
+        }
+        default:
+          throw assertExhaustiveCheck(error.type);
+      }
     }
     default:
       return null;
@@ -162,26 +197,31 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     return (
       <div className="bottom-box">
         <div className="bottom-box-bar">
-          <Tabs
-            className="bottom-box-tabs"
-            tabs={minimalPaths}
-            order={sourceTabs.order}
-            selectedIndex={sourceTabs.selectedIndex}
-            onSelectTab={this._onSelectTab}
-            onCloseTab={this._onCloseTab}
-            onChangeOrder={this._onChangeTabOrder}
-            controlledElementIdForAria="bottom-main"
-          />
-          <button
-            className={classNames(
-              'bottom-close-button',
-              'photon-button',
-              'photon-button-ghost'
-            )}
-            title="Close the bottom box"
-            type="button"
-            onClick={this._onClickCloseButton}
-          />
+          <Localized id="SourceView--tabs" attrs={{ ariaLabel: true }}>
+            <Tabs
+              className="bottom-box-tabs"
+              ariaLabel="Source view tabs"
+              tabs={minimalPaths}
+              order={sourceTabs.order}
+              selectedIndex={sourceTabs.selectedIndex}
+              onSelectTab={this._onSelectTab}
+              onCloseTab={this._onCloseTab}
+              onChangeOrder={this._onChangeTabOrder}
+              controlledElementIdForAria="bottom-main"
+            />
+          </Localized>
+          <Localized id="SourceView--close-button" attrs={{ title: true }}>
+            <button
+              className={classNames(
+                'bottom-close-button',
+                'photon-button',
+                'photon-button-ghost'
+              )}
+              title="Close the source view"
+              type="button"
+              onClick={this._onClickCloseButton}
+            />
+          </Localized>
         </div>
         <div className="bottom-main" id="bottom-main">
           {selectedSourceTabFile !== null ? (

@@ -29,6 +29,7 @@ import type {
   State,
   UploadedProfileInformation,
   SourceTab,
+  SourceLoadingError,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
@@ -556,7 +557,11 @@ type L10nAction =
 type SourcesAction =
   | {| +type: 'SOURCE_LOADING_BEGIN', file: string, url: string |}
   | {| +type: 'SOURCE_LOADING_SUCCESS', file: string, source: string |}
-  | {| +type: 'SOURCE_LOADING_ERROR', file: string, error: string |};
+  | {|
+      +type: 'SOURCE_LOADING_ERROR',
+      file: string,
+      error: SourceLoadingError,
+    |};
 
 export type Action =
   | ProfileAction

@@ -18,6 +18,8 @@ type Props = {|
   orient: 'horizontal' | 'vertical',
   tagName: string,
   className: string,
+  role?: string,
+  ariaLabel?: string,
   order: number[],
   onChangeOrder: (number[]) => mixed,
   // Reorderable elements should set a class name to match against. This allows
@@ -240,7 +242,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { className, order } = this.props;
+    const { className, order, role, ariaLabel } = this.props;
     const children = React.Children.toArray(this.props.children);
     const orderedChildren = order.map(childIndex => children[childIndex]);
     const TagName = this.props.tagName;
@@ -248,7 +250,12 @@ export class Reorderable extends React.PureComponent<Props, State> {
 
     if (this.state.phase === 'RESTING') {
       return (
-        <TagName className={className} onMouseDown={this._onMouseDown}>
+        <TagName
+          className={className}
+          role={role}
+          aria-label={ariaLabel}
+          onMouseDown={this._onMouseDown}
+        >
           {orderedChildren}
         </TagName>
       );
@@ -262,7 +269,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
       adjustSucceedingBy,
     } = this.state;
     return (
-      <TagName className={className}>
+      <TagName className={className} role={role} aria-label={ariaLabel}>
         {orderedChildren.map((child, childIndex) => {
           const style = {
             transition: '200ms ease-in-out transform',

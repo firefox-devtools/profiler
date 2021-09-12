@@ -8,9 +8,11 @@ import classNames from 'classnames';
 import { Reorderable } from '../shared/Reorderable';
 
 import './Tabs.css';
+import { Localized } from '@fluent/react';
 
 type Props = {|
   +className: string,
+  +ariaLabel?: string,
   +tabs: string[],
   +selectedIndex: number | null,
   +controlledElementIdForAria: string,
@@ -104,6 +106,7 @@ export class Tabs extends React.PureComponent<Props> {
       order,
       onChangeOrder,
       onCloseTab,
+      ariaLabel,
     } = this.props;
 
     let renderedTabs = tabs.map((tab, index) => {
@@ -121,14 +124,20 @@ export class Tabs extends React.PureComponent<Props> {
         >
           <span className="tab-text">{tab}</span>
           {onCloseTab ? (
-            <button
-              className={classNames('tab-close-button')}
-              title={`Close ${tab}`}
-              type="button"
-              onClick={this._onClickTabCloseButton}
-              onMouseDown={this._onMouseDownCloseButton}
-              tabIndex={index === selectedIndex ? 0 : -1}
-            />
+            <Localized
+              id="Tabs--close-button"
+              attrs={{ title: true }}
+              vars={{ tab }}
+            >
+              <button
+                className={classNames('tab-close-button')}
+                title={`Close ${tab}`}
+                type="button"
+                onClick={this._onClickTabCloseButton}
+                onMouseDown={this._onMouseDownCloseButton}
+                tabIndex={index === selectedIndex ? 0 : -1}
+              />
+            </Localized>
           ) : null}
         </li>
       );
@@ -138,7 +147,9 @@ export class Tabs extends React.PureComponent<Props> {
       renderedTabs = (
         <Reorderable
           tagName="ol"
-          className="tabs-reorderable"
+          role="tablist"
+          ariaLabel={ariaLabel}
+          className="tabs-list"
           grippyClassName="tab"
           order={order}
           orient="horizontal"
@@ -146,6 +157,12 @@ export class Tabs extends React.PureComponent<Props> {
         >
           {renderedTabs}
         </Reorderable>
+      );
+    } else {
+      renderedTabs = (
+        <ol className="tabs-list" role="tablist" aria-label={ariaLabel}>
+          {renderedTabs}
+        </ol>
       );
     }
 

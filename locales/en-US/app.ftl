@@ -607,6 +607,19 @@ StackSettings--panel-search =
     .label = Filter stacks:
     .title = Only display stacks which contain a function whose name matches this substring
 
+## Source code view in a box at the bottom of the UI.
+
+SourceView--loading-url = Waiting for { $host }…
+SourceView--experimental-source-view-cannot-obtain-source =
+    The source view is experimental and can only obtain source code in limited cases.
+     It currently cannot obtain source code for { $path }.
+SourceView--network-error-when-obtaining-source =
+    There was a network error when fetching the URL { $url }: { $networkErrorMessage }
+SourceView--tabs =
+    .ariaLabel = Source view tabs
+SourceView--close-button =
+    .title = Close the source view
+
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Call Tree
@@ -616,6 +629,11 @@ TabBar--marker-chart-tab = Marker Chart
 TabBar--marker-table-tab = Marker Table
 TabBar--network-tab = Network
 TabBar--js-tracer-tab = JS Tracer
+
+## Generic tab bar, currently only used for the source view
+
+Tabs--close-button =
+    .title = Close { $tab }
 
 ## TrackContextMenu
 ## This is used as a context menu for timeline to organize the tracks in the
