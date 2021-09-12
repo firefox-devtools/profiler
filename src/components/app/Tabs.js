@@ -147,9 +147,9 @@ export class Tabs extends React.PureComponent<Props> {
       renderedTabs = (
         <Reorderable
           tagName="ol"
+          className="tabs-list"
           role="tablist"
           ariaLabel={ariaLabel}
-          className="tabs-list"
           grippyClassName="tab"
           order={order}
           orient="horizontal"
