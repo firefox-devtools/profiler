@@ -331,7 +331,7 @@ export const MenuButtonsPublish = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
@@ -377,7 +377,7 @@ class DownloadSize extends React.PureComponent<
 
   _unwrapPromise() {
     const { downloadSizePromise } = this.props;
-    downloadSizePromise.then(downloadSize => {
+    downloadSizePromise.then((downloadSize) => {
       if (this._isMounted) {
         this.setState({ downloadSize });
       }
@@ -448,7 +448,7 @@ class DownloadButton extends React.PureComponent<
 
   _unwrapPromise() {
     const { compressedProfileBlobPromise } = this.props;
-    compressedProfileBlobPromise.then(compressedProfileBlob => {
+    compressedProfileBlobPromise.then((compressedProfileBlob) => {
       if (this._isMounted) {
         this.setState({ compressedProfileBlob });
       }

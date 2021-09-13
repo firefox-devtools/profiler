@@ -44,99 +44,101 @@ import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
  */
 export const getUrlState: Selector<UrlState> = (state): UrlState =>
   state.urlState;
-export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = state =>
-  getUrlState(state).profileSpecific;
-export const getFullProfileSpecificState: Selector<FullProfileSpecificUrlState> = state =>
-  getProfileSpecificState(state).full;
-export const getActiveTabProfileSpecificState: Selector<ActiveTabSpecificProfileUrlState> = state =>
-  getProfileSpecificState(state).activeTab;
+export const getProfileSpecificState: Selector<ProfileSpecificUrlState> = (
+  state
+) => getUrlState(state).profileSpecific;
+export const getFullProfileSpecificState: Selector<FullProfileSpecificUrlState> =
+  (state) => getProfileSpecificState(state).full;
+export const getActiveTabProfileSpecificState: Selector<ActiveTabSpecificProfileUrlState> =
+  (state) => getProfileSpecificState(state).activeTab;
 
-export const getDataSource: Selector<DataSource> = state =>
+export const getDataSource: Selector<DataSource> = (state) =>
   getUrlState(state).dataSource;
-export const getHash: Selector<string> = state => getUrlState(state).hash;
-export const getProfileUrl: Selector<string> = state =>
+export const getHash: Selector<string> = (state) => getUrlState(state).hash;
+export const getProfileUrl: Selector<string> = (state) =>
   getUrlState(state).profileUrl;
-export const getProfilesToCompare: Selector<string[] | null> = state =>
+export const getProfilesToCompare: Selector<string[] | null> = (state) =>
   getUrlState(state).profilesToCompare;
-export const getProfileNameFromUrl: Selector<string | null> = state =>
+export const getProfileNameFromUrl: Selector<string | null> = (state) =>
   getUrlState(state).profileName;
-export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
+export const getAllCommittedRanges: Selector<StartEndRange[]> = (state) =>
   getProfileSpecificState(state).committedRanges;
-export const getImplementationFilter: Selector<ImplementationFilter> = state =>
-  getProfileSpecificState(state).implementation;
-export const getLastSelectedCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = state =>
-  getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
-export const getInvertCallstack: Selector<boolean> = state =>
+export const getImplementationFilter: Selector<ImplementationFilter> = (
+  state
+) => getProfileSpecificState(state).implementation;
+export const getLastSelectedCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> =
+  (state) => getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
+export const getInvertCallstack: Selector<boolean> = (state) =>
   getProfileSpecificState(state).invertCallstack;
-export const getShowUserTimings: Selector<boolean> = state =>
+export const getShowUserTimings: Selector<boolean> = (state) =>
   getProfileSpecificState(state).showUserTimings;
-export const getSourceTabs: Selector<SourceTabsState> = state =>
+export const getSourceTabs: Selector<SourceTabsState> = (state) =>
   getProfileSpecificState(state).sourceTabs;
-export const getSourceTabActivationGeneration: Selector<number> = state =>
+export const getSourceTabActivationGeneration: Selector<number> = (state) =>
   getSourceTabs(state).activationGeneration;
-export const getTabsWithOpenBottomBox: Selector<TabSlug[]> = state =>
+export const getTabsWithOpenBottomBox: Selector<TabSlug[]> = (state) =>
   getProfileSpecificState(state).tabsWithOpenBottomBox;
-export const getShowJsTracerSummary: Selector<boolean> = state =>
+export const getShowJsTracerSummary: Selector<boolean> = (state) =>
   getFullProfileSpecificState(state).showJsTracerSummary;
-export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>
-  getUrlState(state).timelineTrackOrganization;
+export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> =
+  (state) => getUrlState(state).timelineTrackOrganization;
 
 /**
  * Active tab specific url state selectors
  */
-export const getIsActiveTabResourcesPanelOpen: Selector<boolean> = state =>
+export const getIsActiveTabResourcesPanelOpen: Selector<boolean> = (state) =>
   getActiveTabProfileSpecificState(state).isResourcesPanelOpen;
 
 /**
  * Raw search strings, before any splitting has been performed.
  */
-export const getCurrentSearchString: Selector<string> = state =>
+export const getCurrentSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).callTreeSearchString;
-export const getMarkersSearchString: Selector<string> = state =>
+export const getMarkersSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).markersSearchString;
-export const getNetworkSearchString: Selector<string> = state =>
+export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 
-export const getSelectedTab: Selector<TabSlug> = state =>
+export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
-export const getSelectedThreadIndexesOrNull: Selector<Set<ThreadIndex> | null> = state =>
-  getProfileSpecificState(state).selectedThreads;
-export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = state =>
+export const getSelectedThreadIndexesOrNull: Selector<Set<ThreadIndex> | null> =
+  (state) => getProfileSpecificState(state).selectedThreads;
+export const getSelectedThreadIndexes: Selector<Set<ThreadIndex>> = (state) =>
   ensureExists(
     getSelectedThreadIndexesOrNull(state),
     'Attempted to get a thread index before a profile was loaded.'
   );
-export const getSelectedThreadsKey: Selector<ThreadsKey> = state =>
+export const getSelectedThreadsKey: Selector<ThreadsKey> = (state) =>
   getThreadsKey(getSelectedThreadIndexes(state));
 
 /**
  * This selector is temporary for a migration to multiple selected thread indexes.
  */
-export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = state =>
+export const getFirstSelectedThreadIndex: Selector<ThreadIndex> = (state) =>
   ensureExists(
     getFirstItemFromSet(getSelectedThreadIndexes(state)),
     'Expected to find at least one thread index in the selected thread indexes'
   );
-export const getTimelineType: Selector<TimelineType> = state =>
+export const getTimelineType: Selector<TimelineType> = (state) =>
   getProfileSpecificState(state).timelineType;
 
 /**
  * Simple selectors for tracks and track order.
  */
-export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = state =>
+export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = (state) =>
   getFullProfileSpecificState(state).legacyThreadOrder;
-export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = state =>
+export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = (state) =>
   getFullProfileSpecificState(state).legacyHiddenThreads;
-export const getGlobalTrackOrder: Selector<TrackIndex[]> = state =>
+export const getGlobalTrackOrder: Selector<TrackIndex[]> = (state) =>
   getFullProfileSpecificState(state).globalTrackOrder;
-export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = state =>
+export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = (state) =>
   getFullProfileSpecificState(state).hiddenGlobalTracks;
-export const getHiddenLocalTracksByPid: Selector<
-  Map<Pid, Set<TrackIndex>>
-> = state => getFullProfileSpecificState(state).hiddenLocalTracksByPid;
-export const getLocalTrackOrderByPid: Selector<
-  Map<Pid, TrackIndex[]>
-> = state => getFullProfileSpecificState(state).localTrackOrderByPid;
+export const getHiddenLocalTracksByPid: Selector<Map<Pid, Set<TrackIndex>>> = (
+  state
+) => getFullProfileSpecificState(state).hiddenLocalTracksByPid;
+export const getLocalTrackOrderByPid: Selector<Map<Pid, TrackIndex[]>> = (
+  state
+) => getFullProfileSpecificState(state).localTrackOrderByPid;
 
 /**
  * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures
@@ -174,8 +176,8 @@ const splitSearchString = (searchString: string): string[] | null => {
   }
   const result = searchString
     .split(',')
-    .map(part => part.trim())
-    .filter(part => part);
+    .map((part) => part.trim())
+    .filter((part) => part);
 
   if (result.length) {
     return result;
@@ -204,13 +206,11 @@ export const getSearchStrings: Selector<string[] | null> = createSelector(
   splitSearchString
 );
 
-export const getMarkersSearchStrings: Selector<
-  string[] | null
-> = createSelector(getMarkersSearchString, splitSearchString);
+export const getMarkersSearchStrings: Selector<string[] | null> =
+  createSelector(getMarkersSearchString, splitSearchString);
 
-export const getNetworkSearchStrings: Selector<
-  string[] | null
-> = createSelector(getNetworkSearchString, splitSearchString);
+export const getNetworkSearchStrings: Selector<string[] | null> =
+  createSelector(getNetworkSearchString, splitSearchString);
 
 /**
  * A RegExp can be used for searching and filtering the thread's samples.
@@ -220,15 +220,11 @@ export const getSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
   stringsToRegExp
 );
 
-export const getMarkersSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
-  getMarkersSearchStrings,
-  stringsToRegExp
-);
+export const getMarkersSearchStringsAsRegExp: Selector<RegExp | null> =
+  createSelector(getMarkersSearchStrings, stringsToRegExp);
 
-export const getNetworkSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
-  getNetworkSearchStrings,
-  stringsToRegExp
-);
+export const getNetworkSearchStringsAsRegExp: Selector<RegExp | null> =
+  createSelector(getNetworkSearchStrings, stringsToRegExp);
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];
@@ -245,7 +241,7 @@ export const getTransformStack: DangerousSelectorWithArguments<
 
 export const getSelectedSourceTabFile: Selector<string | null> = createSelector(
   getSourceTabs,
-  sourceTabs => {
+  (sourceTabs) => {
     if (sourceTabs.selectedIndex === null) {
       return null;
     }
@@ -263,29 +259,28 @@ export const getIsBottomBoxOpen: Selector<boolean> = createSelector(
  * The URL predictor is used to generate a link for an uploaded profile, to predict
  * what the URL will be.
  */
-export const getUrlPredictor: Selector<
-  (Action | Action[]) => string
-> = createSelector(
-  getUrlState,
-  (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
-    const actionList: Action[] = Array.isArray(actionOrActionList)
-      ? actionOrActionList
-      : [actionOrActionList];
-    const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
-    return urlFromState(newUrlState);
-  }
-);
+export const getUrlPredictor: Selector<(Action | Action[]) => string> =
+  createSelector(
+    getUrlState,
+    (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
+      const actionList: Action[] = Array.isArray(actionOrActionList)
+        ? actionOrActionList
+        : [actionOrActionList];
+      const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
+      return urlFromState(newUrlState);
+    }
+  );
 
 /**
  * Get the current path for a zip file that is being used.
  */
-export const getPathInZipFileFromUrl: Selector<string | null> = state =>
+export const getPathInZipFileFromUrl: Selector<string | null> = (state) =>
   getUrlState(state).pathInZipFile;
 
 /**
  * Get a short formatted string that represents the meta info of the current profile.
  */
-export const getFormattedMetaInfoString: Selector<string | null> = state => {
+export const getFormattedMetaInfoString: Selector<string | null> = (state) => {
   // Avoid circular dependencies by selected the profile meta manually.
   const { profile } = state.profileView;
   if (!profile) {
@@ -300,7 +295,7 @@ export const getFormattedMetaInfoString: Selector<string | null> = state => {
  */
 export const getFileNameInZipFilePath: Selector<string | null> = createSelector(
   getPathInZipFileFromUrl,
-  pathInZipFile => {
+  (pathInZipFile) => {
     if (pathInZipFile) {
       return getProfileNameFromZipPath(pathInZipFile);
     }

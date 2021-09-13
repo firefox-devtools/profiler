@@ -32,7 +32,7 @@ jest.mock('../../profile-logic/symbol-store');
 
 import { TextEncoder, TextDecoder } from 'util';
 
-describe('UrlManager', function() {
+describe('UrlManager', function () {
   autoMockFullNavigation();
 
   // This is a quite complicated function, that does something very simple:
@@ -68,13 +68,13 @@ describe('UrlManager', function() {
         </Provider>
       );
 
-    const waitUntilUrlSetupPhase = phase =>
-      waitUntilState(store, state => getUrlSetupPhase(state) === phase);
+    const waitUntilUrlSetupPhase = (phase) =>
+      waitUntilState(store, (state) => getUrlSetupPhase(state) === phase);
 
     return { dispatch, getState, createUrlManager, waitUntilUrlSetupPhase };
   }
 
-  beforeEach(function() {
+  beforeEach(function () {
     const profileJSON = createGeckoProfile();
     const mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
 
@@ -91,13 +91,13 @@ describe('UrlManager', function() {
     window.TextDecoder = TextDecoder;
   });
 
-  afterEach(function() {
+  afterEach(function () {
     delete window.geckoProfilerPromise;
     delete window.TextDecoder;
     delete window.fetch;
   });
 
-  it('sets up the URL', async function() {
+  it('sets up the URL', async function () {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
 
     expect(getUrlSetupPhase(getState())).toBe('initial-load');
@@ -110,17 +110,16 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('none');
   });
 
-  it('has no data source by default', async function() {
+  it('has no data source by default', async function () {
     const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup();
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
     expect(getDataSource(getState())).toMatch('none');
   });
 
-  it('sets the data source to from-browser', async function() {
-    const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      '/from-browser/'
-    );
+  it('sets the data source to from-browser', async function () {
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } =
+      setup('/from-browser/');
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
@@ -128,10 +127,9 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('from-browser');
   });
 
-  it('sets the data source to from-browser when coming from the legacy URL /from-addon', async function() {
-    const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      '/from-addon'
-    );
+  it('sets the data source to from-browser when coming from the legacy URL /from-addon', async function () {
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } =
+      setup('/from-addon');
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
@@ -139,10 +137,9 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('from-browser');
   });
 
-  it('redirects from-file back to no data source', async function() {
-    const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      '/from-file/'
-    );
+  it('redirects from-file back to no data source', async function () {
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } =
+      setup('/from-file/');
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
@@ -150,11 +147,10 @@ describe('UrlManager', function() {
     expect(getDataSource(getState())).toMatch('none');
   });
 
-  it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function() {
+  it(`sets the data source to public and doesn't change the URL when there's a fetch error`, async function () {
     const urlPath = '/public/FAKE_HASH/marker-chart';
-    const { getState, createUrlManager, waitUntilUrlSetupPhase } = setup(
-      urlPath
-    );
+    const { getState, createUrlManager, waitUntilUrlSetupPhase } =
+      setup(urlPath);
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
 
@@ -167,7 +163,7 @@ describe('UrlManager', function() {
     expect(window.location.pathname).toBe(urlPath);
   });
 
-  it(`sets the data source to public and doesn't change the URL when there's a URL upgrading error`, async function() {
+  it(`sets the data source to public and doesn't change the URL when there's a URL upgrading error`, async function () {
     window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
 
     const urlPath = '/public/FAKE_HASH/calltree';
@@ -189,7 +185,7 @@ describe('UrlManager', function() {
     expect(window.location.search).toBe(searchString);
   });
 
-  it(`fetches profile and sets the phase to done when everything works`, async function() {
+  it(`fetches profile and sets the phase to done when everything works`, async function () {
     window.fetch.mockResolvedValue(getSuccessfulFetchResponse());
 
     const urlPath = '/public/FAKE_HASH/';
@@ -216,12 +212,8 @@ describe('UrlManager', function() {
     const urlPath = '/public/FAKE_HASH/calltree/';
     const searchString = 'v=' + CURRENT_URL_VERSION;
 
-    const {
-      getState,
-      createUrlManager,
-      waitUntilUrlSetupPhase,
-      dispatch,
-    } = setup(urlPath + '?' + searchString);
+    const { getState, createUrlManager, waitUntilUrlSetupPhase, dispatch } =
+      setup(urlPath + '?' + searchString);
 
     expect(getDataSource(getState())).toMatch('none');
     createUrlManager();
@@ -248,12 +240,8 @@ describe('UrlManager', function() {
   it('allows navigating back and forward when moving between content pages', async () => {
     // The test will start at the home.
     const urlPath = '/ ';
-    const {
-      getState,
-      createUrlManager,
-      waitUntilUrlSetupPhase,
-      dispatch,
-    } = setup(urlPath);
+    const { getState, createUrlManager, waitUntilUrlSetupPhase, dispatch } =
+      setup(urlPath);
     createUrlManager();
 
     await waitUntilUrlSetupPhase('done');
@@ -288,12 +276,8 @@ describe('UrlManager', function() {
 
   it('prevents navigating back after publishing', async () => {
     // This loads a profile from the browser.
-    const {
-      getState,
-      dispatch,
-      createUrlManager,
-      waitUntilUrlSetupPhase,
-    } = setup('/from-browser/');
+    const { getState, dispatch, createUrlManager, waitUntilUrlSetupPhase } =
+      setup('/from-browser/');
     createUrlManager();
     await waitUntilUrlSetupPhase('done');
 
@@ -333,7 +317,7 @@ describe('UrlManager', function() {
     expect(previousLocation).toEqual(window.location.href);
   });
 
-  it('persists view query string for `from-browser` data source ', async function() {
+  it('persists view query string for `from-browser` data source ', async function () {
     // This setup function doesn't add any profile to the state, so that's why
     // it logs an error that says we don't have innerWindowID in this profile.
     // We can safely ignore that part because we don't test this part of the

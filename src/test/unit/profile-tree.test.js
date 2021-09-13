@@ -35,7 +35,7 @@ function callTreeFromProfile(
     profile.meta.categories,
     'Expected to find categories'
   );
-  const defaultCategory = categories.findIndex(c => c.name === 'Other');
+  const defaultCategory = categories.findIndex((c) => c.name === 'Other');
   const callNodeInfo = getCallNodeInfo(
     thread.stackTable,
     thread.frameTable,
@@ -59,7 +59,7 @@ function callTreeFromProfile(
   );
 }
 
-describe('unfiltered call tree', function() {
+describe('unfiltered call tree', function () {
   // These values are hoisted at the top for the ease of access. In the profile fixture
   // for the unfiltered call tree, the indexes for funcs, frames, stacks, and callNodes
   // all happen to share the same indexes as there is a 1 to 1 relationship between them.
@@ -87,13 +87,13 @@ describe('unfiltered call tree', function() {
    * Before creating a CallTree instance some timings are pre-computed.
    * This test ensures that these generated values are correct.
    */
-  describe('computed counts and timings', function() {
+  describe('computed counts and timings', function () {
     const profile = getProfile();
     const [thread] = profile.threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -101,7 +101,7 @@ describe('unfiltered call tree', function() {
       defaultCategory
     );
 
-    it('yields expected results', function() {
+    it('yields expected results', function () {
       expect(
         computeCallTreeCountsAndSummary(
           thread.samples,
@@ -121,13 +121,13 @@ describe('unfiltered call tree', function() {
     });
   });
 
-  describe('roots and children for flame graph', function() {
+  describe('roots and children for flame graph', function () {
     const profile = getProfile();
     const [thread] = profile.threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -135,7 +135,7 @@ describe('unfiltered call tree', function() {
       defaultCategory
     );
 
-    it('returns roots and children', function() {
+    it('returns roots and children', function () {
       expect(
         getRootsAndChildren(
           thread,
@@ -156,7 +156,7 @@ describe('unfiltered call tree', function() {
   /**
    * Explicitly test the structure of the unfiltered call tree.
    */
-  describe('computed structure', function() {
+  describe('computed structure', function () {
     /**
      * The profile samples have the following structure:
      *
@@ -199,7 +199,7 @@ describe('unfiltered call tree', function() {
     `);
     const callTree = callTreeFromProfile(profile);
 
-    it('computes an unfiltered call tree', function() {
+    it('computes an unfiltered call tree', function () {
       expect(formatTree(callTree)).toEqual([
         '- A (total: 3, self: —)',
         '  - B (total: 3, self: —)',
@@ -217,7 +217,7 @@ describe('unfiltered call tree', function() {
   /**
    * The same as the previous test, but with categories
    */
-  describe('computed structure with categories', function() {
+  describe('computed structure with categories', function () {
     /**
      * Test that the category of a frame gets inherited down into its subtree
      * of the call tree, until reaching a frame that has an explicit category.
@@ -231,7 +231,7 @@ describe('unfiltered call tree', function() {
     `);
     const callTree = callTreeFromProfile(profile);
 
-    it('computes an unfiltered call tree', function() {
+    it('computes an unfiltered call tree', function () {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: —)',
         '  - B [DOM] (total: 3, self: —)',
@@ -251,7 +251,7 @@ describe('unfiltered call tree', function() {
    * correct tree structure, and more of simple assertions about how the interface
    * is supposed to behave. There is probably duplication of coverage with other tests.
    */
-  describe('CallTree methods', function() {
+  describe('CallTree methods', function () {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
       B  B  B
@@ -261,49 +261,49 @@ describe('unfiltered call tree', function() {
     `);
     const callTree = callTreeFromProfile(profile);
 
-    describe('getRoots()', function() {
-      it('returns an array with the root indexes', function() {
+    describe('getRoots()', function () {
+      it('returns an array with the root indexes', function () {
         expect(callTree.getRoots()).toEqual([A]);
       });
     });
 
-    describe('getChildren()', function() {
-      it('returns an array with the children indexes', function() {
+    describe('getChildren()', function () {
+      it('returns an array with the children indexes', function () {
         expect(callTree.getChildren(C)).toEqual([D, F]);
         expect(callTree.getChildren(E)).toEqual([]);
       });
     });
 
-    describe('hasChildren()', function() {
-      it('determines if nodes have children', function() {
+    describe('hasChildren()', function () {
+      it('determines if nodes have children', function () {
         expect(callTree.hasChildren(C)).toEqual(true);
         expect(callTree.hasChildren(E)).toEqual(false);
       });
     });
 
-    describe('getAllDescendants()', function() {
-      it('returns a set with the descendant indexes', function() {
+    describe('getAllDescendants()', function () {
+      it('returns a set with the descendant indexes', function () {
         expect(callTree.getAllDescendants(C)).toEqual(new Set([D, E, F, G]));
         expect(callTree.getAllDescendants(E)).toEqual(new Set([]));
       });
     });
 
-    describe('getParent()', function() {
-      it("finds a callNode's parent", function() {
+    describe('getParent()', function () {
+      it("finds a callNode's parent", function () {
         expect(callTree.getParent(A)).toBe(-1);
         expect(callTree.getParent(B)).toBe(A);
       });
     });
 
-    describe('getDepth()', function() {
-      it('returns the depth of callNodes in the tree', function() {
+    describe('getDepth()', function () {
+      it('returns the depth of callNodes in the tree', function () {
         expect(callTree.getDepth(A)).toBe(0);
         expect(callTree.getDepth(B)).toBe(1);
       });
     });
 
-    describe('hasSameNodeIds()', function() {
-      it('determines if the node IDs are the same between two trees', function() {
+    describe('hasSameNodeIds()', function () {
+      it('determines if the node IDs are the same between two trees', function () {
         // This is tested through strict equality, so re-generating callNodes is
         // the only thing this method expects.
         const otherTree = callTreeFromProfile(
@@ -314,8 +314,8 @@ describe('unfiltered call tree', function() {
       });
     });
 
-    describe('getNodeData()', function() {
-      it('gets a node for a given callNodeIndex', function() {
+    describe('getNodeData()', function () {
+      it('gets a node for a given callNodeIndex', function () {
         expect(callTree.getNodeData(A)).toEqual({
           funcName: 'A',
           total: 3,
@@ -326,8 +326,8 @@ describe('unfiltered call tree', function() {
       });
     });
 
-    describe('getDisplayData()', function() {
-      it('gets a node for a given callNodeIndex', function() {
+    describe('getDisplayData()', function () {
+      it('gets a node for a given callNodeIndex', function () {
         expect(callTree.getDisplayData(A)).toEqual({
           ariaLabel:
             'A, running count is 3 samples (100%), self count is 0 samples',
@@ -363,16 +363,15 @@ describe('unfiltered call tree', function() {
       });
     });
 
-    describe('icons from the call tree', function() {
-      it('upgrades http to https', function() {
+    describe('icons from the call tree', function () {
+      it('upgrades http to https', function () {
         const { profile } = getProfileFromTextSamples(`
           A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
         const [thread] = profile.threads;
-        const hostStringIndex = thread.stringTable.indexForString(
-          'examplecom.js'
-        );
+        const hostStringIndex =
+          thread.stringTable.indexForString('examplecom.js');
 
         thread.resourceTable.type[0] = resourceTypes.webhost;
         thread.resourceTable.host[0] = hostStringIndex;
@@ -390,13 +389,13 @@ describe('unfiltered call tree', function() {
    * While not specifically part of the call tree, this is a core function
    * to help navigate stacks through a list of functions.
    */
-  describe('getCallNodeIndexFromPath', function() {
+  describe('getCallNodeIndexFromPath', function () {
     const profile = getProfile();
     const [thread] = profile.threads;
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -406,7 +405,7 @@ describe('unfiltered call tree', function() {
 
     // Helper to make the assertions a little less verbose.
     function checkStack(callNodePath, index, name) {
-      it(`finds stack that ends in ${name}`, function() {
+      it(`finds stack that ends in ${name}`, function () {
         expect(getCallNodeIndexFromPath(callNodePath, callNodeTable)).toBe(
           index
         );
@@ -425,7 +424,7 @@ describe('unfiltered call tree', function() {
     checkStack([A, B, H], H, 'H');
     checkStack([A, B, H, I], I, 'I');
 
-    it(`doesn't find a non-existent stack`, function() {
+    it(`doesn't find a non-existent stack`, function () {
       expect(
         getCallNodeIndexFromPath([A, B, C, D, E, F, G], callNodeTable)
       ).toBe(null);
@@ -433,11 +432,11 @@ describe('unfiltered call tree', function() {
   });
 });
 
-describe('inverted call tree', function() {
+describe('inverted call tree', function () {
   /**
    * Explicitly test the structure of the inverted call tree.
    */
-  describe('computed structure', function() {
+  describe('computed structure', function () {
     const profile = getProfileFromTextSamples(`
       A                A           A
       B[cat:DOM]       B[cat:DOM]  B[cat:DOM]
@@ -451,7 +450,7 @@ describe('inverted call tree', function() {
       profile.meta.categories,
       'Expected to find categories'
     );
-    const defaultCategory = categories.findIndex(c => c.color === 'grey');
+    const defaultCategory = categories.findIndex((c) => c.color === 'grey');
 
     // Check the non-inverted tree first.
     const thread = profile.threads[0];
@@ -477,7 +476,7 @@ describe('inverted call tree', function() {
       'samples'
     );
 
-    it('computes an non-inverted call tree', function() {
+    it('computes an non-inverted call tree', function () {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: 3)',
         '  - B [DOM] (total: 3, self: —)',
@@ -549,7 +548,7 @@ describe('inverted call tree', function() {
      * to B. In the inverted tree, those nodes collapse into each other, and
      * their category should be set to "Other".
      */
-    it('computes an inverted call tree', function() {
+    it('computes an inverted call tree', function () {
       expect(formatTreeIncludeCategories(invertedCallTree)).toEqual([
         '- Z [Other] (total: 2, self: 2)',
         '  - Y [Other] (total: 2, self: —)',
@@ -569,7 +568,7 @@ describe('inverted call tree', function() {
   });
 });
 
-describe('diffing trees', function() {
+describe('diffing trees', function () {
   function getProfile() {
     const { profile } = getMergedProfileFromTextSamples(
       `
@@ -608,7 +607,7 @@ describe('diffing trees', function() {
     const profile = getProfile();
     const rangeStart = 1;
     const rangeEnd = 3;
-    profile.threads = profile.threads.map(thread =>
+    profile.threads = profile.threads.map((thread) =>
       filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
     );
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
@@ -631,7 +630,7 @@ describe('diffing trees', function() {
     const defaultCategory = ensureExists(
       profile.meta.categories,
       'Expected to find categories'
-    ).findIndex(c => c.name === 'Other');
+    ).findIndex((c) => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
@@ -648,7 +647,7 @@ describe('diffing trees', function() {
   });
 });
 
-describe('origin annotation', function() {
+describe('origin annotation', function () {
   const {
     profile: {
       threads: [thread],
@@ -708,18 +707,18 @@ describe('origin annotation', function() {
     );
   }
 
-  it('formats web origins correctly', function() {
+  it('formats web origins correctly', function () {
     expect(getOrigin('A')).toEqual('http://foobar.com/script.js');
   });
 
-  it('formats extension origins correctly', function() {
+  it('formats extension origins correctly', function () {
     expect(getOrigin('B')).toEqual(
       'Extension "Gecko Profiler": ' +
         'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/script.js'
     );
   });
 
-  it('formats library origins correctly', function() {
+  it('formats library origins correctly', function () {
     expect(getOrigin('C')).toEqual(
       'libxul.so: /home/user/mozilla-central/xul.cpp'
     );

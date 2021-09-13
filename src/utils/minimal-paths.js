@@ -62,7 +62,7 @@ class Path {
 // ["a/b/mod.rs", "c/d/mod.rs"] -> ["b/mod.rs", "d/mod.rs"]
 // ["a\\b/index.js", "c/b\\index.js"] -> ["b/index.js", "b\\index.js"]
 export function computeMinimalUniquePathTails(pathStrings: string[]): string[] {
-  const paths = pathStrings.map(path => new Path(path));
+  const paths = pathStrings.map((path) => new Path(path));
 
   // Contains any sub-paths which have already been encountered by paths
   // which the loop has already seen, and which therefore are not unique.

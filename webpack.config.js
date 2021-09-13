@@ -9,7 +9,7 @@ const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
 const es6modules = ['pretty-bytes'];
-const es6modulePaths = es6modules.map(module => {
+const es6modulePaths = es6modules.map((module) => {
   return path.join(__dirname, 'node_modules', module);
 });
 
@@ -133,7 +133,7 @@ if (process.env.NODE_ENV === 'production') {
       cacheMaps: [
         {
           requestTypes: ['navigate'],
-          match: function(url, _request) {
+          match: function (url, _request) {
             // This function is called for "navigate" requests to URLs within
             // our origin, whose URL does not match any files in the service
             // worker's list of assets. We can return a different URL which

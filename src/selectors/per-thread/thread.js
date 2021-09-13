@@ -66,28 +66,29 @@ export function getThreadSelectorsPerThread(
 ) {
   const getMergedThread: Selector<Thread> = createSelector(
     ProfileSelectors.getProfile,
-    profile =>
+    (profile) =>
       mergeThreads(
-        [...threadIndexes].map(threadIndex => profile.threads[threadIndex])
+        [...threadIndexes].map((threadIndex) => profile.threads[threadIndex])
       )
   );
   /**
    * Either return the raw thread from the profile, or merge several raw threads
    * together.
    */
-  const getThread: Selector<Thread> = state =>
+  const getThread: Selector<Thread> = (state) =>
     threadIndexes.size === 1
       ? ProfileSelectors.getProfile(state).threads[
           ensureExists(getFirstItemFromSet(threadIndexes))
         ]
       : getMergedThread(state);
-  const getStringTable: Selector<UniqueStringArray> = state =>
+  const getStringTable: Selector<UniqueStringArray> = (state) =>
     getThread(state).stringTable;
-  const getSamplesTable: Selector<SamplesTable> = state =>
+  const getSamplesTable: Selector<SamplesTable> = (state) =>
     getThread(state).samples;
-  const getNativeAllocations: Selector<NativeAllocationsTable | void> = state =>
-    getThread(state).nativeAllocations;
-  const getThreadRange: Selector<StartEndRange> = state =>
+  const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
+    state
+  ) => getThread(state).nativeAllocations;
+  const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
     ProfileData.getTimeRangeForThread(
@@ -100,7 +101,7 @@ export function getThreadSelectorsPerThread(
    * does not get it for others like the Native Allocations table. The call
    * tree uses the getWeightTypeForCallTree selector.
    */
-  const getSamplesWeightType: Selector<WeightType> = state =>
+  const getSamplesWeightType: Selector<WeightType> = (state) =>
     getSamplesTable(state).weightType || 'samples';
 
   /**
@@ -176,7 +177,7 @@ export function getThreadSelectorsPerThread(
     cache: new MixedTupleMap(),
   });
 
-  const getTransformStack: Selector<TransformStack> = state =>
+  const getTransformStack: Selector<TransformStack> = (state) =>
     UrlState.getTransformStack(state, threadsKey);
 
   const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
@@ -199,13 +200,14 @@ export function getThreadSelectorsPerThread(
     ProfileData.filterThreadByImplementation
   );
 
-  const _getImplementationAndSearchFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationFilteredThread,
-    UrlState.getSearchStrings,
-    (thread, searchStrings) => {
-      return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
-    }
-  );
+  const _getImplementationAndSearchFilteredThread: Selector<Thread> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread, searchStrings) => {
+        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
+      }
+    );
 
   const getFilteredThread: Selector<Thread> = createSelector(
     _getImplementationAndSearchFilteredThread,
@@ -240,82 +242,87 @@ export function getThreadSelectorsPerThread(
    * methods are also available. This selectors also ensures that the current
    * thread supports the last selected call tree summary strategy.
    */
-  const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = createSelector(
-    getThread,
-    UrlState.getLastSelectedCallTreeSummaryStrategy,
-    (thread, lastSelectedCallTreeSummaryStrategy) => {
-      switch (lastSelectedCallTreeSummaryStrategy) {
-        case 'timing':
-          if (
-            thread.samples.length === 0 &&
-            thread.nativeAllocations &&
-            thread.nativeAllocations.length > 0
-          ) {
-            // This is a profile with no samples, but with native allocations available.
-            return 'native-allocations';
-          }
-          break;
-        case 'js-allocations':
-          if (!thread.jsAllocations) {
-            // Attempting to view a thread with no JS allocations, switch back to timing.
-            return 'timing';
-          }
-          break;
-        case 'native-allocations':
-        case 'native-retained-allocations':
-        case 'native-deallocations-sites':
-        case 'native-deallocations-memory':
-          if (!thread.nativeAllocations) {
-            // Attempting to view a thread with no native allocations, switch back
-            // to timing.
-            return 'timing';
-          }
-          break;
-        default:
-          assertExhaustiveCheck(
-            lastSelectedCallTreeSummaryStrategy,
-            'Unhandled call tree sumary strategy.'
-          );
+  const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> =
+    createSelector(
+      getThread,
+      UrlState.getLastSelectedCallTreeSummaryStrategy,
+      (thread, lastSelectedCallTreeSummaryStrategy) => {
+        switch (lastSelectedCallTreeSummaryStrategy) {
+          case 'timing':
+            if (
+              thread.samples.length === 0 &&
+              thread.nativeAllocations &&
+              thread.nativeAllocations.length > 0
+            ) {
+              // This is a profile with no samples, but with native allocations available.
+              return 'native-allocations';
+            }
+            break;
+          case 'js-allocations':
+            if (!thread.jsAllocations) {
+              // Attempting to view a thread with no JS allocations, switch back to timing.
+              return 'timing';
+            }
+            break;
+          case 'native-allocations':
+          case 'native-retained-allocations':
+          case 'native-deallocations-sites':
+          case 'native-deallocations-memory':
+            if (!thread.nativeAllocations) {
+              // Attempting to view a thread with no native allocations, switch back
+              // to timing.
+              return 'timing';
+            }
+            break;
+          default:
+            assertExhaustiveCheck(
+              lastSelectedCallTreeSummaryStrategy,
+              'Unhandled call tree sumary strategy.'
+            );
+        }
+        return lastSelectedCallTreeSummaryStrategy;
       }
-      return lastSelectedCallTreeSummaryStrategy;
-    }
-  );
+    );
 
-  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    getThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
+  const getUnfilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+    createSelector(
+      getThread,
+      getCallTreeSummaryStrategy,
+      CallTree.extractSamplesLikeTable
+    );
 
-  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    getFilteredThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
+  const getFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+    createSelector(
+      getFilteredThread,
+      getCallTreeSummaryStrategy,
+      CallTree.extractSamplesLikeTable
+    );
 
-  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> = createSelector(
-    getPreviewFilteredThread,
-    getCallTreeSummaryStrategy,
-    CallTree.extractSamplesLikeTable
-  );
+  const getPreviewFilteredSamplesForCallTree: Selector<SamplesLikeTable> =
+    createSelector(
+      getPreviewFilteredThread,
+      getCallTreeSummaryStrategy,
+      CallTree.extractSamplesLikeTable
+    );
 
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
    * base thread, if your thread is a range filtered thread (all but the base
    * `getThread` or the last `getPreviewFilteredThread`).
    */
-  const getSampleIndexOffsetFromCommittedRange: Selector<number> = createSelector(
-    getUnfilteredSamplesForCallTree,
-    ProfileSelectors.getCommittedRange,
-    (samples, { start, end }) => {
-      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
-        samples,
-        start,
-        end
-      );
-      return beginSampleIndex;
-    }
-  );
+  const getSampleIndexOffsetFromCommittedRange: Selector<number> =
+    createSelector(
+      getUnfilteredSamplesForCallTree,
+      ProfileSelectors.getCommittedRange,
+      (samples, { start, end }) => {
+        const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+          samples,
+          start,
+          end
+        );
+        return beginSampleIndex;
+      }
+    );
 
   /**
    * This selector returns the offset to add to a sampleIndex when accessing the
@@ -351,28 +358,27 @@ export function getThreadSelectorsPerThread(
     ProfileData.getThreadProcessDetails
   );
 
-  const getTransformLabelL10nIds: Selector<
-    TransformLabeL10nIds[]
-  > = createSelector(
-    getRangeAndTransformFilteredThread,
-    getFriendlyThreadName,
-    getTransformStack,
-    Transforms.getTransformLabelL10nIds
+  const getTransformLabelL10nIds: Selector<TransformLabeL10nIds[]> =
+    createSelector(
+      getRangeAndTransformFilteredThread,
+      getFriendlyThreadName,
+      getTransformStack,
+      Transforms.getTransformLabelL10nIds
+    );
+
+  const getLocalizedTransformLabels: Selector<React.Node[]> = createSelector(
+    getTransformLabelL10nIds,
+    (transformL10nIds) =>
+      transformL10nIds.map((transform) => (
+        <Localized
+          id={transform.l10nId}
+          vars={{ item: transform.item }}
+          key={transform.item}
+        ></Localized>
+      ))
   );
 
-  const getLocalizedTransformLabels: Selector<
-    React.Node[]
-  > = createSelector(getTransformLabelL10nIds, transformL10nIds =>
-    transformL10nIds.map(transform => (
-      <Localized
-        id={transform.l10nId}
-        vars={{ item: transform.item }}
-        key={transform.item}
-      ></Localized>
-    ))
-  );
-
-  const getViewOptions: Selector<ThreadViewOptions> = state =>
+  const getViewOptions: Selector<ThreadViewOptions> = (state) =>
     ProfileSelectors.getProfileViewOptions(state).perThread[threadsKey] ||
     defaultThreadViewOptions;
 
@@ -380,14 +386,14 @@ export function getThreadSelectorsPerThread(
    * Check to see if there are any JS allocations for this thread. This way we
    * can display a custom thread.
    */
-  const getHasJsAllocations: Selector<boolean> = state =>
+  const getHasJsAllocations: Selector<boolean> = (state) =>
     Boolean(getThread(state).jsAllocations);
 
   /**
    * Check to see if there are any JS allocations for this thread. This way we
    * can display a custom thread.
    */
-  const getHasNativeAllocations: Selector<boolean> = state =>
+  const getHasNativeAllocations: Selector<boolean> = (state) =>
     Boolean(getThread(state).nativeAllocations);
 
   /**
@@ -395,7 +401,7 @@ export function getThreadSelectorsPerThread(
    * format that provide the memory address. The earlier versions did not have
    * balanced allocations and deallocations.
    */
-  const getCanShowRetainedMemory: Selector<boolean> = state => {
+  const getCanShowRetainedMemory: Selector<boolean> = (state) => {
     const nativeAllocations = getNativeAllocations(state);
     if (!nativeAllocations) {
       return false;
@@ -408,7 +414,7 @@ export function getThreadSelectorsPerThread(
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
    */
-  const getJsTracerTable: Selector<JsTracerTable | null> = state =>
+  const getJsTracerTable: Selector<JsTracerTable | null> = (state) =>
     getThread(state).jsTracer || null;
 
   /**
@@ -416,40 +422,39 @@ export function getThreadSelectorsPerThread(
    * a helpful loading message for the user. Provide separate selectors for the stack
    * based timing, and the leaf timing, so that they memoize nicely.
    */
-  const getExpensiveJsTracerTiming: Selector<
-    JsTracerTiming[] | null
-  > = createSelector(getJsTracerTable, getThread, (jsTracerTable, thread) =>
-    jsTracerTable === null
-      ? null
-      : JsTracer.getJsTracerTiming(jsTracerTable, thread)
-  );
+  const getExpensiveJsTracerTiming: Selector<JsTracerTiming[] | null> =
+    createSelector(getJsTracerTable, getThread, (jsTracerTable, thread) =>
+      jsTracerTable === null
+        ? null
+        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
+    );
 
   /**
    * This selector can be very slow, so care should be taken when running it to provide
    * a helpful loading message for the user. Provide separate selectors for the stack
    * based timing, and the leaf timing, so that they memoize nicely.
    */
-  const getExpensiveJsTracerLeafTiming: Selector<
-    JsTracerTiming[] | null
-  > = createSelector(
-    getJsTracerTable,
-    getStringTable,
-    (jsTracerTable, stringTable) =>
-      jsTracerTable === null
-        ? null
-        : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
-  );
+  const getExpensiveJsTracerLeafTiming: Selector<JsTracerTiming[] | null> =
+    createSelector(
+      getJsTracerTable,
+      getStringTable,
+      (jsTracerTable, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
+    );
 
-  const getProcessedEventDelaysOrNull: Selector<EventDelayInfo | null> = createSelector(
-    getSamplesTable,
-    ProfileSelectors.getProfileInterval,
-    (samplesTable, interval) =>
-      samplesTable === null || samplesTable.eventDelay === undefined
-        ? null
-        : ProfileData.processEventDelays(samplesTable, interval)
-  );
+  const getProcessedEventDelaysOrNull: Selector<EventDelayInfo | null> =
+    createSelector(
+      getSamplesTable,
+      ProfileSelectors.getProfileInterval,
+      (samplesTable, interval) =>
+        samplesTable === null || samplesTable.eventDelay === undefined
+          ? null
+          : ProfileData.processEventDelays(samplesTable, interval)
+    );
 
-  const getProcessedEventDelays: Selector<EventDelayInfo> = state =>
+  const getProcessedEventDelays: Selector<EventDelayInfo> = (state) =>
     ensureExists(
       getProcessedEventDelaysOrNull(state),
       'Could not get the processed event delays'

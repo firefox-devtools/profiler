@@ -41,7 +41,7 @@ class TimelineImpl extends React.PureComponent<Props> {
 }
 
 export const Timeline = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     timelineTrackOrganization: getTimelineTrackOrganization(state),
   }),
   component: TimelineImpl,

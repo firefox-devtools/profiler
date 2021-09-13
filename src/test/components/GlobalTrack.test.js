@@ -24,7 +24,7 @@ import { fireFullClick, fireFullContextMenu } from '../fixtures/utils';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
-describe('timeline/GlobalTrack', function() {
+describe('timeline/GlobalTrack', function () {
   autoMockCanvasContext();
   // Some child components render to canvas.
   autoMockElementSize({ width: 400, height: 400 });
@@ -119,31 +119,23 @@ describe('timeline/GlobalTrack', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('has the correct selectors into useful parts of the component', function() {
+  it('has the correct selectors into useful parts of the component', function () {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
     expect(getGlobalTrackLabel()).toHaveTextContent('Content ProcessPID: 222');
     expect(getGlobalTrackRow()).toBeTruthy();
   });
 
-  it('starts out not being selected', function() {
-    const {
-      getState,
-      getGlobalTrackRow,
-      threadIndex,
-      trackReference,
-    } = setup();
+  it('starts out not being selected', function () {
+    const { getState, getGlobalTrackRow, threadIndex, trackReference } =
+      setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     expect(getGlobalTrackRow()).not.toHaveClass('selected');
   });
 
   it('can select a thread by clicking the label', () => {
-    const {
-      getState,
-      getGlobalTrackLabel,
-      getGlobalTrackRow,
-      threadIndex,
-    } = setup();
+    const { getState, getGlobalTrackLabel, getGlobalTrackRow, threadIndex } =
+      setup();
     expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
     fireFullClick(getGlobalTrackLabel());
     expect(getFirstSelectedThreadIndex(getState())).toBe(threadIndex);
@@ -151,12 +143,8 @@ describe('timeline/GlobalTrack', function() {
   });
 
   it('can right click a thread', () => {
-    const {
-      getState,
-      getGlobalTrackLabel,
-      threadIndex,
-      trackReference,
-    } = setup();
+    const { getState, getGlobalTrackLabel, threadIndex, trackReference } =
+      setup();
 
     fireFullContextMenu(getGlobalTrackLabel());
     expect(getRightClickedTrack(getState())).toEqual(trackReference);

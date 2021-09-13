@@ -252,7 +252,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
 
     // Not all properties are always present.
     const availableProperties = mainBarProperties.filter(
-      property => typeof networkPayload[property] === 'number'
+      (property) => typeof networkPayload[property] === 'number'
     );
 
     const mainBarPhases = [];
@@ -302,7 +302,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
           className="networkChartRowItemBar"
           style={{ width: markerWidth, left: startPosition }}
         >
-          {mainBarPhases.map(phaseProps => (
+          {mainBarPhases.map((phaseProps) => (
             <NetworkPhase key={phaseProps.name} {...phaseProps} />
           ))}
         </div>
@@ -324,9 +324,9 @@ type NetworkChartRowProps = {|
   +isRightClicked: boolean,
   +isSelected: boolean,
   +isHoveredFromState: boolean,
-  +select: MarkerIndex => mixed,
-  +onLeftClick?: MarkerIndex => mixed,
-  +onRightClick?: MarkerIndex => mixed,
+  +select: (MarkerIndex) => mixed,
+  +onLeftClick?: (MarkerIndex) => mixed,
+  +onRightClick?: (MarkerIndex) => mixed,
   +onHover?: (MarkerIndex | null) => mixed,
   +shouldDisplayTooltips: () => boolean,
 |};

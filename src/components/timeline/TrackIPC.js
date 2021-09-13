@@ -69,7 +69,7 @@ export class TrackIPCImpl extends React.PureComponent<Props, State> {
 }
 
 export const TrackIPC = explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);
     return {
       rangeStart: start,

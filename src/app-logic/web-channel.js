@@ -228,7 +228,8 @@ function _sendMessageWithResponse(
         _fixupOldResponseMessageIfNeeded(message);
 
         // Make the type system assume that we have the right message.
-        const messageFromBrowser: MessageFromBrowser<ResponseFromBrowser> = (message: any);
+        const messageFromBrowser: MessageFromBrowser<ResponseFromBrowser> =
+          (message: any);
 
         if (messageFromBrowser.type) {
           if (messageFromBrowser.requestId === requestId) {

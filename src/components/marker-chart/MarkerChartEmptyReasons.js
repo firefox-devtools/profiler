@@ -41,9 +41,8 @@ class MarkerChartEmptyReasonsImpl extends PureComponent<Props> {
 export const MarkerChartEmptyReasons = explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    isMarkerChartEmptyInFullRange: selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(
-      state
-    ),
+    isMarkerChartEmptyInFullRange:
+      selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(state),
   }),
   component: MarkerChartEmptyReasonsImpl,
 });

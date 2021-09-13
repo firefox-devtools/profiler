@@ -30,7 +30,7 @@ function _getIcon(icon: string): Promise<IconRequestResult> {
 
   icons.add(icon);
 
-  const result = new Promise(resolve => {
+  const result = new Promise((resolve) => {
     const image = new Image();
     image.src = icon;
     image.referrerPolicy = 'no-referrer';
@@ -46,8 +46,8 @@ function _getIcon(icon: string): Promise<IconRequestResult> {
 }
 
 export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
-  return dispatch => {
-    return _getIcon(icon).then(result => {
+  return (dispatch) => {
+    return _getIcon(icon).then((result) => {
       switch (result) {
         case 'loaded':
           dispatch(iconHasLoaded(icon));

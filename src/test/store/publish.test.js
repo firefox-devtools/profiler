@@ -66,8 +66,8 @@ const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
 
-describe('getCheckedSharingOptions', function() {
-  describe('default filtering by channel', function() {
+describe('getCheckedSharingOptions', function () {
+  describe('default filtering by channel', function () {
     const isFiltering = {
       includeExtension: false,
       includeFullTimeRange: false,
@@ -91,33 +91,33 @@ describe('getCheckedSharingOptions', function() {
       return getCheckedSharingOptions(getState());
     }
 
-    it('does not filter with nightly', function() {
+    it('does not filter with nightly', function () {
       expect(getDefaultsWith('nightly')).toEqual(isNotFiltering);
     });
 
-    it('does not filter with nightly-try', function() {
+    it('does not filter with nightly-try', function () {
       expect(getDefaultsWith('nightly-try')).toEqual(isNotFiltering);
     });
 
-    it('does not filter with default', function() {
+    it('does not filter with default', function () {
       expect(getDefaultsWith('default')).toEqual(isNotFiltering);
     });
 
-    it('does not filter local builds', function() {
+    it('does not filter local builds', function () {
       expect(getDefaultsWith('nightly-autoland')).toEqual(isNotFiltering);
     });
 
-    it('does filter with aurora', function() {
+    it('does filter with aurora', function () {
       expect(getDefaultsWith('aurora')).toEqual(isFiltering);
     });
 
-    it('does filter with release', function() {
+    it('does filter with release', function () {
       expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
   });
 
-  describe('toggleCheckedSharingOptions', function() {
-    it('can toggle options', function() {
+  describe('toggleCheckedSharingOptions', function () {
+    it('can toggle options', function () {
       const { profile } = getProfileFromTextSamples('A');
       const { getState, dispatch } = storeWithProfile(profile);
       expect(getCheckedSharingOptions(getState())).toMatchObject({
@@ -139,20 +139,20 @@ describe('getCheckedSharingOptions', function() {
   });
 });
 
-describe('attemptToPublish', function() {
+describe('attemptToPublish', function () {
   // This token was built from jwt.io by setting a payload:
   // { "profileToken": "FAKEHASH" }.
   const JWT_TOKEN = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlVG9rZW4iOiJGQUtFSEFTSCJ9.lrpqj6L1qu-vlV48Xp-3om2Lf3M7eztXuC8UlkePnKg`;
   const BARE_PROFILE_TOKEN = 'FAKEHASH';
 
-  beforeEach(function() {
+  beforeEach(function () {
     if ((window: any).TextEncoder) {
       throw new Error('A TextEncoder was already on the window object.');
     }
     (window: any).TextEncoder = TextEncoder;
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     delete (window: any).TextEncoder;
   });
 
@@ -212,7 +212,7 @@ describe('attemptToPublish', function() {
     const fakeUploadResult = setupFakeUpload();
 
     function waitUntilPhase(phase) {
-      return waitUntilState(store, state => getUploadPhase(state) === phase);
+      return waitUntilState(store, (state) => getUploadPhase(state) === phase);
     }
 
     async function assertUploadSuccess(publishAttempt: Promise<boolean>) {
@@ -240,7 +240,7 @@ describe('attemptToPublish', function() {
     return setupFakeUploadsWithStore(store);
   }
 
-  it('cycles through the upload phases on a successful upload', async function() {
+  it('cycles through the upload phases on a successful upload', async function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
@@ -253,9 +253,8 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
-      BARE_PROFILE_TOKEN
-    );
+    const storedUploadedProfileInformation =
+      await retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN);
     expect(storedUploadedProfileInformation).toMatchObject({
       jwtToken: JWT_TOKEN,
       profileToken: BARE_PROFILE_TOKEN,
@@ -264,7 +263,7 @@ describe('attemptToPublish', function() {
     });
   });
 
-  it('works when the server returns a bare hash instead of a JWT token', async function() {
+  it('works when the server returns a bare hash instead of a JWT token', async function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
@@ -277,16 +276,15 @@ describe('attemptToPublish', function() {
     expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
     expect(getDataSource(getState())).toEqual('public');
 
-    const storedUploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
-      BARE_PROFILE_TOKEN
-    );
+    const storedUploadedProfileInformation =
+      await retrieveUploadedProfileInformationFromDb(BARE_PROFILE_TOKEN);
     expect(storedUploadedProfileInformation).toMatchObject({
       jwtToken: null,
       profileToken: BARE_PROFILE_TOKEN,
     });
   });
 
-  it('can handle upload errors', async function() {
+  it('can handle upload errors', async function () {
     const { dispatch, getState, rejectUpload } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     const error = new Error('fake error');
@@ -298,7 +296,7 @@ describe('attemptToPublish', function() {
     expect(getUploadError(getState())).toBe(error);
   });
 
-  it('updates with upload progress', async function() {
+  it('updates with upload progress', async function () {
     const {
       waitUntilPhase,
       dispatch,
@@ -340,7 +338,7 @@ describe('attemptToPublish', function() {
     expect(getUploadProgressString(getState())).toEqual('10%');
   });
 
-  it('can reset after a successful upload', async function() {
+  it('can reset after a successful upload', async function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload(JWT_TOKEN);
@@ -356,7 +354,7 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('local');
   });
 
-  it('can abort an upload', async function() {
+  it('can abort an upload', async function () {
     const { dispatch, getState } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadGeneration(getState())).toEqual(0);
@@ -368,14 +366,9 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('local');
   });
 
-  it('obeys the generational value, and ignores stale uploads', async function() {
-    const {
-      dispatch,
-      getState,
-      resolveUpload,
-      waitUntilPhase,
-      abortFunction,
-    } = setup();
+  it('obeys the generational value, and ignores stale uploads', async function () {
+    const { dispatch, getState, resolveUpload, waitUntilPhase, abortFunction } =
+      setup();
     // Kick off a download.
     const publishPromise = dispatch(attemptToPublish());
     expect(getUploadGeneration(getState())).toEqual(0);
@@ -401,7 +394,7 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('local');
   });
 
-  it('can revert back to the original state', async function() {
+  it('can revert back to the original state', async function () {
     // This function tests the original state with the trivial operation of
     // testing on the current tab.
     const { dispatch, getState, resolveUpload, assertUploadSuccess } = setup();
@@ -438,7 +431,7 @@ describe('attemptToPublish', function() {
     expect(getSelectedTab(getState())).toEqual(originalTab);
   });
 
-  it('should preserve the transforms after sanitization', async function() {
+  it('should preserve the transforms after sanitization', async function () {
     const {
       profile,
       funcNamesPerThread: [, funcNames],
@@ -449,12 +442,8 @@ describe('attemptToPublish', function() {
     profile.threads[1].pid = 1;
 
     const store = storeWithProfile(profile);
-    const {
-      dispatch,
-      getState,
-      resolveUpload,
-      assertUploadSuccess,
-    } = setupFakeUploadsWithStore(store);
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+      setupFakeUploadsWithStore(store);
 
     // Add some transforms
     const B = funcNames.indexOf('B');
@@ -482,7 +471,7 @@ describe('attemptToPublish', function() {
     expect(transforms.length).toBe(1);
   });
 
-  describe('with zip files', function() {
+  describe('with zip files', function () {
     const setupZipFileTests = async () => {
       const { store } = await storeWithZipFile([
         'profile1.json',
@@ -491,13 +480,9 @@ describe('attemptToPublish', function() {
       return setupFakeUploadsWithStore(store);
     };
 
-    it('removes the zip viewer and only shows the profiler after upload', async function() {
-      const {
-        dispatch,
-        getState,
-        resolveUpload,
-        assertUploadSuccess,
-      } = await setupZipFileTests();
+    it('removes the zip viewer and only shows the profiler after upload', async function () {
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -517,13 +502,9 @@ describe('attemptToPublish', function() {
       expect(getDataSource(getState())).toEqual('public');
     });
 
-    it('can revert viewing the original zip file state after publishing', async function() {
-      const {
-        dispatch,
-        getState,
-        resolveUpload,
-        assertUploadSuccess,
-      } = await setupZipFileTests();
+    it('can revert viewing the original zip file state after publishing', async function () {
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        await setupZipFileTests();
 
       // Load and view a ZIP file.
       await dispatch(viewProfileFromPathInZipFile('profile1.json'));
@@ -572,12 +553,8 @@ describe('attemptToPublish', function() {
       profile.meta.updateChannel = 'nightly';
 
       const store = storeWithProfile(profile);
-      const {
-        dispatch,
-        getState,
-        resolveUpload,
-        assertUploadSuccess,
-      } = setupFakeUploadsWithStore(store);
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        setupFakeUploadsWithStore(store);
 
       // Only the last range will be saved in IDB, as an information to display
       // in the list of profiles.
@@ -622,12 +599,8 @@ describe('attemptToPublish', function() {
       // We create a 5-sample profile, to be able to assert ranges later.
       const { profile } = getProfileFromTextSamples('A  B  C  D  E');
       const store = storeWithProfile(profile);
-      const {
-        dispatch,
-        getState,
-        resolveUpload,
-        assertUploadSuccess,
-      } = setupFakeUploadsWithStore(store);
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        setupFakeUploadsWithStore(store);
 
       dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
       dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
@@ -682,12 +655,8 @@ describe('attemptToPublish', function() {
       profile.meta.updateChannel = 'nightly';
 
       const store = storeWithProfile(profile);
-      const {
-        dispatch,
-        getState,
-        assertUploadSuccess,
-        waitUntilPhase,
-      } = setupFakeUploadsWithStore(store);
+      const { dispatch, getState, assertUploadSuccess, waitUntilPhase } =
+        setupFakeUploadsWithStore(store);
 
       // This sets up a second upload.
       const { resolveUpload: resolveUpload2 } = setupFakeUpload();

@@ -130,7 +130,7 @@ function setupWithProfile(profile) {
   };
 }
 
-describe('MarkerChart', function() {
+describe('MarkerChart', function () {
   autoMockCanvasContext();
   autoMockElementSize({
     width: 200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT,
@@ -208,9 +208,8 @@ describe('MarkerChart', function() {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers(MARKERS);
-    const { flushRafCalls, dispatch, fireMouseEvent } = setupWithProfile(
-      profile
-    );
+    const { flushRafCalls, dispatch, fireMouseEvent } =
+      setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
@@ -252,9 +251,8 @@ describe('MarkerChart', function() {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers(MARKERS);
-    const { flushRafCalls, dispatch, fireMouseEvent } = setupWithProfile(
-      profile
-    );
+    const { flushRafCalls, dispatch, fireMouseEvent } =
+      setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
@@ -292,12 +290,8 @@ describe('MarkerChart', function() {
         getUserTiming('UserTiming B', 2, 8),
       ]);
       const setupResult = setupWithProfile(profile);
-      const {
-        flushRafCalls,
-        dispatch,
-        fireMouseEvent,
-        container,
-      } = setupResult;
+      const { flushRafCalls, dispatch, fireMouseEvent, container } =
+        setupResult;
 
       dispatch(changeSelectedTab('marker-chart'));
       flushRafCalls();
@@ -348,9 +342,10 @@ describe('MarkerChart', function() {
         fireFullClick(menuItem);
       }
 
-      function findFillTextPosition(
-        fillText: string
-      ): {| x: number, y: number |} {
+      function findFillTextPosition(fillText: string): {|
+        x: number,
+        y: number,
+      |} {
         return findFillTextPositionFromDrawLog(drawLog, fillText);
       }
 
@@ -411,12 +406,8 @@ describe('MarkerChart', function() {
     });
 
     it('displays and still highlights other markers when hovering them', () => {
-      const {
-        rightClick,
-        mouseOver,
-        getContextMenu,
-        findFillTextPosition,
-      } = setupForContextMenus();
+      const { rightClick, mouseOver, getContextMenu, findFillTextPosition } =
+        setupForContextMenus();
 
       rightClick(findFillTextPosition('UserTiming A'));
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
@@ -501,12 +492,8 @@ describe('MarkerChart', function() {
     });
 
     it('changes selection range using the full marker duration', () => {
-      const {
-        rightClick,
-        clickOnMenuItem,
-        findFillTextPosition,
-        getState,
-      } = setupForContextMenus();
+      const { rightClick, clickOnMenuItem, findFillTextPosition, getState } =
+        setupForContextMenus();
 
       // Now we're testing the selection using the full marker's duration.
       rightClick(findFillTextPosition('UserTiming B'));
@@ -529,7 +516,7 @@ describe('MarkerChart', function() {
     });
   });
 
-  describe('with search strings', function() {
+  describe('with search strings', function () {
     function getFillTextCalls(drawCalls) {
       return drawCalls
         .filter(([methodName]) => methodName === 'fillText')
@@ -538,7 +525,7 @@ describe('MarkerChart', function() {
 
     const searchString = 'Dot marker E';
 
-    it('renders lots of markers initially', function() {
+    it('renders lots of markers initially', function () {
       const profile = getProfileWithMarkers(MARKERS);
       const { flushRafCalls } = setupWithProfile(profile);
 
@@ -546,10 +533,10 @@ describe('MarkerChart', function() {
       const text = getFillTextCalls(flushDrawLog());
       expect(text.length).toBeGreaterThan(1);
       // Check that our test search string is in here:
-      expect(text.filter(t => t === searchString).length).toBe(1);
+      expect(text.filter((t) => t === searchString).length).toBe(1);
     });
 
-    it('renders only the marker that was searched for', function() {
+    it('renders only the marker that was searched for', function () {
       const profile = getProfileWithMarkers(MARKERS);
       const { flushRafCalls, dispatch } = setupWithProfile(profile);
 
@@ -588,11 +575,8 @@ describe('MarkerChart', function() {
   describe('with active tab', () => {
     function setupForActiveTab() {
       // Setup the profile data for active tab.
-      const {
-        profile,
-        firstTabTabID,
-        parentInnerWindowIDsWithChildren,
-      } = addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
+      const { profile, firstTabTabID, parentInnerWindowIDsWithChildren } =
+        addActiveTabInformationToProfile(getProfileWithMarkers([...MARKERS]));
       profile.meta.configuration = {
         threads: [],
         features: [],

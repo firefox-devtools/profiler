@@ -176,7 +176,7 @@ export function requestSymbols(
   // For each request, turn its set of addresses into an array.
   // We need there to be a defined order in each addressArray so that we can
   // match the results to the request.
-  const requestsWithAddressArrays = requests.map(request => ({
+  const requestsWithAddressArrays = requests.map((request) => ({
     request,
     addressArray: Array.from(request.addresses),
   }));
@@ -189,7 +189,7 @@ export function requestSymbols(
       const { debugName, breakpadId } = request.lib;
       return {
         memoryMap: [[debugName, breakpadId]],
-        stacks: [addressArray.map(addr => [0, addr])],
+        stacks: [addressArray.map((addr) => [0, addr])],
       };
     }),
   };
@@ -199,10 +199,10 @@ export function requestSymbols(
     method: 'POST',
     mode: 'cors',
   })
-    .then(response => response.json())
+    .then((response) => response.json())
     .then(_ensureIsAPIResultV5);
 
-  return requestsWithAddressArrays.map(async function(
+  return requestsWithAddressArrays.map(async function (
     { request, addressArray },
     requestIndex
   ) {

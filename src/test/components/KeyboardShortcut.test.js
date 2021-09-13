@@ -13,7 +13,7 @@ import { fireFullKeyPress } from 'firefox-profiler/test/fixtures/utils';
 import { coerce } from 'firefox-profiler/utils/flow';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
-describe('app/KeyboardShortcut', function() {
+describe('app/KeyboardShortcut', function () {
   function setup() {
     const store = createStore();
     const renderResults = render(

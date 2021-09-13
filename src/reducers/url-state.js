@@ -479,7 +479,7 @@ const sourceTabs: Reducer<SourceTabsState> = (
 ) => {
   switch (action.type) {
     case 'CREATE_SOURCE_TAB_IF_NEEDED_AND_SELECT': {
-      const index = state.tabs.findIndex(tab => tab.file === action.tab.file);
+      const index = state.tabs.findIndex((tab) => tab.file === action.tab.file);
       if (index === -1) {
         const selectedIndex = state.tabs.length;
         return {
@@ -548,8 +548,8 @@ const sourceTabs: Reducer<SourceTabsState> = (
         selectedIndex:
           newSelectedIndex > index ? newSelectedIndex - 1 : newSelectedIndex,
         order: state.order
-          .filter(i => i !== index)
-          .map(i => (i > index ? i - 1 : i)),
+          .filter((i) => i !== index)
+          .map((i) => (i > index ? i - 1 : i)),
       };
     }
     default:
@@ -569,7 +569,7 @@ const tabsWithOpenBottomBox: Reducer<TabSlug[]> = (state = [], action) => {
     case 'CLOSE_BOTTOM_BOX_FOR_TAB': {
       const { tab } = action;
       if (state.includes(tab)) {
-        return state.filter(t => t !== tab);
+        return state.filter((t) => t !== tab);
       }
       return state;
     }

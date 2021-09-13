@@ -6,8 +6,8 @@
 
 import { computeMinimalUniquePathTails } from '../../utils/minimal-paths';
 
-describe('Unique minimal paths', function() {
-  it('passes basic tests', function() {
+describe('Unique minimal paths', function () {
+  it('passes basic tests', function () {
     expect(computeMinimalUniquePathTails([])).toEqual([]);
     expect(computeMinimalUniquePathTails(['mod.rs'])).toEqual(['mod.rs']);
     expect(computeMinimalUniquePathTails(['hello/mod.rs'])).toEqual(['mod.rs']);
@@ -52,7 +52,7 @@ describe('Unique minimal paths', function() {
     ]);
   });
 
-  it('can deal with mixed path separators', function() {
+  it('can deal with mixed path separators', function () {
     expect(
       computeMinimalUniquePathTails([
         'yippie/wave/hello\\mod.rs',

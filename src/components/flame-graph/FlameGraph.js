@@ -375,13 +375,12 @@ function viewportNeedsUpdate() {
 }
 
 export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     unfilteredThread: selectedThreadSelectors.getThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
-      state
-    ),
+    sampleIndexOffset:
+      selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(state),
     // Use the filtered call node max depth, rather than the preview filtered one, so
     // that the viewport height is stable across preview selections.
     maxStackDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
@@ -392,25 +391,20 @@ export const FlameGraph = explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     categories: getCategories(state),
     threadsKey: getSelectedThreadsKey(state),
-    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-      state
-    ),
-    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-      state
-    ),
+    selectedCallNodeIndex:
+      selectedThreadSelectors.getSelectedCallNodeIndex(state),
+    rightClickedCallNodeIndex:
+      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     interval: getProfileInterval(state),
     isInverted: getInvertCallstack(state),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
+    callTreeSummaryStrategy:
+      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     pages: getPageList(state),
-    samples: selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(
-      state
-    ),
-    unfilteredSamples: selectedThreadSelectors.getUnfilteredSamplesForCallTree(
-      state
-    ),
+    samples:
+      selectedThreadSelectors.getPreviewFilteredSamplesForCallTree(state),
+    unfilteredSamples:
+      selectedThreadSelectors.getUnfilteredSamplesForCallTree(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
   }),
   mapDispatchToProps: {

@@ -10,7 +10,7 @@ import {
 } from '../profile-logic/profile-data';
 
 export function fetchSourceForFile(file: string): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     const parsedName = parseFileNameFromSymbolication(file);
     const urls = getUrlsForSourceFile(parsedName);
     if (!urls.corsFetchableRawSource) {

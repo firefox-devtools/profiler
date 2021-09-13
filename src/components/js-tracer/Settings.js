@@ -61,7 +61,7 @@ export const JsTracerSettings = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     showJsTracerSummary: getShowJsTracerSummary(state),
   }),
   mapDispatchToProps: {

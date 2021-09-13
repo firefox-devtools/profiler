@@ -16,10 +16,10 @@ type Props = {|
   +tabs: string[],
   +selectedIndex: number | null,
   +controlledElementIdForAria: string,
-  +onSelectTab: number => void,
+  +onSelectTab: (number) => void,
 
   // Optional. If not specified, no close buttons are displayed.
-  +onCloseTab?: number => void,
+  +onCloseTab?: (number) => void,
 
   // Both optional. Only if both are specified, tab dragging will be allowed.
   +order?: number[],

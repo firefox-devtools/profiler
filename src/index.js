@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
   window.ga = () => {};
 }
 
-window.geckoProfilerPromise = new Promise(function(resolve) {
+window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 

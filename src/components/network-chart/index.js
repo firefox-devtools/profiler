@@ -51,7 +51,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markerIndexes: MarkerIndex[],
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +selectedNetworkMarkerIndex: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +hoveredMarkerIndexFromState: MarkerIndex | null,
@@ -126,7 +126,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     const list = this._virtualListRef.current;
     if (list && selectedNetworkMarkerIndex !== null) {
       const selectedRowIndex = markerIndexes.findIndex(
-        markerIndex => markerIndex === selectedNetworkMarkerIndex
+        (markerIndex) => markerIndex === selectedNetworkMarkerIndex
       );
       list.scrollItemIntoView(selectedRowIndex, 0);
     }
@@ -156,7 +156,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     const selected = this.props.selectedNetworkMarkerIndex;
     const allRows = this.props.markerIndexes;
     const selectedRowIndex = allRows.findIndex(
-      markerIndex => markerIndex === selected
+      (markerIndex) => markerIndex === selected
     );
 
     if (selected === null || selectedRowIndex === -1) {
@@ -362,21 +362,17 @@ class NetworkChartImpl extends React.PureComponent<Props> {
  */
 const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => ({
-      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
-        state
-      ),
+    mapStateToProps: (state) => ({
+      markerIndexes:
+        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      selectedNetworkMarkerIndex: selectedThreadSelectors.getSelectedNetworkMarkerIndex(
-        state
-      ),
-      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-        state
-      ),
-      hoveredMarkerIndexFromState: selectedThreadSelectors.getHoveredMarkerIndex(
-        state
-      ),
+      selectedNetworkMarkerIndex:
+        selectedThreadSelectors.getSelectedNetworkMarkerIndex(state),
+      rightClickedMarkerIndex:
+        selectedThreadSelectors.getRightClickedMarkerIndex(state),
+      hoveredMarkerIndexFromState:
+        selectedThreadSelectors.getHoveredMarkerIndex(state),
       timeRange: getPreviewSelectionRange(state),
       disableOverscan: getPreviewSelection(state).isModifying,
       threadsKey: getSelectedThreadsKey(state),

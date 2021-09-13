@@ -200,11 +200,10 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
 
         return {
           ...threadViewOptions,
-          selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
-            mapOldFuncToNewFunc
-          ),
+          selectedCallNodePath:
+            threadViewOptions.selectedCallNodePath.map(mapOldFuncToNewFunc),
           expandedCallNodePaths: new PathSet(
-            Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
+            Array.from(threadViewOptions.expandedCallNodePaths).map((oldPath) =>
               oldPath.map(mapOldFuncToNewFunc)
             )
           ),
@@ -247,12 +246,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         expandToNodeParentPaths.push(expandToNode.slice(0, i));
       }
       const hasNewExpandedPaths = expandToNodeParentPaths.some(
-        path => !expandedCallNodePaths.has(path)
+        (path) => !expandedCallNodePaths.has(path)
       );
 
       if (hasNewExpandedPaths) {
         expandedCallNodePaths = new PathSet(expandedCallNodePaths);
-        expandToNodeParentPaths.forEach(path =>
+        expandToNodeParentPaths.forEach((path) =>
           expandedCallNodePaths.add(path)
         );
       }
@@ -316,14 +315,14 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);
       const expandedCallNodePaths = new PathSet(
         Array.from(threadViewOptions.expandedCallNodePaths)
-          .map(path =>
+          .map((path) =>
             Transforms.applyTransformToCallNodePath(
               path,
               transform,
               transformedThread
             )
           )
-          .filter(path => path.length > 0)
+          .filter((path) => path.length > 0)
       );
 
       const selectedCallNodePath = Transforms.applyTransformToCallNodePath(
@@ -515,7 +514,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
         return state;
       }
 
-      const mapOldFuncToNewFunc = oldFunc => {
+      const mapOldFuncToNewFunc = (oldFunc) => {
         const newFunc = oldFuncToNewFuncMap.get(oldFunc);
         return newFunc === undefined ? oldFunc : newFunc;
       };

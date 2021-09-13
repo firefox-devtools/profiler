@@ -48,12 +48,10 @@ function getSamplesPixelPosition(
 /**
  * This test verifies that the memory track can draw a graph of the memory.
  */
-describe('TrackMemory', function() {
+describe('TrackMemory', function () {
   function setup() {
     const { profile } = getProfileFromTextSamples(
-      Array(SAMPLE_COUNT)
-        .fill('A')
-        .join('  ')
+      Array(SAMPLE_COUNT).fill('A').join('  ')
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
@@ -120,7 +118,7 @@ describe('TrackMemory', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can create a tooltip', function() {
+  it('can create a tooltip', function () {
     const { moveMouseAtCounter, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
     moveMouseAtCounter(1, 0.5);
@@ -129,20 +127,20 @@ describe('TrackMemory', function() {
     expect(getTooltipContents()).toBeFalsy();
   });
 
-  it('has a tooltip that matches the snapshot', function() {
+  it('has a tooltip that matches the snapshot', function () {
     const { moveMouseAtCounter, getTooltipContents } = setup();
     moveMouseAtCounter(5, 0.5);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
-  it('draws a dot on the graph', function() {
+  it('draws a dot on the graph', function () {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     expect(getMemoryDot()).toBeFalsy();
     moveMouseAtCounter(1, 0.5);
     expect(getMemoryDot()).toBeTruthy();
   });
 
-  it('can draw a dot on both extremes of the graph', function() {
+  it('can draw a dot on both extremes of the graph', function () {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     expect(getMemoryDot()).toBeFalsy();
     moveMouseAtCounter(0, 0.25);
@@ -151,7 +149,7 @@ describe('TrackMemory', function() {
     expect(getMemoryDot()).toBeTruthy();
   });
 
-  it('draws a dot that matches the snapshot', function() {
+  it('draws a dot that matches the snapshot', function () {
     const { moveMouseAtCounter, getMemoryDot } = setup();
     moveMouseAtCounter(1, 0.5);
     expect(getMemoryDot()).toMatchSnapshot();

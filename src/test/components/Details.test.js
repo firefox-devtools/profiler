@@ -41,7 +41,7 @@ jest.mock('../../components/js-tracer', () => ({
   JsTracer: 'js-tracer',
 }));
 
-describe('app/Details', function() {
+describe('app/Details', function () {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -76,7 +76,7 @@ describe('app/Details', function() {
     });
   });
 
-  it('show the correct state for the sidebar open button', function() {
+  it('show the correct state for the sidebar open button', function () {
     const { store, getByTitle } = setup();
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
     store.dispatch(changeSidebarOpenState('calltree', false));

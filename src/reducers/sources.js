@@ -10,21 +10,21 @@ const sources: Reducer<FileSourceItem[]> = (state = [], action) => {
     case 'SOURCE_LOADING_BEGIN': {
       const { file, url } = action;
       return [
-        ...state.filter(item => item.file !== file),
+        ...state.filter((item) => item.file !== file),
         { file, status: { type: 'LOADING', url } },
       ];
     }
     case 'SOURCE_LOADING_SUCCESS': {
       const { file, source } = action;
       return [
-        ...state.filter(item => item.file !== file),
+        ...state.filter((item) => item.file !== file),
         { file, status: { type: 'AVAILABLE', source } },
       ];
     }
     case 'SOURCE_LOADING_ERROR': {
       const { file, error } = action;
       return [
-        ...state.filter(item => item.file !== file),
+        ...state.filter((item) => item.file !== file),
         { file, status: { type: 'ERROR', error } },
       ];
     }

@@ -244,7 +244,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
   render() {
     const { className, order, role, ariaLabel } = this.props;
     const children = React.Children.toArray(this.props.children);
-    const orderedChildren = order.map(childIndex => children[childIndex]);
+    const orderedChildren = order.map((childIndex) => children[childIndex]);
     const TagName = this.props.tagName;
     const xy = this._getXY();
 

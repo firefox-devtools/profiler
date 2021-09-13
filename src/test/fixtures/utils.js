@@ -120,10 +120,9 @@ export function formatTree(
 ): string[] {
   const whitespace = Array(depth * 2 + 1).join(' ');
 
-  children.forEach(callNodeIndex => {
-    const { name, total, self, categoryName } = callTree.getDisplayData(
-      callNodeIndex
-    );
+  children.forEach((callNodeIndex) => {
+    const { name, total, self, categoryName } =
+      callTree.getDisplayData(callNodeIndex);
     const displayName = includeCategories ? `${name} [${categoryName}]` : name;
     lines.push(
       `${whitespace}- ${displayName} (total: ${total}, self: ${self})`
@@ -165,13 +164,13 @@ export function formatTreeIncludeCategories(callTree: CallTree): string[] {
  */
 export function waitUntilState(
   store: Store,
-  predicate: State => boolean
+  predicate: (State) => boolean
 ): Promise<void> {
   if (predicate(store.getState())) {
     return Promise.resolve();
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     store.subscribe(() => {
       if (predicate(store.getState())) {
         // Resolve the next Promise tick, and allow all other store subscribers
@@ -191,7 +190,7 @@ export async function waitUntilData<T>(
   times: number = 10
 ): Promise<T> {
   function wait() {
-    return new Promise(resolve => setTimeout(resolve, 50));
+    return new Promise((resolve) => setTimeout(resolve, 50));
   }
 
   for (let i = 0; i < times; i++) {

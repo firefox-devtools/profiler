@@ -39,4 +39,5 @@ const _selectorsForConsole = {
 };
 
 // Exports require explicit typing. Deduce the type with typeof.
-export const selectorsForConsole: typeof _selectorsForConsole = _selectorsForConsole;
+export const selectorsForConsole: typeof _selectorsForConsole =
+  _selectorsForConsole;

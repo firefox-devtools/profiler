@@ -113,7 +113,7 @@ export function parseTransforms(transformString: string): TransformStack {
   }
   const transforms = [];
 
-  transformString.split('~').forEach(s => {
+  transformString.split('~').forEach((s) => {
     const tuple = s.split('-');
     const shortKey = tuple[0];
     const type = convertToTransformType(SHORT_KEY_TO_TRANSFORM[shortKey]);
@@ -127,12 +127,8 @@ export function parseTransforms(transformString: string): TransformStack {
     switch (type) {
       case 'collapse-resource': {
         // e.g. "cr-js-325-8"
-        const [
-          ,
-          implementation,
-          resourceIndexRaw,
-          collapsedFuncIndexRaw,
-        ] = tuple;
+        const [, implementation, resourceIndexRaw, collapsedFuncIndexRaw] =
+          tuple;
         const resourceIndex = parseInt(resourceIndexRaw, 10);
         const collapsedFuncIndex = parseInt(collapsedFuncIndexRaw, 10);
         if (isNaN(resourceIndex) || isNaN(collapsedFuncIndex)) {
@@ -206,12 +202,8 @@ export function parseTransforms(transformString: string): TransformStack {
       case 'focus-subtree':
       case 'merge-call-node': {
         // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
-        const [
-          ,
-          implementationRaw,
-          serializedCallNodePath,
-          invertedRaw,
-        ] = tuple;
+        const [, implementationRaw, serializedCallNodePath, invertedRaw] =
+          tuple;
         const implementation = toValidImplementationFilter(implementationRaw);
         const callNodePath = decodeUintArrayFromUrlComponent(
           serializedCallNodePath
@@ -252,7 +244,7 @@ export function parseTransforms(transformString: string): TransformStack {
  */
 export function stringifyTransforms(transformStack: TransformStack): string {
   return transformStack
-    .map(transform => {
+    .map((transform) => {
       const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
       if (!shortKey) {
         throw new Error(
@@ -309,7 +301,7 @@ export function getTransformLabelL10nIds(
   transforms: Transform[]
 ): Array<TransformLabeL10nIds> {
   const { funcTable, libs, stringTable, resourceTable } = thread;
-  const labels: TransformLabeL10nIds[] = transforms.map(transform => {
+  const labels: TransformLabeL10nIds[] = transforms.map((transform) => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
       const libIndex = resourceTable.lib[transform.resourceIndex];
@@ -455,7 +447,7 @@ function _mergeFunctionInCallNodePath(
   funcIndex: IndexIntoFuncTable,
   callNodePath: CallNodePath
 ): CallNodePath {
-  return callNodePath.filter(nodeFunc => nodeFunc !== funcIndex);
+  return callNodePath.filter((nodeFunc) => nodeFunc !== funcIndex);
 }
 
 function _dropFunctionInCallNodePath(
@@ -475,7 +467,7 @@ function _collapseResourceInCallNodePath(
   return (
     callNodePath
       // Map any collapsed functions into the collapsedFuncIndex
-      .map(pathFuncIndex => {
+      .map((pathFuncIndex) => {
         return funcTable.resource[pathFuncIndex] === resourceIndex
           ? collapsedFuncIndex
           : pathFuncIndex;
@@ -567,7 +559,7 @@ export function invertCallNodePath(
   return (
     pathToLeaf
       // Map the CallNodeIndex to FuncIndex.
-      .map(index => callNodeTable.func[index])
+      .map((index) => callNodeTable.func[index])
       // Reverse it so that it's in the proper inverted order.
       .reverse()
   );
@@ -744,7 +736,7 @@ export function dropFunction(
     }
   }
 
-  return updateThreadStacks(thread, stackTable, stack =>
+  return updateThreadStacks(thread, stackTable, (stack) =>
     // Drop the stacks that contain that function.
     stack !== null && stackContainsFunc[stack] ? null : stack
   );
@@ -1140,7 +1132,7 @@ export function focusSubtree(
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
 
-    return updateThreadStacks(thread, newStackTable, oldStack => {
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
       if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
         return null;
       }
@@ -1191,7 +1183,7 @@ export function focusInvertedSubtree(
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
 
-    return updateThreadStacks(thread, stackTable, stackIndex => {
+    return updateThreadStacks(thread, stackTable, (stackIndex) => {
       let newStackIndex = oldStackToNewStack.get(stackIndex);
       if (newStackIndex === undefined) {
         newStackIndex = convertStack(stackIndex);
@@ -1335,7 +1327,7 @@ export function filterCallNodePathByImplementation(
   callNodePath: CallNodePath
 ): CallNodePath {
   const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
-  return callNodePath.filter(funcIndex =>
+  return callNodePath.filter((funcIndex) =>
     funcMatchesImplementation(thread, funcIndex)
   );
 }
@@ -1346,7 +1338,7 @@ export function filterCallNodeAndCategoryPathByImplementation(
   path: CallNodeAndCategoryPath
 ): CallNodeAndCategoryPath {
   const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
-  return path.filter(funcIndex =>
+  return path.filter((funcIndex) =>
     funcMatchesImplementation(thread, funcIndex.func)
   );
 }

@@ -26,7 +26,7 @@ import { blankStore } from '../fixtures/stores';
 import { coerceMatchingShape } from '../../utils/flow';
 
 describe('AppLocalizationProvider', () => {
-  afterEach(function() {
+  afterEach(function () {
     delete window.fetch;
   });
 

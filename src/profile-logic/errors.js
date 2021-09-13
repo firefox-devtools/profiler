@@ -14,7 +14,7 @@ export class SymbolsNotFoundError extends Error {
 
   constructor(message: string, library: RequestedLib, ...errors: Error[]) {
     super(
-      [message, ...errors.map(e => ` - ${e.name}: ${e.message}`)].join('\n')
+      [message, ...errors.map((e) => ` - ${e.name}: ${e.message}`)].join('\n')
     );
     // Workaround for a babel issue when extending Errors
     (this: any).__proto__ = SymbolsNotFoundError.prototype;

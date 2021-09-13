@@ -254,7 +254,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +isModifyingSelection: boolean,
   +zeroAt: Milliseconds,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +networkTiming: MarkerTiming[],
   +verticalMarkerIndexes: MarkerIndex[],
   +rightClickedMarkerIndex: MarkerIndex | null,
@@ -434,9 +434,8 @@ export const TrackNetwork = explicitConnect<
       isModifyingSelection: getPreviewSelection(state).isModifying,
       verticalMarkerIndexes: selectors.getTimelineVerticalMarkerIndexes(state),
       rightClickedMarkerIndex: selectors.getRightClickedMarkerIndex(state),
-      selectedNetworkMarkerIndex: selectors.getSelectedNetworkMarkerIndex(
-        state
-      ),
+      selectedNetworkMarkerIndex:
+        selectors.getSelectedNetworkMarkerIndex(state),
       hoveredMarkerIndexFromState: selectors.getHoveredMarkerIndex(state),
     };
   },

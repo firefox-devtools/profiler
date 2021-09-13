@@ -20,7 +20,7 @@ import {
 
 import type { Profile } from 'firefox-profiler/types';
 
-describe('jsTracerFixed', function() {
+describe('jsTracerFixed', function () {
   function fixTiming(events: TestDefinedJsTracerEvent[]) {
     const profile = getProfileWithJsTracerEvents(events);
     const jsTracer = ensureExists(profile.threads[0].jsTracer);
@@ -31,7 +31,7 @@ describe('jsTracerFixed', function() {
     };
   }
 
-  it('does not modify a valid structure', function() {
+  it('does not modify a valid structure', function () {
     const timing = fixTiming([
       // [mozilla                  ]
       //  [int   ][ion          ]
@@ -48,7 +48,7 @@ describe('jsTracerFixed', function() {
     });
   });
 
-  it('fixes overlapping structures, cutting off the beginning', function() {
+  it('fixes overlapping structures, cutting off the beginning', function () {
     const timing = fixTiming([
       // [aaaaaa]
       //      [bbbbbbbbb]
@@ -62,7 +62,7 @@ describe('jsTracerFixed', function() {
     });
   });
 
-  it('fixes overlapping structures, cutting off the end', function() {
+  it('fixes overlapping structures, cutting off the end', function () {
     const timing = fixTiming([
       // [aaaaaa]
       //   [bbbbbb]
@@ -76,7 +76,7 @@ describe('jsTracerFixed', function() {
     });
   });
 
-  it('fixes events which are too early', function() {
+  it('fixes events which are too early', function () {
     const timing = fixTiming([
       //    [aaaaaa]
       // [bbbbbb]
@@ -91,7 +91,7 @@ describe('jsTracerFixed', function() {
     });
   });
 
-  it('fixes events which are way too early', function() {
+  it('fixes events which are way too early', function () {
     const timing = fixTiming([
       //         [aaaa]
       // [bbb]
@@ -107,8 +107,8 @@ describe('jsTracerFixed', function() {
   });
 });
 
-describe('convertJsTracerToThread', function() {
-  it('can generate stacks correctly', function() {
+describe('convertJsTracerToThread', function () {
+  it('can generate stacks correctly', function () {
     const existingProfile = getProfileWithJsTracerEvents([
       // [mozilla                  ]
       //  [int   ][ion          ]
@@ -143,7 +143,7 @@ describe('convertJsTracerToThread', function() {
     ]);
   });
 
-  it('can generate the frameTable implementations correctly', function() {
+  it('can generate the frameTable implementations correctly', function () {
     const existingProfile = getProfileWithJsTracerEvents([
       // [mozilla                  ]
       //  [int   ][ion          ]
@@ -166,7 +166,7 @@ describe('convertJsTracerToThread', function() {
       categories
     );
     const implementationNames = thread.frameTable.implementation.map(
-      implementation =>
+      (implementation) =>
         implementation === null
           ? null
           : thread.stringTable.getString(implementation)
@@ -181,9 +181,9 @@ describe('convertJsTracerToThread', function() {
   });
 });
 
-describe('selectors/getJsTracerTiming', function() {
-  describe('full stack-based view', function() {
-    it('has no JS tracer timing if no js tracer info is present', function() {
+describe('selectors/getJsTracerTiming', function () {
+  describe('full stack-based view', function () {
+    it('has no JS tracer timing if no js tracer info is present', function () {
       const { profile } = getProfileFromTextSamples('A');
       const { getState } = storeWithProfile(profile);
       expect(profile.threads[0].jsTracer).toBe(undefined);
@@ -192,13 +192,13 @@ describe('selectors/getJsTracerTiming', function() {
       ).toEqual(null);
     });
 
-    it('has empty JS tracer timing if no events are in the js tracer table', function() {
+    it('has empty JS tracer timing if no events are in the js tracer table', function () {
       expect(
         getHumanReadableJsTracerTiming({ useSelfTime: false, events: [] })
       ).toEqual([]);
     });
 
-    it('can generate some simple nested timing', function() {
+    it('can generate some simple nested timing', function () {
       expect(
         getHumanReadableJsTracerTiming({
           useSelfTime: false,
@@ -215,7 +215,7 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
 
-    it('can generate sibling timing', function() {
+    it('can generate sibling timing', function () {
       expect(
         getHumanReadableJsTracerTiming({
           useSelfTime: false,
@@ -235,14 +235,14 @@ describe('selectors/getJsTracerTiming', function() {
     });
   });
 
-  describe('self time', function() {
-    it('has empty JS tracer timing if no events are in the js tracer table', function() {
+  describe('self time', function () {
+    it('has empty JS tracer timing if no events are in the js tracer table', function () {
       expect(
         getHumanReadableJsTracerTiming({ useSelfTime: true, events: [] })
       ).toEqual([]);
     });
 
-    it('can generate some simple nested timing', function() {
+    it('can generate some simple nested timing', function () {
       expect(
         getHumanReadableJsTracerTiming({
           useSelfTime: true,
@@ -259,7 +259,7 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
 
-    it('can "drain off" prefixes the first if branch of the algorithm', function() {
+    it('can "drain off" prefixes the first if branch of the algorithm', function () {
       // This test is checking a specific if branch of the timing function:
       //
       //    xxxxxxxxxxxxxxxx[================]
@@ -284,7 +284,7 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
 
-    it('handles float precision errors where the child event outlasts the parent', function() {
+    it('handles float precision errors where the child event outlasts the parent', function () {
       //    0  1  2  3  4  5
       //    [prefix--]
       //       [current-]
@@ -308,7 +308,7 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
 
-    it('can split a prefix stack if the ending time matches', function() {
+    it('can split a prefix stack if the ending time matches', function () {
       // This test is checking a specific if branch of the timing function:
       //
       //   [prefix]xxxxxxxxx
@@ -330,8 +330,8 @@ describe('selectors/getJsTracerTiming', function() {
     });
   });
 
-  describe('match function names', function() {
-    it('works on the sampled data', function() {
+  describe('match function names', function () {
+    it('works on the sampled data', function () {
       // Create a profile from text samples.
       const {
         profile,
@@ -349,15 +349,13 @@ describe('selectors/getJsTracerTiming', function() {
         const thread = profile.threads[0];
 
         // Also create a JS tracer profile.
-        const {
-          stringTable: tracerStringTable,
-          jsTracer,
-        } = getProfileWithJsTracerEvents([
-          ['Root', 0, 20],
-          ['Node', 1, 19],
-          ['https://mozilla.org', 2, 18],
-          ['https://mozilla.org', 3, 16],
-        ]).threads[0];
+        const { stringTable: tracerStringTable, jsTracer } =
+          getProfileWithJsTracerEvents([
+            ['Root', 0, 20],
+            ['Node', 1, 19],
+            ['https://mozilla.org', 2, 18],
+            ['https://mozilla.org', 3, 16],
+          ]).threads[0];
 
         if (!jsTracer) {
           throw new Error('Unable to find a JS tracer table');

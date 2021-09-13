@@ -22,7 +22,7 @@ function mockFetchForBitly({
   responseFromRequestPayload,
 }: {|
   endpointUrl: string,
-  responseFromRequestPayload: any => Response,
+  responseFromRequestPayload: (any) => Response,
 |}) {
   window.fetch.mockImplementation(async (urlString, options) => {
     const { method, headers, body } = options;

@@ -11,13 +11,10 @@ import type {
 } from 'firefox-profiler/types';
 import { getSelectedSourceTabFile } from './url-state';
 
-export const getSources: Selector<FileSourceItem[]> = state => state.sources;
+export const getSources: Selector<FileSourceItem[]> = (state) => state.sources;
 
-export const getSelectedSourceTabSource: Selector<FileSourceStatus | void> = createSelector(
-  getSources,
-  getSelectedSourceTabFile,
-  (sources, file) => {
-    const item = sources.find(item => item.file === file);
+export const getSelectedSourceTabSource: Selector<FileSourceStatus | void> =
+  createSelector(getSources, getSelectedSourceTabFile, (sources, file) => {
+    const item = sources.find((item) => item.file === file);
     return item ? item.status : undefined;
-  }
-);
+  });

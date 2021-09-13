@@ -107,7 +107,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
         {range(
           visibleRangeStart,
           Math.max(visibleRangeStart, visibleRangeEnd)
-        ).map(i => {
+        ).map((i) => {
           const item = items[i];
 
           // We compute forceRenderItem from the first position of item in the list,
@@ -187,7 +187,7 @@ class VirtualListInner<Item> extends React.PureComponent<
     const chunks = range(
       startChunkIndex,
       Math.max(startChunkIndex, endChunkIndex)
-    ).map(c => c * chunkSize);
+    ).map((c) => c * chunkSize);
 
     return (
       <div
@@ -204,7 +204,7 @@ class VirtualListInner<Item> extends React.PureComponent<
           key={-1}
           style={{ height: Math.max(0, visibleRangeStart) * itemHeight + 'px' }}
         />
-        {chunks.map(chunkStart => {
+        {chunks.map((chunkStart) => {
           return (
             <VirtualListInnerChunk
               className={`${className}InnerChunk`}
@@ -235,7 +235,7 @@ type VirtualListProps<Item> = {|
   +focusable: boolean,
   +specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
-  +onCopy?: ClipboardEvent => void,
+  +onCopy?: (ClipboardEvent) => void,
   // This is called when the mouse leaves the list as it is rendered. That is if
   // there isn't enough item to fill the component's height, and the user moves
   // the mouse below the items, this callback would be called.
@@ -449,7 +449,7 @@ export class VirtualList<Item> extends React.PureComponent<
           className={`${className}InnerWrapper`}
           onMouseLeave={this._onMouseLeaveInnerWrapper}
         >
-          {range(columnCount).map(columnIndex => (
+          {range(columnCount).map((columnIndex) => (
             <VirtualListInner
               className={classNames(
                 `${className}Inner`,

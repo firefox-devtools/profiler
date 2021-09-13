@@ -123,7 +123,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 
   _computeMinimalPathsMemoized = memoize((tabs: SourceTab[]): string[] =>
     computeMinimalUniquePathTails(
-      tabs.map(tab => parseFileNameFromSymbolication(tab.file).path)
+      tabs.map((tab) => parseFileNameFromSymbolication(tab.file).path)
     )
   );
 
@@ -157,15 +157,15 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     }
   }
 
-  _onSelectTab = index => {
+  _onSelectTab = (index) => {
     this.props.changeSelectedSourceTab(index);
   };
 
-  _onChangeTabOrder = order => {
+  _onChangeTabOrder = (order) => {
     this.props.changeSourceTabOrder(order);
   };
 
-  _onCloseTab = index => {
+  _onCloseTab = (index) => {
     const { sourceTabs } = this.props;
     const isOnlyTab = sourceTabs.tabs.length === 1;
     this.props.closeSourceTab(index);
@@ -245,11 +245,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 }
 
 export const BottomBox = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     globalLineTimings: selectedThreadSelectors.getLineTimings(state),
-    selectedCallNodeLineTimings: selectedThreadSelectors.getLineTimingsForSelectedCallNode(
-      state
-    ),
+    selectedCallNodeLineTimings:
+      selectedThreadSelectors.getLineTimingsForSelectedCallNode(state),
     sourceTabActivationGeneration: getSourceTabActivationGeneration(state),
     sourceTabs: getSourceTabs(state),
     selectedSourceTabFile: getSelectedSourceTabFile(state),

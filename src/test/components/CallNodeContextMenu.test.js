@@ -20,7 +20,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('calltree/CallNodeContextMenu', function() {
+describe('calltree/CallNodeContextMenu', function () {
   // Provide a store with a useful profile to assert context menu operations off of.
   function createStore() {
     // Create a profile that every transform can be applied to.
@@ -55,7 +55,7 @@ describe('calltree/CallNodeContextMenu', function() {
     return { ...renderResult, getState: store.getState };
   }
 
-  describe('basic rendering', function() {
+  describe('basic rendering', function () {
     it('does not render the context menu when it is closed', () => {
       const isContextMenuOpen = false;
       const { container } = setup(createStore(), isContextMenuOpen);
@@ -75,7 +75,7 @@ describe('calltree/CallNodeContextMenu', function() {
     });
   });
 
-  describe('clicking on call tree transforms', function() {
+  describe('clicking on call tree transforms', function () {
     // Iterate through each transform slug, and click things in it.
     const fixtures = [
       { matcher: /Merge function/, type: 'merge-function' },
@@ -92,7 +92,7 @@ describe('calltree/CallNodeContextMenu', function() {
     ];
 
     fixtures.forEach(({ matcher, type }) => {
-      it(`adds a transform for "${type}"`, function() {
+      it(`adds a transform for "${type}"`, function () {
         const { getState, getByText } = setup();
         fireFullClick(getByText(matcher));
         expect(
@@ -102,8 +102,8 @@ describe('calltree/CallNodeContextMenu', function() {
     });
   });
 
-  describe('clicking on the rest of the menu items', function() {
-    it('can expand all call nodes in the call tree', function() {
+  describe('clicking on the rest of the menu items', function () {
+    it('can expand all call nodes in the call tree', function () {
       const { getState, getByText } = setup();
       expect(
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
@@ -117,7 +117,7 @@ describe('calltree/CallNodeContextMenu', function() {
       ).toHaveLength(11);
     });
 
-    it('can look up functions on SearchFox', function() {
+    it('can look up functions on SearchFox', function () {
       const { getByText } = setup();
       jest.spyOn(window, 'open').mockImplementation(() => {});
       fireFullClick(getByText(/Searchfox/));
@@ -127,14 +127,14 @@ describe('calltree/CallNodeContextMenu', function() {
       );
     });
 
-    it('can copy a function name', function() {
+    it('can copy a function name', function () {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy function name'));
       expect(copy).toBeCalledWith('B');
     });
 
-    it('can copy a script URL', function() {
+    it('can copy a script URL', function () {
       // Create a new profile that has JavaScript in it.
       const {
         profile,
@@ -157,7 +157,7 @@ describe('calltree/CallNodeContextMenu', function() {
       expect(copy).toBeCalledWith('https://example.com/script.js');
     });
 
-    it('can copy a stack', function() {
+    it('can copy a stack', function () {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireFullClick(getByText('Copy stack'));

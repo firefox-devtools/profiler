@@ -147,7 +147,7 @@ export default class SymbolStoreDB {
         this._deleteAllBeforeDate(
           db,
           new Date(+new Date() - this._maxAge)
-        ).catch(e => {
+        ).catch((e) => {
           console.error('Encountered error while cleaning out database:', e);
         });
       };
@@ -167,7 +167,7 @@ export default class SymbolStoreDB {
     breakpadId: string,
     [addrs, index, buffer]: SymbolTableAsTuple
   ): Promise<void> {
-    return this._getDB().then(db => {
+    return this._getDB().then((db) => {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
         transaction.onerror = () => reject(transaction.error);
@@ -204,7 +204,7 @@ export default class SymbolStoreDB {
     debugName: string,
     breakpadId: string
   ): Promise<SymbolTableAsTuple> {
-    return this._getDB().then(db => {
+    return this._getDB().then((db) => {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
         transaction.onerror = () => reject(transaction.error);
@@ -233,7 +233,7 @@ export default class SymbolStoreDB {
 
   close(): Promise<void> {
     // Close the database and make all methods uncallable.
-    return this._getDB().then(db => {
+    return this._getDB().then((db) => {
       db.close();
       this._dbPromise = null;
     });
@@ -262,9 +262,8 @@ export default class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
-      'lastUsedDate'
-    );
+    const lastUsedDateIndex: IDBIndex<any, Date, any> =
+      store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
@@ -290,9 +289,8 @@ export default class SymbolStoreDB {
   ): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
-    const lastUsedDateIndex: IDBIndex<any, Date, any> = store.index(
-      'lastUsedDate'
-    );
+    const lastUsedDateIndex: IDBIndex<any, Date, any> =
+      store.index('lastUsedDate');
     const cursorReq = lastUsedDateIndex.openCursor();
     let deletedCount = 0;
     cursorReq.onsuccess = () => {
@@ -313,7 +311,7 @@ export default class SymbolStoreDB {
     };
   }
 
-  _count(store: SymbolStore, callback: number => void): void {
+  _count(store: SymbolStore, callback: (number) => void): void {
     const countReq = store.count();
     countReq.onsuccess = () => callback(countReq.result);
   }
@@ -323,7 +321,7 @@ export default class SymbolStoreDB {
     n: number,
     callback: () => void
   ): void {
-    this._count(store, symbolTableCount => {
+    this._count(store, (symbolTableCount) => {
       if (symbolTableCount > n) {
         // We'll need to remove at least one symbol table.
         const needToRemoveCount = symbolTableCount - n;

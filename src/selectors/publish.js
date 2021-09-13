@@ -39,10 +39,11 @@ import type {
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
-export const getPublishState: Selector<PublishState> = state => state.publish;
+export const getPublishState: Selector<PublishState> = (state) => state.publish;
 
-export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = state =>
-  getPublishState(state).checkedSharingOptions;
+export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = (
+  state
+) => getPublishState(state).checkedSharingOptions;
 
 export const getFilenameString: Selector<string> = createSelector(
   getProfile,
@@ -51,7 +52,7 @@ export const getFilenameString: Selector<string> = createSelector(
     const { startTime, product } = profile.meta;
 
     // Pad single digit numbers with a 0.
-    const pad = x => (x < 10 ? `0${x}` : `${x}`);
+    const pad = (x) => (x < 10 ? `0${x}` : `${x}`);
 
     // Compute the date string.
     const date = new Date(startTime + rootRange.start);
@@ -67,59 +68,75 @@ export const getFilenameString: Selector<string> = createSelector(
   }
 );
 
-export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> = createSelector(
-  getCheckedSharingOptions,
-  getProfile,
-  getCommittedRange,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
-  getGlobalTracks,
-  getLocalTracksByPid,
-  getHasPreferenceMarkers,
-  (
-    checkedSharingOptions,
-    profile,
-    committedRange,
-    hiddenGlobalTracks,
-    hiddenLocalTracksByPid,
-    globalTracks,
-    localTracksByPid,
-    hasPreferenceMarkers
-  ) => {
-    let isIncludingEverything = true;
-    for (const prop in checkedSharingOptions) {
-      // Do not include preference values checkbox if it's hidden.
-      // Even though `includePreferenceValues` is not taken into account, it's
-      // is false, if the profile updateChannel is not nightly or custom build.
-      if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
-        continue;
+export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> =
+  createSelector(
+    getCheckedSharingOptions,
+    getProfile,
+    getCommittedRange,
+    getHiddenGlobalTracks,
+    getHiddenLocalTracksByPid,
+    getGlobalTracks,
+    getLocalTracksByPid,
+    getHasPreferenceMarkers,
+    (
+      checkedSharingOptions,
+      profile,
+      committedRange,
+      hiddenGlobalTracks,
+      hiddenLocalTracksByPid,
+      globalTracks,
+      localTracksByPid,
+      hasPreferenceMarkers
+    ) => {
+      let isIncludingEverything = true;
+      for (const prop in checkedSharingOptions) {
+        // Do not include preference values checkbox if it's hidden.
+        // Even though `includePreferenceValues` is not taken into account, it's
+        // is false, if the profile updateChannel is not nightly or custom build.
+        if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
+          continue;
+        }
+        isIncludingEverything =
+          isIncludingEverything && checkedSharingOptions[prop];
       }
-      isIncludingEverything =
-        isIncludingEverything && checkedSharingOptions[prop];
-    }
-    if (isIncludingEverything) {
-      // No sanitization is happening, bail out early.
-      return null;
-    }
+      if (isIncludingEverything) {
+        // No sanitization is happening, bail out early.
+        return null;
+      }
 
-    // Find all of the thread indexes that are hidden.
-    const shouldRemoveThreads = new Set();
-    if (!checkedSharingOptions.includeHiddenThreads) {
-      for (const globalTrackIndex of hiddenGlobalTracks) {
-        const globalTrack = globalTracks[globalTrackIndex];
-        if (
-          globalTrack.type === 'process' &&
-          globalTrack.mainThreadIndex !== null
-        ) {
-          // This is a process thread that has been hidden.
-          shouldRemoveThreads.add(globalTrack.mainThreadIndex);
+      // Find all of the thread indexes that are hidden.
+      const shouldRemoveThreads = new Set();
+      if (!checkedSharingOptions.includeHiddenThreads) {
+        for (const globalTrackIndex of hiddenGlobalTracks) {
+          const globalTrack = globalTracks[globalTrackIndex];
+          if (
+            globalTrack.type === 'process' &&
+            globalTrack.mainThreadIndex !== null
+          ) {
+            // This is a process thread that has been hidden.
+            shouldRemoveThreads.add(globalTrack.mainThreadIndex);
+            const localTracks = ensureExists(
+              localTracksByPid.get(globalTrack.pid),
+              'Expected to be able to get a local track by PID.'
+            );
+
+            // Also add all of the children threads, as they are hidden as well.
+            for (const localTrack of localTracks) {
+              if (localTrack.type === 'thread') {
+                shouldRemoveThreads.add(localTrack.threadIndex);
+              }
+            }
+          }
+        }
+
+        // Add all of the local tracks that have been hidden.
+        for (const [pid, hiddenLocalTrackIndexes] of hiddenLocalTracksByPid) {
           const localTracks = ensureExists(
-            localTracksByPid.get(globalTrack.pid),
-            'Expected to be able to get a local track by PID.'
+            localTracksByPid.get(pid),
+            'Expected to be able to get a local track by PID'
           );
-
-          // Also add all of the children threads, as they are hidden as well.
-          for (const localTrack of localTracks) {
+          for (const hiddenLocalTrackIndex of hiddenLocalTrackIndexes) {
+            const localTrack = localTracks[hiddenLocalTrackIndex];
             if (localTrack.type === 'thread') {
               shouldRemoveThreads.add(localTrack.threadIndex);
             }
@@ -127,37 +144,23 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
         }
       }
 
-      // Add all of the local tracks that have been hidden.
-      for (const [pid, hiddenLocalTrackIndexes] of hiddenLocalTracksByPid) {
-        const localTracks = ensureExists(
-          localTracksByPid.get(pid),
-          'Expected to be able to get a local track by PID'
-        );
-        for (const hiddenLocalTrackIndex of hiddenLocalTrackIndexes) {
-          const localTrack = localTracks[hiddenLocalTrackIndex];
-          if (localTrack.type === 'thread') {
-            shouldRemoveThreads.add(localTrack.threadIndex);
-          }
-        }
-      }
+      return {
+        shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
+          ? null
+          : committedRange,
+        shouldRemoveUrls: !checkedSharingOptions.includeUrls,
+        shouldRemoveThreadsWithScreenshots: new Set(
+          checkedSharingOptions.includeScreenshots
+            ? []
+            : profile.threads.map((_, threadIndex) => threadIndex)
+        ),
+        shouldRemoveThreads,
+        shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
+        shouldRemovePreferenceValues:
+          !checkedSharingOptions.includePreferenceValues,
+      };
     }
-
-    return {
-      shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
-        ? null
-        : committedRange,
-      shouldRemoveUrls: !checkedSharingOptions.includeUrls,
-      shouldRemoveThreadsWithScreenshots: new Set(
-        checkedSharingOptions.includeScreenshots
-          ? []
-          : profile.threads.map((_, threadIndex) => threadIndex)
-      ),
-      shouldRemoveThreads,
-      shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
-      shouldRemovePreferenceValues: !checkedSharingOptions.includePreferenceValues,
-    };
-  }
-);
+  );
 
 /**
  * The derived markers are needed for profile sanitization, but they are also
@@ -184,12 +187,13 @@ function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
  */
-export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelector(
-  getProfile,
-  getDerivedMarkerInfoForAllThreads,
-  getRemoveProfileInformation,
-  sanitizePII
-);
+export const getSanitizedProfile: Selector<SanitizeProfileResult> =
+  createSelector(
+    getProfile,
+    getDerivedMarkerInfoForAllThreads,
+    getRemoveProfileInformation,
+    sanitizePII
+  );
 
 /**
  * Computing the compressed data for a profile is a potentially slow operation. This
@@ -200,34 +204,32 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
  * Due to this memoization strategy, one copy of the data is retained in memory and
  * never freed.
  */
-export const getSanitizedProfileData: Selector<
-  Promise<Uint8Array>
-> = createSelector(getSanitizedProfile, ({ profile }) =>
-  compress(serializeProfile(profile))
-);
+export const getSanitizedProfileData: Selector<Promise<Uint8Array>> =
+  createSelector(getSanitizedProfile, ({ profile }) =>
+    compress(serializeProfile(profile))
+  );
 
 /**
  * The blob is needed for both the download size, and the ObjectURL.
  */
 export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
   getSanitizedProfileData,
-  async profileData =>
+  async (profileData) =>
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-export const getDownloadSize: Selector<
-  Promise<string>
-> = createSelector(getCompressedProfileBlob, blobPromise =>
-  blobPromise.then(blob => prettyBytes(blob.size))
+export const getDownloadSize: Selector<Promise<string>> = createSelector(
+  getCompressedProfileBlob,
+  (blobPromise) => blobPromise.then((blob) => prettyBytes(blob.size))
 );
 
-export const getUploadState: Selector<UploadState> = state =>
+export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;
 
-export const getUploadPhase: Selector<UploadPhase> = state =>
+export const getUploadPhase: Selector<UploadPhase> = (state) =>
   getUploadState(state).phase;
 
-export const getUploadGeneration: Selector<number> = state =>
+export const getUploadGeneration: Selector<number> = (state) =>
   getUploadState(state).generation;
 
 export const getUploadProgress: Selector<number> = createSelector(
@@ -240,15 +242,15 @@ export const getUploadProgress: Selector<number> = createSelector(
     clamp(uploadProgress, 0.1, 0.95)
 );
 
-export const getUploadError: Selector<Error | mixed> = state =>
+export const getUploadError: Selector<Error | mixed> = (state) =>
   getUploadState(state).error;
 
 export const getUploadProgressString: Selector<string> = createSelector(
   getUploadProgress,
-  progress => formatNumber(progress, 0, 0, 'percent')
+  (progress) => formatNumber(progress, 0, 0, 'percent')
 );
 
-export const getAbortFunction: Selector<() => void> = state =>
+export const getAbortFunction: Selector<() => void> = (state) =>
   getUploadState(state).abortFunction;
 
 export const getShouldSanitizeByDefault: Selector<boolean> = createSelector(
@@ -256,14 +258,14 @@ export const getShouldSanitizeByDefault: Selector<boolean> = createSelector(
   getShouldSanitizeByDefaultImpl
 );
 
-export const getPrePublishedState: Selector<null | State> = state =>
+export const getPrePublishedState: Selector<null | State> = (state) =>
   getPublishState(state).prePublishedState;
 
-export const getHasPrePublishedState: Selector<boolean> = state =>
+export const getHasPrePublishedState: Selector<boolean> = (state) =>
   Boolean(getPrePublishedState(state));
 
-export const getIsHidingStaleProfile: Selector<boolean> = state =>
+export const getIsHidingStaleProfile: Selector<boolean> = (state) =>
   getPublishState(state).isHidingStaleProfile;
 
-export const getHasSanitizedProfile: Selector<boolean> = state =>
+export const getHasSanitizedProfile: Selector<boolean> = (state) =>
   getPublishState(state).hasSanitizedProfile;

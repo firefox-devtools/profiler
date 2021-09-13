@@ -617,10 +617,8 @@ export class ActivityFillGraphQuerier {
     categoryLowerEdge: number,
     yPercentage: number,
   } {
-    const {
-      canvasPixelWidth,
-      canvasPixelHeight,
-    } = this.renderedComponentSettings;
+    const { canvasPixelWidth, canvasPixelHeight } =
+      this.renderedComponentSettings;
 
     if (
       deviceX < 0 ||
@@ -693,10 +691,8 @@ export class ActivityFillGraphQuerier {
     const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvasPixelWidth / rangeLength;
     const xPixel = ((time - rangeStart) * xPixelsPerMs) | 0;
-    const [
-      sampleRangeStart,
-      sampleRangeEnd,
-    ] = this._getSampleRangeContributingToPixelWhenSmoothed(xPixel);
+    const [sampleRangeStart, sampleRangeEnd] =
+      this._getSampleRangeContributingToPixelWhenSmoothed(xPixel);
 
     const sampleContributions = [];
     for (let sample = sampleRangeStart; sample < sampleRangeEnd; sample++) {
@@ -859,7 +855,7 @@ function _getCategoryFills(
     );
 
   const nestedFills: CategoryFill[][] = categoryIndexesByGravity.map(
-    categoryIndex => {
+    (categoryIndex) => {
       const categoryDrawStyle = categoryDrawStyles[categoryIndex];
       const buffer = percentageBuffers[categoryIndex];
       // For every category we draw four fills, for the four selection kinds:

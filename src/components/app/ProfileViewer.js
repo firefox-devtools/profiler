@@ -163,7 +163,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
 }
 
 export const ProfileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
     uploadProgress: getUploadProgress(state),

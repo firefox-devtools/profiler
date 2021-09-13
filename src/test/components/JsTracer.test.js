@@ -38,7 +38,7 @@ const GRAPH_WIDTH =
   GRAPH_BASE_WIDTH + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT;
 const GRAPH_HEIGHT = 300;
 
-describe('StackChart', function() {
+describe('StackChart', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);
@@ -131,7 +131,7 @@ describe('StackChart', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can change to a summary view', function() {
+  it('can change to a summary view', function () {
     const { getChangeJsTracerSummaryCheckbox, getState } = setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
@@ -141,7 +141,7 @@ describe('StackChart', function() {
     expect(getShowJsTracerSummary(getState())).toEqual(true);
   });
 
-  it('matches the snapshot for an inverted draw call', function() {
+  it('matches the snapshot for an inverted draw call', function () {
     const { getChangeJsTracerSummaryCheckbox } = setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,

@@ -30,7 +30,7 @@ declare class Window {
   ga?: GoogleAnalytics;
   // profiler.firefox.com and globals injected via frame scripts.
   geckoProfilerPromise: Promise<$GeckoProfiler>;
-  connectToGeckoProfiler: $GeckoProfiler => void;
+  connectToGeckoProfiler: ($GeckoProfiler) => void;
 
   // For debugging purposes, allow tooltips to persist. This aids in inspecting
   // the DOM structure.

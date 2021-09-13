@@ -18,9 +18,9 @@ const rl = createInterface({
   input: process.stdin,
 });
 
-rl.on('line', line => {
+rl.on('line', (line) => {
   const [origHead, head] = line.split(' ');
   checkWarnYarnChanged(origHead, head).then(
-    changed => changed && process.exit()
+    (changed) => changed && process.exit()
   );
 });

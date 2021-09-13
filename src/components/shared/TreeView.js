@@ -58,7 +58,7 @@ const TreeViewHeader = <DisplayData: Object>({
   }
   return (
     <div className="treeViewHeader">
-      {fixedColumns.map(col => (
+      {fixedColumns.map((col) => (
         <Localized
           id={col.titleL10nId}
           attrs={{ title: true }}
@@ -151,7 +151,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
         style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
-        {columns.map(col => {
+        {columns.map((col) => {
           const RenderComponent = col.component;
           const text = displayData[col.propName] || '';
 
@@ -277,16 +277,18 @@ class TreeViewRowScrolledColumns<
           } ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
           onClick={this._onToggleClick}
         />
-        {/* The category square is out of the treeview column element because we
+        {
+          /* The category square is out of the treeview column element because we
             reduce the opacity for that element in some cases (with the "dim"
             class).
           */
-        displayData.categoryColor && displayData.categoryName ? (
-          <span
-            className={`colored-square category-color-${displayData.categoryColor}`}
-            title={displayData.categoryName}
-          />
-        ) : null}
+          displayData.categoryColor && displayData.categoryName ? (
+            <span
+              className={`colored-square category-color-${displayData.categoryColor}`}
+              title={displayData.categoryName}
+            />
+          ) : null
+        }
         <span
           className={classNames(
             'treeViewRowColumn',
@@ -347,10 +349,10 @@ type TreeViewProps<DisplayData> = {|
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
-  +onSelectionChange: NodeIndex => mixed,
-  +onRightClickSelection?: NodeIndex => mixed,
-  +onEnterKey?: NodeIndex => mixed,
-  +onDoubleClick?: NodeIndex => mixed,
+  +onSelectionChange: (NodeIndex) => mixed,
+  +onRightClickSelection?: (NodeIndex) => mixed,
+  +onEnterKey?: (NodeIndex) => mixed,
+  +onDoubleClick?: (NodeIndex) => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +onKeyDown?: (SyntheticKeyboardEvent<>) => void,
@@ -582,7 +584,7 @@ export class TreeView<DisplayData: Object> extends React.PureComponent<
     const selected = this.props.selectedNodeId;
     const visibleRows = this._getAllVisibleRows();
     const selectedRowIndex = visibleRows.findIndex(
-      nodeId => nodeId === selected
+      (nodeId) => nodeId === selected
     );
 
     if (selected === null || selectedRowIndex === -1) {

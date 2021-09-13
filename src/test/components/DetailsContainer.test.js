@@ -19,7 +19,7 @@ jest.mock('../../components/app/Details', () => ({
   Details: 'details-viewer',
 }));
 
-describe('app/DetailsContainer', function() {
+describe('app/DetailsContainer', function () {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
       A  A  A
@@ -31,7 +31,7 @@ describe('app/DetailsContainer', function() {
 
     const store = storeWithProfile(profile);
     // Make sure the sidebar is visible in all tabs
-    tabSlugs.forEach(tabSlug =>
+    tabSlugs.forEach((tabSlug) =>
       store.dispatch(changeSidebarOpenState(tabSlug, true))
     );
     return { store };

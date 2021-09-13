@@ -533,7 +533,7 @@ export function stateFromLocation(
     profile
   );
 
-  const pathParts = pathname.split('/').filter(d => d);
+  const pathParts = pathname.split('/').filter((d) => d);
   const dataSource = ensureIsValidDataSource(pathParts[0]);
   const selectedThreadsList: ThreadIndex[] =
     // Either a single thread index, or a list separated by commas.
@@ -632,10 +632,10 @@ export function stateFromLocation(
           query.localTrackOrderByPid
         ),
         legacyThreadOrder: query.threadOrder
-          ? query.threadOrder.split('-').map(index => Number(index))
+          ? query.threadOrder.split('-').map((index) => Number(index))
           : null,
         legacyHiddenThreads: query.hiddenThreads
-          ? query.hiddenThreads.split('-').map(index => Number(index))
+          ? query.hiddenThreads.split('-').map((index) => Number(index))
           : null,
       },
       activeTab: {
@@ -702,7 +702,7 @@ function convertHiddenLocalTracksByPidFromString(
     const hiddenTracksString = stringPart.slice(pidString.length + 1);
     const pid = Number(pidString);
     const indexes = decodeUintArrayFromUrlComponent(hiddenTracksString);
-    if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
+    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
       hiddenLocalTracksByPid.set(pid, new Set(indexes));
     }
   }
@@ -747,7 +747,7 @@ function convertLocalTrackOrderByPidFromString(
     const trackOrderString = stringPart.slice(pidString.length + 1);
     const pid = Number(pidString);
     const indexes = decodeUintArrayFromUrlComponent(trackOrderString);
-    if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
+    if (!isNaN(pid) && indexes.every((n) => !isNaN(n))) {
       localTrackOrderByPid.set(pid, indexes);
     }
   }
@@ -865,25 +865,26 @@ const _upgraders = {
     if (processedLocation.query.callTreeFilters) {
       // Before: "callTreeFilters=prefix-0KV4KV5KV61KV7KV8K~postfixjs-xFFpUMl"
       // After: "transforms=f-combined-0KV4KV5KV61KV7KV8K~f-js-xFFpUMl-i"
-      processedLocation.query.transforms = processedLocation.query.callTreeFilters
-        .split('~')
-        .map(s => {
-          const [type, val] = s.split('-');
-          switch (type) {
-            case 'prefix':
-              return `f-combined-${val}`;
-            case 'prefixjs':
-              return `f-js-${val}`;
-            case 'postfix':
-              return `f-combined-${val}-i`;
-            case 'postfixjs':
-              return `f-js-${val}-i`;
-            default:
-              return undefined;
-          }
-        })
-        .filter(f => f)
-        .join('~');
+      processedLocation.query.transforms =
+        processedLocation.query.callTreeFilters
+          .split('~')
+          .map((s) => {
+            const [type, val] = s.split('-');
+            switch (type) {
+              case 'prefix':
+                return `f-combined-${val}`;
+              case 'prefixjs':
+                return `f-js-${val}`;
+              case 'postfix':
+                return `f-combined-${val}-i`;
+              case 'postfixjs':
+                return `f-js-${val}-i`;
+              default:
+                return undefined;
+            }
+          })
+          .filter((f) => f)
+          .join('~');
       delete processedLocation.query.callTreeFilters;
     }
   },
@@ -978,7 +979,7 @@ const _upgraders = {
 
     query.range = query.range
       .split('~')
-      .map(committedRange => {
+      .map((committedRange) => {
         // This regexp captures two (positive or negative) numbers, separated by a `_`.
         const m = committedRange.match(/^(-?[0-9.]+)_(-?[0-9.]+)$/);
         if (!m) {
@@ -1007,13 +1008,13 @@ const _upgraders = {
     if (query.globalTrackOrder) {
       const globalTrackOrder = (query.globalTrackOrder: string)
         .split('-')
-        .map(s => +s);
+        .map((s) => +s);
       query.globalTrackOrder =
         encodeUintArrayForUrlComponent(globalTrackOrder) || undefined;
     }
     if (query.hiddenGlobalTracks) {
       const hiddenGlobalTracks = new Set(
-        (query.hiddenGlobalTracks: string).split('-').map(s => +s)
+        (query.hiddenGlobalTracks: string).split('-').map((s) => +s)
       );
       query.hiddenGlobalTracks =
         encodeUintSetForUrlComponent(hiddenGlobalTracks) || undefined;
@@ -1021,9 +1022,9 @@ const _upgraders = {
     if (query.hiddenLocalTracksByPid) {
       query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid: string)
         .split('~')
-        .map(pidAndTracks => {
+        .map((pidAndTracks) => {
           const [pid, ...tracks] = pidAndTracks.split('-');
-          const hiddenTracks = new Set(tracks.map(s => +s));
+          const hiddenTracks = new Set(tracks.map((s) => +s));
           return `${pid}-${encodeUintSetForUrlComponent(hiddenTracks)}`;
         })
         .join('~');
@@ -1031,15 +1032,15 @@ const _upgraders = {
     if (query.localTrackOrderByPid) {
       query.localTrackOrderByPid = (query.localTrackOrderByPid: string)
         .split('~')
-        .map(pidAndTracks => {
+        .map((pidAndTracks) => {
           const [pid, ...tracks] = pidAndTracks.split('-');
-          const trackOrder = tracks.map(s => +s);
+          const trackOrder = tracks.map((s) => +s);
           return `${pid}-${encodeUintArrayForUrlComponent(trackOrder)}`;
         })
         .join('~');
     }
     if (query.thread) {
-      const selectedThreads = new Set(query.thread.split(',').map(n => +n));
+      const selectedThreads = new Set(query.thread.split(',').map((n) => +n));
       query.thread = encodeUintSetForUrlComponent(selectedThreads);
     }
 

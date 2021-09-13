@@ -30,7 +30,7 @@ describe('app/CurrentProfileUploadedInformationLoader', () => {
     );
 
     function nextTick() {
-      return new Promise(resolve => setTimeout(resolve));
+      return new Promise((resolve) => setTimeout(resolve));
     }
 
     function navigateToHash(hash: string) {

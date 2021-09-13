@@ -16,7 +16,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
 
-describe('thread merging', function() {
+describe('thread merging', function () {
   function setup() {
     const {
       profile,
@@ -42,42 +42,42 @@ describe('thread merging', function() {
     return { ...store, func };
   }
 
-  it('can merge threads when multiple threads are selected', function() {
+  it('can merge threads when multiple threads are selected', function () {
     const { dispatch, getState } = setup();
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - B (total: 4, self: —)',
-      '    - C (total: 4, self: 2)',
-      '      - D (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - B (total: 4, self: —)',
+        '    - C (total: 4, self: 2)',
+        '      - D (total: 2, self: 2)',
+      ]
+    );
 
     dispatch(changeSelectedThreads(new Set([0, 1])));
 
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 6, self: —)',
-      '  - B (total: 6, self: —)',
-      '    - C (total: 6, self: 2)',
-      '      - D (total: 4, self: 2)',
-      '        - E (total: 2, self: 2)',
-      '- F (total: 2, self: —)',
-      '  - G (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 6, self: —)',
+        '  - B (total: 6, self: —)',
+        '    - C (total: 6, self: 2)',
+        '      - D (total: 4, self: 2)',
+        '        - E (total: 2, self: 2)',
+        '- F (total: 2, self: —)',
+        '  - G (total: 2, self: 2)',
+      ]
+    );
   });
 
-  it('can use thread keys for transforms', function() {
+  it('can use thread keys for transforms', function () {
     const { dispatch, getState, func } = setup();
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - B (total: 4, self: —)',
-      '    - C (total: 4, self: 2)',
-      '      - D (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - B (total: 4, self: —)',
+        '    - C (total: 4, self: 2)',
+        '      - D (total: 2, self: 2)',
+      ]
+    );
 
     // Apply a transform:
     dispatch(
@@ -88,28 +88,28 @@ describe('thread merging', function() {
     );
 
     // Verify the call tree is modified.
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - C (total: 4, self: 2)',
-      '    - D (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - C (total: 4, self: 2)',
+        '    - D (total: 2, self: 2)',
+      ]
+    );
 
     // Now select multiple threads
     dispatch(changeSelectedThreads(new Set([0, 1])));
 
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 6, self: —)',
-      '  - B (total: 6, self: —)',
-      '    - C (total: 6, self: 2)',
-      '      - D (total: 4, self: 2)',
-      '        - E (total: 2, self: 2)',
-      '- F (total: 2, self: —)',
-      '  - G (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 6, self: —)',
+        '  - B (total: 6, self: —)',
+        '    - C (total: 6, self: 2)',
+        '      - D (total: 4, self: 2)',
+        '        - E (total: 2, self: 2)',
+        '- F (total: 2, self: —)',
+        '  - G (total: 2, self: 2)',
+      ]
+    );
 
     dispatch(
       addTransformToStack(getSelectedThreadsKey(getState()), {
@@ -118,34 +118,34 @@ describe('thread merging', function() {
       })
     );
 
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 6, self: —)',
-      '  - B (total: 6, self: 2)',
-      '    - D (total: 4, self: 2)',
-      '      - E (total: 2, self: 2)',
-      '- F (total: 2, self: —)',
-      '  - G (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 6, self: —)',
+        '  - B (total: 6, self: 2)',
+        '    - D (total: 4, self: 2)',
+        '      - E (total: 2, self: 2)',
+        '- F (total: 2, self: —)',
+        '  - G (total: 2, self: 2)',
+      ]
+    );
 
     dispatch(changeSelectedThreads(new Set([0])));
 
     // It retains the old transform.
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - C (total: 4, self: 2)',
-      '    - D (total: 2, self: 2)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - C (total: 4, self: 2)',
+        '    - D (total: 2, self: 2)',
+      ]
+    );
   });
 
-  it('respects the ThreadViewOptions by using a ThreadsKey, with selected call nodes', function() {
+  it('respects the ThreadViewOptions by using a ThreadsKey, with selected call nodes', function () {
     const { dispatch, getState, func } = setup();
 
     // Some simple helpers to make this test more terse:
-    const changePath = path =>
+    const changePath = (path) =>
       dispatch(changeSelectedCallNode(getSelectedThreadsKey(getState()), path));
     const getPath = () =>
       selectedThreadSelectors.getSelectedCallNodePath(getState());

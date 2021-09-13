@@ -382,7 +382,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
 }
 
 export const ServiceWorkerManager = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),
     symbolicationStatus: getSymbolicationStatus(state),

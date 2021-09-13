@@ -96,7 +96,7 @@ export const TimelineActiveTabResourcesPanel = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),
     resourcesThreadsKey: getActiveTabResourcesThreadsKey(state),
   }),

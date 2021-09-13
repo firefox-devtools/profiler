@@ -106,7 +106,7 @@ function _toStructOfArrays(geckoTable: any): any {
         'fieldIndex must be a number in the Gecko profile table.'
       );
     }
-    result[fieldName] = geckoTable.data.map(entry =>
+    result[fieldName] = geckoTable.data.map((entry) =>
       fieldIndex in entry ? entry[fieldIndex] : null
     );
   }
@@ -221,9 +221,8 @@ export function extractFuncsAndResourcesFromFrameLocations(
     const locationIndex = frameLocations[frameIndex];
     const locationString = stringTable.getString(locationIndex);
     const relevantForJS = relevantForJSPerFrame[frameIndex];
-    const info = extractionInfo.stringToNewFuncIndexAndFrameAddress.get(
-      locationString
-    );
+    const info =
+      extractionInfo.stringToNewFuncIndexAndFrameAddress.get(locationString);
     if (info !== undefined) {
       // The location string was already processed.
       const { funcIndex, frameAddress } = info;
@@ -297,13 +296,8 @@ function _extractUnsymbolicatedFunction(
   if (!locationString.startsWith('0x')) {
     return null;
   }
-  const {
-    libs,
-    libToResourceIndex,
-    resourceTable,
-    funcTable,
-    stringTable,
-  } = extractionInfo;
+  const { libs, libToResourceIndex, resourceTable, funcTable, stringTable } =
+    extractionInfo;
 
   let resourceIndex = -1;
   let addressRelativeToLib: Address = -1;
@@ -459,12 +453,8 @@ function _extractJsFunction(
     return null;
   }
 
-  const {
-    funcTable,
-    stringTable,
-    resourceTable,
-    originToResourceIndex,
-  } = extractionInfo;
+  const { funcTable, stringTable, resourceTable, originToResourceIndex } =
+    extractionInfo;
 
   // Case 4: JS function - A match was found in the location string in the format
   // of a JS function.
@@ -533,7 +523,7 @@ function _processFrameTable(
   frameAddresses: (Address | null)[]
 ): FrameTable {
   return {
-    address: frameAddresses.map(a => a ?? -1),
+    address: frameAddresses.map((a) => a ?? -1),
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
@@ -557,7 +547,7 @@ function _processStackTable(
   categories: CategoryList
 ): StackTable {
   // Compute a non-null category for every stack
-  const defaultCategory = categories.findIndex(c => c.color === 'grey') || 0;
+  const defaultCategory = categories.findIndex((c) => c.color === 'grey') || 0;
   const categoryColumn = new Array(geckoStackTable.length);
   const subcategoryColumn = new Array(geckoStackTable.length);
   for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
@@ -638,16 +628,15 @@ function _convertPayloadStackToIndex(
  *  Extract JS allocations into the JsAllocationsTable.
  *  Extract Native allocations into the NativeAllocationsTable.
  */
-function _processMarkers(
-  geckoMarkers: GeckoMarkerStruct
-): {|
+function _processMarkers(geckoMarkers: GeckoMarkerStruct): {|
   markers: RawMarkerTable,
   jsAllocations: JsAllocationsTable | null,
   nativeAllocations: NativeAllocationsTable | null,
 |} {
   const markers = getEmptyRawMarkerTable();
   const jsAllocations = getEmptyJsAllocationsTable();
-  const inProgressNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+  const inProgressNativeAllocations =
+    getEmptyUnbalancedNativeAllocationsTable();
   const memoryAddress: number[] = [];
   const threadId: number[] = [];
 
@@ -894,7 +883,7 @@ function _processCounters(
 ): Counter[] {
   const geckoCounters = geckoProfile.counters;
   const mainThread = geckoProfile.threads.find(
-    thread => thread.name === 'GeckoMain'
+    (thread) => thread.name === 'GeckoMain'
   );
 
   if (!mainThread || !geckoCounters) {
@@ -905,7 +894,7 @@ function _processCounters(
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
   );
 
   if (mainThreadIndex === -1) {
@@ -923,7 +912,7 @@ function _processCounters(
         return result;
       }
 
-      const sampleGroups = sample_groups.map(sampleGroup => ({
+      const sampleGroups = sample_groups.map((sampleGroup) => ({
         id: sampleGroup.id,
         samples: adjustTableTimestamps(
           _toStructOfArrays(sampleGroup.samples),
@@ -962,7 +951,7 @@ function _processProfilerOverhead(
   const geckoProfilerOverhead: ?GeckoProfilerOverhead =
     geckoProfile.profilerOverhead;
   const mainThread = geckoProfile.threads.find(
-    thread => thread.name === 'GeckoMain'
+    (thread) => thread.name === 'GeckoMain'
   );
 
   if (!mainThread || !geckoProfilerOverhead) {
@@ -973,7 +962,7 @@ function _processProfilerOverhead(
   // The gecko profile's process don't map to the final thread list. Use the stable
   // thread list to look up the thread index for the main thread in this profile.
   const mainThreadIndex = stableThreadList.findIndex(
-    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+    (thread) => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
   );
 
   if (mainThreadIndex === -1) {
@@ -1018,18 +1007,14 @@ function _processThread(
   const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
-  const {
-    funcTable,
-    resourceTable,
-    frameFuncs,
-    frameAddresses,
-  } = extractFuncsAndResourcesFromFrameLocations(
-    geckoFrameStruct.location,
-    geckoFrameStruct.relevantForJS,
-    stringTable,
-    libs,
-    extensions
-  );
+  const { funcTable, resourceTable, frameFuncs, frameAddresses } =
+    extractFuncsAndResourcesFromFrameLocations(
+      geckoFrameStruct.location,
+      geckoFrameStruct.relevantForJS,
+      stringTable,
+      libs,
+      extensions
+    );
   const nativeSymbols = getEmptyNativeSymbolTable();
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
@@ -1041,9 +1026,8 @@ function _processThread(
     frameTable,
     categories
   );
-  const { markers, jsAllocations, nativeAllocations } = _processMarkers(
-    geckoMarkers
-  );
+  const { markers, jsAllocations, nativeAllocations } =
+    _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
   const newThread: Thread = {
@@ -1129,7 +1113,7 @@ export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
 ): Table {
   return {
     ...table,
-    time: table.time.map(time => time + delta),
+    time: table.time.map((time) => time + delta),
   };
 }
 
@@ -1146,7 +1130,7 @@ function _adjustJsTracerTimestamps(
   const deltaMicroseconds = delta * 1000;
   return {
     ...jsTracer,
-    timestamps: jsTracer.timestamps.map(time => time + deltaMicroseconds),
+    timestamps: jsTracer.timestamps.map((time) => time + deltaMicroseconds),
   };
 }
 
@@ -1165,7 +1149,7 @@ export function adjustProfilerOverheadTimestamps<
     ...table,
     // Converting microseconds to milliseconds here since we use milliseconds
     // inside the tracks.
-    time: table.time.map(time => time / 1000 + delta),
+    time: table.time.map((time) => time / 1000 + delta),
   };
 }
 
@@ -1186,7 +1170,7 @@ export function adjustMarkerTimestamps(
     ...markers,
     startTime: markers.startTime.map(adjustTimeIfNotNull),
     endTime: markers.endTime.map(adjustTimeIfNotNull),
-    data: markers.data.map(data => {
+    data: markers.data.map((data) => {
       if (!data) {
         return data;
       }
@@ -1321,7 +1305,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
-      subprocessProfile.threads.map(thread => {
+      subprocessProfile.threads.map((thread) => {
         const newThread: Thread = _processThread(
           thread,
           subprocessProfile,
@@ -1553,9 +1537,8 @@ export async function unserializeProfileOfArbitraryFormat(
     // At this point, we expect arbitraryFormat to contain a JSON object of some profile format.
     const json = arbitraryFormat;
 
-    const processedProfile = attemptToUpgradeProcessedProfileThroughMutation(
-      json
-    );
+    const processedProfile =
+      attemptToUpgradeProcessedProfileThroughMutation(json);
     if (processedProfile) {
       return _unserializeProfile(processedProfile);
     }

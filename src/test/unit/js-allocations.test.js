@@ -20,7 +20,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
  * Test that the JsAllocationTable structure can by used with all of the call tree
  * functionality, and that it obeys all of the transformation pipeline.
  */
-describe('JS allocation call trees', function() {
+describe('JS allocation call trees', function () {
   function setup() {
     const { profile, funcNamesDict } = getProfileWithJsAllocations();
 
@@ -30,7 +30,7 @@ describe('JS allocation call trees', function() {
     return { ...store, funcNamesDict };
   }
 
-  it('can create a call tree from JS allocations', function() {
+  it('can create a call tree from JS allocations', function () {
     const { getState } = setup();
     const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -47,7 +47,7 @@ describe('JS allocation call trees', function() {
     ]);
   });
 
-  it('can search the allocations', function() {
+  it('can search the allocations', function () {
     const { getState, dispatch } = setup();
     dispatch(changeCallTreeSearchString('H'));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -62,7 +62,7 @@ describe('JS allocation call trees', function() {
     ]);
   });
 
-  it('can invert the allocation tree', function() {
+  it('can invert the allocation tree', function () {
     const { getState, dispatch } = setup();
     dispatch(changeInvertCallstack(true));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -86,7 +86,7 @@ describe('JS allocation call trees', function() {
     ]);
   });
 
-  it('can use an implementation filter', function() {
+  it('can use an implementation filter', function () {
     const { getState, dispatch } = setup();
     dispatch(changeImplementationFilter('js'));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -104,7 +104,7 @@ describe('JS allocation call trees', function() {
    * through the same stack updating path. This test only checks that one is correctly
    * wired up.
    */
-  it('can apply a call tree transform', function() {
+  it('can apply a call tree transform', function () {
     const {
       getState,
       dispatch,
@@ -131,7 +131,7 @@ describe('JS allocation call trees', function() {
     ]);
   });
 
-  it('will apply a committed range selection', function() {
+  it('will apply a committed range selection', function () {
     const { getState, dispatch } = setup();
 
     dispatch(commitRange(0, 1.5));
@@ -148,7 +148,7 @@ describe('JS allocation call trees', function() {
     ]);
   });
 
-  it('will apply a preview selection', function() {
+  it('will apply a preview selection', function () {
     const { getState, dispatch } = setup();
 
     dispatch(commitRange(0, 1.5));

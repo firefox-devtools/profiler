@@ -84,7 +84,7 @@ class CallTreeImpl extends PureComponent<Props> {
     titleL10nId: '',
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
-  _takeTreeViewRef = treeView => (this._treeView = treeView);
+  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
 
   /**
    * Call Trees can have different types of "weights" for the data. Choose the
@@ -194,7 +194,7 @@ class CallTreeImpl extends PureComponent<Props> {
     const { callNodeInfo, threadsKey, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
       threadsKey,
-      newExpandedCallNodeIndexes.map(callNodeIndex =>
+      newExpandedCallNodeIndexes.map((callNodeIndex) =>
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
@@ -306,15 +306,12 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-      state
-    ),
-    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-      state
-    ),
-    expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
-      state
-    ),
+    selectedCallNodeIndex:
+      selectedThreadSelectors.getSelectedCallNodeIndex(state),
+    rightClickedCallNodeIndex:
+      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
+    expandedCallNodeIndexes:
+      selectedThreadSelectors.getExpandedCallNodeIndexes(state),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
@@ -322,9 +319,8 @@ export const CallTree = explicitConnect<{||}, StateProps, DispatchProps>({
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
-    callNodeMaxDepth: selectedThreadSelectors.getFilteredCallNodeMaxDepth(
-      state
-    ),
+    callNodeMaxDepth:
+      selectedThreadSelectors.getFilteredCallNodeMaxDepth(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
   }),
   mapDispatchToProps: {

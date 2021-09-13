@@ -35,9 +35,8 @@ export const tabSlugs: $ReadOnlyArray<TabSlug> =
  * This array contains the same data as tabsWithTitleL10nId above, but in an ordered
  * array so that we can use it directly in some of our components.
  */
-export const tabsWithTitleL10nIdArray: $ReadOnlyArray<TabsWithTitleL10nId> = tabSlugs.map(
-  tabSlug => ({
+export const tabsWithTitleL10nIdArray: $ReadOnlyArray<TabsWithTitleL10nId> =
+  tabSlugs.map((tabSlug) => ({
     name: tabSlug,
     title: tabsWithTitleL10nId[tabSlug],
-  })
-);
+  }));

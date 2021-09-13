@@ -68,11 +68,11 @@ const MAX_STACKING_DEPTH = 300;
  *   |______________|_____________________________|
  */
 export function getMarkerTimingAndBuckets(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  getLabel: MarkerIndex => string,
+  getLabel: (MarkerIndex) => string,
   categories: ?CategoryList
 ): MarkerTimingAndBuckets {
   // Each marker type will have it's own timing information, later collapse these into
@@ -192,9 +192,9 @@ export function getMarkerTimingAndBuckets(
 }
 
 export function getMarkerTiming(
-  getMarker: MarkerIndex => Marker,
+  getMarker: (MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
-  getLabel: MarkerIndex => string
+  getLabel: (MarkerIndex) => string
 ): MarkerTiming[] {
   // Flow didn't understand the filter operation here, so filter out bucket names
   // imperatively.
