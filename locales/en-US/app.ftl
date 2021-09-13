@@ -611,8 +611,8 @@ StackSettings--panel-search =
 
 SourceView--loading-url = Waiting for { $host }…
 SourceView--experimental-source-view-cannot-obtain-source =
+    Could not obtain the source code for { $path }.
     The source view is experimental and can only obtain source code in limited cases.
-     It currently cannot obtain source code for { $path }.
 SourceView--network-error-when-obtaining-source =
     There was a network error when fetching the URL { $url }: { $networkErrorMessage }
 SourceView--tabs =

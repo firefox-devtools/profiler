@@ -87,8 +87,8 @@ function SourceStatusOverlay({ status }: SourceStatusOverlayProps) {
               vars={{ path }}
             >
               <div className="sourceStatusOverlay error">
-                {`The source view is experimental and can only obtain source code in limited cases.
-                  It currently cannot obtain source code for the file ${path}.`}
+                {`Could not obtain the source code for ${path}.
+                  The source view is experimental and can only obtain source code in limited cases.`}
               </div>
             </Localized>
           );

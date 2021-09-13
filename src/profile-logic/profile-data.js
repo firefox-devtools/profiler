@@ -11,6 +11,8 @@ import {
   resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
+  getEmptyStackTable,
+  shallowCloneFrameTable,
 } from './data-structures';
 import {
   INSTANT,
@@ -70,6 +72,9 @@ import type {
   EventDelayInfo,
   ThreadsKey,
   resourceTypeEnum,
+  MarkerPayload,
+  CauseBacktrace,
+  Address,
 } from 'firefox-profiler/types';
 import type { UniqueStringArray } from 'firefox-profiler/utils/unique-string-array';
 
@@ -3346,4 +3351,326 @@ export function getLineTimings(
     }
   }
   return { totalLineHits, selfLineHits };
+}
+
+export type StackReferences = {|
+  // Stacks which were sampled by sampling. For native stacks, the
+  // corresponding frame address was observed as a value of the instruction
+  // pointer register.
+  samplingSelfStacks: Set<IndexIntoStackTable>,
+  // Stacks which were obtained during a synchronous backtrace. For
+  // native stacks, the corresponding frame address is *not* an observed
+  // value of the instruction pointer, because synchronous backtraces have
+  // a few frames removed from the end of the stack, which includes the
+  // frame with the instruction pointer. This difference only matters for
+  // "return address nudging" which happens at the end of profile processing.
+  syncBacktraceSelfStacks: Set<IndexIntoStackTable>,
+|};
+
+/**
+ * Find the sets of stacks that are referenced as "self" stacks by
+ * various tables in the thread.
+ * The stacks' ancestor nodes are not included (except for any ancestor
+ * nodes that had self time because, i.e. were also referenced directly).
+ * The returned sets are split into two groups: Stacks referenced by
+ * samples, and stacks referenced by sync backtraces (e.g. marker causes).
+ * The two have slightly different properties, see the type definition.
+ */
+export function gatherStackReferences(thread: Thread): StackReferences {
+  const samplingSelfStacks = new Set();
+  const syncBacktraceSelfStacks = new Set();
+
+  const { samples, markers, jsAllocations, nativeAllocations } = thread;
+
+  // Samples
+  for (let i = 0; i < samples.length; i++) {
+    const stack = samples.stack[i];
+    if (stack !== null) {
+      samplingSelfStacks.add(stack);
+    }
+  }
+
+  // Markers
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (data && data.cause) {
+      const stack = data.cause.stack;
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  // JS allocations
+  if (jsAllocations !== undefined) {
+    for (let i = 0; i < jsAllocations.length; i++) {
+      const stack = jsAllocations.stack[i];
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  // Native allocations
+  if (nativeAllocations !== undefined) {
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const stack = nativeAllocations.stack[i];
+      if (stack !== null) {
+        syncBacktraceSelfStacks.add(stack);
+      }
+    }
+  }
+
+  return { samplingSelfStacks, syncBacktraceSelfStacks };
+}
+
+/**
+ * Create a new thread with all stack references translated via the given
+ * map. The map maps IndexIntoOldStackTable -> IndexIntoNewStackTable.
+ * Only a subset of entries are read from the map: The same stacks that
+ * gatherStackReferences found in the thread. All other entries are ignored
+ * and can have arbitrary values (e.g. 0).
+ * With the exception of the caller which does the initial return address
+ * nudging, most callers will want to pass the same map to both map arguments.
+ */
+export function replaceStackReferences(
+  thread: Thread,
+  mapForSampleSelfStacks: Uint32Array,
+  mapForBacktraceSelfStacks: Uint32Array
+): Thread {
+  const {
+    samples: oldSamples,
+    markers: oldMarkers,
+    jsAllocations: oldJsAllocations,
+    nativeAllocations: oldNativeAllocations,
+  } = thread;
+
+  // Samples
+  const samples = {
+    ...oldSamples,
+    stack: oldSamples.stack.map(oldStackIndex =>
+      oldStackIndex === null ? null : mapForSampleSelfStacks[oldStackIndex]
+    ),
+  };
+
+  // Markers
+  function replaceStackReferenceInPayload(
+    oldData: MarkerPayload
+  ): MarkerPayload {
+    if (oldData && 'cause' in oldData && oldData.cause) {
+      // Replace the cause with the right stack index.
+      // Use (...: any) because our current version of Flow has trouble with
+      // the object spread operator.
+      const newStack = mapForBacktraceSelfStacks[oldData.cause.stack];
+      return ({
+        ...oldData,
+        cause: {
+          ...oldData.cause,
+          stack: newStack,
+        },
+      }: any);
+    }
+    return oldData;
+  }
+  const markers = {
+    ...oldMarkers,
+    data: oldMarkers.data.map(replaceStackReferenceInPayload),
+  };
+
+  // JS allocations
+  let jsAllocations;
+  if (oldJsAllocations !== undefined) {
+    jsAllocations = {
+      ...oldJsAllocations,
+      stack: oldJsAllocations.stack.map(oldStackIndex =>
+        oldStackIndex === null ? null : mapForBacktraceSelfStacks[oldStackIndex]
+      ),
+    };
+  }
+
+  // Native allocations
+  let nativeAllocations;
+  if (oldNativeAllocations !== undefined) {
+    nativeAllocations = {
+      ...oldNativeAllocations,
+      stack: oldNativeAllocations.stack.map(oldStackIndex =>
+        oldStackIndex === null ? null : mapForBacktraceSelfStacks[oldStackIndex]
+      ),
+    };
+  }
+
+  return { ...thread, samples, markers, jsAllocations, nativeAllocations };
+}
+
+/**
+ * Creates a new thread with modified frame and stack tables for "nudged" return addresses:
+ * All return addresses are moved "backwards" by one byte, to point into the calling
+ * instruction. This allows symbolication to obtain accurate line numbers and inline frames
+ * for these addresses.
+ * Read on for the background behind all of this.
+ *
+ *
+ *
+ * Top of stack:
+ *   _LZ4F_localSaveDict:
+ *     57c10  push  rbp
+ *     57c11  mov   rbp, rsp
+ *     57c14  mov   rax, rdi
+ * --> 57c17  cmp   dword [rdi+0x20], 0x2    ; instruction pointer, address maps to line 808
+ *     57c1b  mov   rdi, qword [rdi+0xa8]
+ *     57c22  jle   loc_57c33
+ *     [...]
+ *
+ * Caller:
+ *   _LZ4F_compressUpdate:
+ *     [...]
+ *     5782d  jmp   loc_5765f
+ *     57832  mov   rdi, rbx
+ *     57835  call  _LZ4F_localSaveDict       ; call instruction, address maps to line 897
+ * --> 5783a  test  eax, eax                  ; return address,   address maps to line 898
+ *     5783c  mov   rcx, 0xffffffffffffffff
+ *     [...]
+ *
+ * 893    if ((cctxPtr->prefs.frameInfo.blockMode==LZ4F_blockLinked) && (lastBlockCompressed==fromSrcBuffer)) {
+ * 894        if (compressOptionsPtr->stableSrc) {
+ * 895            cctxPtr->tmpIn = cctxPtr->tmpBuff;
+ * 896        } else {
+ * 897            int const realDictSize = LZ4F_localSaveDict(cctxPtr);   // <-- here is the call
+ * 898            if (realDictSize==0) return err0r(LZ4F_ERROR_GENERIC);
+ * 899            cctxPtr->tmpIn = cctxPtr->tmpBuff + realDictSize;
+ * 900        }
+ * 901    }
+ *
+ */
+
+// Ambiguity in stack table from gecko profile format: return address or value of the instruction pointer register?
+// Crucial for accurate per-instruction info: line numbers, inline stacks
+// Without nudging, all callers show time spent in the instruction after the call, which could be in a totally unrelated line with a totally unrelated inline stack
+// Example assembly with —> instruction after call
+// Is one byte enough? Why
+// Also say something about arm 32
+export function nudgeReturnAddresses(thread: Thread): Thread {
+  // Make a new stack table where 1 byte is subtracted from all return addresses,
+  // i.e. the addresses of all frames that are used as stack prefixes.
+  // But not from the addresses of the top of the stack (instruction pointer).
+  // Frames that are used as both prefixes and as sampling self stacks need to be duplicated.
+  const { samplingSelfStacks, syncBacktraceSelfStacks } = gatherStackReferences(
+    thread
+  );
+
+  const { stackTable, frameTable } = thread;
+  const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
+  const ipFrames = new Set();
+  for (const stack of samplingSelfStacks) {
+    const frame = stackTable.frame[stack];
+    const ipAddress = frameTable.address[frame];
+    if (ipAddress !== null) {
+      ipFrames.add(frame);
+      oldIpFrameToNewIpFrame[frame] = frame;
+    }
+  }
+
+  const returnAddressFrames: Map<IndexIntoFrameTable, Address> = new Map();
+  const prefixStacks: Set<IndexIntoStackTable> = new Set();
+  for (const stack of syncBacktraceSelfStacks) {
+    const frame = stackTable.frame[stack];
+    const returnAddress = frameTable.address[frame];
+    if (returnAddress !== null) {
+      returnAddressFrames.set(frame, returnAddress);
+    }
+  }
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const prefix = stackTable.prefix[stack];
+    if (prefix === null || prefixStacks.has(prefix)) {
+      continue;
+    }
+    prefixStacks.add(prefix);
+    const prefixFrame = stackTable.frame[prefix];
+    const prefixAddress = frameTable.address[prefixFrame];
+    if (prefixAddress !== null) {
+      returnAddressFrames.set(prefixFrame, prefixAddress);
+    }
+  }
+
+  if (
+    ipFrames.size === 0 &&
+    returnAddressFrames.size === 0
+  ) {
+    return thread;
+  }
+
+  // Create the new frame table.
+  // Frames that are used as both prefixes and as sampling self stacks need to be duplicated.
+  const newFrameTable = shallowCloneFrameTable(frameTable);
+  // Iterate over all *return address* frames.
+  for (const [frame, address] of returnAddressFrames) {
+    if (ipFrames.has(frame)) {
+      // This address of this frame was observed both as a return address and as
+      // an instruction pointer register value. We have to duplicate this frame so
+      // so that we can make a distinction between the two uses.
+      // The new frame will be used as the ipFrame, and the old frame will be used
+      // as the return address frame (and have its address nudged).
+      const newIpFrame = newFrameTable.length;
+      newFrameTable.address.push(address);
+      newFrameTable.category.push(frameTable.category[frame]);
+      newFrameTable.subcategory.push(frameTable.subcategory[frame]);
+      newFrameTable.func.push(frameTable.func[frame]);
+      newFrameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+      newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+      newFrameTable.implementation.push(frameTable.implementation[frame]);
+      newFrameTable.line.push(frameTable.line[frame]);
+      newFrameTable.column.push(frameTable.column[frame]);
+      newFrameTable.optimizations.push(frameTable.optimizations[frame]);
+      newFrameTable.length++;
+      oldIpFrameToNewIpFrame[frame] = newIpFrame;
+    }
+    // Subtract 1 byte from the return address.
+    newFrameTable.address[frame] = address - 1;
+  }
+
+  // Make a new stack table which refers to the adjusted frames.
+  const newStackTable = getEmptyStackTable();
+  const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
+  const mapForPrefixStacks = new Uint32Array(stackTable.length);
+  for (let stack = 0; stack < stackTable.length; stack++) {
+    const frame = stackTable.frame[stack];
+    const category = stackTable.category[stack];
+    const subcategory = stackTable.subcategory[stack];
+    const prefix = stackTable.prefix[stack];
+
+    const newPrefix = prefix === null ? null : mapForPrefixStacks[prefix];
+
+    if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
+      // Copy this stack to the new stack table, and use the original frame
+      // (which will have the nudged address if this is a return address stack).
+      const newStackIndex = newStackTable.length;
+      newStackTable.frame.push(frame);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.prefix.push(newPrefix);
+      newStackTable.length++;
+      mapForPrefixStacks[stack] = newStackIndex;
+    }
+
+    if (samplingSelfStacks.has(stack)) {
+      // Copy this stack to the new stack table, and use the potentially duplicated
+      // frame, with a non-nudged address.
+      const ipFrame = oldIpFrameToNewIpFrame[frame];
+      const newStackIndex = newStackTable.length;
+      newStackTable.frame.push(ipFrame);
+      newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
+      newStackTable.prefix.push(newPrefix);
+      newStackTable.length++;
+      mapForSamplingSelfStacks[stack] = newStackIndex;
+    }
+  }
+
+  const newThread = {
+    ...thread,
+    frameTable: newFrameTable,
+    stackTable: newStackTable,
+  };
+
+  return replaceStackReferences(newThread, mapForSamplingSelfStacks, mapForPrefixStacks);
 }
