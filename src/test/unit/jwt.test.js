@@ -34,7 +34,7 @@ describe('jwt/isValidJwtToken', () => {
     'SOE=.SUY5.4ScA',
   ];
 
-  fixtures.forEach(fixture => {
+  fixtures.forEach((fixture) => {
     it(`returns false for invalid base64url value: ${fixture}`, () => {
       expect(Jwt.isValidJwtToken(fixture)).toBe(false);
     });

@@ -38,7 +38,7 @@ type CanvasProps = {|
     IndexIntoSamplesTable
   ) => number,
   +categories: CategoryList,
-  +passFillsQuerier: ActivityFillGraphQuerier => void,
+  +passFillsQuerier: (ActivityFillGraphQuerier) => void,
   +onClick: (SyntheticMouseEvent<HTMLCanvasElement>) => void,
   +enableCPUUsage: boolean,
   +maxThreadCPUDelta: number,
@@ -128,7 +128,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       maxThreadCPUDelta,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
-      greyCategoryIndex: categories.findIndex(c => c.color === 'grey') || 0,
+      greyCategoryIndex: categories.findIndex((c) => c.color === 'grey') || 0,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx),
     });
 

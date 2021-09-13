@@ -131,7 +131,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
 }
 
 export const Details = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),

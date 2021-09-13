@@ -86,20 +86,21 @@ export function getStackAndSampleSelectorsPerThread(
     (threadViewOptions): CallNodePath => threadViewOptions.selectedCallNodePath
   );
 
-  const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
-    getCallNodeInfo,
-    getSelectedCallNodePath,
-    (callNodeInfo, callNodePath) => {
-      return ProfileData.getCallNodeIndexFromPath(
-        callNodePath,
-        callNodeInfo.callNodeTable
-      );
-    }
-  );
+  const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
+    createSelector(
+      getCallNodeInfo,
+      getSelectedCallNodePath,
+      (callNodeInfo, callNodePath) => {
+        return ProfileData.getCallNodeIndexFromPath(
+          callNodePath,
+          callNodeInfo.callNodeTable
+        );
+      }
+    );
 
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
-    threadViewOptions => threadViewOptions.expandedCallNodePaths
+    (threadViewOptions) => threadViewOptions.expandedCallNodePaths
   );
 
   const getExpandedCallNodeIndexes: Selector<
@@ -131,14 +132,16 @@ export function getStackAndSampleSelectorsPerThread(
         // This is currently to slow to compute in JS Tracer threads.
         return null;
       }
-      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
-        thread.samples.stack,
-        stackIndexToCallNodeIndex
-      );
-      const activeTabFilteredCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
-        tabFilteredThread.samples.stack,
-        stackIndexToCallNodeIndex
-      );
+      const sampleIndexToCallNodeIndex =
+        ProfileData.getSampleIndexToCallNodeIndex(
+          thread.samples.stack,
+          stackIndexToCallNodeIndex
+        );
+      const activeTabFilteredCallNodeIndex =
+        ProfileData.getSampleIndexToCallNodeIndex(
+          tabFilteredThread.samples.stack,
+          stackIndexToCallNodeIndex
+        );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
         sampleIndexToCallNodeIndex,
@@ -154,10 +157,11 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
     (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
-      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
-        thread.samples.stack,
-        stackIndexToCallNodeIndex
-      );
+      const sampleIndexToCallNodeIndex =
+        ProfileData.getSampleIndexToCallNodeIndex(
+          thread.samples.stack,
+          stackIndexToCallNodeIndex
+        );
       return ProfileData.getTreeOrderComparator(
         callNodeTable,
         sampleIndexToCallNodeIndex
@@ -186,16 +190,17 @@ export function getStackAndSampleSelectorsPerThread(
   const getWeightTypeForCallTree: Selector<WeightType> = createSelector(
     // The weight type is not changed by the filtering done on the profile.
     threadSelectors.getUnfilteredSamplesForCallTree,
-    samples => samples.weightType || 'samples'
+    (samples) => samples.weightType || 'samples'
   );
 
-  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> = createSelector(
-    threadSelectors.getPreviewFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
-    UrlState.getInvertCallstack,
-    CallTree.computeCallTreeCountsAndSummary
-  );
+  const getCallTreeCountsAndSummary: Selector<CallTree.CallTreeCountsAndSummary> =
+    createSelector(
+      threadSelectors.getPreviewFilteredSamplesForCallTree,
+      getCallNodeInfo,
+      ProfileSelectors.getProfileInterval,
+      UrlState.getInvertCallstack,
+      CallTree.computeCallTreeCountsAndSummary
+    );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
@@ -216,38 +221,41 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.computeTracedTiming
   );
 
-  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
-    threadSelectors.getFilteredSamplesForCallTree,
-    getCallNodeInfo,
-    getFilteredCallNodeMaxDepth,
-    ProfileSelectors.getProfileInterval,
-    StackTiming.getStackTimingByDepth
-  );
+  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> =
+    createSelector(
+      threadSelectors.getFilteredSamplesForCallTree,
+      getCallNodeInfo,
+      getFilteredCallNodeMaxDepth,
+      ProfileSelectors.getProfileInterval,
+      StackTiming.getStackTimingByDepth
+    );
 
-  const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
-    getCallNodeInfo,
-    getCallTreeCountsAndSummary,
-    FlameGraph.getFlameGraphTiming
-  );
+  const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      threadSelectors.getPreviewFilteredThread,
+      getCallNodeInfo,
+      getCallTreeCountsAndSummary,
+      FlameGraph.getFlameGraphTiming
+    );
 
-  const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> = createSelector(
-    getRightClickedCallNodeInfo,
-    getCallNodeInfo,
-    (rightClickedCallNodeInfo, { callNodeTable }) => {
-      if (
-        rightClickedCallNodeInfo !== null &&
-        threadsKey === rightClickedCallNodeInfo.threadsKey
-      ) {
-        return ProfileData.getCallNodeIndexFromPath(
-          rightClickedCallNodeInfo.callNodePath,
-          callNodeTable
-        );
+  const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
+    createSelector(
+      getRightClickedCallNodeInfo,
+      getCallNodeInfo,
+      (rightClickedCallNodeInfo, { callNodeTable }) => {
+        if (
+          rightClickedCallNodeInfo !== null &&
+          threadsKey === rightClickedCallNodeInfo.threadsKey
+        ) {
+          return ProfileData.getCallNodeIndexFromPath(
+            rightClickedCallNodeInfo.callNodePath,
+            callNodeTable
+          );
+        }
+
+        return null;
       }
-
-      return null;
-    }
-  );
+    );
 
   return {
     unfilteredSamplesRange,

@@ -26,7 +26,7 @@ export type State = StateRef;
  *
  * See the type below for additional considerations.
  */
-export type Selector<T> = State => T;
+export type Selector<T> = (State) => T;
 
 /**
  * Selectors generally come in two different varieties: selectors that trivially access

@@ -19,19 +19,19 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 
-describe('selectors/getMarkerChartTimingAndBuckets', function() {
+describe('selectors/getMarkerChartTimingAndBuckets', function () {
   function getMarkerChartTimingAndBuckets(testMarkers: TestDefinedMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
     return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
   }
 
-  it('has no marker timing if no markers are present', function() {
+  it('has no marker timing if no markers are present', function () {
     expect(getMarkerChartTimingAndBuckets([])).toEqual([]);
   });
 
-  describe('markers of the same name', function() {
-    it('puts markers of the same time in two rows', function() {
+  describe('markers of the same name', function () {
+    it('puts markers of the same time in two rows', function () {
       // The timing should look like this:
       //              : 'Category'
       // 'Marker Name': *------*
@@ -43,7 +43,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       expect(markerTiming).toHaveLength(3);
     });
 
-    it('puts markers of disjoint times in one row', function() {
+    it('puts markers of disjoint times in one row', function () {
       // The timing should look like this:
       //              : 'Category'
       // 'Marker Name': *------*  *------*
@@ -54,7 +54,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       expect(markerTiming).toHaveLength(2);
     });
 
-    it('puts markers of overlapping times in two rows', function() {
+    it('puts markers of overlapping times in two rows', function () {
       // The timing should look like this:
       //              : 'Category'
       // 'Marker Name': *------*
@@ -66,7 +66,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
       expect(markerTiming).toHaveLength(3);
     });
 
-    it('puts markers of inclusive overlapping times in two rows', function() {
+    it('puts markers of inclusive overlapping times in two rows', function () {
       // The timing should look like this:
       //              : 'Category'
       // 'Marker Name': *--------*
@@ -79,8 +79,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
     });
   });
 
-  describe('markers of the different names', function() {
-    it('puts them in different rows', function() {
+  describe('markers of the different names', function () {
+    it('puts them in different rows', function () {
       // The timing should look like this:
       //              : 'Category'
       // 'Marker Name A': *------*
@@ -103,8 +103,8 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
     });
   });
 
-  describe('markers that are crossing the profile start or end', function() {
-    it('renders properly markers starting before profile start', function() {
+  describe('markers that are crossing the profile start or end', function () {
+    it('renders properly markers starting before profile start', function () {
       const markerTiming = getMarkerChartTimingAndBuckets([
         ['Rasterize', 1, null, { category: 'Paint', type: 'tracing' }],
       ]);
@@ -125,16 +125,16 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
     });
   });
 
-  describe('network markers', function() {
+  describe('network markers', function () {
     function getTimingAndBucketsForNetworkMarkers(testMarkers) {
       const profile = getProfileWithMarkers(testMarkers);
 
       // Let's monkey patch the returned profile to set the Network category on
       // all markers.
       const networkCategory = ensureExists(profile.meta.categories).findIndex(
-        category => category.name === 'Network'
+        (category) => category.name === 'Network'
       );
-      profile.threads.forEach(thread => {
+      profile.threads.forEach((thread) => {
         thread.markers.category.fill(networkCategory);
       });
 
@@ -206,13 +206,12 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
   });
 });
 
-describe('getTimelineVerticalMarkers', function() {
-  it('gets the appropriate markers', function() {
+describe('getTimelineVerticalMarkers', function () {
+  it('gets the appropriate markers', function () {
     const { getState } = storeWithProfile(getNetworkTrackProfile());
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
-      getState()
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getTimelineVerticalMarkerIndexes(getState());
     const allMarkers = selectedThreadSelectors.getFullMarkerListIndexes(
       getState()
     );
@@ -223,7 +222,7 @@ describe('getTimelineVerticalMarkers', function() {
   });
 });
 
-describe('memory markers', function() {
+describe('memory markers', function () {
   function setup() {
     // GC markers have some complicated data structures that are just mocked here with
     // this "any".
@@ -242,31 +241,29 @@ describe('memory markers', function() {
     );
   }
 
-  it('can get memory markers using getMemoryMarkers', function() {
+  it('can get memory markers using getMemoryMarkers', function () {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getTimelineMemoryMarkerIndexes(
-      getState()
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getTimelineMemoryMarkerIndexes(getState());
     expect(
-      markerIndexes.map(markerIndex => getMarker(markerIndex).name)
+      markerIndexes.map((markerIndex) => getMarker(markerIndex).name)
     ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
   });
 
-  it('ignores memory markers in getTimelineOverviewMarkerIndexes', function() {
+  it('ignores memory markers in getTimelineOverviewMarkerIndexes', function () {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getTimelineOverviewMarkerIndexes(
-      getState()
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getTimelineOverviewMarkerIndexes(getState());
     expect(
-      markerIndexes.map(markerIndex => getMarker(markerIndex).name)
+      markerIndexes.map((markerIndex) => getMarker(markerIndex).name)
     ).toEqual(['DOMEvent', 'Navigation', 'Paint']);
   });
 });
 
-describe('selectors/getUserTimingMarkerTiming', function() {
-  it('simple profile', function() {
+describe('selectors/getUserTimingMarkerTiming', function () {
+  it('simple profile', function () {
     const profile = getProfileWithMarkers([
       getUserTiming('renderFunction', 0, 10),
       getUserTiming('componentA', 1, 8),
@@ -308,7 +305,7 @@ describe('selectors/getUserTimingMarkerTiming', function() {
   });
 });
 
-describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
+describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function () {
   const tabID = 123123;
   const innerWindowID = 2;
 
@@ -373,15 +370,16 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         })
       );
     }
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
-      getState()
-    );
+    const markerIndexes =
+      selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
+        getState()
+      );
 
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    return markerIndexes.map(markerIndex => getMarker(markerIndex).name);
+    return markerIndexes.map((markerIndex) => getMarker(markerIndex).name);
   }
 
-  it('does not filter markers if we are not in the single tab view', function() {
+  it('does not filter markers if we are not in the single tab view', function () {
     const markers = setup(false);
     expect(markers).toEqual([
       'Dummy 1',
@@ -392,12 +390,12 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     ]);
   });
 
-  it('filters markers by their tab if we are in the single tab view', function() {
+  it('filters markers by their tab if we are in the single tab view', function () {
     const markers = setup(true);
     expect(markers).toEqual(['Dummy 1', 'Dummy 4']);
   });
 
-  it('preserves global markers', function() {
+  it('preserves global markers', function () {
     const markers = setup(true, [
       ['Dummy 1', 20, null],
       ['Jank', 20, null],
@@ -407,7 +405,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
   });
 });
 
-describe('Marker schema filtering', function() {
+describe('Marker schema filtering', function () {
   function getProfileForMarkerSchema() {
     // prettier-ignore
     const profile = getProfileWithMarkers([
@@ -441,13 +439,13 @@ describe('Marker schema filtering', function() {
     function getMarkerNames(selector): string[] {
       return selector(getState())
         .map(getMarker)
-        .map(marker => marker.name);
+        .map((marker) => marker.name);
     }
 
     return { getMarkerNames };
   }
 
-  it('filters for getMarkerTableMarkerIndexes', function() {
+  it('filters for getMarkerTableMarkerIndexes', function () {
     const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getMarkerTableMarkerIndexes)
@@ -461,7 +459,7 @@ describe('Marker schema filtering', function() {
     ]);
   });
 
-  it('filters for getMarkerChartMarkerIndexes', function() {
+  it('filters for getMarkerChartMarkerIndexes', function () {
     const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getMarkerChartMarkerIndexes)
@@ -475,7 +473,7 @@ describe('Marker schema filtering', function() {
     ]);
   });
 
-  it('filters for MarkerChartMarkerIndexes also for profiles upgraded from version 32', async function() {
+  it('filters for MarkerChartMarkerIndexes also for profiles upgraded from version 32', async function () {
     // This is a profile purposefully stuck at version 32.
     const profile = {
       meta: {
@@ -657,7 +655,7 @@ describe('Marker schema filtering', function() {
     ]);
   });
 
-  it('filters for getTimelineOverviewMarkerIndexes', function() {
+  it('filters for getTimelineOverviewMarkerIndexes', function () {
     const { getMarkerNames } = setup(getProfileForMarkerSchema());
     expect(
       getMarkerNames(selectedThreadSelectors.getTimelineOverviewMarkerIndexes)

@@ -12,7 +12,7 @@ import './FilterNavigatorBar.css';
 type Props = {|
   +className: string,
   +items: $ReadOnlyArray<React.Node | string>,
-  +onPop: number => mixed,
+  +onPop: (number) => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};

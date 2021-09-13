@@ -54,7 +54,7 @@ class MarkerSettingsImpl extends PureComponent<Props> {
 }
 
 export const MarkerSettings = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     searchString: getMarkersSearchString(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },

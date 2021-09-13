@@ -14,8 +14,8 @@ import {
 
 import type { Thread } from 'firefox-profiler/types';
 
-describe('mergeProfilesForDiffing function', function() {
-  it('merges the various tables properly in the diffing profile', function() {
+describe('mergeProfilesForDiffing function', function () {
+  it('merges the various tables properly in the diffing profile', function () {
     const sampleProfileA = getProfileFromTextSamples(
       'A[lib:libA]  B[lib:libA]'
     );
@@ -88,7 +88,7 @@ describe('mergeProfilesForDiffing function', function() {
     expect(resourcesForA).toEqual(['libA', 'libB']);
   });
 
-  it('should set interval of merged profile to minimum of all intervals', function() {
+  it('should set interval of merged profile to minimum of all intervals', function () {
     const sampleProfileA = getProfileFromTextSamples('A');
     const sampleProfileB = getProfileFromTextSamples('B');
     const profileState1 = stateFromLocation({
@@ -115,9 +115,8 @@ describe('mergeProfilesForDiffing function', function() {
   it('should set the resulting profile to symbolicated if all are symbolicated', () => {
     const { profile: symbolicatedProfile } = getProfileFromTextSamples('A');
     const { profile: unsymbolicatedProfile } = getProfileFromTextSamples('B');
-    const { profile: unknownSymbolicatedProfile } = getProfileFromTextSamples(
-      'C'
-    );
+    const { profile: unknownSymbolicatedProfile } =
+      getProfileFromTextSamples('C');
     unsymbolicatedProfile.meta.symbolicated = false;
     delete unknownSymbolicatedProfile.meta.symbolicated;
 
@@ -170,7 +169,7 @@ describe('mergeProfilesForDiffing function', function() {
   });
 });
 
-describe('mergeThreads function', function() {
+describe('mergeThreads function', function () {
   function getFriendlyFuncLibResources(thread: Thread): string[] {
     const { funcTable, resourceTable, stringTable, libs } = thread;
     const strings = [];
@@ -196,7 +195,7 @@ describe('mergeThreads function', function() {
     return strings;
   }
 
-  it('merges the various tables for 2 threads properly', function() {
+  it('merges the various tables for 2 threads properly', function () {
     const { profile } = getProfileFromTextSamples(
       'A[lib:libA]  B[lib:libA]',
       'A[lib:libA]  A[lib:libB]  C[lib:libC]'
@@ -223,7 +222,7 @@ describe('mergeThreads function', function() {
     ]);
   });
 
-  it('merges the various tables for more than 2 threads properly', function() {
+  it('merges the various tables for more than 2 threads properly', function () {
     const { profile } = getProfileFromTextSamples(
       'A[lib:libA]  B[lib:libA]',
       'A[lib:libA]  A[lib:libB]  C[lib:libC]',
@@ -252,7 +251,7 @@ describe('mergeThreads function', function() {
     ]);
   });
 
-  it('merges the marker tables properly', function() {
+  it('merges the marker tables properly', function () {
     const profile = getProfileWithMarkers(
       [
         ['Thread1 Marker1', 2],

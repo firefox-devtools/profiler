@@ -43,9 +43,8 @@ class CurrentProfileUploadedInformationLoaderImpl extends PureComponent<Props> {
     }
 
     const { hash, setCurrentProfileUploadedInformation } = this.props;
-    const uploadedProfileInformation = await retrieveUploadedProfileInformationFromDb(
-      hash
-    );
+    const uploadedProfileInformation =
+      await retrieveUploadedProfileInformationFromDb(hash);
 
     // The previous action is asynchronous, so let's make sure the current hash
     // is still the one we retrieved the information for.
@@ -72,7 +71,7 @@ export const CurrentProfileUploadedInformationLoader = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     hash: getHash(state),
   }),
   mapDispatchToProps: { setCurrentProfileUploadedInformation },

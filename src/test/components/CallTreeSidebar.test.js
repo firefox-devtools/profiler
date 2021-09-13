@@ -25,7 +25,7 @@ import type { CallNodePath } from 'firefox-profiler/types';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('CallTreeSidebar', function() {
+describe('CallTreeSidebar', function () {
   function getProfileWithCategories() {
     return getProfileFromTextSamples(`
       A    A    A              A
@@ -52,7 +52,7 @@ describe('CallTreeSidebar', function() {
       ensureExists(
         profile.meta.categories,
         'Expected to find categories.'
-      ).find(category => category.name === 'Layout'),
+      ).find((category) => category.name === 'Layout'),
       'Could not find Layout category.'
     );
     const [{ frameTable, stackTable }] = profile.threads;

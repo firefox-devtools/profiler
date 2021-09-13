@@ -251,12 +251,8 @@ type ChartProps = {|
  */
 export class JsTracerChart extends React.PureComponent<ChartProps> {
   render() {
-    const {
-      profile,
-      jsTracerTable,
-      showJsTracerSummary,
-      threadsKey,
-    } = this.props;
+    const { profile, jsTracerTable, showJsTracerSummary, threadsKey } =
+      this.props;
     const key = `${threadsKey}-${showJsTracerSummary ? 'true' : 'false'}`;
     return (
       <JsTracerChartLoader

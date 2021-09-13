@@ -51,7 +51,7 @@ autoMockCanvasContext();
 // VirtualList's virtualization. We assert this above.
 autoMockElementSize({ width: 1000, height: 2000 });
 
-describe('calltree/ProfileCallTreeView', function() {
+describe('calltree/ProfileCallTreeView', function () {
   function setup(profile?: Profile) {
     if (!profile) {
       profile = getProfileFromTextSamples(`
@@ -74,7 +74,7 @@ describe('calltree/ProfileCallTreeView', function() {
     );
     const { container } = renderResult;
 
-    const getRowElement = functionName =>
+    const getRowElement = (functionName) =>
       ensureExists(
         screen.getByText(functionName).closest('.treeViewRow'),
         `Couldn't find the row for node ${functionName}.`
@@ -157,9 +157,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('computes a width for a call tree of a really deep stack', () => {
     const { profile } = getProfileFromTextSamples(
-      Array(113)
-        .fill('name')
-        .join('\n')
+      Array(113).fill('name').join('\n')
     );
 
     const { container } = setup(profile);
@@ -296,7 +294,7 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 });
 
-describe('calltree/ProfileCallTreeView EmptyReasons', function() {
+describe('calltree/ProfileCallTreeView EmptyReasons', function () {
   const { profile } = getProfileFromTextSamples(`
     A  A  A
     B  B  B
@@ -314,7 +312,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
     ).container.firstChild;
   }
 
-  it('shows a reason for a call tree with no samples', function() {
+  it('shows a reason for a call tree with no samples', function () {
     const profile = getEmptyProfile();
     const thread = getEmptyThread();
     thread.name = 'Empty Thread';
@@ -324,13 +322,13 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
     expect(renderWithStore(store)).toMatchSnapshot();
   });
 
-  it('shows reasons for being out of range of a threads samples', function() {
+  it('shows reasons for being out of range of a threads samples', function () {
     const store = storeWithProfile(profile);
     store.dispatch(commitRange(5, 10));
     expect(renderWithStore(store)).toMatchSnapshot();
   });
 
-  it('shows reasons for when samples are completely filtered out', function() {
+  it('shows reasons for when samples are completely filtered out', function () {
     const store = storeWithProfile(profile);
     store.dispatch(changeImplementationFilter('js'));
     expect(renderWithStore(store)).toMatchSnapshot();
@@ -485,7 +483,7 @@ describe('ProfileCallTreeView/end-to-end', () => {
   });
 });
 
-describe('ProfileCallTreeView with JS Allocations', function() {
+describe('ProfileCallTreeView with JS Allocations', function () {
   function setup() {
     const { profile } = getProfileWithJsAllocations();
     const store = storeWithProfile(profile);
@@ -497,7 +495,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     return { profile, ...renderResult, ...store };
   }
 
-  it('can switch to JS allocations and back to timing', function() {
+  it('can switch to JS allocations and back to timing', function () {
     const { getState } = setup();
 
     // It starts out with timing.
@@ -518,7 +516,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     ).toEqual('timing');
   });
 
-  it('shows byte related labels for JS allocations', function() {
+  it('shows byte related labels for JS allocations', function () {
     const { getByText, queryByText } = setup();
 
     // These labels do not exist.
@@ -532,14 +530,14 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
-  it('matches the snapshot for JS allocations', function() {
+  it('matches the snapshot for JS allocations', function () {
     const { container } = setup();
     changeSelect({ from: 'Timings', to: 'JavaScript Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
 
-describe('ProfileCallTreeView with unbalanced native allocations', function() {
+describe('ProfileCallTreeView with unbalanced native allocations', function () {
   function setup() {
     const { profile } = getProfileWithUnbalancedNativeAllocations();
     const store = storeWithProfile(profile);
@@ -552,7 +550,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     return { profile, ...renderResult, ...store };
   }
 
-  it('can switch to native allocations and back to timing', function() {
+  it('can switch to native allocations and back to timing', function () {
     const { getState } = setup();
 
     // It starts out with timing.
@@ -574,7 +572,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     ).toEqual('timing');
   });
 
-  it('shows byte related labels for native allocations', function() {
+  it('shows byte related labels for native allocations', function () {
     const { getByText, queryByText } = setup();
 
     // These labels do not exist.
@@ -588,25 +586,25 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
-  it('does not have the retained memory option', function() {
+  it('does not have the retained memory option', function () {
     const { queryByText } = setup();
     expect(queryByText('Retained Memory')).not.toBeInTheDocument();
   });
 
-  it('matches the snapshot for native allocations', function() {
+  it('matches the snapshot for native allocations', function () {
     const { container } = setup();
     changeSelect({ from: 'Timings', to: 'Allocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('matches the snapshot for native deallocations', function() {
+  it('matches the snapshot for native deallocations', function () {
     const { container } = setup();
     changeSelect({ from: 'Timings', to: 'Deallocation Sites' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
 
-describe('ProfileCallTreeView with balanced native allocations', function() {
+describe('ProfileCallTreeView with balanced native allocations', function () {
   function setup() {
     const { profile } = getProfileWithBalancedNativeAllocations();
     const store = storeWithProfile(profile);
@@ -619,7 +617,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     return { profile, ...renderResult, ...store };
   }
 
-  it('can switch to retained memory and back to timing', function() {
+  it('can switch to retained memory and back to timing', function () {
     const { getState } = setup();
 
     // It starts out with timing.
@@ -641,7 +639,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     ).toEqual('timing');
   });
 
-  it('shows byte related labels for retained allocations', function() {
+  it('shows byte related labels for retained allocations', function () {
     const { getByText, queryByText } = setup();
 
     // These labels do not exist.
@@ -655,13 +653,13 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     expect(getByText('Self (bytes)')).toBeInTheDocument();
   });
 
-  it('matches the snapshot for retained allocations', function() {
+  it('matches the snapshot for retained allocations', function () {
     const { container } = setup();
     changeSelect({ from: 'Timings', to: 'Retained Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('matches the snapshot for deallocated memory', function() {
+  it('matches the snapshot for deallocated memory', function () {
     const { container } = setup();
     changeSelect({ from: 'Timings', to: 'Deallocated Memory' });
     expect(container.firstChild).toMatchSnapshot();

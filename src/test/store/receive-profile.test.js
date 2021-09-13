@@ -93,7 +93,7 @@ function simulateOldWebChannelAndFrameScript(geckoProfiler) {
   // Pretend that this browser does not support obtaining the profile via
   // the WebChannel. This will trigger fallback to the frame script /
   // geckoProfiler API.
-  registerMessageToChromeListener(message => {
+  registerMessageToChromeListener((message) => {
     switch (message.type) {
       case 'STATUS_QUERY': {
         triggerResponse(
@@ -177,14 +177,14 @@ function simulateWebChannel(profileGetter) {
     }
   }
 
-  registerMessageToChromeListener(message => {
+  registerMessageToChromeListener((message) => {
     simulateBrowserSide(message);
   });
 
   return webChannel;
 }
 
-describe('actions/receive-profile', function() {
+describe('actions/receive-profile', function () {
   beforeEach(() => {
     // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
     // symbolication can happen.
@@ -220,8 +220,8 @@ describe('actions/receive-profile', function() {
     return new TextEncoder().encode(string);
   }
 
-  describe('viewProfile', function() {
-    it('can take a profile and view it', function() {
+  describe('viewProfile', function () {
+    it('can take a profile and view it', function () {
       const store = blankStore();
 
       expect(() => {
@@ -237,7 +237,7 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(store.getState())).toBe(profile);
     });
 
-    it('will be a fatal error if a profile has no threads', function() {
+    it('will be a fatal error if a profile has no threads', function () {
       const store = blankStore();
       expect(getView(store.getState()).phase).toBe('INITIALIZING');
       const emptyProfile = getEmptyProfile();
@@ -277,7 +277,7 @@ describe('actions/receive-profile', function() {
       return { profile, idleThread, workThread };
     }
 
-    it('will hide threads with idle samples', function() {
+    it('will hide threads with idle samples', function () {
       const store = blankStore();
       const { profile } = getProfileWithIdleAndWorkThread();
 
@@ -289,7 +289,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will show the thread with no samples and with paint markers', function() {
+    it('will show the thread with no samples and with paint markers', function () {
       const store = blankStore();
       const profile = getEmptyProfile();
 
@@ -314,13 +314,10 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide the Windows GPU thread', function() {
+    it('will not hide the Windows GPU thread', function () {
       const store = blankStore();
-      const {
-        profile,
-        idleThread,
-        workThread,
-      } = getProfileWithIdleAndWorkThread();
+      const { profile, idleThread, workThread } =
+        getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
       idleThread.processType = 'default';
       idleThread.pid = 0;
@@ -335,13 +332,10 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide the Compositor thread', function() {
+    it('will not hide the Compositor thread', function () {
       const store = blankStore();
-      const {
-        profile,
-        idleThread,
-        workThread,
-      } = getProfileWithIdleAndWorkThread();
+      const { profile, idleThread, workThread } =
+        getProfileWithIdleAndWorkThread();
       idleThread.name = 'Compositor';
       idleThread.processType = 'default';
       workThread.name = 'GeckoMain';
@@ -354,13 +348,10 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide a main thread', function() {
+    it('will not hide a main thread', function () {
       const store = blankStore();
-      const {
-        profile,
-        idleThread,
-        workThread,
-      } = getProfileWithIdleAndWorkThread();
+      const { profile, idleThread, workThread } =
+        getProfileWithIdleAndWorkThread();
       idleThread.name = 'GeckoMain';
       idleThread.processType = 'default';
       idleThread.pid = 0;
@@ -375,7 +366,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide the only global track', function() {
+    it('will not hide the only global track', function () {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
@@ -396,7 +387,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will hide idle content threads with no RefreshDriverTick markers', function() {
+    it('will hide idle content threads with no RefreshDriverTick markers', function () {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
@@ -422,7 +413,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide non-idle content threads with no RefreshDriverTick markers', function() {
+    it('will not hide non-idle content threads with no RefreshDriverTick markers', function () {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `work  work  work  work  work  work  work`,
@@ -448,7 +439,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will hide an empty global track when all child tracks are hidden', function() {
+    it('will hide an empty global track when all child tracks are hidden', function () {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `work  work  work  work  work`, // pid 1
@@ -479,7 +470,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will not hide audio tracks if they have at least one sample', function() {
+    it('will not hide audio tracks if they have at least one sample', function () {
       const store = blankStore();
 
       const idleThread: Array<string> = (Array.from({
@@ -533,7 +524,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('changeTimelineTrackOrganization', function() {
+  describe('changeTimelineTrackOrganization', function () {
     const tabID = 123;
     const innerWindowID = 111111;
     function setup(initializeCtxId: boolean = false) {
@@ -572,7 +563,7 @@ describe('actions/receive-profile', function() {
       return { ...store, profile };
     }
 
-    it('should be able to switch to active tab view from the full view', function() {
+    it('should be able to switch to active tab view from the full view', function () {
       const { dispatch, getState } = setup();
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
@@ -593,7 +584,7 @@ describe('actions/receive-profile', function() {
       });
     });
 
-    it('should be able to switch to full view from the active tab', function() {
+    it('should be able to switch to full view from the active tab', function () {
       const { dispatch, getState } = setup(true);
       expect(
         UrlStateSelectors.getTimelineTrackOrganization(getState())
@@ -610,7 +601,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileFromBrowser', function() {
+  describe('retrieveProfileFromBrowser', function () {
     function toUint8Array(json) {
       return encode(JSON.stringify(json));
     }
@@ -642,7 +633,7 @@ describe('actions/receive-profile', function() {
 
       // Silence the warnings coming from the failed symbolication attempts, and
       // make sure that the logged error contains our error messages.
-      jest.spyOn(console, 'warn').mockImplementation(error => {
+      jest.spyOn(console, 'warn').mockImplementation((error) => {
         expect(error).toBeInstanceOf(SymbolsNotFoundError);
         expect(error.errors).toEqual(
           expect.arrayContaining([
@@ -697,7 +688,7 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.geckoProfilerPromise;
       delete window.TextDecoder;
       delete window.fetch;
@@ -705,7 +696,7 @@ describe('actions/receive-profile', function() {
 
     for (const setupWith of ['frame-script', 'web-channel']) {
       for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
-        it(`can retrieve a profile from the browser as ${profileAs} using ${setupWith}`, async function() {
+        it(`can retrieve a profile from the browser as ${profileAs} using ${setupWith}`, async function () {
           const setupFn = {
             'frame-script': setupWithFrameScript,
             'web-channel': setupWithWebChannel,
@@ -764,7 +755,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileFromStore', function() {
+  describe('retrieveProfileFromStore', function () {
     // Force type-casting to Response to allow to be used as return value for fetch
     const fetch403Response = (({ ok: false, status: 403 }: any): Response);
     const fetch500Response = (({ ok: false, status: 500 }: any): Response);
@@ -778,7 +769,7 @@ describe('actions/receive-profile', function() {
         Promise.resolve(encode(serializeProfile(_getSimpleProfile()))),
     }: any): Response);
 
-    beforeEach(function() {
+    beforeEach(function () {
       window.TextDecoder = TextDecoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
@@ -786,19 +777,19 @@ describe('actions/receive-profile', function() {
       // (instead of waiting for the timeout).
       jest
         .spyOn(window, 'setTimeout')
-        .mockImplementation(callback => process.nextTick(callback));
+        .mockImplementation((callback) => process.nextTick(callback));
     });
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.TextDecoder;
       delete window.fetch;
     });
 
-    it('can retrieve a profile from the web and save it to state', async function() {
+    it('can retrieve a profile from the web and save it to state', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetch = jest.fn(url =>
+      window.fetch = jest.fn((url) =>
         Promise.resolve(
           url === expectedUrl ? fetch200Response : fetch403Response
         )
@@ -817,9 +808,8 @@ describe('actions/receive-profile', function() {
     });
 
     it('symbolicates a profile if it is not symbolicated yet', async () => {
-      const { profile: unsymbolicatedProfile } = getProfileFromTextSamples(
-        '0xA[lib:libxul]'
-      );
+      const { profile: unsymbolicatedProfile } =
+        getProfileFromTextSamples('0xA[lib:libxul]');
       unsymbolicatedProfile.meta.symbolicated = false;
 
       window.fetch = jest.fn().mockResolvedValue(
@@ -857,12 +847,12 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('requests several times in case of 403', async function() {
+    it('requests several times in case of 403', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
-        .mockImplementationOnce(_ => Promise.resolve(fetch403Response))
-        .mockImplementationOnce(url =>
+        .mockImplementationOnce((_) => Promise.resolve(fetch403Response))
+        .mockImplementationOnce((url) =>
           Promise.resolve(
             url === expectedUrl ? fetch200Response : fetch403Response
           )
@@ -873,7 +863,7 @@ describe('actions/receive-profile', function() {
         await observeStoreStateChanges(store, () =>
           store.dispatch(retrieveProfileFromStore(hash))
         )
-      ).map(state => getView(state));
+      ).map((state) => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -897,21 +887,21 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
-    it('fails in case the profile cannot be found after several tries', async function() {
+    it('fails in case the profile cannot be found after several tries', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
       const views = (
         await observeStoreStateChanges(store, () =>
           store.dispatch(retrieveProfileFromStore(hash))
         )
-      ).map(state => getView(state));
+      ).map((state) => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
         { phase: 'INITIALIZING' },
-        ...steps.map(step => ({
+        ...steps.map((step) => ({
           phase: 'INITIALIZING',
           additionalData: {
             attempt: { count: step, total: 11 },
@@ -922,7 +912,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('fails in case the fetch returns a server error', async function() {
+    it('fails in case the fetch returns a server error', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
@@ -935,7 +925,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileOrZipFromUrl', function() {
+  describe('retrieveProfileOrZipFromUrl', function () {
     // Force type-casting to Response to allow to be used as return value for fetch
     const fetch403Response = (({ ok: false, status: 403 }: any): Response);
     const fetch500Response = (({ ok: false, status: 500 }: any): Response);
@@ -957,7 +947,7 @@ describe('actions/receive-profile', function() {
       arrayBuffer: () => compress(serializeProfile(_getSimpleProfile())),
     }: any): Response);
 
-    beforeEach(function() {
+    beforeEach(function () {
       window.TextDecoder = TextDecoder;
       (window: any).TextEncoder = TextEncoder;
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
@@ -966,18 +956,18 @@ describe('actions/receive-profile', function() {
       // (instead of waiting for the timeout).
       jest
         .spyOn(window, 'setTimeout')
-        .mockImplementation(callback => process.nextTick(callback));
+        .mockImplementation((callback) => process.nextTick(callback));
     });
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.TextDecoder;
       delete (window: any).TextEncoder;
       delete window.fetch;
     });
 
-    it('can retrieve a profile from the web and save it to state', async function() {
+    it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch = jest.fn(url =>
+      window.fetch = jest.fn((url) =>
         Promise.resolve(
           url === expectedUrl ? fetch200Response : fetch403Response
         )
@@ -995,9 +985,9 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
-    it('can retrieve a gzipped profile from the web and save it to state', async function() {
+    it('can retrieve a gzipped profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch = jest.fn(url =>
+      window.fetch = jest.fn((url) =>
         Promise.resolve(
           url === expectedUrl ? fetch200GzippedResponse : fetch403Response
         )
@@ -1015,12 +1005,12 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
-    it('requests several times in case of 403', async function() {
+    it('requests several times in case of 403', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
         .mockResolvedValueOnce(fetch403Response)
-        .mockImplementationOnce(url =>
+        .mockImplementationOnce((url) =>
           Promise.resolve(
             url === expectedUrl ? fetch200Response : fetch403Response
           )
@@ -1031,7 +1021,7 @@ describe('actions/receive-profile', function() {
         await observeStoreStateChanges(store, () =>
           store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
         )
-      ).map(state => getView(state));
+      ).map((state) => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -1055,21 +1045,21 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
-    it('fails in case the profile cannot be found after several tries', async function() {
+    it('fails in case the profile cannot be found after several tries', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
       const views = (
         await observeStoreStateChanges(store, () =>
           store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
         )
-      ).map(state => getView(state));
+      ).map((state) => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
         { phase: 'INITIALIZING' },
-        ...steps.map(step => ({
+        ...steps.map((step) => ({
           phase: 'INITIALIZING',
           additionalData: {
             attempt: { count: step, total: 11 },
@@ -1080,7 +1070,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('fails in case the fetch returns a server error', async function() {
+    it('fails in case the fetch returns a server error', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
@@ -1099,13 +1089,13 @@ describe('actions/receive-profile', function() {
    * in different support URL formats. It's mainly testing what happens when JSON
    * and zip file is sent, and what happens when things fail.
    */
-  describe('_fetchProfile', function() {
-    beforeEach(function() {
+  describe('_fetchProfile', function () {
+    beforeEach(function () {
       window.TextDecoder = TextDecoder;
       window.fetch = jest.fn();
     });
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.TextDecoder;
       delete window.fetch;
     });
@@ -1161,7 +1151,7 @@ describe('actions/receive-profile', function() {
       }: any): Response);
       const fetch403Response = (({ ok: false, status: 403 }: any): Response);
 
-      window.fetch = jest.fn(actualUrl =>
+      window.fetch = jest.fn((actualUrl) =>
         Promise.resolve(
           actualUrl === url ? zippedProfileResponse : fetch403Response
         )
@@ -1178,7 +1168,7 @@ describe('actions/receive-profile', function() {
       return { profile, args, reportError };
     }
 
-    it('fetches a normal profile with the correct content-type headers', async function() {
+    it('fetches a normal profile with the correct content-type headers', async function () {
       const { profile, args } = await configureFetch({
         url: 'https://example.com/profile.json',
         contentType: 'application/json',
@@ -1189,7 +1179,7 @@ describe('actions/receive-profile', function() {
       expect(profileFetched).toEqual(profile);
     });
 
-    it('fetches a zipped profile with correct content-type headers', async function() {
+    it('fetches a zipped profile with correct content-type headers', async function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.zip',
         contentType: 'application/zip',
@@ -1201,7 +1191,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls.length).toBe(0);
     });
 
-    it('fetches a zipped profile with incorrect content-type headers, but .zip extension', async function() {
+    it('fetches a zipped profile with incorrect content-type headers, but .zip extension', async function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.zip',
         isZipped: true,
@@ -1212,7 +1202,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls.length).toBe(0);
     });
 
-    it('fetches a profile with incorrect content-type headers, but .json extension', async function() {
+    it('fetches a profile with incorrect content-type headers, but .json extension', async function () {
       const { profile, args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
         isJSON: true,
@@ -1223,7 +1213,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls.length).toBe(0);
     });
 
-    it('fetches a profile with incorrect content-type headers, no known extension, and attempts to JSON parse it it', async function() {
+    it('fetches a profile with incorrect content-type headers, no known extension, and attempts to JSON parse it it', async function () {
       const { profile, args, reportError } = await configureFetch({
         url: 'https://example.com/profile.file',
         isJSON: true,
@@ -1234,7 +1224,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls.length).toBe(0);
     });
 
-    it('fails if a bad zip file is passed in', async function() {
+    it('fails if a bad zip file is passed in', async function () {
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.file',
         contentType: 'application/zip',
@@ -1252,7 +1242,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls).toMatchSnapshot();
     });
 
-    it('fails if a bad profile JSON is passed in', async function() {
+    it('fails if a bad profile JSON is passed in', async function () {
       const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
@@ -1271,7 +1261,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls).toMatchSnapshot();
     });
 
-    it('fails if a bad profile JSON is passed in, with no content type', async function() {
+    it('fails if a bad profile JSON is passed in, with no content type', async function () {
       const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.json',
@@ -1289,7 +1279,7 @@ describe('actions/receive-profile', function() {
       expect(reportError.mock.calls).toMatchSnapshot();
     });
 
-    it('fails if a completely unknown file is passed in', async function() {
+    it('fails if a completely unknown file is passed in', async function () {
       const invalidJSON = 'invalid';
       const { args, reportError } = await configureFetch({
         url: 'https://example.com/profile.unknown',
@@ -1308,15 +1298,15 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileFromFile', function() {
-    beforeEach(function() {
+  describe('retrieveProfileFromFile', function () {
+    beforeEach(function () {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
       }
       (window: any).TextEncoder = TextEncoder;
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       delete (window: any).TextEncoder;
     });
     /**
@@ -1345,10 +1335,8 @@ describe('actions/receive-profile', function() {
       // When the file is loaded, the profiler tries to connect to the WebChannel
       // for symbolication. Handle that request so that we don't time out.
       // We handle it by rejecting it.
-      const {
-        registerMessageToChromeListener,
-        triggerResponse,
-      } = mockWebChannel();
+      const { registerMessageToChromeListener, triggerResponse } =
+        mockWebChannel();
       registerMessageToChromeListener(() => {
         triggerResponse({
           errno: 2, // ERRNO_NO_SUCH_CHANNEL
@@ -1366,7 +1354,7 @@ describe('actions/receive-profile', function() {
       return { getState, dispatch, view };
     }
 
-    it('can load json with a good mime type', async function() {
+    it('can load json with a good mime type', async function () {
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1380,7 +1368,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('symbolicates unsymbolicated profiles', async function() {
+    it('symbolicates unsymbolicated profiles', async function () {
       simulateSymbolStoreHasNoCache();
 
       window.fetch = jest
@@ -1407,7 +1395,7 @@ describe('actions/receive-profile', function() {
       delete window.fetch;
     });
 
-    it('can load json with an empty mime type', async function() {
+    it('can load json with an empty mime type', async function () {
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
@@ -1421,7 +1409,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('can load gzipped json with an empty mime type', async function() {
+    it('can load gzipped json with an empty mime type', async function () {
       window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
@@ -1436,7 +1424,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('will give an error when unable to parse json', async function() {
+    it('will give an error when unable to parse json', async function () {
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -1454,7 +1442,7 @@ describe('actions/receive-profile', function() {
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
-    it('can load gzipped json', async function() {
+    it('can load gzipped json', async function () {
       window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
@@ -1469,7 +1457,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('can load gzipped json even with incorrect mime type', async function() {
+    it('can load gzipped json even with incorrect mime type', async function () {
       window.TextDecoder = TextDecoder;
       const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
@@ -1484,7 +1472,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('will give an error when unable to parse gzipped profiles', async function() {
+    it('will give an error when unable to parse gzipped profiles', async function () {
       window.TextDecoder = TextDecoder;
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
@@ -1521,7 +1509,7 @@ describe('actions/receive-profile', function() {
       });
     }
 
-    it('can load a zipped profile', async function() {
+    it('can load a zipped profile', async function () {
       const { getState, view } = await setupZipTestWithProfile(
         'profile.json',
         serializeProfile(_getSimpleProfile())
@@ -1534,7 +1522,7 @@ describe('actions/receive-profile', function() {
       expect(zipInStore.files['profile.json']).toBeTruthy();
     });
 
-    it('will load and view a simple profile with no errors', async function() {
+    it('will load and view a simple profile with no errors', async function () {
       const { getState, dispatch } = await setupZipTestWithProfile(
         'profile.json',
         serializeProfile(_getSimpleProfile())
@@ -1553,7 +1541,7 @@ describe('actions/receive-profile', function() {
       expect(errorMessage).toEqual(null);
     });
 
-    it('will be an error to view a profile with no threads', async function() {
+    it('will be an error to view a profile with no threads', async function () {
       const { getState, dispatch } = await setupZipTestWithProfile(
         'profile.json',
         serializeProfile(getEmptyProfile())
@@ -1584,7 +1572,7 @@ describe('actions/receive-profile', function() {
       expect(errorMessage).toMatchSnapshot();
     });
 
-    it('will give an error when unable to decompress a zipped profile', async function() {
+    it('will give an error when unable to decompress a zipped profile', async function () {
       const { view } = await setupTestWithFile({
         type: 'application/zip',
         payload: new ArrayBuffer(10),
@@ -1597,7 +1585,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfilesToCompare', function() {
+  describe('retrieveProfilesToCompare', function () {
     function fetch200Response(profile: string) {
       return {
         ok: true,
@@ -1654,7 +1642,7 @@ describe('actions/receive-profile', function() {
       const shortUrl1 = 'https://perfht.ml/FAKEBITLYHASH1';
       const shortUrl2 = 'https://bit.ly/FAKEBITLYHASH2';
 
-      (expandUrl: any).mockImplementation(shortUrl => {
+      (expandUrl: any).mockImplementation((shortUrl) => {
         switch (shortUrl) {
           case shortUrl1:
             return longUrl1;
@@ -1692,7 +1680,7 @@ describe('actions/receive-profile', function() {
       { skipMarkers }: SetupOptionsParams = {}
     ) {
       if (skipMarkers !== true) {
-        profile1.threads.forEach(thread =>
+        profile1.threads.forEach((thread) =>
           addMarkersToThreadWithCorrespondingSamples(thread, [
             ['A', 1, 3],
             ['A', 1],
@@ -1702,7 +1690,7 @@ describe('actions/receive-profile', function() {
             ['E', 5],
           ])
         );
-        profile2.threads.forEach(thread =>
+        profile2.threads.forEach((thread) =>
           addMarkersToThreadWithCorrespondingSamples(thread, [
             ['F', 1, 3],
             ['G', 2],
@@ -1740,28 +1728,23 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
       );
     });
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.fetch;
     });
 
-    it('retrieves profiles and put them in the same view', async function() {
-      const {
-        profile1,
-        profile2,
-        resultProfile,
-        globalTracks,
-        rootRange,
-      } = await setupWithLongUrl(getSomeProfiles(), {
-        urlSearch1: 'thread=0',
-        urlSearch2: 'thread=1',
-      });
+    it('retrieves profiles and put them in the same view', async function () {
+      const { profile1, profile2, resultProfile, globalTracks, rootRange } =
+        await setupWithLongUrl(getSomeProfiles(), {
+          urlSearch1: 'thread=0',
+          urlSearch2: 'thread=1',
+        });
 
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
@@ -1785,16 +1768,12 @@ describe('actions/receive-profile', function() {
       expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
-    it('expands the URL if needed', async function() {
-      const {
-        shortUrl1,
-        shortUrl2,
-        globalTracks,
-        rootRange,
-      } = await setupWithShortUrl(getSomeProfiles(), {
-        urlSearch1: 'thread=0',
-        urlSearch2: 'thread=1',
-      });
+    it('expands the URL if needed', async function () {
+      const { shortUrl1, shortUrl2, globalTracks, rootRange } =
+        await setupWithShortUrl(getSomeProfiles(), {
+          urlSearch1: 'thread=0',
+          urlSearch2: 'thread=1',
+        });
 
       // Reuse some expectations from the previous test
       expect(globalTracks).toHaveLength(3); // each thread + comparison track
@@ -1805,7 +1784,7 @@ describe('actions/receive-profile', function() {
       expect(expandUrl).toHaveBeenCalledWith(shortUrl2);
     });
 
-    it('keeps the initial rootRange as default', async function() {
+    it('keeps the initial rootRange as default', async function () {
       //Time sample has been set for 100000ms (100s)
       const { profile } = getProfileFromTextSamples(`
         100000
@@ -1822,7 +1801,7 @@ describe('actions/receive-profile', function() {
       expect(rootRange).toEqual({ start: 0, end: 1 });
     });
 
-    it('filters samples and markers, according to the URL', async function() {
+    it('filters samples and markers, according to the URL', async function () {
       const { resultProfile } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&range=0.0011_0.0043',
         urlSearch2: 'thread=1',
@@ -1831,7 +1810,7 @@ describe('actions/receive-profile', function() {
       expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 
-    it('reuses the implementation information if both profiles used it', async function() {
+    it('reuses the implementation information if both profiles used it', async function () {
       const { getState } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&implementation=js',
         urlSearch2: 'thread=1&implementation=js',
@@ -1840,7 +1819,7 @@ describe('actions/receive-profile', function() {
       expect(UrlStateSelectors.getImplementationFilter(getState())).toBe('js');
     });
 
-    it('does not reuse the implementation information if one profile used it', async function() {
+    it('does not reuse the implementation information if one profile used it', async function () {
       const { getState } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&implementation=js',
         urlSearch2: 'thread=1',
@@ -1851,7 +1830,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('reuses transforms', async function() {
+    it('reuses transforms', async function () {
       const { getState } = await setupWithLongUrl(getSomeProfiles(), {
         urlSearch1: 'thread=0&transforms=ff-42',
         urlSearch2: 'thread=1',
@@ -1865,11 +1844,10 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('creates a diff thread that computes properly diff timings', async function() {
+    it('creates a diff thread that computes properly diff timings', async function () {
       const { profile: baseProfile } = getProfileFromTextSamples('A  A');
-      const { profile: regressionProfile } = getProfileFromTextSamples(
-        'A  A  A  A  A  A'
-      );
+      const { profile: regressionProfile } =
+        getProfileFromTextSamples('A  A  A  A  A  A');
       const { resultProfile, getState } = await setupWithLongUrl({
         profile1: baseProfile,
         profile2: regressionProfile,
@@ -1883,7 +1861,7 @@ describe('actions/receive-profile', function() {
       expect(nodeData.self).toBe(4);
     });
 
-    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function() {
+    it("doesn't include screenshot track if the profiles don't have any screenshot marker", async function () {
       const store = blankStore();
       const { resultProfile } = await setup(getSomeProfiles(), {
         url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
@@ -1898,7 +1876,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('includes screenshot track of both profiles if they have screenshot markers', async function() {
+    it('includes screenshot track of both profiles if they have screenshot markers', async function () {
       const store = blankStore();
       //Get profiles with one screenshot track
       const profile1 = getProfileWithMarkers([
@@ -1951,7 +1929,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('getProfilesFromRawUrl', function() {
+  describe('getProfilesFromRawUrl', function () {
     function fetch200Response(profile: string) {
       return {
         ok: true,
@@ -2002,13 +1980,14 @@ describe('actions/receive-profile', function() {
         throw view.error;
       }
 
-      const waitUntilPhase = phase =>
-        waitUntilState(store, state => getView(state).phase === phase);
+      const waitUntilPhase = (phase) =>
+        waitUntilState(store, (state) => getView(state).phase === phase);
 
       const waitUntilSymbolication = () =>
         waitUntilState(
           store,
-          state => ProfileViewSelectors.getSymbolicationStatus(state) === 'DONE'
+          (state) =>
+            ProfileViewSelectors.getSymbolicationStatus(state) === 'DONE'
         );
 
       return {
@@ -2020,19 +1999,19 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
       );
     });
 
-    afterEach(function() {
+    afterEach(function () {
       delete window.fetch;
       delete window.geckoProfilerPromise;
     });
 
-    it('retrieves profile from a `public` data source and loads it', async function() {
+    it('retrieves profile from a `public` data source and loads it', async function () {
       const { profile, getState, dispatch } = await setup({
         pathname: '/public/fakehash/',
         search: '?thread=0&v=4',
@@ -2048,7 +2027,7 @@ describe('actions/receive-profile', function() {
       expect(getView(getState()).phase).toBe('DATA_LOADED');
     });
 
-    it('retrieves profile from a `from-url` data source and loads it', async function() {
+    it('retrieves profile from a `from-url` data source and loads it', async function () {
       const { profile, getState, dispatch } = await setup({
         // '/from-url/https://fakeurl.com/fakeprofile.json/'
         pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
@@ -2065,7 +2044,7 @@ describe('actions/receive-profile', function() {
       expect(getView(getState()).phase).toBe('DATA_LOADED');
     });
 
-    it('keeps the `from-url` value in the URL', async function() {
+    it('keeps the `from-url` value in the URL', async function () {
       const { getState, dispatch } = await setup({
         // '/from-url/https://fakeurl.com/fakeprofile.json/'
         pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
@@ -2080,7 +2059,7 @@ describe('actions/receive-profile', function() {
       expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
     });
 
-    it('retrieves profile from a `compare` data source and loads it', async function() {
+    it('retrieves profile from a `compare` data source and loads it', async function () {
       const url1 = 'http://fake-url.com/public/1?thread=0';
       const url2 = 'http://fake-url.com/public/2?thread=0';
       const { getState, dispatch } = await setup(
@@ -2103,7 +2082,7 @@ describe('actions/receive-profile', function() {
       expect(getView(getState()).phase).toBe('DATA_LOADED');
     });
 
-    it('retrieves profile from a `from-browser` data source and loads it', async function() {
+    it('retrieves profile from a `from-browser` data source and loads it', async function () {
       const { geckoProfile, getState, waitUntilPhase } = await setup(
         {
           pathname: '/from-browser/',
@@ -2122,7 +2101,7 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('finishes symbolication for `from-browser` data source', async function() {
+    it('finishes symbolication for `from-browser` data source', async function () {
       const { waitUntilSymbolication } = await setup(
         {
           pathname: '/from-browser/',
@@ -2137,8 +2116,8 @@ describe('actions/receive-profile', function() {
     });
 
     ['none', 'from-file', 'local', 'uploaded-recordings', 'compare'].forEach(
-      dataSource => {
-        it(`does not retrieve a profile for the datasource ${dataSource}`, async function() {
+      (dataSource) => {
+        it(`does not retrieve a profile for the datasource ${dataSource}`, async function () {
           const sourcePath = `/${dataSource}/`;
           const { getState } = await setup({
             pathname: sourcePath,

@@ -46,7 +46,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
   inputRef = React.createRef();
 
   blurInput() {
-    this.setState(state => ({
+    this.setState((state) => ({
       focusedWithKey: null,
       focusGeneration: state.focusGeneration + 1,
     }));
@@ -152,7 +152,7 @@ class ProfileNameImpl extends React.PureComponent<Props, State> {
 }
 
 export const ProfileName = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     profileNameWithDefault: getProfileNameWithDefault(state),
   }),
   mapDispatchToProps: {

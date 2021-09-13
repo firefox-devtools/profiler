@@ -17,7 +17,7 @@ import { getElementWithFixedSize } from '../fixtures/mocks/element-size';
 
 import type { StartEndRange } from 'firefox-profiler/types';
 
-describe('EmptyThreadIndicator', function() {
+describe('EmptyThreadIndicator', function () {
   // Sizing for the containing dom node.
   const width = 100;
   const height = 10;
@@ -52,7 +52,7 @@ describe('EmptyThreadIndicator', function() {
     };
   }
 
-  describe('rendering', function() {
+  describe('rendering', function () {
     it('matches the snapshot when rendering all three types of indicators', () => {
       const props = propsFromViewportRange({ start: 0, end: 10 });
 
@@ -92,7 +92,7 @@ describe('EmptyThreadIndicator', function() {
     });
   });
 
-  describe('startup empty thread indicator', function() {
+  describe('startup empty thread indicator', function () {
     // Thread startup is between 0 and 3 seconds in the mock data. In addition the space
     // is 100px wide.
 
@@ -127,7 +127,7 @@ describe('EmptyThreadIndicator', function() {
     });
   });
 
-  describe('shutdown empty thread indicator', function() {
+  describe('shutdown empty thread indicator', function () {
     // Thread startup is between 0 and 3 seconds in the mock data. In addition the space
     // is 100px wide.
 
@@ -165,7 +165,7 @@ describe('EmptyThreadIndicator', function() {
     });
   });
 
-  describe('empty buffer start indicator', function() {
+  describe('empty buffer start indicator', function () {
     // Thread startup is between 0 and 3 seconds in the mock data. In addition the space
     // is 100px wide.
 

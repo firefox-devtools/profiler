@@ -66,7 +66,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
     forceScroll: boolean = false
   ) => {
     if (forceScroll) {
-      this.setState(prevState => {
+      this.setState((prevState) => {
         return {
           initialSelected: el,
           forceLayoutGeneration: prevState.forceLayoutGeneration + 1,
@@ -120,7 +120,7 @@ class ActiveTabTimelineImpl extends React.PureComponent<Props, State> {
 }
 
 export const ActiveTabTimeline = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     globalTracks: getActiveTabGlobalTracks(state),
     globalTrackReferences: getActiveTabGlobalTrackReferences(state),
     committedRange: getCommittedRange(state),

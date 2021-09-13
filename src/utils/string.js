@@ -7,7 +7,7 @@
 // Initializing this RegExp outside of removeURLs because that function is in a
 // hot path during sanitization and it's good to avoid the initialization of the
 // RegExp which is costly.
-const REMOVE_URLS_REGEXP = (function() {
+const REMOVE_URLS_REGEXP = (function () {
   const protocols = [
     'http',
     'https',

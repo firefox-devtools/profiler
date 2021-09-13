@@ -49,21 +49,21 @@ import {
 // It is not necessary to add a new test file for every version bump!
 // Only add new test files when necessary, as described in step 4.
 
-describe('upgrading gecko profiles', function() {
+describe('upgrading gecko profiles', function () {
   function testProfileUpgrading(profile) {
     upgradeGeckoProfileToCurrentVersion(profile);
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
     expect(profile).toMatchSnapshot();
   }
 
-  it('should upgrade gecko-1.json all the way to the current version', function() {
+  it('should upgrade gecko-1.json all the way to the current version', function () {
     // This tests:
     //  - exercises all upgraders starting from gecko profile version 3
     //  - samples, most marker types, nested processes
     testProfileUpgrading(require('../fixtures/upgrades/gecko-1.json'));
   });
 
-  it('should upgrade gecko-2.json all the way to the current version', function() {
+  it('should upgrade gecko-2.json all the way to the current version', function () {
     // This tests:
     //  - nothing other than what gecko-1.json already tests, but it uses
     //    version 13 so it's easier to modify for future tests
@@ -73,7 +73,7 @@ describe('upgrading gecko profiles', function() {
   });
 });
 
-describe('upgrading processed profiles', function() {
+describe('upgrading processed profiles', function () {
   async function testProfileUpgrading(profile) {
     const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
     expect(upgradedProfile.meta.preprocessedProfileVersion).toEqual(
@@ -82,7 +82,7 @@ describe('upgrading processed profiles', function() {
     expect(JSON.parse(serializeProfile(upgradedProfile))).toMatchSnapshot();
   }
 
-  it('should upgrade processed-1.json all the way to the current version', async function() {
+  it('should upgrade processed-1.json all the way to the current version', async function () {
     // This tests:
     //  - exercises all upgraders starting from processed profile version 0
     //  - samples, most marker types, threads of different processes
@@ -91,7 +91,7 @@ describe('upgrading processed profiles', function() {
     );
   });
 
-  it('should upgrade processed-2.json all the way to the current version', async function() {
+  it('should upgrade processed-2.json all the way to the current version', async function () {
     // This tests:
     //  - upgrading the DOMEventMarkerPayload.timeStamp field
     //  - Renaming DiskIO markers to FileIO markers
@@ -100,7 +100,7 @@ describe('upgrading processed profiles', function() {
     );
   });
 
-  it('should upgrade processed-3.json all the way to the current version', async function() {
+  it('should upgrade processed-3.json all the way to the current version', async function () {
     // This tests:
     //  - Upgrading pages array and page information inside markers
     //  - Upgrading instant markers
@@ -110,8 +110,8 @@ describe('upgrading processed profiles', function() {
   });
 });
 
-describe('importing perf profile', function() {
-  it('should import a perf profile', async function() {
+describe('importing perf profile', function () {
+  it('should import a perf profile', async function () {
     try {
       const fs = require('fs');
       const zlib = require('zlib');

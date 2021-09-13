@@ -30,7 +30,7 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CauseBacktrace } from 'firefox-profiler/types';
 
-describe('MarkerTable', function() {
+describe('MarkerTable', function () {
   // Set an arbitrary size that will not kick in any virtualization behavior.
   autoMockElementSize({ width: 2000, height: 1000 });
 
@@ -51,7 +51,7 @@ describe('MarkerTable', function() {
     const scrolledRows = () =>
       Array.from(container.querySelectorAll('.treeViewRowScrolledColumns'));
 
-    const getRowElement = functionName =>
+    const getRowElement = (functionName) =>
       ensureExists(
         screen.getByText(functionName).closest('.treeViewRow'),
         `Couldn't find the row for node ${String(functionName)}.`
@@ -195,7 +195,7 @@ describe('MarkerTable', function() {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
-    it('shows reasons when all non-network markers have been filtered out', function() {
+    it('shows reasons when all non-network markers have been filtered out', function () {
       const { dispatch, container } = setup();
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();

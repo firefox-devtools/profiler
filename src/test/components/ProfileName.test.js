@@ -15,7 +15,7 @@ import { getProfileNameFromUrl } from 'firefox-profiler/selectors';
 import { changeProfileName } from 'firefox-profiler/actions/profile-view';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 
-describe('ProfileName', function() {
+describe('ProfileName', function () {
   const defaultName = 'Firefox – macOS 10.14';
 
   function setup(profileName?: string) {
@@ -56,17 +56,17 @@ describe('ProfileName', function() {
     return { ...store, ...renderResult };
   }
 
-  it('matches the snapshot', function() {
+  it('matches the snapshot', function () {
     const { container } = setup();
     expect(container).toMatchSnapshot();
   });
 
-  it('has a default name', function() {
+  it('has a default name', function () {
     const { getByText } = setup();
     expect(getByText(defaultName)).toBeInTheDocument();
   });
 
-  it('can edit the name', function() {
+  it('can edit the name', function () {
     const { getByText, queryByText, getByDisplayValue, getState } = setup();
     const button = getByText(defaultName);
 
@@ -105,7 +105,7 @@ describe('ProfileName', function() {
     });
   });
 
-  it('will use a url-provided profile name', function() {
+  it('will use a url-provided profile name', function () {
     const { getByText } = setup('Custom name from URL');
 
     expect(getByText('Custom name from URL')).toBeInTheDocument();

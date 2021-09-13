@@ -33,7 +33,7 @@ import {
 } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 
-describe('ActiveTabTimeline', function() {
+describe('ActiveTabTimeline', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
   beforeEach(() => {
@@ -45,12 +45,10 @@ describe('ActiveTabTimeline', function() {
   });
 
   it('should be rendered properly from the Timeline component', () => {
-    const {
-      profile,
-      parentInnerWindowIDsWithChildren,
-      firstTabTabID,
-    } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
-    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    const { profile, parentInnerWindowIDsWithChildren, firstTabTabID } =
+      addActiveTabInformationToProfile(getProfileWithNiceTracks());
+    profile.threads[0].frameTable.innerWindowID[0] =
+      parentInnerWindowIDsWithChildren;
     const store = storeWithProfile(profile);
     store.dispatch(
       changeTimelineTrackOrganization({
@@ -70,7 +68,7 @@ describe('ActiveTabTimeline', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('ActiveTabGlobalTrack', function() {
+  describe('ActiveTabGlobalTrack', function () {
     function setup() {
       const { profile, ...pageInfo } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
@@ -142,12 +140,12 @@ describe('ActiveTabTimeline', function() {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('has useful parts of the component', function() {
+    it('has useful parts of the component', function () {
       const { getGlobalTrackRow } = setup();
       expect(getGlobalTrackRow()).toBeTruthy();
     });
 
-    it('starts out not being selected', function() {
+    it('starts out not being selected', function () {
       const { getState, getGlobalTrackRow, threadIndex } = setup();
       expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       expect(getGlobalTrackRow()).not.toHaveClass('selected');
@@ -167,7 +165,7 @@ describe('ActiveTabTimeline', function() {
     });
   });
 
-  describe('ActiveTabResourcesPanel', function() {
+  describe('ActiveTabResourcesPanel', function () {
     function setup() {
       const { profile, ...pageInfo } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
@@ -239,11 +237,8 @@ describe('ActiveTabTimeline', function() {
     });
 
     it('clicking on the header opens the resources panel', () => {
-      const {
-        getResourcesPanelHeader,
-        getResourceFrameTrack,
-        flushRafCalls,
-      } = setup();
+      const { getResourcesPanelHeader, getResourceFrameTrack, flushRafCalls } =
+        setup();
       const resourcesPanelHeader = getResourcesPanelHeader();
       expect(getResourceFrameTrack()).toBeFalsy();
 
@@ -277,7 +272,7 @@ describe('ActiveTabTimeline', function() {
     });
   });
 
-  describe('ActiveTabResourceTrack', function() {
+  describe('ActiveTabResourceTrack', function () {
     function setup() {
       const { profile, ...pageInfo } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
@@ -345,18 +340,18 @@ describe('ActiveTabTimeline', function() {
       };
     }
 
-    describe('with a thread/sub-frame track', function() {
+    describe('with a thread/sub-frame track', function () {
       it('matches the snapshot of a resource track', () => {
         const { container } = setup();
         expect(container.firstChild).toMatchSnapshot();
       });
 
-      it('has the correct track name', function() {
+      it('has the correct track name', function () {
         const { resourcePage } = setup();
         expect(screen.getByText(resourcePage.url)).toBeInTheDocument();
       });
 
-      it('starts out not being selected', function() {
+      it('starts out not being selected', function () {
         const { getState, threadIndex } = setup();
         expect(getFirstSelectedThreadIndex(getState())).not.toBe(threadIndex);
       });

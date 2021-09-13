@@ -19,7 +19,7 @@ import type {
 import './VerticalIndicators.css';
 
 type Props = {|
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +verticalMarkerIndexes: MarkerIndex[],
   +pages: PageList | null,
   +rangeStart: Milliseconds,
@@ -27,7 +27,7 @@ type Props = {|
   +zeroAt: Milliseconds,
   +width: CssPixels,
   +shouldShowTooltip: boolean,
-  +onRightClick: MarkerIndex => mixed,
+  +onRightClick: (MarkerIndex) => mixed,
 |};
 
 /**
@@ -55,7 +55,7 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       width,
       shouldShowTooltip,
     } = this.props;
-    return verticalMarkerIndexes.map<React.Node>(markerIndex => {
+    return verticalMarkerIndexes.map<React.Node>((markerIndex) => {
       const marker = getMarker(markerIndex);
       // Decide on the indicator color.
       let color = '#000';
@@ -91,7 +91,9 @@ export class VerticalIndicators extends React.PureComponent<Props> {
       ) {
         const innerWindowID = data.innerWindowID;
         if (innerWindowID) {
-          const page = pages.find(page => page.innerWindowID === innerWindowID);
+          const page = pages.find(
+            (page) => page.innerWindowID === innerWindowID
+          );
           if (page) {
             url = (
               <div className="timelineVerticalIndicatorsUrl">

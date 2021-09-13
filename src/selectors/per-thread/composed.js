@@ -70,11 +70,11 @@ export function getComposedSelectorsPerThread(
       if (isNetworkChartEmpty) {
         // Don't show the network chart if it's empty.
         visibleTabs = visibleTabs.filter(
-          tabSlug => tabSlug !== 'network-chart'
+          (tabSlug) => tabSlug !== 'network-chart'
         );
       }
       if (!jsTracerTable) {
-        visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'js-tracer');
+        visibleTabs = visibleTabs.filter((tabSlug) => tabSlug !== 'js-tracer');
       }
       return visibleTabs;
     }

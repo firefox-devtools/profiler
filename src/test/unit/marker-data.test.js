@@ -40,7 +40,7 @@ import type {
   Milliseconds,
 } from 'firefox-profiler/types';
 
-describe('Derive markers from Gecko phase markers', function() {
+describe('Derive markers from Gecko phase markers', function () {
   function setupWithTestDefinedMarkers(markers) {
     const profile = processGeckoProfile(createGeckoProfileWithMarkers(markers));
     profile.meta.symbolicated = true; // Avoid symbolication.
@@ -56,7 +56,7 @@ describe('Derive markers from Gecko phase markers', function() {
     };
   }
 
-  it('creates an instant marker', function() {
+  it('creates an instant marker', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         startTime: 5,
@@ -76,7 +76,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('creates an interval marker', function() {
+  it('creates an interval marker', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         startTime: 5,
@@ -96,7 +96,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('matches an IntervalStart and IntervalEnd marker', function() {
+  it('matches an IntervalStart and IntervalEnd marker', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         startTime: 5,
@@ -121,7 +121,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('completes an unmatched IntervalEnd marker', function() {
+  it('completes an unmatched IntervalEnd marker', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         startTime: null,
@@ -142,7 +142,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('completes an unmatched IntervalStart marker', function() {
+  it('completes an unmatched IntervalStart marker', function () {
     const startTime = 2;
     const { markers, profile } = setupWithTestDefinedMarkers([
       {
@@ -165,7 +165,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('handles nested interval start/end markers', function() {
+  it('handles nested interval start/end markers', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         startTime: 2,
@@ -207,7 +207,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('only nests markers of the same name', function() {
+  it('only nests markers of the same name', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {
         name: 'Marker A',
@@ -253,7 +253,7 @@ describe('Derive markers from Gecko phase markers', function() {
     ]);
   });
 
-  it('has special handling for CompositorScreenshot', function() {
+  it('has special handling for CompositorScreenshot', function () {
     const basePayload = {
       type: 'CompositorScreenshot',
       url: 16,
@@ -271,7 +271,7 @@ describe('Derive markers from Gecko phase markers', function() {
         windowID: '0xAAAAAAAAA',
       },
     ];
-    const payloadsForWindowB = payloadsForWindowA.map(payload => ({
+    const payloadsForWindowB = payloadsForWindowA.map((payload) => ({
       ...payload,
       windowID: '0xBBBBBBBBB',
     }));
@@ -349,7 +349,7 @@ describe('Derive markers from Gecko phase markers', function() {
   });
 });
 
-describe('deriveMarkersFromRawMarkerTable', function() {
+describe('deriveMarkersFromRawMarkerTable', function () {
   function setup() {
     // We have a broken marker on purpose in our test data, which outputs an
     // error. Let's silence an error to have a clean output. We check that the
@@ -382,7 +382,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     };
   }
 
-  it('creates a reasonable processed profile', function() {
+  it('creates a reasonable processed profile', function () {
     const { thread, contentThread } = setup();
     expect(thread.name).toBe('GeckoMain');
     expect(thread.processType).toBe('default');
@@ -390,15 +390,15 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('matches the snapshot', function() {
+  it('matches the snapshot', function () {
     const { markers } = setup();
     expect(markers).toMatchSnapshot();
   });
 
-  it('creates 18 markers given the test data', function() {
+  it('creates 18 markers given the test data', function () {
     const { markers } = setup();
     const markerNames = markers.map(
-      marker => (marker.data ? marker.data.type : 'null') + ':' + marker.name
+      (marker) => (marker.data ? marker.data.type : 'null') + ':' + marker.name
     );
     expect(markerNames).toEqual([
       'tracing:Rasterize',
@@ -422,7 +422,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     ]);
   });
 
-  it('creates a marker even if there is no start or end time', function() {
+  it('creates a marker even if there is no start or end time', function () {
     const { markers } = setup();
     expect(markers[1]).toMatchObject({
       start: 2,
@@ -431,7 +431,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should create a marker', function() {
+  it('should create a marker', function () {
     const { markers } = setup();
     expect(markers[2]).toMatchObject({
       start: 3,
@@ -440,7 +440,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should fold the two reflow markers into one marker', function() {
+  it('should fold the two reflow markers into one marker', function () {
     const { markers } = setup();
     expect(markers.length).toEqual(18);
     expect(markers[2]).toMatchObject({
@@ -450,7 +450,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
+  it('should fold the two Rasterize markers into one marker, after the reflow marker', function () {
     const { markers } = setup();
     expect(markers[3]).toMatchObject({
       start: 4,
@@ -459,7 +459,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should correlate the IPC markers together and fold transferStart/transferEnd markers', function() {
+  it('should correlate the IPC markers together and fold transferStart/transferEnd markers', function () {
     const { markers, contentMarkers } = setup();
     expect(markers[14]).toMatchObject({
       start: 30,
@@ -494,7 +494,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should create a marker for the MinorGC startTime/endTime marker', function() {
+  it('should create a marker for the MinorGC startTime/endTime marker', function () {
     const { markers } = setup();
     expect(markers[5]).toMatchObject({
       start: 11,
@@ -503,7 +503,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should create a marker for the DOMEvent marker', function() {
+  it('should create a marker for the DOMEvent marker', function () {
     const { markers } = setup();
     expect(markers[4]).toMatchObject({
       end: 10,
@@ -512,7 +512,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should create a marker for the marker UserTiming', function() {
+  it('should create a marker for the marker UserTiming', function () {
     const { markers } = setup();
     expect(markers[6]).toMatchObject({
       end: 13,
@@ -521,7 +521,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should handle markers without a start', function() {
+  it('should handle markers without a start', function () {
     const { markers } = setup();
     expect(markers[0]).toMatchObject({
       start: 0, // Truncated to the time of the first captured sample.
@@ -530,7 +530,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should handle markers without an end', function() {
+  it('should handle markers without an end', function () {
     const { markers } = setup();
     expect(markers[17]).toMatchObject({
       start: 100,
@@ -540,7 +540,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should handle nested markers correctly', function() {
+  it('should handle nested markers correctly', function () {
     const { markers } = setup();
     expect(markers[7]).toMatchObject({
       start: 13,
@@ -554,7 +554,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should handle arbitrary tracing markers correctly', function() {
+  it('should handle arbitrary tracing markers correctly', function () {
     const { markers } = setup();
     expect(markers[9]).toMatchObject({
       start: 21,
@@ -566,7 +566,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
 
   // Note that the network markers are also extensively tested below in the part
   // for filterRawMarkerTableToRange.
-  it('shifts content process marker times correctly, especially in network markers', function() {
+  it('shifts content process marker times correctly, especially in network markers', function () {
     const { thread, contentThread, markers, contentMarkers } = setup();
 
     expect(thread.processStartupTime).toBe(0);
@@ -723,7 +723,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
 
-  it('should create a marker for the marker CompositorScreenshot', function() {
+  it('should create a marker for the marker CompositorScreenshot', function () {
     const { markers } = setup();
     expect(markers[12]).toMatchObject({
       data: {
@@ -757,7 +757,7 @@ describe('filterRawMarkerTableToRange', () => {
       start,
       end
     );
-    const rawMarkerNames = rawMarkerTable.name.map(i =>
+    const rawMarkerNames = rawMarkerTable.name.map((i) =>
       thread.stringTable.getString(i)
     );
     const processedMarkers = getTestFriendlyDerivedMarkerInfo({
@@ -977,7 +977,7 @@ describe('filterRawMarkerTableToRange', () => {
     });
 
     expect(
-      processedMarkers.map(marker => [
+      processedMarkers.map((marker) => [
         marker.name,
         marker.data && (marker.data: any).id,
         marker.data && (marker.data: any).status,
@@ -1049,7 +1049,7 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     });
 
-    const result = processedMarkers.map(marker => [
+    const result = processedMarkers.map((marker) => [
       marker.name,
       marker.data && (marker.data: any).id,
     ]);
@@ -1122,7 +1122,7 @@ describe('filterRawMarkerTableToRange', () => {
     });
 
     expect(
-      processedMarkers.map(marker => [
+      processedMarkers.map((marker) => [
         marker.name,
         marker.data && (marker.data: any).id,
       ])
@@ -1211,7 +1211,7 @@ describe('filterRawMarkerTableToRange', () => {
     });
 
     expect(
-      processedMarkers.map(marker => [
+      processedMarkers.map((marker) => [
         marker.name,
         marker.data && (marker.data: any).id,
       ])
@@ -1243,7 +1243,7 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
       markersToDelete,
       timeRange
     );
-    const markerNames = rawMarkerTable.name.map(stringIndex =>
+    const markerNames = rawMarkerTable.name.map((stringIndex) =>
       thread.stringTable.getString(stringIndex)
     );
 

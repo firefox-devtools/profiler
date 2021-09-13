@@ -69,7 +69,10 @@ async function logAndExec(
  * @throws Will throw an error if one of the executed commands fails.
  */
 function logAndPipeExec(...commands /*: string[][] */) /*: string */ {
-  console.log('[exec]', commands.map(command => command.join(' ')).join(' | '));
+  console.log(
+    '[exec]',
+    commands.map((command) => command.join(' ')).join(' | ')
+  );
   let prevOutput = '';
   for (const command of commands) {
     const [executable, ...args] = command;
@@ -152,7 +155,7 @@ async function findUpstream() /*: Promise<string> */ {
 
     const gitRemoteOutput = gitRemoteResult.stdout.toString();
     const remotes = gitRemoteOutput.split('\n');
-    const upstreamLine = remotes.find(line =>
+    const upstreamLine = remotes.find((line) =>
       // Change this regexp to make it work with your fork for debugging purpose.
       /devtools-html\/perf.html|firefox-devtools\/profiler/.test(line)
     );
@@ -181,12 +184,7 @@ async function findUpstream() /*: Promise<string> */ {
  * that doesn't match the `allowedRegexp`.
  */
 async function checkAllowedPaths(
-  {
-    upstream,
-    compareBranch,
-    baseBranch,
-    allowedRegexp,
-  } /*:
+  { upstream, compareBranch, baseBranch, allowedRegexp } /*:
   {|
     upstream: string,
     compareBranch: string,

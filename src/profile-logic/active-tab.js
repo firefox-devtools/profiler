@@ -40,9 +40,8 @@ function isTabFilteredThreadEmpty(
     }
   }
 
-  const tabFilteredMarkers = threadSelectors.getActiveTabFilteredMarkerIndexesWithoutGlobals(
-    state
-  );
+  const tabFilteredMarkers =
+    threadSelectors.getActiveTabFilteredMarkerIndexesWithoutGlobals(state);
   if (tabFilteredMarkers.length > 0) {
     // Thread has some markers in it. Don't hide and skip to the next global track.
     return false;
@@ -133,7 +132,7 @@ export function computeActiveTabTracks(
     threadsKey: getThreadsKey(mainTrackIndexesSet),
   };
   const resourcesThreadsKey = getThreadsKey(
-    new Set(resources.map(resource => resource.threadIndex))
+    new Set(resources.map((resource) => resource.threadIndex))
   );
 
   return { mainTrack, screenshots, resources, resourcesThreadsKey };
@@ -200,10 +199,10 @@ function _getActiveTabResourceName(
     // This is a sub-frame.
     // Get the first innerWindowID inside the thread.
     let firstInnerWindowID = ensureExists(thread.frameTable.innerWindowID).find(
-      innerWindowID => innerWindowID && innerWindowID !== 0
+      (innerWindowID) => innerWindowID && innerWindowID !== 0
     );
     if (firstInnerWindowID === undefined || firstInnerWindowID === null) {
-      const markerData = thread.markers.data.find(data => {
+      const markerData = thread.markers.data.find((data) => {
         if (
           data &&
           data.innerWindowID &&

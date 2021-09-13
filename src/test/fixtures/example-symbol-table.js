@@ -22,7 +22,7 @@ export type ExampleSymbolTableSymbols = Array<{|
 export type ExampleSymbolTable = {|
   symbols: ExampleSymbolTableSymbols,
   asTuple: SymbolTableAsTuple,
-  getAddressResult: number => AddressResult | null,
+  getAddressResult: (number) => AddressResult | null,
 |};
 
 function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
@@ -42,7 +42,7 @@ function _makeSymbolTableAsTuple(syms): SymbolTableAsTuple {
 
 function _makeGetAddressResultFunction(
   syms: ExampleSymbolTableSymbols
-): number => AddressResult | null {
+): (number) => AddressResult | null {
   return function getAddressResult(address) {
     for (let i = syms.length - 1; i >= 0; i--) {
       const { address: symbolAddress, name, file, lineRanges } = syms[i];

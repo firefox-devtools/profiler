@@ -48,8 +48,8 @@ describe('shared/ButtonWithPanel', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('protecting against mounting expensive panels', function() {
-    it('does not render the contents when closed', function() {
+  describe('protecting against mounting expensive panels', function () {
+    it('does not render the contents when closed', function () {
       render(
         <ButtonWithPanel
           className="button"
@@ -64,7 +64,7 @@ describe('shared/ButtonWithPanel', () => {
      * This test asserts that we don't try and mount the contents of a panel if it's
      * not open.
      */
-    it('only renders the contents when open', function() {
+    it('only renders the contents when open', function () {
       render(
         <ButtonWithPanel
           className="button"

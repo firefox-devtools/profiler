@@ -70,13 +70,14 @@ import type {
   SampleUnits,
 } from 'firefox-profiler/types';
 
-export const getProfileView: Selector<ProfileViewState> = state =>
+export const getProfileView: Selector<ProfileViewState> = (state) =>
   state.profileView;
-export const getFullProfileView: Selector<FullProfileViewState> = state =>
+export const getFullProfileView: Selector<FullProfileViewState> = (state) =>
   getProfileView(state).full;
-export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = state =>
-  getProfileView(state).activeTab;
-export const getOriginsProfileView: Selector<OriginsViewState> = state =>
+export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = (
+  state
+) => getProfileView(state).activeTab;
+export const getOriginsProfileView: Selector<OriginsViewState> = (state) =>
   getProfileView(state).origins;
 
 /**
@@ -84,16 +85,16 @@ export const getOriginsProfileView: Selector<OriginsViewState> = state =>
  */
 export const getProfileViewOptions: Selector<
   $PropertyType<ProfileViewState, 'viewOptions'>
-> = state => getProfileView(state).viewOptions;
-export const getProfileRootRange: Selector<StartEndRange> = state =>
+> = (state) => getProfileView(state).viewOptions;
+export const getProfileRootRange: Selector<StartEndRange> = (state) =>
   getProfileViewOptions(state).rootRange;
-export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
+export const getSymbolicationStatus: Selector<SymbolicationStatus> = (state) =>
   getProfileViewOptions(state).symbolicationStatus;
-export const getScrollToSelectionGeneration: Selector<number> = state =>
+export const getScrollToSelectionGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
-export const getFocusCallTreeGeneration: Selector<number> = state =>
+export const getFocusCallTreeGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).focusCallTreeGeneration;
-export const getZeroAt: Selector<Milliseconds> = state =>
+export const getZeroAt: Selector<Milliseconds> = (state) =>
   getProfileRootRange(state).start;
 
 export const getCommittedRange: Selector<StartEndRange> = createSelector(
@@ -111,10 +112,10 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
   }
 );
 
-export const getMouseTimePosition: Selector<Milliseconds | null> = state =>
+export const getMouseTimePosition: Selector<Milliseconds | null> = (state) =>
   getProfileViewOptions(state).mouseTimePosition;
 
-export const getPreviewSelection: Selector<PreviewSelection> = state =>
+export const getPreviewSelection: Selector<PreviewSelection> = (state) =>
   getProfileViewOptions(state).previewSelection;
 
 /**
@@ -138,53 +139,54 @@ export const getPreviewSelectionRange: Selector<StartEndRange> = createSelector(
 /**
  * Profile
  */
-export const getProfileOrNull: Selector<Profile | null> = state =>
+export const getProfileOrNull: Selector<Profile | null> = (state) =>
   getProfileView(state).profile;
-export const getProfile: Selector<Profile> = state =>
+export const getProfile: Selector<Profile> = (state) =>
   ensureExists(
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
-export const getProfileInterval: Selector<Milliseconds> = state =>
+export const getProfileInterval: Selector<Milliseconds> = (state) =>
   getProfile(state).meta.interval;
 export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
-export const getDefaultCategory: Selector<IndexIntoCategoryList> = state =>
-  getCategories(state).findIndex(c => c.color === 'grey');
-export const getThreads: Selector<Thread[]> = state =>
+export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
+  getCategories(state).findIndex((c) => c.color === 'grey');
+export const getThreads: Selector<Thread[]> = (state) =>
   getProfile(state).threads;
-export const getThreadNames: Selector<string[]> = state =>
-  getProfile(state).threads.map(t => t.name);
-export const getRightClickedTrack: Selector<TrackReference | null> = state =>
+export const getThreadNames: Selector<string[]> = (state) =>
+  getProfile(state).threads.map((t) => t.name);
+export const getRightClickedTrack: Selector<TrackReference | null> = (state) =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getCounter: Selector<Counter[] | null> = state =>
+export const getCounter: Selector<Counter[] | null> = (state) =>
   getProfile(state).counters || null;
-export const getMeta: Selector<ProfileMeta> = state => getProfile(state).meta;
-export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = state =>
+export const getMeta: Selector<ProfileMeta> = (state) => getProfile(state).meta;
+export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = (state) =>
   getMeta(state).visualMetrics || null;
-export const getVisualMetrics: Selector<VisualMetrics> = state =>
+export const getVisualMetrics: Selector<VisualMetrics> = (state) =>
   ensureExists(
     getVisualMetricsOrNull(state),
     'Tried to access the visual metrics when it does not exist.'
   );
-export const getVisualProgress: Selector<ProgressGraphData[]> = state =>
+export const getVisualProgress: Selector<ProgressGraphData[]> = (state) =>
   getVisualMetrics(state).VisualProgress;
-export const getPerceptualSpeedIndexProgress: Selector<
-  ProgressGraphData[]
-> = state => getVisualMetrics(state).PerceptualSpeedIndexProgress;
-export const getContentfulSpeedIndexProgress: Selector<
-  ProgressGraphData[]
-> = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
-export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
-  getMeta(state).configuration;
+export const getPerceptualSpeedIndexProgress: Selector<ProgressGraphData[]> = (
+  state
+) => getVisualMetrics(state).PerceptualSpeedIndexProgress;
+export const getContentfulSpeedIndexProgress: Selector<ProgressGraphData[]> = (
+  state
+) => getVisualMetrics(state).ContentfulSpeedIndexProgress;
+export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = (
+  state
+) => getMeta(state).configuration;
 
 // Get the marker schema that comes from the Gecko profile.
-const getMarkerSchemaGecko: Selector<MarkerSchema[]> = state =>
+const getMarkerSchemaGecko: Selector<MarkerSchema[]> = (state) =>
   getMeta(state).markerSchema;
 
 // Get the samples table units. They can be different depending on their platform.
 // See SampleUnits type definition for more information.
-export const getSampleUnits: Selector<SampleUnits | void> = state =>
+export const getSampleUnits: Selector<SampleUnits | void> = (state) =>
   getMeta(state).sampleUnits;
 
 /**
@@ -193,7 +195,7 @@ export const getSampleUnits: Selector<SampleUnits | void> = state =>
  */
 export const getCategories: Selector<CategoryList> = createSelector(
   getProfile,
-  profile => {
+  (profile) => {
     const { categories } = profile.meta;
     return categories ? categories : getDefaultCategories();
   }
@@ -203,30 +205,28 @@ export const getCategories: Selector<CategoryList> = createSelector(
 // to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
   getMarkerSchemaGecko,
-  geckoSchema => {
+  (geckoSchema) => {
     const frontEndSchemaNames = new Set([
-      ...markerSchemaFrontEndOnly.map(schema => schema.name),
+      ...markerSchemaFrontEndOnly.map((schema) => schema.name),
     ]);
     return [
       // Don't duplicate schema definitions that the front-end already has.
-      ...geckoSchema.filter(schema => !frontEndSchemaNames.has(schema.name)),
+      ...geckoSchema.filter((schema) => !frontEndSchemaNames.has(schema.name)),
       ...markerSchemaFrontEndOnly,
     ];
   }
 );
 
-export const getMarkerSchemaByName: Selector<MarkerSchemaByName> = createSelector(
-  getMarkerSchema,
-  schemaList => {
+export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
+  createSelector(getMarkerSchema, (schemaList) => {
     const result = Object.create(null);
     for (const schema of schemaList) {
       result[schema.name] = schema;
     }
     return result;
-  }
-);
+  });
 
-export const getActiveTabID: Selector<TabID | null> = state => {
+export const getActiveTabID: Selector<TabID | null> = (state) => {
   const configuration = getProfilerConfiguration(state);
   if (
     configuration &&
@@ -259,16 +259,16 @@ export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
  * type of the function.
  */
 function _createCounterSelectors(counterIndex: CounterIndex) {
-  const getCounter: Selector<Counter> = state =>
+  const getCounter: Selector<Counter> = (state) =>
     ensureExists(
       getProfile(state).counters,
       'Attempting to get a counter by index, but no counters exist.'
     )[counterIndex];
 
-  const getDescription: Selector<string> = state =>
+  const getDescription: Selector<string> = (state) =>
     getCounter(state).description;
 
-  const getPid: Selector<Pid> = state => getCounter(state).pid;
+  const getPid: Selector<Pid> = (state) => getCounter(state).pid;
 
   const getCommittedRangeFilteredCounter: Selector<Counter> = createSelector(
     getCounter,
@@ -278,8 +278,10 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
 
   const getAccumulateCounterSamples: Selector<
     Array<AccumulatedCounterSamples>
-  > = createSelector(getCommittedRangeFilteredCounter, counters =>
-    accumulateCounterSamples(counters.sampleGroups.map(group => group.samples))
+  > = createSelector(getCommittedRangeFilteredCounter, (counters) =>
+    accumulateCounterSamples(
+      counters.sampleGroups.map((group) => group.samples)
+    )
   );
 
   return {
@@ -291,10 +293,8 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
   };
 }
 
-export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> = createSelector(
-  getThreads,
-  correlateIPCMarkers
-);
+export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> =
+  createSelector(getThreads, correlateIPCMarkers);
 
 /**
  * Tracks
@@ -302,32 +302,30 @@ export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> = createS
  * Tracks come in two flavors: global tracks and local tracks.
  * They're uniquely referenced by a TrackReference.
  */
-export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
+export const getGlobalTracks: Selector<GlobalTrack[]> = (state) =>
   getFullProfileView(state).globalTracks;
 
 /**
  * This returns all TrackReferences for global tracks.
  */
-export const getGlobalTrackReferences: Selector<
-  GlobalTrackReference[]
-> = createSelector(getGlobalTracks, globalTracks =>
-  globalTracks.map((globalTrack, trackIndex) => ({
-    type: 'global',
-    trackIndex,
-  }))
-);
+export const getGlobalTrackReferences: Selector<GlobalTrackReference[]> =
+  createSelector(getGlobalTracks, (globalTracks) =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
+  );
 
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
   getThreads,
-  threads => {
+  (threads) => {
     return threads.some(({ stringTable, markers }) => {
       /*
        * Does this particular thread have a Preference in it?
        */
-      const indexForPreferenceString = stringTable.indexForString(
-        'PreferenceRead'
-      );
-      return markers.name.some(name => name === indexForPreferenceString);
+      const indexForPreferenceString =
+        stringTable.indexForString('PreferenceRead');
+      return markers.name.some((name) => name === indexForPreferenceString);
     });
   }
 );
@@ -354,7 +352,7 @@ export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
 > = (state, pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
-    track => track.type === 'process' && track.pid === pid
+    (track) => track.type === 'process' && track.pid === pid
   );
   if (globalTrackIndex === -1) {
     throw new Error('Unable to find the track index for the given pid.');
@@ -369,7 +367,7 @@ export const getGlobalTrackAndIndexByPid: DangerousSelectorWithArguments<
 /**
  * This returns a map of local tracks from a pid.
  */
-export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = state =>
+export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = (state) =>
   getFullProfileView(state).localTracksByPid;
 
 /**
@@ -377,14 +375,12 @@ export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = state =>
  * and finally returns the local tracks for a specific Pid. It does not need memoization
  * and is a very inexpensive function to run.
  */
-export const getLocalTracks: DangerousSelectorWithArguments<
-  LocalTrack[],
-  Pid
-> = (state, pid) =>
-  ensureExists(
-    getFullProfileView(state).localTracksByPid.get(pid),
-    'Unable to get the tracks for the given pid.'
-  );
+export const getLocalTracks: DangerousSelectorWithArguments<LocalTrack[], Pid> =
+  (state, pid) =>
+    ensureExists(
+      getFullProfileView(state).localTracksByPid.get(pid),
+      'Unable to get the tracks for the given pid.'
+    );
 
 /**
  * This selector does an inexpensive look-up for the local track from a reference.
@@ -402,10 +398,10 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
  */
 export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   getLocalTracksByPid,
-  localTracksByPid => {
+  (localTracksByPid) => {
     const processesWithMemoryTrack = new Set();
     for (const [pid, localTracks] of localTracksByPid.entries()) {
-      if (localTracks.some(track => track.type === 'memory')) {
+      if (localTracks.some((track) => track.type === 'memory')) {
         processesWithMemoryTrack.add(pid);
       }
     }
@@ -413,35 +409,37 @@ export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   }
 );
 
-export const getRightClickedThreadIndex: Selector<null | ThreadIndex> = createSelector(
-  getRightClickedTrack,
+export const getRightClickedThreadIndex: Selector<null | ThreadIndex> =
+  createSelector(
+    getRightClickedTrack,
+    getGlobalTracks,
+    getLocalTracksByPid,
+    (rightClickedTrack, globalTracks, localTracksByPid) => {
+      if (rightClickedTrack === null) {
+        return null;
+      }
+      if (rightClickedTrack.type === 'global') {
+        const track = globalTracks[rightClickedTrack.trackIndex];
+        return track.type === 'process' ? track.mainThreadIndex : null;
+      }
+      const { pid, trackIndex } = rightClickedTrack;
+      const localTracks = ensureExists(
+        localTracksByPid.get(pid),
+        'No local tracks found at that pid.'
+      );
+      const track = localTracks[trackIndex];
+
+      return track.type === 'thread' ? track.threadIndex : null;
+    }
+  );
+
+export const getGlobalTrackNames: Selector<string[]> = createSelector(
   getGlobalTracks,
-  getLocalTracksByPid,
-  (rightClickedTrack, globalTracks, localTracksByPid) => {
-    if (rightClickedTrack === null) {
-      return null;
-    }
-    if (rightClickedTrack.type === 'global') {
-      const track = globalTracks[rightClickedTrack.trackIndex];
-      return track.type === 'process' ? track.mainThreadIndex : null;
-    }
-    const { pid, trackIndex } = rightClickedTrack;
-    const localTracks = ensureExists(
-      localTracksByPid.get(pid),
-      'No local tracks found at that pid.'
-    );
-    const track = localTracks[trackIndex];
-
-    return track.type === 'thread' ? track.threadIndex : null;
-  }
-);
-
-export const getGlobalTrackNames: Selector<
-  string[]
-> = createSelector(getGlobalTracks, getThreads, (globalTracks, threads) =>
-  globalTracks.map(globalTrack =>
-    Tracks.getGlobalTrackName(globalTrack, threads)
-  )
+  getThreads,
+  (globalTracks, threads) =>
+    globalTracks.map((globalTrack) =>
+      Tracks.getGlobalTrackName(globalTrack, threads)
+    )
 );
 
 export const getGlobalTrackName: DangerousSelectorWithArguments<
@@ -449,24 +447,23 @@ export const getGlobalTrackName: DangerousSelectorWithArguments<
   TrackIndex
 > = (state, trackIndex) => getGlobalTrackNames(state)[trackIndex];
 
-export const getLocalTrackNamesByPid: Selector<
-  Map<Pid, string[]>
-> = createSelector(
-  getLocalTracksByPid,
-  getThreads,
-  (localTracksByPid, threads) => {
-    const localTrackNamesByPid = new Map();
-    for (const [pid, localTracks] of localTracksByPid) {
-      localTrackNamesByPid.set(
-        pid,
-        localTracks.map(localTrack =>
-          Tracks.getLocalTrackName(localTrack, threads)
-        )
-      );
+export const getLocalTrackNamesByPid: Selector<Map<Pid, string[]>> =
+  createSelector(
+    getLocalTracksByPid,
+    getThreads,
+    (localTracksByPid, threads) => {
+      const localTrackNamesByPid = new Map();
+      for (const [pid, localTracks] of localTracksByPid) {
+        localTrackNamesByPid.set(
+          pid,
+          localTracks.map((localTrack) =>
+            Tracks.getLocalTrackName(localTrack, threads)
+          )
+        );
+      }
+      return localTrackNamesByPid;
     }
-    return localTrackNamesByPid;
-  }
-);
+  );
 
 export const getLocalTrackName = (
   state: State,
@@ -485,15 +482,15 @@ export const getLocalTrackName = (
 /**
  * Returns global tracks for the active tab view.
  */
-export const getActiveTabTimeline: Selector<ActiveTabTimeline> = state =>
+export const getActiveTabTimeline: Selector<ActiveTabTimeline> = (state) =>
   getActiveTabProfileView(state).activeTabTimeline;
 
-export const getActiveTabMainTrack: Selector<ActiveTabMainTrack> = state =>
+export const getActiveTabMainTrack: Selector<ActiveTabMainTrack> = (state) =>
   getActiveTabTimeline(state).mainTrack;
 
-export const getActiveTabGlobalTracks: Selector<
-  ActiveTabGlobalTrack[]
-> = state => [
+export const getActiveTabGlobalTracks: Selector<ActiveTabGlobalTrack[]> = (
+  state
+) => [
   ...getActiveTabTimeline(state).screenshots,
   getActiveTabTimeline(state).mainTrack,
 ];
@@ -501,11 +498,11 @@ export const getActiveTabGlobalTracks: Selector<
 /**
  * Returns resource tracks for the active tab view.
  */
-export const getActiveTabResourceTracks: Selector<
-  ActiveTabResourceTrack[]
-> = state => getActiveTabTimeline(state).resources;
+export const getActiveTabResourceTracks: Selector<ActiveTabResourceTrack[]> = (
+  state
+) => getActiveTabTimeline(state).resources;
 
-export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = state =>
+export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = (state) =>
   getActiveTabTimeline(state).resourcesThreadsKey;
 
 /**
@@ -513,7 +510,7 @@ export const getActiveTabResourcesThreadsKey: Selector<ThreadsKey> = state =>
  */
 export const getActiveTabGlobalTrackReferences: Selector<
   GlobalTrackReference[]
-> = createSelector(getActiveTabGlobalTracks, globalTracks =>
+> = createSelector(getActiveTabGlobalTracks, (globalTracks) =>
   globalTracks.map((globalTrack, trackIndex) => ({
     type: 'global',
     trackIndex,
@@ -544,7 +541,7 @@ export const getActiveTabResourceTrackFromReference: DangerousSelectorWithArgume
  * Origins profile view selectors.
  */
 
-export const getOriginsTimeline: Selector<OriginsTimeline> = state =>
+export const getOriginsTimeline: Selector<OriginsTimeline> = (state) =>
   getOriginsProfileView(state).originsTimeline;
 
 /**
@@ -574,7 +571,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
       // Look up some of the information.
       const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid) || new Set();
       const globalTrackIndex = globalTracks.findIndex(
-        track => track.type === 'process' && track.pid === pid
+        (track) => track.type === 'process' && track.pid === pid
       );
       if (globalTrackIndex === -1) {
         throw new Error('Unable to find a global track from the given pid.');
@@ -611,7 +608,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
  */
 export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
   getPageList,
-  pageList => {
+  (pageList) => {
     if (pageList === null || pageList.length === 0) {
       // There is no data, return null
       return null;
@@ -644,7 +641,7 @@ export const getPagesMap: Selector<Map<TabID, Page[]> | null> = createSelector(
       } else {
         // This is an iframe, we should find its parent to see find top most
         // TabID, which is the tab ID for our case.
-        const getTopMostParent = item => {
+        const getTopMostParent = (item) => {
           // We are using a Map to make this more performant.
           // It should be 1-2 loop iteration in 99% of the cases.
           const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
@@ -696,7 +693,7 @@ export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
 export const getInnerWindowIDSetByTabID: Selector<Map<
   TabID,
   Set<InnerWindowID>
-> | null> = createSelector(getPagesMap, pagesMap => {
+> | null> = createSelector(getPagesMap, (pagesMap) => {
   if (pagesMap === null || pagesMap.size === 0) {
     // There is no data, return null
     return null;
@@ -706,7 +703,7 @@ export const getInnerWindowIDSetByTabID: Selector<Map<
   for (const [tabID, pages] of pagesMap) {
     innerWindowIDSetByTabID.set(
       tabID,
-      new Set(pages.map(page => page.innerWindowID))
+      new Set(pages.map((page) => page.innerWindowID))
     );
   }
   return innerWindowIDSetByTabID;
@@ -775,23 +772,23 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
  * first page we find that belongs to the active tab. Returns null if profiler
  * is not in the single tab view at the moment.
  */
-export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> = createSelector(
-  getPageList,
-  getRelevantInnerWindowIDsForCurrentTab,
-  extractProfileFilterPageData
-);
+export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> =
+  createSelector(
+    getPageList,
+    getRelevantInnerWindowIDsForCurrentTab,
+    extractProfileFilterPageData
+  );
 
 /**
  * Get the map of Thread ID -> Thread Name for easy access.
  */
-export const getThreadIdToNameMap: Selector<
-  Map<number, string>
-> = createSelector(getThreads, threads => {
-  const threadIdToNameMap = new Map();
-  for (const thread of threads) {
-    if (thread.tid !== undefined) {
-      threadIdToNameMap.set(thread.tid, thread.name);
+export const getThreadIdToNameMap: Selector<Map<number, string>> =
+  createSelector(getThreads, (threads) => {
+    const threadIdToNameMap = new Map();
+    for (const thread of threads) {
+      if (thread.tid !== undefined) {
+        threadIdToNameMap.set(thread.tid, thread.name);
+      }
     }
-  }
-  return threadIdToNameMap;
-});
+    return threadIdToNameMap;
+  });

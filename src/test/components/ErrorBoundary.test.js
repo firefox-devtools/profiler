@@ -12,7 +12,7 @@ import { ErrorBoundary } from '../../components/app/ErrorBoundary';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('app/ErrorBoundary', function() {
+describe('app/ErrorBoundary', function () {
   const childComponentText = 'This is a child component';
   const friendlyErrorMessage = 'Oops, there was an error';
   const technicalErrorMessage = 'This is an error.';

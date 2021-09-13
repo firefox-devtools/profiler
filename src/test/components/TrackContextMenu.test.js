@@ -31,7 +31,7 @@ import {
 import { storeWithProfile } from '../fixtures/stores';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('timeline/TrackContextMenu', function() {
+describe('timeline/TrackContextMenu', function () {
   /**
    *  getProfileWithNiceTracks() looks like: [
    *    'show [thread GeckoMain process]',
@@ -59,7 +59,7 @@ describe('timeline/TrackContextMenu', function() {
     };
   }
 
-  describe('showed all tracks', function() {
+  describe('showed all tracks', function () {
     function setupAllTracks() {
       const results = setup();
       const selectAllTracksItem = () => screen.getByText('Show all tracks');
@@ -110,7 +110,7 @@ describe('timeline/TrackContextMenu', function() {
     });
   });
 
-  describe('selected global track', function() {
+  describe('selected global track', function () {
     function setupGlobalTrack(profile, trackIndex = 1) {
       const results = setup(profile);
       const { dispatch, getState } = results;
@@ -164,7 +164,7 @@ describe('timeline/TrackContextMenu', function() {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('has the correct selectors into useful parts of the component', function() {
+    it('has the correct selectors into useful parts of the component', function () {
       const { getState } = setupGlobalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -174,7 +174,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can isolate the process', function() {
+    it('can isolate the process', function () {
       const { isolateProcessItem, getState } = setupGlobalTrack();
       fireFullClick(isolateProcessItem());
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -185,7 +185,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it("can isolate the process's main thread", function() {
+    it("can isolate the process's main thread", function () {
       const { isolateProcessMainThreadItem, getState } = setupGlobalTrack();
       fireFullClick(isolateProcessMainThreadItem());
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -196,15 +196,12 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('isolates a process track without a main thread', function() {
+    it('isolates a process track without a main thread', function () {
       const profile = getProfileWithNiceTracks();
       // Remove the thread [thread GeckoMain tab]
       profile.threads.splice(1, 1);
-      const {
-        isolateProcessMainThreadItem,
-        isolateProcessItem,
-        getState,
-      } = setupGlobalTrack(profile);
+      const { isolateProcessMainThreadItem, isolateProcessItem, getState } =
+        setupGlobalTrack(profile);
 
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
@@ -236,7 +233,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can hide the process', function() {
+    it('can hide the process', function () {
       const { hideContentProcess, getState } = setupGlobalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -255,7 +252,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can toggle a global track by clicking it', function() {
+    it('can toggle a global track by clicking it', function () {
       const { trackItem, trackIndex, getState } = setupGlobalTrack();
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
       fireFullClick(trackItem());
@@ -265,7 +262,7 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can present a disabled isolate item on non-process tracks', function() {
+    it.skip('can present a disabled isolate item on non-process tracks', function () {
       // TODO - We should wait until we have some real tracks without a thread index.
     });
 
@@ -277,7 +274,7 @@ describe('timeline/TrackContextMenu', function() {
     });
   });
 
-  describe('selected local track', function() {
+  describe('selected local track', function () {
     function setupLocalTrack() {
       const results = setup();
       const { dispatch, getState } = results;
@@ -327,7 +324,7 @@ describe('timeline/TrackContextMenu', function() {
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('has the correct selectors into useful parts of the component', function() {
+    it('has the correct selectors into useful parts of the component', function () {
       const { getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -337,7 +334,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can isolate the local track', function() {
+    it('can isolate the local track', function () {
       const { isolateLocalTrackItem, getState } = setupLocalTrack();
       fireFullClick(isolateLocalTrackItem());
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -348,7 +345,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can hide the DOM worker thread', function() {
+    it('can hide the DOM worker thread', function () {
       const { hideDOMWorker, getState } = setupLocalTrack();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -367,7 +364,7 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can toggle a local track by clicking it', function() {
+    it('can toggle a local track by clicking it', function () {
       const { trackItem, pid, trackIndex, getState } = setupLocalTrack();
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
       fireFullClick(trackItem());
@@ -377,12 +374,12 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('can isolate a non-thread track, as long as there process has a thread index', function() {
+    it.skip('can isolate a non-thread track, as long as there process has a thread index', function () {
       // TODO - We should wait until we have some real non-thread tracks
     });
   });
 
-  describe('global / local track visibility interplay', function() {
+  describe('global / local track visibility interplay', function () {
     function setupTracks() {
       const results = setup();
       const { dispatch, getState } = results;
@@ -414,7 +411,7 @@ describe('timeline/TrackContextMenu', function() {
       };
     }
 
-    it('will unhide the global track when unhiding one of its local tracks', function() {
+    it('will unhide the global track when unhiding one of its local tracks', function () {
       const { getState, globalTrackItem, localTrackItem } = setupTracks();
       // Hide the global track.
       fireFullClick(globalTrackItem());

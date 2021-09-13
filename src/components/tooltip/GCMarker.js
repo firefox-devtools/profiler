@@ -189,7 +189,7 @@ export function getGCMinorDetails(
              * things start to get interesting for a phase of a
              * nursery collection.
              */
-            .filter(pt => pt.time > 250) // 250us
+            .filter((pt) => pt.time > 250) // 250us
             .map(_markerDetailPhase)
         );
         break;
@@ -517,7 +517,7 @@ function _filterInterestingPhaseTimes(
   const sortedPhaseTimes = _treeGetLeaves(tree)
     .sort((a, b) => b.time - a.time)
     .slice(0, numSelect)
-    .filter(pt => pt.time > 0);
+    .filter((pt) => pt.time > 0);
 
   /*
    * Sort by the ordering of the original list, which is in an execution order
@@ -538,6 +538,6 @@ function _sumMaybeEntries(
   selectEntries: Array<string>
 ): Microseconds {
   return selectEntries
-    .map(name => (entries[name] ? entries[name] : 0))
+    .map((name) => (entries[name] ? entries[name] : 0))
     .reduce((a, x) => a + x, 0);
 }

@@ -40,12 +40,10 @@ export class TimelineRuler extends PureComponent<Props> {
     const { zeroAt, rangeStart, rangeEnd, width } = this.props;
     const pixelsPerMilliSecond = width / (rangeEnd - rangeStart);
     const minimumNotchWidth = 55; // pixels
-    const {
-      number: notchTime,
-      exponent,
-    } = this._findNiceNumberGreaterOrEqualTo(
-      minimumNotchWidth / pixelsPerMilliSecond
-    );
+    const { number: notchTime, exponent } =
+      this._findNiceNumberGreaterOrEqualTo(
+        minimumNotchWidth / pixelsPerMilliSecond
+      );
     const firstNotchIndex = Math.ceil((rangeStart - zeroAt) / notchTime);
     const lastNotchIndex = Math.floor((rangeEnd - zeroAt) / notchTime);
     const notches = [];

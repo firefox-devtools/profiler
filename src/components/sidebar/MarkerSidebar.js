@@ -55,7 +55,7 @@ class MarkerSidebarImpl extends React.PureComponent<Props> {
 }
 
 export const MarkerSidebar = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     marker: selectedThreadSelectors.getSelectedMarker(state),
     markerIndex: selectedThreadSelectors.getSelectedMarkerIndex(state),
     selectedThreadsKey: getSelectedThreadsKey(state),

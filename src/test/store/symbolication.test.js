@@ -30,16 +30,16 @@ import { SymbolsNotFoundError } from '../../profile-logic/errors';
  * Symbolication happens across actions and reducers, so test this functionality in
  * its own file.
  */
-describe('doSymbolicateProfile', function() {
+describe('doSymbolicateProfile', function () {
   const symbolStoreName = 'test-db';
-  beforeAll(function() {
+  beforeAll(function () {
     // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = fakeIndexedDB;
     window.IDBKeyRange = FDBKeyRange;
     window.TextDecoder = TextDecoder;
   });
 
-  afterAll(async function() {
+  afterAll(async function () {
     delete window.indexedDB;
     delete window.IDBKeyRange;
     delete window.TextDecoder;
@@ -67,8 +67,8 @@ describe('doSymbolicateProfile', function() {
     }
 
     const symbolProvider = {
-      requestSymbolsFromServer: requests =>
-        requests.map(async request => {
+      requestSymbolsFromServer: (requests) =>
+        requests.map(async (request) => {
           if (request.lib.debugName !== 'firefox.pdb') {
             throw new SymbolsNotFoundError(
               'Should only have lib called firefox.pdb',
@@ -92,7 +92,7 @@ describe('doSymbolicateProfile', function() {
           return map;
         }),
 
-      requestSymbolTableFromBrowser: async lib => {
+      requestSymbolTableFromBrowser: async (lib) => {
         if (lib.debugName !== 'firefox.pdb') {
           throw new SymbolsNotFoundError(
             'Should only have libs called firefox.pdb',
@@ -114,7 +114,7 @@ describe('doSymbolicateProfile', function() {
       store,
       // Provide an easy way to turn func names to current func indexes.
       funcNamesToFuncIndexes: (names: string[]) =>
-        names.map(name => {
+        names.map((name) => {
           // Get the current thread in the store every time this is called, so it
           // is always up to date for the latest store changes. This is a convenience
           // to make the tests easier to read.
@@ -135,7 +135,7 @@ describe('doSymbolicateProfile', function() {
     getCallTree,
   } = selectedThreadSelectors;
 
-  describe('doSymbolicateProfile', function() {
+  describe('doSymbolicateProfile', function () {
     it('can symbolicate a profile when symbols come from-browser', async () => {
       const {
         store: { dispatch, getState },
@@ -276,7 +276,7 @@ describe('doSymbolicateProfile', function() {
   });
 
   describe('merging of functions with different memory addresses, but in the same function', () => {
-    it('starts with expanded call nodes of multiple memory addresses', async function() {
+    it('starts with expanded call nodes of multiple memory addresses', async function () {
       // Don't use the mocks on this test, as no SymbolStore database is needed.
       const {
         store: { dispatch, getState },
@@ -301,7 +301,7 @@ describe('doSymbolicateProfile', function() {
       );
     });
 
-    it('symbolicates and merges functions in the stored call node paths', async function() {
+    it('symbolicates and merges functions in the stored call node paths', async function () {
       const {
         store: { dispatch, getState },
         profile,

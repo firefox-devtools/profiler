@@ -171,7 +171,7 @@ class OriginsTimelineView extends React.PureComponent<Props, State> {
 
 export const TimelineOrigins = explicitConnect<{||}, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => ({
+    mapStateToProps: (state) => ({
       threads: getThreads(state),
       committedRange: getCommittedRange(state),
       zeroAt: getZeroAt(state),
