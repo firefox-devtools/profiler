@@ -14,8 +14,7 @@
 }
 
 .markerContextMenuIconStartSelectionHere, /* <- for dot markers */
-.markerContextMenuIconStartSelectionAtMarkerStart /* <- for interval markers */
- {
+.markerContextMenuIconStartSelectionAtMarkerStart /* <- for interval markers */ {
   background-image: url(firefox-profiler-res/img/svg/start-selection-at-marker-start.svg);
 }
 
@@ -28,8 +27,7 @@
 }
 
 .markerContextMenuIconEndSelectionHere, /* <- for dot markers */
-.markerContextMenuIconEndSelectionAtMarkerEnd /* <- for interval markers */
- {
+.markerContextMenuIconEndSelectionAtMarkerEnd /* <- for interval markers */ {
   background-image: url(firefox-profiler-res/img/svg/end-selection-at-marker-end.svg);
 }
 
