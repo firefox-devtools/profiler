@@ -1766,11 +1766,13 @@ describe('actions/receive-profile', function() {
       const profileState1 = stateFromLocation({
         pathname: '/public/fakehash1/',
         search: '?profileName=name 1',
+        hash: '',
       });
 
       const profileState2 = stateFromLocation({
         pathname: '/public/fakehash1/',
         search: '?profileName=name 2',
+        hash: '',
       });
 
       const profiles = [
@@ -1781,7 +1783,9 @@ describe('actions/receive-profile', function() {
       const expectedThreads = profiles.map((profile, i) => ({
         ...profile.thread,
         pid: `${profile.thread.pid} from profile ${i + 1}`,
-        processName: `${profile.state.profileName}: ${profile.thread.name}`,
+        processName: `${profile.state.profileName || `Profile ${i + 1}`}: ${
+          profile.thread.name
+        }`,
         unregisterTime: getTimeRangeForThread(profile.thread, 1).end,
       }));
 

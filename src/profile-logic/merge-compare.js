@@ -190,7 +190,8 @@ export function mergeProfilesForDiffing(
 
     // We're reseting the thread's PID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
-    thread.processName = `${profileName}: ${thread.processName || thread.name}`;
+    thread.processName = `${profileName ||
+      `Profile ${i + 1}`}: ${thread.processName || thread.name}`;
 
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
