@@ -20,7 +20,7 @@ import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
-import { urlFromState } from '../../app-logic/url-handling';
+import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 import {
   viewProfile,
   finalizeProfileView,
@@ -1759,18 +1759,31 @@ describe('actions/receive-profile', function() {
         globalTracks,
         rootRange,
       } = await setupWithLongUrl(getSomeProfiles(), {
-        urlSearch1: 'thread=0',
-        urlSearch2: 'thread=1',
+        urlSearch1: 'thread=0&profileName=name 1',
+        urlSearch2: 'thread=1&profileName=name 2',
       });
 
-      const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
-        (thread, i) => ({
-          ...thread,
-          pid: `${thread.pid} from profile ${i + 1}`,
-          processName: `Profile ${i + 1}: ${thread.name}`,
-          unregisterTime: getTimeRangeForThread(thread, 1).end,
-        })
-      );
+      const profileState1 = stateFromLocation({
+        pathname: '/public/fakehash1/',
+        search: '?profileName=name 1',
+      });
+
+      const profileState2 = stateFromLocation({
+        pathname: '/public/fakehash1/',
+        search: '?profileName=name 2',
+      });
+
+      const profiles = [
+        { thread: profile1.threads[0], state: profileState1 },
+        { thread: profile2.threads[1], state: profileState2 },
+      ];
+
+      const expectedThreads = profiles.map((profile, i) => ({
+        ...profile.thread,
+        pid: `${profile.thread.pid} from profile ${i + 1}`,
+        processName: `${profile.state.profileName}: ${profile.thread.name}`,
+        unregisterTime: getTimeRangeForThread(profile.thread, 1).end,
+      }));
 
       // comparison thread
       expectedThreads.push(
