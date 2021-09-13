@@ -122,15 +122,12 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', titleL10nId: '', component: ZipFileRow };
   _treeView: ?TreeView<ZipDisplayData>;
-  _takeTreeViewRef = treeView => (this._treeView = treeView);
+  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
 
   constructor(props) {
     super(props);
-    const {
-      expandedZipFileIndexes,
-      zipFileTree,
-      changeExpandedZipFile,
-    } = this.props;
+    const { expandedZipFileIndexes, zipFileTree, changeExpandedZipFile } =
+      this.props;
     if (expandedZipFileIndexes.length === 0 && zipFileTree) {
       changeExpandedZipFile([...zipFileTree.getAllDescendants(null)]);
     }
@@ -323,7 +320,7 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
 }
 
 export const ZipFileViewer = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const zipFileTree = getZipFileTree(state);
     if (zipFileTree === null) {
       throw new Error(

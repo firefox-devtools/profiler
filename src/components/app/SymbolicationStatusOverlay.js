@@ -46,7 +46,7 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
         const libNames = Array.from(waitingForLibs.values()).map(
-          lib => lib.debugName
+          (lib) => lib.debugName
         );
         return (
           <div className="symbolicationStatusOverlay">
@@ -73,7 +73,7 @@ export const SymbolicationStatusOverlay = explicitConnect<
   StateProps,
   {||}
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),

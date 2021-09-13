@@ -343,7 +343,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
 }
 
 export const FullTimeline = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
     globalTrackReferences: getGlobalTrackReferences(state),

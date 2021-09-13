@@ -216,13 +216,8 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
-    const {
-      width,
-      rangeStart,
-      rangeEnd,
-      progressGraphData,
-      interval,
-    } = this.props;
+    const { width, rangeStart, rangeEnd, progressGraphData, interval } =
+      this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
     if (
@@ -343,7 +338,7 @@ export const TrackVisualProgressGraph = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const { start, end } = getCommittedRange(state);
     return {
       rangeStart: start,

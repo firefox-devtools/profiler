@@ -540,7 +540,7 @@ export function convertJsTracerToThreadWithoutSamples(
 
   // Get some computed values before entering the loop.
   const blankStringIndex = stringTable.indexForString('');
-  const otherCategory = categories.findIndex(c => c.name === 'Other');
+  const otherCategory = categories.findIndex((c) => c.name === 'Other');
   if (otherCategory === -1) {
     throw new Error("Expected to find an 'Other' category.");
   }

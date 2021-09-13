@@ -29,36 +29,37 @@ import {
   isolateProcessMainThread,
 } from '../../actions/profile-view';
 
-describe('ordering and hiding', function() {
+describe('ordering and hiding', function () {
   function init(profile = getProfileWithNiceTracks()) {
     const { dispatch, getState } = storeWithProfile(profile);
 
     // Find all of the indexes.
     const parentThreadIndex = profile.threads.findIndex(
-      thread => thread.name === 'GeckoMain' && thread.processType === 'process'
+      (thread) =>
+        thread.name === 'GeckoMain' && thread.processType === 'process'
     );
     const tabThreadIndex = profile.threads.findIndex(
-      thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+      (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
     const workerThreadIndex = profile.threads.findIndex(
-      thread => thread.name === 'DOM Worker'
+      (thread) => thread.name === 'DOM Worker'
     );
     const styleThreadIndex = profile.threads.findIndex(
-      thread => thread.name === 'Style'
+      (thread) => thread.name === 'Style'
     );
     const parentPid = profile.threads[parentThreadIndex].pid;
     const tabPid = profile.threads[workerThreadIndex].pid;
     const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
     const parentTrackIndex = globalTracks.findIndex(
-      track =>
+      (track) =>
         track.type === 'process' && track.mainThreadIndex === parentThreadIndex
     );
     const tabTrackIndex = globalTracks.findIndex(
-      track =>
+      (track) =>
         track.type === 'process' && track.mainThreadIndex === tabThreadIndex
     );
     profile.threads.findIndex(
-      thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+      (thread) => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
     let styleTrackIndex, workerTrackIndex;
     for (const [, tracks] of ProfileViewSelectors.getLocalTracksByPid(
@@ -120,13 +121,13 @@ describe('ordering and hiding', function() {
   function getProfileWithoutAProcessMainThread() {
     const profile = getProfileWithNiceTracks();
     profile.threads = profile.threads.filter(
-      thread => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
+      (thread) => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
     );
     return profile;
   }
 
-  describe('global tracks', function() {
-    it('starts out with the initial sorting', function() {
+  describe('global tracks', function () {
+    it('starts out with the initial sorting', function () {
       const { getState } = init();
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -136,7 +137,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can hide a global track', function() {
+    it('can hide a global track', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(hideGlobalTrack(tabTrackIndex));
@@ -154,7 +155,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('cannot hide the last global track', function() {
+    it('cannot hide the last global track', function () {
       const { getState, dispatch, parentTrackIndex, tabTrackIndex } = init();
       dispatch(hideGlobalTrack(parentTrackIndex));
       dispatch(hideGlobalTrack(tabTrackIndex));
@@ -166,7 +167,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can show a global track', function() {
+    it('can show a global track', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       dispatch(hideGlobalTrack(tabTrackIndex));
       withAnalyticsMock(() => {
@@ -185,7 +186,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can change the global track order', function() {
+    it('can change the global track order', function () {
       const { getState, dispatch, parentTrackIndex, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(changeGlobalTrackOrder([tabTrackIndex, parentTrackIndex]));
@@ -204,7 +205,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can isolate a global process track', function() {
+    it('can isolate a global process track', function () {
       const { getState, dispatch, parentTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateProcess(parentTrackIndex));
@@ -222,7 +223,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('keeps the selected local track when isolating a global track', function() {
+    it('keeps the selected local track when isolating a global track', function () {
       const { getState, dispatch, tabTrackIndex, styleThreadIndex } = init();
       dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(isolateProcess(tabTrackIndex));
@@ -234,7 +235,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can isolate just the main thread of a process', function() {
+    it('can isolate just the main thread of a process', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateProcessMainThread(tabTrackIndex));
@@ -252,7 +253,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('finds a good selectedThreadIndex when a selected global track is hidden', function() {
+    it('finds a good selectedThreadIndex when a selected global track is hidden', function () {
       const {
         getState,
         dispatch,
@@ -269,7 +270,7 @@ describe('ordering and hiding', function() {
       );
     });
 
-    it('selects the mainThreadIndex when isolating a process track', function() {
+    it('selects the mainThreadIndex when isolating a process track', function () {
       const {
         getState,
         dispatch,
@@ -286,11 +287,10 @@ describe('ordering and hiding', function() {
       );
     });
 
-    it('will reselect a local thread track when no global track is available', function() {
+    it('will reselect a local thread track when no global track is available', function () {
       const profile = getProfileWithoutAProcessMainThread();
-      const { getState, dispatch, parentTrackIndex, parentThreadIndex } = init(
-        profile
-      );
+      const { getState, dispatch, parentTrackIndex, parentThreadIndex } =
+        init(profile);
       dispatch(changeSelectedThreads(new Set([parentThreadIndex])));
       dispatch(hideGlobalTrack(parentTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -301,7 +301,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can extract a screenshots track', function() {
+    it('can extract a screenshots track', function () {
       const { getState } = storeWithProfile(getScreenshotTrackProfile());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [screenshots]',
@@ -311,7 +311,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    describe('sorting of track types to ensure proper URL backwards compatibility', function() {
+    describe('sorting of track types to ensure proper URL backwards compatibility', function () {
       const stableIndexOrder = [
         'process',
         'process',
@@ -344,22 +344,24 @@ describe('ordering and hiding', function() {
         };
       }
 
-      it('creates stable track indexes over time', function() {
+      it('creates stable track indexes over time', function () {
         const { globalTracks } = setup();
-        expect(globalTracks.map(track => track.type)).toEqual(stableIndexOrder);
+        expect(globalTracks.map((track) => track.type)).toEqual(
+          stableIndexOrder
+        );
       });
 
-      it('creates a separate user-facing ordering that is different from the internal sortiong', function() {
+      it('creates a separate user-facing ordering that is different from the internal sortiong', function () {
         const { globalTracks, globalTrackOrder } = setup();
         expect(
-          globalTrackOrder.map(trackIndex => globalTracks[trackIndex].type)
+          globalTrackOrder.map((trackIndex) => globalTracks[trackIndex].type)
         ).toEqual(userFacingSortOrder);
       });
     });
   });
 
-  describe('local tracks', function() {
-    it('can hide a local track', function() {
+  describe('local tracks', function () {
+    it('can hide a local track', function () {
       const { getState, dispatch, workerTrackIndex, tabPid } = init();
       withAnalyticsMock(() => {
         dispatch(hideLocalTrack(tabPid, workerTrackIndex));
@@ -377,7 +379,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can count hidden local tracks', function() {
+    it('can count hidden local tracks', function () {
       const { getState, dispatch, workerTrackIndex, tabPid } = init();
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
@@ -386,7 +388,7 @@ describe('ordering and hiding', function() {
       });
     });
 
-    it('can count hidden global tracks and their hidden local tracks', function() {
+    it('can count hidden global tracks and their hidden local tracks', function () {
       const { getState, dispatch, tabTrackIndex } = init();
       dispatch(hideGlobalTrack(tabTrackIndex));
       expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
@@ -395,15 +397,10 @@ describe('ordering and hiding', function() {
       });
     });
 
-    it('will hide the global track if hiding the last visible thread', function() {
+    it('will hide the global track if hiding the last visible thread', function () {
       const profile = getProfileWithoutAProcessMainThread();
-      const {
-        getState,
-        dispatch,
-        workerTrackIndex,
-        tabPid,
-        styleTrackIndex,
-      } = init(profile);
+      const { getState, dispatch, workerTrackIndex, tabPid, styleTrackIndex } =
+        init(profile);
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -414,7 +411,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it("can select a local track's thread", function() {
+    it("can select a local track's thread", function () {
       const { getState, dispatch, workerThreadIndex } = init();
       dispatch(changeSelectedThreads(new Set([workerThreadIndex])));
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -425,7 +422,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('will reselect a sibling thread index when a track is hidden', function() {
+    it('will reselect a sibling thread index when a track is hidden', function () {
       const {
         getState,
         dispatch,
@@ -443,14 +440,9 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('will reselect a sibling thread index when a track is hidden 2', function() {
-      const {
-        getState,
-        dispatch,
-        tabPid,
-        styleTrackIndex,
-        styleThreadIndex,
-      } = init();
+    it('will reselect a sibling thread index when a track is hidden 2', function () {
+      const { getState, dispatch, tabPid, styleTrackIndex, styleThreadIndex } =
+        init();
       dispatch(changeSelectedThreads(new Set([styleThreadIndex])));
       dispatch(hideLocalTrack(tabPid, styleTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -461,7 +453,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('will reselect the main thread index when all local tracks are hidden', function() {
+    it('will reselect the main thread index when all local tracks are hidden', function () {
       const {
         getState,
         dispatch,
@@ -481,7 +473,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('will not hide the last visible thread', function() {
+    it('will not hide the last visible thread', function () {
       const profile = getProfileWithoutAProcessMainThread();
       const {
         getState,
@@ -502,7 +494,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('will not hide the last visible thread 2', function() {
+    it('will not hide the last visible thread 2', function () {
       const profile = getProfileWithoutAProcessMainThread();
       const {
         getState,
@@ -523,7 +515,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can show a local track', function() {
+    it('can show a local track', function () {
       const { getState, dispatch, tabPid, workerTrackIndex } = init();
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
       withAnalyticsMock(() => {
@@ -542,14 +534,9 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can change the local track order', function() {
-      const {
-        getState,
-        dispatch,
-        styleTrackIndex,
-        workerTrackIndex,
-        tabPid,
-      } = init();
+    it('can change the local track order', function () {
+      const { getState, dispatch, styleTrackIndex, workerTrackIndex, tabPid } =
+        init();
       dispatch(
         changeLocalTrackOrder(tabPid, [styleTrackIndex, workerTrackIndex])
       );
@@ -561,7 +548,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can isolate a local track', function() {
+    it('can isolate a local track', function () {
       const { getState, dispatch, tabPid, workerTrackIndex } = init();
       withAnalyticsMock(() => {
         dispatch(isolateLocalTrack(tabPid, workerTrackIndex));
@@ -579,7 +566,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can select the isolated track', function() {
+    it('can select the isolated track', function () {
       const {
         getState,
         dispatch,
@@ -603,7 +590,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    describe('sorting of track types to ensure proper URL backwards compatibility', function() {
+    describe('sorting of track types to ensure proper URL backwards compatibility', function () {
       const stableIndexOrder = [
         'thread',
         // Network is last.
@@ -629,38 +616,38 @@ describe('ordering and hiding', function() {
         };
       }
 
-      it('creates stable track indexes over time', function() {
+      it('creates stable track indexes over time', function () {
         const { localTracks } = setup();
-        expect(localTracks.map(track => track.type)).toEqual(stableIndexOrder);
+        expect(localTracks.map((track) => track.type)).toEqual(
+          stableIndexOrder
+        );
       });
 
-      it('creates a separate user-facing ordering that is different from the internal sortiong', function() {
+      it('creates a separate user-facing ordering that is different from the internal sortiong', function () {
         const { localTracks, localTrackOrder } = setup();
         expect(
-          localTrackOrder.map(trackIndex => localTracks[trackIndex].type)
+          localTrackOrder.map((trackIndex) => localTracks[trackIndex].type)
         ).toEqual(userFacingSortOrder);
       });
     });
   });
 });
 
-describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function() {
-  it('knows when a profile does not have a memory track', function() {
+describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function () {
+  it('knows when a profile does not have a memory track', function () {
     const profile = getProfileWithNiceTracks();
     const [thread] = profile.threads;
     const { getState } = storeWithProfile(profile);
-    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
-      getState()
-    );
+    const processesWithMemoryTrack =
+      ProfileViewSelectors.getProcessesWithMemoryTrack(getState());
     expect(processesWithMemoryTrack.has(thread.pid)).toEqual(false);
   });
 
-  it('knows when a profile has a memory track', function() {
+  it('knows when a profile has a memory track', function () {
     const { getState, profile } = getStoreWithMemoryTrack();
     const [thread] = profile.threads;
-    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
-      getState()
-    );
+    const processesWithMemoryTrack =
+      ProfileViewSelectors.getProcessesWithMemoryTrack(getState());
     expect(processesWithMemoryTrack.has(thread.pid)).toEqual(true);
   });
 });

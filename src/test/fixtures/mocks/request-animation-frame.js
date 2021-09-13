@@ -16,7 +16,7 @@ import { stripIndent } from 'common-tags';
 function stripThisFileFromErrorStack(stack: string) {
   const stacks = stack.split('\n');
   const filteredStacks = stacks.filter(
-    stack => !stack.includes('/request-animation-frame.js')
+    (stack) => !stack.includes('/request-animation-frame.js')
   );
   return filteredStacks.join('\n');
 }
@@ -52,7 +52,7 @@ function stripThisFileFromErrorStack(stack: string) {
 
 export function mockRaf() {
   let requests = [];
-  jest.spyOn(window, 'requestAnimationFrame').mockImplementation(fn => {
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
     requests.push({
       func: fn,
       stack: stripThisFileFromErrorStack(new Error().stack),
@@ -93,7 +93,7 @@ export function mockRaf() {
       const lastRequest = requests.pop();
       const remainingRequestFirstStacks = requests.map((request, i) => {
         const stackLines = request.stack.split('\n');
-        const firstLineFromProject = stackLines.find(line =>
+        const firstLineFromProject = stackLines.find((line) =>
           line.includes('/src/')
         );
         const reportedFirstLine = firstLineFromProject || stackLines[0];

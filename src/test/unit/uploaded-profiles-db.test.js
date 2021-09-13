@@ -18,7 +18,7 @@ import {
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
 
-describe('uploaded-profiles-db', function() {
+describe('uploaded-profiles-db', function () {
   async function storeGenericUploadedProfileInformation(
     overrides: $Shape<UploadedProfileInformation>
   ) {
@@ -72,7 +72,8 @@ describe('uploaded-profiles-db', function() {
     await setup();
 
     // 2. Retrieve the list and expect it's in the expected sorted order.
-    const listOfUploadedProfileInformation = await listAllUploadedProfileInformationFromDb();
+    const listOfUploadedProfileInformation =
+      await listAllUploadedProfileInformationFromDb();
     expect(listOfUploadedProfileInformation).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-2' }),
       expect.objectContaining({ profileToken: 'PROFILE-3' }),

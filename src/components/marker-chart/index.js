@@ -50,7 +50,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: StartEndRange,
@@ -178,10 +178,9 @@ function viewportNeedsUpdate(
 }
 
 export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
-      state
-    );
+  mapStateToProps: (state) => {
+    const markerTimingAndBuckets =
+      selectedThreadSelectors.getMarkerChartTimingAndBuckets(state);
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerTimingAndBuckets,
@@ -189,9 +188,8 @@ export const MarkerChart = explicitConnect<{||}, StateProps, DispatchProps>({
       timeRange: getCommittedRange(state),
       threadsKey: getSelectedThreadsKey(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-        state
-      ),
+      rightClickedMarkerIndex:
+        selectedThreadSelectors.getRightClickedMarkerIndex(state),
       timelineMarginLeft: getTimelineMarginLeft(state),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
     };

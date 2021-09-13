@@ -125,7 +125,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
         localTrackOrderByPid.get(pid),
         'Expected to find local tracks for the given pid'
       );
-      localTrackOrder.forEach(index => {
+      localTrackOrder.forEach((index) => {
         if (index === trackIndex) {
           showLocalTrack(pid, trackIndex);
         } else {
@@ -411,9 +411,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
       // Is there only one visible global track?
       globalTracks.length - hiddenGlobalTracks.size === 1;
 
-    const rightClickedTrackName = this.getRightClickedTrackName(
-      rightClickedTrack
-    );
+    const rightClickedTrackName =
+      this.getRightClickedTrackName(rightClickedTrack);
 
     return (
       <MenuItem onClick={this._isolateProcessMainThread} disabled={isDisabled}>
@@ -460,9 +459,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
       // Is there only one local track left?
       localTrackOrder.length - hiddenLocalTracks.size === 1;
 
-    const rightClickedTrackName = this.getRightClickedTrackName(
-      rightClickedTrack
-    );
+    const rightClickedTrackName =
+      this.getRightClickedTrackName(rightClickedTrack);
 
     return (
       <MenuItem onClick={this._isolateLocalTrack} disabled={isDisabled}>
@@ -523,9 +521,8 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
       return null;
     }
     const trackIndex = rightClickedTrack.trackIndex;
-    const rightClickedTrackName = this.getRightClickedTrackName(
-      rightClickedTrack
-    );
+    const rightClickedTrackName =
+      this.getRightClickedTrackName(rightClickedTrack);
 
     if (rightClickedTrack.type === 'global') {
       return (
@@ -616,7 +613,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<Props> {
         {isolateScreenshot}
         {hideTrack}
         {separator}
-        {globalTrackOrder.map(globalTrackIndex => {
+        {globalTrackOrder.map((globalTrackIndex) => {
           const globalTrack = globalTracks[globalTrackIndex];
           if (rightClickedTrack === null) {
             return (

@@ -39,7 +39,7 @@ class DebugWarningImp extends PureComponent<Props> {
 }
 
 export const DebugWarning = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     meta: getMeta(state),
   }),
   component: DebugWarningImp,

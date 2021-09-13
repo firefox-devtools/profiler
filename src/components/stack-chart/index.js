@@ -76,7 +76,7 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +userTimings: MarkerIndex[],
   +timelineMarginLeft: CssPixels,
 |};
@@ -246,7 +246,7 @@ class StackChartImpl extends React.PureComponent<Props> {
 }
 
 export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const showUserTimings = getShowUserTimings(state);
     const combinedTimingRows = showUserTimings
       ? selectedThreadSelectors.getCombinedTimingRows(state)
@@ -264,12 +264,10 @@ export const StackChart = explicitConnect<{||}, StateProps, DispatchProps>({
       threadsKey: getSelectedThreadsKey(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-        state
-      ),
+      selectedCallNodeIndex:
+        selectedThreadSelectors.getSelectedCallNodeIndex(state),
+      rightClickedCallNodeIndex:
+        selectedThreadSelectors.getRightClickedCallNodeIndex(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       pages: getPageList(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),

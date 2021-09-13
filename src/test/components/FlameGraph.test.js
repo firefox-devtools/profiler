@@ -50,7 +50,7 @@ import type { CssPixels } from 'firefox-profiler/types';
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
-describe('FlameGraph', function() {
+describe('FlameGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   afterEach(removeRootOverlayElement);
@@ -144,12 +144,8 @@ describe('FlameGraph', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const {
-      rightClick,
-      clickMenuItem,
-      getContextMenu,
-      findFillTextPosition,
-    } = setupFlameGraph();
+    const { rightClick, clickMenuItem, getContextMenu, findFillTextPosition } =
+      setupFlameGraph();
 
     rightClick(findFillTextPosition('A'));
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
@@ -210,7 +206,7 @@ describe('FlameGraph', function() {
       ).toBeInTheDocument();
     });
 
-    it('shows reasons when samples have been completely filtered out', function() {
+    it('shows reasons when samples have been completely filtered out', function () {
       const { dispatch } = setupFlameGraph();
       dispatch(changeImplementationFilter('js'));
       expect(

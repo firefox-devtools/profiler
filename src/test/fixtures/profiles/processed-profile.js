@@ -120,7 +120,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
   const markersTable = thread.markers;
   const allTimes = new Set();
 
-  markers.forEach(tuple => {
+  markers.forEach((tuple) => {
     const name = tuple[0];
     const startTime = tuple[1];
     // Flow doesn't support variadic tuple types.
@@ -329,7 +329,7 @@ export function getProfileWithMarkers(
       'getProfileWithMarkers expected to get at least one list of markers.'
     );
   }
-  profile.threads = markersPerThread.map(testDefinedMarkers =>
+  profile.threads = markersPerThread.map((testDefinedMarkers) =>
     getThreadWithMarkers(testDefinedMarkers)
   );
   return profile;
@@ -424,7 +424,7 @@ export function getMarkerTableProfile() {
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   const profile = getEmptyProfile();
-  profile.threads = threadNames.map(name => getEmptyThread({ name }));
+  profile.threads = threadNames.map((name) => getEmptyThread({ name }));
   return profile;
 }
 
@@ -487,9 +487,7 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
  * Now the variables named A B Cjs D directly refer to the func indices and can
  * be used in tests.
  */
-export function getProfileFromTextSamples(
-  ...allTextSamples: string[]
-): {
+export function getProfileFromTextSamples(...allTextSamples: string[]): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
@@ -505,7 +503,7 @@ export function getProfileFromTextSamples(
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
 
-  profile.threads = allTextSamples.map(textSamples => {
+  profile.threads = allTextSamples.map((textSamples) => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
 
@@ -514,11 +512,11 @@ export function getProfileFromTextSamples(
 
     // Check if the first row is made by base 10 integers. 0x200 and other will parse
     // as numbers, but they can be used as valid function names.
-    const isFirstRowMadeOfNumbers = textOnlyStacks.every(stack =>
+    const isFirstRowMadeOfNumbers = textOnlyStacks.every((stack) =>
       /^\d+$/.test(stack[0])
     );
     if (isFirstRowMadeOfNumbers) {
-      sampleTimes = textOnlyStacks.map(stack => parseInt(stack[0]));
+      sampleTimes = textOnlyStacks.map((stack) => parseInt(stack[0]));
       for (const stack of textOnlyStacks) {
         // Remove the number.
         stack.shift();
@@ -577,7 +575,7 @@ function _getColumnPositions(line): number[] {
 
   // Find the start and end positions of all consecutive runs of two spaces or more.
   const columnSeparatorRanges = _getAllMatchRanges(/ {2,}/g, trimmedLine);
-  return [indent, ...columnSeparatorRanges.map(range => range.end + indent)];
+  return [indent, ...columnSeparatorRanges.map((range) => range.end + indent)];
 }
 
 /**
@@ -601,7 +599,7 @@ function _getColumnPositions(line): number[] {
 function _parseTextSamples(textSamples: string): Array<string[]> {
   const lines = textSamples.split('\n').filter(
     // Filter out empty lines
-    t => t
+    (t) => t
   );
   if (lines.length === 0) {
     throw new Error('Empty text data was sent');
@@ -611,7 +609,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   const columnPositions = _getColumnPositions(lines[0]);
 
   // Create a table of string cells. Empty cells contain the empty string.
-  const rows = lines.map(line =>
+  const rows = lines.map((line) =>
     columnPositions.map((pos, columnIndex) =>
       line.substring(pos, columnPositions[columnIndex + 1]).trim()
     )
@@ -670,7 +668,7 @@ function _findCategoryFromFuncName(
   }
 
   if (categoryName) {
-    const category = categories.findIndex(c => c.name === categoryName);
+    const category = categories.findIndex((c) => c.name === categoryName);
     if (category !== -1) {
       return category;
     }
@@ -719,7 +717,7 @@ function _buildThreadFromTextOnlyStacks(
   } = thread;
 
   // Create the FuncTable.
-  funcNames.forEach(funcName => {
+  funcNames.forEach((funcName) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.fileName.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
@@ -731,7 +729,7 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.length++;
   });
 
-  const categoryOther = categories.findIndex(c => c.name === 'Other');
+  const categoryOther = categories.findIndex((c) => c.name === 'Other');
 
   // This map caches resource indexes for library names.
   const resourceIndexCache = {};
@@ -739,7 +737,7 @@ function _buildThreadFromTextOnlyStacks(
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
-    column.forEach(funcNameWithModifier => {
+    column.forEach((funcNameWithModifier) => {
       const funcName = funcNameWithModifier.replace(/\[.*/, '');
 
       // There is a one-to-one relationship between strings and funcIndexes here, so
@@ -873,14 +871,12 @@ function _buildThreadFromTextOnlyStacks(
 /**
  * This returns a merged profile from a number of profile strings.
  */
-export function getMergedProfileFromTextSamples(
-  ...profileStrings: string[]
-): {
+export function getMergedProfileFromTextSamples(...profileStrings: string[]): {
   profile: Profile,
   funcNamesPerThread: Array<string[]>,
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
-  const profilesAndFuncNames = profileStrings.map(str =>
+  const profilesAndFuncNames = profileStrings.map((str) =>
     getProfileFromTextSamples(str)
   );
   const profiles = profilesAndFuncNames.map(({ profile }) => profile);
@@ -1076,7 +1072,7 @@ export function getIPCTrackProfile() {
 }
 
 export function getScreenshotTrackProfile() {
-  const screenshotMarkersForWindowId = windowID =>
+  const screenshotMarkersForWindowId = (windowID) =>
     Array(10)
       .fill()
       .map((_, i) => [
@@ -1197,7 +1193,7 @@ export function getProfileWithJsTracerEvents(
   ...eventsLists: Array<TestDefinedJsTracerEvent[]>
 ): Profile {
   const profile = getEmptyProfile();
-  profile.threads = eventsLists.map(events =>
+  profile.threads = eventsLists.map((events) =>
     getThreadWithJsTracerEvents(events)
   );
   return profile;

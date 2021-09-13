@@ -10,7 +10,7 @@ import { Localized } from '@fluent/react';
 import './IdleSearchField.css';
 
 type Props = {|
-  +onIdleAfterChange: string => void,
+  +onIdleAfterChange: (string) => void,
   +onFocus?: () => void,
   +onBlur?: (Element | null) => void,
   +idlePeriod: number,

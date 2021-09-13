@@ -14,7 +14,7 @@ import type {
 /**
  * A simple selector into the icon state.
  */
-export const getIcons: Selector<IconState> = state => state.icons;
+export const getIcons: Selector<IconState> = (state) => state.icons;
 
 /**
  * In order to load icons without multiple requests, icons are created through
@@ -33,11 +33,10 @@ export const getIconClassName: DangerousSelectorWithArguments<
 /**
  * This functions returns an object with both the icon URL and the class name.
  */
-export const getIconsWithClassNames: Selector<
-  IconWithClassName[]
-> = createSelector(getIcons, icons =>
-  [...icons].map(icon => ({ icon, className: _classNameFromUrl(icon) }))
-);
+export const getIconsWithClassNames: Selector<IconWithClassName[]> =
+  createSelector(getIcons, (icons) =>
+    [...icons].map((icon) => ({ icon, className: _classNameFromUrl(icon) }))
+  );
 
 /**
  * Transforms a URL into a valid CSS class name.

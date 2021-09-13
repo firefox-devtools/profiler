@@ -123,7 +123,7 @@ export function setupInitialUrlState(
   location: Location,
   profile: Profile | null
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     let urlState;
     try {
       urlState = stateFromLocation(location, profile);

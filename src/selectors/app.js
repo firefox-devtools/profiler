@@ -51,45 +51,45 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 /**
  * Simple selectors into the app state.
  */
-export const getApp: Selector<AppState> = state => state.app;
-export const getView: Selector<AppViewState> = state => getApp(state).view;
-export const getUrlSetupPhase: Selector<UrlSetupPhase> = state =>
+export const getApp: Selector<AppState> = (state) => state.app;
+export const getView: Selector<AppViewState> = (state) => getApp(state).view;
+export const getUrlSetupPhase: Selector<UrlSetupPhase> = (state) =>
   getApp(state).urlSetupPhase;
-export const getHasZoomedViaMousewheel: Selector<boolean> = state => {
+export const getHasZoomedViaMousewheel: Selector<boolean> = (state) => {
   return getApp(state).hasZoomedViaMousewheel;
 };
-export const getIsSidebarOpen: Selector<boolean> = state =>
+export const getIsSidebarOpen: Selector<boolean> = (state) =>
   getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];
-export const getPanelLayoutGeneration: Selector<number> = state =>
+export const getPanelLayoutGeneration: Selector<number> = (state) =>
   getApp(state).panelLayoutGeneration;
-export const getLastVisibleThreadTabSlug: Selector<TabSlug> = state =>
+export const getLastVisibleThreadTabSlug: Selector<TabSlug> = (state) =>
   getApp(state).lastVisibleThreadTabSlug;
 export const getTrackThreadHeights: Selector<{
   [key: ThreadsKey]: CssPixels,
-}> = state => getApp(state).trackThreadHeights;
-export const getIsNewlyPublished: Selector<boolean> = state =>
+}> = (state) => getApp(state).trackThreadHeights;
+export const getIsNewlyPublished: Selector<boolean> = (state) =>
   getApp(state).isNewlyPublished;
-export const getExperimental: Selector<ExperimentalFlags> = state =>
+export const getExperimental: Selector<ExperimentalFlags> = (state) =>
   getApp(state).experimental;
-export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
+export const getIsEventDelayTracksEnabled: Selector<boolean> = (state) =>
   getExperimental(state).eventDelayTracks;
-export const getIsExperimentalCPUGraphsEnabled: Selector<boolean> = state =>
+export const getIsExperimentalCPUGraphsEnabled: Selector<boolean> = (state) =>
   getExperimental(state).cpuGraphs;
 
-export const getIsDragAndDropDragging: Selector<boolean> = state =>
+export const getIsDragAndDropDragging: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropDragging;
-export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
+export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
   getApp(state).isDragAndDropOverlayRegistered;
 
-export const getCurrentProfileUploadedInformation: Selector<UploadedProfileInformation | null> = state =>
-  getApp(state).currentProfileUploadedInformation;
+export const getCurrentProfileUploadedInformation: Selector<UploadedProfileInformation | null> =
+  (state) => getApp(state).currentProfileUploadedInformation;
 
 /**
  * Height of screenshot track is different depending on the view.
  */
 export const getScreenshotTrackHeight: Selector<number> = createSelector(
   getTimelineTrackOrganization,
-  timelineTrackOrganization => {
+  (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
       case 'active-tab':
         return ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT;
@@ -325,7 +325,7 @@ export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
  */
 export const getTimelineMarginLeft: Selector<number> = createSelector(
   getTimelineTrackOrganization,
-  timelineTrackOrganization => {
+  (timelineTrackOrganization) => {
     switch (timelineTrackOrganization.type) {
       case 'active-tab':
         return ACTIVE_TAB_TIMELINE_MARGIN_LEFT;

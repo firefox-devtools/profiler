@@ -124,7 +124,7 @@ function _formatDateTime(timestamp: number): string {
 }
 
 export const WindowTitle = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     profileNameFromUrl: getProfileNameFromUrl(state),
     fileNameInZipFilePath: getFileNameInZipFilePath(state),
     formattedMetaInfoString: getFormattedMetaInfoString(state),

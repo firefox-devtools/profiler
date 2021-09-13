@@ -62,7 +62,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   _toggleErrorDetails = () => {
-    this.setState(state => ({ showDetails: !state.showDetails }));
+    this.setState((state) => ({ showDetails: !state.showDetails }));
   };
 
   render() {

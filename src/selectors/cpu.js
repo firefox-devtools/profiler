@@ -28,7 +28,7 @@ export const getIsCPUUtilizationProvided: Selector<boolean> = createSelector(
       // Therefore we are also checking the samples table to see if we have CPU
       // delta values.
       ((meta.configuration && meta.configuration.features.includes('cpu')) ||
-        threads.some(thread => thread.samples.threadCPUDelta !== undefined))
+        threads.some((thread) => thread.samples.threadCPUDelta !== undefined))
     );
   }
 );

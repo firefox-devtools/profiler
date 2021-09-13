@@ -132,11 +132,10 @@ function _getStoreFromStateAfterUrlRoundtrip(state: State): Store {
   return store;
 }
 
-describe('selectedThread', function() {
+describe('selectedThread', function () {
   function dispatchUrlWithThread(store, threadIndexSet) {
-    const serializedSelectedThreads = encodeUintSetForUrlComponent(
-      threadIndexSet
-    );
+    const serializedSelectedThreads =
+      encodeUintSetForUrlComponent(threadIndexSet);
     const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: `?thread=${serializedSelectedThreads}&v=${CURRENT_URL_VERSION}`,
@@ -179,14 +178,14 @@ describe('selectedThread', function() {
     return store;
   }
 
-  it('selects the right thread when receiving a profile from web', function() {
+  it('selects the right thread when receiving a profile from web', function () {
     const { getState } = setup(new Set([1]));
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([1])
     );
   });
 
-  it('selects a default thread when a wrong thread has been requested', function() {
+  it('selects a default thread when a wrong thread has been requested', function () {
     const { getState } = setup(new Set([100]));
 
     // "2" is the content process' main tab
@@ -195,7 +194,7 @@ describe('selectedThread', function() {
     );
   });
 
-  it('selects the right threads (multi selection) when receiving a profile from web', function() {
+  it('selects the right threads (multi selection) when receiving a profile from web', function () {
     const { getState } = setup(new Set([0, 2]));
     expect(urlStateSelectors.getSelectedThreadIndexes(getState())).toEqual(
       new Set([0, 2])
@@ -203,13 +202,13 @@ describe('selectedThread', function() {
   });
 });
 
-describe('url handling tracks', function() {
+describe('url handling tracks', function () {
   function initWithSearchParams(search: string) {
     return _getStoreWithURL({ search }, getProfileWithNiceTracks());
   }
 
-  describe('global tracks', function() {
-    it('creates tracks without any set search parameters', function() {
+  describe('global tracks', function () {
+    it('creates tracks without any set search parameters', function () {
       const { getState } = initWithSearchParams('');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
@@ -219,7 +218,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can reorder global tracks', function() {
+    it('can reorder global tracks', function () {
       const { getState } = initWithSearchParams('?globalTrackOrder=10');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain tab]',
@@ -229,7 +228,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can hide tracks', function() {
+    it('can hide tracks', function () {
       const { getState } = initWithSearchParams('?hiddenGlobalTracks=1');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
@@ -239,13 +238,13 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('will not accept invalid tracks in the thread order', function() {
+    it('will not accept invalid tracks in the thread order', function () {
       const { getState } = initWithSearchParams('?globalTrackOrder=102');
       // This will result in being the default order.
       expect(urlStateSelectors.getGlobalTrackOrder(getState())).toEqual([0, 1]);
     });
 
-    it('will not accept invalid hidden threads', function() {
+    it('will not accept invalid hidden threads', function () {
       const { getState } = initWithSearchParams(
         '?hiddenGlobalTracks=089&thread=1'
       );
@@ -254,7 +253,7 @@ describe('url handling tracks', function() {
       );
     });
 
-    it('keeps the order at reload', function() {
+    it('keeps the order at reload', function () {
       // In this test, we want to have indexes greater than 10. So we generate
       // 15 threads with the same information.
       const aLotOfThreads = Array.from({ length: 15 }, () => 'A');
@@ -268,21 +267,7 @@ describe('url handling tracks', function() {
       const store = _getStoreWithURL({}, profile);
       store.dispatch(
         changeGlobalTrackOrder([
-          5,
-          4,
-          2,
-          11,
-          9,
-          1,
-          12,
-          13,
-          14,
-          3,
-          7,
-          8,
-          10,
-          6,
-          0,
+          5, 4, 2, 11, 9, 1, 12, 13, 14, 3, 7, 8, 10, 6, 0,
         ])
       );
 
@@ -300,8 +285,8 @@ describe('url handling tracks', function() {
     });
   });
 
-  describe('local tracks', function() {
-    it('can reorder local tracks', function() {
+  describe('local tracks', function () {
+    it('can reorder local tracks', function () {
       const { getState } = initWithSearchParams('?localTrackOrderByPid=222-10');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
@@ -311,7 +296,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('can hide local tracks', function() {
+    it('can hide local tracks', function () {
       const { getState } = initWithSearchParams(
         '?hiddenLocalTracksByPid=222-1'
       );
@@ -324,7 +309,7 @@ describe('url handling tracks', function() {
     });
 
     // This is a test for issue https://github.com/firefox-devtools/profiler/issues/1389
-    it('can select a local track without mixing track and thread indexes', function() {
+    it('can select a local track without mixing track and thread indexes', function () {
       // We're building a very specific profile, where local track indexes and
       // thread indexes could be confused. This is easier if we have local
       // tracks for the first process, because then the thread indexes and the
@@ -362,8 +347,8 @@ describe('url handling tracks', function() {
     });
   });
 
-  describe('legacy thread information', function() {
-    it('handles legacy thread ordering', function() {
+  describe('legacy thread information', function () {
+    it('handles legacy thread ordering', function () {
       // Flip the threads around
       const { getState } = initWithSearchParams('?threadOrder=3-2-1-0');
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -374,7 +359,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    it('handles legacy thread hiding', function() {
+    it('handles legacy thread hiding', function () {
       // Flip the threads around
       const { getState } = initWithSearchParams('?hiddenThreads=0-2');
       expect(getHumanReadableTracks(getState())).toEqual([
@@ -387,14 +372,14 @@ describe('url handling tracks', function() {
   });
 });
 
-describe('search strings', function() {
-  it('properly handles the call tree search string stacks with 1 item', function() {
+describe('search strings', function () {
+  it('properly handles the call tree search string stacks with 1 item', function () {
     const { getState } = _getStoreWithURL({ search: '?search=string' });
     expect(urlStateSelectors.getCurrentSearchString(getState())).toBe('string');
     expect(urlStateSelectors.getSearchStrings(getState())).toEqual(['string']);
   });
 
-  it('properly handles the call tree search string stacks with several items', function() {
+  it('properly handles the call tree search string stacks with several items', function () {
     const { getState } = _getStoreWithURL({
       search: '?search=string,foo,%20bar',
     });
@@ -408,7 +393,7 @@ describe('search strings', function() {
     ]);
   });
 
-  it('properly handles marker search strings', function() {
+  it('properly handles marker search strings', function () {
     const { getState } = _getStoreWithURL({
       search: '?markerSearch=otherString',
     });
@@ -417,24 +402,24 @@ describe('search strings', function() {
     );
   });
 
-  it('properly handles showUserTimings strings', function() {
+  it('properly handles showUserTimings strings', function () {
     const { getState } = _getStoreWithURL({ search: '' });
     expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
-  it('defaults to not showing user timings', function() {
+  it('defaults to not showing user timings', function () {
     const { getState } = _getStoreWithURL();
     expect(urlStateSelectors.getShowUserTimings(getState())).toBe(false);
   });
 
-  it('serializes the call tree search strings in the URL', function() {
+  it('serializes the call tree search strings in the URL', function () {
     const { getState, dispatch } = _getStoreWithURL();
 
     const callTreeSearchString = 'some, search, string';
 
     dispatch(changeCallTreeSearchString(callTreeSearchString));
 
-    ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
+    ['calltree', 'stack-chart', 'flame-graph'].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
@@ -444,14 +429,14 @@ describe('search strings', function() {
     });
   });
 
-  it('serializes the marker search string in the URL', function() {
+  it('serializes the marker search string in the URL', function () {
     const { getState, dispatch } = _getStoreWithURL();
 
     const markerSearchString = 'abc';
 
     dispatch(changeMarkersSearchString(markerSearchString));
 
-    ['marker-chart', 'marker-table'].forEach(tabSlug => {
+    ['marker-chart', 'marker-table'].forEach((tabSlug) => {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateSelectors.getUrlState(getState());
       const queryString = getQueryStringFromUrlState(urlState);
@@ -459,7 +444,7 @@ describe('search strings', function() {
     });
   });
 
-  it('serializes the network search string in the URL', function() {
+  it('serializes the network search string in the URL', function () {
     const { getState, dispatch } = _getStoreWithURL();
 
     const networkSearchString = 'abc';
@@ -472,8 +457,8 @@ describe('search strings', function() {
   });
 });
 
-describe('profileName', function() {
-  it('serializes the profileName in the URL', function() {
+describe('profileName', function () {
+  it('serializes the profileName in the URL', function () {
     const { getState, dispatch } = _getStoreWithURL();
     const profileName = 'Good Profile';
 
@@ -485,7 +470,7 @@ describe('profileName', function() {
     );
   });
 
-  it('reflects in the state from URL', function() {
+  it('reflects in the state from URL', function () {
     const { getState } = _getStoreWithURL({
       search: '?profileName=XXX',
     });
@@ -493,7 +478,7 @@ describe('profileName', function() {
     expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe('XXX');
   });
 
-  it('provides default values for when no profile name is given', function() {
+  it('provides default values for when no profile name is given', function () {
     const { getState } = _getStoreWithURL();
     expect(urlStateSelectors.getProfileNameFromUrl(getState())).toBe(null);
     expect(urlStateSelectors.getProfileNameWithDefault(getState())).toBe(
@@ -502,8 +487,8 @@ describe('profileName', function() {
   });
 });
 
-describe('ctxId', function() {
-  it('serializes the ctxId in the URL', function() {
+describe('ctxId', function () {
+  it('serializes the ctxId in the URL', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -516,7 +501,7 @@ describe('ctxId', function() {
     expect(queryString).toContain(`ctxId=${tabID}`);
   });
 
-  it('reflects in the state from URL', function() {
+  it('reflects in the state from URL', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -532,7 +517,7 @@ describe('ctxId', function() {
     });
   });
 
-  it('returns the full view when ctxId is not specified', function() {
+  it('returns the full view when ctxId is not specified', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -542,14 +527,16 @@ describe('ctxId', function() {
     });
   });
 
-  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
+  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function () {
     const {
       profile,
       parentInnerWindowIDsWithChildren,
       iframeInnerWindowIDsWithChild,
     } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
-    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
-    profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
+    profile.threads[0].frameTable.innerWindowID[0] =
+      parentInnerWindowIDsWithChildren;
+    profile.threads[1].frameTable.innerWindowID[0] =
+      iframeInnerWindowIDsWithChild;
     const { getState } = _getStoreWithURL(
       {
         search: '?view=active-tab&ctxId=123',
@@ -576,7 +563,7 @@ describe('ctxId', function() {
     ]);
   });
 
-  it('should remove other full view url states if present', function() {
+  it('should remove other full view url states if present', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -598,7 +585,7 @@ describe('ctxId', function() {
     );
   });
 
-  it('if not present in the URL, still manages to load the active tab view', function() {
+  it('if not present in the URL, still manages to load the active tab view', function () {
     const { profile } = addActiveTabInformationToProfile(
       getProfileWithNiceTracks()
     );
@@ -617,7 +604,7 @@ describe('ctxId', function() {
   });
 });
 
-describe('committed ranges', function() {
+describe('committed ranges', function () {
   describe('serialization', () => {
     it('serializes when there is no range', () => {
       const { getState } = _getStoreWithURL();
@@ -806,7 +793,7 @@ describe('committed ranges', function() {
   });
 });
 
-describe('implementation', function() {
+describe('implementation', function () {
   function setup(settings, profile) {
     const store = _getStoreWithURL(settings, profile);
 
@@ -834,7 +821,7 @@ describe('implementation', function() {
 
     it.each(['js', 'cpp'])(
       'can serialize the value "%s"',
-      implementationFilter => {
+      (implementationFilter) => {
         const { getQueryString, dispatch } = setup();
         dispatch(changeImplementationFilter(implementationFilter));
         expect(getQueryString()).toContain(
@@ -854,7 +841,7 @@ describe('implementation', function() {
 
     it.each(['js', 'cpp'])(
       'deserializes known value %s',
-      implementationFilter => {
+      (implementationFilter) => {
         const { getState } = setup({
           search: `?implementation=${implementationFilter}`,
         });
@@ -875,13 +862,13 @@ describe('implementation', function() {
   });
 });
 
-describe('url upgrading', function() {
-  describe('version 1: legacy URL serialized call tree filters', function() {
+describe('url upgrading', function () {
+  describe('version 1: legacy URL serialized call tree filters', function () {
     /**
      * Originally transform stacks were called call tree filters. This test asserts that
      * the upgrade process works correctly.
      */
-    it('can upgrade callTreeFilters to transforms', function() {
+    it('can upgrade callTreeFilters to transforms', function () {
       const { getState } = _getStoreWithURL({
         search:
           '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345',
@@ -917,8 +904,8 @@ describe('url upgrading', function() {
     });
   });
 
-  describe('version 2: split apart timeline tab', function() {
-    it('switches to the stack chart when given a timeline tab', function() {
+  describe('version 2: split apart timeline tab', function () {
+    it('switches to the stack chart when given a timeline tab', function () {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
         v: 1,
@@ -926,7 +913,7 @@ describe('url upgrading', function() {
       expect(urlStateSelectors.getSelectedTab(getState())).toBe('stack-chart');
     });
 
-    it('switches to the marker-table when given a markers tab', function() {
+    it('switches to the marker-table when given a markers tab', function () {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
         v: false,
@@ -935,8 +922,8 @@ describe('url upgrading', function() {
     });
   });
 
-  describe('version 3: remove platform only option', function() {
-    it('switches to the stack chart when given a timeline tab', function() {
+  describe('version 3: remove platform only option', function () {
+    it('switches to the stack chart when given a timeline tab', function () {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
         search: '?hidePlatformDetails',
@@ -946,8 +933,8 @@ describe('url upgrading', function() {
     });
   });
 
-  describe('version 4: Add relevantForJs frames to JS callNodePaths', function() {
-    it('can upgrade a simple stack with one relevantForJs frame in the middle', function() {
+  describe('version 4: Add relevantForJs frames to JS callNodePaths', function () {
+    it('can upgrade a simple stack with one relevantForJs frame in the middle', function () {
       const {
         profile,
         funcNamesDictPerThread: [funcNamesDictPerThread],
@@ -1001,7 +988,7 @@ describe('url upgrading', function() {
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
-    it('can upgrade a simple stack with one relevantForJs frame in the front', function() {
+    it('can upgrade a simple stack with one relevantForJs frame in the front', function () {
       const {
         profile,
         funcNamesDictPerThread: [funcNamesDictPerThread],
@@ -1051,7 +1038,7 @@ describe('url upgrading', function() {
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
-    it('can upgrade a simple stack with relevantForJs and native frames in the middle', function() {
+    it('can upgrade a simple stack with relevantForJs and native frames in the middle', function () {
       const {
         profile,
         funcNamesDictPerThread: [funcNamesDictPerThread],
@@ -1102,7 +1089,7 @@ describe('url upgrading', function() {
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
-    it('can upgrade the callNodePath in the second branch of the call tree', function() {
+    it('can upgrade the callNodePath in the second branch of the call tree', function () {
       const {
         profile,
         funcNamesDictPerThread: [funcNamesDictPerThread],
@@ -1152,7 +1139,7 @@ describe('url upgrading', function() {
       expect(query.transforms).toEqual(newTransformNodeString);
     });
 
-    it('can upgrade the callNodePath in the second branch of the call tree with relevantForJs frame first', function() {
+    it('can upgrade the callNodePath in the second branch of the call tree with relevantForJs frame first', function () {
       const {
         profile,
         funcNamesDictPerThread: [funcNamesDictPerThread],
@@ -1270,8 +1257,8 @@ describe('url upgrading', function() {
     });
   });
 
-  describe('version 6: change encoding of fields with TrackIndex lists', function() {
-    it('parses version 5 correctly', function() {
+  describe('version 6: change encoding of fields with TrackIndex lists', function () {
+    it('parses version 5 correctly', function () {
       const { getState } = _getStoreWithURL(
         {
           pathname:
@@ -1284,12 +1271,7 @@ describe('url upgrading', function() {
       );
       const state = getState();
       expect(urlStateSelectors.getGlobalTrackOrder(state)).toEqual([
-        5,
-        0,
-        1,
-        2,
-        3,
-        4,
+        5, 0, 1, 2, 3, 4,
       ]);
       expect(urlStateSelectors.getHiddenGlobalTracks(state)).toEqual(
         new Set([3, 4, 5])
@@ -1314,7 +1296,7 @@ describe('url upgrading', function() {
       );
     });
 
-    it('parses version 5 with multiple selected threads (comma-separated)', function() {
+    it('parses version 5 with multiple selected threads (comma-separated)', function () {
       const { getState } = _getStoreWithURL(
         {
           pathname:
@@ -1332,7 +1314,7 @@ describe('url upgrading', function() {
   });
 
   // More general checks
-  it("won't run if the current version is specified", function() {
+  it("won't run if the current version is specified", function () {
     const { getState } = _getStoreWithURL({
       pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
       v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
@@ -1350,7 +1332,7 @@ describe('url upgrading', function() {
     );
   });
 
-  it('throws a specific error if a more recent version is specified', function() {
+  it('throws a specific error if a more recent version is specified', function () {
     expect(() =>
       _getStoreWithURL({
         v: CURRENT_URL_VERSION + 1,
@@ -1359,7 +1341,7 @@ describe('url upgrading', function() {
   });
 });
 
-describe('URL serialization of the transform stack', function() {
+describe('URL serialization of the transform stack', function () {
   const transformString =
     'f-combined-0w2~mcn-combined-2w4~f-js-3w5-i~mf-6~ff-7~cr-combined-8-9~' +
     'rec-combined-10~df-11~cfs-12';
@@ -1367,7 +1349,7 @@ describe('URL serialization of the transform stack', function() {
     search: '?transforms=' + transformString,
   });
 
-  it('deserializes focus subtree transforms', function() {
+  it('deserializes focus subtree transforms', function () {
     const transformStack = selectedThreadSelectors.getTransformStack(
       getState()
     );
@@ -1421,14 +1403,14 @@ describe('URL serialization of the transform stack', function() {
     ]);
   });
 
-  it('re-serializes the focus subtree transforms', function() {
+  it('re-serializes the focus subtree transforms', function () {
     const urlState = urlStateSelectors.getUrlState(getState());
     const queryString = getQueryStringFromUrlState(urlState);
     expect(queryString).toContain(`transforms=${transformString}`);
   });
 });
 
-describe('URL persistence of transform stacks for a combined thread (multi-thread selection)', function() {
+describe('URL persistence of transform stacks for a combined thread (multi-thread selection)', function () {
   function setup() {
     const store = _getStoreWithURL();
     const { dispatch } = store;
@@ -1457,7 +1439,7 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     return store;
   }
 
-  it('persists the transform for thread 0 if thread 0 is selected', function() {
+  it('persists the transform for thread 0 if thread 0 is selected', function () {
     const { dispatch, getState } = setup();
     dispatch(changeSelectedThreads(new Set([0])));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1479,13 +1461,12 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     ]);
 
     newStore.dispatch(changeSelectedThreads(new Set([1])));
-    const transformStackForDifferentThread = selectedThreadSelectors.getTransformStack(
-      newStore.getState()
-    );
+    const transformStackForDifferentThread =
+      selectedThreadSelectors.getTransformStack(newStore.getState());
     expect(transformStackForDifferentThread).toEqual([]);
   });
 
-  it('persists the transform for thread 1 if thread 1 is selected', function() {
+  it('persists the transform for thread 1 if thread 1 is selected', function () {
     const { dispatch, getState } = setup();
     dispatch(changeSelectedThreads(new Set([1])));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1507,7 +1488,7 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     ]);
   });
 
-  it('persists the transform for thread 2 if thread 2 is selected', function() {
+  it('persists the transform for thread 2 if thread 2 is selected', function () {
     const { dispatch, getState } = setup();
     dispatch(changeSelectedThreads(new Set([2])));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1522,7 +1503,7 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
     expect(transformStack).toEqual([]);
   });
 
-  it('persists the transform for the combined thread of 0+1 if threads 0 and 1 are selected', function() {
+  it('persists the transform for the combined thread of 0+1 if threads 0 and 1 are selected', function () {
     const { dispatch, getState } = setup();
     dispatch(changeSelectedThreads(new Set([0, 2])));
     const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
@@ -1543,8 +1524,8 @@ describe('URL persistence of transform stacks for a combined thread (multi-threa
   });
 });
 
-describe('urlFromState', function() {
-  it('outputs no default parameters besides the current URL version', function() {
+describe('urlFromState', function () {
+  it('outputs no default parameters besides the current URL version', function () {
     const pathname =
       '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree';
     const newUrlState = stateFromLocation({
@@ -1558,11 +1539,11 @@ describe('urlFromState', function() {
   });
 });
 
-describe('compare', function() {
+describe('compare', function () {
   const url1 = 'http://fake-url.com/hash/1';
   const url2 = 'http://fake-url.com/hash/2';
 
-  it('unserializes profiles URL properly', function() {
+  it('unserializes profiles URL properly', function () {
     const store = _getStoreWithURL(
       {
         pathname: '/compare/',
@@ -1580,7 +1561,7 @@ describe('compare', function() {
     ]);
   });
 
-  it('serializes profiles URL properly', function() {
+  it('serializes profiles URL properly', function () {
     const store = _getStoreWithURL(
       { pathname: '/compare/' },
       /* no profile */ null
@@ -1607,7 +1588,7 @@ describe('compare', function() {
   });
 });
 
-describe('uploaded-recordings', function() {
+describe('uploaded-recordings', function () {
   it('unserializes uploaded-recordings URLs', () => {
     const store = _getStoreWithURL(
       { pathname: '/uploaded-recordings' },
@@ -1634,17 +1615,17 @@ describe('uploaded-recordings', function() {
   });
 });
 
-describe('last requested call tree summary strategy', function() {
+describe('last requested call tree summary strategy', function () {
   const { getLastSelectedCallTreeSummaryStrategy } = urlStateSelectors;
 
-  it('defaults to timing', function() {
+  it('defaults to timing', function () {
     const { getState } = _getStoreWithURL();
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
       'timing'
     );
   });
 
-  it('can be js allocations', function() {
+  it('can be js allocations', function () {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=js-allocations',
     });
@@ -1653,7 +1634,7 @@ describe('last requested call tree summary strategy', function() {
     );
   });
 
-  it('can be native allocations', function() {
+  it('can be native allocations', function () {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=native-allocations',
     });
@@ -1662,7 +1643,7 @@ describe('last requested call tree summary strategy', function() {
     );
   });
 
-  it('will use the default "timing" when an unknown value is received', function() {
+  it('will use the default "timing" when an unknown value is received', function () {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=unknown-value',
     });
@@ -1672,7 +1653,7 @@ describe('last requested call tree summary strategy', function() {
   });
 });
 
-describe('symbolServerUrl', function() {
+describe('symbolServerUrl', function () {
   function setup(search: string) {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -1687,14 +1668,14 @@ describe('symbolServerUrl', function() {
     };
   }
 
-  it('defaults to the Mozilla symbol server', function() {
+  it('defaults to the Mozilla symbol server', function () {
     const { symbolServerUrl, queryString } = setup('');
     expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
     expect(symbolServerUrl.substr(-1)).not.toEqual('/');
     expect(queryString).not.toContain('symbolServer=');
   });
 
-  it('can be switch to a custom localhost server', function() {
+  it('can be switch to a custom localhost server', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=http://localhost:1234/symbols'
     );
@@ -1704,7 +1685,7 @@ describe('symbolServerUrl', function() {
     );
   });
 
-  it('removes any trailing slash', function() {
+  it('removes any trailing slash', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=http://localhost:1234/'
     );
@@ -1714,7 +1695,7 @@ describe('symbolServerUrl', function() {
     );
   });
 
-  it('will error when switching to an unknown host', function() {
+  it('will error when switching to an unknown host', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=https://symbols.mozilla.org.example.com/symbols'
     );
@@ -1725,14 +1706,14 @@ describe('symbolServerUrl', function() {
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will error when switching to an invalid host', function() {
+  it('will error when switching to an invalid host', function () {
     const { symbolServerUrl, queryString } = setup('?symbolServer=invalid');
     expect(symbolServerUrl).toEqual(SYMBOL_SERVER_URL);
     expect(queryString).toContain('symbolServer=invalid');
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will error when switching to an allowed but non-https host', function() {
+  it('will error when switching to an allowed but non-https host', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=http://symbols.mozilla.org/'
     );
@@ -1743,7 +1724,7 @@ describe('symbolServerUrl', function() {
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will allow an allowed https host', function() {
+  it('will allow an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=https://symbolication.stage.mozaws.net'
     );
@@ -1754,7 +1735,7 @@ describe('symbolServerUrl', function() {
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will strip the trailing slash on an allowed https host', function() {
+  it('will strip the trailing slash on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=https://symbolication.stage.mozaws.net/'
     );
@@ -1765,7 +1746,7 @@ describe('symbolServerUrl', function() {
     expect(console.error.mock.calls).toMatchSnapshot();
   });
 
-  it('will allow a a subdirectory path on an allowed https host', function() {
+  it('will allow a a subdirectory path on an allowed https host', function () {
     const { symbolServerUrl, queryString } = setup(
       '?symbolServer=https://symbolication.stage.mozaws.net/subdir/'
     );

@@ -73,7 +73,7 @@ autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
 beforeEach(addRootOverlayElement);
 afterEach(removeRootOverlayElement);
 
-describe('StackChart', function() {
+describe('StackChart', function () {
   it('matches the snapshot', () => {
     const { container } = setupSamples();
     const drawCalls = flushDrawLog();
@@ -81,13 +81,9 @@ describe('StackChart', function() {
     expect(drawCalls).toMatchSnapshot();
   });
 
-  it('can select a call node when clicking the chart', function() {
-    const {
-      dispatch,
-      getState,
-      leftClick,
-      findFillTextPosition,
-    } = setupSamples();
+  it('can select a call node when clicking the chart', function () {
+    const { dispatch, getState, leftClick, findFillTextPosition } =
+      setupSamples();
 
     // Start out deselected
     dispatch(changeSelectedCallNode(0, []));
@@ -113,16 +109,12 @@ describe('StackChart', function() {
     );
   });
 
-  it('can display a context menu when right clicking the chart', function() {
+  it('can display a context menu when right clicking the chart', function () {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const {
-      rightClick,
-      getContextMenu,
-      clickMenuItem,
-      findFillTextPosition,
-    } = setupSamples();
+    const { rightClick, getContextMenu, clickMenuItem, findFillTextPosition } =
+      setupSamples();
 
     rightClick(findFillTextPosition('A'));
 
@@ -149,7 +141,7 @@ describe('StackChart', function() {
     return drawCalls.filter(([fn]) => fn === 'fillText').map(([, arg]) => arg);
   }
 
-  it('can scroll into view when selecting a node', function() {
+  it('can scroll into view when selecting a node', function () {
     // Create a stack deep enough to not have all its rendered frames
     // fit within GRAPH_HEIGHT.
     const frames = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(
@@ -165,7 +157,7 @@ describe('StackChart', function() {
     dispatch(
       changeSelectedCallNode(
         0,
-        frames.map(name => funcNames.indexOf(name))
+        frames.map((name) => funcNames.indexOf(name))
       )
     );
     flushRafCalls();
@@ -209,7 +201,7 @@ describe('StackChart', function() {
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
-    it('shows reasons when samples have been completely filtered out', function() {
+    it('shows reasons when samples have been completely filtered out', function () {
       const { dispatch, container } = setupSamples();
       dispatch(changeImplementationFilter('js'));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
@@ -217,7 +209,7 @@ describe('StackChart', function() {
   });
 });
 
-describe('MarkerChart', function() {
+describe('MarkerChart', function () {
   it('can turn on the show user timings', () => {
     const { getByLabelText, getState } = setupUserTimings({
       isShowUserTimingsClicked: false,
@@ -245,11 +237,11 @@ describe('MarkerChart', function() {
 
   // TODO implement selecting user timing markers #2355
   // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can select a marker when clicking the chart', function() {});
+  it.skip('can select a marker when clicking the chart', function () {});
 
   // TODO implement selecting user timing markers #2355
   // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can right click a marker and show a context menu', function() {});
+  it.skip('can right click a marker and show a context menu', function () {});
 
   it('shows a tooltip when hovering', () => {
     const { getTooltip, moveMouse, findFillTextPosition } = setupUserTimings({
@@ -264,7 +256,7 @@ describe('MarkerChart', function() {
   });
 });
 
-describe('CombinedChart', function() {
+describe('CombinedChart', function () {
   it('renders combined stack chart', () => {
     const { container } = setupCombinedTimings();
 

@@ -48,19 +48,19 @@ type MarkerDisplayData = {|
 |};
 
 class MarkerTree {
-  _getMarker: MarkerIndex => Marker;
+  _getMarker: (MarkerIndex) => Marker;
   _markerIndexes: MarkerIndex[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
   _markerSchemaByName: MarkerSchemaByName;
-  _getMarkerLabel: MarkerIndex => string;
+  _getMarkerLabel: (MarkerIndex) => string;
 
   constructor(
-    getMarker: MarkerIndex => Marker,
+    getMarker: (MarkerIndex) => Marker,
     markerIndexes: MarkerIndex[],
     zeroAt: Milliseconds,
     markerSchemaByName: MarkerSchemaByName,
-    getMarkerLabel: MarkerIndex => string
+    getMarkerLabel: (MarkerIndex) => string
   ) {
     this._getMarker = getMarker;
     this._markerIndexes = markerIndexes;
@@ -137,14 +137,14 @@ function _formatStart(start: number, zeroAt) {
 
 type StateProps = {|
   +threadsKey: ThreadsKey,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +markerIndexes: MarkerIndex[],
   +selectedMarker: MarkerIndex | null,
   +rightClickedMarkerIndex: MarkerIndex | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
   +markerSchemaByName: MarkerSchemaByName,
-  +getMarkerLabel: MarkerIndex => string,
+  +getMarkerLabel: (MarkerIndex) => string,
 |};
 
 type DispatchProps = {|
@@ -164,7 +164,7 @@ class MarkerTableImpl extends PureComponent<Props> {
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
-  _takeTreeViewRef = treeView => (this._treeView = treeView);
+  _takeTreeViewRef = (treeView) => (this._treeView = treeView);
 
   getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
 
@@ -251,15 +251,14 @@ class MarkerTableImpl extends PureComponent<Props> {
 }
 
 export const MarkerTable = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     getMarker: selectedThreadSelectors.getMarkerGetter(state),
     markerIndexes: selectedThreadSelectors.getMarkerTableMarkerIndexes(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
-    rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-      state
-    ),
+    rightClickedMarkerIndex:
+      selectedThreadSelectors.getRightClickedMarkerIndex(state),
     zeroAt: getZeroAt(state),
     markerSchemaByName: getMarkerSchemaByName(state),
     getMarkerLabel: selectedThreadSelectors.getMarkerTableLabelGetter(state),

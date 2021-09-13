@@ -36,8 +36,8 @@ type State = {
 export class Draggable extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null = null;
   _handlers: {
-    mouseMoveHandler: MouseEvent => void,
-    mouseUpHandler: MouseEvent => void,
+    mouseMoveHandler: (MouseEvent) => void,
+    mouseUpHandler: (MouseEvent) => void,
   } | null = null;
   state = {
     dragging: false,
@@ -60,7 +60,7 @@ export class Draggable extends React.PureComponent<Props, State> {
     const mouseDownY = e.pageY;
     const startValue = this.props.value;
 
-    const mouseMoveHandler = e => {
+    const mouseMoveHandler = (e) => {
       this.props.onMove(
         startValue,
         e.pageX - mouseDownX,
@@ -72,7 +72,7 @@ export class Draggable extends React.PureComponent<Props, State> {
       e.preventDefault();
     };
 
-    const mouseUpHandler = e => {
+    const mouseUpHandler = (e) => {
       this.props.onMove(
         startValue,
         e.pageX - mouseDownX,
@@ -89,8 +89,8 @@ export class Draggable extends React.PureComponent<Props, State> {
   };
 
   _installMoveAndUpHandlers(
-    mouseMoveHandler: MouseEvent => void,
-    mouseUpHandler: MouseEvent => void
+    mouseMoveHandler: (MouseEvent) => void,
+    mouseUpHandler: (MouseEvent) => void
   ) {
     // Unregister any leftover old handlers, in case we didn't get a mouseup for the previous
     // drag (e.g. when tab switching during a drag, or when ctrl+clicking on macOS).

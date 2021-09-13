@@ -104,7 +104,7 @@ async function persistJustUploadedProfileInformationToDb(
   }
 
   const zeroAt = getZeroAt(prepublishedState);
-  const adjustRange = range => ({
+  const adjustRange = (range) => ({
     start: range.start - zeroAt,
     end: range.end - zeroAt,
   });
@@ -121,9 +121,8 @@ async function persistJustUploadedProfileInformationToDb(
   const urlPredictor = getUrlPredictor(prepublishedState);
   let predictedUrl;
 
-  const removeProfileInformation = getRemoveProfileInformation(
-    prepublishedState
-  );
+  const removeProfileInformation =
+    getRemoveProfileInformation(prepublishedState);
   if (removeProfileInformation) {
     // In case you wonder, committedRanges is either an empty array (if the
     // range was sanitized) or `null` (otherwise).
@@ -263,7 +262,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
-      const hashOrToken = await startUpload(gzipData, uploadProgress => {
+      const hashOrToken = await startUpload(gzipData, (uploadProgress) => {
         dispatch(updateUploadProgress(uploadProgress));
       });
 
@@ -287,15 +286,11 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         return false;
       }
 
-      const removeProfileInformation = getRemoveProfileInformation(
-        prePublishedState
-      );
+      const removeProfileInformation =
+        getRemoveProfileInformation(prePublishedState);
       if (removeProfileInformation) {
-        const {
-          committedRanges,
-          oldThreadIndexToNew,
-          profile,
-        } = sanitizedInformation;
+        const { committedRanges, oldThreadIndexToNew, profile } =
+          sanitizedInformation;
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -438,9 +433,9 @@ export function revertToPrePublishedState(): ThunkAction<Promise<void>> {
 }
 
 export function hideStaleProfile(): ThunkAction<Promise<void>> {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({ type: 'HIDE_STALE_PROFILE' });
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // This timing should match .profileViewerFadeOut.
       setTimeout(resolve, 300);
     });

@@ -173,11 +173,8 @@ export function getFlameGraphTiming(
   callNodeInfo: CallNodeInfo,
   callTreeCountsAndSummary: CallTreeCountsAndSummary
 ): FlameGraphTiming {
-  const {
-    callNodeChildCount,
-    callNodeSummary,
-    rootTotalSummary,
-  } = callTreeCountsAndSummary;
+  const { callNodeChildCount, callNodeSummary, rootTotalSummary } =
+    callTreeCountsAndSummary;
 
   const { roots, children } = getRootsAndChildren(
     thread,
@@ -192,7 +189,7 @@ export function getFlameGraphTiming(
   const stack: Array<{
     depth: number,
     nodeIndex: IndexIntoCallNodeTable,
-  }> = roots.map(nodeIndex => ({ nodeIndex, depth: 0 }));
+  }> = roots.map((nodeIndex) => ({ nodeIndex, depth: 0 }));
 
   // Keep track of time offset by depth level.
   const timeOffset = [0.0];

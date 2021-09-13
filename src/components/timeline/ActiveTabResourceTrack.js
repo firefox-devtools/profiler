@@ -58,29 +58,29 @@ class ActiveTabResourceTrackComponent extends PureComponent<Props, State> {
     };
   }
 
-  _onClick = (
-    clickedArea: 'timelineTrackResourceLabel' | 'timelineTrackRow'
-  ) => (event: MouseEvent) => {
-    const { isSelected } = this.props;
-    const { isOpen } = this.state;
+  _onClick =
+    (clickedArea: 'timelineTrackResourceLabel' | 'timelineTrackRow') =>
+    (event: MouseEvent) => {
+      const { isSelected } = this.props;
+      const { isOpen } = this.state;
 
-    if (event.button === 0) {
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-      //Only toggle the resource track when the resource label is clicked
-      if (clickedArea === 'timelineTrackResourceLabel') {
-        if (isSelected || !isOpen) {
-          // We have two different states for selected tracks and open tracks because
-          // non selected tracks also can stay opened. We can only close the track if
-          // the track is already selected.
-          this.setState(prevState => {
-            return { isOpen: !prevState.isOpen };
-          });
+      if (event.button === 0) {
+        // Don't allow clicks on the threads list to steal focus from the tree view.
+        event.preventDefault();
+        //Only toggle the resource track when the resource label is clicked
+        if (clickedArea === 'timelineTrackResourceLabel') {
+          if (isSelected || !isOpen) {
+            // We have two different states for selected tracks and open tracks because
+            // non selected tracks also can stay opened. We can only close the track if
+            // the track is already selected.
+            this.setState((prevState) => {
+              return { isOpen: !prevState.isOpen };
+            });
+          }
         }
+        this.props.selectActiveTabTrack(this._getTrackReference());
       }
-      this.props.selectActiveTabTrack(this._getTrackReference());
-    }
-  };
+    };
 
   _getTrackReference(): ActiveTabTrackReference {
     const { trackIndex } = this.props;

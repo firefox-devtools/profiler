@@ -18,7 +18,8 @@ export type RightClickedCallNodeInfo = {|
   +callNodePath: CallNodePath,
 |};
 
-export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.rightClickedCallNode
-);
+export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> =
+  createSelector(
+    getProfileViewOptions,
+    (viewOptions) => viewOptions.rightClickedCallNode
+  );

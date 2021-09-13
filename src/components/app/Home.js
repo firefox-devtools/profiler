@@ -63,7 +63,7 @@ class ActionButtons extends React.PureComponent<
     isLoadFromUrlPressed: false,
   };
 
-  _takeInputRef = input => {
+  _takeInputRef = (input) => {
     this._fileInput = input;
   };
 
@@ -82,7 +82,7 @@ class ActionButtons extends React.PureComponent<
 
   _loadFromUrlPressed = (event: SyntheticEvent<>) => {
     event.preventDefault();
-    this.setState(prevState => {
+    this.setState((prevState) => {
       return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
     });
   };
@@ -229,7 +229,7 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
       // Query the browser to see if the menu button is available.
       queryIsMenuButtonEnabled().then(
-        isMenuButtonEnabled => {
+        (isMenuButtonEnabled) => {
           this.setState({
             popupInstallPhase: isMenuButtonEnabled
               ? 'popup-enabled'
@@ -267,13 +267,13 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     }
   }
 
-  _enableMenuButton = e => {
+  _enableMenuButton = (e) => {
     e.preventDefault();
     enableMenuButton().then(
       () => {
         this.setState({ popupInstallPhase: 'popup-enabled' });
       },
-      error => {
+      (error) => {
         // This error doesn't get surfaced in the UI, but it does in console.
         console.error('Unable to enable the profiler popup button.', error);
       }

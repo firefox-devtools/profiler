@@ -23,7 +23,7 @@ import type { CallTreeSummaryStrategy } from 'firefox-profiler/types';
  * Test that the NativeAllocationTable structure can by used with all of the call tree
  * functionality, and that it obeys all of the transformation pipeline.
  */
-describe('Native allocation call trees', function() {
+describe('Native allocation call trees', function () {
   function setup(
     type: 'balanced' | 'unbalanced',
     summaryStrategy: CallTreeSummaryStrategy
@@ -39,8 +39,8 @@ describe('Native allocation call trees', function() {
     return { ...store, funcNamesDict };
   }
 
-  describe('with balanced allocations', function() {
-    it('can create a call tree from allocations only', function() {
+  describe('with balanced allocations', function () {
+    it('can create a call tree from allocations only', function () {
       const { getState } = setup('balanced', 'native-allocations');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -57,7 +57,7 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('can create a call tree from deallocation sites only', function() {
+    it('can create a call tree from deallocation sites only', function () {
       const { getState } = setup('balanced', 'native-deallocations-sites');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -76,7 +76,7 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('can create a call tree from deallocated memory', function() {
+    it('can create a call tree from deallocated memory', function () {
       const { getState } = setup('balanced', 'native-deallocations-memory');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -93,7 +93,7 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('can create a call tree from retained allocations', function() {
+    it('can create a call tree from retained allocations', function () {
       const { getState } = setup('balanced', 'native-retained-allocations');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -111,8 +111,8 @@ describe('Native allocation call trees', function() {
     });
   });
 
-  describe('with unbalanced allocations', function() {
-    it('can create a call tree from allocations only', function() {
+  describe('with unbalanced allocations', function () {
+    it('can create a call tree from allocations only', function () {
       const { getState } = setup('unbalanced', 'native-allocations');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -129,7 +129,7 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('can create a call tree from deallocations only', function() {
+    it('can create a call tree from deallocations only', function () {
       const { getState } = setup('unbalanced', 'native-deallocations-sites');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
@@ -144,7 +144,7 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('cannot create a call tree from retained allocations', function() {
+    it('cannot create a call tree from retained allocations', function () {
       const { getState } = setup('unbalanced', 'native-retained-allocations');
       expect(() => {
         selectedThreadSelectors.getCallTree(getState());
@@ -152,7 +152,7 @@ describe('Native allocation call trees', function() {
     });
   });
 
-  it('can search the allocations', function() {
+  it('can search the allocations', function () {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeCallTreeSearchString('Hjs'));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -167,7 +167,7 @@ describe('Native allocation call trees', function() {
     ]);
   });
 
-  it('can invert the allocation tree', function() {
+  it('can invert the allocation tree', function () {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeInvertCallstack(true));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -191,7 +191,7 @@ describe('Native allocation call trees', function() {
     ]);
   });
 
-  it('can use an implementation filter', function() {
+  it('can use an implementation filter', function () {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeImplementationFilter('js'));
     const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -203,7 +203,7 @@ describe('Native allocation call trees', function() {
     ]);
   });
 
-  it('will apply a committed range selection', function() {
+  it('will apply a committed range selection', function () {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
 
     dispatch(commitRange(0, 1.5));
@@ -220,7 +220,7 @@ describe('Native allocation call trees', function() {
     ]);
   });
 
-  it('will apply a preview selection', function() {
+  it('will apply a preview selection', function () {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
 
     dispatch(commitRange(0, 1.5));

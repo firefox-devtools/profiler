@@ -43,12 +43,8 @@ class JsTracerImpl extends React.PureComponent<Props> {
   _rafGeneration: number = 0;
 
   render() {
-    const {
-      profile,
-      jsTracerTable,
-      showJsTracerSummary,
-      threadsKey,
-    } = this.props;
+    const { profile, jsTracerTable, showJsTracerSummary, threadsKey } =
+      this.props;
     return (
       <div className="jsTracer">
         {jsTracerTable === null || jsTracerTable.events.length === 0 ? (
@@ -70,7 +66,7 @@ class JsTracerImpl extends React.PureComponent<Props> {
 }
 
 export const JsTracer = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     return {
       profile: getProfile(state),
       threadsKey: getSelectedThreadsKey(state),

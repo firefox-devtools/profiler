@@ -85,9 +85,7 @@ class EmptyThreadIndicatorImpl extends PureComponent<Props> {
  * pretty clear explanations of the requirements:
  * src/test/components/EmptyThreadIndicator.test.js
  */
-export function getIndicatorPositions(
-  props: Props
-): {|
+export function getIndicatorPositions(props: Props): {|
   startup: SyntheticCssDeclarations | null,
   shutdown: SyntheticCssDeclarations | null,
   emptyBufferStart: SyntheticCssDeclarations | null,

@@ -30,7 +30,7 @@ export function uploadBinaryProfileData() {
     },
     startUpload: (
       data: $TypedArray,
-      progressChangeCallback?: number => mixed
+      progressChangeCallback?: (number) => mixed
     ): Promise<string> =>
       new Promise((resolve, reject) => {
         if (isAborted) {
@@ -84,7 +84,7 @@ export function uploadBinaryProfileData() {
           );
         };
 
-        xhr.upload.onprogress = e => {
+        xhr.upload.onprogress = (e) => {
           if (progressChangeCallback && e.lengthComputable) {
             progressChangeCallback(e.loaded / e.total);
           }

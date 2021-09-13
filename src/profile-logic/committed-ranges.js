@@ -32,7 +32,7 @@ export function parseCommittedRanges(
   return (
     stringValue
       .split('~')
-      .map(committedRange => {
+      .map((committedRange) => {
         // Strings look like: 12345m25, which means the start is at 12'345ms, and
         // the duration is 25ms. All values are integer, but the start can be
         // missing.
@@ -175,7 +175,7 @@ export function getFormattedTimeLength(length: number): string {
 export function getCommittedRangeLabels(
   committedRanges: StartEndRange[]
 ): string[] {
-  const labels = committedRanges.map(range =>
+  const labels = committedRanges.map((range) =>
     getFormattedTimeLength(range.end - range.start)
   );
   return labels;

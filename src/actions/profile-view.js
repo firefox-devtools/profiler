@@ -634,7 +634,7 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
  * This action shows all tracks
  */
 export function showAllTracks(): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
@@ -651,7 +651,7 @@ export function showAllTracks(): ThunkAction<void> {
  * This action shows a specific global track.
  */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
@@ -735,7 +735,7 @@ export function isolateProcess(
     dispatch({
       type: 'ISOLATE_PROCESS',
       hiddenGlobalTracks: new Set(
-        trackIndexes.filter(i => i !== isolatedTrackIndex)
+        trackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
       selectedThreadIndexes: newSelectedThreadIndexes,
@@ -812,7 +812,7 @@ export function isolateProcessMainThread(
       type: 'ISOLATE_PROCESS_MAIN_THREAD',
       pid: track.pid,
       hiddenGlobalTracks: new Set(
-        trackIndexes.filter(i => i !== isolatedTrackIndex)
+        trackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
       selectedThreadIndexes: new Set([selectedThreadIndex]),
@@ -1020,7 +1020,7 @@ export function showLocalTrack(
   pid: Pid,
   trackIndex: TrackIndex
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
@@ -1081,10 +1081,10 @@ export function isolateLocalTrack(
       type: 'ISOLATE_LOCAL_TRACK',
       pid,
       hiddenGlobalTracks: new Set(
-        globalTrackIndexes.filter(i => i !== globalTrackIndex)
+        globalTrackIndexes.filter((i) => i !== globalTrackIndex)
       ),
       hiddenLocalTracks: new Set(
-        localTrackIndexes.filter(i => i !== isolatedTrackIndex)
+        localTrackIndexes.filter((i) => i !== isolatedTrackIndex)
       ),
       selectedThreadIndexes,
     });
@@ -1115,22 +1115,21 @@ export function expandAllCallNodeDescendants(
   callNodeInfo: CallNodeInfo
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
-      getState()
-    );
+    const expandedCallNodeIndexes =
+      selectedThreadSelectors.getExpandedCallNodeIndexes(getState());
     const tree = selectedThreadSelectors.getCallTree(getState());
 
     // Create a set with the selected call node and its descendants
     const descendants = tree.getAllDescendants(callNodeIndex);
     descendants.add(callNodeIndex);
     // And also add all the call nodes that already were expanded
-    expandedCallNodeIndexes.forEach(callNodeIndex => {
+    expandedCallNodeIndexes.forEach((callNodeIndex) => {
       if (callNodeIndex !== null) {
         descendants.add(callNodeIndex);
       }
     });
 
-    const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
+    const expandedCallNodePaths = [...descendants].map((callNodeIndex) =>
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
     dispatch(changeExpandedCallNodes(threadsKey, expandedCallNodePaths));
@@ -1221,9 +1220,8 @@ export function changeImplementationFilter(
   return (dispatch, getState) => {
     const previousImplementation = getImplementationFilter(getState());
     const threadsKey = getSelectedThreadsKey(getState());
-    const transformedThread = selectedThreadSelectors.getRangeAndTransformFilteredThread(
-      getState()
-    );
+    const transformedThread =
+      selectedThreadSelectors.getRangeAndTransformFilteredThread(getState());
 
     sendAnalytics({
       hitType: 'event',
@@ -1286,7 +1284,7 @@ export function changeInvertCallstack(
 export function changeShowUserTimings(
   showUserTimings: boolean
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'profile',
@@ -1307,7 +1305,7 @@ export function changeShowUserTimings(
 export function changeShowJsTracerSummary(
   showSummary: boolean
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch) => {
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'profile',

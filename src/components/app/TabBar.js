@@ -18,7 +18,7 @@ import './TabBar.css';
 type Props = {|
   +selectedTabSlug: string,
   +visibleTabs: $ReadOnlyArray<TabSlug>,
-  +onSelectTab: string => void,
+  +onSelectTab: (string) => void,
 |};
 
 export class TabBar extends React.PureComponent<Props> {
@@ -40,7 +40,7 @@ export class TabBar extends React.PureComponent<Props> {
         role="tablist"
         aria-label="Profiler tabs"
       >
-        {visibleTabs.map(tabSlug => (
+        {visibleTabs.map((tabSlug) => (
           <li
             className={classNames({
               tabBarTab: true,

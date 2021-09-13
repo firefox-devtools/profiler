@@ -58,7 +58,7 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
   >,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -211,7 +211,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
     const textDevicePixelsOffsetTop =
       TEXT_CSS_PIXELS_OFFSET_TOP * devicePixelRatio;
     let categoryForUserTiming = categories.findIndex(
-      category => category.name === 'JavaScript'
+      (category) => category.name === 'JavaScript'
     );
     if (categoryForUserTiming === -1) {
       // Default to the first item in the categories list.
@@ -500,9 +500,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    const result = this._getCallNodeIndexOrMarkerIndexFromHoveredItem(
-      hoveredItem
-    );
+    const result =
+      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
 
     if (!result) {
       this.props.onSelectionChange(null);
@@ -515,9 +514,8 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
-    const result = this._getCallNodeIndexOrMarkerIndexFromHoveredItem(
-      hoveredItem
-    );
+    const result =
+      this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);
 
     // TODO implement right clicking user timing markers #2354
     if (result && result.type === 'call-node') {
