@@ -21,22 +21,31 @@ export function isPerfScriptFormat(profile: string): boolean {
   return /^\S.+?\s+(?:\d+\/)?\d+\s+(?:\[\d+\]\s+)?[\d.]+:/.test(firstLine);
 }
 
-// Don't try and type this more specifically. It will be run through the Gecko upgrader
-// process.
-type GeckoProfileVersion4 = MixedObject;
+// Don't try and type this more specifically.
+type GeckoProfileVersion24 = MixedObject;
+
+const CATEGORIES = [
+  { name: 'User', color: 'yellow', subcategories: ['Other'] },
+  { name: 'Kernel', color: 'orange', subcategories: ['Other'] },
+];
+const USER_CATEGORY_INDEX = 0;
+const KERNEL_CATEGORY_INDEX = 1;
 
 /**
- * Convert the output from `perf script` into the gecko profile format (version 4).
+ * Convert the output from `perf script` into the gecko profile format (version 24).
  */
 export function convertPerfScriptProfile(
   profile: string
-): GeckoProfileVersion4 {
+): GeckoProfileVersion24 {
   function _createThread(name, pid, tid) {
     const markers = {
       schema: {
         name: 0,
-        time: 1,
-        data: 2,
+        startTime: 1,
+        endTime: 2,
+        phase: 3,
+        category: 4,
+        data: 5,
       },
       data: [],
     };
@@ -45,26 +54,27 @@ export function convertPerfScriptProfile(
         stack: 0,
         time: 1,
         responsiveness: 2,
-        rss: 3,
-        uss: 4,
-        frameNumber: 5,
       },
       data: [],
     };
     const frameTable = {
       schema: {
         location: 0,
-        implementation: 1,
-        optimizations: 2,
-        line: 3,
-        category: 4,
+        relevantForJS: 1,
+        innerWindowID: 2,
+        implementation: 3,
+        optimizations: 4,
+        line: 5,
+        column: 6,
+        category: 7,
+        subcategory: 8,
       },
       data: [],
     };
     const stackTable = {
       schema: {
-        frame: 0,
-        prefix: 1,
+        prefix: 0,
+        frame: 1,
       },
       data: [],
     };
@@ -76,20 +86,43 @@ export function convertPerfScriptProfile(
       let stack = stackMap.get(key);
       if (stack === undefined) {
         stack = stackTable.data.length;
-        stackTable.data.push([frame, prefix]);
+        stackTable.data.push([prefix, frame]);
         stackMap.set(key, stack);
       }
       return stack;
     }
 
     const frameMap = new Map();
-    function getOrCreateFrame(frameString) {
+    function getOrCreateFrame(frameString: string) {
       let frame = frameMap.get(frameString);
       if (frame === undefined) {
         frame = frameTable.data.length;
-        const stringIndex = stringTable.length;
+        const location = stringTable.length;
         stringTable.push(frameString);
-        frameTable.data.push([stringIndex]);
+        // Heuristic: 'kallsyms' presence in a frame seems to be a reasonably
+        // reliable indicator of a Linux kernel frame, and easier/more portable
+        // than checking if the address is in kernel-space (e.g. starting with FF).
+        const category = frameString.includes('kallsyms')
+          ? KERNEL_CATEGORY_INDEX
+          : USER_CATEGORY_INDEX;
+        const implementation = null;
+        const optimizations = null;
+        const line = null;
+        const relevantForJS = false;
+        const subcategory = null;
+        const innerWindowID = 0;
+        const column = null;
+        frameTable.data.push([
+          location,
+          relevantForJS,
+          innerWindowID,
+          implementation,
+          optimizations,
+          line,
+          column,
+          category,
+          subcategory,
+        ]);
         frameMap.set(frameString, frame);
       }
       return frame;
@@ -106,7 +139,10 @@ export function convertPerfScriptProfile(
         const frame = getOrCreateFrame(stackFrame);
         return getOrCreateStack(frame, prefix);
       }, null);
-      samples.data.push([stack, time]);
+      // We don't have this information, so simulate that there's no latency at
+      // all in processing events.
+      const responsiveness = 0;
+      samples.data.push([stack, time, responsiveness]);
     }
 
     return {
@@ -121,6 +157,9 @@ export function convertPerfScriptProfile(
           frameTable,
           stackTable,
           stringTable,
+          registerTime: 0,
+          unregisterTime: null,
+          processType: 'default',
         };
       },
     };
@@ -199,7 +238,7 @@ export function convertPerfScriptProfile(
 
     const threadName = threadNamePidAndTidMatch[1].trim();
     const pid = Number(threadNamePidAndTidMatch[2] || 0);
-    const tid = threadNamePidAndTidMatch[3];
+    const tid = Number(threadNamePidAndTidMatch[3] || 0);
 
     // Assume start time is the time of the first sample
     if (startTime === 0) {
@@ -264,11 +303,19 @@ export function convertPerfScriptProfile(
       processType: 0,
       product: 'Firefox',
       stackwalk: 1,
+      debug: 0,
+      gcpoison: 0,
+      asyncstack: 1,
       startTime: startTime,
-      version: 4,
+      shutdownTime: null,
+      version: 24,
       presymbolicated: true,
+      categories: CATEGORIES,
+      markerSchema: [],
     },
     libs: [],
     threads: threadArray,
+    processes: [],
+    pausedRanges: [],
   };
 }
