@@ -193,7 +193,7 @@ function _guessMarkerCategories(profile: any) {
     { name: 'DOM', color: 'blue', subcategories: ['Other'] },
   ]) {
     const index = profile.meta.categories.findIndex(
-      (category) => category.name === defaultCategory.name
+      category => category.name === defaultCategory.name
     );
     if (index === -1) {
       // Add on any unknown categories.
@@ -202,13 +202,13 @@ function _guessMarkerCategories(profile: any) {
   }
 
   const otherCategory = profile.meta.categories.findIndex(
-    (category) => category.name === 'Other'
+    category => category.name === 'Other'
   );
 
   const keyToCategoryIndex: Map<string, number> = new Map(
     keyToCategoryName.map(([key, categoryName]) => {
       const index = profile.meta.categories.findIndex(
-        (category) => category.name === categoryName
+        category => category.name === categoryName
       );
       if (index === -1) {
         throw new Error('Could not find a category index to map to.');
@@ -249,7 +249,7 @@ function _guessMarkerCategories(profile: any) {
 // Every "upgrader" takes the profile as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders = {
-  [1]: (profile) => {
+  [1]: profile => {
     // Starting with version 1, markers are sorted.
     timeCode('sorting thread markers', () => {
       for (const thread of profile.threads) {
@@ -271,7 +271,7 @@ const _upgraders = {
       }
     }
   },
-  [2]: (profile) => {
+  [2]: profile => {
     // pdbName -> debugName, add arch
     for (const thread of profile.threads) {
       for (const lib of thread.libs) {
@@ -289,7 +289,7 @@ const _upgraders = {
       }
     }
   },
-  [3]: (profile) => {
+  [3]: profile => {
     // Make sure every lib has a debugPath property. We can't infer this
     // value from the other properties on the lib so we just set it to the
     // empty string.
@@ -299,8 +299,8 @@ const _upgraders = {
       }
     }
   },
-  [4]: (profile) => {
-    profile.threads.forEach((thread) => {
+  [4]: profile => {
+    profile.threads.forEach(thread => {
       const { funcTable, stringArray, resourceTable } = thread;
       const stringTable = new UniqueStringArray(stringArray);
 
@@ -397,8 +397,9 @@ const _upgraders = {
       for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
         const oldResourceIndex = funcTable.resource[funcIndex];
         if (oldResourceToNewResourceMap.has(oldResourceIndex)) {
-          funcTable.resource[funcIndex] =
-            oldResourceToNewResourceMap.get(oldResourceIndex);
+          funcTable.resource[funcIndex] = oldResourceToNewResourceMap.get(
+            oldResourceIndex
+          );
         }
         let fileName = null;
         let lineNumber = null;
@@ -426,13 +427,13 @@ const _upgraders = {
       thread.stringArray = stringTable.serializeToArray();
     });
   },
-  [5]: (profile) => {
+  [5]: profile => {
     // The "frameNumber" column was removed from the samples table.
     for (const thread of profile.threads) {
       delete thread.samples.frameNumber;
     }
   },
-  [6]: (profile) => {
+  [6]: profile => {
     // The type field for DOMEventMarkerPayload was renamed to eventType.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
@@ -456,7 +457,7 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [7]: (profile) => {
+  [7]: profile => {
     // Each thread has the following new attributes:
     //  - processShutdownTime: null if the process is still running, otherwise
     //    the shutdown time of the process in milliseconds relative to
@@ -483,7 +484,7 @@ const _upgraders = {
       thread.unregisterTime = null;
     }
   },
-  [8]: (profile) => {
+  [8]: profile => {
     // DOMEventMarkerPayload.timeStamp in content process should be in
     // milliseconds relative to meta.startTime.  Adjust it by adding
     // the thread.processStartupTime which is the delta to
@@ -517,7 +518,7 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [9]: (profile) => {
+  [9]: profile => {
     // Upgrade the GC markers
 
     /*
@@ -654,7 +655,7 @@ const _upgraders = {
       }
     }
   },
-  [10]: (profile) => {
+  [10]: profile => {
     // Cause backtraces
     // Styles and reflow tracing markers supply call stacks that were captured
     // at the time that style or layout was invalidated. In version 9, this
@@ -666,7 +667,7 @@ const _upgraders = {
     // a simple number, the stack index.
     _mutateProfileToEnsureCauseBacktraces(profile);
   },
-  [11]: (profile) => {
+  [11]: profile => {
     // Removed the startTime and endTime from DOMEventMarkerPayload and
     // made it a tracing marker instead. DOMEventMarkerPayload is no longer a
     // single marker, it requires a start and an end marker. Therefore, we have
@@ -760,7 +761,7 @@ const _upgraders = {
       }
     }
   },
-  [12]: (profile) => {
+  [12]: profile => {
     // profile.meta has a new property called "categories", which contains a
     // list of categories, which are objects with "name" and "color" properties.
     // The "category" column in the frameTable now refers to elements in this
@@ -927,7 +928,7 @@ const _upgraders = {
       }
     }
   },
-  [13]: (profile) => {
+  [13]: profile => {
     // The stackTable has a new column called "category", which is computed
     // from the stack's frame's category, or if that is null, from the stack's
     // prefix's category. For root stacks whose frame doesn't have a category,
@@ -936,9 +937,7 @@ const _upgraders = {
     // profile's category column is derived from the gecko profile (which does
     // not have a category column in its stack table).
     const { meta, threads } = profile;
-    const defaultCategory = meta.categories.findIndex(
-      (c) => c.color === 'grey'
-    );
+    const defaultCategory = meta.categories.findIndex(c => c.color === 'grey');
 
     for (const thread of threads) {
       const { stackTable, frameTable } = thread;
@@ -959,7 +958,7 @@ const _upgraders = {
       }
     }
   },
-  [14]: (profile) => {
+  [14]: profile => {
     // Profiles are now required to have either a string or number pid. If the pid
     // is a string, then it is a generated name, if it is a number, it's the pid
     // generated by the system.
@@ -971,7 +970,7 @@ const _upgraders = {
       }
     }
   },
-  [15]: (profile) => {
+  [15]: profile => {
     // Profiles now have a column property in the frameTable
     for (const thread of profile.threads) {
       thread.frameTable.column = new Array(thread.frameTable.length);
@@ -980,7 +979,7 @@ const _upgraders = {
       }
     }
   },
-  [16]: (profile) => {
+  [16]: profile => {
     // The type field on some markers were missing. Renamed category field of
     // VsyncTimestamp and LayerTranslation marker payloads to type and added
     // a type field to Screenshot marker payload.
@@ -1026,7 +1025,7 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
-  [17]: (profile) => {
+  [17]: profile => {
     // Profiles now have a relevantForJS property in the funcTable.
     // This column is false on C++ and JS frames, and true on label frames that
     // are entry and exit points to JS.
@@ -1060,7 +1059,7 @@ const _upgraders = {
       thread.stringArray = stringTable.serializeToArray();
     }
   },
-  [18]: (profile) => {
+  [18]: profile => {
     // When we added column numbers we forgot to update the func table.
     // As a result, when we had a column number for an entry, the line number
     // ended up in the `fileName` property, and the column number in the
@@ -1097,7 +1096,7 @@ const _upgraders = {
       thread.stringArray = stringTable.serializeToArray();
     }
   },
-  [19]: (profile) => {
+  [19]: profile => {
     // When we added timing information to network markers, we forgot to shift
     // timestamps from subprocesses during profile processing. This upgrade
     // fixes that.
@@ -1142,12 +1141,12 @@ const _upgraders = {
       }
     }
   },
-  [20]: (_profile) => {
+  [20]: _profile => {
     // rss and uss was removed from the SamplesTable. The version number was bumped
     // to help catch errors of using an outdated version of profiler.firefox.com with a newer
     // profile. There's no good reason to remove the values for upgrading profiles though.
   },
-  [21]: (profile) => {
+  [21]: profile => {
     // Before version 21, during the profile processing step, only certain markers had
     // their stacks converted to causes. However, in version 10, an upgrader was written
     // that would convert every single marker's stack to a cause. This created two types
@@ -1160,7 +1159,7 @@ const _upgraders = {
     // markers. This upgrader upgrades profiles from case 2 above.
     _mutateProfileToEnsureCauseBacktraces(profile);
   },
-  [22]: (profile) => {
+  [22]: profile => {
     // FileIO was originally called DiskIO. This profile upgrade performs the rename.
     for (const thread of profile.threads) {
       if (thread.stringArray.indexOf('DiskIO') === -1) {
@@ -1182,7 +1181,7 @@ const _upgraders = {
       }
     }
   },
-  [23]: (profile) => {
+  [23]: profile => {
     // profile.meta.categories now has a subcategories property on each element,
     // with an array of subcategories for that category, with at least one
     // subcategory per category.
@@ -1193,19 +1192,19 @@ const _upgraders = {
     }
     for (const thread of profile.threads) {
       const { frameTable, stackTable } = thread;
-      frameTable.subcategory = frameTable.category.map((c) =>
+      frameTable.subcategory = frameTable.category.map(c =>
         c === null ? null : 0
       );
-      stackTable.subcategory = stackTable.category.map((c) =>
+      stackTable.subcategory = stackTable.category.map(c =>
         c === null ? null : 0
       );
     }
   },
-  [24]: (profile) => {
+  [24]: profile => {
     // Markers now have a category field. For older profiles, guess the marker category.
     _guessMarkerCategories(profile);
   },
-  [25]: (profile) => {
+  [25]: profile => {
     // Previously, we had DocShell ID and DocShell History ID in the page object
     // to identify a specific page. We changed these IDs in the gecko side to
     // Browsing Context ID and Inner Window ID. Inner Window ID is enough to
@@ -1258,7 +1257,7 @@ const _upgraders = {
 
       for (const thread of profile.threads) {
         const { markers } = thread;
-        markers.data = markers.data.map((data) => {
+        markers.data = markers.data.map(data => {
           if (
             data &&
             data.docShellId !== undefined &&
@@ -1285,7 +1284,7 @@ const _upgraders = {
       }
     }
   },
-  [26]: (profile) => {
+  [26]: profile => {
     // Due to a bug in gecko side, we were keeping the sample_group inside an
     // object instead of an array. Usually there is only one sample group, that's
     // why it wasn't a problem before. To future proof it, we are fixing it by
@@ -1296,7 +1295,7 @@ const _upgraders = {
       }
     }
   },
-  [27]: (profile) => {
+  [27]: profile => {
     // Profiles now have an innerWindowID property in the frameTable.
     // We are filling this array with 0 values because we have no idea what that value might be.
     for (const thread of profile.threads) {
@@ -1304,7 +1303,7 @@ const _upgraders = {
       frameTable.innerWindowID = new Array(frameTable.length).fill(0);
     }
   },
-  [28]: (profile) => {
+  [28]: profile => {
     // There was a bug where some markers got a null category during sanitization.
     for (const thread of profile.threads) {
       const { markers } = thread;
@@ -1315,7 +1314,7 @@ const _upgraders = {
       }
     }
   },
-  [29]: (profile) => {
+  [29]: profile => {
     // The sample and allocation properties "duration" were changed to "weight"
     // The weight and weightType fields were made non-optional. The sample
     // "duration" field was used for diffing profiles.
@@ -1347,7 +1346,7 @@ const _upgraders = {
       }
     }
   },
-  [30]: (profile) => {
+  [30]: profile => {
     // The idea of phased markers was added to profiles, where the startTime and
     // endTime is always in the RawMarkerTable directly, not in the payload.
     //
@@ -1432,7 +1431,7 @@ const _upgraders = {
       }
     }
   },
-  [31]: (profile) => {
+  [31]: profile => {
     // The upgrader for 30 messed up markers with type "tracing" but that don't
     // have an interval. This upgrader fixes them.
 
@@ -1454,7 +1453,7 @@ const _upgraders = {
       }
     }
   },
-  [32]: (profile) => {
+  [32]: profile => {
     // Migrate DOMEvent markers to Markers 2.0
 
     // This is a fairly permissive type, but helps ensure the logic below is type checked.
@@ -1499,7 +1498,7 @@ const _upgraders = {
       }
     }
   },
-  [33]: (profile) => {
+  [33]: profile => {
     // The marker schema, which details how to display markers was added. Back-fill
     // any old profiles with a default schema.
 
@@ -1699,7 +1698,7 @@ const _upgraders = {
       },
     ];
   },
-  [34]: (profile) => {
+  [34]: profile => {
     // We were incrementing timestamps for marker' causes only for a few marker
     // types: 'tracing' and 'Styles'.
     // See https://github.com/firefox-devtools/profiler/issues/3030
@@ -1722,7 +1721,7 @@ const _upgraders = {
       }
     }
   },
-  [35]: (profile) => {
+  [35]: profile => {
     // The browsingContextID inside the pages array and activeBrowsingContextID
     // have been renamed to tabID and activeTabID.
     // Previously, we were using the browsingcontextID to figure out which tab
@@ -1749,7 +1748,7 @@ const _upgraders = {
       }
     }
   },
-  [36]: (profile) => {
+  [36]: profile => {
     // Threads now have a nativeSymbols table.
     // The frame table has a new field: nativeSymbol.
     // The function table loses one field: address. (This field moves to the nativeSymbols table.)
@@ -1789,12 +1788,12 @@ const _upgraders = {
       }
       delete funcTable.address;
       frameTable.nativeSymbol = frameTable.func.map(
-        (f) => funcToNativeSymbolMap.get(f) ?? null
+        f => funcToNativeSymbolMap.get(f) ?? null
       );
       thread.nativeSymbols = nativeSymbols;
     }
   },
-  [37]: (profile) => {
+  [37]: profile => {
     // "Java Main Thread" has been renamed to "AndroidUI (JVM)".
     // Usually thread name changes are not that important as they don't affect
     // the front-end logic. But this one is important because visibility of
@@ -1804,6 +1803,198 @@ const _upgraders = {
     for (const thread of profile.threads) {
       if (thread.name === 'Java Main Thread') {
         thread.name = 'AndroidUI (JVM)';
+      }
+    }
+  },
+  [38]: profile => {
+    // The frame table no longer contains return addresses, it now contains
+    // "nudged" return addresses, i.e. return address minus one byte.
+    // See nudgeReturnAddresses for more details.
+    // The code from nudgeReturnAddresses is duplicated below because this
+    // upgrader needs to stay unaffected by any profile format changes after
+    // version 38.
+    //
+    // This upgrader is needed so that clicking "Re-symbolicate" on old profiles
+    // will obtain correct line numbers and inline frames (once implemented),
+    // and so that the assembly view (once implemented) on an old profile will
+    // assign the correct "total" cost to call instructions.
+    for (const thread of profile.threads) {
+      const samplingSelfStacks = new Set();
+      const syncBacktraceSelfStacks = new Set();
+
+      const {
+        samples,
+        markers,
+        jsAllocations,
+        nativeAllocations,
+        stackTable,
+        frameTable,
+      } = thread;
+
+      for (let i = 0; i < samples.length; i++) {
+        const stack = samples.stack[i];
+        if (stack !== null) {
+          samplingSelfStacks.add(stack);
+        }
+      }
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (data && data.cause) {
+          const stack = data.cause.stack;
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+      if (jsAllocations !== undefined) {
+        for (let i = 0; i < jsAllocations.length; i++) {
+          const stack = jsAllocations.stack[i];
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+      if (nativeAllocations !== undefined) {
+        for (let i = 0; i < nativeAllocations.length; i++) {
+          const stack = nativeAllocations.stack[i];
+          if (stack !== null) {
+            syncBacktraceSelfStacks.add(stack);
+          }
+        }
+      }
+
+      const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
+      const ipFrames = new Set();
+      for (const stack of samplingSelfStacks) {
+        const frame = stackTable.frame[stack];
+        oldIpFrameToNewIpFrame[frame] = frame;
+        const address = frameTable.address[frame];
+        if (address !== -1) {
+          ipFrames.add(frame);
+        }
+      }
+      const returnAddressFrames = new Map();
+      const prefixStacks = new Set();
+      for (const stack of syncBacktraceSelfStacks) {
+        const frame = stackTable.frame[stack];
+        const returnAddress = frameTable.address[frame];
+        if (returnAddress !== -1) {
+          returnAddressFrames.set(frame, returnAddress);
+        }
+      }
+      for (let stack = 0; stack < stackTable.length; stack++) {
+        const prefix = stackTable.prefix[stack];
+        if (prefix === null || prefixStacks.has(prefix)) {
+          continue;
+        }
+        prefixStacks.add(prefix);
+        const prefixFrame = stackTable.frame[prefix];
+        const prefixAddress = frameTable.address[prefixFrame];
+        if (prefixAddress !== -1) {
+          returnAddressFrames.set(prefixFrame, prefixAddress);
+        }
+      }
+
+      if (ipFrames.size !== 0 || returnAddressFrames.size !== 0) {
+        // Iterate over all *return address* frames, i.e. all frames that were obtained
+        // by stack walking.
+        for (const [frame, address] of returnAddressFrames) {
+          if (ipFrames.has(frame)) {
+            // This address of this frame was observed both as a return address and as
+            // an instruction pointer register value. We have to duplicate this frame so
+            // so that we can make a distinction between the two uses.
+            // The new frame will be used as the ipFrame, and the old frame will be used
+            // as the return address frame (and have its address nudged).
+            const newIpFrame = frameTable.length;
+            frameTable.address.push(address);
+            frameTable.category.push(frameTable.category[frame]);
+            frameTable.subcategory.push(frameTable.subcategory[frame]);
+            frameTable.func.push(frameTable.func[frame]);
+            frameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
+            frameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
+            frameTable.implementation.push(frameTable.implementation[frame]);
+            frameTable.line.push(frameTable.line[frame]);
+            frameTable.column.push(frameTable.column[frame]);
+            frameTable.optimizations.push(frameTable.optimizations[frame]);
+            frameTable.length++;
+            oldIpFrameToNewIpFrame[frame] = newIpFrame;
+          }
+          // Subtract 1 byte from the return address.
+          frameTable.address[frame] = address - 1;
+        }
+
+        // Now the frame table contains adjusted / "nudged" addresses.
+
+        // Make a new stack table which refers to the adjusted frames.
+        const newStackTable = {
+          frame: [],
+          prefix: [],
+          category: [],
+          subcategory: [],
+          length: 0,
+        };
+        const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
+        const mapForReturnAddressStacks = new Uint32Array(stackTable.length);
+        for (let stack = 0; stack < stackTable.length; stack++) {
+          const frame = stackTable.frame[stack];
+          const category = stackTable.category[stack];
+          const subcategory = stackTable.subcategory[stack];
+          const prefix = stackTable.prefix[stack];
+
+          const newPrefix =
+            prefix === null ? null : mapForReturnAddressStacks[prefix];
+
+          if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
+            // Copy this stack to the new stack table, and use the original frame
+            // (which will have the nudged address if this is a return address stack).
+            const newStackIndex = newStackTable.length;
+            newStackTable.frame.push(frame);
+            newStackTable.category.push(category);
+            newStackTable.subcategory.push(subcategory);
+            newStackTable.prefix.push(newPrefix);
+            newStackTable.length++;
+            mapForReturnAddressStacks[stack] = newStackIndex;
+          }
+
+          if (samplingSelfStacks.has(stack)) {
+            // Copy this stack to the new stack table, and use the potentially duplicated
+            // frame, with a non-nudged address.
+            const ipFrame = oldIpFrameToNewIpFrame[frame];
+            const newStackIndex = newStackTable.length;
+            newStackTable.frame.push(ipFrame);
+            newStackTable.category.push(category);
+            newStackTable.subcategory.push(subcategory);
+            newStackTable.prefix.push(newPrefix);
+            newStackTable.length++;
+            mapForSamplingSelfStacks[stack] = newStackIndex;
+          }
+        }
+        thread.stackTable = newStackTable;
+
+        samples.stack = samples.stack.map(oldStackIndex =>
+          oldStackIndex === null
+            ? null
+            : mapForSamplingSelfStacks[oldStackIndex]
+        );
+        markers.data.forEach(data => {
+          if (data && 'cause' in data && data.cause) {
+            data.cause.stack = mapForReturnAddressStacks[data.cause.stack];
+          }
+        });
+        if (jsAllocations !== undefined) {
+          jsAllocations.stack = jsAllocations.stack.map(oldStackIndex =>
+            oldStackIndex === null
+              ? null
+              : mapForReturnAddressStacks[oldStackIndex]
+          );
+        }
+        if (nativeAllocations !== undefined) {
+          nativeAllocations.stack = nativeAllocations.stack.map(oldStackIndex =>
+            oldStackIndex === null
+              ? null
+              : mapForReturnAddressStacks[oldStackIndex]
+          );
+        }
       }
     }
   },

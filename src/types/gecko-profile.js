@@ -170,6 +170,13 @@ export type GeckoFrameTable = {|
       // index into stringTable, points to strings like:
       // JS: "Startup::XRE_Main"
       // C++: "0x7fff7d962da1"
+      // For native frames, i.e. strings of the form "0xHEX", the number value is a code
+      // address in the process's virtual memory. These addresses have been observed from
+      // the instruction pointer register, or from stack walking. Addresess from stack
+      // walking are return addresses, i.e. they point at the instruction *after* the call
+      // instruction.
+      // For native frames from arm32, the address must have its Thumb bit masked off, i.e.
+      // this must be a 2-byte aligned value (so that it's usable as an instruction address).
       IndexIntoStringTable,
       // for label frames, whether this frame should be shown in "JS only" stacks
       boolean,

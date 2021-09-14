@@ -3360,7 +3360,7 @@ export type StackReferences = {|
  * Find the sets of stacks that are referenced as "self" stacks by
  * various tables in the thread.
  * The stacks' ancestor nodes are not included (except for any ancestor
- * nodes that had self time because, i.e. were also referenced directly).
+ * nodes that had self time, i.e. were also referenced directly).
  * The returned sets are split into two groups: Stacks referenced by
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
@@ -3415,7 +3415,7 @@ export function gatherStackReferences(thread: Thread): StackReferences {
 
 /**
  * Create a new thread with all stack references translated via the given
- * map. The map maps IndexIntoOldStackTable -> IndexIntoNewStackTable.
+ * maps. The maps map IndexIntoOldStackTable -> IndexIntoNewStackTable.
  * Only a subset of entries are read from the map: The same stacks that
  * gatherStackReferences found in the thread. All other entries are ignored
  * and can have arbitrary values (e.g. 0).
@@ -3493,12 +3493,32 @@ export function replaceStackReferences(
 
 /**
  * Creates a new thread with modified frame and stack tables for "nudged" return addresses:
- * All return addresses are moved "backwards" by one byte, to point into the calling
+ * All return addresses are moved backwards by one byte, to point into the "call"
  * instruction. This allows symbolication to obtain accurate line numbers and inline frames
- * for these addresses.
- * Read on for the background behind all of this.
+ * for these frames.
+ * Addresses which were sampled from the instruction pointer register remain unchanged.
+ * Non-native frames (i.e profiler label frames or JS frames) also remain unchanged.
  *
+ * This function is called at the end of profile processing. In the Gecko profile format,
+ * caller frame addresses are return addresses. In the processed profile format, caller
+ * frame addresses point at/into the call instruction.
  *
+ * # Motivation
+ *
+ * When the profiler captures a stack, the frame addresses in the stack come from two
+ * different sources:
+ *
+ *  1. The top frame comes from the instruction pointer register. The register contains the
+ *     address of the instruction that is currently executing.
+ *  2. The other frames come from stack walking. During stack walking, we record the
+ *     return addresses for all caller functions that are on the stack. A "return address"
+ *     is the address that the CPU will jump to once the called function returns. It is the
+ *     address of the instruction *after* the "call" instruction.
+ *
+ * Here's an example, where _LZ4F_compressUpdate calls _LZ4F_localSaveDict and the
+ * CPU was observed executing an instruction in _LZ4F_localSaveDict.
+ * The frame addresses in the stack are: [..., 0x5783a, 0x57c17].
+ * (The example uses libmozglue.dylib 64EC2645330C3A0BA6E4EBCD28A1B5940.)
  *
  * Top of stack:
  *   _LZ4F_localSaveDict:
@@ -3520,6 +3540,9 @@ export function replaceStackReferences(
  *     5783c  mov   rcx, 0xffffffffffffffff
  *     [...]
  *
+ * Corresponding C code:
+ *
+ * [...]
  * 893    if ((cctxPtr->prefs.frameInfo.blockMode==LZ4F_blockLinked) && (lastBlockCompressed==fromSrcBuffer)) {
  * 894        if (compressOptionsPtr->stableSrc) {
  * 895            cctxPtr->tmpIn = cctxPtr->tmpBuff;
@@ -3529,41 +3552,95 @@ export function replaceStackReferences(
  * 899            cctxPtr->tmpIn = cctxPtr->tmpBuff + realDictSize;
  * 900        }
  * 901    }
+ * [...]
  *
+ * During symbolication, we resolve each address to a source file + line number.
+ * However, if we were to look up the line number for a return address, we get the
+ * line number for the instruction *after* the "call" instruction. In the example,
+ * 0x5783a is the return address, and symbolicating 0x5783a gives us line number 898.
+ * This is not the line number we want! We want to know *which line contains the
+ * function call*. So we need to look up the address of the call instruction, or at
+ * least an address that falls "inside" the call instruction.
+ * In the example, the call instruction is at 0x57835 and the return address is 0x5783a.
+ * So the call instruction occupies 5 bytes starting at 0x57835. Any address in that
+ * range, i.e. any address with `0x57835 <= address && address < 0x5783a`, will
+ * symbolicate to line number 897. This is the line number we want.
+ *
+ * To keep it simple, we will just subtract one byte from the return address. This
+ * won't point at the start of the call instruction, but it will point inside of it,
+ * which is good enough.
+ *
+ * ## Alternatives
+ *
+ * There are two places where we could potentially perform the one-byte adjustment:
+ * We can bake it into the frame table, or we can leave the frame table as-is and
+ * do the adjustment only when we prepare the symbolication request. For the latter,
+ * we would need a way to know which addresses need adjustment and which do not.
+ * So we'd need a per-frame bit (e.g. a new frame table column) to differentiate
+ * these frames.
+ * However, we don't really have a use for the unchanged return address. The only
+ * places where we make use of the frame address is during symbolication, and, in the
+ * future, in an assembly view. Both uses want to account the sample time to the
+ * calling instruction.
+ * So for simplicity, this function chooses the "bake it into the frame table"
+ * approach, and the processed format is documented to contain this adjustment.
+ *
+ * ## Summary
+ *
+ * To reiterate: The adjustment performed by this function is absolutely critical
+ * for useful line numbers.  It may be "just one byte", but it makes all the
+ * difference in having trustworthy information.
+ * Without the adjustment, line numbers can be way off - in the example it was just
+ * the very next line, but it could potentially be anywhere else in the function!
+ * And finally, this issue does not only affect line numbers, it also affects inline
+ * frames, for the same reason: The instruction after the call instruction could be
+ * the result of a completely different function that was inlined at this spot.
+ * If we instead look up the inline frames for the call instruction, we will get
+ * the correct inline frames at the point of the function call.
+ *
+ * # Implementation
+ *
+ * There are two slightly tricky parts to the implementation of this function.
+ *
+ *  1. The original frame table + stack table does not annotate which frames came
+ *     from the instruction pointer and which frames came from stack walking. We have
+ *     to look at the rest of the thread to see which stack nodes are referenced from
+ *     where.
+ *  2. Some stack nodes and frames in the original thread serve a dual purpose: The
+ *     address of an instruction that directly follows a call instruction could have
+ *     been observed in both manners, at different times. And a stack node could be
+ *     used in both contexts. If we detect that this happened, we need to duplicate
+ *     the frame and the stack node and pick the right one depending on the use.
  */
-
-// Ambiguity in stack table from gecko profile format: return address or value of the instruction pointer register?
-// Crucial for accurate per-instruction info: line numbers, inline stacks
-// Without nudging, all callers show time spent in the instruction after the call, which could be in a totally unrelated line with a totally unrelated inline stack
-// Example assembly with —> instruction after call
-// Is one byte enough? Why
-// Also say something about arm 32
 export function nudgeReturnAddresses(thread: Thread): Thread {
-  // Make a new stack table where 1 byte is subtracted from all return addresses,
-  // i.e. the addresses of all frames that are used as stack prefixes.
-  // But not from the addresses of the top of the stack (instruction pointer).
-  // Frames that are used as both prefixes and as sampling self stacks need to be duplicated.
   const { samplingSelfStacks, syncBacktraceSelfStacks } =
     gatherStackReferences(thread);
 
   const { stackTable, frameTable } = thread;
+
+  // Collect frames that were obtained from the instruction pointer.
+  // These are the top ("self") frames of stacks from sampling.
+  // In the variable names below, ip means "instruction pointer".
   const oldIpFrameToNewIpFrame = new Uint32Array(frameTable.length);
   const ipFrames = new Set();
   for (const stack of samplingSelfStacks) {
     const frame = stackTable.frame[stack];
-    const ipAddress = frameTable.address[frame];
-    if (ipAddress !== null) {
+    oldIpFrameToNewIpFrame[frame] = frame;
+    const address = frameTable.address[frame];
+    if (address !== -1) {
       ipFrames.add(frame);
-      oldIpFrameToNewIpFrame[frame] = frame;
     }
   }
 
+  // Collect frames that were obtained from stack walking.
+  // These are any "self" frames of sync backtraces, and any frames
+  // used for "prefix" stacks, i.e. callers.
   const returnAddressFrames: Map<IndexIntoFrameTable, Address> = new Map();
   const prefixStacks: Set<IndexIntoStackTable> = new Set();
   for (const stack of syncBacktraceSelfStacks) {
     const frame = stackTable.frame[stack];
     const returnAddress = frameTable.address[frame];
-    if (returnAddress !== null) {
+    if (returnAddress !== -1) {
       returnAddressFrames.set(frame, returnAddress);
     }
   }
@@ -3575,19 +3652,22 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
     prefixStacks.add(prefix);
     const prefixFrame = stackTable.frame[prefix];
     const prefixAddress = frameTable.address[prefixFrame];
-    if (prefixAddress !== null) {
+    if (prefixAddress !== -1) {
       returnAddressFrames.set(prefixFrame, prefixAddress);
     }
   }
 
   if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
+    // Nothing to do, use the original thread.
     return thread;
   }
 
   // Create the new frame table.
-  // Frames that are used as both prefixes and as sampling self stacks need to be duplicated.
+  // Frames that were observed both from the instruction pointer and from
+  // stack walking have to be duplicated.
   const newFrameTable = shallowCloneFrameTable(frameTable);
-  // Iterate over all *return address* frames.
+  // Iterate over all *return address* frames, i.e. all frames that were obtained
+  // by stack walking.
   for (const [frame, address] of returnAddressFrames) {
     if (ipFrames.has(frame)) {
       // This address of this frame was observed both as a return address and as
@@ -3613,17 +3693,19 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
     newFrameTable.address[frame] = address - 1;
   }
 
+  // Now the frame table contains adjusted / "nudged" addresses.
+
   // Make a new stack table which refers to the adjusted frames.
   const newStackTable = getEmptyStackTable();
   const mapForSamplingSelfStacks = new Uint32Array(stackTable.length);
-  const mapForPrefixStacks = new Uint32Array(stackTable.length);
+  const mapForReturnAddressStacks = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
     const category = stackTable.category[stack];
     const subcategory = stackTable.subcategory[stack];
     const prefix = stackTable.prefix[stack];
 
-    const newPrefix = prefix === null ? null : mapForPrefixStacks[prefix];
+    const newPrefix = prefix === null ? null : mapForReturnAddressStacks[prefix];
 
     if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
       // Copy this stack to the new stack table, and use the original frame
@@ -3634,7 +3716,7 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
       newStackTable.subcategory.push(subcategory);
       newStackTable.prefix.push(newPrefix);
       newStackTable.length++;
-      mapForPrefixStacks[stack] = newStackIndex;
+      mapForReturnAddressStacks[stack] = newStackIndex;
     }
 
     if (samplingSelfStacks.has(stack)) {
@@ -3660,6 +3742,6 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
   return replaceStackReferences(
     newThread,
     mapForSamplingSelfStacks,
-    mapForPrefixStacks
+    mapForReturnAddressStacks
   );
 }

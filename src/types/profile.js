@@ -270,7 +270,15 @@ export type RawMarkerTable = {|
 export type FrameTable = {|
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
-  // The library is given by the frame's nativeSymbol: frame -> nativeSymbol -> lib.
+  //
+  // For frames obtained from stack walking, the address points into the call instruction.
+  // It is not a return address, it is a "nudged" return address (i.e. return address
+  // minus one byte). This is different from the Gecko profile format. The conversion
+  // is performed at the end of profile processing. See the big comment above
+  // nudgeReturnAddresses for more details.
+  //
+  // The library which this address is relative to is given by the frame's nativeSymbol:
+  // frame -> nativeSymbol -> lib.
   address: Array<Address | -1>,
 
   category: (IndexIntoCategoryList | null)[],
