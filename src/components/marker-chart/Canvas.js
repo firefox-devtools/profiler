@@ -71,7 +71,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +threadsKey: ThreadsKey,
   +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
   +changeRightClickedMarker: ChangeRightClickedMarker,
@@ -414,7 +414,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
 
     // We draw highlighted markers after the normal markers so that they stand
     // out more.
-    highlightedMarkers.forEach(highlightedMarker => {
+    highlightedMarkers.forEach((highlightedMarker) => {
       this.drawOneMarker(
         ctx,
         highlightedMarker.x,
@@ -591,7 +591,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
 
     // This is a small utility function to define if some marker timing is in
     // our hit test range.
-    const isMarkerTimingInDotRadius = index =>
+    const isMarkerTimingInDotRadius = (index) =>
       markerTiming.start[index] < xInTime + dotRadiusInTime &&
       markerTiming.end[index] > xInTime - dotRadiusInTime;
 
@@ -679,12 +679,8 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props, State> {
     if (markerIndex === null) {
       return;
     }
-    const {
-      getMarker,
-      updatePreviewSelection,
-      rangeStart,
-      rangeEnd,
-    } = this.props;
+    const { getMarker, updatePreviewSelection, rangeStart, rangeEnd } =
+      this.props;
     const marker = getMarker(markerIndex);
     const { start, end } = getStartEndRangeForMarker(
       rangeStart,

@@ -21,7 +21,7 @@ import { getView } from 'firefox-profiler/selectors';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
 describe('app/DragAndDrop', () => {
-  afterEach(function() {
+  afterEach(function () {
     delete window.TextDecoder;
   });
 
@@ -71,10 +71,8 @@ describe('app/DragAndDrop', () => {
     // When the file is dropped, the profiler tries to connect to the WebChannel
     // for symbolication. Handle that request so that we don't time out.
     // We handle it by rejecting it.
-    const {
-      registerMessageToChromeListener,
-      triggerResponse,
-    } = mockWebChannel();
+    const { registerMessageToChromeListener, triggerResponse } =
+      mockWebChannel();
     registerMessageToChromeListener(() => {
       triggerResponse({
         errno: 2, // ERRNO_NO_SUCH_CHANNEL

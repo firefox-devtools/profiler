@@ -11,7 +11,7 @@ import { Response } from 'firefox-profiler/test/fixtures/mocks/response';
 describe('profile upload', () => {
   function setup() {
     function fakeXMLHttpRequest() {
-      // eslint-disable-next-line babel/no-invalid-this
+      // eslint-disable-next-line @babel/no-invalid-this
       Object.assign(this, {
         abort: jest.fn(),
         upload: {},
@@ -20,7 +20,7 @@ describe('profile upload', () => {
         send: jest.fn(),
       });
 
-      // eslint-disable-next-line babel/no-invalid-this
+      // eslint-disable-next-line @babel/no-invalid-this
       fakeXMLHttpRequest.instances.push(this);
     }
     fakeXMLHttpRequest.instances = [];

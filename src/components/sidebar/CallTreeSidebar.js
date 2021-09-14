@@ -81,7 +81,7 @@ function SidebarDetail({
 
 type ImplementationBreakdownProps = {|
   +breakdown: BreakdownByImplementation,
-  +number: number => string,
+  +number: (number) => string,
 |};
 
 // This component is responsible for displaying the breakdown data specific to
@@ -147,7 +147,7 @@ class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdow
 type CategoryBreakdownProps = {|
   +breakdown: BreakdownByCategory,
   +categoryList: CategoryList,
-  +number: number => string,
+  +number: (number) => string,
 |};
 
 type CategoryBreakdownState = {|
@@ -215,9 +215,8 @@ class CategoryBreakdown extends React.PureComponent<
     return (
       <>
         {data.map(({ category, value, subcategories }) => {
-          const hasSubcategory = shouldDisplaySubcategoryInfoForCategory(
-            category
-          );
+          const hasSubcategory =
+            shouldDisplaySubcategoryInfoForCategory(category);
           const expanded = openCategories.has(category.name);
           return (
             <React.Fragment key={category.name}>
@@ -311,19 +310,19 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
           return {
             running: 'Running time',
             self: 'Self time',
-            number: n => formatMilliseconds(n, 3, 1),
+            number: (n) => formatMilliseconds(n, 3, 1),
           };
         case 'samples':
           return {
             running: 'Running samples',
             self: 'Self samples',
-            number: n => formatNumber(n, 0),
+            number: (n) => formatNumber(n, 0),
           };
         case 'bytes':
           return {
             running: 'Running size',
             self: 'Self size',
-            number: n => formatBytes(n),
+            number: (n) => formatBytes(n),
           };
         default:
           throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
@@ -469,7 +468,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 }
 
 export const CallTreeSidebar = explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
     selectedThreadsKey: getSelectedThreadsKey(state),

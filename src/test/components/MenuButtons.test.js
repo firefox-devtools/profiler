@@ -76,7 +76,7 @@ jest.mock('firefox-profiler/profile-logic/symbolication');
 // Mock hash
 const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
 
-describe('app/MenuButtons', function() {
+describe('app/MenuButtons', function () {
   function createSimpleProfile(updateChannel = 'release') {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
@@ -147,7 +147,7 @@ describe('app/MenuButtons', function() {
     };
   }
 
-  describe('<Publish>', function() {
+  describe('<Publish>', function () {
     function mockUpload() {
       // Create a promise with the resolve function outside of it.
       let resolveUpload, rejectUpload;
@@ -217,20 +217,20 @@ describe('app/MenuButtons', function() {
       };
     }
 
-    beforeAll(function() {
+    beforeAll(function () {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
       }
       (window: any).TextEncoder = TextEncoder;
     });
 
-    afterAll(async function() {
+    afterAll(async function () {
       delete URL.createObjectURL;
       delete URL.revokeObjectURL;
       delete (window: any).TextEncoder;
     });
 
-    beforeEach(function() {
+    beforeEach(function () {
       // Flow doesn't know sha1 is a jest mock.
       (sha1: any).mockImplementation((_data: Uint8Array) =>
         Promise.resolve(hash)
@@ -267,12 +267,8 @@ describe('app/MenuButtons', function() {
 
     it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', async () => {
       const { profile } = createSimpleProfile();
-      const {
-        getPanel,
-        container,
-        navigateToHash,
-        openPublishPanel,
-      } = setupForPublish(profile);
+      const { getPanel, container, navigateToHash, openPublishPanel } =
+        setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       await openPublishPanel();
@@ -281,29 +277,23 @@ describe('app/MenuButtons', function() {
 
     it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
       const { profile } = createPreferenceReadProfile('release');
-      const { queryPreferenceCheckbox, openPublishPanel } = setupForPublish(
-        profile
-      );
+      const { queryPreferenceCheckbox, openPublishPanel } =
+        setupForPublish(profile);
       await openPublishPanel();
       expect(queryPreferenceCheckbox()).toBeTruthy();
     });
 
     it('does not show the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
       const { profile } = createSimpleProfile('release');
-      const { queryPreferenceCheckbox, openPublishPanel } = setupForPublish(
-        profile
-      );
+      const { queryPreferenceCheckbox, openPublishPanel } =
+        setupForPublish(profile);
       await openPublishPanel();
       expect(queryPreferenceCheckbox()).toBeFalsy();
     });
 
     it('can publish and revert', async () => {
-      const {
-        openPublishPanel,
-        getPanelForm,
-        resolveUpload,
-        getState,
-      } = setupForPublish();
+      const { openPublishPanel, getPanelForm, resolveUpload, getState } =
+        setupForPublish();
       await openPublishPanel();
       fireEvent.submit(getPanelForm());
       resolveUpload('SOME_HASH');
@@ -343,12 +333,8 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for an error', async () => {
-      const {
-        getPanel,
-        getPanelForm,
-        rejectUpload,
-        openPublishPanel,
-      } = setupForPublish();
+      const { getPanel, getPanelForm, rejectUpload, openPublishPanel } =
+        setupForPublish();
 
       await openPublishPanel();
       fireEvent.submit(getPanelForm());
@@ -364,12 +350,12 @@ describe('app/MenuButtons', function() {
     });
   });
 
-  describe('<MetaInfoPanel>', function() {
+  describe('<MetaInfoPanel>', function () {
     async function setupForMetaInfoPanel(profile: Profile) {
       jest
         .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function() {
-          // eslint-disable-next-line babel/no-invalid-this
+        .mockImplementation(function () {
+          // eslint-disable-next-line @babel/no-invalid-this
           return 'toLocaleString ' + this.toUTCString();
         });
 
@@ -410,10 +396,8 @@ describe('app/MenuButtons', function() {
         duration: 20,
       };
 
-      const {
-        displayMetaInfoPanel,
-        getMetaInfoPanel,
-      } = await setupForMetaInfoPanel(profile);
+      const { displayMetaInfoPanel, getMetaInfoPanel } =
+        await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
       const renderedCapacity = ensureExists(
         screen.getByText(/Buffer Capacity/).nextSibling
@@ -432,10 +416,8 @@ describe('app/MenuButtons', function() {
       const profile = processGeckoProfile(createGeckoProfile());
       profile.meta.device = 'Android Device';
 
-      const {
-        displayMetaInfoPanel,
-        getMetaInfoPanel,
-      } = await setupForMetaInfoPanel(profile);
+      const { displayMetaInfoPanel, getMetaInfoPanel } =
+        await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
 
       const renderedDevice = ensureExists(
@@ -461,10 +443,8 @@ describe('app/MenuButtons', function() {
         }
       }
 
-      const {
-        displayMetaInfoPanel,
-        getMetaInfoPanel,
-      } = await setupForMetaInfoPanel(profile);
+      const { displayMetaInfoPanel, getMetaInfoPanel } =
+        await setupForMetaInfoPanel(profile);
       await displayMetaInfoPanel();
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
@@ -558,10 +538,8 @@ describe('app/MenuButtons', function() {
 
       test('dismissing the panel will move back to the profile information when opened again', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
-        const {
-          displayMetaInfoPanel,
-          waitForPanelToBeRemoved,
-        } = await setupForDeletion();
+        const { displayMetaInfoPanel, waitForPanelToBeRemoved } =
+          await setupForDeletion();
         fireFullClick(await screen.findByText('Delete'));
 
         // Dismissing by clicking elsewhere
@@ -604,7 +582,7 @@ describe('app/MenuButtons', function() {
       });
     });
 
-    describe('symbolication', function() {
+    describe('symbolication', function () {
       type SymbolicationTestConfig = $ReadOnly<{|
         symbolicated: boolean,
       |}>;
@@ -672,7 +650,7 @@ describe('app/MenuButtons', function() {
     });
   });
 
-  describe('Full View Button', function() {
+  describe('Full View Button', function () {
     function setupForFullViewButton() {
       const { profile } = addActiveTabInformationToProfile(
         getProfileWithNiceTracks()
@@ -689,12 +667,8 @@ describe('app/MenuButtons', function() {
     });
 
     it('is present when we are in the active tab view', () => {
-      const {
-        dispatch,
-        getState,
-        getByText,
-        container,
-      } = setupForFullViewButton();
+      const { dispatch, getState, getByText, container } =
+        setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({
@@ -710,12 +684,8 @@ describe('app/MenuButtons', function() {
     });
 
     it('switches to full view when clicked', () => {
-      const {
-        dispatch,
-        getState,
-        getByText,
-        queryByText,
-      } = setupForFullViewButton();
+      const { dispatch, getState, getByText, queryByText } =
+        setupForFullViewButton();
 
       dispatch(
         changeTimelineTrackOrganization({

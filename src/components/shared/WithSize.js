@@ -33,9 +33,7 @@ export function withSize<
   // The SizeProps act as a bounds on the generic props. This ensures that the props
   // that passed in take into account they are being given the width and height.
   Props: $ReadOnly<{ ...SizeProps }>
->(
-  Wrapped: React.ComponentType<Props>
-): React.ComponentType<
+>(Wrapped: React.ComponentType<Props>): React.ComponentType<
   // The component that is returned does not accept width and height parameters, as
   // they are injected by this higher order component.
   $ReadOnly<$Diff<Props, SizeProps>>

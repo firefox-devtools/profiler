@@ -55,7 +55,7 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + beforeOrAfter;
 }
 
-describe('SampleTooltipContents', function() {
+describe('SampleTooltipContents', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   beforeEach(addRootOverlayElement);

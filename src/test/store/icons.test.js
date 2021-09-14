@@ -9,7 +9,7 @@ import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
 import type { CallNodeDisplayData } from 'firefox-profiler/types';
 
-describe('actions/icons', function() {
+describe('actions/icons', function () {
   const validIcons = [
     'https://valid.icon1.example.org/favicon.ico',
     'https://valid.icon2.example.org/favicon.ico',
@@ -51,18 +51,18 @@ describe('actions/icons', function() {
     };
   }
 
-  describe('With the initial state', function() {
+  describe('With the initial state', function () {
     function getInitialState() {
       return blankStore().getState();
     }
 
-    it('getIcons return an empty set', function() {
+    it('getIcons return an empty set', function () {
       const initialState = iconsAccessors.getIcons(getInitialState());
       expect(initialState).toBeInstanceOf(Set);
       expect(initialState.size).toEqual(0);
     });
 
-    it('getIconClassName returns an empty string for any icon', function() {
+    it('getIconClassName returns an empty string for any icon', function () {
       const subject = iconsAccessors.getIconClassName(
         getInitialState(),
         _createCallNodeWithIcon(validIcons[0]).icon
@@ -70,14 +70,14 @@ describe('actions/icons', function() {
       expect(subject).toBe('');
     });
 
-    it('getIconsWithClassNames returns an empty array', function() {
+    it('getIconsWithClassNames returns an empty array', function () {
       const subject = iconsAccessors.getIconsWithClassNames(getInitialState());
       expect(subject).toEqual([]);
     });
   });
 
-  describe('Requesting an existing icon', function() {
-    it('will populate the local cache', async function() {
+  describe('Requesting an existing icon', function () {
+    it('will populate the local cache', async function () {
       const { dispatch, getState } = blankStore();
       const promises = [
         dispatch(iconsActions.iconStartLoading(validIcons[0])),
@@ -93,7 +93,7 @@ describe('actions/icons', function() {
         expect(instance.src).toEqual(validIcons[i]);
         expect(instance.referrerPolicy).toEqual('no-referrer');
       });
-      imageInstances.forEach(instance => (instance: any).onload());
+      imageInstances.forEach((instance) => (instance: any).onload());
       await Promise.all(promises);
 
       const state = getState();
@@ -115,8 +115,8 @@ describe('actions/icons', function() {
     });
   });
 
-  describe('Requesting a non-existing image', function() {
-    it('will not populate the local cache', async function() {
+  describe('Requesting a non-existing image', function () {
+    it('will not populate the local cache', async function () {
       const { dispatch, getState } = blankStore();
       const actionPromise = dispatch(
         iconsActions.iconStartLoading(invalidIcon)

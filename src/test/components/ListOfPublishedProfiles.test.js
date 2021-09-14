@@ -258,14 +258,10 @@ describe('ListOfPublishedProfiles', () => {
 
   it('renders action buttons when appropriate', async () => {
     await storeProfileInformations(listOfProfileInformations);
-    const {
-      container,
-      findByText,
-      getAllByText,
-      getDeleteButtonForProfile,
-    } = setup({
-      withActionButtons: true,
-    });
+    const { container, findByText, getAllByText, getDeleteButtonForProfile } =
+      setup({
+        withActionButtons: true,
+      });
 
     // Wait for the full rendering with a find* operation.
     await findByText(/macOS/);
@@ -479,7 +475,7 @@ describe('ListOfPublishedProfiles', () => {
   });
 
   describe('The uploaded recordings list should update on window focus', () => {
-    it('will update the stored profiles on window focus', async function() {
+    it('will update the stored profiles on window focus', async function () {
       // Add 3 examples, all with the same name.
       // mockDate('4 Jul 2020 15:00'); // Now is 4th of July, at 3pm local timezone.
 

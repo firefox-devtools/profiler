@@ -13,7 +13,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
 import { fireFullClick } from '../fixtures/utils';
 
-describe('<Permalink>', function() {
+describe('<Permalink>', function () {
   function setup(search = '', injectedUrlShortener) {
     jest.useFakeTimers();
 
@@ -43,7 +43,7 @@ describe('<Permalink>', function() {
 
     const getPermalinkButton = () => screen.getByText('Permalink');
     const queryInput = () => screen.queryByTestId('MenuButtonsPermalink-input');
-    const clickAndRunTimers = where => {
+    const clickAndRunTimers = (where) => {
       fireFullClick(where);
       jest.runAllTimers();
     };
@@ -60,13 +60,13 @@ describe('<Permalink>', function() {
     };
   }
 
-  it('can render the permalink button', function() {
+  it('can render the permalink button', function () {
     const { getPermalinkButton, queryInput } = setup();
     getPermalinkButton();
     expect(queryInput()).toBeFalsy();
   });
 
-  it('can click the permalink button', async function() {
+  it('can click the permalink button', async function () {
     const {
       getPermalinkButton,
       queryInput,

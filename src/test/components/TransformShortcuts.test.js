@@ -157,7 +157,7 @@ function setupStore(childrenToRender) {
 
 // This returns a function that makes it easy to simulate a keypress on a
 // specific element identified by a class name.
-const pressKeyBuilder = className => (options: KeyPressOptions) => {
+const pressKeyBuilder = (className) => (options: KeyPressOptions) => {
   const div = ensureExists(
     document.querySelector('.' + className),
     `Couldn't find the content div with selector .${className}`

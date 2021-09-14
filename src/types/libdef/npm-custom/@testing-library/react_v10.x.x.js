@@ -245,15 +245,14 @@ declare module '@testing-library/react' {
     wrapper?: React$ComponentType<*>,
   |};
 
-  declare export type RenderOptionsWithCustomQueries<
-    CustomQueries: { ... }
-  > = {|
-    queries: CustomQueries,
-    container?: HTMLElement,
-    baseElement?: HTMLElement,
-    hydrate?: boolean,
-    wrapper?: React$ComponentType<*>,
-  |};
+  declare export type RenderOptionsWithCustomQueries<CustomQueries: { ... }> =
+    {|
+      queries: CustomQueries,
+      container?: HTMLElement,
+      baseElement?: HTMLElement,
+      hydrate?: boolean,
+      wrapper?: React$ComponentType<*>,
+    |};
 
   declare export function render(
     ui: React$Element<any>,

@@ -50,7 +50,7 @@ const INITIAL_ELEMENT_SIZE = {
   offsetY: TOP,
 };
 
-describe('timeline/TrackScreenshots', function() {
+describe('timeline/TrackScreenshots', function () {
   autoMockDomRect();
   autoMockCanvasContext();
   autoMockElementSize(INITIAL_ELEMENT_SIZE);
@@ -240,7 +240,7 @@ describe('timeline/TrackScreenshots', function() {
     expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();
   });
 
-  it('is created in the <Timeline /> with a profile with screenshots', function() {
+  it('is created in the <Timeline /> with a profile with screenshots', function () {
     const { getAllByText } = setup(getScreenshotTrackProfile(), <Timeline />);
 
     // The function `getAllByText` throws already if none are found, with a useful Error,
@@ -249,7 +249,7 @@ describe('timeline/TrackScreenshots', function() {
     expect(getAllByText('Screenshots').length).toBeGreaterThan(0);
   });
 
-  it('is not created in the <Timeline /> with a profile with no screenshots', function() {
+  it('is not created in the <Timeline /> with a profile with no screenshots', function () {
     const { queryByText } = setup(getProfileWithNiceTracks(), <Timeline />);
     expect(queryByText('Screenshots')).not.toBeInTheDocument();
   });
@@ -330,9 +330,10 @@ function setup(
     return parseInt(screenshotHover().style.top);
   }
 
-  function moveMouseAndGetImageSize(
-    pageX: number
-  ): {| width: number, height: number |} {
+  function moveMouseAndGetImageSize(pageX: number): {|
+    width: number,
+    height: number,
+  |} {
     moveMouse(pageX);
     const style = screenshotHoverImage().style;
     return {

@@ -140,7 +140,7 @@ function setupWithMarkers({ rangeStart, rangeEnd }, ...markersPerThread) {
   };
 }
 
-describe('TimelineMarkers', function() {
+describe('TimelineMarkers', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
   // We will be hovering over element with a tooltip. It requires root overlay

@@ -59,7 +59,9 @@ class ProfileFilterNavigatorBarImpl extends React.PureComponent<Props> {
     if (filterPageData) {
       firstItem = (
         <>
-          <Icon iconUrl={filterPageData.favicon} />
+          {filterPageData.favicon ? (
+            <Icon iconUrl={filterPageData.favicon} />
+          ) : null}
           <span title={filterPageData.origin}>
             {filterPageData.hostname} (
             {getFormattedTimeLength(rootRange.end - rootRange.start)})
@@ -95,7 +97,7 @@ export const ProfileFilterNavigator = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => {
+  mapStateToProps: (state) => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
     const uncommittedItem = previewSelection.hasSelection

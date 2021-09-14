@@ -8,7 +8,7 @@ import { Worker } from 'worker_threads';
 
 class NodeWorker {
   _instance: Worker;
-  onmessage: MessageEvent => mixed;
+  onmessage: (MessageEvent) => mixed;
 
   constructor(file: string) {
     const worker = new Worker(__dirname + '/node-worker-contents.js', {
@@ -74,6 +74,6 @@ export default class {
  * This function allows for stopping the workers, and is only part of the mock.
  */
 export function __shutdownWorkers() {
-  workerInstances.forEach(worker => worker.terminate());
+  workerInstances.forEach((worker) => worker.terminate());
   workerInstances.length = 0;
 }

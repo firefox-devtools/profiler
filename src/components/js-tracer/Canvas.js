@@ -161,7 +161,7 @@ class JsTracerCanvasImpl extends React.PureComponent<Props, State> {
     this.drawEvents(renderPass, hoveredItem);
     this.drawSeparatorsAndLabels(renderPass);
 
-    this.setState(state =>
+    this.setState((state) =>
       state.hasFirstDraw ? null : { hasFirstDraw: true }
     );
   };

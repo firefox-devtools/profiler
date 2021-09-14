@@ -37,7 +37,7 @@ export function mockWebChannel() {
       }
     });
 
-  jest.spyOn(window, 'dispatchEvent').mockImplementation(event => {
+  jest.spyOn(window, 'dispatchEvent').mockImplementation((event) => {
     if (
       event instanceof CustomEvent &&
       event.type === 'WebChannelMessageToChrome'
@@ -63,7 +63,7 @@ export function mockWebChannel() {
   }
 
   function registerMessageToChromeListener(
-    listener: MessageToBrowser => void
+    listener: (MessageToBrowser) => void
   ): void {
     onMessageToChrome = listener;
   }

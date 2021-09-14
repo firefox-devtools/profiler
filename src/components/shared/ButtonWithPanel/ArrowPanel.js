@@ -44,7 +44,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
   }
 
   close() {
-    this.setState(state => {
+    this.setState((state) => {
       if (!state.open) {
         return null;
       }
@@ -62,7 +62,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
 
   _onCloseAnimationFinish(openGeneration: number) {
     return () => {
-      this.setState(state => {
+      this.setState((state) => {
         if (state.openGeneration === openGeneration) {
           return { isClosing: false };
         }

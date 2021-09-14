@@ -44,12 +44,10 @@ function getSamplesPixelPosition(
 /**
  * This test verifies that the memory track can draw a graph of the memory.
  */
-describe('TrackVisualProgress', function() {
+describe('TrackVisualProgress', function () {
   function setup() {
     const profile = getVisualProgressTrackProfile(
-      Array(SAMPLE_COUNT)
-        .fill('A')
-        .join('  ')
+      Array(SAMPLE_COUNT).fill('A').join('  ')
     );
     const {
       meta: { visualMetrics },
@@ -83,7 +81,7 @@ describe('TrackVisualProgress', function() {
       document.querySelector('.timelineTrackVisualProgressTooltip');
     const getVisualProgressDot = () =>
       container.querySelector('.timelineTrackVisualProgressGraphDot');
-    const moveMouseAtCounter = index =>
+    const moveMouseAtCounter = (index) =>
       fireEvent(
         canvas,
         getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })
@@ -119,7 +117,7 @@ describe('TrackVisualProgress', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can create a tooltip', function() {
+  it('can create a tooltip', function () {
     const { moveMouseAtCounter, getTooltipContents, canvas } = setup();
     expect(getTooltipContents()).toBeFalsy();
     moveMouseAtCounter(5000);
@@ -128,20 +126,20 @@ describe('TrackVisualProgress', function() {
     expect(getTooltipContents()).toBeFalsy();
   });
 
-  it('has a tooltip that matches the snapshot', function() {
+  it('has a tooltip that matches the snapshot', function () {
     const { moveMouseAtCounter, getTooltipContents } = setup();
     moveMouseAtCounter(5000);
     expect(getTooltipContents()).toMatchSnapshot();
   });
 
-  it('draws a dot on the graph', function() {
+  it('draws a dot on the graph', function () {
     const { moveMouseAtCounter, getVisualProgressDot } = setup();
     expect(getVisualProgressDot()).toBeFalsy();
     moveMouseAtCounter(5000);
     expect(getVisualProgressDot()).toBeTruthy();
   });
 
-  it('draws a dot that matches the snapshot', function() {
+  it('draws a dot that matches the snapshot', function () {
     const { moveMouseAtCounter, getVisualProgressDot } = setup();
     moveMouseAtCounter(5000);
     expect(getVisualProgressDot()).toMatchSnapshot();

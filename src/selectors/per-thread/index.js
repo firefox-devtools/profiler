@@ -52,7 +52,7 @@ const _mergedThreadSelectorsMemoized = memoize(
     // We don't pass this set inside this memoization function since we create
     // an intermediate Set whenever we need to access the cache. Memoize should
     // only use threadsKey as the key.
-    const threadIndexes = new Set(('' + threadsKey).split(',').map(n => +n));
+    const threadIndexes = new Set(('' + threadsKey).split(',').map((n) => +n));
     return _buildThreadSelectors(threadIndexes, threadsKey);
   },
   { limit: 5 }
@@ -117,7 +117,7 @@ export const getThreadSelectors = (
 export const getThreadSelectorsFromThreadsKey = (
   threadsKey: ThreadsKey,
   threadIndexes: Set<ThreadIndex> = new Set(
-    ('' + threadsKey).split(',').map(n => +n)
+    ('' + threadsKey).split(',').map((n) => +n)
   )
 ): ThreadSelectors => {
   if (threadIndexes.size === 1) {
@@ -166,7 +166,7 @@ export const selectedThreadSelectors: ThreadSelectors = (() => {
   const anyThreadSelectors: ThreadSelectors = getThreadSelectors(0);
   const result: $Shape<ThreadSelectors> = {};
   for (const key in anyThreadSelectors) {
-    result[key] = state =>
+    result[key] = (state) =>
       getThreadSelectors(UrlState.getSelectedThreadIndexes(state))[key](state);
   }
   const result2: ThreadSelectors = (result: any);

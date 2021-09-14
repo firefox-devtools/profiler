@@ -50,7 +50,7 @@ export function setupLocalization(
   locales: Array<string>,
   pseudoStrategy?: 'accented' | 'bidi'
 ): ThunkAction<Promise<void>> {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(requestL10n());
 
     // Setting defaultLocale to `en-US` means that it will always be the

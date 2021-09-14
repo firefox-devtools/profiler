@@ -20,7 +20,7 @@ export function getZippedProfiles(files: string[] = []): JSZip {
   const profileText = serializeProfile(profile);
 
   const zip = new JSZip();
-  files.forEach(fileName => {
+  files.forEach((fileName) => {
     zip.file(fileName, profileText);
   });
 

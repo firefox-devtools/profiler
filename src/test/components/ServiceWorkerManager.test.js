@@ -237,11 +237,8 @@ describe('app/ServiceWorkerManager', () => {
     it(`doesn't show a notice if updated after we were fully loaded`, async () => {
       process.env.NODE_ENV = 'production';
 
-      const {
-        navigateToFromBrowserProfileLoadingPage,
-        container,
-        dispatch,
-      } = setup();
+      const { navigateToFromBrowserProfileLoadingPage, container, dispatch } =
+        setup();
       navigateToFromBrowserProfileLoadingPage();
       await dispatch(viewProfile(_getSimpleProfile()));
 

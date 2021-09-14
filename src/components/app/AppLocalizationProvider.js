@@ -66,7 +66,7 @@ export const AppLocalizationProvider = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     localization: getLocalization(state),
     primaryLocale: getPrimaryLocale(state),
     direction: getDirection(state),

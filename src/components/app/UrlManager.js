@@ -84,14 +84,11 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  */
 class UrlManagerImpl extends React.PureComponent<Props> {
   async _processInitialUrls() {
-    const {
-      startFetchingProfiles,
-      setupInitialUrlState,
-      urlSetupDone,
-    } = this.props;
+    const { startFetchingProfiles, setupInitialUrlState, urlSetupDone } =
+      this.props;
     // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
-    const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> = (this
-      .props.getProfilesFromRawUrl: any);
+    const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> =
+      (this.props.getProfilesFromRawUrl: any);
 
     // Notify the UI that we are starting to fetch profiles.
     startFetchingProfiles();
@@ -230,7 +227,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
 }
 
 export const UrlManager = explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     urlState: state.urlState,
     urlSetupPhase: getUrlSetupPhase(state),
     phase: getView(state).phase,

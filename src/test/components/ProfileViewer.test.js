@@ -24,7 +24,7 @@ import {
   getElementWithFixedSize,
 } from '../fixtures/mocks/element-size';
 
-describe('ProfileViewer', function() {
+describe('ProfileViewer', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: 200, height: 300 });
 

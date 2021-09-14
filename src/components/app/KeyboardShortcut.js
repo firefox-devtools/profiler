@@ -102,7 +102,7 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           return;
         }
         // Toggle the state.
-        this.setState(state =>
+        this.setState((state) =>
           state.isOpen ? this._close(state) : this._open(state)
         );
         break;

@@ -49,7 +49,7 @@ const GRAPH_HEIGHT = 50;
  * ThreadActivityGraph component was added as a new default. Currently this test
  * only checks the older behavior.
  */
-describe('timeline/TrackThread', function() {
+describe('timeline/TrackThread', function () {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
   autoMockCanvasContext();
@@ -90,7 +90,9 @@ describe('timeline/TrackThread', function() {
     // call. This is a good way to know where the canvas drew something.
     function getFillRectCenterByIndex(log: any[], index: number): Coordinate {
       type FillRectCall = [string, number, number, number, number];
-      const calls: FillRectCall[] = log.filter(call => call[0] === 'fillRect');
+      const calls: FillRectCall[] = log.filter(
+        (call) => call[0] === 'fillRect'
+      );
       const call = calls[index];
       if (!call) {
         console.error(log);
@@ -157,13 +159,9 @@ describe('timeline/TrackThread', function() {
     expect(flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can click a stack in the stack graph in normal call trees', function() {
-    const {
-      getState,
-      stackGraphCanvas,
-      thread,
-      getFillRectCenterByIndex,
-    } = setup(getSamplesProfile());
+  it('can click a stack in the stack graph in normal call trees', function () {
+    const { getState, stackGraphCanvas, thread, getFillRectCenterByIndex } =
+      setup(getSamplesProfile());
 
     const log = flushDrawLog();
 
@@ -171,7 +169,7 @@ describe('timeline/TrackThread', function() {
     const getCallNodePath = () =>
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map(funcIndex =>
+        .map((funcIndex) =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
@@ -188,7 +186,7 @@ describe('timeline/TrackThread', function() {
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
 
-  it('can click a stack in the stack graph in inverted call trees', function() {
+  it('can click a stack in the stack graph in inverted call trees', function () {
     const {
       dispatch,
       getState,
@@ -201,7 +199,7 @@ describe('timeline/TrackThread', function() {
     const getCallNodePath = () =>
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map(funcIndex =>
+        .map((funcIndex) =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
@@ -235,7 +233,7 @@ describe('timeline/TrackThread', function() {
     }
   });
 
-  it('can click a marker', function() {
+  it('can click a marker', function () {
     const { getState, markerCanvas, getFillRectCenterByIndex } = setup(
       getMarkersProfile([
         ['DOMEvent', 0, 4],
@@ -253,7 +251,7 @@ describe('timeline/TrackThread', function() {
     // Currently markers are drawn with 3 fillRects, the middle of the three is the
     // big interesting one. If this test breaks, likely the drawing strategy
     // has changed.
-    const determineIndex = i => i * 3 + 1;
+    const determineIndex = (i) => i * 3 + 1;
 
     expect(
       clickAndGetMarkerName(getFillRectCenterByIndex(log, determineIndex(0)))
@@ -270,13 +268,13 @@ describe('timeline/TrackThread', function() {
     });
   });
 
-  it('does not add disk io markers if none are present', function() {
+  it('does not add disk io markers if none are present', function () {
     const noMarkers = [];
     const { queryByTestId } = setup(getMarkersProfile(noMarkers));
     expect(queryByTestId('TimelineMarkersFileIo')).not.toBeInTheDocument();
   });
 
-  it('adds file io markers if they are present', function() {
+  it('adds file io markers if they are present', function () {
     const fileIoMarker = [
       [
         'FileIO',
@@ -294,7 +292,7 @@ describe('timeline/TrackThread', function() {
     expect(getByTestId('TimelineMarkersFileIo')).toBeInTheDocument();
   });
 
-  it('does not add off-thread file io markers even if they are present', function() {
+  it('does not add off-thread file io markers even if they are present', function () {
     const fileIoMarker = [
       [
         'FileIO',

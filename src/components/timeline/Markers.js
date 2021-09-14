@@ -54,7 +54,7 @@ type CanvasProps = {|
   +rangeEnd: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +markerIndexes: MarkerIndex[],
   +hoveredMarker: Marker | null,
   +mouseDownMarker: Marker | null,
@@ -109,14 +109,8 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
   }
 
   drawCanvas(c: HTMLCanvasElement) {
-    const {
-      rangeStart,
-      rangeEnd,
-      width,
-      height,
-      getMarker,
-      markerIndexes,
-    } = this.props;
+    const { rangeStart, rangeEnd, width, height, getMarker, markerIndexes } =
+      this.props;
 
     if (height === 0 || width === 0) {
       // bail out early if the size isn't known yet.
@@ -269,7 +263,7 @@ export type OwnProps = {|
 
 export type StateProps = {|
   +additionalClassName?: ?string,
-  +getMarker: MarkerIndex => Marker,
+  +getMarker: (MarkerIndex) => Marker,
   +markerIndexes: MarkerIndex[],
   +isSelected: boolean,
   +isModifyingSelection: boolean,
@@ -305,13 +299,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   _hitTest(e: SyntheticMouseEvent<HTMLCanvasElement>): MarkerIndex | null {
     const c = e.currentTarget;
     const r = c.getBoundingClientRect();
-    const {
-      width,
-      rangeStart,
-      rangeEnd,
-      getMarker,
-      markerIndexes,
-    } = this.props;
+    const { width, rangeStart, rangeEnd, getMarker, markerIndexes } =
+      this.props;
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
     const rangeLength = rangeEnd - rangeStart;
@@ -362,7 +351,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
   };
 
-  _onMouseDown = e => {
+  _onMouseDown = (e) => {
     const markerIndex = this._hitTest(e);
     const { changeRightClickedMarker, threadsKey, getMarker } = this.props;
 

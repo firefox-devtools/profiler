@@ -66,19 +66,16 @@ import { TemporaryError } from '../../utils/errors';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-describe('app/AppViewRouter', function() {
-  it('renders an initial home', function() {
+describe('app/AppViewRouter', function () {
+  it('renders an initial home', function () {
     const { container } = setup();
 
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders the addon loading page, and the profile view after capturing', function() {
-    const {
-      container,
-      dispatch,
-      navigateToFromBrowserProfileLoadingPage,
-    } = setup();
+  it('renders the addon loading page, and the profile view after capturing', function () {
+    const { container, dispatch, navigateToFromBrowserProfileLoadingPage } =
+      setup();
 
     navigateToFromBrowserProfileLoadingPage();
     dispatch(waitingForProfileFromBrowser());
@@ -90,7 +87,7 @@ describe('app/AppViewRouter', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('does not try to retrieve a profile when moving from from-browser to public', function() {
+  it('does not try to retrieve a profile when moving from from-browser to public', function () {
     const {
       container,
       dispatch,
@@ -108,7 +105,7 @@ describe('app/AppViewRouter', function() {
     expect(retrieveProfileFromStore).not.toBeCalled();
   });
 
-  it('renders the profile view', function() {
+  it('renders the profile view', function () {
     const { container, dispatch, navigateToStoreLoadingPage } = setup();
 
     navigateToStoreLoadingPage();
@@ -121,7 +118,7 @@ describe('app/AppViewRouter', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders temporary errors', function() {
+  it('renders temporary errors', function () {
     const { container, dispatch, navigateToStoreLoadingPage } = setup();
 
     navigateToStoreLoadingPage();
@@ -136,7 +133,7 @@ describe('app/AppViewRouter', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders an home when the user pressed back after an error', function() {
+  it('renders an home when the user pressed back after an error', function () {
     const {
       container,
       dispatch,

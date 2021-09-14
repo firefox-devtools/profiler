@@ -8,7 +8,8 @@ import { getProfileViewOptions } from './profile';
 
 import type { Selector, MarkerReference } from 'firefox-profiler/types';
 
-export const getRightClickedMarkerInfo: Selector<MarkerReference | null> = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.rightClickedMarker
-);
+export const getRightClickedMarkerInfo: Selector<MarkerReference | null> =
+  createSelector(
+    getProfileViewOptions,
+    (viewOptions) => viewOptions.rightClickedMarker
+  );

@@ -21,7 +21,7 @@ import {
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
-describe('TooltipCallNode', function() {
+describe('TooltipCallNode', function () {
   function setup(profile) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
@@ -54,13 +54,11 @@ describe('TooltipCallNode', function() {
   }
 
   it('handles native allocations', () => {
-    const {
-      profile,
-      funcNamesDict,
-    } = getProfileWithUnbalancedNativeAllocations();
+    const { profile, funcNamesDict } =
+      getProfileWithUnbalancedNativeAllocations();
     const threadIndex = 0;
     const callNodePath = ['A', 'B', 'Fjs', 'Gjs'].map(
-      name => funcNamesDict[name]
+      (name) => funcNamesDict[name]
     );
 
     const { dispatch, renderTooltip } = setup(profile);
@@ -71,7 +69,7 @@ describe('TooltipCallNode', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  describe('with page information', function() {
+  describe('with page information', function () {
     function setupWithPageInformation(pageUrl: string, iframeUrl?: string) {
       const {
         profile,
@@ -108,7 +106,9 @@ describe('TooltipCallNode', function() {
           profile.pages[profile.pages.length - 1].innerWindowID;
       }
 
-      const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
+      const callNodePath = ['A', 'Bjs', 'Cjs'].map(
+        (name) => funcNamesDict[name]
+      );
       const { dispatch, renderTooltip } = setup(profile);
       dispatch(changeSelectedCallNode(threadIndex, callNodePath));
       const renderResults = renderTooltip();

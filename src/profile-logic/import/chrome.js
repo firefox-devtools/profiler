@@ -256,7 +256,7 @@ type ThreadInfo = {
 function findEvent<T: TracingEventUnion>(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
-  f: T => boolean
+  f: (T) => boolean
 ): T | void {
   const events: T[] | void = (eventsByName.get(name): any);
   return events ? events.find(f) : undefined;
@@ -269,7 +269,7 @@ function findEvents<
 >(
   eventsByName: Map<string, TracingEventUnion[]>,
   name: string,
-  f: T => boolean
+  f: (T) => boolean
 ): T[] {
   const events: T[] | void = (eventsByName.get(name): any);
   if (!events) {
@@ -308,7 +308,7 @@ function getThreadInfo(
   const threadNameEvent = findEvent<ThreadNameEvent>(
     eventsByName,
     'thread_name',
-    e => e.pid === chunk.pid && e.tid === chunk.tid
+    (e) => e.pid === chunk.pid && e.tid === chunk.tid
   );
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
@@ -326,7 +326,7 @@ function getThreadInfo(
   const processNameEvent = findEvent<ProcessNameEvent>(
     eventsByName,
     'process_name',
-    e => e.pid === chunk.pid
+    (e) => e.pid === chunk.pid
   );
   if (processNameEvent) {
     thread.processName = processNameEvent.args.name;
@@ -337,7 +337,7 @@ function getThreadInfo(
   const processLabelsEvent = findEvent<ProcessLabelsEvent>(
     eventsByName,
     'process_labels',
-    e => e.pid === chunk.pid
+    (e) => e.pid === chunk.pid
   );
   if (processLabelsEvent) {
     const labels = processLabelsEvent.args.labels;
@@ -351,7 +351,7 @@ function getThreadInfo(
   const processSortIndexEvent = findEvent<ProcessSortIndexEvent>(
     eventsByName,
     'process_sort_index',
-    e => e.pid === chunk.pid
+    (e) => e.pid === chunk.pid
   );
   let processSortIndex = 0;
   if (processSortIndexEvent) {
@@ -361,7 +361,7 @@ function getThreadInfo(
   const threadSortIndexEvent = findEvent<ThreadSortIndexEvent>(
     eventsByName,
     'thread_sort_index',
-    e => e.pid === chunk.pid && e.tid === chunk.tid
+    (e) => e.pid === chunk.pid && e.tid === chunk.tid
   );
   let threadSortIndex = 0;
   if (threadSortIndexEvent) {
@@ -417,11 +417,11 @@ type FunctionInfo = {
 };
 
 function makeFunctionInfoFinder(categories) {
-  const jsCat = categories.findIndex(c => c.name === 'JavaScript');
-  const gcCat = categories.findIndex(c => c.name === 'GC / CC');
-  const domCat = categories.findIndex(c => c.name === 'DOM');
-  const otherCat = categories.findIndex(c => c.name === 'Other');
-  const idleCat = categories.findIndex(c => c.name === 'Idle');
+  const jsCat = categories.findIndex((c) => c.name === 'JavaScript');
+  const gcCat = categories.findIndex((c) => c.name === 'GC / CC');
+  const domCat = categories.findIndex((c) => c.name === 'DOM');
+  const otherCat = categories.findIndex((c) => c.name === 'Other');
+  const idleCat = categories.findIndex((c) => c.name === 'Idle');
   if (
     jsCat === -1 ||
     gcCat === -1 ||
@@ -500,12 +500,8 @@ async function processTracingEvents(
       profile,
       profileEvent
     );
-    const {
-      thread,
-      funcKeyToFuncId,
-      nodeIdToStackId,
-      originToResourceIndex,
-    } = threadInfo;
+    const { thread, funcKeyToFuncId, nodeIdToStackId, originToResourceIndex } =
+      threadInfo;
 
     let profileChunks = [];
     if (profileEvent.name === 'Profile') {
@@ -514,7 +510,7 @@ async function processTracingEvents(
       profileChunks = findEvents<ProfileChunkEvent>(
         eventsByName,
         'ProfileChunk',
-        e => e.id === id
+        (e) => e.id === id
       );
     } else if (profileEvent.name === 'CpuProfile') {
       threadInfo.lastSeenTime =
@@ -570,8 +566,9 @@ async function processTracingEvents(
           }
 
           const { functionName } = callFrame;
-          const funcKey = `${functionName}:${url || ''}:${lineNumber ||
-            0}:${columnNumber || 0}`;
+          const funcKey = `${functionName}:${url || ''}:${lineNumber || 0}:${
+            columnNumber || 0
+          }`;
           const { category, isJS, relevantForJS } = getFunctionInfo(
             functionName,
             url !== undefined || lineNumber !== undefined
@@ -734,7 +731,7 @@ async function extractScreenshots(
   );
 
   const graphicsIndex = ensureExists(profile.meta.categories).findIndex(
-    category => category.name === 'Graphics'
+    (category) => category.name === 'Graphics'
   );
 
   if (graphicsIndex === -1) {
@@ -775,7 +772,7 @@ async function extractScreenshots(
 function getImageSize(
   url: string
 ): Promise<null | {| width: number, height: number |}> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const image = new Image();
     image.src = url;
 
@@ -816,7 +813,7 @@ function extractMarkers(
   profile: Profile
 ) {
   const otherCategoryIndex = ensureExists(profile.meta.categories).findIndex(
-    category => category.name === 'Other'
+    (category) => category.name === 'Other'
   );
   if (otherCategoryIndex === -1) {
     throw new Error('No "Other" category in empty profile category list');

@@ -12,7 +12,7 @@ import type { ThreadCPUDeltaUnit, Milliseconds } from 'firefox-profiler/types';
 const MS_TO_US_MULTIPLIER = 1000;
 const MS_TO_NS_MULTIPLIER = 1000000;
 
-describe('processThreadCPUDelta', function() {
+describe('processThreadCPUDelta', function () {
   function setup(
     threadCPUDelta?: Array<number | null>,
     unit: ThreadCPUDeltaUnit = 'ns',
@@ -38,22 +38,22 @@ describe('processThreadCPUDelta', function() {
     return { profile, thread, processedThread };
   }
 
-  it('removes the threadCPUDelta array if all of its values are null', function() {
+  it('removes the threadCPUDelta array if all of its values are null', function () {
     const { processedThread } = setup([null, null, null, null, null, null]);
     expect(processedThread.samples.threadCPUDelta).toBe(undefined);
   });
 
-  it('does not remove the values if there is at least one non-null value ', function() {
+  it('does not remove the values if there is at least one non-null value ', function () {
     const { processedThread } = setup([null, null, null, null, 0.1]);
     // We do the processing for null elements, see the following test for a more specific assertion.
     expect(processedThread.samples.threadCPUDelta).not.toBe(undefined);
   });
 
-  it('throws if there are no threadCPUDelta values', function() {
+  it('throws if there are no threadCPUDelta values', function () {
     expect(() => setup(undefined)).toThrow();
   });
 
-  it('removes the null values by finding the closest non-null threadCPUDelta value', function() {
+  it('removes the null values by finding the closest non-null threadCPUDelta value', function () {
     // Testing the case where only the values in the middle are null.
     const { processedThread: processedThread1 } = setup([
       0.1,
@@ -64,12 +64,7 @@ describe('processThreadCPUDelta', function() {
       0.2,
     ]);
     expect(processedThread1.samples.threadCPUDelta).toEqual([
-      0.1,
-      0.1,
-      0.1,
-      0.2,
-      0.2,
-      0.2,
+      0.1, 0.1, 0.1, 0.2, 0.2, 0.2,
     ]);
 
     // Testing the case where the values at the start are null.
@@ -86,7 +81,7 @@ describe('processThreadCPUDelta', function() {
     expect(processedThread4.samples.threadCPUDelta).toEqual([0.1, 0.2, 0.2]);
   });
 
-  it('processes Linux timing values and caps them to 100% if they are more than the interval values', function() {
+  it('processes Linux timing values and caps them to 100% if they are more than the interval values', function () {
     // Interval is in the ms values and Linux uses ns for threadCPUDelta values.
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
@@ -110,7 +105,7 @@ describe('processThreadCPUDelta', function() {
     ]);
   });
 
-  it('processes macOS timing values and caps them to 100% if they are more than the interval values', function() {
+  it('processes macOS timing values and caps them to 100% if they are more than the interval values', function () {
     // Interval is in the ms values and macOS uses µs for threadCPUDelta values.
     const intervalMs = 1;
     const { processedThread: processedThread1 } = setup(
@@ -134,7 +129,7 @@ describe('processThreadCPUDelta', function() {
     ]);
   });
 
-  it('does not process the Windows values for 100% capping because they are not timing values', function() {
+  it('does not process the Windows values for 100% capping because they are not timing values', function () {
     // Use the ns conversion multiplier to imitate the worst case.
     const intervalMs = 1;
     const threadCPUDelta = [
@@ -155,7 +150,7 @@ describe('processThreadCPUDelta', function() {
     expect(processedThread1.samples.threadCPUDelta).toEqual(threadCPUDelta);
   });
 
-  it('processes the timing values and caps the first element correctly if it exceeds the interval', function() {
+  it('processes the timing values and caps the first element correctly if it exceeds the interval', function () {
     // Testing the case where only the values in the middle are null.
     const interval = 1;
     const { processedThread: processedThread1 } = setup(

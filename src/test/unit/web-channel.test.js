@@ -11,7 +11,7 @@ import {
 
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
 
-describe('event handlers for Firefox WebChannel events', function() {
+describe('event handlers for Firefox WebChannel events', function () {
   it('can test if the menu button is enabled', async () => {
     const {
       messagesSentToBrowser,
@@ -102,7 +102,7 @@ describe('event handlers for Firefox WebChannel events', function() {
     await expect(response).resolves.toBe(undefined);
   });
 
-  it('will error if the message is not understood by Firefox', async function() {
+  it('will error if the message is not understood by Firefox', async function () {
     const { triggerResponse } = mockWebChannel();
 
     const consoleError = jest
@@ -124,7 +124,7 @@ describe('event handlers for Firefox WebChannel events', function() {
     expect(consoleError).toHaveBeenCalled();
   });
 
-  it('will error if the messages are received that are malformed', async function() {
+  it('will error if the messages are received that are malformed', async function () {
     const { triggerResponse } = mockWebChannel();
 
     const consoleError = jest

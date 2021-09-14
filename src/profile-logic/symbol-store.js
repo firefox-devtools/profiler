@@ -60,7 +60,7 @@ const MAX_JOB_COUNT_PER_CHUNK = 10;
 export function readSymbolsFromSymbolTable(
   addresses: Set<number>,
   symbolTable: SymbolTableAsTuple,
-  demangleCallback: string => string
+  demangleCallback: (string) => string
 ): Map<number, AddressResult> {
   const [symbolTableAddrs, symbolTableIndex, symbolTableBuffer] = symbolTable;
   const addressArray = Uint32Array.from(addresses);
@@ -130,7 +130,7 @@ function _partitionIntoChunksOfMaxValue<T>(
   array: T[],
   maxValue: number,
   maxChunkLength: number,
-  computeValue: T => number
+  computeValue: (T) => number
 ): T[][] {
   const chunks = [];
   for (const element of array) {
@@ -153,7 +153,7 @@ function _partitionIntoChunksOfMaxValue<T>(
   return chunks.map(({ elements }) => elements);
 }
 
-type DemangleFunction = string => string;
+type DemangleFunction = (string) => string;
 
 /**
  * This function returns a function that can demangle function name using a
@@ -174,7 +174,7 @@ async function _getDemangleCallback(): Promise<DemangleFunction> {
     // support, or due to bad server configuration), so we will fall back
     // to a pass-through function if that happens.
     console.error('Demangling module could not be imported.', error);
-    return mangledString => mangledString;
+    return (mangledString) => mangledString;
   }
 }
 
@@ -211,7 +211,7 @@ export class SymbolStore {
   ): Promise<void> {
     return this._db
       .storeSymbolTable(lib.debugName, lib.breakpadId, symbolTable)
-      .catch(error => {
+      .catch((error) => {
         console.log(
           `Failed to store the symbol table for ${lib.debugName} in the database:`,
           error
@@ -238,7 +238,7 @@ export class SymbolStore {
     // Option 3: Obtain symbol tables from the browser.
 
     // Check requests for validity first.
-    requests = requests.filter(request => {
+    requests = requests.filter((request) => {
       const { debugName, breakpadId } = request.lib;
       if (debugName === '' || breakpadId === '') {
         errorCb(
@@ -259,7 +259,7 @@ export class SymbolStore {
     const requestsForNonCachedLibs = [];
     const requestsForCachedLibs = [];
     await Promise.all(
-      requests.map(async request => {
+      requests.map(async (request) => {
         const { debugName, breakpadId } = request.lib;
         try {
           // Try to get the symbol table from the database.
@@ -306,7 +306,7 @@ export class SymbolStore {
     // handled within the same request to the symbolication API, each library's
     // promise can fail independently if the symbol server does not have symbols
     // for this library.
-    const libraryPromiseChunks = chunks.map(requests =>
+    const libraryPromiseChunks = chunks.map((requests) =>
       this._symbolProvider
         .requestSymbolsFromServer(requests)
         .map((resultsPromise, i) => ({
@@ -359,9 +359,8 @@ export class SymbolStore {
           try {
             // Option 3: Request a symbol table from the browser.
             // This call will throw if the browser cannot obtain the symbol table.
-            const symbolTable = await this._symbolProvider.requestSymbolTableFromBrowser(
-              lib
-            );
+            const symbolTable =
+              await this._symbolProvider.requestSymbolTableFromBrowser(lib);
 
             // Did not throw, option 3 was successful!
             successCb(

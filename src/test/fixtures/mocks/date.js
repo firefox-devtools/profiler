@@ -30,7 +30,7 @@ export function mockDate(dateOrTimestamp: string | number): () => void {
   // When called without args it will return a Date object at the fixed
   // specified time. Otherwise it will just defer the call to the real Date
   // object.
-  jest.spyOn(global, 'Date').mockImplementation(function(...args) {
+  jest.spyOn(global, 'Date').mockImplementation(function (...args) {
     if (!args.length) {
       return new originalDate(dateOrTimestamp);
     }
@@ -45,7 +45,7 @@ export function mockDate(dateOrTimestamp: string | number): () => void {
   // the `instanceof` operator that some of our code uses (especially
   // fake-indexeddb).
   Object.defineProperty(global.Date, Symbol.hasInstance, {
-    value: function(val) {
+    value: function (val) {
       return val instanceof originalDate;
     },
   });

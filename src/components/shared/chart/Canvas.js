@@ -17,7 +17,7 @@ type Props<HoveredItem> = {|
   +onSelectItem?: (HoveredItem | null) => void,
   +onRightClick?: (HoveredItem | null) => void,
   +onDoubleClickItem: (HoveredItem | null) => void,
-  +getHoveredItemInfo: HoveredItem => React.Node,
+  +getHoveredItemInfo: (HoveredItem) => React.Node,
   +drawCanvas: (
     CanvasRenderingContext2D,
     hoveredItem: HoveredItem | null,

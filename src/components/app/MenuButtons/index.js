@@ -63,7 +63,7 @@ type OwnProps = {|
   // that would mock out a local module, but I was having trouble getting it working
   // correctly (perhaps due to ES6 modules), so I just went with dependency injection
   // instead.
-  injectedUrlShortener?: string => Promise<string>,
+  injectedUrlShortener?: (string) => Promise<string>,
 |};
 
 type StateProps = {|
@@ -200,11 +200,8 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
           );
         }
 
-        const {
-          name,
-          profileToken,
-          jwtToken,
-        } = currentProfileUploadedInformation;
+        const { name, profileToken, jwtToken } =
+          currentProfileUploadedInformation;
 
         if (!jwtToken) {
           throw new Error(
@@ -328,12 +325,8 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   }
 
   _renderPermalink() {
-    const {
-      dataSource,
-      isNewlyPublished,
-      injectedUrlShortener,
-      profileUrl,
-    } = this.props;
+    const { dataSource, isNewlyPublished, injectedUrlShortener, profileUrl } =
+      this.props;
 
     const showPermalink =
       this._getUploadedStatus(dataSource, profileUrl) === 'uploaded';
@@ -388,7 +381,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
 export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => ({
+    mapStateToProps: (state) => ({
       rootRange: getProfileRootRange(state),
       dataSource: getDataSource(state),
       profileUrl: getProfileUrl(state),
@@ -397,9 +390,8 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       hasPrePublishedState: getHasPrePublishedState(state),
       abortFunction: getAbortFunction(state),
       timelineTrackOrganization: getTimelineTrackOrganization(state),
-      currentProfileUploadedInformation: getCurrentProfileUploadedInformation(
-        state
-      ),
+      currentProfileUploadedInformation:
+        getCurrentProfileUploadedInformation(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,

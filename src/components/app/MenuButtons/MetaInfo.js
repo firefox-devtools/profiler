@@ -188,8 +188,10 @@ class MetaInfoPanelImpl extends React.PureComponent<Props> {
                     Buffer Capacity:
                   </Localized>
                 </span>
-                {/* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
-                formatBytes(configuration.capacity * 8, 0)}
+                {
+                  /* The capacity is expressed in "entries", where 1 entry == 8 bytes. */
+                  formatBytes(configuration.capacity * 8, 0)
+                }
               </div>
               <div className="metaInfoRow">
                 <span className="metaInfoLabel">
@@ -390,7 +392,7 @@ function _renderRowOfList(labelL10nId: string, data: string[]): React.Node {
         <Localized id={labelL10nId} />
       </span>
       <ul className="metaInfoList">
-        {data.map(d => (
+        {data.map((d) => (
           <li className="metaInfoListItem" key={d}>
             {d}
           </li>
@@ -413,7 +415,7 @@ function _formatDate(timestamp: number): string {
 }
 
 export const MetaInfoPanel = explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
+  mapStateToProps: (state) => ({
     profile: getProfile(state),
     symbolicationStatus: getSymbolicationStatus(state),
   }),
