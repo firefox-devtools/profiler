@@ -41,8 +41,11 @@ export function convertPerfScriptProfile(
     const markers = {
       schema: {
         name: 0,
-        time: 1,
-        data: 2,
+        startTime: 1,
+        endTime: 2,
+        phase: 3,
+        category: 4,
+        data: 5,
       },
       data: [],
     };
@@ -51,9 +54,6 @@ export function convertPerfScriptProfile(
         stack: 0,
         time: 1,
         responsiveness: 2,
-        rss: 3,
-        uss: 4,
-        frameNumber: 5,
       },
       data: [],
     };
@@ -73,8 +73,8 @@ export function convertPerfScriptProfile(
     };
     const stackTable = {
       schema: {
-        frame: 0,
-        prefix: 1,
+        prefix: 0,
+        frame: 1,
       },
       data: [],
     };
@@ -86,7 +86,7 @@ export function convertPerfScriptProfile(
       let stack = stackMap.get(key);
       if (stack === undefined) {
         stack = stackTable.data.length;
-        stackTable.data.push([frame, prefix]);
+        stackTable.data.push([prefix, frame]);
         stackMap.set(key, stack);
       }
       return stack;
@@ -139,7 +139,10 @@ export function convertPerfScriptProfile(
         const frame = getOrCreateFrame(stackFrame);
         return getOrCreateStack(frame, prefix);
       }, null);
-      samples.data.push([stack, time]);
+      // We don't have this information, so simulate that there's no latency at
+      // all in processing events.
+      const responsiveness = 0;
+      samples.data.push([stack, time, responsiveness]);
     }
 
     return {
@@ -156,6 +159,7 @@ export function convertPerfScriptProfile(
           stringTable,
           registerTime: 0,
           unregisterTime: null,
+          processType: 'default',
         };
       },
     };
@@ -234,7 +238,7 @@ export function convertPerfScriptProfile(
 
     const threadName = threadNamePidAndTidMatch[1].trim();
     const pid = Number(threadNamePidAndTidMatch[2] || 0);
-    const tid = threadNamePidAndTidMatch[3];
+    const tid = Number(threadNamePidAndTidMatch[3] || 0);
 
     // Assume start time is the time of the first sample
     if (startTime === 0) {
@@ -299,7 +303,11 @@ export function convertPerfScriptProfile(
       processType: 0,
       product: 'Firefox',
       stackwalk: 1,
+      debug: 0,
+      gcpoison: 0,
+      asyncstack: 1,
       startTime: startTime,
+      shutdownTime: null,
       version: 24,
       presymbolicated: true,
       categories: CATEGORIES,
@@ -308,5 +316,6 @@ export function convertPerfScriptProfile(
     libs: [],
     threads: threadArray,
     processes: [],
+    pausedRanges: [],
   };
 }

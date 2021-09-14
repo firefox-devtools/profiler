@@ -251,9 +251,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -289,16 +289,16 @@ Object {
       "samples": Object {
         "length": 10,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           1,
@@ -421,7 +421,7 @@ Object {
           "do_lookup_x" => 19,
         },
       },
-      "tid": "7564",
+      "tid": 7564,
       "unregisterTime": null,
     },
     Object {
@@ -536,9 +536,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7565,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -566,10 +566,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -634,7 +634,7 @@ Object {
           "[kernel.kallsyms]" => 8,
         },
       },
-      "tid": "7565",
+      "tid": 7565,
       "unregisterTime": null,
     },
     Object {
@@ -749,9 +749,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -779,10 +779,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -847,7 +847,7 @@ Object {
           "[kernel.kallsyms]" => 8,
         },
       },
-      "tid": "7566",
+      "tid": 7566,
       "unregisterTime": null,
     },
     Object {
@@ -1149,9 +1149,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7567,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -1195,11 +1195,11 @@ Object {
       "samples": Object {
         "length": 5,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           8,
@@ -1360,7 +1360,7 @@ Object {
           "strchr" => 33,
         },
       },
-      "tid": "7567",
+      "tid": 7567,
       "unregisterTime": null,
     },
     Object {
@@ -1492,9 +1492,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -1526,10 +1526,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -1606,7 +1606,7 @@ Object {
           "/usr/lib64/libglib-2.0.so.0.5200.3" => 10,
         },
       },
-      "tid": "7568",
+      "tid": 7568,
       "unregisterTime": null,
     },
     Object {
@@ -1789,9 +1789,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -1827,15 +1827,15 @@ Object {
       "samples": Object {
         "length": 9,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           3,
@@ -1950,7 +1950,7 @@ Object {
           "/usr/lib64/libglib-2.0.so.0.5200.3" => 16,
         },
       },
-      "tid": "7569",
+      "tid": 7569,
       "unregisterTime": null,
     },
     Object {
@@ -2048,9 +2048,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -2074,10 +2074,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           1,
@@ -2132,7 +2132,7 @@ Object {
           "[kernel.kallsyms]" => 5,
         },
       },
-      "tid": "7570",
+      "tid": 7570,
       "unregisterTime": null,
     },
     Object {
@@ -2247,9 +2247,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -2277,10 +2277,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -2343,7 +2343,7 @@ Object {
           "[kernel.kallsyms]" => 7,
         },
       },
-      "tid": "7571",
+      "tid": 7571,
       "unregisterTime": null,
     },
     Object {
@@ -2458,9 +2458,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -2488,10 +2488,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -2558,7 +2558,7 @@ Object {
           "[kernel.kallsyms]" => 7,
         },
       },
-      "tid": "7572",
+      "tid": 7572,
       "unregisterTime": null,
     },
     Object {
@@ -2673,9 +2673,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -2703,10 +2703,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           2,
@@ -2769,7 +2769,7 @@ Object {
           "[kernel.kallsyms]" => 7,
         },
       },
-      "tid": "7573",
+      "tid": 7573,
       "unregisterTime": null,
     },
     Object {
@@ -2901,9 +2901,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -2935,10 +2935,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           3,
@@ -3039,7 +3039,7 @@ Object {
           "/home/jesup/src/mozilla/head/obj-opt2/toolkit/library/libxul.so" => 10,
         },
       },
-      "tid": "7574",
+      "tid": 7574,
       "unregisterTime": null,
     },
     Object {
@@ -3647,9 +3647,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -3685,10 +3685,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           33,
@@ -3995,7 +3995,7 @@ Object {
           "[kernel.kallsyms]" => 67,
         },
       },
-      "tid": "7575",
+      "tid": 7575,
       "unregisterTime": null,
     },
     Object {
@@ -4603,9 +4603,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -4641,10 +4641,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           33,
@@ -4951,7 +4951,7 @@ Object {
           "[kernel.kallsyms]" => 67,
         },
       },
-      "tid": "7576",
+      "tid": 7576,
       "unregisterTime": null,
     },
     Object {
@@ -5559,9 +5559,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -5597,10 +5597,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           33,
@@ -5911,7 +5911,7 @@ Object {
           "[kernel.kallsyms]" => 67,
         },
       },
-      "tid": "7577",
+      "tid": 7577,
       "unregisterTime": null,
     },
     Object {
@@ -6519,9 +6519,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -6557,10 +6557,10 @@ Object {
       "samples": Object {
         "length": 4,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
+          0,
+          0,
+          0,
+          0,
         ],
         "stack": Array [
           33,
@@ -6871,7 +6871,7 @@ Object {
           "[kernel.kallsyms]" => 67,
         },
       },
-      "tid": "7578",
+      "tid": 7578,
       "unregisterTime": null,
     },
     Object {
@@ -7275,9 +7275,9 @@ Object {
       "pausedRanges": Array [],
       "pid": 7564,
       "processName": "",
-      "processShutdownTime": undefined,
+      "processShutdownTime": null,
       "processStartupTime": 0,
-      "processType": undefined,
+      "processType": "default",
       "registerTime": 0,
       "resourceTable": Object {
         "host": Array [
@@ -7305,7 +7305,7 @@ Object {
       "samples": Object {
         "length": 1,
         "responsiveness": Array [
-          null,
+          0,
         ],
         "stack": Array [
           19,
@@ -7498,7 +7498,7 @@ Object {
           "native_write_msr" => 41,
         },
       },
-      "tid": "7598",
+      "tid": 7598,
       "unregisterTime": null,
     },
   ],
