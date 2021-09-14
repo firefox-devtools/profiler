@@ -3705,7 +3705,8 @@ export function nudgeReturnAddresses(thread: Thread): Thread {
     const subcategory = stackTable.subcategory[stack];
     const prefix = stackTable.prefix[stack];
 
-    const newPrefix = prefix === null ? null : mapForReturnAddressStacks[prefix];
+    const newPrefix =
+      prefix === null ? null : mapForReturnAddressStacks[prefix];
 
     if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
       // Copy this stack to the new stack table, and use the original frame
